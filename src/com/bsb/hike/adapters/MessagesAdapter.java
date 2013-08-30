@@ -1764,48 +1764,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		dialog.setContentView(R.layout.sms_undelivered_popup);
 		dialog.setCancelable(true);
 
-		View hikeSMS1 = dialog.findViewById(R.id.hike_sms_container1);
-		View hikeSMS2 = dialog.findViewById(R.id.hike_sms_container2);
-		View nativeSMS1 = dialog.findViewById(R.id.native_sms_container1);
-		View nativeSMS2 = dialog.findViewById(R.id.native_sms_container2);
-		View orContainer = dialog.findViewById(R.id.or_container);
+		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
+		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
+		View divider = dialog.findViewById(R.id.divider);
 
-		hikeSMS1.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
-		hikeSMS2.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
-		orContainer.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		divider.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 
 		if (conversation instanceof GroupConversation) {
-			nativeSMS1.setVisibility(View.GONE);
-			nativeSMS2.setVisibility(View.GONE);
-			orContainer.setVisibility(View.GONE);
+			nativeSMS.setVisibility(View.GONE);
+			divider.setVisibility(View.GONE);
 		}
 
-		TextView hikeSmsText = (TextView) dialog
-				.findViewById(R.id.hike_sms_text);
 		final CheckBox sendHike = (CheckBox) dialog
 				.findViewById(R.id.hike_sms_checkbox);
 
-		TextView nativeSmsTextHead = (TextView) dialog
-				.findViewById(R.id.native_sms_head_text);
-		TextView nativeSmsText = (TextView) dialog
-				.findViewById(R.id.native_sms_text);
 		final CheckBox sendNative = (CheckBox) dialog
 				.findViewById(R.id.native_sms_checkbox);
-		ImageView avatar = (ImageView) dialog.findViewById(R.id.avatar);
-		TextView nativeSMSInfo = (TextView) dialog
-				.findViewById(R.id.native_sms_info);
-
-		SharedPreferences prefs = preferences;
-
-		String userMsisdn = prefs
-				.getString(HikeMessengerApp.MSISDN_SETTING, "");
-		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(userMsisdn, true));
 
 		final Button sendBtn = (Button) dialog.findViewById(R.id.btn_send);
 		sendBtn.setEnabled(false);
-
-		String username = prefs.getString(HikeMessengerApp.NAME_SETTING, "");
 
 		if (PreferenceManager.getDefaultSharedPreferences(context).contains(
 				HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF)) {
@@ -1821,23 +1799,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				sendBtn.setEnabled(true);
 			}
 		}
-
-		nativeSmsTextHead.setText(username);
-
-		int numUnsentMessages = getAllUnsentMessages(false).size();
-		if (numUnsentMessages == 1) {
-			nativeSMSInfo.setText(R.string.native_sms_info1);
-		} else {
-			nativeSMSInfo.setText(context.getString(
-					R.string.native_sms_info1_multiple,
-					Integer.toString(numUnsentMessages)));
-		}
-
-		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
-		hikeSmsText.setText(Utils.getMessageDisplayText(convMessage, context));
-		nativeSmsText
-				.setText(Utils.getMessageDisplayText(convMessage, context));
-
 		sendHike.setOnClickListener(new OnClickListener() {
 
 			@Override

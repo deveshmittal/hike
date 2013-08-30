@@ -5,17 +5,23 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -25,6 +31,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -36,7 +43,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	public static final int CHATS_TAB_INDEX = 1;
 	public static final int FRIENDS_TAB_INDEX = 2;
 
+	private enum DialogShowing {
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING
+	}
+
 	private ViewPager viewPager;
+	private DialogShowing dialogShowing;
 
 	private int[] headers = { R.string.updates, R.string.chats,
 			R.string.friends };
@@ -47,6 +59,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	private boolean deviceDetailsSent;
 
 	private View parentLayout;
+	private Dialog dialog;
+	private SharedPreferences accountPrefs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +69,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		if (Utils.requireAuth(this)) {
 			return;
 		}
-		SharedPreferences accountPrefs = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0);
 
 		boolean justSignedUp = accountPrefs.getBoolean(
 				HikeMessengerApp.JUST_SIGNED_UP, false);
@@ -75,6 +89,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		if (savedInstanceState != null) {
 			deviceDetailsSent = savedInstanceState
 					.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+			int dialogShowingOrdinal = savedInstanceState
+					.getInt(HikeConstants.Extras.DIALOG_SHOWING);
+			if (dialogShowingOrdinal != -1) {
+				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
+			} else {
+				dialogShowing = null;
+			}
 		}
 
 		if (justSignedUp) {
@@ -90,6 +111,93 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 		initialiseViewPager();
 		initialiseTabs();
+
+		if (savedInstanceState == null && dialogShowing == null) {
+			/*
+			 * Only show app rater if the tutorial is not being shown an the app
+			 * was just launched i.e not an orientation change
+			 */
+			AppRater.appLaunched(this);
+		} else if (dialogShowing != null) {
+			switch (dialogShowing) {
+			case SMS_CLIENT:
+				showSMSClientDialog();
+				break;
+
+			case SMS_SYNC_CONFIRMATION:
+			case SMS_SYNCING:
+				showSMSSyncDialog();
+				break;
+			}
+		}
+
+		if (!AppRater.showingDialog() && dialogShowing == null) {
+			if (!accountPrefs.getBoolean(
+					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
+				showSMSClientDialog();
+			}
+		}
+	}
+
+	private void showSMSClientDialog() {
+		dialogShowing = DialogShowing.SMS_CLIENT;
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sms_with_hike_popup);
+		dialog.setCancelable(false);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), true);
+
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						getApplicationContext()).edit();
+				editor.putBoolean(HikeConstants.SEND_SMS_PREF, true);
+				editor.commit();
+
+				dialogShowing = null;
+				dialog.dismiss();
+				if (!accountPrefs.getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					showSMSSyncDialog();
+				}
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), false);
+				dialogShowing = null;
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true);
+				editor.commit();
+			}
+		});
+		dialog.show();
+	}
+
+	private void showSMSSyncDialog() {
+		if (dialogShowing == null) {
+			dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION;
+		}
+
+		dialog = Utils.showSMSSyncDialog(this,
+				dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
 	}
 
 	@Override
@@ -116,6 +224,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT,
 				deviceDetailsSent);
+		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
 	}
 
