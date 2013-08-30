@@ -121,9 +121,9 @@ public class AccountUtils {
 
 	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
 	
-	public static final String GAMES_PRODUCTION_BASE = "hike.in/apps/android/";
+	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/android/";
 
-	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/apps/android/";
+	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/android/";
 
 	public static String gamesUrl = HTTP_STRING + GAMES_PRODUCTION_BASE;
 	

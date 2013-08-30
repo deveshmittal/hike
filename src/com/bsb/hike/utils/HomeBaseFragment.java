@@ -106,6 +106,9 @@ public class HomeBaseFragment extends SherlockListFragment {
 	}
 
 	private Intent getGamingIntent() {
+		
+		SharedPreferences prefs = getSherlockActivity().getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Intent intent = new Intent(this.getSherlockActivity()
 				.getApplicationContext(), WebViewActivity.class);
 		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
@@ -115,25 +118,23 @@ public class HomeBaseFragment extends SherlockListFragment {
 		intent.putExtra(
 				HikeConstants.Extras.URL_TO_LOAD,
 				AccountUtils.gamesUrl
-						+ getActivity().getSharedPreferences(
-								HikeConstants.GAMES, Context.MODE_PRIVATE)
-								.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+						+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 		intent.putExtra(HikeConstants.Extras.TITLE, getSherlockActivity()
-				.getString(R.string.new_string));
+				.getString(R.string.games));
 		return intent;
 	}
 
 	private Intent getRewardsIntent() {
+		SharedPreferences prefs = getSherlockActivity().getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Intent intent = new Intent(this.getSherlockActivity()
 				.getApplicationContext(), WebViewActivity.class);
 		intent.putExtra(
 				HikeConstants.Extras.URL_TO_LOAD,
 				AccountUtils.rewardsUrl
-						+ getActivity().getSharedPreferences(
-								HikeConstants.GAMES, Context.MODE_PRIVATE)
-								.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+						+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 		intent.putExtra(HikeConstants.Extras.TITLE, getSherlockActivity()
-				.getString(R.string.new_string));
+				.getString(R.string.rewards));
 		return intent;
 	}
 

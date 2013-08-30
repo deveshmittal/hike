@@ -544,10 +544,14 @@ public class HikeNotification {
 
 		} else {
 			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			filePath = hikeFile.getFilePath(); // check
-			bigPictureImage = BitmapFactory.decodeFile(filePath);
-			if (bigPictureImage != null)
-				doesExist = true;
+			if (hikeFile!=null) {
+				if (hikeFile.getFileTypeString().equals(HikeFileType.IMAGE)) {
+					filePath = hikeFile.getFilePath(); // check
+					bigPictureImage = BitmapFactory.decodeFile(filePath);
+					if (bigPictureImage != null)
+						doesExist = true;
+				}
+			}
 		}
 
 		if (doesExist) {
