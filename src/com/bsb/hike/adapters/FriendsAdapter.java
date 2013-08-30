@@ -548,18 +548,21 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public void setCompleteList(List<ContactInfo> completeList) {
 		this.completeList = completeList;
 	}
+
 	public List<ContactInfo> getFriendsList() {
 		return friendsList;
 	}
+
 	public void setFriendsList(List<ContactInfo> friendsList) {
 		this.friendsList = friendsList;
 	}
+
 	public List<ContactInfo> getFilteredFriendsList() {
 		return filteredFriendsList;
 	}
+
 	public void setFilteredFriendsList(List<ContactInfo> filteredFriendsList) {
 		this.filteredFriendsList = filteredFriendsList;
 	}
-
 
 }

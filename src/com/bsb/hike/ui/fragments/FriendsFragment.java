@@ -48,8 +48,8 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 			HikePubSub.USER_LEFT, HikePubSub.CONTACT_ADDED,
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER,
-			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED, 
-			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED};
+			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
 
 	private SharedPreferences preferences;
 
@@ -299,10 +299,9 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 				}
 
 			});
-		} else if(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type)){
-			List <ContactInfo> friendsList = friendsAdapter.getFriendsList();
-			for(int i=0; i<friendsList.size()-1;i++)
- {
+		} else if (HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type)) {
+			List<ContactInfo> friendsList = friendsAdapter.getFriendsList();
+			for (int i = 0; i < friendsList.size() - 1; i++) {
 				String msisdn = friendsList.get(i).getMsisdn();
 				long lastSeenUpdated = 0;
 				if (HikeMessengerApp.lastSeenFriendsMap.get(msisdn) != null) {
@@ -315,14 +314,15 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 					}
 				}
 			}
-			Collections.sort(friendsAdapter.getFriendsList(),  ContactInfo.lastSeenTimeComparator);
+			Collections.sort(friendsAdapter.getFriendsList(),
+					ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					friendsAdapter.makeCompleteList(false);
 				}
 			});
-			
+
 		}
 	}
 
