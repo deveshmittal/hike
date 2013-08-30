@@ -83,7 +83,7 @@
                     android:id="@+id/loading_layout"
                     style="@style/SignupButton"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/signup_loading_bckg"
+                    android:background="@drawable/signup_btn_loading"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal"
                     android:visibility="invisible" >
