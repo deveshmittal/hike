@@ -217,8 +217,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 							.getText().toString();
 					if (!searchString.equals("")) {
 						searchString = URLEncoder.encode(searchString, "UTF-8");
-						double lat = myLocation.getLatitude();
-						double lng = myLocation.getLongitude();
+						double lat = 0;
+						double lng = 0;
+						if (myLocation != null) {
+							lat = myLocation.getLatitude();
+							lng = myLocation.getLongitude();
+						}
 						searchStr = "https://maps.googleapis.com/maps/api/place/textsearch/"
 								+ "json?query="
 								+ searchString
