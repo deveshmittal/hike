@@ -285,7 +285,7 @@ public class TellAFriend extends HikeAppStateBaseActivity implements
 							: R.string.posting_update_twitter));
 
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
-			hikeHTTPTask.execute(hikeHttpRequest);
+			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 		} catch (JSONException e) {
 			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
