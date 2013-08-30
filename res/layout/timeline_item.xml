@@ -110,7 +110,6 @@
                 android:id="@+id/yes_btn"
                 style="@style/ProtipBtn.YesBtn"
                 android:focusable="false"
-                android:singleLine="true"
                 android:onClick="onYesBtnClick"
                 android:text="@string/confirm" />
 
