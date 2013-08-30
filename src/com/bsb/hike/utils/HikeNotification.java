@@ -81,7 +81,9 @@ public class HikeNotification {
 				context).setContentTitle(context.getString(R.string.team_hike))
 				.setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(proTip.getHeader()).setAutoCancel(true)
-				.setTicker(proTip.getHeader()).setDefaults(vibrate);
+				.setTicker(proTip.getHeader())
+				.setDefaults(vibrate)
+				.setPriority(Notification.PRIORITY_HIGH);
 
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 		stackBuilder.addNextIntent(notificationIntent);
@@ -351,6 +353,7 @@ public class HikeNotification {
 				context).setContentTitle(key).setSmallIcon(smallIconId)
 				.setLargeIcon(avatarBitmap).setContentText(message)
 				.setAutoCancel(true)
+				.setPriority(Notification.PRIORITY_HIGH)
 				.setTicker(text).setDefaults(vibrate);
 
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
@@ -419,6 +422,7 @@ public class HikeNotification {
 				.setLargeIcon(bigPictureImage)
 				.setTicker(text)
 				.setDefaults(vibrate)
+				.setPriority(Notification.PRIORITY_HIGH)
 				.setContentText(text);
 
 		NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
@@ -484,6 +488,7 @@ public class HikeNotification {
 				.setAutoCancel(true)
 				.setLargeIcon(avatarBitmap)
 				.setTicker(text)
+				.setPriority(Notification.PRIORITY_HIGH)
 				.setContentText(maskedText);
 
 		NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
