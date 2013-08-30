@@ -16,25 +16,17 @@
         android:paddingRight="4dp" >
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="@dimen/larger_avatar"
+            android:layout_height="@dimen/larger_avatar" >
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="@dimen/larger_avatar"
-                android:layout_height="@dimen/larger_avatar"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/large_avatar_margin"
-                android:layout_marginTop="@dimen/large_avatar_margin"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/frame_avatar_large_selector" />
         </FrameLayout>
 
