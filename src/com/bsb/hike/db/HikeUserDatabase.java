@@ -1006,7 +1006,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
 		mDb.delete(DBConstants.THUMBNAILS_TABLE, null, null);
 		mDb.delete(DBConstants.FAVORITES_TABLE, null, null);
-		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_INDEX, null, null);
+		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, null);
 	}
 
 	public ContactInfo getContactInfoFromPhoneNo(String number) {
