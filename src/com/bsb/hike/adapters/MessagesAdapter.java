@@ -852,11 +852,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				&& !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn())) {
 			if (position != 0) {
 				ConvMessage previous = getItem(position - 1);
-				if (previous.getParticipantInfoState() == ParticipantInfoState.NO_INFO
-						&& !convMessage.getGroupParticipantMsisdn().equals(
+				if (previous.getParticipantInfoState() != ParticipantInfoState.NO_INFO
+						|| !convMessage.getGroupParticipantMsisdn().equals(
 								previous.getGroupParticipantMsisdn())) {
 					firstMessageFromParticipant = true;
 				}
+			} else {
+				firstMessageFromParticipant = true;
 			}
 		}
 
@@ -1185,18 +1187,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.circularProgress.setVisibility(View.INVISIBLE);
 			}
 			if (!convMessage.isSent()) {
-				boolean showAvatar = false;
-
-				if (isGroupChat) {
-					if (position != 0) {
-						ConvMessage previous = getItem(position - 1);
-						if (!convMessage.getGroupParticipantMsisdn().equals(
-								previous.getGroupParticipantMsisdn())) {
-							showAvatar = true;
-						}
-					}
-				}
-				if (showAvatar) {
+				if (firstMessageFromParticipant) {
 					holder.image.setVisibility(View.VISIBLE);
 					holder.image.setImageDrawable(IconCacheManager
 							.getInstance().getIconForMSISDN(
