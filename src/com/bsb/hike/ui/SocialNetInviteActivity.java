@@ -545,7 +545,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 			getSupportActionBar().setBackgroundDrawable(
 					getResources().getDrawable(R.drawable.bg_header_compose));
 
-			//title.setText(R.string.invite);
+			// title.setText(R.string.invite);
 			// backIcon.setImageResource(R.drawable.ic_cancel);
 		} else {
 			init();

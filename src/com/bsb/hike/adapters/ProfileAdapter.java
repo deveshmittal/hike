@@ -172,8 +172,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile_pic);
 				viewHolder.timeStamp = (TextView) v
 						.findViewById(R.id.timestamp);
-				viewHolder.infoContainer = v
-						.findViewById(R.id.info_container);
+				viewHolder.infoContainer = v.findViewById(R.id.info_container);
 				break;
 
 			case EMPTY_STATUS:

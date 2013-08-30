@@ -278,19 +278,19 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		startFbSession();
 	}
-	
-	private void startFbSession(){
+
+	private void startFbSession() {
 		if (ensureOpenSession()) {
 			ensurePublishPermissions();
 		}
 	}
+
 	private boolean ensureOpenSession() {
 		Log.d("StatusUpdate", "entered in ensureOpenSession");
 		if (Session.getActiveSession() == null
 				|| !Session.getActiveSession().isOpened()) {
 
-			Log.d("StatusUpdate",
-					"active session is either null or closed");
+			Log.d("StatusUpdate", "active session is either null or closed");
 			Session.openActiveSession(this, true, new Session.StatusCallback() {
 				@Override
 				public void call(Session session, SessionState state,
@@ -338,7 +338,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 								Log.d("StatusUpdate", session
 										.getExpirationDate().toString());
 								makeMeRequest(session,
-										session.getAccessToken(), session.getExpirationDate().getTime());
+										session.getAccessToken(), session
+												.getExpirationDate().getTime());
 							} else {
 
 							}
@@ -347,9 +348,13 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 					}));
 		} else {
-			Log.d("StatusUpdate", "time = "+Long.valueOf(session.getExpirationDate().getTime()).toString());
-			makeMeRequest(session,
-					session.getAccessToken(), session.getExpirationDate().getTime());
+			Log.d("StatusUpdate",
+					"time = "
+							+ Long.valueOf(
+									session.getExpirationDate().getTime())
+									.toString());
+			makeMeRequest(session, session.getAccessToken(), session
+					.getExpirationDate().getTime());
 		}
 	}
 

@@ -231,8 +231,8 @@ public class StickerAdapter extends PagerAdapter implements
 											DownloadType.MORE_STICKERS);
 									Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-									HikeMessengerApp.stickerTaskMap.put(categoryId,
-											downloadStickerTask);
+									HikeMessengerApp.stickerTaskMap.put(
+											categoryId, downloadStickerTask);
 									stickerPageAdapter.notifyDataSetChanged();
 								}
 							}

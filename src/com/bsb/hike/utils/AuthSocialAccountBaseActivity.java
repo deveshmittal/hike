@@ -184,47 +184,49 @@ public abstract class AuthSocialAccountBaseActivity extends
 					true);
 		}
 	}
-	
-	public void onCompleteFacebookAuth(String aToken, long expirationDate, String userId) {
+
+	public void onCompleteFacebookAuth(String aToken, long expirationDate,
+			String userId) {
 		facebookAuthPopupShowing = false;
 		Facebook facebook = HikeMessengerApp.getFacebook();
-		
+
 		final Editor editor = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
-				aToken);
-		editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
-				expirationDate);
+		editor.putString(HikeMessengerApp.FACEBOOK_TOKEN, aToken);
+		editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, expirationDate);
 
 		editor.putString(HikeMessengerApp.FACEBOOK_USER_ID, userId);
 		editor.commit();
-		sendCredentialsToServer(userId, aToken,
-				expirationDate, true);
+		sendCredentialsToServer(userId, aToken, expirationDate, true);
 		return;
 	}
-	
-	public void makeMeRequest(final Session session, final String aToken, final long expirationDate) {
-	    // Make an API call to get user data and define a 
-	    // new callback to handle the response.
-	    Request request = Request.newMeRequest(session, 
-	            new Request.GraphUserCallback() {
-	        @Override
-	        public void onCompleted(GraphUser user, Response response) {
-	            // If the response is successful
-	            if (session == Session.getActiveSession()) {
-	                if (user != null) {
-	                	onCompleteFacebookAuth(aToken, expirationDate, user.getId());
-	                }
-	            }
-	            if (response.getError() != null) {
-	            	Log.e(getClass().getSimpleName(), "Facebook Get newMeRequest Failled", response.getError().getException());
-	            	facebookError();
-	            }
-	        }
-	    });
-	    request.executeAsync();
-	} 
-	
+
+	public void makeMeRequest(final Session session, final String aToken,
+			final long expirationDate) {
+		// Make an API call to get user data and define a
+		// new callback to handle the response.
+		Request request = Request.newMeRequest(session,
+				new Request.GraphUserCallback() {
+					@Override
+					public void onCompleted(GraphUser user, Response response) {
+						// If the response is successful
+						if (session == Session.getActiveSession()) {
+							if (user != null) {
+								onCompleteFacebookAuth(aToken, expirationDate,
+										user.getId());
+							}
+						}
+						if (response.getError() != null) {
+							Log.e(getClass().getSimpleName(),
+									"Facebook Get newMeRequest Failled",
+									response.getError().getException());
+							facebookError();
+						}
+					}
+				});
+		request.executeAsync();
+	}
+
 	public void facebookError() {
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
