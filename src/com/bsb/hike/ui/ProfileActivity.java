@@ -318,6 +318,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		switch (profileType) {
 		case CONTACT_INFO:
 			getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
+
+			MenuItem callItem = menu.findItem(R.id.call);
+			if (callItem != null) {
+				callItem.setVisible(getPackageManager().hasSystemFeature(
+						PackageManager.FEATURE_TELEPHONY));
+			}
 			return true;
 		case GROUP_INFO:
 			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
@@ -399,9 +405,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void setupContactProfileScreen() {
-		boolean canCall = getPackageManager().hasSystemFeature(
-				PackageManager.FEATURE_TELEPHONY);
-
 		this.mLocalMSISDN = getIntent().getStringExtra(
 				HikeConstants.Extras.CONTACT_INFO);
 
