@@ -423,15 +423,11 @@ public class HikeNotification {
 		int smallIconId = returnSmallIcon();
 		Bitmap bigPictureImage = BitmapFactory.decodeFile(profileStruct[0]);
 
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-				.setContentTitle(title)
-				.setSmallIcon(smallIconId)
-				.setAutoCancel(true)
-				.setLargeIcon(bigPictureImage)
-				.setTicker(text)
-				.setDefaults(vibrate)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setContentText(text);
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setContentTitle(title).setSmallIcon(smallIconId)
+				.setAutoCancel(true).setLargeIcon(bigPictureImage)
+				.setTicker(text).setDefaults(vibrate)
+				.setPriority(Notification.PRIORITY_HIGH).setContentText(text);
 
 		NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 		bigPicStyle.bigPicture(bigPictureImage);
@@ -500,9 +496,7 @@ public class HikeNotification {
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
 				context).setContentTitle(key).setSmallIcon(smallIconId)
-				.setAutoCancel(true)
-				.setLargeIcon(avatarBitmap)
-				.setTicker(text)
+				.setAutoCancel(true).setLargeIcon(avatarBitmap).setTicker(text)
 				.setPriority(Notification.PRIORITY_HIGH)
 				.setContentText(maskedText);
 
