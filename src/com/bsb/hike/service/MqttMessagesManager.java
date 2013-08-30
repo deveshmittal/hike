@@ -884,10 +884,12 @@ public class MqttMessagesManager {
 						statusMessage);
 			}
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
-			/*
-			 * Start auto download of the profile image.
-			 */
-			autoDownloadProfileImage(statusMessage, true);
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				/*
+				 * Start auto download of the profile image.
+				 */
+				autoDownloadProfileImage(statusMessage, true);
+			}
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
 
