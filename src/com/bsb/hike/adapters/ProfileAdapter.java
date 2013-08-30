@@ -252,18 +252,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				} else if (mContactInfo.isOnhike()) {
 					String subText = null;
 					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
-							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND
+							|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
 						subText = Utils.getLastSeenTimeAsString(context,
 								mContactInfo.getLastSeenTime(),
 								mContactInfo.getOffline());
 					}
 
-					if (TextUtils.isEmpty(subText)) {
+					if (TextUtils.isEmpty(subText)
+							&& mContactInfo.getHikeJoinTime() != 0) {
 						subText = context.getString(R.string.on_hike_since,
 								mContactInfo.getFormattedHikeJoinTime());
-					}
-
-					if (TextUtils.isEmpty(subText)) {
+					} else if (TextUtils.isEmpty(subText)) {
 						subText = context.getString(R.string.on_hike);
 					}
 
@@ -436,8 +436,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					.getTimestampFormatted(true, context));
 
 			viewHolder.infoContainer.setTag(profilePicStatusUpdate);
-			viewHolder.infoContainer
-					.setOnLongClickListener(profileActivity);
+			viewHolder.infoContainer.setOnLongClickListener(profileActivity);
 			break;
 
 		case EMPTY_STATUS:
