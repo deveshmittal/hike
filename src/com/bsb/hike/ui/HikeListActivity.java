@@ -87,7 +87,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 			break;
 		}
 		setupActionBar();
-		new SetupContactList().execute();
+		Utils.executeContactListResultTask(new SetupContactList());
 	}
 
 	private void init() {

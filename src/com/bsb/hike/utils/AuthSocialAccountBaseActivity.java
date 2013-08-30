@@ -328,7 +328,7 @@ public abstract class AuthSocialAccountBaseActivity extends
 				});
 		hikeHttpRequest.setJSONData(request);
 		hikeHTTPTask = new HikeHTTPTask(null, 0);
-		hikeHTTPTask.execute(hikeHttpRequest);
+		Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 
 		dialog = ProgressDialog.show(this, null,
 				getString(R.string.saving_social));

@@ -1,5 +1,7 @@
 package com.bsb.hike.view;
 
+import com.bsb.hike.utils.Utils;
+
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -190,8 +192,14 @@ public class TwitterOAuthView extends WebView {
 			throw new IllegalArgumentException();
 		}
 		Boolean dummy = Boolean.valueOf(dummyCallbackUrl);
-		new TwitterOAuthTask().execute(consumerKey, consumerSecret,
-				callbackUrl, dummy, listener);
+		TwitterOAuthTask authTask = new TwitterOAuthTask();
+		if (Utils.isHoneycombOrHigher()) {
+			authTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					consumerKey, consumerSecret, callbackUrl, dummy, listener);
+		} else {
+			authTask.execute(consumerKey, consumerSecret, callbackUrl, dummy,
+					listener);
+		}
 	}
 
 	private class TwitterOAuthTask extends AsyncTask<Object, Void, Result> {

@@ -53,6 +53,7 @@ import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
@@ -115,7 +116,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 		if (isFacebook) {
 			getFriends();
 		} else {
-			new GetTwitterFollowers().execute();
+			Utils.executeStringResultTask(new GetTwitterFollowers());
 		}
 		mTwitterInviteTask = (HikeHTTPTask) getLastCustomNonConfigurationInstance();
 		if (mTwitterInviteTask != null) {
@@ -242,7 +243,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 									Log.d("SocialNetInviteActivity",
 											response.toString());
 									friends = users;
-									new GetFriends().execute();
+									Utils.executeStringResultTask(new GetFriends());
 								}
 							} catch (NullPointerException e) {
 								Log.e(this.getClass().getName(),
@@ -415,7 +416,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 		mTwitterInviteTask = new HikeHTTPTask(this,
 				R.string.posting_update_fail);
 
-		mTwitterInviteTask.execute(hikeHttpRequest);
+		Utils.executeHttpTask(mTwitterInviteTask, hikeHttpRequest);
 		mDialog = ProgressDialog.show(this, null,
 				getString(R.string.posting_update_twitter));
 

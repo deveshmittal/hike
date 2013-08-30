@@ -215,7 +215,12 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				deleteSocialCredentialsTask = new DeleteSocialCredentialsTask();
-				deleteSocialCredentialsTask.execute(facebook);
+				if (Utils.isHoneycombOrHigher()) {
+					deleteSocialCredentialsTask.executeOnExecutor(
+							AsyncTask.THREAD_POOL_EXECUTOR, facebook);
+				} else {
+					deleteSocialCredentialsTask.execute(facebook);
+				}
 			}
 		});
 		builder.setNegativeButton(R.string.cancel, new OnClickListener() {

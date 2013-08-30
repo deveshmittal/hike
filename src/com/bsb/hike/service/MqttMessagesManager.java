@@ -440,7 +440,7 @@ public class MqttMessagesManager {
 							context, hikeFile.getFile(), hikeFile.getFileKey(),
 							convMessage, hikeFile.getHikeFileType(),
 							convMessage.getMsgID(), false);
-					downloadFile.execute();
+					Utils.executeIntProgFtResultAsyncTask(downloadFile);
 				}
 			}
 			removeTypingNotification(convMessage.getMsisdn(),
@@ -1092,14 +1092,14 @@ public class MqttMessagesManager {
 				context, statusMessage.getMappedId(), fileName, true,
 				statusUpdate, statusMessage.getMsisdn(),
 				statusMessage.getNotNullName(), false);
-		downloadProfileImageTask.execute();
+		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
 
 	private void autoDownloadGroupImage(String id) {
 		String fileName = Utils.getProfileImageFileName(id);
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, id, fileName, true, false, null, null, false);
-		downloadProfileImageTask.execute();
+		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
 
 	private void setDefaultSMSClientTutorialSetting() {

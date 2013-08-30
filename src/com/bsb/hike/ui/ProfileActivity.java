@@ -462,7 +462,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						}
 					});
 			mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
-			mActivityState.getHikeJoinTimeTask.execute(hikeHttpRequest);
+			Utils.executeHttpTask(mActivityState.getHikeJoinTimeTask,
+					hikeHttpRequest);
 		}
 	}
 
@@ -699,7 +700,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						}
 					});
 			mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
-			mActivityState.getHikeJoinTimeTask.execute(hikeHttpRequest);
+			Utils.executeHttpTask(mActivityState.getHikeJoinTimeTask,
+					hikeHttpRequest);
 		}
 	}
 
@@ -718,7 +720,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			Log.d(getClass().getSimpleName(), "Loading more items");
 			loadingMoreMessages = true;
 
-			new AsyncTask<Void, Void, List<StatusMessage>>() {
+			AsyncTask<Void, Void, List<StatusMessage>> asyncTask = new AsyncTask<Void, Void, List<StatusMessage>>() {
 
 				@Override
 				protected List<StatusMessage> doInBackground(Void... params) {
@@ -754,8 +756,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					loadingMoreMessages = false;
 				}
 
-			}.execute();
-
+			};
+			if (Utils.isHoneycombOrHigher()) {
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			} else {
+				asyncTask.execute();
+			}
 		}
 	}
 
@@ -1001,7 +1007,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					R.string.update_profile_failed);
 			HikeHttpRequest[] r = new HikeHttpRequest[requests.size()];
 			requests.toArray(r);
-			mActivityState.task.execute(r);
+			Utils.executeHttpTask(mActivityState.task, r);
 		} else if (isBackPressed) {
 			finishEditing();
 		}
@@ -1134,7 +1140,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 								}
 							}
 						});
-				mActivityState.downloadPicasaImageTask.execute();
+				Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
 				mDialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -2024,7 +2030,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		});
 		mActivityState.task = new HikeHTTPTask(this,
 				R.string.delete_status_error);
-		mActivityState.task.execute(hikeHttpRequest);
+		Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
 		mDialog = ProgressDialog.show(this, null,
 				getString(R.string.deleting_status));
 	}

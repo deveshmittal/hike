@@ -122,7 +122,7 @@ public class StickerAdapter extends PagerAdapter implements
 				public void onClick(View v) {
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 							activity, position, downloadTypeBeforeFail);
-					downloadStickerTask.execute();
+					Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 					HikeMessengerApp.stickerTaskMap.put(categoryId,
 							downloadStickerTask);
@@ -132,7 +132,7 @@ public class StickerAdapter extends PagerAdapter implements
 		} else {
 			stickerList.setVisibility(View.VISIBLE);
 
-			new AsyncTask<Void, Void, List<Sticker>>() {
+			AsyncTask<Void, Void, List<Sticker>> stickerTask = new AsyncTask<Void, Void, List<Sticker>>() {
 
 				boolean updateAvailable;
 
@@ -229,7 +229,7 @@ public class StickerAdapter extends PagerAdapter implements
 									DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 											activity, position,
 											DownloadType.MORE_STICKERS);
-									downloadStickerTask.execute();
+									Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 									HikeMessengerApp.stickerTaskMap.put(categoryId,
 											downloadStickerTask);
@@ -240,7 +240,12 @@ public class StickerAdapter extends PagerAdapter implements
 					});
 				}
 
-			}.execute();
+			};
+			if (Utils.isHoneycombOrHigher()) {
+				stickerTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			} else {
+				stickerTask.execute();
+			}
 		}
 	}
 

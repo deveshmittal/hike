@@ -203,7 +203,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	private void setLastSentMessagePosition() {
-		new AsyncTask<Void, Void, Void>() {
+		AsyncTask<Void, Void, Void> getLastSentMessagePositionTask = new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
@@ -230,7 +230,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 				notifyDataSetChanged();
 			}
-		}.execute();
+		};
+		Utils.executeAsyncTask(getLastSentMessagePositionTask);
 	}
 
 	/**
@@ -1127,7 +1128,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								context, categoryId, stickerId);
 						HikeMessengerApp.stickerTaskMap.put(key,
 								downloadSingleStickerTask);
-						downloadSingleStickerTask.execute();
+						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
 					}
 				}
 			}
@@ -1518,7 +1519,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									(hikeFile.getHikeFileType() == HikeFileType.CONTACT),
 									conversation);
 						}
-						uploadTask.execute();
+						Utils.executeIntProgFtResultAsyncTask(uploadTask);
 						HikeMessengerApp.fileTransferTaskMap.put(
 								convMessage.getMsgID(), uploadTask);
 						notifyDataSetChanged();
@@ -1551,7 +1552,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								context, receivedFile, hikeFile.getFileKey(),
 								convMessage, hikeFile.getHikeFileType(),
 								convMessage.getMsgID());
-						downloadFile.execute();
+						Utils.executeIntProgFtResultAsyncTask(downloadFile);
 					}
 				}
 			} else if (convMessage.getMetadata() != null

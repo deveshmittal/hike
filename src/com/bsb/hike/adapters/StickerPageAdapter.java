@@ -217,7 +217,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					public void onClick(View v) {
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 								activity, categoryIndex, DownloadType.UPDATE);
-						downloadStickerTask.execute();
+						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 						HikeMessengerApp.stickerTaskMap.put(categoryId,
 								downloadStickerTask);

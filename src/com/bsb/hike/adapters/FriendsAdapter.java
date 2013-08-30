@@ -68,76 +68,65 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredOtherContactsList = new ArrayList<ContactInfo>(0);
 
-		new AsyncTask<Void, Void, Void>() {
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask();
+		Utils.executeAsyncTask(fetchFriendsTask);
+	}
 
-			List<ContactInfo> favoriteTaskList;
-			List<ContactInfo> otherTaskList;
+	private class FetchFriendsTask extends AsyncTask<Void, Void, Void> {
 
-			@Override
-			protected Void doInBackground(Void... params) {
-				String myMsisdn = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-						HikeMessengerApp.MSISDN_SETTING, "");
+		List<ContactInfo> favoriteTaskList;
+		List<ContactInfo> otherTaskList;
 
-				boolean nativeSMSOn = PreferenceManager
-						.getDefaultSharedPreferences(context).getBoolean(
-								HikeConstants.SEND_SMS_PREF, false);
+		@Override
+		protected Void doInBackground(Void... params) {
+			String myMsisdn = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
 
-				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
-						.getInstance();
+			boolean nativeSMSOn = PreferenceManager
+					.getDefaultSharedPreferences(context).getBoolean(
+							HikeConstants.SEND_SMS_PREF, false);
 
-				favoriteTaskList = hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.FRIEND, HikeConstants.BOTH_VALUE,
-						myMsisdn, nativeSMSOn);
-				favoriteTaskList.addAll(hikeUserDatabase
-						.getContactsOfFavoriteType(
-								FavoriteType.REQUEST_RECEIVED,
-								HikeConstants.BOTH_VALUE, myMsisdn,
-								nativeSMSOn, false, true));
-				favoriteTaskList
-						.addAll(hikeUserDatabase
-								.getContactsOfFavoriteType(
-										FavoriteType.REQUEST_SENT,
-										HikeConstants.BOTH_VALUE, myMsisdn,
-										nativeSMSOn));
-				favoriteTaskList
-						.addAll(hikeUserDatabase
-								.getContactsOfFavoriteType(
-										FavoriteType.REQUEST_SENT_REJECTED,
-										HikeConstants.BOTH_VALUE, myMsisdn,
-										nativeSMSOn));
-				Collections.sort(favoriteTaskList,
-						ContactInfo.lastSeenTimeComparator);
+			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
-				otherTaskList = hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.NOT_FRIEND, HikeConstants.BOTH_VALUE,
-						myMsisdn, nativeSMSOn);
-				otherTaskList.addAll(hikeUserDatabase
-						.getContactsOfFavoriteType(
-								FavoriteType.REQUEST_RECEIVED,
-								HikeConstants.BOTH_VALUE, myMsisdn,
-								nativeSMSOn, true));
-				otherTaskList.addAll(hikeUserDatabase
-						.getContactsOfFavoriteType(
-								FavoriteType.REQUEST_RECEIVED_REJECTED,
-								HikeConstants.BOTH_VALUE, myMsisdn,
-								nativeSMSOn, true));
-				Collections.sort(otherTaskList);
+			favoriteTaskList = hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, myMsisdn,
+					nativeSMSOn);
+			favoriteTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
+					myMsisdn, nativeSMSOn, false, true));
+			favoriteTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
+					myMsisdn, nativeSMSOn));
+			favoriteTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_SENT_REJECTED,
+					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
+			Collections.sort(favoriteTaskList,
+					ContactInfo.lastSeenTimeComparator);
 
-				return null;
-			}
+			otherTaskList = hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.NOT_FRIEND, HikeConstants.BOTH_VALUE,
+					myMsisdn, nativeSMSOn);
+			otherTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
+					myMsisdn, nativeSMSOn, true));
+			otherTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_RECEIVED_REJECTED,
+					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, true));
+			Collections.sort(otherTaskList);
 
-			@Override
-			protected void onPostExecute(Void result) {
-				friendsList = favoriteTaskList;
-				otherContactsList = otherTaskList;
+			return null;
+		}
 
-				filteredFriendsList.addAll(favoriteTaskList);
-				filteredOtherContactsList.addAll(otherTaskList);
-				makeCompleteList(true);
-			}
+		@Override
+		protected void onPostExecute(Void result) {
+			friendsList = favoriteTaskList;
+			otherContactsList = otherTaskList;
 
-		}.execute();
+			filteredFriendsList.addAll(favoriteTaskList);
+			filteredOtherContactsList.addAll(otherTaskList);
+			makeCompleteList(true);
+		}
 	}
 
 	public void onQueryChanged(String s) {

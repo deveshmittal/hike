@@ -400,7 +400,7 @@ public class ConversationFragment extends HomeBaseFragment implements
 							Utils.logEvent(getActivity(),
 									HikeConstants.LogEvent.DELETE_CONVERSATION);
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-							task.execute(conv);
+							executeAsyncTask(task, conv);
 						} else if (getString(R.string.delete_leave).equals(
 								option)) {
 							Utils.logEvent(getActivity(),
@@ -409,7 +409,7 @@ public class ConversationFragment extends HomeBaseFragment implements
 						} else if (getString(R.string.email_conversation)
 								.equals(option)) {
 							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask();
-							task.execute(conv);
+							executeAsyncTask(task, conv);
 						}
 
 					}
@@ -482,7 +482,18 @@ public class ConversationFragment extends HomeBaseFragment implements
 
 	private void deleteConversation(Conversation conv) {
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-		task.execute(conv);
+		executeAsyncTask(task, conv);
+	}
+
+	private void executeAsyncTask(
+			AsyncTask<Conversation, Void, Conversation[]> asyncTask,
+			Conversation... conversations) {
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					conversations);
+		} else {
+			asyncTask.execute(conversations);
+		}
 	}
 
 	private void toggleTypingNotification(boolean isTyping,

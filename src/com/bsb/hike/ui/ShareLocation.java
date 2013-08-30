@@ -176,7 +176,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						.getBoolean(HikeConstants.Extras.IS_TEXT_SEARCH);
 				searchStr = savedInstanceState
 						.getString(HikeConstants.Extras.HTTP_SEARCH_STR);
-				new GetPlaces().execute(searchStr);
+				executeTask(new GetPlaces(), searchStr);
 			} else {
 				Log.d(getClass().getSimpleName(),
 						"savedInstanceState is null updating nearby places");
@@ -234,7 +234,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 						isTextSearch = true;
 
-						new GetPlaces().execute(searchStr);
+						executeTask(new GetPlaces(), searchStr);
 					}
 				} catch (UnsupportedEncodingException e) {
 					Log.w(getClass().getSimpleName(),
@@ -469,10 +469,20 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				;
 				isTextSearch = false;
 			}
-			new GetPlaces().execute(searchStr);
+			executeTask(new GetPlaces(), searchStr);
 
 		} catch (UnsupportedEncodingException e) {
 			Log.w(getClass().getSimpleName(), "in text search url encoding", e);
+		}
+	}
+
+	private void executeTask(AsyncTask<String, Void, Integer> asyncTask,
+			String... strings) {
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, strings);
+		} else {
+			asyncTask.execute(strings);
 		}
 	}
 
@@ -796,7 +806,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		 * Getting the address blocks the UI so we run this code in a background
 		 * thread.
 		 */
-		(new AsyncTask<Void, Void, String>() {
+		AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
 
 			@Override
 			protected String doInBackground(Void... params) {
@@ -812,7 +822,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						true);
 				adapter.notifyDataSetChanged();
 			}
-		}).execute();
+		};
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
 	}
 
 	public static String getAddressFromPosition(double lat, double lng,

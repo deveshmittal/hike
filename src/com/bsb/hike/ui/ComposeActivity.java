@@ -98,7 +98,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		mContactList.setEmptyView(findViewById(android.R.id.empty));
 
 		init();
-		new CreateAutoCompleteViewTask().execute();
+		Utils.executeContactListResultTask(new CreateAutoCompleteViewTask());
 	}
 
 	private void init() {
@@ -136,7 +136,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 					startActivity(intent);
 				} else {
 					init();
-					new CreateAutoCompleteViewTask().execute();
+					Utils.executeContactListResultTask(new CreateAutoCompleteViewTask());
 				}
 			}
 		});

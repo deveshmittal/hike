@@ -505,7 +505,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		hikeHttpRequest.setJSONData(data);
 		mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
-		mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
+		Utils.executeHttpTask(mActivityTask.hikeHTTPTask, hikeHttpRequest);
 
 		/*
 		 * Starting the manual cancel as well.

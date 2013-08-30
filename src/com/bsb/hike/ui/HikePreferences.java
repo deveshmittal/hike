@@ -195,7 +195,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 							HikePreferences.this, true);
 					isDeleting = true;
 					setBlockingTask(task);
-					task.execute();
+					Utils.executeBoolResultAsyncTask(task);
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
@@ -215,7 +215,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 							HikePreferences.this, false);
 					isDeleting = false;
 					setBlockingTask(task);
-					task.execute();
+					Utils.executeBoolResultAsyncTask(task);
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {

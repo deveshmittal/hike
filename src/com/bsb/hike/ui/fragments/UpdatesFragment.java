@@ -235,7 +235,7 @@ public class UpdatesFragment extends HomeBaseFragment implements
 			Log.d(getClass().getSimpleName(), "Loading more items");
 			loadingMoreMessages = true;
 
-			new AsyncTask<Void, Void, List<StatusMessage>>() {
+			AsyncTask<Void, Void, List<StatusMessage>> asyncTask = new AsyncTask<Void, Void, List<StatusMessage>>() {
 
 				@Override
 				protected List<StatusMessage> doInBackground(Void... params) {
@@ -272,8 +272,12 @@ public class UpdatesFragment extends HomeBaseFragment implements
 					loadingMoreMessages = false;
 				}
 
-			}.execute();
-
+			};
+			if (Utils.isHoneycombOrHigher()) {
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			} else {
+				asyncTask.execute();
+			}
 		}
 	}
 

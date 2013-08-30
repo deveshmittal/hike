@@ -1236,14 +1236,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							}
 						});
 				HikeHTTPTask getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
-				getHikeJoinTimeTask.execute(hikeHttpRequest);
+				Utils.executeHttpTask(getHikeJoinTimeTask, hikeHttpRequest);
 			}
 
 			if (shouldShowLastSeen()) {
 				/*
 				 * Fetching last seen value.
 				 */
-				new FetchLastSeenTask(mContactNumber, false).execute();
+				Utils.executeLongResultTask(new FetchLastSeenTask(
+						mContactNumber, false));
 			}
 		}
 
@@ -3086,7 +3087,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					UploadFileTask uploadFileTask = new UploadFileTask(
 							selectedFileUri, hikeFileType, mContactNumber,
 							getApplicationContext(), mConversation);
-					uploadFileTask.execute();
+					Utils.executeIntProgFtResultAsyncTask(uploadFileTask);
 					return;
 				} else {
 					String fileUriStart = "file://";
@@ -3359,7 +3360,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				filePath, fileType, hikeFileType, isRecording
 						&& !isForwardingFile, recordingDuration,
 				getApplicationContext(), mConversation);
-		uploadFileTask.execute();
+		Utils.executeIntProgFtResultAsyncTask(uploadFileTask);
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude,
@@ -3368,14 +3369,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
 				mContactNumber, latitude, longitude, zoomLevel,
 				getApplicationContext(), mConversation);
-		uploadLocationTask.execute();
+		Utils.executeIntProgFtResultAsyncTask(uploadLocationTask);
 	}
 
 	private void initialiseContactTransfer(JSONObject contactJson) {
 		UploadContactOrLocationTask contactOrLocationTask = new UploadContactOrLocationTask(
 				mContactNumber, contactJson, getApplicationContext(),
 				mConversation);
-		contactOrLocationTask.execute();
+		Utils.executeIntProgFtResultAsyncTask(contactOrLocationTask);
 	}
 
 	private void saveContact(List<ContactInfoData> items,
@@ -3693,7 +3694,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 							ChatThread.this, categoryIndex,
 							DownloadType.NEW_CATEGORY);
-					downloadStickerTask.execute();
+					Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 					HikeMessengerApp.stickerTaskMap.put(categoryId,
 							downloadStickerTask);
@@ -4186,7 +4187,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		protected void onPostExecute(Long result) {
 			if (result == null) {
 				if (!retriedOnce) {
-					new FetchLastSeenTask(msisdn, true).execute();
+					Utils.executeLongResultTask(new FetchLastSeenTask(msisdn,
+							true));
 					return;
 				}
 			} else {

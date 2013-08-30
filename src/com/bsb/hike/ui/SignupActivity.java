@@ -340,7 +340,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 			mActivityState.task = new HikeHTTPTask(this, R.string.call_me_fail,
 					false);
-			mActivityState.task.execute(hikeHttpRequest);
+			Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
 
 			dialog = ProgressDialog.show(this, null,
 					getResources().getString(R.string.calling_you));

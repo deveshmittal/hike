@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,6 +77,7 @@ import android.location.Geocoder;
 import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
@@ -95,6 +97,7 @@ import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -113,11 +116,14 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
@@ -132,6 +138,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
+import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -2065,7 +2072,7 @@ public class Utils {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SMS_SYNC_START,
 						null);
 
-				new SyncOldSMSTask(context).execute();
+				executeSMSSyncStateResultTask(new SyncOldSMSTask(context));
 
 				setupSyncDialogLayout(false, btnContainer, syncProgress, info,
 						btnDivider);
@@ -2669,4 +2676,98 @@ public class Utils {
 		return bitmap;
 	}
 
+	public static boolean isHoneycombOrHigher() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+
+	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeFtResultAsyncTask(
+			AsyncTask<Void, Void, FTResult> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeIntProgFtResultAsyncTask(
+			AsyncTask<Void, Integer, FTResult> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeBoolResultAsyncTask(
+			AsyncTask<Void, Void, Boolean> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeHttpTask(
+			AsyncTask<HikeHttpRequest, Integer, Boolean> asyncTask,
+			HikeHttpRequest... hikeHttpRequests) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					hikeHttpRequests);
+		} else {
+			asyncTask.execute(hikeHttpRequests);
+		}
+	}
+
+	public static void executeSignupTask(
+			AsyncTask<Void, SignupTask.StateValue, Boolean> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeLongResultTask(
+			AsyncTask<Void, Void, Long> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeContactListResultTask(
+			AsyncTask<Void, Void, List<Pair<AtomicBoolean, ContactInfo>>> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeStringResultTask(
+			AsyncTask<Void, Void, String> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeSMSSyncStateResultTask(
+			AsyncTask<Void, Void, SMSSyncState> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
 }
