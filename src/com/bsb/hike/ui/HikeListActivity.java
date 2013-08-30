@@ -144,7 +144,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			@Override
 			public void onClick(View v) {
-				onTitleIconClick(null);
+				if (type == Type.INVITE) {
+					showNativeSMSPopup();
+				} else {
+					onTitleIconClick(null);
+				}
 			}
 		});
 
@@ -179,14 +183,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			@Override
 			public void onClick(View v) {
-				Editor editor = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-				editor.putBoolean(
-						HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP, true);
-				editor.commit();
-
-				dialog.dismiss();
-
 				onTitleIconClick(null);
 			}
 		});
@@ -265,24 +261,10 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		super.onDestroy();
 	}
 
-	public void onTitleIconLeftClick(View v) {
-		selectedContacts.clear();
-		onTitleIconClick(v);
-	}
-
 	public void onTitleIconClick(View v) {
 		if (type != Type.BLOCK) {
-			Iterator<String> iterator = selectedContacts.iterator();
 
-			if (type == Type.INVITE
-					&& !HikeMessengerApp.isIndianUser()
-					&& !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-							MODE_PRIVATE).getBoolean(
-							HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP,
-							false)) {
-				showNativeSMSPopup();
-				return;
-			}
+			Iterator<String> iterator = selectedContacts.iterator();
 
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();

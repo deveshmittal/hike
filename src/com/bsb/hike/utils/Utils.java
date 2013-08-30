@@ -1457,13 +1457,11 @@ public class Utils {
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 				convMessage.serialize());
 
-		if (!HikeMessengerApp.isIndianUser()) {
-			ArrayList<String> messages = smsManager.divideMessage(convMessage
-					.getMessage());
+		ArrayList<String> messages = smsManager.divideMessage(convMessage
+				.getMessage());
 
-			smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
-					messages, null, null);
-		}
+		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+				messages, null, null);
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,
