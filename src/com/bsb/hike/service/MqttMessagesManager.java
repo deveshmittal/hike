@@ -1033,6 +1033,8 @@ public class MqttMessagesManager {
 
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
+			contactInfo.setLastSeenTime(lastSeenTime);
+			contactInfo.setOffline(isOffline);
 
 			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		} else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type)) {
