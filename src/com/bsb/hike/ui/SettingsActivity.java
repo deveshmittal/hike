@@ -104,6 +104,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF,
 					R.xml.notification_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
 			break;
 		case 1:
 			intent = new Intent(this, HikeListActivity.class);
@@ -113,10 +114,12 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF,
 					R.xml.privacy_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 		case 3:
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF, R.xml.sms_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.sms);
 			break;
 		case 4:
 			intent = new Intent(Intent.ACTION_VIEW);

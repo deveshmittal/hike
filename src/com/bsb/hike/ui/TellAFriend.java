@@ -9,11 +9,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,7 +46,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 	boolean pickFriendsWhenSessionOpened;
 
-
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -58,27 +53,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
-
-		TextView viaSms = (TextView) findViewById(R.id.via_sms);
-
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				HikeConstants.FREE_SMS_PREF, true)) {
-			String text = getString(R.string.earn_sms_friend_join);
-			String textToBold = getString(R.string.via_sms);
-			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-			if (text.indexOf(textToBold) != -1) {
-				ssb.setSpan(
-						new ForegroundColorSpan(getResources().getColor(
-								R.color.subtext)), text.indexOf(textToBold),
-						text.indexOf(textToBold) + textToBold.length(),
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			}
-
-			viaSms.setText(ssb);
-			viaSms.setVisibility(View.VISIBLE);
-		} else {
-			viaSms.setVisibility(View.GONE);
-		}
 
 		int ids[] = { R.id.facebook, R.id.twitter, R.id.sms, R.id.email,
 				R.id.other };
@@ -89,15 +63,10 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		View smsContainer = findViewById(R.id.sms);
 		TextView smsMainText = (TextView) smsContainer
 				.findViewById(R.id.item_txt);
-		TextView smsSubText = (TextView) smsContainer
-				.findViewById(R.id.item_subtxt);
 
 		smsMainText
 				.setText(HikeMessengerApp.isIndianUser() ? R.string.free_sms_txt
 						: R.string.sms);
-		smsSubText
-				.setText(HikeMessengerApp.isIndianUser() ? R.string.invite_free_sms
-						: R.string.invite_sms);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
@@ -254,7 +223,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 			startPickFriendsActivity();
 		}
 	}
-	
+
 	private void postToSocialNetwork(final boolean facebook) {
 		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 				"/account/spread", RequestType.SOCIAL_POST,
@@ -294,7 +263,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
-	
+
 	private void parseResponse(JSONObject response, boolean facebook) {
 		String responseString = response
 				.optString(facebook ? HikeConstants.FACEBOOK_STATUS
@@ -339,10 +308,9 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(R.string.invite);
+		title.setText(R.string.invite_friends);
 		backContainer.setOnClickListener(new OnClickListener() {
-			
-		
+
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(TellAFriend.this, HomeActivity.class);

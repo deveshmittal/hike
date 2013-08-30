@@ -323,7 +323,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(R.string.free_sms);
+		title.setText(R.string.free_sms_txt);
 		backContainer.setOnClickListener(new View.OnClickListener() {
 			
 			@Override

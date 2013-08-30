@@ -69,6 +69,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 
 		Intent intent = getIntent();
 		int preferences = intent.getIntExtra(HikeConstants.Extras.PREF, -1);
+		int titleRes = intent.getIntExtra(HikeConstants.Extras.TITLE, 0);
 
 		addPreferencesFromResource(preferences);
 
@@ -145,11 +146,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 								dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
 			}
 		}
-		setupActionBar();
-		
+		setupActionBar(titleRes);
+
 	}
-	
-	private void setupActionBar() {
+
+	private void setupActionBar(int titleRes) {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
@@ -159,7 +160,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(R.string.invite);
+		title.setText(titleRes);
 		backContainer.setOnClickListener(new View.OnClickListener() {
 			
 		
