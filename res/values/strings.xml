@@ -33,6 +33,8 @@
 	<string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
 	<string name="delete_key">deleteAccount</string>
 	<string name="unlink_key">unlinkAccount</string>
+	<string name="unlink_facebook">unlinkFacebook</string>
+	<string name="unlink_twitter">unlinkTwitter</string>
 	<string name="how_hike_feel">How does hike make you feel?</string>
 	<string name="feedback_success">Thanks for your feedback!</string>
 	<string name="phone_num">Phone Number</string>
@@ -143,6 +145,8 @@
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
 	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
+	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from hike?</string>
+	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from hike?</string>
 	<string name="unlink">Unlink</string>
 	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
 	<string name="plus">plus</string>
@@ -179,7 +183,7 @@
 	<string name="share_file_message">Hey! I just sent you a file through hike: %1$s</string>
 	<string name="max_file_size">Max file size can be 15 MB</string>
 	<string name="unable_to_read">Unable to read file</string>
-	<string name="share_location">Share Location</string>
+	<string name="share_location">Select Location</string>
 	<string name="group_mute">This conversation is muted.</string>
 	<string name="poke_msg">Nudge!</string>
 	<string name="invite_to_hike">Invite to hike</string>
@@ -201,7 +205,7 @@
 	<string name="sms_subtext">Invite friends via SMS</string>
 	<string name="email_subtext">Invite via Email</string>
 	<string name="other_subtext">Get an invite URL</string>
-	<string name="facebook_msg">I\'ve started using hike, an awesome new free messaging app. You can message friends on hike and also those who aren\'t for free! Messaging has never been simpler. Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
+	<string name="facebook_msg">Hey, I\'m using hike, this awesome new messaging app. Check it out at http://hike.in</string>
 	<string name="gps_disabled">For better accuracy to your location, enable the GPS.</string>
 	<string name="twitter_post_success">Posted to your timeline!</string>
 	<string name="twitter_post_fail">Could not post to your timeline.</string>
@@ -216,7 +220,11 @@
 	<string name="delete_account">Delete Account</string>
 	<string name="delete_account_msg">Permanently delete your account</string>
 	<string name="unlink_account">Unlink Account</string>
+	<string name="unlink_facebook_account">Unlink Facebook Account</string>
+	<string name="unlink_twitter_account">Unlink Twitter Account</string>
 	<string name="unlink_account_msg">Unlink your account from this phone</string>
+	<string name="unlink_facebook_account_msg">Unlink your facebook account from hike</string>
+	<string name="unlink_twitter_account_msg">Unlink your twitter account from hike</string>
 	<string name="privacy">Privacy</string>
 	<string name="notifications">Notifications</string>
 	<string name="favorites">Favorites</string>
@@ -496,7 +504,7 @@
 	<string name="posting_update">Posting...</string>
 	<string name="posting_update_facebook">Posting to Facebook...</string>
 	<string name="posting_update_twitter">Posting to Twitter...</string>
-	<string name="posting_update_fail">Unable to post. Please retry again later.</string>
+	<string name="posting_update_fail">Unable to post. Please try again later.</string>
 	<string name="posted_update">Posted successfully</string>
 	<string name="joined_hike_update">Joined hike</string>
 	<string name="msg_undelivered">%1$s is offline. Tap to send as SMS.</string>
@@ -588,11 +596,11 @@
     <string name="invite_via_twitter">Invite Via Twitter</string>
     <string name="search_hint">Search</string>
     <string name="send_invite">Invite(%1$d)</string>
-    <string name="fb_invite_success">Request Sent</string>
-    <string name="fb_invite_failed">Request Canceled</string>
-    <string name="social_invite_network_error">Could not sent invite. Check network settings.</string>
+    <string name="fb_invite_success">Invite Successful</string>
+    <string name="fb_invite_failed">Invite Canceled</string>
+    <string name="social_invite_network_error">Unable to send invite. Check network settings.</string>
     <string name="not_connected_to_internet">Unable to connect to the internet</string>
-    <string name="limited_requests">Cannot send request to more than 50 Friends At a time</string>
+    <string name="limited_requests">Invite can only be send to 10 Friends At a time</string>
     <string name="tap_chat">Tap to chat</string>
     <string name="tap_sms">Tap to send SMS</string>
     <string name="photo">Photo</string>

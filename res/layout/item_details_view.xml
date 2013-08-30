@@ -2,23 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:padding="12sp" >
+    android:padding="8dp" >
 
-    <TextView
-        android:id="@+id/name"
+    <ImageView
+        android:id="@+id/isChecked"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_is_selected"
+        android:visibility="gone" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/isChecked"
         android:singleLine="true"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
-    <TextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/itemDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/name"
         android:singleLine="true"
-        android:textColor="@color/lightgrey"
-        android:textSize="14sp" />
+        android:textColor="@color/description_lightgrey"
+        android:textSize="12sp" />
 
 </RelativeLayout>

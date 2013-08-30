@@ -127,7 +127,7 @@
         <activity android:name=".ui.ShareLocation"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden"
-            android:configChanges="orientation|keyboardHidden" >
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity android:name=".ui.TellAFriend"
             android:launchMode="singleTop" >
@@ -165,7 +165,7 @@
         </activity>
         <activity
             android:name="com.bsb.hike.ui.SocialNetInviteActivity"
-            android:configChanges="orientation|keyboardHidden" >
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >

@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,12 +23,15 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -41,6 +43,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
@@ -86,7 +89,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 	private final int GPS_DISABLED = 2;
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
 	private Dialog playServiceErrordialog;
-
+	private int selectedPosition = 0;
+	
+	private Button doneBtn;
+	private TextView title;
+	private ImageView backIcon;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -142,13 +150,15 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				public void onItemClick(AdapterView<?> parent, final View view,
 						int position, long id) {
 					lastMarker.setVisible(false);
+					selectedPosition = position;
 					Marker currentMarker = adapter.getMarker(position);
 					currentMarker.setVisible(true);
 					currentMarker.setIcon(BitmapDescriptorFactory
-							.fromResource(R.drawable.yellow_point));
+							.fromResource(R.drawable.ic_share_location_item));
 					lastMarker = currentMarker;
 					map.animateCamera(CameraUpdateFactory
 							.newLatLng(currentMarker.getPosition()));
+					adapter.notifyDataSetChanged();
 				}
 			});
 
@@ -194,7 +204,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 					((View) findViewById(R.id.frame))
 							.setLayoutParams(new TableLayout.LayoutParams(
 									LayoutParams.MATCH_PARENT,
-									LayoutParams.MATCH_PARENT, 1.5f));
+									LayoutParams.MATCH_PARENT, 5.68f));
 				}
 			}
 		});
@@ -232,23 +242,52 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				}
 			}
 		});
-
+		setupActionBar();
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.share_location_menu, menu);
-		return true;
+	
+	private void init() {
+		backIcon.setImageResource(R.drawable.ic_back);
+		getSupportActionBar().setBackgroundDrawable(
+				getResources().getDrawable(R.drawable.bg_header));
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
-		if (item.getItemId() == R.id.sendLocation) {
-			sendSelectedLocation();
-		}
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
 
-		return true;
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
+		title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(R.string.share_location);
+
+		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn.setVisibility(View.VISIBLE);
+		doneBtn.setText(R.string.send);
+
+		backContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+
+		doneBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				sendSelectedLocation();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		init();
 	}
 
 	public void sendSelectedLocation() {
@@ -279,24 +318,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		super.onSaveInstanceState(outState);
 	}
 
-	public void onTitleIconClick(View v) {
-		if (myLocation == null) {
-			Toast.makeText(getApplicationContext(),
-					getString(R.string.select_location), Toast.LENGTH_SHORT)
-					.show();
-			return;
-		}
-		Intent result = new Intent();
-		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, 15);
-		result.putExtra(HikeConstants.Extras.LATITUDE,
-				lastMarker.getPosition().latitude);
-		result.putExtra(HikeConstants.Extras.LONGITUDE,
-				lastMarker.getPosition().longitude);
-		setResult(RESULT_OK, result);
-
-		finish();
-	}
-
 	private void initMyLocationManager() {
 		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -312,9 +333,9 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 											myLocation.distanceTo(newLocation))
 											.toString());
 					if ((currentLocationDevice == GPS_ENABLED && myLocation
-							.distanceTo(newLocation) > 50)
+							.distanceTo(newLocation) > 100)
 							|| (currentLocationDevice == GPS_DISABLED && myLocation
-									.distanceTo(newLocation) > 500)) {
+									.distanceTo(newLocation) > 800)) {
 
 						myLocation = newLocation;
 						userMarker.setPosition(new LatLng(newLocation
@@ -328,8 +349,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						Log.d("ShareLocation", "my lati in loc listener = "
 								+ Double.valueOf(newLocation.getLatitude())
 										.toString());
-						if (!isTextSearch)
+						if (!isTextSearch){
+							lastMarker = userMarker;
+							selectedPosition = 0;
+							lastMarker.setVisible(true);
 							updateNearbyPlaces();
+ 						}
 					}
 				} else {
 					myLocation = newLocation;
@@ -407,9 +432,10 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				.position(myLatLng)
 				.title("My Location")
 				.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.yellow_point)));
+						.fromResource(R.drawable.ic_share_location_item)));
 
 		lastMarker = userMarker;
+		selectedPosition = 0;
 		updateLocationAddress(lat, lng, userMarker);
 
 		CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -514,7 +540,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 								.position(placeLL)
 								.title(placeName)
 								.icon(BitmapDescriptorFactory
-										.fromResource(R.drawable.yellow_point))
+										.fromResource(R.drawable.ic_share_location_item))
 								.snippet(address);
 					}
 				}
@@ -553,7 +579,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 		// process data retrieved from doInBackground
 		protected void onPostExecute(Integer totalPlaces) {
-
 			for (int p = 0; p < totalPlaces; p++) {
 				if (places[p] != null) {
 					placeMarkers[p] = map.addMarker(places[p]);
@@ -696,7 +721,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder;
-
 			if (convertView == null) {
 				convertView = l_Inflater.inflate(R.layout.item_details_view,
 						null);
@@ -706,9 +730,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 				holder.txt_itemDescription = (TextView) convertView
 						.findViewById(R.id.itemDescription);
-				// holder.itemImage = (ImageView)
-				// convertView.findViewById(R.id.photo);
-
+				
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
@@ -733,10 +755,18 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						.setCompoundDrawablePadding((int) getResources()
 								.getDimension(
 										R.dimen.share_my_location_drawable_padding));
-			} else
+			} else{
 				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(0,
 						0, 0, 0);
-
+			}
+			
+			if(position == selectedPosition){
+				convertView.findViewById(R.id.isChecked).setVisibility(View.VISIBLE);
+			}
+			else{
+				convertView.findViewById(R.id.isChecked).setVisibility(View.GONE);
+			}
+			
 			holder.txt_itemDescription.setText(itemDetailsrrayList
 					.get(position).getItemDescription());
 			// holder.itemImage.setImageResource(itemDetailsrrayList.get(position).getImageNumber());
@@ -756,7 +786,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		class ViewHolder {
 			TextView txt_itemName;
 			TextView txt_itemDescription;
-			ImageView itemImage;
 		}
 
 	}

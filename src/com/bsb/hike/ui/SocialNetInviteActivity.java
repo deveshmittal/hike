@@ -16,28 +16,34 @@ import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SocialNetInviteAdapter;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -46,7 +52,6 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
@@ -59,8 +64,8 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 
-public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity implements
-		OnItemClickListener, FinishableEvent {
+public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
+		implements OnItemClickListener, FinishableEvent {
 	private ListView listView;
 	private ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> list;
 	private SocialNetInviteAdapter adapter;
@@ -74,6 +79,12 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	private HikeHTTPTask mTwitterInviteTask;
 	private Dialog mDialog;
 	private Menu mMenu;
+	private int MAX_INVITE_LIMIT = 10;
+
+	private Button doneBtn;
+	private TextView title;
+	private ImageView backIcon;
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikelistactivity);
@@ -107,30 +118,91 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			new GetTwitterFollowers().execute();
 		}
 		mTwitterInviteTask = (HikeHTTPTask) getLastCustomNonConfigurationInstance();
-		if(mTwitterInviteTask != null){
+		if (mTwitterInviteTask != null) {
 			mDialog = ProgressDialog.show(this, null,
-					getString(R.string.posting_update_twitter)); 
+					getString(R.string.posting_update_twitter));
+		}
+		setupActionBar();
+	}
+
+	private void init() {
+		selectedFriends.clear();
+		doneBtn.setVisibility(View.GONE);
+		backIcon.setImageResource(R.drawable.ic_back);
+		getSupportActionBar().setBackgroundDrawable(
+				getResources().getDrawable(R.drawable.bg_header));
+		setLabel();
+	}
+
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
+
+		doneBtn = (Button) actionBarView.findViewById(R.id.done_btn);
+
+		title = (TextView) actionBarView.findViewById(R.id.title);
+
+		backContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(SocialNetInviteActivity.this,
+						TellAFriend.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+
+			}
+		});
+
+		doneBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				sendInvite();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		init();
+	}
+
+	private void setLabel() {
+		if (isFacebook) {
+			title.setText(R.string.invite_via_facebook);
+		} else {
+			title.setText(R.string.invite_via_twitter);
 		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.social_net_invite_menu, menu);
-		menu.findItem(R.id.sendInvite).setTitle(getString(R.string.send_invite, 0));
-		mMenu = menu;
+		// getSupportMenuInflater().inflate(R.menu.social_net_invite_menu,
+		// menu);
+		// menu.findItem(R.id.sendInvite).setTitle(
+		// getString(R.string.send_invite, 0));
+		// mMenu = menu;
+		// mMenu.findItem(R.id.sendInvite).setEnabled(false);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		if (item.getItemId() == R.id.sendInvite) {
 			sendInvite();
 		}
 
 		return true;
 	}
-	
+
 	protected void onSaveInstanceState(Bundle outState) {
 
 		outState.putBoolean(HikeConstants.Extras.IS_FACEBOOK, isFacebook);
@@ -175,10 +247,11 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 							} catch (NullPointerException e) {
 								Log.e(this.getClass().getName(),
 										"Unable to Connect to Internet", e);
-								Toast toast = Toast.makeText(
-										SocialNetInviteActivity.this,
-										getString(R.string.not_connected_to_internet),
-										Toast.LENGTH_LONG);
+								Toast toast = Toast
+										.makeText(
+												SocialNetInviteActivity.this,
+												getString(R.string.social_invite_network_error),
+												Toast.LENGTH_LONG);
 								toast.show();
 								finish();
 							}
@@ -349,7 +422,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		return;
 	}
 
-	private void sendRequestDialog(String selectedUserIds) {
+	private void sendRequestDialog(final String selectedUserIds) {
 		Session session = Session.getActiveSession();
 		if (session != null) {
 
@@ -366,11 +439,13 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 					if (error != null) {
 						if (error instanceof FacebookOperationCanceledException) {
 							Toast.makeText(SocialNetInviteActivity.this,
-									getString(R.string.fb_invite_failed), Toast.LENGTH_SHORT)
-									.show();
+									getString(R.string.fb_invite_failed),
+									Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(SocialNetInviteActivity.this,
-									getString(R.string.social_invite_network_error), Toast.LENGTH_SHORT).show();
+							Toast.makeText(
+									SocialNetInviteActivity.this,
+									getString(R.string.social_invite_network_error),
+									Toast.LENGTH_SHORT).show();
 							selectedFriends.clear();
 							finish();
 						}
@@ -379,7 +454,34 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 						final String requestId = values.getString("request");
 						if (requestId != null) {
 							Toast.makeText(SocialNetInviteActivity.this,
-									getString(R.string.fb_invite_success), Toast.LENGTH_SHORT).show();
+									getString(R.string.fb_invite_success),
+									Toast.LENGTH_SHORT).show();
+
+							try {
+								JSONObject data = new JSONObject();
+								data.put(HikeConstants.TYPE,
+										HikeConstants.MqttMessageTypes.FACEBOOK);
+
+								JSONArray nativeinvites = new JSONArray(
+										selectedFriends);
+								JSONObject d = new JSONObject();
+								d.put(HikeConstants.NATIVE_INVITES,
+										nativeinvites);
+								d.put(HikeConstants.TIMESTAMP,
+										System.currentTimeMillis() / 1000);
+								data.put(HikeConstants.DATA, d);
+								HikeMessengerApp.getPubSub().publish(
+										HikePubSub.MQTT_PUBLISH, data);
+								Log.d("SocialNetInviteActivity", "fb packet"
+										+ data.toString());
+
+								// sendFacebookInviteIds(data);
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								Log.e("SocialNetInviteActivity",
+										"while preparing JSON For Fb", e);
+							}
+
 							String alreadyInvited = settings
 									.getString(
 											HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS,
@@ -394,16 +496,18 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 											TextUtils
 													.join(",", selectedFriends))
 									.commit();
-							selectedFriends.clear();
+
 							Log.d("invited ids",
 									settings.getString(
 											HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS,
 											""));
+
+							selectedFriends.clear();
 							finish();
 						} else {
 							Toast.makeText(SocialNetInviteActivity.this,
-									getString(R.string.fb_invite_failed), Toast.LENGTH_SHORT)
-									.show();
+									getString(R.string.fb_invite_failed),
+									Toast.LENGTH_SHORT).show();
 						}
 					}
 
@@ -424,19 +528,37 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		if (selectedFriends.contains(socialFriend.second.getId())) {
 			selectedFriends.remove(socialFriend.second.getId());
 		} else {
-			if (selectedFriends.size() != 50) {
+			if (selectedFriends.size() != MAX_INVITE_LIMIT) {
 				selectedFriends.add(socialFriend.second.getId());
 			} else {
-				Toast.makeText(
-						SocialNetInviteActivity.this,
-						getString(R.string.limited_requests),
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(SocialNetInviteActivity.this,
+						getString(R.string.limited_requests), Toast.LENGTH_LONG)
+						.show();
 				return;
 			}
 		}
+
+		if (!selectedFriends.isEmpty()) {
+			doneBtn.setVisibility(View.VISIBLE);
+			doneBtn.setText(Integer.toString(selectedFriends.size()));
+			getSupportActionBar().setBackgroundDrawable(
+					getResources().getDrawable(R.drawable.bg_header_compose));
+
+			//title.setText(R.string.invite);
+			// backIcon.setImageResource(R.drawable.ic_cancel);
+		} else {
+			init();
+		}
+
 		socialFriend.first.set(!socialFriend.first.get());
 		checkbox.setChecked(socialFriend.first.get());
-		mMenu.findItem(R.id.sendInvite).setTitle(getString(R.string.send_invite, selectedFriends.size()));
+		/*
+		 * mMenu.findItem(R.id.sendInvite).setTitle(
+		 * getString(R.string.send_invite, selectedFriends.size())); if
+		 * (selectedFriends.size() > 0)
+		 * mMenu.findItem(R.id.sendInvite).setEnabled(true); else {
+		 * mMenu.findItem(R.id.sendInvite).setEnabled(false); }
+		 */
 	}
 
 	@Override
