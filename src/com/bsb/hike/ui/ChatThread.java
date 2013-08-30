@@ -710,6 +710,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			return false;
 		}
 
+		if (mConversation instanceof GroupConversation) {
+			if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+				return false;
+			}
+		}
+
 		switch (item.getItemId()) {
 		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
