@@ -64,11 +64,11 @@ public class SocialNetInviteAdapter extends
 
 		SocialNetFriendInfo currFriend = getItem(position).second;
 		if (convertView == null) {
-			convertView = l_Inflater.inflate(R.layout.compose_list_item, null);
+			convertView = l_Inflater.inflate(R.layout.invite_list_item, null);
 			holder = new ViewHolder();
 			holder.txt_itemName = (TextView) convertView
 					.findViewById(R.id.name);
-			convertView.findViewById(R.id.number).setVisibility(View.GONE);
+			convertView.findViewById(R.id.avatar_frame).setVisibility(View.GONE);
 			// holder.txt_itemDescription = (TextView)
 			// convertView.findViewById(R.id.itemDescription);
 			holder.itemImage = (ImageView) convertView

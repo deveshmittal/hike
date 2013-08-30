@@ -149,6 +149,7 @@ public class HikeConstants {
 	public static final String UI_EVENT = "uiEvent";
 	public static final String LOGEVENT_TAG = "mob";
 	public static final String FREE_SMS_ON = "free_sms_on";
+	public static final String NATIVE_INVITES = "nativeinvites";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -672,6 +673,7 @@ public class HikeConstants {
 		public static final String SERVER_TIMESTAMP = "sts";
 		public static final String REQUEST_SERVER_TIMESTAMP = "rsts";
 		public static final String PROTIP = "pt";
+		public static final String FACEBOOK = "fb";
 	}
 
 	public static final class SMSNative {
