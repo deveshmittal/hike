@@ -68,7 +68,7 @@ public class HikeNotification {
 
 		int notificationId = context.getString(R.string.team_hike).hashCode();
 		// we've got to invoke the timeline here
-		Intent notificationIntent = getHomeActivityIntent(0);
+		Intent notificationIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME,
 				context.getString(R.string.team_hike));
 
@@ -201,7 +201,7 @@ public class HikeNotification {
 
 		long timeStamp = System.currentTimeMillis() / 1000;
 
-		Intent notificationIntent = getHomeActivityIntent(0);
+		Intent notificationIntent = getHomeActivityIntent(HomeActivity.FRIENDS_TAB_INDEX);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = returnSmallIcon();
@@ -234,7 +234,7 @@ public class HikeNotification {
 
 		long timeStamp = statusMessage.getTimeStamp();
 
-		Intent notificationIntent = getHomeActivityIntent(0);
+		Intent notificationIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = returnSmallIcon();
@@ -276,7 +276,7 @@ public class HikeNotification {
 
 		int notificationId = (int) timeStamp;
 
-		Intent notificationIntent = getHomeActivityIntent(0);
+		Intent notificationIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = returnSmallIcon();
@@ -438,7 +438,7 @@ public class HikeNotification {
 		bigPicStyle.setBigContentTitle(title);
 		mBuilder.setStyle(bigPicStyle);
 
-		Intent resultIntent = getHomeActivityIntent(0);
+		Intent resultIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
 		resultIntent.setData((Uri.parse("custom://"
 				+ profileStruct[1].toString().hashCode())));
 		resultIntent.putExtra(HikeConstants.Extras.MSISDN,

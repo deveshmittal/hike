@@ -32,6 +32,10 @@ import com.viewpagerindicator.TabPageIndicator;
 
 public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
+	public static final int UPDATES_TAB_INDEX = 0;
+	public static final int CHATS_TAB_INDEX = 1;
+	public static final int FRIENDS_TAB_INDEX = 2;
+
 	private ViewPager viewPager;
 
 	private int[] headers = { R.string.updates, R.string.chats,
