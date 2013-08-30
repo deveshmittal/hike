@@ -3928,6 +3928,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		this.mSendBtn.setEnabled(false);
 		this.mComposeView.setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
 		findViewById(R.id.emo_btn).setEnabled(alive ? true : false);
+		findViewById(R.id.sticker_btn).setEnabled(alive ? true : false);
+		if (emoticonLayout != null
+				&& emoticonLayout.getVisibility() == View.VISIBLE) {
+			onEmoticonBtnClicked(null);
+		}
 	}
 
 	private String getMsisdnMainUser() {
