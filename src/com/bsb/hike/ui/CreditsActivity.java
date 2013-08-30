@@ -15,12 +15,15 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -31,7 +34,7 @@ import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.Utils;
 
 public class CreditsActivity extends AuthSocialAccountBaseActivity implements
-		Listener {
+	   View.OnClickListener, Listener, View.OnKeyListener {
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
 	private TextView freeSms50;
@@ -146,6 +149,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 		updateCredits();
 		setupSocialButtons();
+		setupActionBar();
 	}
 
 	private void setupSocialButtons() {
@@ -304,6 +308,30 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		}
 		creditsContainer.setPadding(paddingLeft, 0, 0, 0);
 	}
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(R.string.free_sms);
+		backContainer.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(CreditsActivity.this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+
+		});
+
+		actionBar.setCustomView(actionBarView);
+	}
 
 	private class DeleteSocialCredentialsTask extends
 			AsyncTask<Boolean, Void, Boolean> {
@@ -363,5 +391,17 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 			setupSocialButtons();
 			deleteSocialCredentialsTask = null;
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean onKey(View v, int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

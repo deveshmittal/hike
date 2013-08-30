@@ -10,21 +10,27 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.facebook.SessionState;
 
-public class TellAFriend extends HikeAppStateBaseActivity implements
+public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		OnClickListener, Listener {
 
 	private boolean facebookPostPopupShowing = false;
@@ -37,6 +43,7 @@ public class TellAFriend extends HikeAppStateBaseActivity implements
 	private ProgressDialog progressDialog;
 
 	boolean pickFriendsWhenSessionOpened;
+
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -99,6 +106,7 @@ public class TellAFriend extends HikeAppStateBaseActivity implements
 						getString(R.string.posting_update));
 			}
 		}
+		setupActionBar();
 	}
 
 	@Override
@@ -241,6 +249,31 @@ public class TellAFriend extends HikeAppStateBaseActivity implements
 			pickFriendsWhenSessionOpened = false;
 			startPickFriendsActivity();
 		}
+	}
+
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(R.string.invite);
+		backContainer.setOnClickListener(new OnClickListener() {
+			
+		
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(TellAFriend.this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 }
