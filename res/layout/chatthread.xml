@@ -41,30 +41,28 @@
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sms_counter"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="45dp"
                 android:layout_alignParentBottom="true"
-                android:background="@drawable/compose_box"
+                android:background="@color/updates_text"
                 android:gravity="center_vertical"
                 android:paddingLeft="13dp"
+                android:drawablePadding="10dp"
                 android:text="99 SMS left"
-                android:textColor="@color/green"
-                android:textSize="14sp"
+                android:drawableLeft="@drawable/ic_sms_user"
+                android:textColor="#b3b2ae"
+                android:textSize="13sp"
                 android:visibility="invisible" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/conversation_mute"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_conversation_mute"
+                android:layout_height="35dp"
+                android:background="@color/updates_text"
                 android:gravity="center_vertical"
                 android:paddingLeft="18dp"
-                android:shadowColor="#66ffffff"
-                android:shadowDy="0.5"
-                android:shadowRadius="0.5"
                 android:text="@string/group_mute"
-                android:textColor="#7c6e57"
-                android:textSize="15sp"
-                android:textStyle="bold|italic"
+                android:textColor="@color/actionbar_text"
+                android:textSize="14sp"
                 android:visibility="gone" />
             
             <LinearLayout
