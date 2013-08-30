@@ -912,10 +912,6 @@ public class MqttMessagesManager {
 				jsonObj.getJSONObject(HikeConstants.DATA).remove(
 						HikeConstants.THUMBNAIL);
 
-				/*
-				 * Start auto download of the profile image.
-				 */
-				autoDownloadProfileImage(statusMessage, true);
 			}
 
 			statusMessage
@@ -928,7 +924,10 @@ public class MqttMessagesManager {
 						statusMessage);
 			}
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
-
+			/*
+			 * Start auto download of the profile image.
+			 */
+			autoDownloadProfileImage(statusMessage, true);
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
 
@@ -1124,7 +1123,7 @@ public class MqttMessagesManager {
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, statusMessage.getMappedId(), fileName, true,
 				statusUpdate, statusMessage.getMsisdn(),
-				statusMessage.getName());
+				statusMessage.getNotNullName());
 		downloadProfileImageTask.execute();
 	}
 
