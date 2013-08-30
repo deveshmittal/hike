@@ -8,8 +8,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -17,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -65,8 +68,33 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		ListView settingsList = (ListView) findViewById(R.id.settings_content);
 		settingsList.setAdapter(listAdapter);
 		settingsList.setOnItemClickListener(this);
+		setupActionBar();
 	}
 
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(R.string.settings);
+		backContainer.setOnClickListener(new OnClickListener() {
+			
+		
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(SettingsActivity.this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+	}
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {

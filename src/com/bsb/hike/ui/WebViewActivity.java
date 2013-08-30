@@ -5,15 +5,20 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.MailTo;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
-public class WebViewActivity extends HikeAppStateBaseActivity {
+public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,7 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
+		setupActionBar(title);
 	}
 
 	public Intent newEmailIntent(Context context, String address,
@@ -75,5 +81,29 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		intent.putExtra(Intent.EXTRA_CC, cc);
 		intent.setType("message/rfc822");
 		return intent;
+	}
+	private void setupActionBar(String titleString) {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(titleString);
+		backContainer.setOnClickListener(new OnClickListener() {
+			
+		
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(WebViewActivity.this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 }
