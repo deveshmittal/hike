@@ -247,6 +247,24 @@
         <item name="android:textColor">@color/update_no_btn</item>
     </style>
 
+    <style name="ProtipBtn">
+        <item name="android:layout_width">90dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="ProtipBtn.YesBtn">
+        <item name="android:background">@drawable/bg_blue_btn_selector</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    
+    <style name="ProtipBtn.NoBtn">
+        <item name="android:background">@drawable/bg_grey_btn_selector</item>
+        <item name="android:textColor">@color/protip_dismiss</item>
+    </style>
+    
     <style name="PreviewText">
         <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>

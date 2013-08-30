@@ -108,16 +108,14 @@
             android:layout_toRightOf="@id/avatar_container"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone" >
+            android:visibility="visible" >
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/yes_btn"
-                style="@style/UpdateText.StatusYesBtn"
+                style="@style/ProtipBtn.YesBtn"
                 android:focusable="false"
+                android:singleLine="true"
                 android:onClick="onYesBtnClick"
-                android:paddingBottom="2dp"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
                 android:text="@string/confirm" />
 
             <View
@@ -127,12 +125,9 @@
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/no_btn"
-                style="@style/UpdateText.StatusNoBtn"
+                style="@style/ProtipBtn.NoBtn"
                 android:focusable="false"
                 android:onClick="onNoBtnClick"
-                android:paddingBottom="2dp"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
                 android:text="@string/not_now" />
         </LinearLayout>
     </RelativeLayout>

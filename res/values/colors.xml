@@ -141,4 +141,5 @@
     <color name="voice_message_stroke">#1273716d</color>
     <color name="signup_bg">#0f8fe1</color>
     <color name="description_lightgrey">#bfbcb6</color>
+    <color name="protip_dismiss">#a59b94</color>
 </resources>

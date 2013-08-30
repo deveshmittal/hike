@@ -32,6 +32,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -141,6 +142,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				viewHolder.buttonDivider = convertView
 						.findViewById(R.id.button_divider);
+
+				viewHolder.infoContainer = convertView
+						.findViewById(R.id.btn_container);
 				break;
 
 			case PROFILE_PIC_CHANGE:
@@ -203,20 +207,25 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					viewHolder.noBtn.getPaddingTop());
 			viewHolder.noBtn.setText(R.string.not_now);
 
+			viewHolder.infoContainer.setVisibility(View.GONE);
+
 			switch (statusMessage.getStatusMessageType()) {
 			case NO_STATUS:
+				viewHolder.infoContainer.setVisibility(View.VISIBLE);
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
 				viewHolder.yesBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setVisibility(View.GONE);
 
 				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()) {
 					viewHolder.extraInfo.setText(R.string.no_status);
-					viewHolder.yesBtn.setText(R.string.update_status);
+					viewHolder.yesBtn.setText(R.string.post);
 				} else if (EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 						.getId()) {
 					viewHolder.extraInfo.setText(R.string.no_status_recently);
-					viewHolder.yesBtn.setText(R.string.update_status);
+					viewHolder.yesBtn.setText(R.string.post);
 				}
+				viewHolder.yesBtn.setTag(statusMessage);
+				viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 				break;
 			case FRIEND_REQUEST:
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
@@ -253,22 +262,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			case PROTIP:
 				Protip protip = statusMessage.getProtip();
 
+				viewHolder.infoContainer.setVisibility(View.VISIBLE);
+
 				viewHolder.buttonDivider.setVisibility(View.GONE);
 				viewHolder.timeStamp.setVisibility(View.GONE);
 
 				viewHolder.noBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setText(R.string.dismiss);
 				viewHolder.yesBtn.setText(R.string.download);
-
-				int btnPadding = context.getResources().getDimensionPixelSize(
-						R.dimen.protip_btn_padding);
-				viewHolder.noBtn.setPadding(btnPadding,
-						viewHolder.noBtn.getPaddingTop(), btnPadding,
-						viewHolder.noBtn.getPaddingTop());
-
-				viewHolder.yesBtn.setPadding(btnPadding,
-						viewHolder.yesBtn.getPaddingTop(), btnPadding,
-						viewHolder.yesBtn.getPaddingTop());
 
 				if (!TextUtils.isEmpty(protip.getText())) {
 					viewHolder.extraInfo.setVisibility(View.VISIBLE);
@@ -289,14 +290,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
-					if (!TextUtils.isEmpty(protip.getGameDownlodURL())) {
-						viewHolder.yesBtn.setTag(protip);
-						viewHolder.yesBtn.setVisibility(View.VISIBLE);
-						viewHolder.yesBtn
-								.setOnClickListener(yesBtnClickListener);
-					}
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
+				}
+				if (!TextUtils.isEmpty(protip.getGameDownlodURL())) {
+					viewHolder.yesBtn.setTag(statusMessage);
+					viewHolder.yesBtn.setVisibility(View.VISIBLE);
+					viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
+				} else {
+					viewHolder.yesBtn.setVisibility(View.GONE);
 				}
 
 				Linkify.addLinks(viewHolder.mainInfo, Linkify.ALL);
@@ -308,9 +310,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			}
 
 			viewHolder.avatar.setTag(statusMessage);
-
-			// viewHolder.yesBtn.setTag(statusMessage);
-			// viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 
 			viewHolder.noBtn.setTag(statusMessage);
 			viewHolder.noBtn.setOnClickListener(noBtnClickListener);
@@ -389,19 +388,28 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		@Override
 		public void onClick(View v) {
-			Protip protip = (Protip) v.getTag();
-			String url = protip.getGameDownlodURL();
-			Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
-					| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-			try {
-				context.startActivity(marketIntent);
-			} catch (ActivityNotFoundException e) {
-				Log.e(CentralTimelineAdapter.class.getSimpleName(),
-						"Unable to open market");
+			StatusMessage statusMessage = (StatusMessage) v.getTag();
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
+				Intent intent = new Intent(context, StatusUpdate.class);
+				context.startActivity(intent);
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+				Protip protip = statusMessage.getProtip();
+				String url = protip.getGameDownlodURL();
+				Intent marketIntent = new Intent(Intent.ACTION_VIEW,
+						Uri.parse(url));
+				marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+						| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+				try {
+					context.startActivity(marketIntent);
+				} catch (ActivityNotFoundException e) {
+					Log.e(CentralTimelineAdapter.class.getSimpleName(),
+							"Unable to open market");
+				}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+						protip.getMappedId());
 			}
-			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-					protip.getMappedId());
 		}
 	};
 
