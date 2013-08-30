@@ -1783,91 +1783,99 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public boolean onLongClick(View view) {
-		GroupParticipant groupParticipant = (GroupParticipant) view.getTag();
+		if (profileType == ProfileType.USER_PROFILE) {
+			StatusMessage statusMessage = (StatusMessage) view.getTag();
+			return statusMessageContextMenu(statusMessage);
+		} else if (profileType == ProfileType.GROUP_INFO) {
+			GroupParticipant groupParticipant = (GroupParticipant) view
+					.getTag();
 
-		ArrayList<String> optionsList = new ArrayList<String>();
-		ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
+			ArrayList<String> optionsList = new ArrayList<String>();
+			ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
 
-		ContactInfo tempContactInfo = null;
+			ContactInfo tempContactInfo = null;
 
-		if (groupParticipant == null) {
-			return false;
-		}
-
-		String myMsisdn = preferences.getString(
-				HikeMessengerApp.MSISDN_SETTING, "");
-
-		tempContactInfo = groupParticipant.getContactInfo();
-		if (myMsisdn.equals(tempContactInfo.getMsisdn())) {
-			return false;
-		}
-
-		final ContactInfo contactInfo = tempContactInfo;
-
-		optionsList.add(getString(R.string.send_message));
-		optionImagesList.add(R.drawable.ic_send_message);
-		if (!tempContactInfo.isOnhike()) {
-			optionsList.add(getString(R.string.invite_to_hike));
-			optionImagesList.add(R.drawable.ic_invite_single);
-		}
-		if (tempContactInfo.isUnknownContact()) {
-			optionsList.add(getString(R.string.add_to_contacts));
-			optionImagesList.add(R.drawable.ic_add_to_contacts);
-		}
-		if (isGroupOwner) {
-			optionsList.add(getString(R.string.remove_from_group));
-			optionImagesList.add(R.drawable.ic_remove_from_group);
-		}
-
-		final String[] options = new String[optionsList.size()];
-		optionsList.toArray(options);
-
-		final Integer[] optionIcons = new Integer[optionImagesList.size()];
-		optionImagesList.toArray(optionIcons);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-				R.layout.alert_item, R.id.item, options) {
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View v = super.getView(position, convertView, parent);
-				if (optionIcons.length > 0) {
-					TextView tv = (TextView) v.findViewById(R.id.item);
-					tv.setCompoundDrawablesWithIntrinsicBounds(
-							optionIcons[position], 0, 0, 0);
-				}
-				return v;
+			if (groupParticipant == null) {
+				return false;
 			}
 
-		};
+			String myMsisdn = preferences.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
 
-		builder.setAdapter(dialogAdapter,
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						String option = options[which];
-						if (getString(R.string.send_message).equals(option)) {
-							openChatThread(contactInfo);
-						} else if (getString(R.string.invite_to_hike).equals(
-								option)) {
-							inviteToHike(contactInfo.getMsisdn());
-						} else if (getString(R.string.add_to_contacts).equals(
-								option)) {
-							addToContacts(contactInfo.getMsisdn());
-						} else if (getString(R.string.remove_from_group)
-								.equals(option)) {
-							removeFromGroup(contactInfo);
-						}
+			tempContactInfo = groupParticipant.getContactInfo();
+			if (myMsisdn.equals(tempContactInfo.getMsisdn())) {
+				return false;
+			}
+
+			final ContactInfo contactInfo = tempContactInfo;
+
+			optionsList.add(getString(R.string.send_message));
+			optionImagesList.add(R.drawable.ic_send_message);
+			if (!tempContactInfo.isOnhike()) {
+				optionsList.add(getString(R.string.invite_to_hike));
+				optionImagesList.add(R.drawable.ic_invite_single);
+			}
+			if (tempContactInfo.isUnknownContact()) {
+				optionsList.add(getString(R.string.add_to_contacts));
+				optionImagesList.add(R.drawable.ic_add_to_contacts);
+			}
+			if (isGroupOwner) {
+				optionsList.add(getString(R.string.remove_from_group));
+				optionImagesList.add(R.drawable.ic_remove_from_group);
+			}
+
+			final String[] options = new String[optionsList.size()];
+			optionsList.toArray(options);
+
+			final Integer[] optionIcons = new Integer[optionImagesList.size()];
+			optionImagesList.toArray(optionIcons);
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
+					R.layout.alert_item, R.id.item, options) {
+
+				@Override
+				public View getView(int position, View convertView,
+						ViewGroup parent) {
+					View v = super.getView(position, convertView, parent);
+					if (optionIcons.length > 0) {
+						TextView tv = (TextView) v.findViewById(R.id.item);
+						tv.setCompoundDrawablesWithIntrinsicBounds(
+								optionIcons[position], 0, 0, 0);
 					}
-				});
+					return v;
+				}
 
-		AlertDialog alertDialog = builder.show();
-		alertDialog.getListView().setDivider(
-				getResources()
-						.getDrawable(R.drawable.ic_thread_divider_profile));
-		return true;
+			};
+
+			builder.setAdapter(dialogAdapter,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							String option = options[which];
+							if (getString(R.string.send_message).equals(option)) {
+								openChatThread(contactInfo);
+							} else if (getString(R.string.invite_to_hike)
+									.equals(option)) {
+								inviteToHike(contactInfo.getMsisdn());
+							} else if (getString(R.string.add_to_contacts)
+									.equals(option)) {
+								addToContacts(contactInfo.getMsisdn());
+							} else if (getString(R.string.remove_from_group)
+									.equals(option)) {
+								removeFromGroup(contactInfo);
+							}
+						}
+					});
+
+			AlertDialog alertDialog = builder.show();
+			alertDialog.getListView().setDivider(
+					getResources().getDrawable(
+							R.drawable.ic_thread_divider_profile));
+			return true;
+		}
+		return false;
 	}
 
 	private void removeFromGroup(final ContactInfo contactInfo) {
@@ -1922,8 +1930,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
 
-		ArrayList<String> optionsList = new ArrayList<String>();
-
 		StatusMessage tempStatusMessage = null;
 
 		ProfileItem profileItem = profileAdapter.getItem(position);
@@ -1936,9 +1942,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			return false;
 		}
 
-		optionsList.add(getString(R.string.delete_status));
+		return statusMessageContextMenu(tempStatusMessage);
+	}
 
-		final StatusMessage statusMessage = tempStatusMessage;
+	private boolean statusMessageContextMenu(final StatusMessage statusMessage) {
+		ArrayList<String> optionsList = new ArrayList<String>();
+		optionsList.add(getString(R.string.delete_status));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
