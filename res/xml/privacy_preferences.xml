@@ -13,6 +13,15 @@
         android:widgetLayout="@layout/checkbox_widget" />
     
     <com.bsb.hike.view.IconCheckBoxPreference
+        icon="ic_auto_download_pref"
+        android:defaultValue="true"
+        android:key="autoDownloadImagePref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/auto_download_image_info"
+        android:title="@string/auto_download_image_header"
+        android:widgetLayout="@layout/checkbox_widget" />
+    
+    <com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_ssl"
         android:key="sslPref"
         android:layout="@layout/icon_preference"

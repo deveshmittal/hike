@@ -68,6 +68,8 @@ public class MqttMessagesManager {
 
 	private SharedPreferences settings;
 
+	private SharedPreferences appPrefs;
+
 	private Context context;
 
 	private HikePubSub pubSub;
@@ -88,6 +90,7 @@ public class MqttMessagesManager {
 		this.typingNotificationMap = HikeMessengerApp
 				.getTypingNotificationSet();
 		this.clearTypingNotificationHandler = new Handler();
+		this.appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
 	public static MqttMessagesManager getInstance(Context context) {
@@ -427,20 +430,22 @@ public class MqttMessagesManager {
 			}
 
 			/*
-			 * Start auto download
+			 * Start auto download for images
 			 */
 			if (convMessage.isFileTransferMessage()) {
-				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
-						.get(0);
+				if (appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF,
+						true)) {
+					HikeFile hikeFile = convMessage.getMetadata()
+							.getHikeFiles().get(0);
 
-				if (hikeFile.getHikeFileType() != HikeFileType.LOCATION
-						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT
-						&& hikeFile.getHikeFileType() != HikeFileType.UNKNOWN) {
-					DownloadFileTask downloadFile = new DownloadFileTask(
-							context, hikeFile.getFile(), hikeFile.getFileKey(),
-							convMessage, hikeFile.getHikeFileType(),
-							convMessage.getMsgID(), false);
-					Utils.executeIntProgFtResultAsyncTask(downloadFile);
+					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE) {
+						DownloadFileTask downloadFile = new DownloadFileTask(
+								context, hikeFile.getFile(),
+								hikeFile.getFileKey(), convMessage,
+								hikeFile.getHikeFileType(),
+								convMessage.getMsgID(), false);
+						Utils.executeIntProgFtResultAsyncTask(downloadFile);
+					}
 				}
 			}
 			removeTypingNotification(convMessage.getMsisdn(),
@@ -1086,6 +1091,9 @@ public class MqttMessagesManager {
 
 	private void autoDownloadProfileImage(StatusMessage statusMessage,
 			boolean statusUpdate) {
+		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+			return;
+		}
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
@@ -1096,6 +1104,9 @@ public class MqttMessagesManager {
 	}
 
 	private void autoDownloadGroupImage(String id) {
+		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+			return;
+		}
 		String fileName = Utils.getProfileImageFileName(id);
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, id, fileName, true, false, null, null, false);

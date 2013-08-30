@@ -169,6 +169,7 @@ public class HikeConstants {
 	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
+	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";

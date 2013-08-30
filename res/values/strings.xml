@@ -637,4 +637,6 @@
 	<string name="last_seen_tip_friends">Only your friends can see when you were last seen</string>
 	<string name="from_your_number">from your own number</string>
 	<string name="at_sms_rate">At SMS rate</string>
+	<string name="auto_download_image_header">Auto download images</string>
+	<string name="auto_download_image_info">hike automatically downloads any received images</string>
 </resources>
