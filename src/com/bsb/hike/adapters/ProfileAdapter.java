@@ -198,6 +198,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.extraInfo = (TextView) v
 						.findViewById(R.id.extra_info);
 
+				viewHolder.infoContainer = v.findViewById(R.id.btn_container);
 				viewHolder.imageBtn1 = (ImageButton) v
 						.findViewById(R.id.yes_btn);
 				viewHolder.imageBtn2 = (ImageButton) v
@@ -483,6 +484,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 			viewHolder.text.setText(contactFirstName);
 
+			viewHolder.infoContainer.setVisibility(View.GONE);
 			if (mContactInfo.isOnhike()) {
 				switch (mContactInfo.getFavoriteType()) {
 				case NOT_FRIEND:
@@ -503,6 +505,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 							R.string.add_as_friend_profile, contactFirstName));
 					break;
 				case REQUEST_RECEIVED:
+					viewHolder.infoContainer.setVisibility(View.VISIBLE);
+
 					viewHolder.subText
 							.setText(R.string.sent_you_friend_request);
 
