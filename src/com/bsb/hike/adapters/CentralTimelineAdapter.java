@@ -23,13 +23,15 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
-import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -156,6 +158,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						.findViewById(R.id.profile_pic);
 				viewHolder.timeStamp = (TextView) convertView
 						.findViewById(R.id.timestamp);
+				viewHolder.infoContainer = convertView
+						.findViewById(R.id.info_container);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -336,6 +340,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
 					true, context));
+
+			viewHolder.infoContainer.setTag(statusMessage);
+			viewHolder.infoContainer
+					.setOnClickListener(onProfileInfoClickListener);
 			break;
 		}
 
@@ -354,6 +362,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView statusImg;
 		View buttonDivider;
 		ImageView largeProfilePic;
+		View infoContainer;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
@@ -419,6 +428,32 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
 						statusMessage.getProtip().getMappedId());
 			}
+		}
+	};
+
+	private OnClickListener onProfileInfoClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			StatusMessage statusMessage = (StatusMessage) v.getTag();
+			if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
+					|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)
+					|| (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)) {
+				return;
+			} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
+				Intent intent = new Intent(context, ProfileActivity.class);
+				intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE,
+						true);
+				context.startActivity(intent);
+				return;
+			}
+
+			Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(
+					null, statusMessage.getMsisdn(), statusMessage
+							.getNotNullName(), statusMessage.getMsisdn()));
+			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+			intent.setClass(context, ChatThread.class);
+			context.startActivity(intent);
 		}
 	};
 
