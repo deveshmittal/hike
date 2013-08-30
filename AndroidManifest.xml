@@ -134,7 +134,8 @@
         </activity>
         <activity android:name=".ui.SettingsActivity" >
         </activity>
-        <activity android:name=".ui.TwitterAuthActivity" >
+        <activity android:name=".ui.TwitterAuthActivity" 
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity android:name=".ui.StatusUpdate"
             android:windowSoftInputMode="adjustResize" >
