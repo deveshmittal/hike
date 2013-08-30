@@ -231,14 +231,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			mActivityState = new ActivityState();
 		}
 
-		setContentView(R.layout.profile);
-
 		if (getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) {
+			setContentView(R.layout.profile);
 			this.profileType = ProfileType.GROUP_INFO;
 			HikeMessengerApp.getPubSub().addListeners(this,
 					groupInfoPubSubListeners);
 			setupGroupProfileScreen();
 		} else if (getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO)) {
+			setContentView(R.layout.profile);
 			this.profileType = ProfileType.CONTACT_INFO;
 			HikeMessengerApp.getPubSub().addListeners(this,
 					contactInfoPubSubListeners);
@@ -249,9 +249,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE,
 					false)) {
+				setContentView(R.layout.profile_edit);
 				this.profileType = ProfileType.USER_PROFILE_EDIT;
 				setupEditScreen();
 			} else {
+				setContentView(R.layout.profile);
 				this.profileType = ProfileType.USER_PROFILE;
 				HikeMessengerApp.getPubSub().addListeners(this,
 						profilePubSubListeners);
