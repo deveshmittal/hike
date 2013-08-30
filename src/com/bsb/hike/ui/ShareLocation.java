@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +12,6 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.SearchManager.OnDismissListener;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -23,15 +23,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -44,8 +42,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -90,11 +86,11 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
 	private Dialog playServiceErrordialog;
 	private int selectedPosition = 0;
-	
+
 	private Button doneBtn;
 	private TextView title;
 	private ImageView backIcon;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -249,7 +245,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		setupActionBar();
 	}
 
-	
 	private void init() {
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(
@@ -353,12 +348,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						Log.d("ShareLocation", "my lati in loc listener = "
 								+ Double.valueOf(newLocation.getLatitude())
 										.toString());
-						if (!isTextSearch){
+						if (!isTextSearch) {
 							lastMarker = userMarker;
 							selectedPosition = 0;
 							lastMarker.setVisible(true);
 							updateNearbyPlaces();
- 						}
+						}
 					}
 				} else {
 					myLocation = newLocation;
@@ -734,7 +729,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 				holder.txt_itemDescription = (TextView) convertView
 						.findViewById(R.id.itemDescription);
-				
+
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
@@ -759,18 +754,19 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						.setCompoundDrawablePadding((int) getResources()
 								.getDimension(
 										R.dimen.share_my_location_drawable_padding));
-			} else{
+			} else {
 				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(0,
 						0, 0, 0);
 			}
-			
-			if(position == selectedPosition){
-				convertView.findViewById(R.id.isChecked).setVisibility(View.VISIBLE);
+
+			if (position == selectedPosition) {
+				convertView.findViewById(R.id.isChecked).setVisibility(
+						View.VISIBLE);
+			} else {
+				convertView.findViewById(R.id.isChecked).setVisibility(
+						View.GONE);
 			}
-			else{
-				convertView.findViewById(R.id.isChecked).setVisibility(View.GONE);
-			}
-			
+
 			holder.txt_itemDescription.setText(itemDetailsrrayList
 					.get(position).getItemDescription());
 			// holder.itemImage.setImageResource(itemDetailsrrayList.get(position).getImageNumber());
