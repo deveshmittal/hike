@@ -2412,7 +2412,7 @@ public class Utils {
 			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.last_seen_tip);
+			tipText.setText(R.string.last_seen_tip_friends);
 			break;
 		case MOOD:
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
