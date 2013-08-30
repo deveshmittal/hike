@@ -341,21 +341,25 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		case CONTACT_INFO:
 			MenuItem friendItem = menu.findItem(R.id.unfriend);
 
-			if (contactInfo.isOnhike()) {
-				friendItem.setVisible(false);
-			} else {
-				friendItem.setVisible(true);
-				if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
-					friendItem.setTitle(R.string.unfriend);
+			if (friendItem != null) {
+				if (contactInfo.isOnhike()) {
+					friendItem.setVisible(false);
 				} else {
-					friendItem.setTitle(R.string.add_as_friend_menu);
+					friendItem.setVisible(true);
+					if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
+						friendItem.setTitle(R.string.unfriend);
+					} else {
+						friendItem.setTitle(R.string.add_as_friend_menu);
+					}
 				}
 			}
 			return true;
 		case GROUP_INFO:
 			MenuItem muteItem = menu.findItem(R.id.mute_group);
-			muteItem.setTitle(groupConversation.isMuted() ? R.string.unmute_group
-					: R.string.mute_group);
+			if (muteItem != null) {
+				muteItem.setTitle(groupConversation.isMuted() ? R.string.unmute_group
+						: R.string.mute_group);
+			}
 			return true;
 		}
 		return super.onPrepareOptionsMenu(menu);
