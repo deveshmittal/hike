@@ -434,7 +434,8 @@ public class MqttMessagesManager {
 						.get(0);
 
 				if (hikeFile.getHikeFileType() != HikeFileType.LOCATION
-						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
+						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT
+						&& hikeFile.getHikeFileType() != HikeFileType.UNKNOWN) {
 					DownloadFileTask downloadFile = new DownloadFileTask(
 							context, hikeFile.getFile(), hikeFile.getFileKey(),
 							convMessage, hikeFile.getHikeFileType(),
