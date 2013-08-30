@@ -523,6 +523,7 @@ public class HikeConstants {
 		public static final String IS_TEXT_SEARCH = "isTextSearch";
 		public static final String HTTP_SEARCH_STR = "searchStr";
 		public static final String IS_FACEBOOK = "isFacebook";
+		public static final String EMOTICON_TYPE = "emoticonType";
 	}
 
 	public static final class LogEvent {

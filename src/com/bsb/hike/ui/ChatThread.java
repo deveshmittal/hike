@@ -477,9 +477,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING)) {
-				onEmoticonBtnClicked(null, savedInstanceState.getInt(
-						HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, 0),
-						false);
+
+				int emoticonTypeOrdinal = savedInstanceState.getInt(
+						HikeConstants.Extras.EMOTICON_TYPE, -1);
+				if (emoticonTypeOrdinal != -1) {
+					EmoticonType type = EmoticonType.values()[emoticonTypeOrdinal];
+
+					View emoticonLayout = findViewById(type == EmoticonType.STICKERS ? R.id.sticker_btn
+							: R.id.emo_btn);
+					onEmoticonBtnClicked(
+							emoticonLayout,
+							savedInstanceState
+									.getInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY,
+											0), false);
+				}
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING)) {
@@ -3484,6 +3495,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		outState.putBoolean(HikeConstants.Extras.EMOTICON_SHOWING,
 				emoticonLayout != null
 						&& emoticonLayout.getVisibility() == View.VISIBLE);
+		outState.putInt(HikeConstants.Extras.EMOTICON_TYPE,
+				emoticonType != null ? emoticonType.ordinal() : -1);
+		outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY,
+				emoticonViewPager != null ? emoticonViewPager.getCurrentItem()
+						: -1);
 		outState.putBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING,
 				filePickerDialog != null && filePickerDialog.isShowing());
 		outState.putBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING,
