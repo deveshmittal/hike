@@ -131,34 +131,6 @@ public class UpdatesFragment extends HomeBaseFragment implements
 						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 						friendMsisdns);
 
-		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
-				-1);
-
-		Protip protip = null;
-		boolean showProtip = false;
-		if (currentProtipId == -1) {
-			protip = HikeConversationsDatabase.getInstance().getLastProtip();
-			if (protip != null) {
-				if (Utils.showProtip(protip, prefs)) {
-					showProtip = true;
-					Editor editor = prefs.edit();
-					editor.putLong(HikeMessengerApp.CURRENT_PROTIP,
-							protip.getId());
-					editor.putLong(HikeMessengerApp.PROTIP_WAIT_TIME,
-							protip.getWaitTime());
-					editor.commit();
-				}
-			}
-		} else {
-			showProtip = true;
-			protip = HikeConversationsDatabase.getInstance().getProtipForId(
-					currentProtipId);
-		}
-
-		if (showProtip && protip != null) {
-			statusMessages.add(0, new StatusMessage(protip));
-		}
-
 		String name = Utils.getFirstName(prefs.getString(
 				HikeMessengerApp.NAME_SETTING, null));
 		String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS, "");
@@ -185,6 +157,34 @@ public class UpdatesFragment extends HomeBaseFragment implements
 						System.currentTimeMillis() / 1000);
 				statusMessages.add(0, noStatusMessage);
 			}
+		}
+
+		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
+				-1);
+
+		Protip protip = null;
+		boolean showProtip = false;
+		if (currentProtipId == -1) {
+			protip = HikeConversationsDatabase.getInstance().getLastProtip();
+			if (protip != null) {
+				if (Utils.showProtip(protip, prefs)) {
+					showProtip = true;
+					Editor editor = prefs.edit();
+					editor.putLong(HikeMessengerApp.CURRENT_PROTIP,
+							protip.getId());
+					editor.putLong(HikeMessengerApp.PROTIP_WAIT_TIME,
+							protip.getWaitTime());
+					editor.commit();
+				}
+			}
+		} else {
+			showProtip = true;
+			protip = HikeConversationsDatabase.getInstance().getProtipForId(
+					currentProtipId);
+		}
+
+		if (showProtip && protip != null) {
+			statusMessages.add(0, new StatusMessage(protip));
 		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(getActivity(),
