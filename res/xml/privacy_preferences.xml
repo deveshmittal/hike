@@ -33,5 +33,19 @@
 		android:key="@string/unlink_key"
 		android:summary="@string/unlink_account_msg"
 		android:title="@string/unlink_account" />
+	
+	<com.bsb.hike.view.IconPreference
+		icon="ic_fb_priv"
+		android:layout="@layout/icon_preference"
+		android:key="@string/unlink_facebook"
+		android:summary="@string/unlink_facebook_account_msg"
+		android:title="@string/unlink_facebook_account" />
+	
+	<com.bsb.hike.view.IconPreference
+		icon="ic_twitter_priv"
+		android:layout="@layout/icon_preference"
+		android:key="@string/unlink_twitter"
+		android:summary="@string/unlink_twitter_account_msg"
+		android:title="@string/unlink_twitter_account" />
 
 </PreferenceScreen>

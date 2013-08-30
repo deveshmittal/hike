@@ -29,6 +29,7 @@ import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
+import com.facebook.Session;
 
 public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		implements OnPreferenceClickListener, OnPreferenceChangeListener,
@@ -88,6 +89,18 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				getString(R.string.unlink_key));
 		if (unlinkPreference != null) {
 			unlinkPreference.setOnPreferenceClickListener(this);
+		}
+		
+		Preference unlinkFacebookPreference = getPreferenceScreen().findPreference(
+				getString(R.string.unlink_facebook));
+		if (unlinkFacebookPreference != null) {
+			unlinkFacebookPreference.setOnPreferenceClickListener(this);
+		}
+		
+		Preference unlinkTwitterPreference = getPreferenceScreen().findPreference(
+				getString(R.string.unlink_twitter));
+		if (unlinkTwitterPreference != null) {
+			unlinkTwitterPreference.setOnPreferenceClickListener(this);
 		}
 
 		final IconCheckBoxPreference smsClientPreference = (IconCheckBoxPreference) getPreferenceScreen()
@@ -212,7 +225,51 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			});
 			AlertDialog alertDialog = builder.create();
 			alertDialog.show();
+		}else if (preference.getKey().equals(getString(R.string.unlink_facebook))) {
+			Builder builder = new Builder(HikePreferences.this);
+			builder.setMessage(R.string.unlink_facebook_confirmation);
+			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Session session = Session.getActiveSession();
+					if (session != null) {
+						session.closeAndClearTokenInformation();
+					}
+				}
+			});
+			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
+		}else if (preference.getKey().equals(getString(R.string.unlink_twitter))) {
+			Builder builder = new Builder(HikePreferences.this);
+			builder.setMessage(R.string.unlink_twitter_confirmation);
+			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+								MODE_PRIVATE).edit();
+						editor.putBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE,
+								false);
+						editor.putString(
+								HikeMessengerApp.TWITTER_TOKEN, "");
+						editor.putString(
+								HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
+						editor.commit();
+				}
+			});
+			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
 		}
+		
 		return true;
 	}
 

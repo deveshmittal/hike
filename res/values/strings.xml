@@ -33,6 +33,8 @@
 	<string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
 	<string name="delete_key">deleteAccount</string>
 	<string name="unlink_key">unlinkAccount</string>
+	<string name="unlink_facebook">unlinkFacebook</string>
+	<string name="unlink_twitter">unlinkTwitter</string>
 	<string name="how_hike_feel">How does hike make you feel?</string>
 	<string name="feedback_success">Thanks for your feedback!</string>
 	<string name="phone_num">Phone Number</string>
@@ -142,6 +144,8 @@
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
 	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
+	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from hike?</string>
+	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from hike?</string>
 	<string name="unlink">Unlink</string>
 	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
 	<string name="plus">plus</string>
@@ -215,7 +219,11 @@
 	<string name="delete_account">Delete Account</string>
 	<string name="delete_account_msg">Permanently delete your account</string>
 	<string name="unlink_account">Unlink Account</string>
+	<string name="unlink_facebook_account">Unlink Facebook Account</string>
+	<string name="unlink_twitter_account">Unlink Twitter Account</string>
 	<string name="unlink_account_msg">Unlink your account from this phone</string>
+	<string name="unlink_facebook_account_msg">Unlink your facebook account from hike</string>
+	<string name="unlink_twitter_account_msg">Unlink your twitter account from hike</string>
 	<string name="privacy">Privacy</string>
 	<string name="notifications">Notifications</string>
 	<string name="favorites">Favorites</string>
