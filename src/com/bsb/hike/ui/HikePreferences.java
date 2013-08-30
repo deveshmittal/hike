@@ -162,11 +162,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(titleRes);
 		backContainer.setOnClickListener(new View.OnClickListener() {
-			
-		
+
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(HikePreferences.this, HomeActivity.class);
+				Intent intent = new Intent(HikePreferences.this,
+						HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}
@@ -174,6 +174,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 
 		actionBar.setCustomView(actionBarView);
 	}
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT,

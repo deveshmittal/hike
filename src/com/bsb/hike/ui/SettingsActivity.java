@@ -83,11 +83,11 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(R.string.settings);
 		backContainer.setOnClickListener(new OnClickListener() {
-			
-		
+
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(SettingsActivity.this, HomeActivity.class);
+				Intent intent = new Intent(SettingsActivity.this,
+						HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}
@@ -95,6 +95,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 
 		actionBar.setCustomView(actionBarView);
 	}
+
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
