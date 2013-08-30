@@ -15,8 +15,6 @@ import com.bsb.hike.utils.HikeAppStateBaseActivity;
 
 public class WebViewActivity extends HikeAppStateBaseActivity {
 
-	private String pageString;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -25,9 +23,6 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		String urlToLoad = getIntent().getStringExtra(
 				HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
-
-		pageString = getIntent().getStringExtra(
-				HikeConstants.Extras.REWARDS_PAGE);
 
 		WebView webView = (WebView) findViewById(R.id.t_and_c_page);
 
@@ -69,15 +64,6 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
-	}
-
-	@Override
-	public void onBackPressed() {
-		if (pageString.equals(HikeConstants.REWARDS) || pageString.equals(HikeConstants.GAMES)) {
-			super.onBackPressed();
-		} else {
-			finish();
-		}
 	}
 
 	public Intent newEmailIntent(Context context, String address,
