@@ -48,7 +48,8 @@ public class UpdatesFragment extends HomeBaseFragment implements
 	private boolean reachedEnd;
 	private boolean loadingMoreMessages;
 
-	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED };
+	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
+			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED };
 	private String[] friendMsisdns;
 
 	@Override
@@ -307,6 +308,14 @@ public class UpdatesFragment extends HomeBaseFragment implements
 			});
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
+		} else if (HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
 		}
 	}
 

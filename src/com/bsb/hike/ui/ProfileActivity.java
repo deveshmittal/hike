@@ -115,7 +115,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END,
 			HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED,
-			HikePubSub.USER_LEFT };
+			HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
@@ -123,11 +123,13 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.HIKE_JOIN_TIME_OBTAINED,
-			HikePubSub.LAST_SEEN_TIME_UPDATED };
+			HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.LARGER_IMAGE_DOWNLOADED };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.STATUS_MESSAGE_RECEIVED,
-			HikePubSub.USER_JOIN_TIME_OBTAINED };
+			HikePubSub.USER_JOIN_TIME_OBTAINED,
+			HikePubSub.LARGER_IMAGE_DOWNLOADED };
 
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
@@ -1752,6 +1754,15 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					profileAdapter.updateContactInfo(contactInfo);
 				}
 
+			});
+		} else if (HikePubSub.LARGER_IMAGE_DOWNLOADED.equals(type)) {
+			// TODO: find a more specific way to trigger this.
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					profileAdapter.notifyDataSetChanged();
+				}
 			});
 		}
 	}

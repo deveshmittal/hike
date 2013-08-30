@@ -18,6 +18,8 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -128,6 +130,13 @@ public class ImageViewerFragment extends SherlockFragment implements
 			imageView.setImageDrawable(BitmapDrawable.createFromPath(basePath
 					+ "/" + fileName));
 		}
+
+		if (isStatusImage) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
+		}
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.LARGER_IMAGE_DOWNLOADED, null);
 	}
 
 	@Override

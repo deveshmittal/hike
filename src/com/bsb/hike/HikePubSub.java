@@ -268,6 +268,10 @@ public class HikePubSub implements Runnable {
 
 	public static final String CANCEL_ALL_NOTIFICATIONS = "cancelAllNotifications";
 
+	public static final String LARGER_IMAGE_DOWNLOADED = "largerImageDownloaded";
+
+	public static final String LARGER_UPDATE_IMAGE_DOWNLOADED = "largerUpdateImageDownloaded";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
