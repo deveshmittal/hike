@@ -86,8 +86,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		existingGroupId = getIntent().getStringExtra(
 				HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
-		if (getIntent().getAction() == Intent.ACTION_SEND
-				|| getIntent().getAction() == Intent.ACTION_SENDTO) {
+		if (Intent.ACTION_SEND.equals(getIntent().getAction())
+				|| Intent.ACTION_SENDTO.equals(getIntent().getAction())) {
 			isForwardingMessage = true;
 		}
 
