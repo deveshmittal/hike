@@ -98,12 +98,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		if (savedInstanceState != null) {
 			deviceDetailsSent = savedInstanceState
 					.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
-			int dialogShowingOrdinal = savedInstanceState
-					.getInt(HikeConstants.Extras.DIALOG_SHOWING);
+			int dialogShowingOrdinal = savedInstanceState.getInt(
+					HikeConstants.Extras.DIALOG_SHOWING, -1);
 			if (dialogShowingOrdinal != -1) {
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
-			} else {
-				dialogShowing = null;
 			}
 		}
 
@@ -441,8 +439,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT,
 				deviceDetailsSent);
-		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
-				dialogShowing != null ? dialogShowing.ordinal() : -1);
+		if (dialog != null && dialog.isShowing()) {
+			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+					dialogShowing != null ? dialogShowing.ordinal() : -1);
+		}
 		super.onSaveInstanceState(outState);
 	}
 

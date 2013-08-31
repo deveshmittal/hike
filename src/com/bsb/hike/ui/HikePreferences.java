@@ -180,8 +180,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT,
 				isDeleting);
-		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
-				dialogShowing != null ? dialogShowing.ordinal() : -1);
+		if (mDialog != null && mDialog.isShowing()) {
+			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+					dialogShowing != null ? dialogShowing.ordinal() : -1);
+		}
 		super.onSaveInstanceState(outState);
 	}
 
