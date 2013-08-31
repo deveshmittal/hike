@@ -85,6 +85,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private TextView charCounter;
 	private View tipView;
 	private Button doneBtn;
+	private TextView title;
 
 	@Override
 	public Object onRetainCustomNonConfigurationInstance() {
@@ -94,8 +95,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.status_dialog);
-
-		setupActionBar();
 
 		Object o = getLastCustomNonConfigurationInstance();
 
@@ -116,6 +115,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		emojiParent = (ViewGroup) findViewById(R.id.emoji_container);
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
+
+		setupActionBar();
 
 		avatar = (ImageView) findViewById(R.id.avatar);
 
@@ -208,14 +209,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		View backContainer = actionBarView.findViewById(R.id.back);
 
-		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title = (TextView) actionBarView.findViewById(R.id.title);
 		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
-
-		title.setText(R.string.new_update);
 
 		doneBtn.setVisibility(View.VISIBLE);
 		doneBtn.setText(R.string.post);
 		doneBtn.setEnabled(false);
+
+		setTitle();
 
 		backContainer.setOnClickListener(new OnClickListener() {
 			@Override
@@ -236,6 +237,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void setTitle() {
+		title.setText(moodParent.getVisibility() == View.VISIBLE ? R.string.moods
+				: R.string.new_update);
 	}
 
 	private Runnable cancelStatusPost = new Runnable() {
@@ -373,12 +379,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			Utils.closeTip(TipType.MOOD, tipView, preferences);
 		}
 		showMoodSelector();
+		setTitle();
 	}
 
 	@Override
 	public void onBackPressed() {
 		if (isEmojiOrMoodLayoutVisible()) {
 			hideEmojiOrMoodLayout();
+			setTitle();
 		} else {
 			super.onBackPressed();
 		}
