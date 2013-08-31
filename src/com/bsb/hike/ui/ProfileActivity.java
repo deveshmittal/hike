@@ -43,6 +43,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -1417,49 +1418,57 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		if (groupConversation == null) {
 			return;
 		}
-		groupEditDialog = new Dialog(this, R.style.Theme_CustomDialog_Keyboard);
-		groupEditDialog.setContentView(R.layout.group_name_change_dialog);
-		groupEditDialog.setCancelable(true);
-		groupEditDialog.getWindow().setGravity(Gravity.CENTER);
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
 
-		mNameEdit = (EditText) groupEditDialog
-				.findViewById(R.id.group_name_edit);
+		mActivityState.groupEditDialogShowing = true;
 
+		Builder builder = new Builder(this);
+		builder.setTitle(R.string.edit_group_name);
+
+		mNameEdit = new EditText(this);
 		mNameEdit
 				.setText(TextUtils.isEmpty(mActivityState.edittedGroupName) ? groupConversation
 						.getLabel() : mActivityState.edittedGroupName);
 
 		mNameEdit.setSelection(mNameEdit.length());
 
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
+		int margin = (int) (Utils.densityMultiplier * 10);
+		int padding = (int) (Utils.densityMultiplier * 10);
 
-		mActivityState.groupEditDialogShowing = true;
+		mNameEdit.setPadding(0, padding, 0, padding);
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT);
+		layoutParams.leftMargin = margin;
+		layoutParams.rightMargin = margin;
 
-		Button okBtn = (Button) groupEditDialog.findViewById(R.id.btn_ok);
-		Button cancelBtn = (Button) groupEditDialog
-				.findViewById(R.id.btn_cancel);
+		mNameEdit.setLayoutParams(layoutParams);
+		mNameEdit.setBackgroundResource(R.drawable.bg_search_bar);
 
-		okBtn.setText(R.string.save);
-		okBtn.setOnClickListener(new View.OnClickListener() {
+		builder.setView(mNameEdit);
 
-			@Override
-			public void onClick(View v) {
-				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-				groupEditDialog.cancel();
-				saveChanges();
-			}
-		});
-		cancelBtn.setOnClickListener(new View.OnClickListener() {
+		builder.setNegativeButton(R.string.cancel,
+				new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-				groupEditDialog.cancel();
-			}
-		});
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+						groupEditDialog.cancel();
+					}
+				});
 
-		groupEditDialog.setOnCancelListener(new OnCancelListener() {
+		builder.setPositiveButton(R.string.save,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+						groupEditDialog.cancel();
+						saveChanges();
+					}
+				});
+
+		builder.setOnCancelListener(new OnCancelListener() {
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
@@ -1467,7 +1476,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				mActivityState.edittedGroupName = null;
 			}
 		});
-		groupEditDialog.show();
+		builder.show();
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {

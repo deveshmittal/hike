@@ -34,6 +34,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -186,9 +187,22 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		} else {
 			if (TextUtils.isEmpty(existingGroupId)) {
 				Builder builder = new Builder(this);
-				builder.setTitle("Group Name");
+				builder.setTitle(R.string.group_name);
 
 				final EditText editText = new EditText(this);
+
+				int margin = (int) (Utils.densityMultiplier * 10);
+				int padding = (int) (Utils.densityMultiplier * 10);
+
+				editText.setPadding(0, padding, 0, padding);
+				LayoutParams layoutParams = new LayoutParams(
+						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+				layoutParams.leftMargin = margin;
+				layoutParams.rightMargin = margin;
+
+				editText.setLayoutParams(layoutParams);
+				editText.setBackgroundResource(R.drawable.bg_search_bar);
+
 				builder.setView(editText);
 
 				builder.setNegativeButton(R.string.cancel,
@@ -209,7 +223,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 									int which) {
 								String groupName = editText.getText()
 										.toString();
-								if (TextUtils.isEmpty(groupName)) {
+								if (TextUtils.isEmpty(groupName.trim())) {
 									Toast.makeText(ComposeActivity.this,
 											R.string.enter_valid_group_name,
 											Toast.LENGTH_SHORT).show();
