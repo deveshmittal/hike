@@ -2,6 +2,7 @@ package com.bsb.hike;
 
 import static org.acra.ACRA.LOG_TAG;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -268,6 +269,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
+
+	public static final String REMOVE_HUMANOID_STICKERS = "removeHumanoiStickers";
 
 	public static List<StickerCategory> stickerCategories;
 
@@ -548,6 +551,17 @@ public class HikeMessengerApp extends Application implements Listener {
 			setupBollywoodCategoryVisibility(settings);
 		}
 		setupStickerCategoryList(settings);
+
+		if (!settings.contains(REMOVE_HUMANOID_STICKERS)) {
+			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
+					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
+			File categoryDir = new File(categoryDirPath);
+			Utils.deleteFile(categoryDir);
+
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
+			editor.commit();
+		}
 
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
 			HikeConversationsDatabase.getInstance()
