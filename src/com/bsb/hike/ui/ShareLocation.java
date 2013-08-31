@@ -145,7 +145,9 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				@Override
 				public void onItemClick(AdapterView<?> parent, final View view,
 						int position, long id) {
-					lastMarker.setVisible(false);
+					if (lastMarker != null) {
+						lastMarker.setVisible(false);
+					}
 					selectedPosition = position;
 					Marker currentMarker = adapter.getMarker(position);
 					currentMarker.setVisible(true);
