@@ -3992,6 +3992,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
+			if (mConversation instanceof GroupConversation) {
+				if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+					return false;
+				}
+			}
 			sendPoke();
 			return true;
 		}
