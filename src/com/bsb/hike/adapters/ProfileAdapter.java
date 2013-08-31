@@ -326,8 +326,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 							.findViewById(R.id.avatar);
 					ImageView avatarFrame = (ImageView) groupParticipantParentView
 							.findViewById(R.id.avatar_frame);
+					View ownerIndicator = groupParticipantParentView
+							.findViewById(R.id.owner_indicator);
 
 					ContactInfo contactInfo = groupParticipant.getContactInfo();
+
+					if (contactInfo.getMsisdn().equals(
+							groupConversation.getGroupOwner())) {
+						ownerIndicator.setVisibility(View.VISIBLE);
+					} else {
+						ownerIndicator.setVisibility(View.GONE);
+					}
 
 					int offline = contactInfo.getOffline();
 
