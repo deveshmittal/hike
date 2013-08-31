@@ -98,8 +98,6 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		mInputNumberView = (EditText) findViewById(R.id.search_text);
 		mContactList = (ListView) findViewById(R.id.compose_list);
 
-		mContactList.setEmptyView(findViewById(android.R.id.empty));
-
 		init();
 		Utils.executeContactListResultTask(new CreateAutoCompleteViewTask());
 	}
@@ -364,6 +362,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 						freeSMSOn, isGroupChat, isForwardingMessage,
 						isSharingFile, nativeSMSOn);
 			}
+
+			findViewById(R.id.empty).setVisibility(View.GONE);
 
 			mInputNumberView.setText("");
 
