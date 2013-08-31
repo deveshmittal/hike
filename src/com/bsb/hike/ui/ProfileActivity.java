@@ -1817,7 +1817,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					.getTag();
 
 			ArrayList<String> optionsList = new ArrayList<String>();
-			ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
 
 			ContactInfo tempContactInfo = null;
 
@@ -1836,44 +1835,23 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			final ContactInfo contactInfo = tempContactInfo;
 
 			optionsList.add(getString(R.string.send_message));
-			optionImagesList.add(R.drawable.ic_send_message);
 			if (!tempContactInfo.isOnhike()) {
 				optionsList.add(getString(R.string.invite_to_hike));
-				optionImagesList.add(R.drawable.ic_invite_single);
 			}
 			if (tempContactInfo.isUnknownContact()) {
 				optionsList.add(getString(R.string.add_to_contacts));
-				optionImagesList.add(R.drawable.ic_add_to_contacts);
 			}
 			if (isGroupOwner) {
 				optionsList.add(getString(R.string.remove_from_group));
-				optionImagesList.add(R.drawable.ic_remove_from_group);
 			}
 
 			final String[] options = new String[optionsList.size()];
 			optionsList.toArray(options);
 
-			final Integer[] optionIcons = new Integer[optionImagesList.size()];
-			optionImagesList.toArray(optionIcons);
-
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-					R.layout.alert_item, R.id.item, options) {
-
-				@Override
-				public View getView(int position, View convertView,
-						ViewGroup parent) {
-					View v = super.getView(position, convertView, parent);
-					if (optionIcons.length > 0) {
-						TextView tv = (TextView) v.findViewById(R.id.item);
-						tv.setCompoundDrawablesWithIntrinsicBounds(
-								optionIcons[position], 0, 0, 0);
-					}
-					return v;
-				}
-
-			};
+					R.layout.alert_item, R.id.item, options);
 
 			builder.setAdapter(dialogAdapter,
 					new DialogInterface.OnClickListener() {
