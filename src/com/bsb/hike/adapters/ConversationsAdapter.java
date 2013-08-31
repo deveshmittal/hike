@@ -67,6 +67,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			TextView unreadIndicator = (TextView) v
 					.findViewById(R.id.unread_indicator);
 			unreadIndicator.setVisibility(View.GONE);
+			imgStatus.setVisibility(View.GONE);
 			/*
 			 * If the message is a status message, we only show an indicator if
 			 * the status of the message is unread.
@@ -83,7 +84,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
 					avatarframe
 							.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
-					imgStatus.setVisibility(View.GONE);
 					unreadIndicator.setVisibility(View.VISIBLE);
 
 					if (conversation.getUnreadCount() == 0) {
@@ -95,12 +95,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 				} else {
 					avatarframe
 							.setImageResource(R.drawable.frame_avatar_large_selector);
-					imgStatus.setImageResource(0);
-					imgStatus.setVisibility(View.GONE);
 				}
-			} else {
-				imgStatus.setImageResource(0);
-				imgStatus.setVisibility(View.GONE);
 			}
 
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
@@ -120,9 +115,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 											.getGroupParticipantMsisdn()),
 							markedUp);
 				}
-				imgStatus.setVisibility(HikeMessengerApp.fileTransferTaskMap != null
-						&& HikeMessengerApp.fileTransferTaskMap.containsKey(message
-								.getMsgID()) ? View.GONE : View.VISIBLE);
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
 				JSONArray participantInfoArray = metadata
 						.getGcjParticipantInfo();
@@ -231,12 +223,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						&& !TextUtils.isEmpty(message
 								.getGroupParticipantMsisdn())
 						&& message.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
-					markedUp = Utils
-							.addContactName(
-									((GroupConversation) conversation)
-											.getGroupParticipantFirstName(
-													message.getGroupParticipantMsisdn()),
-									markedUp);
+					markedUp = Utils.addContactName(
+							((GroupConversation) conversation)
+									.getGroupParticipantFirstName(message
+											.getGroupParticipantMsisdn()),
+							markedUp);
 				}
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, true);
