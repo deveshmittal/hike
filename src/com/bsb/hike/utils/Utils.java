@@ -2421,7 +2421,7 @@ public class Utils {
 			tipText.setText(R.string.last_seen_tip_friends);
 			break;
 		case MOOD:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
+			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(R.string.moods_tip);
 			break;
 		case STATUS:
