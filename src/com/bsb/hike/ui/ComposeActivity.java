@@ -194,7 +194,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				int margin = (int) (Utils.densityMultiplier * 10);
 				int padding = (int) (Utils.densityMultiplier * 10);
 
-				editText.setPadding(0, padding, 0, padding);
+				editText.setPadding(padding, padding, padding, padding);
 				LayoutParams layoutParams = new LayoutParams(
 						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				layoutParams.leftMargin = margin;
