@@ -8,9 +8,9 @@
         android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/bg_status_chat_thread"
-        android:padding="10dp"
-        android:layout_marginBottom="10dp" >
+        android:padding="10dp" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
@@ -29,44 +29,47 @@
                 android:src="@drawable/frame_avatar_medium_selector" />
         </RelativeLayout>
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/timestamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="6dp"
-            android:text="2 mins ago"
-            android:textColor="@color/timestampcolor"
-            android:textSize="12sp"
-            android:textStyle="bold|italic" />
-        
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
             android:layout_marginRight="5dp"
+            android:layout_marginTop="7dp"
             android:layout_toRightOf="@id/avatar_container"
             android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="2 mins ago"
+                android:textColor="@color/timestampcolor"
+                android:textSize="12sp"
+                android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/status_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/timestamp"
                 android:text="@string/xyz_posted_update"
                 android:textColor="@color/list_item_subtext"
                 android:textSize="12sp"
                 android:textStyle="bold|italic" />
+        </RelativeLayout>
 
-            <com.bsb.hike.view.LinkedTextView
-                android:id="@+id/status_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="5"
-                android:ellipsize="end"
-                android:textColor="@color/subtext"
-                android:textSize="16sp" />
-        </LinearLayout>
+        <com.bsb.hike.view.LinkedTextView
+            android:id="@+id/status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/content"
+            android:layout_toRightOf="@id/avatar_container"
+            android:ellipsize="end"
+            android:maxLines="5"
+            android:textColor="@color/subtext"
+            android:textSize="16sp" />
     </RelativeLayout>
 
     <LinearLayout
