@@ -254,14 +254,43 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 				} else if (rhsFavoriteType == FavoriteType.REQUEST_RECEIVED) {
 					return 1;
 				}
-			} else if (lhs.getOffline() != rhs.getOffline()) {
-				if (lhs.getOffline() == 0) {
-					return -1;
-				} else if (rhs.getOffline() == 0) {
+			}
+
+			if (hasLastSeenValue(lhsFavoriteType)) {
+				if (!hasLastSeenValue(rhsFavoriteType)) {
+					if (lhs.getOffline() == 0) {
+						return -1;
+					}
+				}
+				int value = compareOfflineValues(lhs.getOffline(),
+						rhs.getOffline());
+				if (value != 0) {
+					return value;
+				}
+			} else if (hasLastSeenValue(rhsFavoriteType)
+					&& !hasLastSeenValue(lhsFavoriteType)) {
+				if (rhs.getOffline() == 0) {
 					return 1;
 				}
 			}
+
 			return lhs.compareTo(rhs);
+		}
+
+		private boolean hasLastSeenValue(FavoriteType favoriteType) {
+			return favoriteType == FavoriteType.FRIEND
+					|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED;
+		}
+
+		private int compareOfflineValues(int lhs, int rhs) {
+			if (lhs != rhs) {
+				if (lhs == 0) {
+					return -1;
+				} else if (rhs == 0) {
+					return 1;
+				}
+			}
+			return 0;
 		}
 	};
 
