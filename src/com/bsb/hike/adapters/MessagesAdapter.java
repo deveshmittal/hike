@@ -101,6 +101,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		TextView messageTextView;
 		TextView dayTextView;
 		ImageView image;
+		ImageView avatarFrame;
 		ViewGroup container;
 		ImageView fileThumb;
 		ImageView showFileBtn;
@@ -296,6 +297,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				v = inflater.inflate(R.layout.in_thread_status_update, null);
 
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
+				holder.avatarFrame = (ImageView) v
+						.findViewById(R.id.avatar_frame);
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.status_text);
 				holder.dayTextView = (TextView) v
@@ -808,8 +811,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (statusMessage.hasMood()) {
 				holder.image.setImageResource(EmoticonConstants.moodMapping
 						.get(statusMessage.getMoodId()));
+				holder.avatarFrame.setVisibility(View.GONE);
 			} else {
-				holder.image.setBackgroundResource(R.drawable.bg_status_type);
+				holder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 
 			holder.container.setTag(convMessage);
