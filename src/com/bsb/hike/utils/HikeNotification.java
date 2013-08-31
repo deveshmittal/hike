@@ -75,7 +75,8 @@ public class HikeNotification {
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.ic_protip);
-		Bitmap avatarBitmap = Utils.drawableToBitmap(avatarDrawable);
+		Bitmap avatarBitmap = Utils.returnScaledBitmap
+				((Utils.drawableToBitmap(avatarDrawable)), context);		
 		int smallIconId = returnSmallIcon();
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
@@ -355,7 +356,8 @@ public class HikeNotification {
 		int smallIconId = returnSmallIcon();
 		final Drawable avatarDrawable = IconCacheManager.getInstance()
 				.getIconForMSISDN(msisdn);
-		Bitmap avatarBitmap = Utils.drawableToBitmap(avatarDrawable);
+		Bitmap avatarBitmap = Utils.returnScaledBitmap
+				((Utils.drawableToBitmap(avatarDrawable)), context);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
 				context).setContentTitle(key).setSmallIcon(smallIconId)
@@ -479,7 +481,8 @@ public class HikeNotification {
 
 		final Drawable avatarDrawable = IconCacheManager.getInstance()
 				.getIconForMSISDN(contactInfo.getMsisdn());
-		Bitmap avatarBitmap = Utils.drawableToBitmap(avatarDrawable);
+		Bitmap avatarBitmap = Utils.returnScaledBitmap
+				((Utils.drawableToBitmap(avatarDrawable)), context);		
 		int notificationId = convMessage.getMsisdn().hashCode(); // group the
 
 		String maskedText;
