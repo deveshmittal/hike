@@ -159,7 +159,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		if (type != Type.BLOCK) {
 			title.setText(R.string.invite_sms);
 		} else {
-			title.setText(R.string.block_title);
+			title.setText(R.string.blocked_list);
 		}
 	}
 
