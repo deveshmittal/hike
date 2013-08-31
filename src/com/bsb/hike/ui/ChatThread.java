@@ -342,7 +342,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		/* clear any toast notifications */
 		if (mConversation != null) {
 			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-			mgr.cancel((int) mConversation.getConvId());
+			mgr.cancel((int) mConversation.getMsisdn().hashCode());
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
