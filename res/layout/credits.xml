@@ -1,287 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fadingEdge="none" >
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/credits_main_margin"
         android:gravity="center_horizontal"
         android:orientation="vertical" >
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="@dimen/credits_main_margin"
-            android:gravity="center_horizontal"
-            android:orientation="vertical" >
+            android:paddingBottom="15dp"
+            android:paddingLeft="@dimen/credits_progress_layout_padding"
+            android:paddingRight="@dimen/credits_progress_layout_padding"
+            android:paddingTop="15dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/hike_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/hike_hike"
+                android:textColor="@color/lightblack"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="@dimen/free_hike_width"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/hike_txt"
+                android:layout_toRightOf="@+id/hike_txt"
+                android:paddingBottom="1dp"
+                android:paddingLeft="5dp"
+                android:text="@string/free_worldwide"
+                android:textColor="@color/credits_text"
+                android:textSize="10sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/unlimited_txt"
+                style="@style/Text.Credits"
+                android:layout_alignBottom="@+id/hike_txt"
+                android:layout_alignParentRight="true"
+                android:text="@string/unlimited" />
+
+            <ImageView
+                android:id="@+id/credits_hike"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/hike_txt"
+                android:layout_marginLeft="3dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_credits_full" />
+
+            <ImageView
+                android:id="@+id/hike_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@+id/unlimited_txt"
+                android:layout_below="@+id/hike_txt"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@id/credits_hike"
+                android:scaleType="fitXY"
+                android:src="@drawable/hike_to_hike_progress" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/free_sms_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/credits_hike"
+                android:layout_marginTop="30dp"
+                android:text="@string/free_sms_left"
+                android:textColor="@color/lightblack"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="@dimen/free_sms_width"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/free_sms_txt"
+                android:layout_toRightOf="@id/free_sms_txt"
+                android:paddingBottom="1dp"
+                android:paddingLeft="5dp"
+                android:text="@string/sms_renew"
+                android:textColor="@color/credits_text"
+                android:textSize="10sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/credits_full_txt"
+                style="@style/Text.Credits"
+                android:layout_alignBottom="@id/free_sms_txt"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="1dp"
+                android:text="100" />
+
+            <ImageView
+                android:id="@+id/credits_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/free_sms_txt"
+                android:layout_marginLeft="3dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_credits_empty" />
+
+            <ImageView
+                android:id="@+id/credits_full"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/free_sms_txt"
+                android:layout_marginRight="3dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_smile" />
+
+            <ProgressBar
+                android:id="@+id/credits_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="18dp"
+                android:layout_below="@+id/free_sms_txt"
+                android:layout_marginLeft="@dimen/credits_progress_margin"
+                android:layout_marginRight="@dimen/credits_progress_margin"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bg_credits_progress"
+                android:max="100"
+                android:paddingBottom="4dp"
+                android:progress="90"
+                android:progressDrawable="@drawable/credits_progress" />
 
             <RelativeLayout
+                android:id="@+id/credits_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/profile_bckg"
-                android:paddingBottom="15dp"
-                android:paddingLeft="@dimen/credits_progress_layout_padding"
-                android:paddingRight="@dimen/credits_progress_layout_padding"
-                android:paddingTop="15dp" >
+                android:layout_below="@id/credits_progress"
+                android:layout_marginLeft="@dimen/credits_num_container_margin"
+                android:layout_marginRight="@dimen/credits_num_container_margin" >
 
                 <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/hike_txt"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/credits_num"
+                    android:layout_width="@dimen/credits_num_view_width"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:text="@string/hike_hike"
-                    android:textColor="@color/lightblack"
-                    android:textSize="16sp"
+                    android:background="@drawable/bg_credits_num"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="4dp"
+                    android:text="80"
+                    android:textColor="#ffffff"
                     android:textStyle="bold" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:layout_width="@dimen/free_hike_width"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/hike_txt"
-                    android:layout_toRightOf="@+id/hike_txt"
-                    android:paddingBottom="1dp"
-                    android:paddingLeft="5dp"
-                    android:text="@string/free_worldwide"
-                    android:textColor="@color/credits_text"
-                    android:textSize="10sp" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/unlimited_txt"
-                    style="@style/Text.Credits"
-                    android:layout_alignBottom="@+id/hike_txt"
-                    android:layout_alignParentRight="true"
-                    android:text="@string/unlimited" />
-
-                <ImageView
-                    android:id="@+id/credits_hike"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_below="@+id/hike_txt"
-                    android:layout_marginLeft="3dp"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_credits_full" />
-
-                <ImageView
-                    android:id="@+id/hike_progress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignRight="@+id/unlimited_txt"
-                    android:layout_below="@+id/hike_txt"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_toRightOf="@id/credits_hike"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/hike_to_hike_progress" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/free_sms_txt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/credits_hike"
-                    android:layout_marginTop="30dp"
-                    android:text="@string/free_sms_left"
-                    android:textColor="@color/lightblack"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:layout_width="@dimen/free_sms_width"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/free_sms_txt"
-                    android:layout_toRightOf="@id/free_sms_txt"
-                    android:paddingBottom="1dp"
-                    android:paddingLeft="5dp"
-                    android:text="@string/sms_renew"
-                    android:textColor="@color/credits_text"
-                    android:textSize="10sp" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/credits_full_txt"
-                    style="@style/Text.Credits"
-                    android:layout_alignBottom="@id/free_sms_txt"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginBottom="1dp"
-                    android:text="100" />
-
-                <ImageView
-                    android:id="@+id/credits_empty"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_below="@+id/free_sms_txt"
-                    android:layout_marginLeft="3dp"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_credits_empty" />
-
-                <ImageView
-                    android:id="@+id/credits_full"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_below="@+id/free_sms_txt"
-                    android:layout_marginRight="3dp"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_smile" />
-
-                <ProgressBar
-                    android:id="@+id/credits_progress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="18dp"
-                    android:layout_below="@+id/free_sms_txt"
-                    android:layout_marginLeft="@dimen/credits_progress_margin"
-                    android:layout_marginRight="@dimen/credits_progress_margin"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/bg_credits_progress"
-                    android:max="100"
-                    android:paddingBottom="4dp"
-                    android:progress="90"
-                    android:progressDrawable="@drawable/credits_progress" />
-
-                <RelativeLayout
-                    android:id="@+id/credits_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/credits_progress"
-                    android:layout_marginLeft="@dimen/credits_num_container_margin"
-                    android:layout_marginRight="@dimen/credits_num_container_margin" >
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/credits_num"
-                        android:layout_width="@dimen/credits_num_view_width"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_credits_num"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="4dp"
-                        android:text="80"
-                        android:textColor="#ffffff"
-                        android:textStyle="bold" />
-                </RelativeLayout>
             </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/profile_bckg"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingBottom="20dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="20dp" >
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/free_sms_100"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/share_fb_twitter"
-                    android:textColor="@color/credits_text"
-                    android:textSize="13sp" />
-
-                <LinearLayout
-                    android:layout_width="240dp"
-                    android:layout_height="36dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/btn_help"
-                    android:orientation="horizontal" >
-
-                    <LinearLayout
-                        android:id="@+id/btn_fb"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/fb_btn"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:onClick="onFacebookClick" >
-
-                        <TextView
-                            android:id="@+id/facebook_txt"
-                            style="@style/SocialButtons"
-                            android:drawableLeft="@drawable/ic_fb"
-                            android:text="@string/facebook" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/ic_button_divider" />
-
-                    <LinearLayout
-                        android:id="@+id/btn_twitter"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/twitter_btn"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:onClick="onTwitterClick" >
-
-                        <TextView
-                            android:id="@+id/twitter_txt"
-                            style="@style/SocialButtons"
-                            android:drawableLeft="@drawable/ic_twitter"
-                            android:text="@string/twitter" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:drawableLeft="@drawable/ic_invite_sms"
-                    android:drawablePadding="5dp"
-                    android:gravity="center"
-                    android:text="@string/invite_via_sms"
-                    android:textColor="@color/black"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/free_sms"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:text="@string/invite_friend_free_sms"
-                    android:textColor="@color/credits_text"
-                    android:textSize="13sp" />
-
-                <ImageButton
-                    android:id="@+id/invite_now"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/btn_blue_selector"
-                    android:onClick="onInviteClick"
-                    android:paddingBottom="12dp"
-                    android:paddingLeft="40dp"
-                    android:paddingRight="40dp"
-                    android:paddingTop="9dp"
-                    android:src="@drawable/txt_invite_friends" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:drawableLeft="@drawable/ic_india"
-            android:drawablePadding="3dp"
-            android:gravity="center"
-            android:text="@string/disclaimer_india"
-            android:textColor="@color/subtext"
-            android:textSize="12sp" />
+        </RelativeLayout>
     </LinearLayout>
 
-</ScrollView>
+    <com.bsb.hike.view.CustomFontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:drawableLeft="@drawable/ic_india"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="40dp"
+        android:drawablePadding="3dp"
+        android:gravity="center"
+        android:text="@string/disclaimer_india"
+        android:textColor="@color/subtext"
+        android:textSize="12sp" />
+
+</RelativeLayout>
