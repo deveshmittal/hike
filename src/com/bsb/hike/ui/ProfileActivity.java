@@ -1246,12 +1246,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onYesBtnClick(View v) {
-		ContactInfo contactInfo = (ContactInfo) v.getTag();
 		respondToFriendRequest(contactInfo, true);
 	}
 
 	public void onNoBtnClick(View v) {
-		ContactInfo contactInfo = (ContactInfo) v.getTag();
 		respondToFriendRequest(contactInfo, false);
 	}
 
