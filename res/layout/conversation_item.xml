@@ -8,12 +8,10 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="@drawable/list_item"
-        android:layout_marginLeft="@dimen/list_margin"
-        android:layout_marginRight="@dimen/list_margin"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp" >
+        android:orientation="horizontal" >
 
         <FrameLayout
             android:layout_width="@dimen/larger_avatar"
