@@ -868,7 +868,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 			conv.setMsgID(msgId);
 
-			if (conv.isFileTransferMessage()) {
+			if (conv.isFileTransferMessage() && conv.getConversation() != null) {
 				addSharedMedia(msgId, conv.getConversation().getConvId());
 			}
 
