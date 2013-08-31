@@ -287,6 +287,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		case GROUP_INFO:
 			title.setText(R.string.group);
 			break;
+		case USER_PROFILE_EDIT:
+			title.setText(R.string.edit_profile);
+			break;
 		}
 
 		backContainer.setOnClickListener(new View.OnClickListener() {
