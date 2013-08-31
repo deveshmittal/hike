@@ -2428,10 +2428,6 @@ public class Utils {
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(activity.getString(R.string.status_tip, name));
 			break;
-		case STICKER:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
-			tipText.setText(R.string.stickers_tip);
-			break;
 		case WALKIE_TALKIE:
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
 			tipText.setText(R.string.walkie_talkie_tip);
@@ -2470,9 +2466,6 @@ public class Utils {
 			break;
 		case STATUS:
 			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case STICKER:
-			editor.putBoolean(HikeMessengerApp.SHOWN_STICKERS_TIP, true);
 			break;
 		case WALKIE_TALKIE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);

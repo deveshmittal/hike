@@ -105,7 +105,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -3918,32 +3917,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		iconPageIndicator.setCurrentItem(pageNum);
 
 		onPageChangeListener.onPageSelected(pageNum);
-		/*
-		 * show the tip if we are not currently on the stickers tab and we have
-		 * not shown this tip before and there is no other tip showing.
-		 */
-		if (tipView == null
-				&& emoticonType != EmoticonType.STICKERS
-				&& !prefs
-						.getBoolean(HikeMessengerApp.SHOWN_STICKERS_TIP, false)) {
-			tipView = findViewById(R.id.stickers_tip);
-
-			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tipView
-					.getLayoutParams();
-			int screenWidth = getResources().getDisplayMetrics().widthPixels;
-			int buttonWidth = screenWidth / 3;
-			int marginRight = (int) (buttonWidth / 2 - ((int) 22 * Utils.densityMultiplier));
-			layoutParams.rightMargin = marginRight;
-
-			tipView.setLayoutParams(layoutParams);
-			Utils.showTip(this, TipType.STICKER, tipView);
-		} else if (emoticonType == EmoticonType.STICKERS && tipView != null) {
-			TipType viewTipType = (TipType) tipView.getTag();
-			if (viewTipType == TipType.STICKER) {
-				Utils.closeTip(TipType.STICKER, tipView, prefs);
-				tipView = null;
-			}
-		}
 	}
 
 	private void toggleGroupLife(boolean alive) {

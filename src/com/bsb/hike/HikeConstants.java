@@ -723,7 +723,7 @@ public class HikeConstants {
 	}
 
 	public static enum TipType {
-		EMOTICON, STICKER, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
+		EMOTICON, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
 	}
 
 	public static enum EmoticonType {
