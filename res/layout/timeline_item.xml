@@ -27,11 +27,11 @@
                 android:src="@drawable/frame_avatar_medium_selector" />
         </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/side_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@id/avatar_container"
             android:layout_alignTop="@id/avatar_container"
             android:gravity="right"
             android:orientation="vertical" >
@@ -40,31 +40,34 @@
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
                 android:text="2 mins ago"
                 android:textColor="@color/timestampcolor"
                 android:textSize="12sp"
                 android:textStyle="bold|italic" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/details_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/avatar_container"
-            android:layout_marginRight="5dp"
-            android:layout_toRightOf="@id/avatar_container"
-            android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/timestamp"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="Rishabh Sharma"
                 android:textColor="@color/updates_text"
                 android:textSize="14sp"
                 android:textStyle="bold" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/details_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/side_content"
+            android:layout_marginRight="5dp"
+            android:layout_toRightOf="@id/avatar_container"
+            android:orientation="vertical" >
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/main_info"
