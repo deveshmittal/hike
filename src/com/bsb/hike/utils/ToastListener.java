@@ -119,7 +119,7 @@ public class ToastListener implements Listener {
 				}
 
 				// this.toaster.pushInboxNotifications(contactInfo, message);
-				this.toaster.notifyMessage(contactInfo, message, false);
+				this.toaster.notifyMessage(contactInfo, message, true);
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
