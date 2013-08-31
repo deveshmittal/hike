@@ -99,7 +99,7 @@ public class HikeNotification {
 
 	}
 
-	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg) {
+	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg, boolean isRich) {
 		String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		int notificationId = msisdn.hashCode();
@@ -184,7 +184,7 @@ public class HikeNotification {
 			}
 		}
 
-		if (convMsg.isStickerMessage() || convMsg.isFileTransferMessage()) {
+		if ((convMsg.isStickerMessage() || convMsg.isFileTransferMessage() ) && isRich ) {
 			// big picture messages ! intercept !
 			pushBigPictureMessageNotifications(notificationIntent, contactInfo,
 					convMsg);
@@ -545,13 +545,13 @@ public class HikeNotification {
 		} else {
 			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			if (hikeFile!=null) {
-				if (hikeFile.getFileTypeString().equals(HikeFileType.IMAGE)) {
+				if (hikeFile.getFileTypeString().toLowerCase().startsWith("image")){
 					filePath = hikeFile.getFilePath(); // check
 					bigPictureImage = BitmapFactory.decodeFile(filePath);
 					if (bigPictureImage != null)
 						doesExist = true;
 				}
-			}
+			}  
 		}
 
 		if (doesExist) {
