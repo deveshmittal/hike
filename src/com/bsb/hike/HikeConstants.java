@@ -733,7 +733,4 @@ public class HikeConstants {
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
 
-	public static final String[] BOLLYWOOD_COUNTRY_CODES = { "+91", "+94",
-			"+880", "+977", "+93", "+92", "+975", "+960", "+968", "+966",
-			"+961", "+962", "+965", "+973", "+971", "+974" };
 }

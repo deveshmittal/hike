@@ -39,7 +39,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikePubSub.Listener;
@@ -541,7 +540,11 @@ public class HikeMessengerApp extends Application implements Listener {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
 
-		if (!settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
+		/*
+		 * If we had earlier removed bollywood stickers we need to display them
+		 * again.
+		 */
+		if (settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
 			setupBollywoodCategoryVisibility(settings);
 		}
 		setupStickerCategoryList(settings);
@@ -567,36 +570,15 @@ public class HikeMessengerApp extends Application implements Listener {
 	}
 
 	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
-		String countryCode = prefs.getString(COUNTRY_CODE, "");
-
-		if (TextUtils.isEmpty(countryCode)) {
-			return;
-		}
-
-		boolean showBollywoodCategory = false;
-		for (String bollywoodCountryCode : HikeConstants.BOLLYWOOD_COUNTRY_CODES) {
-			if (bollywoodCountryCode.equals(countryCode)) {
-				showBollywoodCategory = true;
-				break;
-			}
-		}
+		/*
+		 * We now show the bollywood category for all users.
+		 */
 		Editor editor = prefs.edit();
-		editor.putBoolean(SHOW_BOLLYWOOD_STICKERS, showBollywoodCategory);
-		if (!showBollywoodCategory) {
-			try {
-				JSONArray removedIdArray = new JSONArray(prefs.getString(
-						REMOVED_CATGORY_IDS, "[]"));
-				removedIdArray.put(HikeConstants.BOLLYWOOD_CATEGORY);
-				editor.putString(REMOVED_CATGORY_IDS, removedIdArray.toString());
-			} catch (JSONException e) {
-				editor.remove(REMOVED_CATGORY_IDS);
-				Log.w("HikeMessengerApp", "Removed id array pref corrupted", e);
-			}
-		}
+		editor.remove(SHOW_BOLLYWOOD_STICKERS);
+		editor.remove(REMOVED_CATGORY_IDS);
 		editor.commit();
-		if (!showBollywoodCategory) {
-			setupStickerCategoryList(prefs);
-		}
+
+		setupStickerCategoryList(prefs);
 	}
 
 	public static Facebook getFacebook() {
