@@ -119,7 +119,7 @@ public class ToastListener implements Listener {
 				}
 
 				// this.toaster.pushInboxNotifications(contactInfo, message);
-				this.toaster.notifyMessage(contactInfo, message);
+				this.toaster.notifyMessage(contactInfo, message, true);
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
@@ -183,7 +183,7 @@ public class ToastListener implements Listener {
 				contactInfo = this.db.getContactInfoFromMSISDN(
 						message.getMsisdn(), false);
 			}
-			toaster.notifyMessage(contactInfo, message);
+			toaster.notifyMessage(contactInfo, message, true);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {

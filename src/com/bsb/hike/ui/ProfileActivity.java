@@ -1175,6 +1175,19 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 	}
 
+	public void onChangeImageClicked(View v) {
+		/*
+		 * The user wants to change their profile picture. Open a dialog to allow
+		 * them pick Camera or Gallery
+		 */
+		final CharSequence[] items = getResources().getStringArray(
+				R.array.profile_pic_dialog);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.choose_picture);
+		builder.setItems(items, this);
+		builder.show();
+	}
+
 	@Override
 	public void onClick(DialogInterface dialog, int item) {
 		Intent intent = null;
@@ -1485,6 +1498,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				mActivityState.edittedGroupName = null;
 			}
 		});
+		groupEditDialog = builder.create();
 		builder.show();
 	}
 

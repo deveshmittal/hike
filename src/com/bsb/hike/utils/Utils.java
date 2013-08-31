@@ -2663,6 +2663,7 @@ public class Utils {
 		 */
 		Bitmap bitmap = Bitmap.createBitmap((int) (48 * densityMultiplier),
 				(int) (48 * densityMultiplier), Config.ARGB_8888);
+		
 		Canvas canvas = new Canvas(bitmap);
 		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
 		drawable.draw(canvas);
@@ -2762,5 +2763,18 @@ public class Utils {
 		} else {
 			asyncTask.execute();
 		}
+	}
+
+	public static Bitmap returnScaledBitmap(Bitmap src, Context context) {
+		Resources res = context.getResources();
+		if (Build.VERSION.SDK_INT > 11) {
+			int height = (int) res
+					.getDimension(android.R.dimen.notification_large_icon_height);
+			int width = (int) res
+					.getDimension(android.R.dimen.notification_large_icon_width);
+			return src = Bitmap.createScaledBitmap(src, width, height, false);
+		} else
+			return src;
+
 	}
 }
