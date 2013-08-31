@@ -1626,6 +1626,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				voiceMessagePlayer.playMessage(hikeFile);
 			}
 			return;
+		} else if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN
+				|| receivedFile == null) {
+			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT);
 		} else {
 			openFile.setDataAndType(Uri.fromFile(receivedFile),
 					hikeFile.getFileTypeString());
