@@ -1774,6 +1774,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
 		View divider = dialog.findViewById(R.id.divider);
+		TextView nativeHeader = (TextView) dialog
+				.findViewById(R.id.native_sms_header);
 
 		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 		divider.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
@@ -1806,6 +1808,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				sendBtn.setEnabled(true);
 			}
 		}
+
+		int numUnsentMessages = getAllUnsentMessages(false).size();
+		nativeHeader.setText(context.getString(R.string.x_regular_sms,
+				numUnsentMessages));
+
 		sendHike.setOnClickListener(new OnClickListener() {
 
 			@Override
