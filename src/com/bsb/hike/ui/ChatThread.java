@@ -568,25 +568,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				startActivity(intent);
 			}
 
-			/*
-			 * If the user had typed something, we save it as a draft and will
-			 * show it in the text box when he comes back to this conversation.
-			 */
-			if (mComposeView != null
-					&& mComposeView.getVisibility() == View.VISIBLE) {
-				Editor editor = getSharedPreferences(
-						HikeConstants.DRAFT_SETTING, MODE_PRIVATE).edit();
-				if (mComposeView.length() != 0) {
-					editor.putString(mContactNumber, mComposeView.getText()
-							.toString());
-				} else {
-					editor.remove(mContactNumber);
-				}
-				editor.commit();
-			}
+			saveDraft();
 			super.onBackPressed();
 		} else {
 			onEmoticonBtnClicked(null, 0, true);
+		}
+	}
+
+	private void saveDraft() {
+		/*
+		 * If the user had typed something, we save it as a draft and will show
+		 * it in the text box when he comes back to this conversation.
+		 */
+		if (mComposeView != null
+				&& mComposeView.getVisibility() == View.VISIBLE) {
+			Editor editor = getSharedPreferences(HikeConstants.DRAFT_SETTING,
+					MODE_PRIVATE).edit();
+			if (mComposeView.length() != 0) {
+				editor.putString(mContactNumber, mComposeView.getText()
+						.toString());
+			} else {
+				editor.remove(mContactNumber);
+			}
+			editor.commit();
 		}
 	}
 
@@ -1408,6 +1412,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			@Override
 			public void onClick(View v) {
+				saveDraft();
+
 				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
