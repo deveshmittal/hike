@@ -205,7 +205,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
-					myMsisdn, nativeSMSOn, false, true));
+					myMsisdn, nativeSMSOn, false));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 
