@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,7 +35,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -126,16 +124,16 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			@Override
 			public void onClick(View v) {
+				Intent intent = null;
 				if (type != Type.BLOCK) {
-					Intent intent = new Intent(HikeListActivity.this,
+					intent = new Intent(HikeListActivity.this,
 							TellAFriend.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
 				} else {
-					Intent intent = new Intent(HikeListActivity.this,
+					intent = new Intent(HikeListActivity.this,
 							SettingsActivity.class);
-					startActivity(intent);
 				}
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
 
 			}
 		});
