@@ -53,8 +53,6 @@
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_cancel"
             style="@style/SmsPopupButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="@string/cancel" />
 
         <View
@@ -66,8 +64,6 @@
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_ok"
             style="@style/SmsPopupButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="@string/allow" />
     </LinearLayout>
 
