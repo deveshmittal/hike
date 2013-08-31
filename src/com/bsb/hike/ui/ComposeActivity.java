@@ -69,6 +69,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean isSharingFile;
 	private String existingGroupId;
 
+	private Map<String, GroupParticipant> groupParticipants;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -364,10 +366,16 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 
 			mInputNumberView.setText("");
+
+			if (!TextUtils.isEmpty(existingGroupId)) {
+				groupParticipants = HikeConversationsDatabase.getInstance()
+						.getGroupParticipants(existingGroupId, true, false);
+			}
+
 			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
 					ComposeActivity.this, contactList, mInputNumberView,
-					isGroupChat, existingGroupId, freeSMSOn, nativeSMSOn,
-					isForwardingMessage);
+					existingGroupId, isForwardingMessage, groupParticipants);
+
 			mContactList.setAdapter(adapter);
 			mContactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			mContactList.setOnItemClickListener(ComposeActivity.this);
@@ -403,12 +411,57 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) tag;
 
 		if (!isForwardingMessage) {
-			pair.first.set(!pair.first.get());
-			view.setTag(pair);
-			((HikeSearchContactAdapter) adapterView.getAdapter())
-					.notifyDataSetChanged();
+			boolean isChecked = pair.first.get();
+			boolean unknownContact = false;
 
 			ContactInfo contactInfo = pair.second;
+			if (contactInfo == null) {
+				String textEntered = mInputNumberView.getText().toString();
+				String msisdn = Utils.normalizeNumber(
+						textEntered,
+						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+								0).getString(HikeMessengerApp.COUNTRY_CODE,
+								HikeConstants.INDIA_COUNTRY_CODE));
+
+				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
+
+				unknownContact = true;
+			}
+
+			boolean toggle = true;
+			if (!isChecked) {
+				if (groupParticipants != null
+						&& groupParticipants.containsKey(contactInfo
+								.getMsisdn())) {
+					toggle = false;
+					Toast.makeText(getApplicationContext(),
+							R.string.contact_selected_already,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+			}
+
+			HikeSearchContactAdapter adapter = ((HikeSearchContactAdapter) adapterView
+					.getAdapter());
+
+			if (toggle) {
+				pair.first.set(!pair.first.get());
+			}
+
+			if (unknownContact) {
+				Pair<AtomicBoolean, ContactInfo> unknownPair = new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(true), contactInfo);
+				adapter.addItemToCompleteList(unknownPair);
+				adapter.add(unknownPair);
+			}
+
+			mInputNumberView.setText("");
+
+			view.setTag(pair);
+
+			adapter.sort();
+			adapter.notifyDataSetChanged();
+
 			if (selectedContactSet.contains(contactInfo)) {
 				selectedContactSet.remove(contactInfo);
 			} else {
@@ -478,5 +531,4 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			startActivity(intent);
 		}
 	}
-
 }
