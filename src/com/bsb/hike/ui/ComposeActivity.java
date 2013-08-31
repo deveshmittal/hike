@@ -201,7 +201,6 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				layoutParams.rightMargin = margin;
 
 				editText.setLayoutParams(layoutParams);
-				editText.setBackgroundResource(R.drawable.bg_search_bar);
 
 				builder.setView(editText);
 

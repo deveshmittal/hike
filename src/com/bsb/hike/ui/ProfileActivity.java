@@ -1443,7 +1443,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		layoutParams.rightMargin = margin;
 
 		mNameEdit.setLayoutParams(layoutParams);
-		mNameEdit.setBackgroundResource(R.drawable.bg_search_bar);
 
 		builder.setView(mNameEdit);
 
