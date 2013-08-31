@@ -144,4 +144,12 @@
     <color name="protip_dismiss">#a59b94</color>
     <color name="action_bar_item_pressed">#9A33b5e5</color>
     <color name="sms_popup">#0f8fe1</color>
+    <color name="humanoid_bg">#a4e2f6</color>
+    <color name="humanoid_btn_normal">#c1f0ff</color>
+    <color name="humanoid_btn_pressed">#b7ecfd</color>
+	<color name="humanoid_text">#198db6</color>
+	<color name="humanoid_btn_text">#198db6</color>
+	<color name="humanoid_text_shadow">#4DFFFFFF</color>
+	<color name="humanoid_btn_text_shadow">#4DFFFFFF</color>
+	<color name="humanoid_div">#58bbdd</color>
 </resources>

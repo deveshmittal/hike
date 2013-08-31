@@ -538,7 +538,7 @@ public class EmoticonConstants {
 			R.drawable.bollywood, R.drawable.rageface };
 
 	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
-			R.drawable.preview_doggy, R.drawable.preview_doggy,
+			R.drawable.preview_humanoid, R.drawable.preview_doggy,
 			R.drawable.preview_kitty, R.drawable.preview_expressions,
 			R.drawable.preview_bollywood, R.drawable.preview_rageface };
 

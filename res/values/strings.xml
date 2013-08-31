@@ -639,4 +639,5 @@
 	<string name="at_sms_rate">At SMS rate</string>
 	<string name="auto_download_image_header">Auto download images</string>
 	<string name="auto_download_image_info">hike automatically downloads any received images</string>
+	<string name="humanoid_category">Humanoid</string>
 </resources>

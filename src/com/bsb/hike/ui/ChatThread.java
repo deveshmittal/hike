@@ -3745,6 +3745,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		switch (HikeMessengerApp.stickerCategories.get(categoryIndex).categoryResId) {
 		case R.drawable.humanoid:
+			resParentBg = getResources().getColor(R.color.humanoid_bg);
+
+			stickerBtnBg = R.drawable.humanoid_btn;
+			stickerBtnText = android.R.string.ok;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.humanoid_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.humanoid_btn_text_shadow);
+
+			categoryText = R.string.humanoid_category;
+			categoryTextColor = getResources().getColor(R.color.humanoid_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.humanoid_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.humanoid_div);
+			break;
 		case R.drawable.doggy:
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
