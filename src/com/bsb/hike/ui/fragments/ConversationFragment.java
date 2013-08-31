@@ -32,10 +32,12 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -60,6 +62,7 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.utils.HomeBaseFragment;
 import com.bsb.hike.utils.Utils;
 
@@ -297,7 +300,24 @@ public class ConversationFragment extends HomeBaseFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.conversations, null);
+		View parent = inflater.inflate(R.layout.conversations, null);
+
+		ListView friendsList = (ListView) parent
+				.findViewById(android.R.id.list);
+		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
+
+		Button startChat = (Button) parent.findViewById(R.id.start_chat_btn);
+		startChat.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(getActivity(), ComposeActivity.class);
+				intent.putExtra(HikeConstants.Extras.EDIT, true);
+				startActivity(intent);
+			}
+		});
+
+		return parent;
 	}
 
 	@Override
