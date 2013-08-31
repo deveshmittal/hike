@@ -17,10 +17,10 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
-public class CreditsActivity extends AuthSocialAccountBaseActivity implements
+public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		Listener {
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
@@ -117,9 +117,8 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		 * Here we check if we are already showing the twitter webview. If we
 		 * are, we dont do any other UI changes.
 		 */
-		if ((twitterOAuthView == null)
-				&& (HikePubSub.SMS_CREDIT_CHANGED.equals(type) || HikePubSub.INVITEE_NUM_CHANGED
-						.equals(type))) {
+		if ((HikePubSub.SMS_CREDIT_CHANGED.equals(type) || HikePubSub.INVITEE_NUM_CHANGED
+				.equals(type))) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
