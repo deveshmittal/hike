@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -136,6 +137,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
 				showSMSClientDialog();
 			}
+		}
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+
+		if (Utils.requireAuth(this)) {
+			return;
 		}
 	}
 
