@@ -41,8 +41,7 @@ import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -63,10 +62,9 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
-import com.bsb.hike.utils.HomeBaseFragment;
 import com.bsb.hike.utils.Utils;
 
-public class ConversationFragment extends HomeBaseFragment implements
+public class ConversationFragment extends SherlockListFragment implements
 		OnItemLongClickListener, Listener, Runnable {
 
 	private class DeleteConversationsAsyncTask extends
@@ -292,12 +290,6 @@ public class ConversationFragment extends HomeBaseFragment implements
 	private Handler messageRefreshHandler;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setHasOptionsMenu(true);
-	}
-
-	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View parent = inflater.inflate(R.layout.conversations, null);
@@ -331,11 +323,6 @@ public class ConversationFragment extends HomeBaseFragment implements
 				.getTypingNotificationSet().values()) {
 			toggleTypingNotification(true, typingNotification);
 		}
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.chats_menu, menu);
 	}
 
 	@Override

@@ -274,6 +274,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String LARGER_UPDATE_IMAGE_DOWNLOADED = "largerUpdateImageDownloaded";
 
+	public static final String FRIENDS_TAB_QUERY = "friendsTabQuery";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

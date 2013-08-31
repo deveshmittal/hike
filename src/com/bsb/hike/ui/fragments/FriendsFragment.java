@@ -20,11 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -36,9 +32,8 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.HomeBaseFragment;
 
-public class FriendsFragment extends HomeBaseFragment implements Listener,
+public class FriendsFragment extends SherlockListFragment implements Listener,
 		OnItemLongClickListener {
 
 	private FriendsAdapter friendsAdapter;
@@ -49,15 +44,10 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER,
 			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED,
-			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED,
+			HikePubSub.FRIENDS_TAB_QUERY };
 
 	private SharedPreferences preferences;
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setHasOptionsMenu(true);
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,41 +73,6 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-		inflater.inflate(R.menu.friends_menu, menu);
-
-		final SearchView searchView = new SearchView(getSherlockActivity()
-				.getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getString(R.string.search_hint));
-		searchView.setIconifiedByDefault(false);
-		searchView.setIconified(false);
-		searchView.setOnQueryTextListener(onQueryTextListener);
-		searchView.clearFocus();
-
-		menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
-				.setIcon(R.drawable.ic_top_bar_search)
-				.setActionView(searchView)
-				.setShowAsAction(
-						MenuItem.SHOW_AS_ACTION_ALWAYS
-								| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-	}
-
-	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener() {
-
-		@Override
-		public boolean onQueryTextSubmit(String query) {
-			return false;
-		}
-
-		@Override
-		public boolean onQueryTextChange(String newText) {
-			friendsAdapter.onQueryChanged(newText);
-			return true;
-		}
-	};
 
 	@Override
 	public void onDestroy() {
@@ -323,6 +278,15 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 				}
 			});
 
+		} else if (HikePubSub.FRIENDS_TAB_QUERY.equals(type)) {
+			final String query = (String) object;
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					friendsAdapter.onQueryChanged(query);
+				}
+			});
 		}
 	}
 

@@ -17,8 +17,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -34,10 +33,9 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.utils.HomeBaseFragment;
 import com.bsb.hike.utils.Utils;
 
-public class UpdatesFragment extends HomeBaseFragment implements
+public class UpdatesFragment extends SherlockListFragment implements
 		OnScrollListener, Listener {
 
 	private StatusMessage noStatusMessage;
@@ -51,12 +49,6 @@ public class UpdatesFragment extends HomeBaseFragment implements
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED };
 	private String[] friendMsisdns;
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setHasOptionsMenu(true);
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,11 +79,6 @@ public class UpdatesFragment extends HomeBaseFragment implements
 		if (centralTimelineAdapter != null) {
 			centralTimelineAdapter.stopImageLoaderThread();
 		}
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.updates_menu, menu);
 	}
 
 	private void resetUnseenStatusCount() {

@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Dialog;
@@ -20,11 +21,17 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -32,6 +39,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -149,6 +157,197 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		}
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		return setupMenuOptions(menu);
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem gamesItem = menu.findItem(R.id.games);
+		MenuItem rewardsItem = menu.findItem(R.id.rewards);
+		MenuItem muteItem = menu.findItem(R.id.mute_notification);
+
+		SharedPreferences prefs = this.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		if (rewardsItem != null) {
+			rewardsItem.setVisible(prefs.getBoolean(
+					HikeMessengerApp.SHOW_REWARDS, false));
+		}
+
+		if (gamesItem != null) {
+			gamesItem.setVisible(prefs.getBoolean(HikeMessengerApp.SHOW_GAMES,
+					false));
+		}
+
+		if (muteItem != null) {
+			int preference = PreferenceManager
+					.getDefaultSharedPreferences(this).getInt(
+							HikeConstants.STATUS_PREF, 0);
+			muteItem.setTitle(preference == 0 ? R.string.mute_notifications
+					: R.string.unmute_notifications);
+		}
+
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	private boolean setupMenuOptions(Menu menu) {
+		switch (viewPager.getCurrentItem()) {
+		case UPDATES_TAB_INDEX:
+			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
+			return true;
+		case CHATS_TAB_INDEX:
+			getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
+			return true;
+		case FRIENDS_TAB_INDEX:
+			getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
+
+			final SearchView searchView = new SearchView(getSupportActionBar()
+					.getThemedContext());
+			searchView.setQueryHint(getString(R.string.search_hint));
+			searchView.setIconifiedByDefault(false);
+			searchView.setIconified(false);
+			searchView.setOnQueryTextListener(onQueryTextListener);
+			searchView.clearFocus();
+
+			menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
+					.setIcon(R.drawable.ic_top_bar_search)
+					.setActionView(searchView)
+					.setShowAsAction(
+							MenuItem.SHOW_AS_ACTION_ALWAYS
+									| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent = null;
+
+		switch (item.getItemId()) {
+		case R.id.new_conversation:
+			intent = new Intent(this, ComposeActivity.class);
+			intent.putExtra(HikeConstants.Extras.EDIT, true);
+			break;
+		case R.id.new_update:
+			intent = new Intent(this, StatusUpdate.class);
+			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
+					true);
+			break;
+		case R.id.settings:
+			intent = new Intent(this, SettingsActivity.class);
+			break;
+		case R.id.invite:
+			intent = new Intent(this, TellAFriend.class);
+			break;
+		case R.id.free_sms:
+			intent = new Intent(this, CreditsActivity.class);
+			break;
+		case R.id.my_profile:
+			intent = new Intent(this, ProfileActivity.class);
+			break;
+		case R.id.rewards:
+			intent = getRewardsIntent();
+			break;
+		case R.id.games:
+			intent = getGamingIntent();
+			break;
+		case R.id.mute_notification:
+			toggleMute();
+			return true;
+		}
+
+		if (intent != null) {
+			startActivity(intent);
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener() {
+
+		@Override
+		public boolean onQueryTextSubmit(String query) {
+			return false;
+		}
+
+		@Override
+		public boolean onQueryTextChange(String newText) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY,
+					newText);
+			return true;
+		}
+	};
+
+	private Intent getGamingIntent() {
+
+		SharedPreferences prefs = this.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Intent intent = new Intent(this.getApplicationContext(),
+				WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
+		/*
+		 * using the same token as rewards token, as per DK sir's mail
+		 */
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl
+				+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.games));
+		return intent;
+	}
+
+	private Intent getRewardsIntent() {
+		SharedPreferences prefs = this.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Intent intent = new Intent(this.getApplicationContext(),
+				WebViewActivity.class);
+		intent.putExtra(
+				HikeConstants.Extras.URL_TO_LOAD,
+				AccountUtils.rewardsUrl
+						+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.rewards));
+		return intent;
+	}
+
+	private void toggleMute() {
+		SharedPreferences settingPref = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		int preference = settingPref.getInt(HikeConstants.STATUS_PREF, 0);
+
+		int newValue;
+
+		Editor editor = settingPref.edit();
+		if (preference == 0) {
+			newValue = -1;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		} else {
+			newValue = 0;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		}
+		editor.commit();
+
+		try {
+			JSONObject jsonObject = new JSONObject();
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.PUSH_SU, newValue);
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					jsonObject);
+
+			Toast.makeText(
+					this,
+					newValue == 0 ? R.string.status_notification_on
+							: R.string.status_notification_off,
+					Toast.LENGTH_SHORT).show();
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), e);
+		}
+	}
+
 	private void showSMSClientDialog() {
 		dialogShowing = DialogShowing.SMS_CLIENT;
 
@@ -263,6 +462,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
 		tabIndicator.setOnPageChangeListener(onPageChangeListener);
 
+		invalidateOptionsMenu();
 		setBackground();
 	}
 
@@ -293,6 +493,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 		@Override
 		public void onPageSelected(int position) {
+			invalidateOptionsMenu();
 			setBackground();
 		}
 
