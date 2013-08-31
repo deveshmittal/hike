@@ -560,7 +560,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					.query(DBConstants.CONVERSATIONS_TABLE,
 							new String[] { DBConstants.MESSAGE_ID },
 							DBConstants.MSISDN + " = ?",
-							new String[] { msisdn }, null, null, null);
+							new String[] { groupId }, null, null, null);
 
 			long conversationMsgId = -1;
 			if (conversationCursor.moveToFirst()) {
@@ -602,7 +602,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					if (conversationMsgId == msgId) {
 						mDb.update(DBConstants.CONVERSATIONS_TABLE,
 								contentValues, DBConstants.MSISDN + "=?",
-								new String[] { msisdn });
+								new String[] { groupId });
 					}
 
 					contentValues.put(DBConstants.READ_BY,
