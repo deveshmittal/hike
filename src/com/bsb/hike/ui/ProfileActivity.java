@@ -871,6 +871,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 							Utils.removeTempProfileImage(mLocalMSISDN);
 							mActivityState.destFilePath = null;
 							if (profileAdapter != null) {
+								/*
+								 * Reload the older image
+								 */
+								profileAdapter.setProfilePreview(null);
 								profileAdapter.notifyDataSetChanged();
 							}
 							if (isBackPressed) {
@@ -885,6 +889,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 							db.setIcon(mLocalMSISDN, bytes, false);
 
 							Utils.renameTempProfileImage(mLocalMSISDN);
+
+							if (profileAdapter != null) {
+								profileAdapter.setProfilePreview(null);
+								profileAdapter.notifyDataSetChanged();
+							}
 
 							if (profileType == ProfileType.USER_PROFILE
 									|| profileType == ProfileType.USER_PROFILE_EDIT) {
