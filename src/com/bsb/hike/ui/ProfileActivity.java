@@ -1491,6 +1491,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				mActivityState.edittedGroupName = null;
 			}
 		});
+		groupEditDialog = builder.create();
 		builder.show();
 	}
 
