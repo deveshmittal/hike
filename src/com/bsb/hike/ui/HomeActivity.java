@@ -167,6 +167,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		MenuItem gamesItem = menu.findItem(R.id.games);
 		MenuItem rewardsItem = menu.findItem(R.id.rewards);
 		MenuItem muteItem = menu.findItem(R.id.mute_notification);
+		MenuItem freeSmsItem = menu.findItem(R.id.free_sms);
 
 		SharedPreferences prefs = this.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -181,12 +182,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 					false));
 		}
 
+		SharedPreferences appPref = PreferenceManager
+				.getDefaultSharedPreferences(this);
+
 		if (muteItem != null) {
-			int preference = PreferenceManager
-					.getDefaultSharedPreferences(this).getInt(
-							HikeConstants.STATUS_PREF, 0);
+			int preference = appPref.getInt(HikeConstants.STATUS_PREF, 0);
 			muteItem.setTitle(preference == 0 ? R.string.mute_notifications
 					: R.string.unmute_notifications);
+		}
+
+		if (freeSmsItem != null) {
+			boolean preference = appPref.getBoolean(
+					HikeConstants.FREE_SMS_PREF, true);
+			freeSmsItem.setVisible(preference);
 		}
 
 		return super.onPrepareOptionsMenu(menu);
