@@ -68,7 +68,7 @@
 	<string name="add_group">Zu Gruppe hinzufügen</string>
 	<string name="invite_share_message">Ich benutze hike, eine tolle neue kostenlose Messaging-App! Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="max_sms">Maximal 5 SMS-Kontakte pro Gruppe erlaubt.</string>
-	<string name="max_contact">Maximal 20 Kontakte pro Gruppe erlaubt.</string>
+	<string name="max_contact">Maximal 50 Kontakte pro Gruppe erlaubt.</string>
 	<string name="invite_sent">Einladung gesendet.</string>
 	<string name="sms_renew">Wird jeweils am 1. des Monats nachgeladen</string>
 	<string name="invite_friend_free_sms">Du bekommst monatlich 50 Frei-SMS für jeden Freund, der wegen dir bei hike Mitglied wird.</string>

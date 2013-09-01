@@ -424,6 +424,15 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			boolean isChecked = pair.first.get();
 			boolean unknownContact = false;
 
+			int totalSelectedContacts = selectedContactSet.size()
+					+ (groupParticipants != null ? groupParticipants.size() : 0);
+			if (totalSelectedContacts >= HikeConstants.MAX_CONTACTS_IN_GROUP
+					&& !isChecked) {
+				Toast.makeText(getApplicationContext(), R.string.max_contact,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+
 			ContactInfo contactInfo = pair.second;
 			if (contactInfo == null) {
 				String textEntered = mInputNumberView.getText().toString();

@@ -69,7 +69,7 @@
 	<string name="add_group">समूह में जोड़ें</string>
 	<string name="invite_share_message">मैं शानदार नया मैसेजिंग एप हाइक इस्तेमाल कर रहा हूँ! मुझे मुफ्त SMS भेजने हेतु http://get.hike.in/%1$s से एप डाउनलोड करें!</string>
 	<string name="max_sms">समूह में अधिकतम 5 SMS संपर्क</string>
-	<string name="max_contact">समूह में अधिकतम 20 संपर्क</string>
+	<string name="max_contact">समूह में अधिकतम 50 संपर्क</string>
 	<string name="invite_sent">आमंत्रण भेजा गया।</string>
 	<string name="sms_renew">हर महीने की पहली को रिफिल करें</string>
 	<string name="invite_friend_free_sms">आपकी वजह से हाइक से जुड़नेवाले हर दोस्त के लिए 50 मुफ्त SMS हर महीने अर्जित करें</string>

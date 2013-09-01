@@ -246,7 +246,7 @@ public class HikeConstants {
 
 	public static final int MAX_CHAR_IN_NAME = 20;
 
-	public static final int MAX_CONTACTS_IN_GROUP = 20;
+	public static final int MAX_CONTACTS_IN_GROUP = 50;
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
 	public static final int PROFILE_IMAGE_DIMENSIONS = 120;

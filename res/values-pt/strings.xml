@@ -68,7 +68,7 @@
 	<string name="add_group">Adic. a grupo</string>
 	<string name="invite_share_message">Uso o hike, um excelente app novo e grátis de mensagem! Baixe o app em http://get.hike.in/%1$s para mandar mensagens de graça!</string>
 	<string name="max_sms">Máx. 5 contatos de SMS em um grupo.</string>
-	<string name="max_contact">Máx. 20 contatos em um grupo.</string>
+	<string name="max_contact">Máx. 50 contatos em um grupo.</string>
 	<string name="invite_sent">Convite enviado.</string>
 	<string name="sms_renew">Recarrega todo dia 1º</string>
 	<string name="invite_friend_free_sms">Ganhe 50 SMS de graça por mês para cada amigo que entrar no hike por sua causa.</string>

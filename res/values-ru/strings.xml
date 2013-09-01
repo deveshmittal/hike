@@ -68,7 +68,7 @@
 	<string name="add_group">Добавить в группу</string>
 	<string name="invite_share_message">Я использую hike, новое бесплатное приложение-чат! Загрузи его с http://get.hike.in/%1$s, чтобы общаться со мной бесплатно!</string>
 	<string name="max_sms">До 5 SMS-контактов на группу.</string>
-	<string name="max_contact">До 20 контактов на группу.</string>
+	<string name="max_contact">До 50 контактов на группу.</string>
 	<string name="invite_sent">Отправлено.</string>
 	<string name="sms_renew">Сброс: 1й день каждого месяца.</string>
 	<string name="invite_friend_free_sms">Получите 50 бесплатных SMS в месяц за каждого друга, приглашенного в hike.</string>
