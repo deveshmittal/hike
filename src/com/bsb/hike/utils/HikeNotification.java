@@ -100,7 +100,8 @@ public class HikeNotification {
 
 	}
 
-	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg, boolean isRich) {
+	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg,
+			boolean isRich) {
 		String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		int notificationId = msisdn.hashCode();
@@ -185,10 +186,72 @@ public class HikeNotification {
 			}
 		}
 
-		if ((convMsg.isStickerMessage() || convMsg.isFileTransferMessage() ) && isRich ) {
+		// check if this is a sticker message and find if its non downloaded or
+		// non present.
+		// in that case we just show a normal notification instead of a rich
+		// notification.
+
+		// check if this is a sticker or a file and populate the big picture
+		// accordingly
+		Bitmap bigPictureImage = null;
+		boolean doesStickerExist = false;
+		HikeFile hikeFile = null;
+		if (convMsg.isStickerMessage()) {
+			Sticker sticker = convMsg.getMetadata().getSticker();
+
+			/*
+			 * If this is the first category, then the sticker are a part of the
+			 * app bundle itself
+			 */
+			if (sticker.getStickerIndex() != -1) {
+
+				int resourceId = 0;
+
+				if (sticker.getCategoryIndex() == 0) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+							.getStickerIndex()];
+				} else if (sticker.getCategoryIndex() == 1) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+							.getStickerIndex()];
+				}
+
+				if (resourceId > 0) {
+					Drawable dr = context.getResources()
+							.getDrawable(resourceId);
+					bigPictureImage = Utils.drawableToBitmap(dr);
+					doesStickerExist = true;
+				}
+
+			} else {
+				String filePath = sticker.getStickerPath(context);
+				if (!TextUtils.isEmpty(filePath)) {
+					bigPictureImage = BitmapFactory.decodeFile(filePath);
+					if (bigPictureImage != null)
+					doesStickerExist = true;
+				}
+			}
+
+		} else {
+			if (convMsg.isFileTransferMessage()) {
+				hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
+				if (hikeFile != null) {
+					if (hikeFile.getFileTypeString().toLowerCase()
+							.startsWith("image")) {
+						String filePath = hikeFile.getFilePath(); // check
+						bigPictureImage = BitmapFactory.decodeFile(filePath);
+						if (bigPictureImage != null)
+							doesStickerExist = true;
+					}
+				}
+			}
+		}
+
+		if ((convMsg.isStickerMessage() && doesStickerExist) || (convMsg.isFileTransferMessage() && 
+				hikeFile!=null && hikeFile.getFileTypeString().toLowerCase().startsWith("image")) && isRich)
+				{
 			// big picture messages ! intercept !
 			pushBigPictureMessageNotifications(notificationIntent, contactInfo,
-					convMsg);
+					convMsg, bigPictureImage);
 		} else
 			showNotification(notificationIntent, icon, timestamp,
 					notificationId, text, key, message, msisdn); // regular text
@@ -467,13 +530,8 @@ public class HikeNotification {
 	}
 
 	public void pushBigPictureMessageNotifications(Intent notificationIntent,
-			ContactInfo contactInfo, ConvMessage convMessage) {
-
-		boolean isSticker = convMessage.isStickerMessage();
-		HikeFile hikeFile = null;
-		Sticker sticker = null;
-		Bitmap bigPictureImage = null;
-		String filePath = "";
+			ContactInfo contactInfo, ConvMessage convMessage, Bitmap bigPictureImage) {
+		
 		String msisdn = convMessage.getMsisdn();
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
@@ -507,61 +565,11 @@ public class HikeNotification {
 
 		bigPicStyle.setBigContentTitle(key);
 		mBuilder.setStyle(bigPicStyle);
-		boolean doesExist = false;
-		// check if this is a sticker or a file and populate the big picture
-		// accordingly
-		if (isSticker) {
-			sticker = convMessage.getMetadata().getSticker();
-
-			/*
-			 * If this is the first category, then the sticker are a part of the
-			 * app bundle itself
-			 */
-			if (sticker.getStickerIndex() != -1) {
-
-				int resourceId = 0;
-
-				if (sticker.getCategoryIndex() == 0) {
-					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
-							.getStickerIndex()];
-				} else if (sticker.getCategoryIndex() == 1) {
-					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
-							.getStickerIndex()];
-				}
-
-				if (resourceId > 0) {
-					Drawable dr = context.getResources()
-							.getDrawable(resourceId);
-					bigPictureImage = Utils.drawableToBitmap(dr);
-					doesExist = true;
-				}
-
-			} else {
-				filePath = sticker.getStickerPath(context);
-				if (!TextUtils.isEmpty(filePath)) {
-					bigPictureImage = BitmapFactory.decodeFile(filePath);
-					if (bigPictureImage != null)
-						doesExist = true;
-				}
-			}
-
-		} else {
-			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			if (hikeFile!=null) {
-				if (hikeFile.getFileTypeString().toLowerCase().startsWith("image")){
-					filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = BitmapFactory.decodeFile(filePath);
-					if (bigPictureImage != null)
-						doesExist = true;
-				}
-			}  
-		}
-
-		if (doesExist) {
-			// set the big picture image
-			bigPicStyle.bigPicture(bigPictureImage);
-		}
-
+		
+		// set the big picture image
+		bigPicStyle.bigPicture(bigPictureImage);
+	
+		
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 		stackBuilder.addNextIntent(notificationIntent);
 
@@ -572,8 +580,8 @@ public class HikeNotification {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(notificationId, mBuilder.build());
+		}
 
-	}
 
 	private int returnSmallIcon() {
 		if (Build.VERSION.SDK_INT < 16) {
