@@ -82,7 +82,7 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
-		
+
 	}
 
 	@Override
@@ -338,8 +338,8 @@ public class DbConversationListener implements Listener {
 			 */
 			Collections.reverse(messages);
 
-			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(),
-					Utils.isUserOnline(context), messages.size());
+			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation()
+					.isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages) {
 				sendNativeSMS(convMessage);
@@ -365,12 +365,11 @@ public class DbConversationListener implements Listener {
 			mConversationDb.deleteProtip(mappedId);
 			sendDismissTipLogEvent(mappedId, url);
 		}
-			
-			
+
 	}
 
-	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline,
-			int numMessages) {
+	private void sendNativeSMSFallbackLogEvent(boolean onHike,
+			boolean userOnline, int numMessages) {
 		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 		try {
@@ -393,7 +392,7 @@ public class DbConversationListener implements Listener {
 		JSONObject metadata = new JSONObject();
 		try {
 			metadata.put(HikeConstants.TIP_ID, tipId);
-			if(!TextUtils.isEmpty(URL))
+			if (!TextUtils.isEmpty(URL))
 				metadata.put(HikeConstants.TIP_URL, URL);
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
 			data.put(HikeConstants.METADATA, metadata);
@@ -403,7 +402,7 @@ public class DbConversationListener implements Listener {
 			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
-	
+
 	private void sendNativeSMS(ConvMessage convMessage) {
 		SmsManager smsManager = SmsManager.getDefault();
 
