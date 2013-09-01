@@ -68,7 +68,7 @@ public class HikeSearchContactAdapter extends
 			AtomicBoolean lhsIsCheck = lhs.first;
 			AtomicBoolean rhsIsCheck = rhs.first;
 
-			if (lhsIsCheck != rhsIsCheck) {
+			if (lhsIsCheck.get() != rhsIsCheck.get()) {
 				if (lhsIsCheck.get()) {
 					return -1;
 				} else {
