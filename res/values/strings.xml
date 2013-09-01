@@ -642,4 +642,5 @@
 	<string name="humanoid_category">Humanoid</string>
 	<string name="empty_chat">You have no chats :(\nStart one now!</string>
 	<string name="start_chat">Start a chat</string>
+	<string name="feedback_on_hike">Feedback on hike</string>
 </resources>
