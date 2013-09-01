@@ -485,11 +485,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	private void setBackground() {
 		int position = viewPager.getCurrentItem();
 		if (position == 0) {
-			parentLayout.setBackgroundColor(Color.argb(255, initialRed,
-					initialGreen, initialBlue));
+			parentLayout.setBackgroundColor(getResources().getColor(
+					R.color.updates_bg));
 		} else {
-			parentLayout.setBackgroundColor(Color.argb(255, finalRed,
-					finalGreen, finalBlue));
+			parentLayout.setBackgroundColor(getResources().getColor(
+					R.color.white));
 		}
 	}
 
