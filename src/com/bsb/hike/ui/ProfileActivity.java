@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -1453,7 +1454,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		mNameEdit
 				.setText(TextUtils.isEmpty(mActivityState.edittedGroupName) ? groupConversation
 						.getLabel() : mActivityState.edittedGroupName);
-
+		mNameEdit.setFilters(new InputFilter[] {new InputFilter.LengthFilter(30)});
 		mNameEdit.setSelection(mNameEdit.length());
 
 		int margin = (int) (Utils.densityMultiplier * 10);

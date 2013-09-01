@@ -137,7 +137,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 
 			StringBuilder message = new StringBuilder("\n\n");
-
+			
 			try {
 				message.append(getString(R.string.hike_version)
 						+ " "
@@ -160,6 +160,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			message.append(getString(R.string.msisdn) + " " + msisdn);
 
 			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
+			intent.putExtra(Intent.EXTRA_SUBJECT, R.string.feedback_on_hike);
 			break;
 		}
 		try {
