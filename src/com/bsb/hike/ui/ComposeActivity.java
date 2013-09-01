@@ -70,6 +70,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	private String existingGroupId;
 
 	private Map<String, GroupParticipant> groupParticipants;
+	private boolean createGroup;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		selectedContactSet = new HashSet<ContactInfo>();
 
+		createGroup = getIntent().getBooleanExtra(
+				HikeConstants.Extras.CREATE_GROUP, false);
 		isGroupChat = getIntent().getBooleanExtra(
 				HikeConstants.Extras.GROUP_CHAT, false);
 		isForwardingMessage = getIntent().getBooleanExtra(
@@ -103,7 +106,6 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void init() {
-		selectedContactSet.clear();
 		doneBtn.setVisibility(View.GONE);
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(
@@ -136,6 +138,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
 				} else {
+					selectedContactSet.clear();
 					init();
 					Utils.executeContactListResultTask(new CreateAutoCompleteViewTask());
 				}
@@ -156,7 +159,9 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void setLabel() {
-		if (isSharingFile) {
+		if (createGroup) {
+			title.setText(R.string.new_group);
+		} else if (isSharingFile) {
 			title.setText(R.string.share_file);
 		} else if (isForwardingMessage) {
 			title.setText(R.string.forward);
@@ -173,6 +178,11 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				selectedContactSet.size());
 		while (iterator.hasNext()) {
 			selectedContactList.add(iterator.next());
+		}
+
+		if (createGroup && selectedContactList.size() <= 1) {
+			Toast.makeText(getApplicationContext(),
+					R.string.invalid_group_chat, Toast.LENGTH_SHORT).show();
 		}
 
 		ContactInfo conversationContactInfo = null;
@@ -462,13 +472,16 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			adapter.sort();
 			adapter.notifyDataSetChanged();
 
+			mContactList.setSelection(0);
+
 			if (selectedContactSet.contains(contactInfo)) {
 				selectedContactSet.remove(contactInfo);
 			} else {
 				selectedContactSet.add(contactInfo);
 			}
 
-			if (!selectedContactSet.isEmpty()) {
+			if ((createGroup && selectedContactSet.size() > 1)
+					|| (!createGroup && !selectedContactSet.isEmpty())) {
 				doneBtn.setVisibility(View.VISIBLE);
 				doneBtn.setText(Integer.toString(selectedContactSet.size()));
 				getSupportActionBar().setBackgroundDrawable(
@@ -478,7 +491,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				if (!TextUtils.isEmpty(existingGroupId)) {
 					title.setText(R.string.add_group);
 				} else {
-					title.setText(selectedContactSet.size() > 1 ? R.string.new_group
+					title.setText((selectedContactSet.size() > 1 || createGroup) ? R.string.new_group
 							: R.string.new_chat);
 				}
 

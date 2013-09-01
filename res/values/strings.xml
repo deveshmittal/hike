@@ -644,4 +644,6 @@
 	<string name="start_chat">Start a chat</string>
 	<string name="x_regular_sms">%1$d x Regular SMS</string>
 	<string name="last_seen_yesterday_group_participant">Yesterday</string>
+	<string name="invite_friends_hike">Invite friends to hike</string>
+	<string name="create_group">Create group</string>
 </resources>

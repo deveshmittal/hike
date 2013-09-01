@@ -36,10 +36,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public static final int FRIEND_INDEX = 0;
 	public static final int HIKE_INDEX = 1;
 
+	public static final String EXTRA_ID = "-910";
 	public static final String SECTION_ID = "-911";
 
+	public static final String INVITE_MSISDN = "-123";
+	public static final String GROUP_MSISDN = "-124";
+
 	public enum ViewType {
-		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST
+		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST, EXTRA
 	}
 
 	private LayoutInflater layoutInflater;
@@ -52,6 +56,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private Context context;
 	private ContactInfo friendsSection;
 	private ContactInfo contactsSection;
+	private ContactInfo inviteExtraItem;
+	private ContactInfo groupExtraItem;
 	private ContactFilter contactFilter;
 	private String queryText;
 
@@ -211,6 +217,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		completeList.clear();
 
+		inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
+				context.getString(R.string.invite_friends_hike), null);
+		completeList.add(inviteExtraItem);
+
+		groupExtraItem = new ContactInfo(EXTRA_ID, GROUP_MSISDN,
+				context.getString(R.string.create_group), null);
+		completeList.add(groupExtraItem);
+
 		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredFriendsList.size()),
 				context.getString(R.string.friends_lower_case), null);
@@ -324,6 +338,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		ContactInfo contactInfo = getItem(position);
 		if (SECTION_ID.equals(contactInfo.getId())) {
 			return ViewType.SECTION.ordinal();
+		} else if (EXTRA_ID.equals(contactInfo.getId())) {
+			return ViewType.EXTRA.ordinal();
 		} else {
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			if (favoriteType == FavoriteType.FRIEND
@@ -368,6 +384,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			case FRIEND_REQUEST:
 				convertView = layoutInflater.inflate(
 						R.layout.friend_request_view, null);
+				break;
+			case EXTRA:
+				convertView = layoutInflater.inflate(
+						R.layout.friends_tab_extra_item, null);
 			}
 		}
 
@@ -441,7 +461,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						: R.string.tap_sms);
 			}
 
-		} else {
+		} else if (viewType == ViewType.SECTION) {
 			TextView headerName = (TextView) convertView
 					.findViewById(R.id.name);
 			TextView headerCount = (TextView) convertView
@@ -449,6 +469,19 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 			headerName.setText(contactInfo.getName());
 			headerCount.setText(contactInfo.getMsisdn());
+		} else if (viewType == ViewType.EXTRA) {
+			TextView headerName = (TextView) convertView
+					.findViewById(R.id.contact);
+			ImageView headerIcon = (ImageView) convertView
+					.findViewById(R.id.icon);
+
+			if (contactInfo.getMsisdn().equals(INVITE_MSISDN)) {
+				headerIcon.setImageResource(R.drawable.ic_invite_to_hike);
+				headerName.setText(R.string.invite_friends_hike);
+			} else {
+				headerIcon.setImageResource(R.drawable.ic_create_group);
+				headerName.setText(R.string.create_group);
+			}
 		}
 
 		return convertView;

@@ -32,6 +32,8 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.TellAFriend;
 
 public class FriendsFragment extends SherlockListFragment implements Listener,
 		OnItemLongClickListener {
@@ -88,14 +90,25 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			return;
 		}
 
-		Intent intent = new Intent(getActivity(), ChatThread.class);
-		if (contactInfo.getName() != null) {
-			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
+		if (FriendsAdapter.EXTRA_ID.equals(contactInfo.getId())) {
+			Intent intent;
+			if (FriendsAdapter.INVITE_MSISDN.equals(contactInfo.getMsisdn())) {
+				intent = new Intent(getActivity(), TellAFriend.class);
+			} else {
+				intent = new Intent(getActivity(), ComposeActivity.class);
+				intent.putExtra(HikeConstants.Extras.CREATE_GROUP, true);
+			}
+			startActivity(intent);
+		} else {
+			Intent intent = new Intent(getActivity(), ChatThread.class);
+			if (contactInfo.getName() != null) {
+				intent.putExtra(HikeConstants.Extras.NAME,
+						contactInfo.getName());
+			}
+			intent.putExtra(HikeConstants.Extras.MSISDN,
+					contactInfo.getMsisdn());
+			startActivity(intent);
 		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
-		startActivity(intent);
-
-		return;
 	}
 
 	@SuppressWarnings("unchecked")
