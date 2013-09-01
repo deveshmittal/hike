@@ -865,11 +865,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
-		boolean shouldSortInDB = !freeSMSOn || fwdOrgroupChat || nativeSMSOn;
-
-		String orderBy = (shouldSortInDB) ? DBConstants.ONHIKE + " DESC, "
-				+ DBConstants.NAME + " COLLATE NOCASE" : "";
-
 		String[] columns = { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
@@ -878,7 +873,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		Cursor c = null;
 		try {
 			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
-					null, null, null, orderBy);
+					null, null, null, null);
 			List<Pair<AtomicBoolean, ContactInfo>> contactInfos = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(
 					c.getCount());
 
@@ -913,20 +908,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						new AtomicBoolean(), contactInfo));
 			}
 
-			if (!shouldSortInDB) {
-				Collections.sort(contactInfos,
-						new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
+			Collections.sort(contactInfos,
+					new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
 
-							@Override
-							public int compare(
-									Pair<AtomicBoolean, ContactInfo> lhs,
-									Pair<AtomicBoolean, ContactInfo> rhs) {
-								ContactInfo firstContact = lhs.second;
-								ContactInfo secondContact = rhs.second;
-								return firstContact.compareTo(secondContact);
-							}
-						});
-			}
+						@Override
+						public int compare(
+								Pair<AtomicBoolean, ContactInfo> lhs,
+								Pair<AtomicBoolean, ContactInfo> rhs) {
+							ContactInfo firstContact = lhs.second;
+							ContactInfo secondContact = rhs.second;
+							return firstContact.compareTo(secondContact);
+						}
+					});
 			return contactInfos;
 		} finally {
 			if (c != null) {
