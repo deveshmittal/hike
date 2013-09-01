@@ -430,6 +430,10 @@
 	    <item name="android:padding">1dp</item>
 	</style>
 	
+	<style name="AvatarStyle.MorePadding">
+	    <item name="android:padding">2dp</item>
+	</style>
+	
 	<style name="UndeliveredPopup">
 	    <item name="android:textColor">@color/list_item_header</item>
 	    <item name="android:textStyle">bold|italic</item>

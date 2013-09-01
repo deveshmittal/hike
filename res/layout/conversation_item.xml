@@ -19,12 +19,12 @@
 
             <ImageView
                 android:id="@+id/avatar"
-                style="@style/AvatarStyle.Padding"
+                style="@style/AvatarStyle.MorePadding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle.Padding"
+                style="@style/AvatarStyle"
                 android:src="@drawable/frame_avatar_large_selector" />
         </FrameLayout>
 
