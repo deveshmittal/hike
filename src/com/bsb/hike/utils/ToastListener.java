@@ -30,6 +30,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HikePreferences;
 
 public class ToastListener implements Listener {
 
@@ -187,13 +188,31 @@ public class ToastListener implements Listener {
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
-			Protip proTip = (Protip) object;
 
+			Protip proTip = (Protip) object;
+			boolean whetherToShow = false;;
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
-			if (proTip.isShowPush())
+			SharedPreferences accountPrefs = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			long currentProtipId = accountPrefs.getLong(
+					HikeMessengerApp.CURRENT_PROTIP, -1);
+			if (currentProtipId == -1) {
+				Protip protip = HikeConversationsDatabase.getInstance()
+						.getLastProtip();
+				whetherToShow = Utils.showProtip(protip, accountPrefs);
+			}
+			else {
+				Protip protip = HikeConversationsDatabase.getInstance()
+						.getProtipForId(currentProtipId);
+				if (protip == null) {
+					whetherToShow = true;
+				}
+				
+			if (proTip.isShowPush() && whetherToShow)
 				toaster.notifyMessage(proTip);
+			}
 
 		}
 	}
