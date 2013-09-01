@@ -1,10 +1,13 @@
 package com.bsb.hike.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.MailTo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,7 +18,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
@@ -59,8 +61,15 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 					Intent i = new Intent(WebViewActivity.this,
 							HikeListActivity.class);
 					startActivity(i);
-				} else {
-					view.loadUrl(url);
+				} else if (url.startsWith("market://")
+						|| url.contains("play.google.com/store/apps/details?id")) {
+					try {
+						view.getContext().startActivity(
+								new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+					} catch (ActivityNotFoundException e) {
+						Log.w(getClass().getSimpleName(), e);
+						view.loadUrl(url);
+					}
 				}
 				return true;
 			}
