@@ -115,13 +115,13 @@
                 android:id="@+id/compose_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:minHeight="48dp" >
 
                 <ImageButton
                     android:id="@+id/send_message"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="44dp"
+                    android:layout_height="40dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
                     android:onClick="onSendClick"
@@ -138,15 +138,15 @@
                     android:background="@null"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="9dp"
                     android:onClick="onEmoticonBtnClicked"
                     android:src="@drawable/emoticon_hike_btn" />
 
                 <ImageButton
                     android:id="@+id/sticker_btn"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="44dp"
+                    android:layout_height="40dp"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
                     android:background="@drawable/bg_brown_btn_selector"
@@ -175,7 +175,7 @@
                         android:lineSpacingExtra="3dp"
                         android:maxLength="@integer/max_length_message"
                         android:maxLines="4"
-                        android:minHeight="32dp"
+                        android:minHeight="40dp"
                         android:paddingRight="5dp"
                         android:paddingLeft="5dp"
                         android:textColor="@color/chat_color"
