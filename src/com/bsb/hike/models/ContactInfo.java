@@ -296,6 +296,9 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	@Override
 	public int compareTo(ContactInfo rhs) {
+		if (rhs == null) {
+			return -1;
+		}
 		if (TextUtils.isEmpty(this.name) && TextUtils.isEmpty(rhs.name)) {
 			return (this.msisdn.toLowerCase()
 					.compareTo(((ContactInfo) rhs).msisdn.toLowerCase()));

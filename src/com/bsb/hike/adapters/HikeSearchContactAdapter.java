@@ -76,6 +76,9 @@ public class HikeSearchContactAdapter extends
 				}
 			}
 
+			if (lhs.second == null) {
+				return 1;
+			}
 			return lhs.second.compareTo(rhs.second);
 		}
 	};
