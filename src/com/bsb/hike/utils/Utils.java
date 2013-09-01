@@ -2679,7 +2679,7 @@ public class Utils {
 		 */
 		Bitmap bitmap = Bitmap.createBitmap((int) (48 * densityMultiplier),
 				(int) (48 * densityMultiplier), Config.ARGB_8888);
-		
+
 		Canvas canvas = new Canvas(bitmap);
 		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
 		drawable.draw(canvas);

@@ -91,6 +91,7 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		intent.setType("message/rfc822");
 		return intent;
 	}
+
 	private void setupActionBar(String titleString) {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -103,11 +104,11 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(titleString);
 		backContainer.setOnClickListener(new OnClickListener() {
-			
-		
+
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(WebViewActivity.this, HomeActivity.class);
+				Intent intent = new Intent(WebViewActivity.this,
+						HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}
