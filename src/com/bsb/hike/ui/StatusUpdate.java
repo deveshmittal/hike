@@ -180,9 +180,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
 
-		if (preferences.getInt(HikeMessengerApp.LAST_MOOD, -1) == -1
-				&& !preferences.getBoolean(HikeMessengerApp.SHOWN_MOODS_TIP,
-						false)) {
+		if (!preferences.getBoolean(HikeMessengerApp.SHOWN_MOODS_TIP, false)) {
 			tipView = findViewById(R.id.mood_tip);
 
 			/*

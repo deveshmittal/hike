@@ -238,11 +238,11 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
-	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip";
+	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip1";
 
 	public static final String SHOWN_STICKERS_TIP = "shownStickerTip";
 
-	public static final String SHOWN_MOODS_TIP = "shownMoodsTip";
+	public static final String SHOWN_MOODS_TIP = "shownMoodsTip1";
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
