@@ -363,7 +363,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void onEmojiClick(View v) {
-		showEmojiSelector();
+		if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
+			emojiParent.setVisibility(View.GONE);
+		} else {
+			showEmojiSelector();
+		}
 	}
 
 	public void onMoodClick(View v) {
@@ -375,6 +380,10 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		}
 		if (tipView != null) {
 			Utils.closeTip(TipType.MOOD, tipView, preferences);
+		}
+		if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
+			emojiParent.setVisibility(View.GONE);
 		}
 		showMoodSelector();
 		setTitle();
