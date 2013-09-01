@@ -32,6 +32,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -354,10 +355,13 @@ public class DbConversationListener implements Listener {
 			mConversationDb.deleteProtip(mappedId);
 
 			sendDismissTipLogEvent(mappedId, null);
-		} else if(HikePubSub.GAMING_PROTIP_DOWNLOADED.equals(type)){
-			String mappedId = (String) object;
+		} else if (HikePubSub.GAMING_PROTIP_DOWNLOADED.equals(type)) {
+			Protip protip = (Protip) object;
+
+			String mappedId = protip.getMappedId();
+			String url = protip.getGameDownlodURL();
+
 			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
-			String url= mConversationDb.getProtipForId(Long.valueOf(mappedId)).getGameDownlodURL();
 			mConversationDb.deleteProtip(mappedId);
 			sendDismissTipLogEvent(mappedId, url);
 		}

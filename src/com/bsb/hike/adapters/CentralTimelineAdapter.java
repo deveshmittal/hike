@@ -407,8 +407,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					Log.e(CentralTimelineAdapter.class.getSimpleName(),
 							"Unable to open market");
 				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-						protip.getMappedId());
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.GAMING_PROTIP_DOWNLOADED,
+						protip);
 			}
 		}
 	};
