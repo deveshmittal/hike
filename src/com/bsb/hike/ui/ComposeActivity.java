@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -199,9 +200,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				layoutParams.leftMargin = margin;
 				layoutParams.rightMargin = margin;
-
+				editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(30)});
 				editText.setLayoutParams(layoutParams);
-
 				builder.setView(editText);
 
 				builder.setNegativeButton(R.string.cancel,
@@ -398,6 +398,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view,
+
 			int position, long id) {
 		Object tag = view.getTag();
 		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) tag;
