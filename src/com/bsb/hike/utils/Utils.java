@@ -113,13 +113,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeConstants.TipType;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -132,9 +132,9 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
@@ -2280,6 +2280,11 @@ public class Utils {
 
 	public static String getLastSeenTimeAsString(Context context,
 			long lastSeenTime, int offline) {
+		return getLastSeenTimeAsString(context, lastSeenTime, offline, false);
+	}
+
+	public static String getLastSeenTimeAsString(Context context,
+			long lastSeenTime, int offline, boolean groupParticipant) {
 		/*
 		 * This refers to the setting being turned off
 		 */
@@ -2325,16 +2330,22 @@ public class Utils {
 		 */
 		if ((nowDay - lastSeenDay) > 1) {
 			String format;
-			if (is24Hour) {
-				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM, HH:mm";
+			if (groupParticipant) {
+				format = "dd/MM/yy";
+				DateFormat df = new SimpleDateFormat(format);
+				lastSeen = df.format(lastSeenDate);
 			} else {
-				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM, h:mmaaa";
+				if (is24Hour) {
+					format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+							+ "' MMM, HH:mm";
+				} else {
+					format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+							+ "' MMM, h:mmaaa";
+				}
+				DateFormat df = new SimpleDateFormat(format);
+				lastSeen = context.getString(R.string.last_seen_more,
+						df.format(lastSeenDate));
 			}
-			DateFormat df = new SimpleDateFormat(format);
-			lastSeen = context.getString(R.string.last_seen_more,
-					df.format(lastSeenDate));
 		} else {
 			String format;
 			if (is24Hour) {
@@ -2344,11 +2355,16 @@ public class Utils {
 			}
 
 			DateFormat df = new SimpleDateFormat(format);
-			lastSeen = context
-					.getString(
-							(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
-									: R.string.last_seen_today, df
-									.format(lastSeenDate));
+			if (groupParticipant) {
+				lastSeen = (nowDay > lastSeenDay) ? context
+						.getString(R.string.last_seen_yesterday_group_participant)
+						: df.format(lastSeenDate);
+			} else {
+				lastSeen = context.getString(
+						(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+								: R.string.last_seen_today, df
+								.format(lastSeenDate));
+			}
 		}
 
 		lastSeen = lastSeen.replace("AM", "am");

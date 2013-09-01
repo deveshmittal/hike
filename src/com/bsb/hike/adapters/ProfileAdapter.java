@@ -341,9 +341,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					int offline = contactInfo.getOffline();
 
 					String lastSeenString = null;
-					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+							&& !contactInfo.getMsisdn().equals(
+									contactInfo.getId())) {
 						lastSeenString = Utils.getLastSeenTimeAsString(context,
-								contactInfo.getLastSeenTime(), offline);
+								contactInfo.getLastSeenTime(), offline, true);
 					}
 
 					nameTextView.setText(contactInfo.getFirstName());

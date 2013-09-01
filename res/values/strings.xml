@@ -643,4 +643,5 @@
 	<string name="empty_chat">You have no chats :(\nStart one now!</string>
 	<string name="start_chat">Start a chat</string>
 	<string name="x_regular_sms">%1$d x Regular SMS</string>
+	<string name="last_seen_yesterday_group_participant">Yesterday</string>
 </resources>
