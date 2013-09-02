@@ -130,10 +130,10 @@ public class HikeConstants {
 	public static final String FOREGROUND = "fg";
 	public static final String BACKGROUND = "bg";
 	public static final String JUST_OPENED = "justOpened";
-	public static final String BULK_LAST_SEEN ="bulklastseen";
+	public static final String BULK_LAST_SEEN = "bulklastseen";
 	public static final String LAST_SEEN = "ls";
 	public static final String LAST_SEEN_SETTING = "lastseen";
-	public static final String BULK_LAST_SEEN_KEY ="lastseens";
+	public static final String BULK_LAST_SEEN_KEY = "lastseens";
 	public static final String PROTIP_HEADER = "h";
 	public static final String PROTIP_TEXT = "t";
 	public static final String PROTIP_IMAGE_URL = "img";
