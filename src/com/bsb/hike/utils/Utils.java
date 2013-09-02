@@ -395,8 +395,7 @@ public class Utils {
 		return context.getResources().getDrawable(id);
 	}
 
-	public static String getDefaultAvatarServerName(Context context,
-			String msisdn) {
+	public static String getDefaultAvatarServerName(String msisdn) {
 		String name;
 		int count = 7;
 		int id = iconHash(msisdn) % count;
