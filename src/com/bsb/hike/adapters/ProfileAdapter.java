@@ -18,6 +18,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
@@ -228,7 +229,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			viewHolder.text.setText(name);
 
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null,
-					false);
+					false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null) {
 				imageLoader.loadImage(msisdn, viewHolder.image);

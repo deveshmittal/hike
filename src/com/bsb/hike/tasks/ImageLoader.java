@@ -40,11 +40,16 @@ public class ImageLoader {
 	// --------------------------------------------------------------------------------------------
 
 	public void loadImage(String id, ImageView imageView) {
+		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) imageView.getTag();
+		if (imageViewerInfo.isDefaultImage) {
+			id = Utils.getDefaultAvatarServerName(id);
+		}
+
 		if (imageMap.containsKey(id) && imageMap.get(id).get() != null) {
 			imageView.setImageBitmap(imageMap.get(id).get());
 		} else {
 			Drawable avatarDrawable = IconCacheManager.getInstance()
-					.getIconForMSISDN(id);
+					.getIconForMSISDN(imageViewerInfo.mappedId);
 			imageView.setImageDrawable(avatarDrawable);
 			queueImage(id, imageView);
 		}
@@ -115,48 +120,63 @@ public class ImageLoader {
 
 						String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 								+ HikeConstants.PROFILE_ROOT;
-						String fileName = Utils
-								.getProfileImageFileName(listItemToLoad.id);
+						ImageViewerInfo tag = (ImageViewerInfo) listItemToLoad.imageView
+								.getTag();
 
-						File orgFile = new File(basePath, fileName);
-						if (!orgFile.exists()) {
-							continue;
-						}
+						if (tag != null) {
+							String id;
+							if (tag.isDefaultImage) {
+								id = Utils
+										.getDefaultAvatarServerName(tag.mappedId);
+							} else {
+								id = tag.mappedId;
+							}
 
-						File outputDir = context.getCacheDir();
-						try {
-							File tempFile = File.createTempFile(
-									listItemToLoad.id, ".jpg", outputDir);
+							String fileName;
+							if (tag.isDefaultImage) {
+								fileName = listItemToLoad.id;
+							} else {
+								fileName = Utils
+										.getProfileImageFileName(listItemToLoad.id);
+							}
 
-							Bitmap orgBitmap = BitmapFactory.decodeFile(orgFile
-									.getPath());
-							if (orgBitmap == null) {
+							File orgFile = new File(basePath, fileName);
+							if (!orgFile.exists()) {
 								continue;
 							}
-							Utils.saveBitmapToFile(tempFile, orgBitmap,
-									CompressFormat.JPEG, 50);
-							Bitmap bmp = BitmapFactory.decodeFile(tempFile
-									.getPath());
 
-							tempFile.delete();
+							File outputDir = context.getCacheDir();
+							try {
+								File tempFile = File.createTempFile(
+										listItemToLoad.id, ".jpg", outputDir);
 
-							imageMap.put(listItemToLoad.id,
-									new SoftReference<Bitmap>(bmp));
-							ImageViewerInfo tag = (ImageViewerInfo) listItemToLoad.imageView
-									.getTag();
+								Bitmap orgBitmap = BitmapFactory
+										.decodeFile(orgFile.getPath());
+								if (orgBitmap == null) {
+									continue;
+								}
+								Utils.saveBitmapToFile(tempFile, orgBitmap,
+										CompressFormat.JPEG, 50);
+								Bitmap bmp = BitmapFactory.decodeFile(tempFile
+										.getPath());
 
-							if (tag != null
-									&& (tag.mappedId).equals(listItemToLoad.id)) {
-								BitmapDisplayer bmpDisplayer = new BitmapDisplayer(
-										bmp, listItemToLoad.imageView);
+								tempFile.delete();
 
-								Activity a = (Activity) listItemToLoad.imageView
-										.getContext();
+								imageMap.put(listItemToLoad.id,
+										new SoftReference<Bitmap>(bmp));
 
-								a.runOnUiThread(bmpDisplayer);
+								if (id.equals(listItemToLoad.id)) {
+									BitmapDisplayer bmpDisplayer = new BitmapDisplayer(
+											bmp, listItemToLoad.imageView);
+
+									Activity a = (Activity) listItemToLoad.imageView
+											.getContext();
+
+									a.runOnUiThread(bmpDisplayer);
+								}
+							} catch (IOException e1) {
+								e1.printStackTrace();
 							}
-						} catch (IOException e1) {
-							e1.printStackTrace();
 						}
 					}
 
