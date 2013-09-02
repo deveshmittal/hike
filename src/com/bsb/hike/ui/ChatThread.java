@@ -394,7 +394,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Utils.setDensityMultiplier(ChatThread.this);
 
 		/* force the user into the reg-flow process if the token isn't set */
 		if (Utils.requireAuth(this)) {

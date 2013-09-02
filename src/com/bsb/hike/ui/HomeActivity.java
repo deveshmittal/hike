@@ -74,7 +74,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Utils.setDensityMultiplier(this);
 		if (Utils.requireAuth(this)) {
 			return;
 		}

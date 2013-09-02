@@ -470,6 +470,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		super.onCreate();
 
+		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
+
 		HikeConversationsDatabase.init(this);
 		HikeUserDatabase.init(this);
 		HikeMqttPersistence.init(this);

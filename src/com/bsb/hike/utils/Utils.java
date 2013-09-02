@@ -880,10 +880,8 @@ public class Utils {
 	 * 
 	 * @param activity
 	 */
-	public static void setDensityMultiplier(Activity activity) {
-		DisplayMetrics metrics = new DisplayMetrics();
-		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		Utils.densityMultiplier = metrics.scaledDensity;
+	public static void setDensityMultiplier(DisplayMetrics displayMetrics) {
+		Utils.densityMultiplier = displayMetrics.scaledDensity;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info,
