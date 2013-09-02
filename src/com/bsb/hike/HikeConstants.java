@@ -428,6 +428,12 @@ public class HikeConstants {
 	public static final int XHDPI_ID = 1;
 	public static final int XXHDPI_ID = 0;
 
+	public static final int LDPI_CACHE = 15;
+	public static final int MDPI_CACHE = 20;
+	public static final int HDPI_CACHE = 25;
+	public static final int XHDPI_CACHE = 30;
+	public static final int XXHDPI_CACHE = 30;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
