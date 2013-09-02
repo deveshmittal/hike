@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.bsb.hike.HikeConstants;
@@ -123,6 +125,18 @@ public class IconCacheManager {
 			}
 		}
 
+		return b;
+	}
+
+	public synchronized Drawable getStickerThumbnail(String stickerPath) {
+		Drawable b = mIcons.get(stickerPath);
+		if (b == null) {
+			b = new BitmapDrawable(BitmapFactory.decodeFile(stickerPath));
+
+			if (b != null) {
+				mIcons.put(stickerPath, b);
+			}
+		}
 		return b;
 	}
 

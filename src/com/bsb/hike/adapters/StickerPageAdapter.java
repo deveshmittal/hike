@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
@@ -186,8 +187,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 										.getStickerIndex()]);
 					}
 				} else {
-					imageView.setImageBitmap(BitmapFactory.decodeFile(sticker
-							.getSmallStickerPath(activity)));
+					imageView.setImageDrawable(IconCacheManager.getInstance()
+							.getStickerThumbnail(
+									sticker.getSmallStickerPath(activity)));
 				}
 				imageView.setTag(sticker);
 
