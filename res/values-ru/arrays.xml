@@ -42,6 +42,15 @@
 	    <item>Играю</item>
 	    <item>Программирую</item>
 	    <item>Смотрю ТВ</item>
+	    <item>Слушаю музыку</item>
+	    <item>Отрываюсь на вечеринке</item>
+	    <item>Пою</item>
+	    <item>Ем</item>
+	    <item>Тренируюсь</item>
+	    <item>Готовлю</item>
+	    <item>Салон красоты</item>
+	    <item>Болею</item>
+	    
 	</string-array>	
 	
 </resources>
