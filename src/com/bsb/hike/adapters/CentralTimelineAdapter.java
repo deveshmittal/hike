@@ -193,6 +193,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.mainInfo.setText(statusMessage.getText());
 
+			viewHolder.timeStamp.setVisibility(View.VISIBLE);
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
 					true, context));
 
@@ -296,6 +297,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				if (!TextUtils.isEmpty(protip.getGameDownlodURL())) {
 					viewHolder.yesBtn.setTag(statusMessage);
 					viewHolder.yesBtn.setVisibility(View.VISIBLE);
+					viewHolder.buttonDivider.setVisibility(View.VISIBLE);
 					viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 				} else {
 					viewHolder.yesBtn.setVisibility(View.GONE);
