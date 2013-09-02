@@ -8,6 +8,7 @@
     <com.bsb.hike.view.PinnedSectionListView
         android:id="@id/android:list"
         style="@style/HomeList"
+        android:fastScrollEnabled="true"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp" />
 
