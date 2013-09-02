@@ -32,28 +32,28 @@
     <com.bsb.hike.view.IconPreference
 		icon="ic_delete_priv"
 		android:layout="@layout/icon_preference"
-        android:key="@string/delete_key"
+        android:key="deleteAccount"
         android:summary="@string/delete_account_msg"
         android:title="@string/delete_account" />
 
 	<com.bsb.hike.view.IconPreference
 		icon="ic_unlink_priv"
 		android:layout="@layout/icon_preference"
-		android:key="@string/unlink_key"
+		android:key="unlinkAccount"
 		android:summary="@string/unlink_account_msg"
 		android:title="@string/unlink_account" />
 	
 	<com.bsb.hike.view.IconPreference
 		icon="ic_fb_priv"
 		android:layout="@layout/icon_preference"
-		android:key="@string/unlink_facebook"
+		android:key="unlinkFacebook"
 		android:summary="@string/unlink_facebook_account_msg"
 		android:title="@string/unlink_facebook_account" />
 	
 	<com.bsb.hike.view.IconPreference
 		icon="ic_twitter_priv"
 		android:layout="@layout/icon_preference"
-		android:key="@string/unlink_twitter"
+		android:key="unlinkTwitter"
 		android:summary="@string/unlink_twitter_account_msg"
 		android:title="@string/unlink_twitter_account" />
 

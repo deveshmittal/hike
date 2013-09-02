@@ -84,7 +84,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		}
 
 		Preference deletePreference = getPreferenceScreen().findPreference(
-				getString(R.string.delete_key));
+				HikeConstants.DELETE_PREF);
 		if (deletePreference != null) {
 			Utils.logEvent(HikePreferences.this,
 					HikeConstants.LogEvent.PRIVACY_SCREEN);
@@ -94,19 +94,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					HikeConstants.LogEvent.NOTIFICATION_SCREEN);
 		}
 		Preference unlinkPreference = getPreferenceScreen().findPreference(
-				getString(R.string.unlink_key));
+				HikeConstants.UNLINK_PREF);
 		if (unlinkPreference != null) {
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
 
 		Preference unlinkFacebookPreference = getPreferenceScreen()
-				.findPreference(getString(R.string.unlink_facebook));
+				.findPreference(HikeConstants.UNLINK_FB);
 		if (unlinkFacebookPreference != null) {
 			unlinkFacebookPreference.setOnPreferenceClickListener(this);
 		}
 
 		Preference unlinkTwitterPreference = getPreferenceScreen()
-				.findPreference(getString(R.string.unlink_twitter));
+				.findPreference(HikeConstants.UNLINK_PREF);
 		if (unlinkTwitterPreference != null) {
 			unlinkTwitterPreference.setOnPreferenceClickListener(this);
 		}
@@ -222,7 +222,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 	@Override
 	public boolean onPreferenceClick(final Preference preference) {
 		Log.d("HikePreferences", "Preference clicked: " + preference.getKey());
-		if (preference.getKey().equals(getString(R.string.delete_key))) {
+		if (preference.getKey().equals(HikeConstants.DELETE_PREF)) {
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage(R.string.delete_confirmation);
 			builder.setPositiveButton(R.string.delete, new OnClickListener() {
@@ -242,7 +242,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			});
 			AlertDialog alertDialog = builder.create();
 			alertDialog.show();
-		} else if (preference.getKey().equals(getString(R.string.unlink_key))) {
+		} else if (preference.getKey().equals(HikeConstants.UNLINK_PREF)) {
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage(R.string.unlink_confirmation);
 			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
@@ -262,8 +262,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			});
 			AlertDialog alertDialog = builder.create();
 			alertDialog.show();
-		} else if (preference.getKey().equals(
-				getString(R.string.unlink_facebook))) {
+		} else if (preference.getKey().equals(HikeConstants.UNLINK_FB)) {
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage(R.string.unlink_facebook_confirmation);
 			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
@@ -285,8 +284,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			});
 			AlertDialog alertDialog = builder.create();
 			alertDialog.show();
-		} else if (preference.getKey().equals(
-				getString(R.string.unlink_twitter))) {
+		} else if (preference.getKey().equals(HikeConstants.UNLINK_TWITTER)) {
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage(R.string.unlink_twitter_confirmation);
 			builder.setPositiveButton(R.string.unlink, new OnClickListener() {

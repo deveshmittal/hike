@@ -171,6 +171,10 @@ public class HikeConstants {
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
 	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String HIKEBOT = "TD-HIKE";
+	public static final String UNLINK_PREF = "unlinkAccount";
+	public static final String DELETE_PREF = "deleteAccount";
+	public static final String UNLINK_FB = "unlinkFacebook";
+	public static final String UNLINK_TWITTER = "unlinkTwitter";
 
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";

@@ -31,10 +31,6 @@
 	<string name="sending_feedback_failed">Unable to send feedback</string>
 	<string name="feedback_hint">We\'d love to hear from you...</string>
 	<string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
-	<string name="delete_key">deleteAccount</string>
-	<string name="unlink_key">unlinkAccount</string>
-	<string name="unlink_facebook">unlinkFacebook</string>
-	<string name="unlink_twitter">unlinkTwitter</string>
 	<string name="how_hike_feel">How does hike make you feel?</string>
 	<string name="feedback_success">Thanks for your feedback!</string>
 	<string name="phone_num">Phone Number</string>
