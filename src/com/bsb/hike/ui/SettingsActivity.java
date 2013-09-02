@@ -160,7 +160,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			message.append(getString(R.string.msisdn) + " " + msisdn);
 
 			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
-			intent.putExtra(Intent.EXTRA_SUBJECT, R.string.feedback_on_hike);
+			intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_on_hike));
 			break;
 		}
 		try {
