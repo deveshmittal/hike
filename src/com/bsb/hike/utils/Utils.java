@@ -1929,13 +1929,6 @@ public class Utils {
 			notificationCount++;
 		}
 
-		if (HikeUserDatabase.getInstance().getFriendTableRowCount() == 0) {
-			notificationCount++;
-		} else {
-			notificationCount += HikeUserDatabase.getInstance()
-					.getPendingFriendRequestCount();
-		}
-
 		notificationCount += accountPrefs.getInt(
 				HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 

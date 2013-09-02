@@ -754,8 +754,6 @@ public class MqttMessagesManager {
 						statusMessage);
 				pubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
 						statusMessage);
-
-				incrementUnseenStatusCount();
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
