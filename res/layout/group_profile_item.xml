@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="72dp"
     android:layout_weight="1"
-    android:background="@drawable/bg_updates_white"
+    android:background="@drawable/updates_bg_selector"
     android:paddingLeft="8dp"
     android:paddingRight="8dp" >
 

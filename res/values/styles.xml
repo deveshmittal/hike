@@ -414,7 +414,7 @@
 
 	<style name="UpdatesContainer">
 	    <item name="android:layout_margin">@dimen/updates_margin</item>
-        <item name="android:background">@drawable/bg_updates_white</item>
+        <item name="android:background">@drawable/updates_bg_selector</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
