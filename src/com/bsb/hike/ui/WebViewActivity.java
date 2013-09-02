@@ -70,6 +70,8 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 						Log.w(getClass().getSimpleName(), e);
 						view.loadUrl(url);
 					}
+				} else {
+					view.loadUrl(url);
 				}
 				return true;
 			}
