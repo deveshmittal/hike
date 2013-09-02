@@ -74,7 +74,7 @@ public class HikeNotification {
 
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		final Drawable avatarDrawable = context.getResources().getDrawable(
-				R.drawable.ic_protip);
+				R.drawable.hike_avtar_protip);
 		Bitmap avatarBitmap = Utils.returnScaledBitmap
 				((Utils.drawableToBitmap(avatarDrawable)), context);		
 		int smallIconId = returnSmallIcon();
