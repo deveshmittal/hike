@@ -341,11 +341,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					int offline = contactInfo.getOffline();
 
 					String lastSeenString = null;
+					boolean showingLastSeen = false;
 					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
 							&& !contactInfo.getMsisdn().equals(
 									contactInfo.getId())) {
 						lastSeenString = Utils.getLastSeenTimeAsString(context,
 								contactInfo.getLastSeenTime(), offline, true);
+						showingLastSeen = false;
 					}
 
 					nameTextView.setText(contactInfo.getFirstName());
@@ -357,7 +359,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						mainInfo.setText(lastSeenString);
 					}
 
-					if (offline == 0) {
+					if (showingLastSeen && offline == 0) {
 						mainInfo.setTextColor(context.getResources().getColor(
 								R.color.unread_message));
 						avatarFrame
