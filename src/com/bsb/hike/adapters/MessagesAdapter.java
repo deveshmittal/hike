@@ -1059,6 +1059,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else if (metadata != null && metadata.isPokeMessage()) {
 			holder.messageTextView.setVisibility(View.GONE);
 			holder.messageContainer.setVisibility(View.VISIBLE);
+			if (!convMessage.isSent()) {
+				if (firstMessageFromParticipant) {
+					holder.participantNameFT.setVisibility(View.VISIBLE);
+					holder.participantNameFT
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+				} else {
+					holder.participantNameFT.setVisibility(View.GONE);
+				}
+			}
 			holder.poke.setVisibility(View.VISIBLE);
 			holder.poke
 					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
