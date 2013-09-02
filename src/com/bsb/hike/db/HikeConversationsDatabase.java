@@ -556,11 +556,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 							+ DBConstants.MESSAGE_ID + " IN " + sb.toString(),
 					new String[] { groupId }, null, null, null);
 
-			conversationCursor = mDb
-					.query(DBConstants.CONVERSATIONS_TABLE,
-							new String[] { DBConstants.MESSAGE_ID },
-							DBConstants.MSISDN + " = ?",
-							new String[] { groupId }, null, null, null);
+			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE,
+					new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN
+							+ " = ?", new String[] { groupId }, null, null,
+					null);
 
 			long conversationMsgId = -1;
 			if (conversationCursor.moveToFirst()) {
@@ -675,10 +674,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MSG_STATUS, status);
+		int numRows = mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
+				updateStatement, null);
+
+		if (status == State.RECEIVED_READ.ordinal()) {
+			contentValues.put(DBConstants.UNREAD_COUNT, 0);
+		}
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
 				updateStatement, null);
-		return mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
-				updateStatement, null);
+
+		return numRows;
 	}
 
 	/**
