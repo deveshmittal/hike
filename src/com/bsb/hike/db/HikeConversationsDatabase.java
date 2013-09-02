@@ -584,10 +584,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					/*
 					 * Checking if this number has already been added.
 					 */
+					boolean alreadyAdded = false;
 					for (int i = 0; i < readByArray.length(); i++) {
 						if (readByArray.optString(i).equals(msisdn)) {
-							continue;
+							alreadyAdded = true;
+							break;
 						}
+					}
+					if (alreadyAdded) {
+						continue;
 					}
 					readByArray.put(msisdn);
 
