@@ -66,11 +66,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private ContactInfo groupExtraItem;
 	private ContactFilter contactFilter;
 	private String queryText;
+	private boolean lastSeenPref;
 
 	public FriendsAdapter(final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();
+		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
+				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 
 		completeList = new ArrayList<ContactInfo>();
 
@@ -483,7 +486,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				avatarFrame
 						.setImageResource(R.drawable.frame_avatar_medium_selector);
 
-				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+						&& lastSeenPref) {
 					String lastSeenString = Utils.getLastSeenTimeAsString(
 							context, contactInfo.getLastSeenTime(),
 							contactInfo.getOffline());
