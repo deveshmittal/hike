@@ -2170,15 +2170,15 @@ public class Utils {
 		Log.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
 
 		if (densityMultiplierX100 > 200) {
-			return 0;
+			return HikeConstants.XXHDPI_ID;
 		} else if (densityMultiplierX100 > 150) {
-			return 1;
+			return HikeConstants.XHDPI_ID;
 		} else if (densityMultiplierX100 > 100) {
-			return 2;
+			return HikeConstants.HDPI_ID;
 		} else if (densityMultiplierX100 > 75) {
-			return 3;
+			return HikeConstants.MDPI_ID;
 		} else {
-			return 4;
+			return HikeConstants.LDPI_ID;
 		}
 	}
 

@@ -422,6 +422,12 @@ public class HikeConstants {
 
 	public static final int MAX_READ_BY_NAMES = 3;
 
+	public static final int LDPI_ID = 4;
+	public static final int MDPI_ID = 3;
+	public static final int HDPI_ID = 2;
+	public static final int XHDPI_ID = 1;
+	public static final int XXHDPI_ID = 0;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
