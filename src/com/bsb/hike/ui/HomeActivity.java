@@ -502,6 +502,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		public void onPageSelected(int position) {
 			invalidateOptionsMenu();
 			setBackground();
+			/*
+			 * Sending a blank query search to ensure all friends are shown.
+			 */
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY,
+					"");
 		}
 
 		@Override
