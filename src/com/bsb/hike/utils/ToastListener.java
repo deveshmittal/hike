@@ -196,24 +196,10 @@ public class ToastListener implements Listener {
 			}
 			SharedPreferences accountPrefs = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			long currentProtipId = accountPrefs.getLong(
-					HikeMessengerApp.CURRENT_PROTIP, -1);
-			if (currentProtipId == -1) {
-				Protip protip = HikeConversationsDatabase.getInstance()
-						.getLastProtip();
-				whetherToShow = Utils.showProtip(protip, accountPrefs);
-			}
-			else {
-				Protip protip = HikeConversationsDatabase.getInstance()
-						.getProtipForId(currentProtipId);
-				if (protip == null) {
-					whetherToShow = true;
-				}
-				
+			whetherToShow = Utils.isProtipNotificationShowable(accountPrefs);
+			
 			if (proTip.isShowPush() && whetherToShow)
 				toaster.notifyMessage(proTip);
-			}
-
 		}
 	}
 

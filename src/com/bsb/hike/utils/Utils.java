@@ -134,6 +134,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -2790,5 +2791,23 @@ public class Utils {
 		} else
 			return src;
 
+	}
+
+	public static boolean isProtipNotificationShowable(SharedPreferences prefs) {
+
+		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
+				-1);
+
+		Protip protip = null;
+		boolean showProtipNotification = false;
+		if (currentProtipId == -1) {
+			protip = HikeConversationsDatabase.getInstance().getLastProtip();
+			if (protip != null) {
+				if (Utils.showProtip(protip, prefs)) {
+					showProtipNotification = true;
+				}
+			}
+		}
+		return (showProtipNotification);
 	}
 }

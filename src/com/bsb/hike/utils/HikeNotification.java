@@ -527,11 +527,14 @@ public class HikeNotification {
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(profileStruct[1].hashCode(),
 				mBuilder.build());
+		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+				: System.currentTimeMillis();
 	}
 
 	public void pushBigPictureMessageNotifications(Intent notificationIntent,
-			ContactInfo contactInfo, ConvMessage convMessage, Bitmap bigPictureImage) {
-		
+			ContactInfo contactInfo, ConvMessage convMessage,
+			Bitmap bigPictureImage) {
+
 		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
 		SharedPreferences preferenceManager = PreferenceManager
@@ -551,7 +554,6 @@ public class HikeNotification {
 		boolean led = preferenceManager
 				.getBoolean(HikeConstants.LED_PREF, true);
 
-		
 		String msisdn = convMessage.getMsisdn();
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
@@ -559,8 +561,8 @@ public class HikeNotification {
 
 		final Drawable avatarDrawable = IconCacheManager.getInstance()
 				.getIconForMSISDN(contactInfo.getMsisdn());
-		Bitmap avatarBitmap = Utils.returnScaledBitmap
-				((Utils.drawableToBitmap(avatarDrawable)), context);		
+		Bitmap avatarBitmap = Utils.returnScaledBitmap(
+				(Utils.drawableToBitmap(avatarDrawable)), context);
 		int notificationId = convMessage.getMsisdn().hashCode(); // group the
 
 		String maskedText;
@@ -578,18 +580,17 @@ public class HikeNotification {
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
 				context).setContentTitle(key).setSmallIcon(smallIconId)
 				.setAutoCancel(true).setLargeIcon(avatarBitmap).setTicker(text)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setDefaults(vibrate)
+				.setPriority(Notification.PRIORITY_HIGH).setDefaults(vibrate)
 				.setContentText(maskedText);
 
 		NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 
 		bigPicStyle.setBigContentTitle(key);
 		mBuilder.setStyle(bigPicStyle);
-		
+
 		// set the big picture image
 		bigPicStyle.bigPicture(bigPictureImage);
-	
+
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 		stackBuilder.addNextIntent(notificationIntent);
 
@@ -604,7 +605,7 @@ public class HikeNotification {
 		if (led) {
 			mBuilder.setLights(Color.BLUE, 300, 1000);
 		}
-		
+
 		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(resultPendingIntent);
@@ -612,7 +613,9 @@ public class HikeNotification {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(notificationId, mBuilder.build());
-		}
+		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+				: System.currentTimeMillis();
+	}
 
 
 	private int returnSmallIcon() {
