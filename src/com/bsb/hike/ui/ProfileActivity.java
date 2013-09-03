@@ -286,7 +286,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			title.setText(R.string.me);
 			break;
 		case GROUP_INFO:
-			title.setText(R.string.group);
+			title.setText(R.string.group_info);
 			break;
 		case USER_PROFILE_EDIT:
 			title.setText(R.string.edit_profile);
