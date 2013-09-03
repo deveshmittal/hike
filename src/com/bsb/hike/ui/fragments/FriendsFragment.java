@@ -167,7 +167,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
 						} else {
-							friendsAdapter.removeFromGroup(contactInfo,
+							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.SMS_INDEX);
 						}
 					}
