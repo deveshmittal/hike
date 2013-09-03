@@ -333,7 +333,6 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		private boolean freeSMSOn;
 		private boolean nativeSMSOn;
 		private String userMsisdn;
-		boolean loadOnUiThread;
 
 		@Override
 		protected void onPreExecute() {
@@ -348,39 +347,41 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			userMsisdn = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
-
-			loadOnUiThread = Utils.loadOnUiThread();
 		}
 
 		@Override
 		protected List<Pair<AtomicBoolean, ContactInfo>> doInBackground(
 				Void... params) {
-			if (!loadOnUiThread) {
-				return getContactsForComposeScreen(userMsisdn, freeSMSOn,
-						isGroupChat, isForwardingMessage, isSharingFile,
-						nativeSMSOn);
-			} else {
-				return null;
+			List<Pair<AtomicBoolean, ContactInfo>> contactList = getContactsForComposeScreen(
+					userMsisdn, freeSMSOn, isGroupChat, isForwardingMessage,
+					isSharingFile, nativeSMSOn);
+
+			if (!TextUtils.isEmpty(existingGroupId)) {
+				groupParticipants = HikeConversationsDatabase.getInstance()
+						.getGroupParticipants(existingGroupId, true, false);
+				List<Integer> indicesToRemove = new ArrayList<Integer>();
+
+				for (int i = contactList.size() - 1; i >= 0; i--) {
+					Pair<AtomicBoolean, ContactInfo> pair = contactList.get(i);
+					ContactInfo contactInfo = pair.second;
+					if (groupParticipants.containsKey(contactInfo.getMsisdn())) {
+						indicesToRemove.add(i);
+					}
+				}
+
+				for (Integer i : indicesToRemove) {
+					contactList.remove(i.intValue());
+				}
 			}
+			return contactList;
 		}
 
 		@Override
 		protected void onPostExecute(
 				List<Pair<AtomicBoolean, ContactInfo>> contactList) {
-			if (contactList == null) {
-				contactList = getContactsForComposeScreen(userMsisdn,
-						freeSMSOn, isGroupChat, isForwardingMessage,
-						isSharingFile, nativeSMSOn);
-			}
-
 			findViewById(R.id.empty).setVisibility(View.GONE);
 
 			mInputNumberView.setText("");
-
-			if (!TextUtils.isEmpty(existingGroupId)) {
-				groupParticipants = HikeConversationsDatabase.getInstance()
-						.getGroupParticipants(existingGroupId, true, false);
-			}
 
 			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
 					ComposeActivity.this, contactList, mInputNumberView,
