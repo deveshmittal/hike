@@ -52,13 +52,15 @@ import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.facebook.Session;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 
 public class StatusUpdate extends AuthSocialAccountBaseActivity implements
-		Listener {
+		Listener, OnSoftKeyboardListener {
 
 	private class ActivityTask {
 		int moodId = -1;
@@ -81,6 +83,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private ViewGroup emojiParent;
 	private EditText statusTxt;
 
+	private CustomLinearLayout parentLayout;
 	private Handler handler;
 	private TextView charCounter;
 	private View tipView;
@@ -117,6 +120,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
 
 		setupActionBar();
+
+		parentLayout = (CustomLinearLayout) findViewById(R.id.parent_layout);
+		parentLayout.setOnSoftKeyboardListener(this);
 
 		avatar = (ImageView) findViewById(R.id.avatar);
 
@@ -759,5 +765,17 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			progressDialog.dismiss();
 			progressDialog = null;
 		}
+	}
+
+	@Override
+	public void onShown() {
+		if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
+			emojiParent.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
+	public void onHidden() {
 	}
 }
