@@ -31,6 +31,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -2121,7 +2122,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	 * 
 	 * @return
 	 */
-	public List<Pair<AtomicBoolean, ContactInfo>> getGroupNameAndParticipantsAsContacts() {
+	public List<Pair<AtomicBoolean, ContactInfo>> getGroupNameAndParticipantsAsContacts(
+			Context context) {
 		Cursor groupCursor = null;
 		try {
 			List<Pair<AtomicBoolean, ContactInfo>> groups = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
@@ -2143,8 +2145,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 				// Here we make this string the msisdn so that it can be
 				// displayed in the list view when forwarding the message
-				String numberMembers = numMembers
-						+ (numMembers > 0 ? " Members" : " Member");
+				String numberMembers = context.getString(R.string.num_people,
+						(numMembers + 1));
 
 				ContactInfo group = new ContactInfo(groupId, numberMembers,
 						groupName, groupId, true);

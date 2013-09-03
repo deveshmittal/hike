@@ -408,7 +408,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, HikeConversationsDatabase.getInstance()
-					.getGroupNameAndParticipantsAsContacts());
+					.getGroupNameAndParticipantsAsContacts(this));
 		}
 		return contactList;
 	}
