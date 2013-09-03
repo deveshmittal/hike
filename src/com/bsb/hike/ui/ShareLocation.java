@@ -91,13 +91,14 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 	private Dialog playServiceErrordialog;
 	private int selectedPosition = 0;
 	private LocationClient mLocationClient;
-	private boolean isOnResume = false;
 	// These settings are the same as the settings for the map. They will in
 	// fact give you updates at
 	// the maximal rates currently possible.
 	private static final LocationRequest REQUEST = LocationRequest.create()
-			.setInterval(1000) // 1 seconds
-			.setFastestInterval(16) // 16ms = 60fps
+			.setInterval(1000)
+			// 1 seconds
+			.setFastestInterval(16)
+			// 16ms = 60fps
 			.setSmallestDisplacement(4)
 			.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
@@ -170,6 +171,11 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 					map.animateCamera(CameraUpdateFactory
 							.newLatLng(currentMarker.getPosition()));
 					adapter.notifyDataSetChanged();
+					if (selectedPosition != 0) {
+						mLocationClient.disconnect();
+					} else {
+						mLocationClient.connect();
+					}
 				}
 			});
 
@@ -180,11 +186,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 			map.getUiSettings().setZoomControlsEnabled(false);
 			map.getUiSettings().setCompassEnabled(false);
 			map.getUiSettings().setMyLocationButtonEnabled(true);
-			
+
 			map.setTrafficEnabled(false);
 			// map.setMyLocationEnabled(true);
 			setUpLocationClientIfNeeded();
-			mLocationClient.connect(); //onConnected is called when connection is made.
+			mLocationClient.connect(); // onConnected is called when connection
+										// is made.
 
 			places = new MarkerOptions[MAX_PLACES];
 			placeMarkers = new Marker[MAX_PLACES + 1];
@@ -232,6 +239,15 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 						if (myLocation != null) {
 							lat = myLocation.getLatitude();
 							lng = myLocation.getLongitude();
+
+							lastMarker.setVisible(false);
+							lastMarker = userMarker;
+							lastMarker.setVisible(true);
+							selectedPosition = 0;
+							map.animateCamera(CameraUpdateFactory
+									.newLatLng(lastMarker.getPosition()));
+							adapter.notifyDataSetChanged();
+
 						}
 						searchStr = "https://maps.googleapis.com/maps/api/place/textsearch/"
 								+ "json?query="
@@ -249,6 +265,10 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 						isTextSearch = true;
 
 						executeTask(new GetPlaces(), searchStr);
+
+						if (!mLocationClient.isConnected()) {
+							mLocationClient.connect();
+						}
 					}
 				} catch (UnsupportedEncodingException e) {
 					Log.w(getClass().getSimpleName(),
@@ -256,7 +276,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 				}
 			}
 		});
-		
+
 		setupActionBar();
 	}
 
@@ -303,7 +323,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 
 		init();
 	}
-	
+
 	private void setUpLocationClientIfNeeded() {
 		if (mLocationClient == null) {
 			mLocationClient = new LocationClient(getApplicationContext(), this, // ConnectionCallbacks
@@ -323,9 +343,9 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 	public void onLocationChanged(Location newLocation) {
 		if (myLocation != null) {
 			userMarker.setPosition(new LatLng(newLocation.getLatitude(),
-						newLocation.getLongitude()));
+					newLocation.getLongitude()));
 			map.animateCamera(CameraUpdateFactory.newLatLng(userMarker
-						.getPosition()));
+					.getPosition()));
 			Log.d("ShareLocation",
 					"is Location changed = "
 							+ Double.valueOf(myLocation.distanceTo(newLocation))
@@ -349,6 +369,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 					lastMarker = userMarker;
 					selectedPosition = 0;
 					lastMarker.setVisible(true);
+					adapter.notifyDataSetChanged();
 					updateNearbyPlaces();
 				}
 			}
@@ -368,7 +389,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onConnected(Bundle arg0) {
 		Log.d("ShareLocation", "LocationClient Connected");
-		if (myLocation==null || (!isOnResume && !isTextSearch) ){
+		if (myLocation == null) {
 			Log.d("ShareLocation", "LocationClient Connected inside if");
 			updateMyLocation();
 		}
@@ -384,19 +405,20 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 	protected void onResume() {
 		super.onResume();
 		setUpLocationClientIfNeeded();
-		mLocationClient.connect();
+		if (selectedPosition == 0)
+			mLocationClient.connect();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		isOnResume = true;
+		Log.d("ShareLocation", "onPause");
 		if (mLocationClient != null) {
+			Log.d("ShareLocation", "Disconnecting LocationClient");
 			mLocationClient.disconnect();
 		}
 	}
 
-	
 	public void sendSelectedLocation() {
 		if (lastMarker == null) {
 			Log.d("ShareLocation", "sendSelectedLocation");
@@ -430,12 +452,14 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 		// get location manager
 		showLocationDialog();
 		myLocation = mLocationClient.getLastLocation();
-		if(myLocation == null)
-			myLocation = locManager.getLastKnownLocation(currentLocationDevice==GPS_ENABLED? LocationManager.GPS_PROVIDER:LocationManager.NETWORK_PROVIDER);
+		if (myLocation == null)
+			myLocation = locManager
+					.getLastKnownLocation(currentLocationDevice == GPS_ENABLED ? LocationManager.GPS_PROVIDER
+							: LocationManager.NETWORK_PROVIDER);
 		// myLocation = map.getMyLocation();
 		Log.d(getClass().getSimpleName(), "inside updateMyLocation");
 
-		if (myLocation != null){
+		if (myLocation != null) {
 			setMyLocation(myLocation);
 			updateNearbyPlaces();
 		}
@@ -466,8 +490,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
 				.build(); // Creates a CameraPosition from the builder
 		Log.d(getClass().getSimpleName(), "stting up camera in set my location");
-		map.moveCamera(
-				CameraUpdateFactory.newCameraPosition(cameraPosition));
+		map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 	}
 
