@@ -728,6 +728,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				return false;
 			}
 		}
+		if (mUserIsBlocked) {
+			return false;
+		}
 
 		switch (item.getItemId()) {
 		case R.id.attachment:
@@ -1430,6 +1433,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void openProfileScreen() {
+		if (mUserIsBlocked) {
+			return;
+		}
 		if (!(mConversation instanceof GroupConversation)) {
 			String userMsisdn = prefs.getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
