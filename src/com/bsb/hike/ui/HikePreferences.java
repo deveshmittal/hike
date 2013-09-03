@@ -294,8 +294,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					Toast.makeText(getApplicationContext(),
 							R.string.social_unlink_success, Toast.LENGTH_SHORT)
 							.show();
-					getPreferenceScreen().removePreference(getPreferenceScreen()
-							.findPreference(HikeConstants.UNLINK_FB));
+					getPreferenceScreen().removePreference(
+							getPreferenceScreen().findPreference(
+									HikeConstants.UNLINK_FB));
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
@@ -323,8 +324,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					Toast.makeText(getApplicationContext(),
 							R.string.social_unlink_success, Toast.LENGTH_SHORT)
 							.show();
-					getPreferenceScreen().removePreference(getPreferenceScreen()
-							.findPreference(HikeConstants.UNLINK_TWITTER));
+					getPreferenceScreen().removePreference(
+							getPreferenceScreen().findPreference(
+									HikeConstants.UNLINK_TWITTER));
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
