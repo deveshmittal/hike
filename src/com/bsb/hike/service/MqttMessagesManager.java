@@ -991,12 +991,12 @@ public class MqttMessagesManager {
 			 */
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 			JSONObject lastSeens = null;
-			if(data!=null)
-			 lastSeens = data
-					.getJSONObject(HikeConstants.BULK_LAST_SEEN_KEY);
+			if (data != null)
+				lastSeens = data
+						.getJSONObject(HikeConstants.BULK_LAST_SEEN_KEY);
 			// Iterator<String> iterator = lastSeens.keys();
 
-			if (lastSeens!=null) {
+			if (lastSeens != null) {
 				for (Iterator<String> iterator = lastSeens.keys(); iterator
 						.hasNext();) {
 					String msisdn = iterator.next();
@@ -1008,8 +1008,8 @@ public class MqttMessagesManager {
 								lastSeenTime);
 					} else {
 						/*
-						 * Otherwise the last seen time notifies that the user is
-						 * either online or has turned the setting off.
+						 * Otherwise the last seen time notifies that the user
+						 * is either online or has turned the setting off.
 						 */
 						isOffline = (int) lastSeenTime;
 						lastSeenTime = System.currentTimeMillis() / 1000;
