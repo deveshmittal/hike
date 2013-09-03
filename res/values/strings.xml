@@ -140,7 +140,7 @@
 	<string name="quit">Quit</string>
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
-	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
+	<string name="unlink_confirmation">Are you sure you want logout your hike account from this device?  ?</string>
 	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from hike?</string>
 	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from hike?</string>
 	<string name="unlink">Unlink</string>
