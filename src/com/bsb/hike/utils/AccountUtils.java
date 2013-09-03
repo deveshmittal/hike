@@ -463,7 +463,7 @@ public class AccountUtils {
 	}
 
 	private static void assertIfTokenNull() {
-		Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
+//		Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
 	public static void setName(String name) throws NetworkErrorException,
