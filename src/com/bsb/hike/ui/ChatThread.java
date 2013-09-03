@@ -731,6 +731,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (mUserIsBlocked) {
 			return false;
 		}
+		if (mCredits <= 0) {
+			boolean nativeSmsPref = Utils.getSendSmsPref(this);
+			if (!nativeSmsPref) {
+				return false;
+			}
+		}
 
 		switch (item.getItemId()) {
 		case R.id.attachment:
@@ -2183,6 +2189,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (!show) {
 			showOverlay(false);
 		}
+		findViewById(R.id.emo_btn).setEnabled(false);
+		findViewById(R.id.sticker_btn).setEnabled(false);
 	}
 
 	private void nonZeroCredits() {
@@ -2203,6 +2211,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		findViewById(
 				(mConversation instanceof GroupConversation) ? R.id.group_info_layout
 						: R.id.info_layout).setVisibility(View.GONE);
+
+		findViewById(R.id.emo_btn).setEnabled(true);
+		findViewById(R.id.sticker_btn).setEnabled(true);
 
 		if (!blockOverlay) {
 			hideOverlay();
@@ -4001,6 +4012,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		public boolean onDoubleTap(MotionEvent e) {
 			if (mConversation instanceof GroupConversation) {
 				if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+					return false;
+				}
+			}
+			if (mCredits <= 0) {
+				boolean nativeSmsPref = Utils.getSendSmsPref(ChatThread.this);
+				if (!nativeSmsPref) {
 					return false;
 				}
 			}
