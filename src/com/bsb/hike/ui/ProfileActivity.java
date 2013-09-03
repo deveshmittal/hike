@@ -354,9 +354,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				} else {
 					friendItem.setVisible(true);
 					if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
-						friendItem.setTitle(R.string.unfriend);
-					} else {
 						friendItem.setTitle(R.string.add_as_friend_menu);
+					} else {
+						friendItem.setTitle(R.string.unfriend);
 					}
 				}
 			}
