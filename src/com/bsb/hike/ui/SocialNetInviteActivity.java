@@ -468,9 +468,9 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 								JSONObject d = new JSONObject();
 								d.put(HikeConstants.NATIVE_INVITES,
 										nativeinvites);
-								d.put(HikeConstants.TIMESTAMP,
-										System.currentTimeMillis() / 1000);
 								data.put(HikeConstants.DATA, d);
+								data.put(HikeConstants.TIMESTAMP,
+										System.currentTimeMillis() / 1000);
 								HikeMessengerApp.getPubSub().publish(
 										HikePubSub.MQTT_PUBLISH, data);
 								Log.d("SocialNetInviteActivity", "fb packet"
