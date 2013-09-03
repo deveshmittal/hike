@@ -754,8 +754,6 @@ public class MqttMessagesManager {
 						statusMessage);
 				pubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
 						statusMessage);
-
-				incrementUnseenStatusCount();
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
@@ -992,35 +990,39 @@ public class MqttMessagesManager {
 			 * ,"+919810335374":<last_seen_time_in_epoch>}}}
 			 */
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			JSONObject lastSeens = data
+			JSONObject lastSeens = null;
+			if(data!=null)
+			 lastSeens = data
 					.getJSONObject(HikeConstants.BULK_LAST_SEEN_KEY);
 			// Iterator<String> iterator = lastSeens.keys();
 
-			for (Iterator<String> iterator = lastSeens.keys(); iterator
-					.hasNext();) {
-				String msisdn = iterator.next();
-				int isOffline;
-				long lastSeenTime = lastSeens.getLong(msisdn);
-				if (lastSeenTime > 0) {
-					isOffline = 1;
-					lastSeenTime = Utils.applyServerTimeOffset(context,
-							lastSeenTime);
-				} else {
-					/*
-					 * Otherwise the last seen time notifies that the user is
-					 * either online or has turned the setting off.
-					 */
-					isOffline = (int) lastSeenTime;
-					lastSeenTime = System.currentTimeMillis() / 1000;
+			if (lastSeens!=null) {
+				for (Iterator<String> iterator = lastSeens.keys(); iterator
+						.hasNext();) {
+					String msisdn = iterator.next();
+					int isOffline;
+					long lastSeenTime = lastSeens.getLong(msisdn);
+					if (lastSeenTime > 0) {
+						isOffline = 1;
+						lastSeenTime = Utils.applyServerTimeOffset(context,
+								lastSeenTime);
+					} else {
+						/*
+						 * Otherwise the last seen time notifies that the user is
+						 * either online or has turned the setting off.
+						 */
+						isOffline = (int) lastSeenTime;
+						lastSeenTime = System.currentTimeMillis() / 1000;
+					}
+					userDb.updateLastSeenTime(msisdn, lastSeenTime);
+					userDb.updateIsOffline(msisdn, (int) isOffline);
+
+					HikeMessengerApp.lastSeenFriendsMap.put(msisdn,
+							Long.valueOf(lastSeenTime));
+
 				}
-				userDb.updateLastSeenTime(msisdn, lastSeenTime);
-				userDb.updateIsOffline(msisdn, (int) isOffline);
-
-				HikeMessengerApp.lastSeenFriendsMap.put(msisdn,
-						Long.valueOf(lastSeenTime));
-
+				pubSub.publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
 			}
-			pubSub.publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
 
 		} else if (HikeConstants.MqttMessageTypes.LAST_SEEN.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);

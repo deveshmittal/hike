@@ -54,6 +54,12 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		String name = conversation.getLabel();
 
 		contactView.setText(name);
+		if (conversation instanceof GroupConversation) {
+			contactView.setCompoundDrawablesWithIntrinsicBounds(
+					R.drawable.ic_group, 0, 0, 0);
+		} else {
+			contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+		}
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty()) {
 			ConvMessage message = messages.get(messages.size() - 1);

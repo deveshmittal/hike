@@ -762,8 +762,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						+ DBConstants.BLOCK_TABLE + ")");
 			}
 		}
-		if (onHike != -1) {
+		if (onHike != HikeConstants.BOTH_VALUE) {
 			queryBuilder.append(" AND " + DBConstants.ONHIKE + " = " + onHike);
+			if (onHike == HikeConstants.NOT_ON_HIKE_VALUE) {
+				queryBuilder.append(" AND ((" + DBConstants.USERS_TABLE + "."
+						+ DBConstants.MSISDN + " LIKE '+91%')");
+				if (favoriteType != FavoriteType.NOT_FRIEND
+						&& favoriteType != null) {
+					queryBuilder.append(" OR (" + favoriteMsisdnColumnName
+							+ " LIKE '+91%')");
+				}
+				queryBuilder.append(")");
+			}
 		} else if (!nativeSMSOn) {
 			queryBuilder.append(" AND ((" + DBConstants.ONHIKE + " =1) OR  ("
 					+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN

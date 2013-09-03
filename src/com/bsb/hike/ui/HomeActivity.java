@@ -35,6 +35,7 @@ import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
@@ -46,7 +47,8 @@ import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
-public class HomeActivity extends HikeAppStateBaseFragmentActivity {
+public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
+		Listener {
 
 	public static final int UPDATES_TAB_INDEX = 0;
 	public static final int CHATS_TAB_INDEX = 1;
@@ -70,6 +72,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	private View parentLayout;
 	private Dialog dialog;
 	private SharedPreferences accountPrefs;
+
+	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
+			HikePubSub.PROTIP_ADDED, HikePubSub.RESET_UNREAD_COUNT };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +120,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 			}
 		}
 
+		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
+
 		initialiseViewPager();
 		initialiseTabs();
 
@@ -143,6 +150,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 				showSMSClientDialog();
 			}
 		}
+
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+	}
+
+	@Override
+	protected void onDestroy() {
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		super.onDestroy();
 	}
 
 	@Override
@@ -286,6 +301,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 			return true;
 		}
 	};
+	private TabPageIndicator tabIndicator;
 
 	private Intent getGamingIntent() {
 
@@ -464,7 +480,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	}
 
 	private void initialiseTabs() {
-		TabPageIndicator tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
+		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
 		tabIndicator.setViewPager(viewPager,
 				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
 		tabIndicator.setOnPageChangeListener(onPageChangeListener);
@@ -507,6 +523,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 			 */
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY,
 					"");
+			if (position == UPDATES_TAB_INDEX) {
+				showUpdateIcon = false;
+				tabIndicator.notifyDataSetChanged();
+			}
 		}
 
 		@Override
@@ -536,6 +556,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 		}
 	};
+	private boolean showUpdateIcon;
 
 	private void initialiseViewPager() {
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -598,9 +619,38 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 		@Override
 		public int getIconResId(int index) {
-			return tabIcons[index];
+			if (index == UPDATES_TAB_INDEX && showUpdateIcon) {
+				return R.drawable.ic_new_update;
+			} else {
+				return tabIcons[index];
+			}
 		}
 
 	}
 
+	@Override
+	public void onEventReceived(String type, Object object) {
+		super.onEventReceived(type, object);
+		if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)
+				|| HikePubSub.PROTIP_ADDED.equals(type)) {
+			showUpdateIcon = Utils.getNotificationCount(
+					getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0),
+					false) > 0;
+			if (!showUpdateIcon) {
+				return;
+			}
+			runOnUiThread(refreshTabIcon);
+		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
+			showUpdateIcon = false;
+			runOnUiThread(refreshTabIcon);
+		}
+	}
+
+	Runnable refreshTabIcon = new Runnable() {
+
+		@Override
+		public void run() {
+			tabIndicator.notifyDataSetChanged();
+		}
+	};
 }

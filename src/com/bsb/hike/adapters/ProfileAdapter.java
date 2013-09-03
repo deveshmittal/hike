@@ -18,6 +18,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
@@ -228,7 +229,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			viewHolder.text.setText(name);
 
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null,
-					false);
+					false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null) {
 				imageLoader.loadImage(msisdn, viewHolder.image);
@@ -341,11 +342,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					int offline = contactInfo.getOffline();
 
 					String lastSeenString = null;
+					boolean showingLastSeen = false;
 					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
 							&& !contactInfo.getMsisdn().equals(
 									contactInfo.getId())) {
 						lastSeenString = Utils.getLastSeenTimeAsString(context,
 								contactInfo.getLastSeenTime(), offline, true);
+						showingLastSeen = false;
 					}
 
 					nameTextView.setText(contactInfo.getFirstName());
@@ -357,7 +360,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						mainInfo.setText(lastSeenString);
 					}
 
-					if (offline == 0) {
+					if (showingLastSeen && offline == 0) {
 						mainInfo.setTextColor(context.getResources().getColor(
 								R.color.unread_message));
 						avatarFrame

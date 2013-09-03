@@ -73,7 +73,7 @@ public class ImageViewerFragment extends SherlockFragment implements
 		}
 
 		fileName = hasCustomImage ? Utils.getProfileImageFileName(mappedId)
-				: Utils.getDefaultAvatarServerName(getActivity(), mappedId);
+				: Utils.getDefaultAvatarServerName(mappedId);
 
 		File file = new File(basePath, fileName);
 

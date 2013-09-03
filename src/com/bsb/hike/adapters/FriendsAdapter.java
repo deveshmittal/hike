@@ -35,6 +35,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 	public static final int FRIEND_INDEX = 0;
 	public static final int HIKE_INDEX = 1;
+	public static final int SMS_INDEX = 2;
 
 	public static final String EXTRA_ID = "-910";
 	public static final String SECTION_ID = "-911";
@@ -47,32 +48,42 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	private LayoutInflater layoutInflater;
-	private List<ContactInfo> completeList;
-	private List<ContactInfo> friendsList;
-	private List<ContactInfo> otherContactsList;
-	private List<ContactInfo> filteredFriendsList;
 
-	private List<ContactInfo> filteredOtherContactsList;
+	private List<ContactInfo> completeList;
+
+	private List<ContactInfo> friendsList;
+	private List<ContactInfo> hikeContactsList;
+	private List<ContactInfo> smsContactsList;
+	private List<ContactInfo> filteredFriendsList;
+	private List<ContactInfo> filteredHikeContactsList;
+	private List<ContactInfo> filteredSmsContactsList;
+
 	private Context context;
 	private ContactInfo friendsSection;
-	private ContactInfo contactsSection;
+	private ContactInfo hikeContactsSection;
+	private ContactInfo smsContactsSection;
 	private ContactInfo inviteExtraItem;
 	private ContactInfo groupExtraItem;
 	private ContactFilter contactFilter;
 	private String queryText;
+	private boolean lastSeenPref;
 
 	public FriendsAdapter(final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();
+		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
+				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 
 		completeList = new ArrayList<ContactInfo>();
 
 		friendsList = new ArrayList<ContactInfo>(0);
-		otherContactsList = new ArrayList<ContactInfo>(0);
+		hikeContactsList = new ArrayList<ContactInfo>(0);
+		smsContactsList = new ArrayList<ContactInfo>(0);
 
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
-		filteredOtherContactsList = new ArrayList<ContactInfo>(0);
+		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
+		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
 
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask();
 		Utils.executeAsyncTask(fetchFriendsTask);
@@ -81,7 +92,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private class FetchFriendsTask extends AsyncTask<Void, Void, Void> {
 
 		List<ContactInfo> favoriteTaskList;
-		List<ContactInfo> otherTaskList;
+		List<ContactInfo> hikeTaskList;
+		List<ContactInfo> smsTaskList;
 
 		@Override
 		protected Void doInBackground(Void... params) {
@@ -110,27 +122,33 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			Collections.sort(favoriteTaskList,
 					ContactInfo.lastSeenTimeComparator);
 
-			otherTaskList = hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.NOT_FRIEND, HikeConstants.BOTH_VALUE,
+			hikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
 					myMsisdn, nativeSMSOn);
-			otherTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
+			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_RECEIVED, HikeConstants.ON_HIKE_VALUE,
 					myMsisdn, nativeSMSOn, true));
-			otherTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED_REJECTED,
-					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, true));
-			Collections.sort(otherTaskList);
+					HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn, true));
+			Collections.sort(hikeTaskList);
 
+			smsTaskList = hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.NOT_FRIEND, HikeConstants.NOT_ON_HIKE_VALUE,
+					myMsisdn, nativeSMSOn);
+			Collections.sort(smsTaskList);
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			friendsList = favoriteTaskList;
-			otherContactsList = otherTaskList;
+			hikeContactsList = hikeTaskList;
+			smsContactsList = smsTaskList;
 
 			filteredFriendsList.addAll(favoriteTaskList);
-			filteredOtherContactsList.addAll(otherTaskList);
+			filteredHikeContactsList.addAll(hikeTaskList);
+			filteredSmsContactsList.addAll(smsTaskList);
 			makeCompleteList(true);
 		}
 	}
@@ -151,7 +169,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						.trim();
 
 				List<ContactInfo> filteredFriendsList = new ArrayList<ContactInfo>();
-				List<ContactInfo> filteredOtherContactsList = new ArrayList<ContactInfo>();
+				List<ContactInfo> filteredHikeContactsList = new ArrayList<ContactInfo>();
+				List<ContactInfo> filteredSmsContactsList = new ArrayList<ContactInfo>();
 
 				for (ContactInfo info : friendsList) {
 					String name = info.getName();
@@ -163,31 +182,62 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						}
 					}
 
-					if (textToBeFiltered.contains(info.getMsisdn())) {
-						filteredFriendsList.add(info);
+					if (info.getMsisdn() != null) {
+						if (info.getMsisdn().contains(textToBeFiltered)) {
+							filteredFriendsList.add(info);
+						}
 					}
 				}
 
-				for (ContactInfo info : otherContactsList) {
+				for (ContactInfo info : hikeContactsList) {
 					String name = info.getName();
 					if (name != null) {
 						name = name.toLowerCase();
 						if (name.contains(textToBeFiltered)) {
-							filteredOtherContactsList.add(info);
+							filteredHikeContactsList.add(info);
 							continue;
 						}
 					}
 
-					if (textToBeFiltered.contains(info.getMsisdn())) {
-						filteredOtherContactsList.add(info);
+					if (info.getMsisdn() != null) {
+						if (info.getMsisdn().contains(textToBeFiltered)) {
+							filteredHikeContactsList.add(info);
+						}
 					}
 				}
 
-				results.values = new Pair<List<ContactInfo>, List<ContactInfo>>(
-						filteredFriendsList, filteredOtherContactsList);
+				for (ContactInfo info : smsContactsList) {
+					String name = info.getName();
+					if (name != null) {
+						name = name.toLowerCase();
+						if (name.contains(textToBeFiltered)) {
+							filteredSmsContactsList.add(info);
+							continue;
+						}
+					}
+
+					if (info.getMsisdn() != null) {
+						if (info.getMsisdn().contains(textToBeFiltered)) {
+							filteredSmsContactsList.add(info);
+						}
+					}
+				}
+
+				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(
+						3);
+				resultList.add(filteredFriendsList);
+				resultList.add(filteredHikeContactsList);
+				resultList.add(filteredSmsContactsList);
+
+				results.values = resultList;
 			} else {
-				results.values = new Pair<List<ContactInfo>, List<ContactInfo>>(
-						friendsList, otherContactsList);
+				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(
+						3);
+				resultList.add(friendsList);
+				resultList.add(hikeContactsList);
+				resultList.add(smsContactsList);
+
+				results.values = resultList;
 			}
 			results.count = 1;
 			return results;
@@ -197,13 +247,16 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		@Override
 		protected void publishResults(CharSequence constraint,
 				FilterResults results) {
-			Pair<List<ContactInfo>, List<ContactInfo>> pair = (Pair<List<ContactInfo>, List<ContactInfo>>) results.values;
+			List<List<ContactInfo>> resultList = (List<List<ContactInfo>>) results.values;
 
 			filteredFriendsList.clear();
-			filteredFriendsList.addAll(pair.first);
+			filteredFriendsList.addAll(resultList.get(0));
 
-			filteredOtherContactsList.clear();
-			filteredOtherContactsList.addAll(pair.second);
+			filteredHikeContactsList.clear();
+			filteredHikeContactsList.addAll(resultList.get(1));
+
+			filteredSmsContactsList.clear();
+			filteredSmsContactsList.addAll(resultList.get(2));
 
 			makeCompleteList(true);
 		}
@@ -232,12 +285,19 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		completeList.addAll(filteredFriendsList);
 
-		contactsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(filteredOtherContactsList.size()),
-				context.getString(R.string.contacts), null);
-		completeList.add(contactsSection);
+		hikeContactsSection = new ContactInfo(SECTION_ID,
+				Integer.toString(filteredHikeContactsList.size()),
+				context.getString(R.string.hike_contacts), null);
+		completeList.add(hikeContactsSection);
 
-		completeList.addAll(filteredOtherContactsList);
+		completeList.addAll(filteredHikeContactsList);
+
+		smsContactsSection = new ContactInfo(SECTION_ID,
+				Integer.toString(filteredSmsContactsList.size()),
+				context.getString(R.string.sms_contacts), null);
+		completeList.add(smsContactsSection);
+
+		completeList.addAll(filteredSmsContactsList);
 
 		notifyDataSetChanged();
 	}
@@ -257,8 +317,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			boolean remakeCompleteList) {
 		removeContactByMatchingMsisdn(friendsList, contactInfo);
 
-		removeContactByMatchingMsisdn(otherContactsList, contactInfo);
+		removeContactByMatchingMsisdn(hikeContactsList, contactInfo);
 
+		removeContactByMatchingMsisdn(smsContactsList, contactInfo);
 		if (remakeCompleteList) {
 			makeCompleteList(false);
 		}
@@ -277,8 +338,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
 			break;
 		case HIKE_INDEX:
-			otherContactsList.add(contactInfo);
-			Collections.sort(otherContactsList);
+			hikeContactsList.add(contactInfo);
+			Collections.sort(hikeContactsList);
+		case SMS_INDEX:
+			smsContactsList.add(contactInfo);
+			Collections.sort(smsContactsList);
 		}
 
 		makeCompleteList(false);
@@ -291,7 +355,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			groupList = friendsList;
 			break;
 		case HIKE_INDEX:
-			groupList = otherContactsList;
+			groupList = hikeContactsList;
+			break;
+		case SMS_INDEX:
+			groupList = smsContactsList;
 			break;
 		}
 		groupList.clear();
@@ -307,7 +374,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			removeContactByMatchingMsisdn(friendsList, contactInfo);
 			break;
 		case HIKE_INDEX:
-			removeContactByMatchingMsisdn(otherContactsList, contactInfo);
+			removeContactByMatchingMsisdn(hikeContactsList, contactInfo);
+			break;
+		case SMS_INDEX:
+			removeContactByMatchingMsisdn(smsContactsList, contactInfo);
 			break;
 		}
 		makeCompleteList(false);
@@ -416,7 +486,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				avatarFrame
 						.setImageResource(R.drawable.frame_avatar_medium_selector);
 
-				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+						&& lastSeenPref) {
 					String lastSeenString = Utils.getLastSeenTimeAsString(
 							context, contactInfo.getLastSeenTime(),
 							contactInfo.getOffline());
@@ -455,10 +526,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.add_friend);
 				addFriend.setTag(contactInfo);
 				addFriend.setOnClickListener(this);
-
-				TextView info = (TextView) convertView.findViewById(R.id.info);
-				info.setText(contactInfo.isOnhike() ? R.string.tap_chat
-						: R.string.tap_sms);
 			}
 
 		} else if (viewType == ViewType.SECTION) {

@@ -1711,6 +1711,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 																	// return to
 																	// sender
 
+					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT,
+							mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MSG_READ,
 							mConversation.getMsisdn());
 				}

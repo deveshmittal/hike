@@ -142,7 +142,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 								FriendsAdapter.HIKE_INDEX);
 					} else if (HikePubSub.USER_LEFT.equals(type)) {
 						friendsAdapter.removeFromGroup(contactInfo,
-								FriendsAdapter.HIKE_INDEX);
+								FriendsAdapter.SMS_INDEX);
 					}
 				}
 			});
@@ -168,7 +168,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 									FriendsAdapter.HIKE_INDEX);
 						} else {
 							friendsAdapter.removeFromGroup(contactInfo,
-									FriendsAdapter.FRIEND_INDEX);
+									FriendsAdapter.SMS_INDEX);
 						}
 					}
 				}
@@ -190,6 +190,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 						if (contactInfo.isOnhike()) {
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
+						} else {
+							friendsAdapter.addToGroup(contactInfo,
+									FriendsAdapter.SMS_INDEX);
 						}
 					} else {
 						friendsAdapter.addToGroup(contactInfo,
@@ -247,6 +250,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 						if (contactInfo.isOnhike()) {
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
+						} else {
+							friendsAdapter.addToGroup(contactInfo,
+									FriendsAdapter.SMS_INDEX);
 						}
 					}
 				}

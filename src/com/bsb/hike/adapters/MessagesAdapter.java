@@ -1041,8 +1041,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.marginView.setVisibility(hikeFile.getThumbnail() == null
 						&& !showThumbnail ? View.VISIBLE : View.GONE);
 			}
-			if (!convMessage.isSent()
-					&& (conversation instanceof GroupConversation)) {
+			if (!convMessage.isSent()) {
 				if (firstMessageFromParticipant) {
 					holder.participantNameFT
 							.setText(((GroupConversation) conversation)
@@ -1059,6 +1058,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else if (metadata != null && metadata.isPokeMessage()) {
 			holder.messageTextView.setVisibility(View.GONE);
 			holder.messageContainer.setVisibility(View.VISIBLE);
+			if (!convMessage.isSent()) {
+				if (firstMessageFromParticipant) {
+					holder.participantNameFT.setVisibility(View.VISIBLE);
+					holder.participantNameFT
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+				} else {
+					holder.participantNameFT.setVisibility(View.GONE);
+				}
+			}
 			holder.poke.setVisibility(View.VISIBLE);
 			holder.poke
 					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
@@ -1075,8 +1085,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			Sticker sticker = metadata.getSticker();
 
-			if (isGroupChat && !convMessage.isSent()
-					&& convMessage.getGroupParticipantMsisdn() != null) {
+			if (!convMessage.isSent()) {
 				if (firstMessageFromParticipant) {
 					holder.stickerParticipantName.setVisibility(View.VISIBLE);
 					holder.stickerParticipantName
@@ -1146,8 +1155,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			CharSequence markedUp = convMessage.getMessage();
 			// Fix for bug where if a participant leaves the group chat, the
 			// participant's name is never shown
-			if (isGroupChat && !convMessage.isSent()
-					&& convMessage.getGroupParticipantMsisdn() != null) {
+			if (!convMessage.isSent()) {
 				if (firstMessageFromParticipant) {
 					holder.participantNameFT.setVisibility(View.VISIBLE);
 					holder.participantNameFT
