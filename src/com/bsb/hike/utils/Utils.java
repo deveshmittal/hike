@@ -2743,7 +2743,7 @@ public class Utils {
 
 	public static Bitmap returnScaledBitmap(Bitmap src, Context context) {
 		Resources res = context.getResources();
-		if (Build.VERSION.SDK_INT > 11) {
+		if (isHoneycombOrHigher()) {
 			int height = (int) res
 					.getDimension(android.R.dimen.notification_large_icon_height);
 			int width = (int) res

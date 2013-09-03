@@ -61,10 +61,19 @@ public class HikeNotification {
 		SharedPreferences preferenceManager = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
 
+		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
 				false) ? Notification.DEFAULT_VIBRATE : 0;
 		boolean led = preferenceManager
 				.getBoolean(HikeConstants.LED_PREF, true);
+
+		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
+				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
+				: 0;
+		
+		boolean playNativeJingle = preferenceManager.getBoolean(
+				HikeConstants.NATIVE_JINGLE_PREF, true);
+
 
 		int notificationId = context.getString(R.string.team_hike).hashCode();
 		// we've got to invoke the timeline here
@@ -92,7 +101,13 @@ public class HikeNotification {
 		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(resultPendingIntent);
-
+		if (playNativeJingle && playSound != 0) {
+			mBuilder.setSound(Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1));
+		} else if (playSound != 0) {
+			mBuilder.setDefaults(mBuilder.getNotification().defaults
+					| playSound);
+		}
 		if (led) {
 			mBuilder.setLights(Color.BLUE, 300, 1000);
 		}

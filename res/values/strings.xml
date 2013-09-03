@@ -642,9 +642,9 @@
 	<string name="last_seen_yesterday_group_participant">Yesterday</string>
 	<string name="invite_friends_hike">Invite friends to hike</string>
 	<string name="create_group">Create group</string>
-	<string name="feedback_on_hike">Feedback on hike</string>
 	<string name="hike_contacts">hike Contacts</string>
 	<string name="sms_contacts">SMS Contacts</string>
 	<string name="invite_subtext">Earn additional SMS for every friend the joins hike through you.</string>
 	<string name="india_only">Free SMS can only be sent to India.</string>
+	<string name="feedback_on_hike">Feedback on hike for Android</string>
 </resources>

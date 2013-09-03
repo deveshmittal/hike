@@ -3,11 +3,8 @@ package com.bsb.hike.utils;
 import java.lang.ref.WeakReference;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
@@ -17,7 +14,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
-import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -30,7 +26,6 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.HikePreferences;
 
 public class ToastListener implements Listener {
 
@@ -190,14 +185,15 @@ public class ToastListener implements Listener {
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
 
 			Protip proTip = (Protip) object;
-			boolean whetherToShow = false;;
+			boolean whetherToShow = false;
+			;
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
 			SharedPreferences accountPrefs = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			whetherToShow = Utils.isProtipNotificationShowable(accountPrefs);
-			
+
 			if (proTip.isShowPush() && whetherToShow)
 				toaster.notifyMessage(proTip);
 		}
