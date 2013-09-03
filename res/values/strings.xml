@@ -528,7 +528,7 @@
 	<string name="default_client_header">Unified Inbox</string>
 	<string name="default_client_info">Receive regular SMS within hike</string>
 	<string name="native_header">Send via Regular SMS</string>
-	<string name="native_info">You will now send a regular SMS through hike. Operator rates will apply.</string>
+	<string name="native_info">You will now send regular SMS through hike. Operator rates will apply.</string>
 	<string name="use_hike_for_sms">Unified Inbox</string>
 	<string name="use_hike_for_sms_info">To send a regular SMS, you need to make hike your primary SMS inbox</string>
 	<string name="allow">Allow</string>
