@@ -203,18 +203,9 @@ public class ToastListener implements Listener {
 						.getLastProtip();
 				whetherToShow = Utils.showProtip(protip, accountPrefs);
 			}
-			else {
-				Protip protip = HikeConversationsDatabase.getInstance()
-						.getProtipForId(currentProtipId);
-				if (protip == null) {
-					whetherToShow = true;
-				}
-				
 			if (proTip.isShowPush() && whetherToShow)
 				toaster.notifyMessage(proTip);
 			}
-
-		}
 	}
 
 	private void notifyConnStatus(MQTTConnectionStatus status) {
