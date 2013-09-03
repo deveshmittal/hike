@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -102,13 +103,25 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		Preference unlinkFacebookPreference = getPreferenceScreen()
 				.findPreference(HikeConstants.UNLINK_FB);
 		if (unlinkFacebookPreference != null) {
-			unlinkFacebookPreference.setOnPreferenceClickListener(this);
+			Session session = Session.getActiveSession();
+			if (Session.getActiveSession() != null && session.isOpened()) {
+				unlinkFacebookPreference.setOnPreferenceClickListener(this);
+			} else {
+				getPreferenceScreen()
+						.removePreference(unlinkFacebookPreference);
+			}
 		}
 
 		Preference unlinkTwitterPreference = getPreferenceScreen()
-				.findPreference(HikeConstants.UNLINK_PREF);
+				.findPreference(HikeConstants.UNLINK_TWITTER);
 		if (unlinkTwitterPreference != null) {
-			unlinkTwitterPreference.setOnPreferenceClickListener(this);
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).getBoolean(
+					HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
+				unlinkTwitterPreference.setOnPreferenceClickListener(this);
+			} else {
+				getPreferenceScreen().removePreference(unlinkTwitterPreference);
+			}
 		}
 
 		final IconCheckBoxPreference smsClientPreference = (IconCheckBoxPreference) getPreferenceScreen()
@@ -268,6 +281,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					Editor editor = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
+							.edit();
+					editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
+							false);
+					editor.commit();
 					Session session = Session.getActiveSession();
 					if (session != null) {
 						session.closeAndClearTokenInformation();
@@ -275,6 +294,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					Toast.makeText(getApplicationContext(),
 							R.string.social_unlink_success, Toast.LENGTH_SHORT)
 							.show();
+					getPreferenceScreen().removePreference(getPreferenceScreen()
+							.findPreference(HikeConstants.UNLINK_FB));
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
@@ -302,6 +323,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					Toast.makeText(getApplicationContext(),
 							R.string.social_unlink_success, Toast.LENGTH_SHORT)
 							.show();
+					getPreferenceScreen().removePreference(getPreferenceScreen()
+							.findPreference(HikeConstants.UNLINK_TWITTER));
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
