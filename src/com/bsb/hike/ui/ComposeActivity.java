@@ -210,7 +210,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				layoutParams.leftMargin = margin;
 				layoutParams.rightMargin = margin;
-				editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(30)});
+				editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
+						30) });
 				editText.setLayoutParams(layoutParams);
 				builder.setView(editText);
 
@@ -418,7 +419,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view,
 
-			int position, long id) {
+	int position, long id) {
 		Object tag = view.getTag();
 		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) tag;
 
