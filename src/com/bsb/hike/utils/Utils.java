@@ -1922,42 +1922,12 @@ public class Utils {
 			boolean countUsersStatus) {
 		int notificationCount = 0;
 
-		if (TextUtils.isEmpty(accountPrefs.getString(
-				HikeMessengerApp.LAST_STATUS, ""))
-				&& HikeConversationsDatabase.getInstance()
-						.getTimelineStatusMessageCount() < HikeConstants.MIN_STATUS_COUNT) {
-			notificationCount++;
-		}
-
 		notificationCount += accountPrefs.getInt(
 				HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 
 		if (countUsersStatus) {
 			notificationCount += accountPrefs.getInt(
 					HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		}
-
-		long currentProtipId = accountPrefs.getLong(
-				HikeMessengerApp.CURRENT_PROTIP, -1);
-
-		if (currentProtipId == -1) {
-			Protip protip = HikeConversationsDatabase.getInstance()
-					.getLastProtip();
-			if (protip != null) {
-				if (showProtip(protip, accountPrefs)) {
-					notificationCount++;
-				}
-			}
-		} else {
-			Protip protip = HikeConversationsDatabase.getInstance()
-					.getProtipForId(currentProtipId);
-			if (protip == null) {
-				Editor editor = accountPrefs.edit();
-				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-				editor.commit();
-			} else {
-				notificationCount++;
-			}
 		}
 
 		return notificationCount;

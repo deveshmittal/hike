@@ -276,6 +276,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String FRIENDS_TAB_QUERY = "friendsTabQuery";
 
+	public static final String INCREMENTED_UNSEEN_STATUS_COUNT = "incrementedUnseenStatusCount";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

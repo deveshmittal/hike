@@ -1087,6 +1087,10 @@ public class MqttMessagesManager {
 						Base64.decode(iconBase64, Base64.DEFAULT), false);
 			}
 
+			if (Utils.isProtipNotificationShowable(settings)) {
+				incrementUnseenStatusCount();
+			}
+
 			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		}
 	}
@@ -1149,6 +1153,8 @@ public class MqttMessagesManager {
 		Editor editor = settings.edit();
 		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
 		editor.commit();
+
+		pubSub.publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	private void updateDbBatch(long[] ids, ConvMessage.State status,

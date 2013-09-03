@@ -73,8 +73,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private Dialog dialog;
 	private SharedPreferences accountPrefs;
 
-	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
-			HikePubSub.PROTIP_ADDED, HikePubSub.RESET_UNREAD_COUNT };
+	private String[] pubSubListeners = {
+			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
+			HikePubSub.RESET_UNREAD_COUNT };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -631,14 +632,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onEventReceived(String type, Object object) {
 		super.onEventReceived(type, object);
-		if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)
-				|| HikePubSub.PROTIP_ADDED.equals(type)) {
-			showUpdateIcon = Utils.getNotificationCount(
-					getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0),
-					false) > 0;
-			if (!showUpdateIcon) {
-				return;
-			}
+		if (HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT.equals(type)) {
+			showUpdateIcon = true;
 			runOnUiThread(refreshTabIcon);
 		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
 			showUpdateIcon = false;
