@@ -3,11 +3,9 @@ package com.bsb.hike.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -22,38 +20,19 @@ import com.bsb.hike.utils.Utils;
 
 public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		Listener {
-	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
 	private TextView creditsMax;
 	private TextView creditsCurrent;
 	private ProgressBar creditsBar;
 
-	/* Width of the container in which the credit view will slide */
-	private int creditProgressBarWidth;
-	/* Width of the view that shows the current credit number */
-	private int creditNumWidth;
-
-	/*
-	 * Offset for the number of credits/(100 total credits) will come in the
-	 * curved part of the progress bar
-	 */
-	private final static int OFFSET_PORTRAIT = 3;
-	private final static int OFFSET_LANDSCAPE = 1;
-
-	private int currentOffset;
-
-	private int creditNumContainerWidth;
-
 	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.INVITEE_NUM_CHANGED, HikePubSub.SOCIAL_AUTH_COMPLETED };
+			HikePubSub.INVITEE_NUM_CHANGED };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		currentOffset = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? OFFSET_PORTRAIT
-				: OFFSET_LANDSCAPE;
 
 		initalizeViews(savedInstanceState);
 
@@ -67,33 +46,9 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
 
-		creditsContainer = (ViewGroup) findViewById(R.id.credits_container);
 		creditsMax = (TextView) findViewById(R.id.credits_full_txt);
 		creditsCurrent = (TextView) findViewById(R.id.credits_num);
 		creditsBar = (ProgressBar) findViewById(R.id.credits_progress);
-
-		creditNumWidth = getResources().getDimensionPixelSize(
-				R.dimen.credits_num_view_width);
-
-		int totalProgressBarMargin = getResources().getDimensionPixelSize(
-				R.dimen.credits_main_margin)
-				+ getResources().getDimensionPixelSize(
-						R.dimen.credits_progress_margin)
-				+ getResources().getDimensionPixelSize(
-						R.dimen.credits_progress_layout_padding)
-				+ getResources().getDimensionPixelSize(
-						R.dimen.credits_progress_curve_width);
-		creditProgressBarWidth = getResources().getDisplayMetrics().widthPixels
-				- (2 * totalProgressBarMargin);
-
-		int totalCreditNumContainerMargin = getResources()
-				.getDimensionPixelSize(R.dimen.credits_main_margin)
-				+ getResources().getDimensionPixelSize(
-						R.dimen.credits_num_container_margin)
-				+ getResources().getDimensionPixelSize(
-						R.dimen.credits_progress_layout_padding);
-		creditNumContainerWidth = getResources().getDisplayMetrics().widthPixels
-				- (2 * totalCreditNumContainerMargin);
 
 		updateCredits();
 		setupActionBar();
@@ -133,24 +88,11 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		int totalCredits = Integer.parseInt(settings.getString(
 				HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 
-		int actualOffset = (int) ((currentOffset * totalCredits) / 100);
-
-		creditsMax.setText(totalCredits + "+");
-		creditsCurrent.setText(currentCredits + "");
+		creditsMax.setText(Integer.toString(totalCredits));
+		creditsCurrent.setText(Integer.toString(currentCredits));
 
 		creditsBar.setMax(totalCredits);
 		creditsBar.setProgress(currentCredits);
-
-		int paddingLeft;
-		if (currentCredits <= actualOffset) {
-			paddingLeft = 0;
-		} else if (currentCredits >= totalCredits - actualOffset) {
-			paddingLeft = creditNumContainerWidth - creditNumWidth;
-		} else {
-			int creditsForContainer = currentCredits - actualOffset;
-			paddingLeft = (int) ((creditsForContainer * creditProgressBarWidth) / totalCredits);
-		}
-		creditsContainer.setPadding(paddingLeft, 0, 0, 0);
 	}
 
 	private void setupActionBar() {
