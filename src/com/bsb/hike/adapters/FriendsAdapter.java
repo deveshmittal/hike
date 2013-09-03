@@ -510,9 +510,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.sent_friend_request);
 
-						ImageButton acceptBtn = (ImageButton) convertView
+						ImageView acceptBtn = (ImageView) convertView
 								.findViewById(R.id.accept);
-						ImageButton rejectBtn = (ImageButton) convertView
+						ImageView rejectBtn = (ImageView) convertView
 								.findViewById(R.id.reject);
 
 						acceptBtn.setTag(contactInfo);

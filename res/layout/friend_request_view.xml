@@ -28,14 +28,14 @@
                 android:src="@drawable/frame_avatar_medium_selector" />
         </FrameLayout>
 
-        <ImageButton
+        <ImageView
             android:id="@+id/accept"
             style="@style/RequestBtn.Accept"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="8dp" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/reject"
             style="@style/RequestBtn.Reject"
             android:layout_centerVertical="true"
