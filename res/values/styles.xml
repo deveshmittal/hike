@@ -332,8 +332,14 @@
         <item name="android:actionOverflowButtonStyle">@style/OverflowMenu</item>
         <item name="actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
+    	<item name="android:windowAnimationStyle">@style/ActivityAnimation</item>
     </style>
     
+    <style name="ActivityAnimation">
+        <item name="android:windowExitAnimation">@anim/fade_out_animation</item>
+    	<item name="android:windowEnterAnimation">@anim/fade_in_animation</item>
+    </style>
+
     <style name="AppTheme.Home">
         <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
         <item name="vpiTabTextIndicatorStyle">@style/TabText</item>
