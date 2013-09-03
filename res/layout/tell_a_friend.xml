@@ -26,7 +26,7 @@
                 android:drawableLeft="@drawable/ic_invite_sms"
                 android:drawablePadding="5dp"
                 android:paddingLeft="10dp"
-                android:text="@string/free_sms_txt"
+                android:text="@string/sms"
                 android:textColor="@color/lightblack"
                 android:textSize="15sp"
                 android:textStyle="bold|italic" />

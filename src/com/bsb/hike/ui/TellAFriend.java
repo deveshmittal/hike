@@ -60,14 +60,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 			findViewById(ids[i]).setOnClickListener(this);
 		}
 
-		View smsContainer = findViewById(R.id.sms);
-		TextView smsMainText = (TextView) smsContainer
-				.findViewById(R.id.item_txt);
-
-		smsMainText
-				.setText(HikeMessengerApp.isIndianUser() ? R.string.free_sms_txt
-						: R.string.sms);
-
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
 		if (savedInstanceState != null) {
