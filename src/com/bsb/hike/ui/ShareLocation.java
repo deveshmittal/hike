@@ -180,6 +180,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 			map.getUiSettings().setZoomControlsEnabled(false);
 			map.getUiSettings().setCompassEnabled(false);
 			map.getUiSettings().setMyLocationButtonEnabled(true);
+			
 			map.setTrafficEnabled(false);
 			// map.setMyLocationEnabled(true);
 			setUpLocationClientIfNeeded();
@@ -255,6 +256,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 				}
 			}
 		});
+		
 		setupActionBar();
 	}
 
@@ -464,9 +466,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
 				.build(); // Creates a CameraPosition from the builder
 		Log.d(getClass().getSimpleName(), "stting up camera in set my location");
-		map.animateCamera(
-				CameraUpdateFactory.newCameraPosition(cameraPosition), 3000,
-				null);
+		map.moveCamera(
+				CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 	}
 
@@ -485,7 +486,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 						+ myLocation.getLongitude()
 						+ "&types="
 						+ typesStr
-						+ "&radius=1000&sensor=true"
+						+ "&radius=2000&sensor=true"
 						+ "&key="
 						+ getResources().getString(R.string.places_api_key);
 				;
