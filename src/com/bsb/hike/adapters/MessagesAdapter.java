@@ -1670,6 +1670,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		setSmsToggleSubtext(isChecked);
 
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_SMS_PREF_TOGGLED,
+				null);
+
 		Utils.sendNativeSmsLogEvent(isChecked);
 
 		if (isChecked) {

@@ -281,7 +281,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.STICKER_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-			HikePubSub.LAST_SEEN_TIME_UPDATED };
+			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED };
 
 	private EmoticonType emoticonType;
 
@@ -888,7 +888,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	public void onSendClick(View v) {
 		if (!mConversation.isOnhike() && mCredits <= 0) {
-			return;
+			boolean nativeSmsPref = Utils.getSendSmsPref(this);
+			if (!nativeSmsPref) {
+				return;
+			}
 		}
 		if (TextUtils.isEmpty(mComposeView.getText())) {
 			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE) {
@@ -1315,7 +1318,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		updateUIForHikeStatus();
 
 		mComposeViewWatcher = new ComposeViewWatcher(mConversation,
-				mComposeView, mSendBtn, mCredits);
+				mComposeView, mSendBtn, mCredits, this);
 
 		/*
 		 * create an object that we can notify when the contents of the thread
@@ -2092,6 +2095,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					}
 				}
 			});
+		} else if (HikePubSub.SEND_SMS_PREF_TOGGLED.equals(type)) {
+			if (mConversation == null) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					updateUIForHikeStatus();
+				}
+			});
 		}
 	}
 
@@ -2142,7 +2156,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	/* must be called on the UI Thread */
 	private void updateChatMetadata() {
 		mMetadataNumChars.setVisibility(View.VISIBLE);
-		if (mCredits <= 0) {
+
+		boolean nativeSmsPref = Utils.getSendSmsPref(this);
+
+		if (mCredits <= 0 && !nativeSmsPref) {
 			zeroCredits();
 		} else {
 			nonZeroCredits();
@@ -2166,6 +2183,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			} else {
 				mMetadataNumChars.setVisibility(View.INVISIBLE);
 			}
+		}
+	}
+
+	public void onTitleIconClick(View v) {
+		if (v.getId() == R.id.info_layout
+				|| v.getId() == R.id.group_info_layout) {
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.I_BUTTON);
+			showOverlay(false);
 		}
 	}
 
