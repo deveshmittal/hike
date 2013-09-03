@@ -357,7 +357,7 @@
 	<string name="remove_friend">Удалить</string>
 	<string name="no_status">Вы еще не публиковали обновления статуса</string>
 	<string name="update_status">Обновить статус</string>
-	<string name="free_sms_txt">SMS</string>
+	<string name="free_sms_txt">Беспл. SMS</string>
 	<string name="on_dnd">в DND</string>
 	<string name="blocked_list">Список заблокир.</string>
 	<string name="edit">Изменить</string>

@@ -357,7 +357,7 @@
 	<string name="remove_friend">Supprimer</string>
 	<string name="no_status">Tu n\'as pas encore mis à jour ton statut.</string>
 	<string name="update_status">Statut mise à jour</string>
-	<string name="free_sms_txt">SMS</string>
+	<string name="free_sms_txt">SMS gratuit</string>
 	<string name="on_dnd">sur DND</string>
 	<string name="blocked_list">Liste de blocage</string>
 	<string name="edit">Modifier</string>

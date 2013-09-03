@@ -346,7 +346,7 @@
 	<string name="remove_friend">Entfernen</string>
 	<string name="no_status">Du hast bis jetzt noch keine Statusmeldungen gepostet.</string>
 	<string name="update_status">Status aktualisieren</string>
-	<string name="free_sms_txt">SMS</string>
+	<string name="free_sms_txt">Frei-SMS</string>
 	<string name="on_dnd">bei DND</string>
 	<string name="blocked_list">Gesperrt-Liste</string>
 	<string name="edit">Bearbeiten</string>

@@ -363,7 +363,7 @@
 	<string name="remove_friend">Remove</string>
 	<string name="no_status">Looks like you haven\'t posted any status updates yet.</string>
 	<string name="update_status">Update status</string>
-	<string name="free_sms_txt">SMS</string>
+	<string name="free_sms_txt">Free SMS</string>
 	<string name="on_dnd">on DND</string>
 	<string name="blocked_list">Blocked List</string>
 	<string name="edit">Edit</string>
