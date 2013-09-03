@@ -53,7 +53,13 @@ public class UpdatesFragment extends SherlockListFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.updates, null);
+		View parent = inflater.inflate(R.layout.updates, null);
+
+		ListView updatesList = (ListView) parent
+				.findViewById(android.R.id.list);
+		updatesList.setEmptyView(parent.findViewById(android.R.id.empty));
+
+		return parent;
 	}
 
 	@Override
@@ -97,89 +103,19 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 		userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-		List<ContactInfo> friendsList = HikeUserDatabase.getInstance()
-				.getContactsOfFavoriteType(FavoriteType.FRIEND,
-						HikeConstants.BOTH_VALUE, userMsisdn);
-
-		ArrayList<String> msisdnList = new ArrayList<String>();
-
-		for (ContactInfo contactInfo : friendsList) {
-			if (TextUtils.isEmpty(contactInfo.getMsisdn())) {
-				continue;
-			}
-			msisdnList.add(contactInfo.getMsisdn());
-		}
-		msisdnList.add(userMsisdn);
-
-		friendMsisdns = new String[msisdnList.size()];
-		msisdnList.toArray(friendMsisdns);
-		statusMessages = HikeConversationsDatabase.getInstance()
-				.getStatusMessages(true,
-						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
-						friendMsisdns);
-
-		String name = Utils.getFirstName(prefs.getString(
-				HikeMessengerApp.NAME_SETTING, null));
-		String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS, "");
-
-		/*
-		 * If we already have a few status messages in the timeline, no need to
-		 * prompt the user to post his/her own message.
-		 */
-		if (statusMessages.size() < HikeConstants.MIN_STATUS_COUNT) {
-			if (TextUtils.isEmpty(lastStatus)) {
-				noStatusMessage = new StatusMessage(
-						CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID, null,
-						"12345", getString(R.string.team_hike), getString(
-								R.string.hey_name, name),
-						StatusMessageType.NO_STATUS,
-						System.currentTimeMillis() / 1000);
-				statusMessages.add(0, noStatusMessage);
-			} else if (statusMessages.isEmpty()) {
-				noStatusMessage = new StatusMessage(
-						CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID,
-						null, "12345", getString(R.string.team_hike),
-						getString(R.string.hey_name, name),
-						StatusMessageType.NO_STATUS,
-						System.currentTimeMillis() / 1000);
-				statusMessages.add(0, noStatusMessage);
-			}
-		}
-
-		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
-				-1);
-
-		Protip protip = null;
-		boolean showProtip = false;
-		if (currentProtipId == -1) {
-			protip = HikeConversationsDatabase.getInstance().getLastProtip();
-			if (protip != null) {
-				if (Utils.showProtip(protip, prefs)) {
-					showProtip = true;
-					Editor editor = prefs.edit();
-					editor.putLong(HikeMessengerApp.CURRENT_PROTIP,
-							protip.getId());
-					editor.putLong(HikeMessengerApp.PROTIP_WAIT_TIME,
-							protip.getWaitTime());
-					editor.commit();
-				}
-			}
-		} else {
-			showProtip = true;
-			protip = HikeConversationsDatabase.getInstance().getProtipForId(
-					currentProtipId);
-		}
-
-		if (showProtip && protip != null) {
-			statusMessages.add(0, new StatusMessage(protip));
-		}
+		statusMessages = new ArrayList<StatusMessage>();
 
 		centralTimelineAdapter = new CentralTimelineAdapter(getActivity(),
 				statusMessages, userMsisdn);
 		setListAdapter(centralTimelineAdapter);
 		getListView().setOnScrollListener(this);
 
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		FetchUpdates fetchUpdates = new FetchUpdates();
+		if (Utils.isHoneycombOrHigher()) {
+			fetchUpdates.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			fetchUpdates.execute();
+		}
 	}
 
 	@Override
@@ -316,5 +252,107 @@ public class UpdatesFragment extends SherlockListFragment implements
 			startIndex++;
 		}
 		return startIndex;
+	}
+
+	private class FetchUpdates extends
+			AsyncTask<Void, Void, List<StatusMessage>> {
+
+		@Override
+		protected List<StatusMessage> doInBackground(Void... params) {
+			List<ContactInfo> friendsList = HikeUserDatabase.getInstance()
+					.getContactsOfFavoriteType(FavoriteType.FRIEND,
+							HikeConstants.BOTH_VALUE, userMsisdn);
+
+			ArrayList<String> msisdnList = new ArrayList<String>();
+
+			for (ContactInfo contactInfo : friendsList) {
+				if (TextUtils.isEmpty(contactInfo.getMsisdn())) {
+					continue;
+				}
+				msisdnList.add(contactInfo.getMsisdn());
+			}
+			msisdnList.add(userMsisdn);
+
+			friendMsisdns = new String[msisdnList.size()];
+			msisdnList.toArray(friendMsisdns);
+			List<StatusMessage> statusMessages = HikeConversationsDatabase
+					.getInstance().getStatusMessages(true,
+							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
+							friendMsisdns);
+
+			String name = Utils.getFirstName(prefs.getString(
+					HikeMessengerApp.NAME_SETTING, null));
+			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS,
+					"");
+
+			/*
+			 * If we already have a few status messages in the timeline, no need
+			 * to prompt the user to post his/her own message.
+			 */
+			if (statusMessages.size() < HikeConstants.MIN_STATUS_COUNT) {
+				if (TextUtils.isEmpty(lastStatus)) {
+					noStatusMessage = new StatusMessage(
+							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID,
+							null, "12345", getString(R.string.team_hike),
+							getString(R.string.hey_name, name),
+							StatusMessageType.NO_STATUS,
+							System.currentTimeMillis() / 1000);
+					statusMessages.add(0, noStatusMessage);
+				} else if (statusMessages.isEmpty()) {
+					noStatusMessage = new StatusMessage(
+							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID,
+							null, "12345", getString(R.string.team_hike),
+							getString(R.string.hey_name, name),
+							StatusMessageType.NO_STATUS, System
+									.currentTimeMillis() / 1000);
+					statusMessages.add(0, noStatusMessage);
+				}
+			}
+
+			long currentProtipId = prefs.getLong(
+					HikeMessengerApp.CURRENT_PROTIP, -1);
+
+			Protip protip = null;
+			boolean showProtip = false;
+			if (currentProtipId == -1) {
+				protip = HikeConversationsDatabase.getInstance()
+						.getLastProtip();
+				if (protip != null) {
+					if (Utils.showProtip(protip, prefs)) {
+						showProtip = true;
+						Editor editor = prefs.edit();
+						editor.putLong(HikeMessengerApp.CURRENT_PROTIP,
+								protip.getId());
+						editor.putLong(HikeMessengerApp.PROTIP_WAIT_TIME,
+								protip.getWaitTime());
+						editor.commit();
+					}
+				}
+			} else {
+				showProtip = true;
+				protip = HikeConversationsDatabase.getInstance()
+						.getProtipForId(currentProtipId);
+			}
+
+			if (showProtip && protip != null) {
+				statusMessages.add(0, new StatusMessage(protip));
+			}
+
+			return statusMessages;
+		}
+
+		@Override
+		protected void onPostExecute(List<StatusMessage> result) {
+			if (!isAdded()) {
+				Log.d(getClass().getSimpleName(), "Not added");
+				return;
+			}
+			statusMessages.addAll(result);
+			Log.d(getClass().getSimpleName(), "Updating...");
+			centralTimelineAdapter.notifyDataSetChanged();
+			HikeMessengerApp.getPubSub().addListeners(UpdatesFragment.this,
+					pubSubListeners);
+		}
+
 	}
 }
