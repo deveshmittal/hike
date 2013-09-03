@@ -380,7 +380,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 15 adds the sticker table. Version 16 adds the protips table.
 		 */
-
+		boolean protipGameUrlAdded = false;
+		if (oldVersion < 16) {
+			protipGameUrlAdded = true;
+		}
 		/*
 		 * Version 17 add the unread column.
 		 */
@@ -408,7 +411,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 20 adds an index for the file thumbnails table.
 		 */
-		if (oldVersion < 21) {
+		if (!protipGameUrlAdded && oldVersion < 21) {
 			String alter = "ALTER TABLE " + DBConstants.PROTIP_TABLE
 					+ " ADD COLUMN " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL
 					+ " TEXT";
