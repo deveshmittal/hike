@@ -544,7 +544,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				setTextAndIconForSystemMessages(participantInfo,
 						Utils.getFormattedParticipantInfo(message, highlight),
-						R.drawable.ic_hike_user);
+						R.drawable.ic_joined_chat);
 
 				((ViewGroup) holder.container).addView(participantInfo);
 			} else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT
@@ -676,9 +676,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				TextView mainMessage = (TextView) inflater.inflate(
 						R.layout.participant_info, null);
-				setTextAndIconForSystemMessages(mainMessage,
+				setTextAndIconForSystemMessages(
+						mainMessage,
 						Utils.getFormattedParticipantInfo(message,
-								participantName), R.drawable.ic_group_info);
+								participantName),
+						infoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.drawable.ic_group_info
+								: R.drawable.ic_group_image);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
