@@ -114,10 +114,7 @@ public class DbConversationListener implements Listener {
 				Log.d("DBCONVERSATION LISTENER",
 						"Sending Message : " + convMessage.getMessage()
 								+ "	;	to : " + convMessage.getMsisdn());
-				if (!convMessage.isSMS()
-						|| !PreferenceManager.getDefaultSharedPreferences(
-								context).getBoolean(
-								HikeConstants.SEND_SMS_PREF, false)) {
+				if (!convMessage.isSMS() || !Utils.getSendSmsPref(context)) {
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH,
 							convMessage.serialize());
 				} else {

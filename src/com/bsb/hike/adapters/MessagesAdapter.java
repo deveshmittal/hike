@@ -492,9 +492,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			hikeSmsText = holder.hikeSmsText;
 			regularSmsText = holder.regularSmsText;
 
-			boolean smsToggleOn = PreferenceManager
-					.getDefaultSharedPreferences(context).getBoolean(
-							HikeConstants.SEND_SMS_PREF, false);
+			boolean smsToggleOn = Utils.getSendSmsPref(context);
 			holder.smsToggle.setChecked(smsToggleOn);
 			setSmsToggleSubtext(smsToggleOn);
 
@@ -1493,9 +1491,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							}
 						}
 					} else {
-						sendAllUnsentMessagesAsSMS(PreferenceManager
-								.getDefaultSharedPreferences(context)
-								.getBoolean(HikeConstants.SEND_SMS_PREF, false));
+						sendAllUnsentMessagesAsSMS(Utils
+								.getSendSmsPref(context));
 					}
 					return;
 				}

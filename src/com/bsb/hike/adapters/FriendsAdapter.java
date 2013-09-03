@@ -102,9 +102,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
 
-			boolean nativeSMSOn = PreferenceManager
-					.getDefaultSharedPreferences(context).getBoolean(
-							HikeConstants.SEND_SMS_PREF, false);
+			boolean nativeSMSOn = Utils.getSendSmsPref(context);
 
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 

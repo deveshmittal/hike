@@ -2772,4 +2772,9 @@ public class Utils {
 		}
 		return (showProtipNotification);
 	}
+
+	public static boolean getSendSmsPref(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean(HikeConstants.SEND_SMS_PREF, false);
+	}
 }

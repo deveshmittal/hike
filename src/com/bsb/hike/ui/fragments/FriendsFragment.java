@@ -34,6 +34,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.TellAFriend;
+import com.bsb.hike.utils.Utils;
 
 public class FriendsFragment extends SherlockListFragment implements Listener,
 		OnItemLongClickListener {
@@ -204,9 +205,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			String myMsisdn = preferences.getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
 
-			boolean nativeSMSOn = PreferenceManager
-					.getDefaultSharedPreferences(getActivity()).getBoolean(
-							HikeConstants.SEND_SMS_PREF, false);
+			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
 
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
