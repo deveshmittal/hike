@@ -70,6 +70,7 @@
             android:layout_marginTop="@dimen/abs__action_bar_subtitle_top_margin"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="1"
+            android:textStyle="normal"
             android:textSize="12sp"
             android:visibility="gone" />
     </LinearLayout>
