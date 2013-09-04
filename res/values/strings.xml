@@ -69,7 +69,7 @@
 	<string name="max_sms">Max 5 SMS contacts in a group.</string>
 	<string name="max_contact">Max 50 contacts in a group.</string>
 	<string name="invite_sent">Invite sent.</string>
-	<string name="sms_renew">Refills 1st of every month</string>
+	<string name="sms_renew">Refills on the 1st of every month</string>
 	<string name="invite_friend_free_sms">Earn an extra 50 free SMS per month for every friend that joins hike because of you.</string>
 	<string name="free_sms_50">50 free SMS</string>
 	<string name="group_chat_free">Group chat is free till 31st Dec.\nCredits don\'t apply.</string>
@@ -644,7 +644,7 @@
 	<string name="create_group">Create group</string>
 	<string name="hike_contacts">hike Contacts</string>
 	<string name="sms_contacts">SMS Contacts</string>
-	<string name="invite_subtext">Earn additional SMS for every friend the joins hike through you.</string>
+	<string name="invite_subtext">Earn additional SMS for every friend that joins hike through you.</string>
 	<string name="india_only">Free SMS can only be sent to India.</string>
 	<string name="feedback_on_hike">Feedback on hike for Android</string>
 	<string name="privacy_setting">Privacy</string>
