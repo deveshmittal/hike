@@ -34,6 +34,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1710,11 +1711,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					R.color.sms_choice_unselected));
 			regularSmsText.setTextColor(context.getResources().getColor(
 					R.color.sms_choice_selected));
+
+			hikeSmsText.setTextSize(
+					TypedValue.COMPLEX_UNIT_PX,
+					context.getResources().getDimensionPixelSize(
+							R.dimen.sms_toggle_unchecked));
+			regularSmsText.setTextSize(
+					TypedValue.COMPLEX_UNIT_PX,
+					context.getResources().getDimensionPixelSize(
+							R.dimen.sms_toggle_checked));
 		} else {
 			hikeSmsText.setTextColor(context.getResources().getColor(
 					R.color.sms_choice_selected));
 			regularSmsText.setTextColor(context.getResources().getColor(
 					R.color.sms_choice_unselected));
+
+			hikeSmsText.setTextSize(
+					TypedValue.COMPLEX_UNIT_PX,
+					context.getResources().getDimensionPixelSize(
+							R.dimen.sms_toggle_checked));
+			regularSmsText.setTextSize(
+					TypedValue.COMPLEX_UNIT_PX,
+					context.getResources().getDimensionPixelSize(
+							R.dimen.sms_toggle_unchecked));
 		}
 		smsToggleSubtext.setText(ssb);
 	}
