@@ -1,5 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,7 +15,13 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,9 +41,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 
 public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
-		OnClickListener, Listener {
-
-	private boolean facebookPostPopupShowing = false;
+		Listener, OnItemClickListener {
 
 	private SharedPreferences settings;
 
@@ -49,24 +55,45 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.tell_a_friend);
+		setContentView(R.layout.settings);
 
-		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE);
+		ArrayList<String> items = new ArrayList<String>();
+		items.add(getString(R.string.sms));
+		items.add(getString(R.string.facebook));
+		items.add(getString(R.string.twitter));
+		items.add(getString(R.string.email));
+		items.add(getString(R.string.share_via_other));
 
-		int ids[] = { R.id.facebook, R.id.twitter, R.id.sms, R.id.email,
-				R.id.other };
-		for (int i = 0; i < ids.length; i++) {
-			findViewById(ids[i]).setOnClickListener(this);
-		}
+		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
+		itemIcons.add(R.drawable.ic_invite_sms);
+		itemIcons.add(R.drawable.ic_invite_fb);
+		itemIcons.add(R.drawable.ic_invite_twitter);
+		itemIcons.add(R.drawable.ic_invite_email);
+		itemIcons.add(R.drawable.ic_invite_other);
+
+		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this,
+				R.layout.setting_item, R.id.item, items) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				TextView tv = (TextView) v.findViewById(R.id.summary);
+				tv.setVisibility(View.GONE);
+				ImageView iconImage = (ImageView) v.findViewById(R.id.icon);
+				iconImage.setImageResource(itemIcons.get(position));
+
+				return v;
+			}
+
+		};
+
+		ListView settingsList = (ListView) findViewById(R.id.settings_content);
+		settingsList.setAdapter(listAdapter);
+		settingsList.setOnItemClickListener(this);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
 		if (savedInstanceState != null) {
-			if (savedInstanceState
-					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
-				onClick(findViewById(R.id.facebook));
-			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.DIALOG_SHOWING)) {
 				progressDialog = ProgressDialog.show(this, null,
@@ -78,8 +105,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING,
-				facebookPostPopupShowing);
 		outState.putBoolean(HikeConstants.Extras.DIALOG_SHOWING,
 				progressDialog != null && progressDialog.isShowing());
 		super.onSaveInstanceState(outState);
@@ -103,47 +128,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.facebook:
-			onClickPickFriends();
-			break;
-
-		case R.id.twitter:
-			if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE,
-					false)) {
-				startActivity(new Intent(this, TwitterAuthActivity.class));
-			} else {
-				postToSocialNetwork(false);
-			}
-			break;
-
-		case R.id.sms:
-			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-			startActivity(new Intent(this, HikeListActivity.class));
-			break;
-
-		case R.id.email:
-			Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
-
-			mailIntent.setData(Uri.parse("mailto:"));
-			mailIntent.putExtra(Intent.EXTRA_SUBJECT,
-					getString(R.string.email_subject));
-			mailIntent.putExtra(Intent.EXTRA_TEXT,
-					Utils.getInviteMessage(this, R.string.email_body));
-
-			startActivity(mailIntent);
-			break;
-
-		case R.id.other:
-			Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_INVITE);
-			Utils.startShareIntent(this,
-					Utils.getInviteMessage(this, R.string.invite_share_message));
-			break;
-		}
-	}
-
-	@Override
 	public void onEventReceived(String type, Object object) {
 		if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)) {
 			final boolean facebook = (Boolean) object;
@@ -151,8 +135,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 				@Override
 				public void run() {
-					onClick(findViewById(facebook ? R.id.facebook
-							: R.id.twitter));
+					onItemClick(null, null, facebook ? 1 : 2, 0);
 				}
 			});
 		} else if (HikePubSub.DISMISS_POSTING_DIALOG.equals(type)) {
@@ -284,7 +267,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 				editor.remove(HikeMessengerApp.TWITTER_TOKEN_SECRET);
 			}
 			editor.commit();
-			onClick(findViewById(facebook ? R.id.facebook : R.id.twitter));
+			onItemClick(null, null, facebook ? 1 : 2, 0);
 		}
 	}
 
@@ -310,6 +293,48 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		switch (position) {
+		case 0:
+			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+			startActivity(new Intent(this, HikeListActivity.class));
+			break;
+
+		case 1:
+			onClickPickFriends();
+			break;
+
+		case 2:
+			if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE,
+					false)) {
+				startActivity(new Intent(this, TwitterAuthActivity.class));
+			} else {
+				postToSocialNetwork(false);
+			}
+			break;
+
+		case 3:
+			Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
+
+			mailIntent.setData(Uri.parse("mailto:"));
+			mailIntent.putExtra(Intent.EXTRA_SUBJECT,
+					getString(R.string.email_subject));
+			mailIntent.putExtra(Intent.EXTRA_TEXT,
+					Utils.getInviteMessage(this, R.string.email_body));
+
+			startActivity(mailIntent);
+			break;
+
+		case 4:
+			Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_INVITE);
+			Utils.startShareIntent(this,
+					Utils.getInviteMessage(this, R.string.invite_share_message));
+			break;
+		}
 	}
 
 }
