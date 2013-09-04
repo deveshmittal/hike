@@ -1,51 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent" 
-	android:layout_height="wrap_content"
-	android:minHeight="?android:attr/listPreferredItemHeight"
-	android:gravity="center"
-	android:paddingRight="12dp"
-	android:paddingLeft="12dp"
-	android:background="@drawable/list_item">
-
-<RelativeLayout android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:paddingRight="5dp">
+    android:background="@drawable/list_item"
+    android:gravity="center"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp" >
 
-    <ImageView
-        android:id="@+id/icon"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="12dp"
-        android:src="@drawable/ic_credits" />
+        android:layout_weight="1"
+        android:paddingRight="5dp" >
 
-    <com.bsb.hike.view.CustomFontTextView android:id="@+id/item"
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/ic_credits" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/icon"
+            android:layout_centerVertical="true"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send a message"
+                android:textColor="@color/list_item_header"
+                android:textSize="18sp"
+                android:textStyle="bold|italic" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="4"
+                android:textColor="@color/description_lightgrey"
+                android:textSize="12sp"
+                android:textStyle="bold|italic" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- Preference should place its actual preference widget here. -->
+
+    <LinearLayout
+        android:id="@+android:id/widget_frame"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send a message"
-        android:textSize="16sp"
-        android:textColor="@color/setting_item"
-        android:layout_toRightOf="@id/icon"/>
-
-    <com.bsb.hike.view.CustomFontTextView android:id="@+id/summary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/item"
-        android:layout_alignLeft="@id/item"
-        android:textSize="12sp"
-        android:textColor="@color/setting_item"
-        android:maxLines="4"
-        android:textStyle="italic" />
-
-</RelativeLayout>
-
-<!-- Preference should place its actual preference widget here. -->
-<LinearLayout android:id="@+android:id/widget_frame"
-    android:layout_width="wrap_content" android:layout_height="match_parent"
-    android:gravity="center_vertical" android:orientation="vertical" />
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical" />
 
 </LinearLayout>
-
