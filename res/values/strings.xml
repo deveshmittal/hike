@@ -14,7 +14,7 @@
     <string name="preferences">Preferences</string>
     <string name="resend">Resend</string>
     <string name="delete_account_failed">hike couldn\'t delete your account. Please try again.</string>
-    <string name="unlink_account_failed">hike couldn\'t unlink your account. Please try again</string>
+    <string name="unlink_account_failed">Hike couldn\'t logout your account. Please try again</string>
     <string name="hike_network_connection">Network Connection</string>
     <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
     <string name="notconnected_no_internet">Boss, check the internet!</string>
@@ -37,6 +37,8 @@
 	<string name="pin">Pin</string>
 	<string name="name">Name</string>
 	<string name="terms_privacy">Terms and Privacy</string>
+	<string name="privacy_setting">Privacy</string>
+	<string name="privacy_setting_hinttext">Your Hike privacy Settings</string>
 	<string name="invite_now">Invite Now</string>
 	<string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
 	<string name="shortcut">Add Shortcut</string>
@@ -140,10 +142,11 @@
 	<string name="quit">Quit</string>
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
-	<string name="unlink_confirmation">Are you sure you want logout your hike account from this device?  ?</string>
-	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from hike?</string>
-	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from hike?</string>
-	<string name="unlink">Unlink</string>
+	<string name="unlink_confirmation">Are you sure you want logout your hike account from this device?</string>
+	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from Hike?</string>
+	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from Hike?</string>
+	<string name="unlink">Logout</string>
+	<string name="unlink_hinttext">Logout your Hike account from this device</string>
 	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
 	<string name="plus">plus</string>
 	<string name="change_group_name">%1$s changed the group name.</string>
@@ -219,10 +222,11 @@
 	<string name="unlink_facebook_account">Unlink Facebook Account</string>
 	<string name="unlink_twitter_account">Unlink Twitter Account</string>
 	<string name="unlink_account_msg">Unlink your account from this phone</string>
-	<string name="unlink_facebook_account_msg">Unlink your facebook account from hike</string>
-	<string name="unlink_twitter_account_msg">Unlink your twitter account from hike</string>
+	<string name="unlink_facebook_account_msg">Unlink your facebook account from Hike</string>
+	<string name="unlink_twitter_account_msg">Unlink your twitter account from Hike</string>
 	<string name="privacy">Privacy</string>
 	<string name="notifications">Notifications</string>
+	<string name="notifications_hintext">Notifications for Hike activity</string>
 	<string name="favorites">Favorites</string>
 	<string name="recent">RECENTS</string>
 	<string name="friends_on_hike">FRIENDS ON HIKE (%1$d)</string>
@@ -317,7 +321,10 @@
 	<string name="gck_help">Tap and hold a participant to remove them from the group</string>
 	<string name="change_group_image">%1$s changed the group image.</string>
 	<string name="contact">Contact</string>
+	<string name="feedback">Feedback</string>
+	<string name="feedback_hinttext">Give us feedback</string>
 	<string name="faq">FAQs</string>
+	<string name="faq_hinttext">Frequently Asked Questions</string>
 	<string name="feeling_lazy">Feeling lazy? We\'ll do it for you</string>
 	<string name="connect_fb">Connect with Facebook</string>
 	<string name="camera">Camera</string>
@@ -373,6 +380,7 @@
 	<string name="mute_group">Mute group</string>
 	<string name="unmute_group">Unmute group</string>
 	<string name="account">Account</string>
+	<string name="account_hintttext">Your Hike Account Settings</string>
 	<string name="deleting_account">Deleting Account</string>
 	<string name="unlinking_account">Unlinking Account</string>
 	<string name="enter_num">Please enter your phone number</string>
@@ -508,6 +516,8 @@
 	<string name="sms_undelivered">Tap to send as SMS</string>
 	<string name="status_notification_on">Status Update notifications are turned on</string>
 	<string name="status_notification_off">Status Update notifications are turned off</string>
+	<string name="status_notification_hinttext"> Receive push notifications for Status Updates on Hike</string>
+	<string name="status_notification">Status Update Notifications</string>
 	<string name="invite_friends_earn_sms">Invite friends, Earn free SMS</string>
 	<string name="added_friend">Added you to Circle of Friends</string>
 	<string name="name_added_friend">%1$s added you to Circle of Friends</string>
@@ -633,8 +643,8 @@
 	<string name="last_seen_tip_friends">Only your friends can see when you were last seen</string>
 	<string name="from_your_number">from your own number</string>
 	<string name="at_sms_rate">At SMS rate</string>
-	<string name="auto_download_image_header">Auto download images</string>
-	<string name="auto_download_image_info">hike automatically downloads any received images</string>
+	<string name="auto_download_image_header">Image auto download</string>
+	<string name="auto_download_image_info">Images received by you will automatically be downloaded</string>
 	<string name="humanoid_category">Humanoid</string>
 	<string name="empty_chat">You have no chats :(\nStart one now!</string>
 	<string name="start_chat">Start a chat</string>
