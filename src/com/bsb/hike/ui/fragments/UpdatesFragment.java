@@ -299,7 +299,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 			 * If we already have a few status messages in the timeline, no need
 			 * to prompt the user to post his/her own message.
 			 */
-			if (statusMessages.size() < HikeConstants.MIN_STATUS_COUNT) {
+			if (result.size() < HikeConstants.MIN_STATUS_COUNT) {
 				if (TextUtils.isEmpty(lastStatus)) {
 					noStatusMessage = new StatusMessage(
 							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID,
