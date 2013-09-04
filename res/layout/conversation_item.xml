@@ -45,7 +45,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:text="9:35AM"
-                    android:textColor="@color/conversation_timestamp"
+                    android:textColor="@color/timestamp"
                     android:textSize="12sp"
                     android:textStyle="bold|italic" />
 
@@ -63,12 +63,13 @@
                     android:textColor="@color/list_item_header"
                     android:textSize="14sp"
                     android:drawablePadding="3dp"
-                    android:textStyle="bold|italic" />
+                    android:textStyle="bold" />
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp" >
 
                 <ImageView
                     android:id="@+id/msg_status_indicator"
@@ -112,9 +113,8 @@
                     android:ellipsize="end"
                     android:singleLine="true"
                     android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
-                    android:textColor="@color/list_item_subtext"
+                    android:textColor="@color/list_item_header"
                     android:textSize="16sp"
-                    android:textStyle="bold|italic"
                     android:visibility="invisible" />
             </RelativeLayout>
         </LinearLayout>

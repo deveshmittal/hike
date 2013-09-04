@@ -123,7 +123,7 @@
     <color name="list_item_header">#33312e</color>
     <color name="list_item_subtext">#73716d</color>
     <color name="conversation_timestamp">#bfbcb6</color>
-    <color name="unread_message">#2588ca</color>
+    <color name="unread_message">#0090ec</color>
     <color name="conversation_pressed">#f1efe8</color>
     <color name="list_divider">#1f73716d</color>
     <color name="home_bg">#fffffc</color>
@@ -155,4 +155,5 @@
 	<color name="context_menu_divider">#f5f5f5</color>
 	<color name="free_sms_divider">#f5f5f2</color>
 	<color name="downloading_sticker">#a4a4a0</color>
+	<color name="timestamp">#adaca9</color>
 </resources>

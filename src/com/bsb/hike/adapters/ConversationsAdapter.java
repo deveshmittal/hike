@@ -249,7 +249,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						R.color.unread_message));
 			} else {
 				messageView.setTextColor(context.getResources().getColor(
-						R.color.grey));
+						R.color.list_item_header));
 			}
 		}
 
