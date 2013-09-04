@@ -2780,4 +2780,14 @@ public class Utils {
 		return PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean(HikeConstants.SEND_SMS_PREF, false);
 	}
+
+	public static boolean isFilenameValid(String file) {
+		File f = new File(file);
+		try {
+			f.getCanonicalPath();
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
 }
