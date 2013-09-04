@@ -138,40 +138,6 @@ public class HikeNotification {
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
 
-		// For showing the name of the contact that sent the message in a group
-		// chat
-		if (convMsg.isGroupChat()
-				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
-				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
-			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-			ContactInfo participant = hUDB.getContactInfoFromMSISDN(
-					convMsg.getGroupParticipantMsisdn(), false);
-
-			if (TextUtils.isEmpty(participant.getName())) {
-				HikeConversationsDatabase hCDB = HikeConversationsDatabase
-						.getInstance();
-				participant.setName(hCDB.getParticipantName(msisdn,
-						convMsg.getGroupParticipantMsisdn()));
-			}
-			message = participant.getFirstName() + HikeConstants.SEPARATOR
-					+ message;
-		}
-
-		int icon = returnSmallIcon();
-
-		/*
-		 * Jellybean has added support for emojis so we don't need to add a '*'
-		 * to replace them
-		 */
-		if (Build.VERSION.SDK_INT < 16) {
-			// Replace emojis with a '*'
-			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
-					message, "*");
-		}
-
-		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
-				key, message));
-
 		// we've got to invoke the chat thread from here with the respective
 		// users
 		Intent notificationIntent = new Intent(context, ChatThread.class);
@@ -212,6 +178,7 @@ public class HikeNotification {
 		boolean doesStickerExist = false;
 		HikeFile hikeFile = null;
 		if (convMsg.isStickerMessage()) {
+
 			Sticker sticker = convMsg.getMetadata().getSticker();
 
 			/*
@@ -242,12 +209,13 @@ public class HikeNotification {
 				if (!TextUtils.isEmpty(filePath)) {
 					bigPictureImage = BitmapFactory.decodeFile(filePath);
 					if (bigPictureImage != null)
-					doesStickerExist = true;
+						doesStickerExist = true;
 				}
 			}
 
 		} else {
 			if (convMsg.isFileTransferMessage()) {
+				
 				hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
 				if (hikeFile != null) {
 					if (hikeFile.getFileTypeString().toLowerCase()
@@ -261,9 +229,34 @@ public class HikeNotification {
 			}
 		}
 
-		if ((convMsg.isStickerMessage() && doesStickerExist) || (convMsg.isFileTransferMessage() && 
-				hikeFile!=null && hikeFile.getFileTypeString().toLowerCase().startsWith("image")) && isRich)
-				{
+		// For showing the name of the contact that sent the message in a group
+		// chat
+		if (convMsg.isGroupChat()
+				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
+				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
+		message = contactInfo.getFirstName() + HikeConstants.SEPARATOR
+				+ message;
+		}
+
+		int icon = returnSmallIcon();
+
+		/*
+		 * Jellybean has added support for emojis so we don't need to add a '*'
+		 * to replace them
+		 */
+		if (Build.VERSION.SDK_INT < 16) {
+			// Replace emojis with a '*'
+			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
+					message, "*");
+		}
+
+		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
+				key, message));
+
+		if ((convMsg.isStickerMessage() && doesStickerExist)
+				|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
+						.getFileTypeString().toLowerCase().startsWith("image"))
+				&& isRich) {
 			// big picture messages ! intercept !
 			pushBigPictureMessageNotifications(notificationIntent, contactInfo,
 					convMsg, bigPictureImage);

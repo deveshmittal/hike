@@ -56,6 +56,7 @@
             android:enabled="true">            
         </service>
         
+        <service android:name=".service.UpgradeIntentService" />
         <service android:name=".GCMIntentService" />
 
         <activity
