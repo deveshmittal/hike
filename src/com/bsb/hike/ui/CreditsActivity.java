@@ -57,7 +57,9 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 	public void onInviteClick(View v) {
 		Utils.logEvent(CreditsActivity.this,
 				HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-		startActivity(new Intent(CreditsActivity.this, HikeListActivity.class));
+		Intent intent = new Intent(CreditsActivity.this, HikeListActivity.class);
+		intent.putExtra(HikeConstants.Extras.FROM_CREDITS_SCREEN, true);
+		startActivity(intent);
 	}
 
 	@Override

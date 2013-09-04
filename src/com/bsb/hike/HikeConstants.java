@@ -544,6 +544,7 @@ public class HikeConstants {
 		public static final String IS_FACEBOOK = "isFacebook";
 		public static final String EMOTICON_TYPE = "emoticonType";
 		public static final String CREATE_GROUP = "createGroup";
+		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
 	}
 
 	public static final class LogEvent {

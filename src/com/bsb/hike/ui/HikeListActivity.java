@@ -126,8 +126,14 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 			public void onClick(View v) {
 				Intent intent = null;
 				if (type != Type.BLOCK) {
-					intent = new Intent(HikeListActivity.this,
-							TellAFriend.class);
+					if (getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CREDITS_SCREEN, false)) {
+						intent = new Intent(HikeListActivity.this,
+								CreditsActivity.class);
+					} else {
+						intent = new Intent(HikeListActivity.this,
+								TellAFriend.class);
+					}
 				} else {
 					intent = new Intent(HikeListActivity.this,
 							SettingsActivity.class);
