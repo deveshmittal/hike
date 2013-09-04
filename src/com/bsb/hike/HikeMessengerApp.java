@@ -64,7 +64,6 @@ import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
-import com.facebook.android.Facebook;
 
 @ReportsCrashes(formKey = "", customReportContent = {
 		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
@@ -281,8 +280,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
-	private static Facebook facebook;
-
 	private static Twitter twitter;
 
 	private static HikePubSub mPubSubInstance;
@@ -485,9 +482,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		IconCacheManager.init();
 
-		facebook = new Facebook(HikeConstants.APP_FACEBOOK_ID);
-		makeFacebookInstance(settings);
-
 		String twitterToken = settings.getString(
 				HikeMessengerApp.TWITTER_TOKEN, "");
 		String twitterTokenSecret = settings.getString(
@@ -622,10 +616,6 @@ public class HikeMessengerApp extends Application implements Listener {
 		setupStickerCategoryList(prefs);
 	}
 
-	public static Facebook getFacebook() {
-		return facebook;
-	}
-
 	public static HikePubSub getPubSub() {
 		return mPubSubInstance;
 	}
@@ -644,13 +634,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static boolean isIndianUser() {
 		return isIndianUser;
-	}
-
-	public static void makeFacebookInstance(SharedPreferences settings) {
-		facebook.setAccessExpires(settings.getLong(
-				HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
-		facebook.setAccessToken(settings.getString(
-				HikeMessengerApp.FACEBOOK_TOKEN, ""));
 	}
 
 	public static void makeTwitterInstance(String token, String tokenSecret) {

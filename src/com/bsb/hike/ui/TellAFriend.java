@@ -97,8 +97,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		HikeMessengerApp.getFacebook().authorizeCallback(requestCode,
-				resultCode, data);
 		Session.getActiveSession().onActivityResult(this, requestCode,
 				resultCode, data);
 
