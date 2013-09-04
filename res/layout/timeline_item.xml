@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text="2 mins ago"
-                android:textColor="@color/timestampcolor"
+                android:textColor="@color/conversation_timestamp"
                 android:textSize="12sp"
                 android:textStyle="bold|italic" />
 
