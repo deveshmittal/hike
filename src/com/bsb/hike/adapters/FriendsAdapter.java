@@ -480,7 +480,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.avatar_frame);
 
 				lastSeen.setTextColor(context.getResources().getColor(
-						R.color.conversation_timestamp));
+						R.color.list_item_subtext));
 				lastSeen.setVisibility(View.GONE);
 
 				avatarFrame
