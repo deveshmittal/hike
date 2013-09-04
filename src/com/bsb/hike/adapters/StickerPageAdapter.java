@@ -3,7 +3,6 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.app.Activity;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -207,13 +206,17 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			if (HikeMessengerApp.stickerTaskMap.containsKey(categoryId)) {
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
+				updateText.setTextColor(activity.getResources().getColor(
+						R.color.downloading_sticker));
 				convertView.setClickable(false);
-				button.setBackgroundResource(R.drawable.invite_to_hike_pressed);
+				button.setBackgroundResource(R.drawable.bg_sticker_downloading);
 			} else {
 				progressBar.setVisibility(View.GONE);
 				updateText.setText(R.string.new_stickers_available);
+				updateText.setTextColor(activity.getResources().getColor(
+						R.color.actionbar_text));
 				convertView.setClickable(true);
-				button.setBackgroundResource(R.drawable.invite_chatthread_button);
+				button.setBackgroundResource(R.drawable.bg_download_sticker);
 				convertView.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
