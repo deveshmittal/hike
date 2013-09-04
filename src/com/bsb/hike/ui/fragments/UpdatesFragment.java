@@ -280,6 +280,16 @@ public class UpdatesFragment extends SherlockListFragment implements
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 							friendMsisdns);
 
+			return statusMessages;
+		}
+
+		@Override
+		protected void onPostExecute(List<StatusMessage> result) {
+			if (!isAdded()) {
+				Log.d(getClass().getSimpleName(), "Not added");
+				return;
+			}
+
 			String name = Utils.getFirstName(prefs.getString(
 					HikeMessengerApp.NAME_SETTING, null));
 			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS,
@@ -338,15 +348,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 				statusMessages.add(0, new StatusMessage(protip));
 			}
 
-			return statusMessages;
-		}
-
-		@Override
-		protected void onPostExecute(List<StatusMessage> result) {
-			if (!isAdded()) {
-				Log.d(getClass().getSimpleName(), "Not added");
-				return;
-			}
 			statusMessages.addAll(result);
 			Log.d(getClass().getSimpleName(), "Updating...");
 			centralTimelineAdapter.notifyDataSetChanged();
