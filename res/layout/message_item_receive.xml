@@ -185,7 +185,7 @@
 
 	        <ImageView
 	            android:id="@+id/typing"
-	            android:layout_width="40dp"
+	            android:layout_width="46dp"
 	            android:layout_height="wrap_content"
 	            android:layout_toRightOf="@+id/avatar_container"
 	            android:background="@drawable/ic_bubble_white"
