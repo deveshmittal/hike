@@ -586,8 +586,8 @@
 	<string name="email_your_conversation">Email your conversation</string>
 	<string name="exporting_conversations_prefix">Exporting conversations...</string>
 	<string name="attached_is_the_conversation_backup_string">Attached is the conversation backup..</string>
-	<string name="new_chat">New chat</string>
-	<string name="new_update">New update</string>
+	<string name="new_chat">New Chat</string>
+	<string name="new_update">New Update</string>
 	<string name="invite_via_facebook">Invite Via Facebook</string>
     <string name="invite_via_twitter">Invite Via Twitter</string>
     <string name="search_hint">Search</string>
