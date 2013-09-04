@@ -731,7 +731,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (mUserIsBlocked) {
 			return false;
 		}
-		if (mCredits <= 0) {
+		if (!mConversation.isOnhike() && mCredits <= 0) {
 			boolean nativeSmsPref = Utils.getSendSmsPref(this);
 			if (!nativeSmsPref) {
 				return false;
@@ -4053,7 +4053,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					return false;
 				}
 			}
-			if (mCredits <= 0) {
+			if (!mConversation.isOnhike() && mCredits <= 0) {
 				boolean nativeSmsPref = Utils.getSendSmsPref(ChatThread.this);
 				if (!nativeSmsPref) {
 					return false;

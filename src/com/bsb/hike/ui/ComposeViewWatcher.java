@@ -75,7 +75,7 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 		 */
 		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation
 				.isOnhike() || mCredits > 0)));
-		if (mCredits <= 0) {
+		if (!mConversation.isOnhike() && mCredits <= 0) {
 			boolean nativeSmsPref = Utils.getSendSmsPref(context);
 			canSend = nativeSmsPref;
 		}
