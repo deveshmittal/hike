@@ -175,6 +175,11 @@ public class HikeConstants {
 	public static final String DELETE_PREF = "deleteAccount";
 	public static final String UNLINK_FB = "unlinkFacebook";
 	public static final String UNLINK_TWITTER = "unlinkTwitter";
+	public static final String BLOKED_LIST_PREF = "blockedList";
+	public static final String SYSTEM_HEALTH_PREF = "systemHealth";
+	public static final String HELP_FAQS_PREF = "helpFaqs";
+	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
+
 
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";

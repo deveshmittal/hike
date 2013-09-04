@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/manage_account">
+    android:title="@string/privacy">
 
+<!--     icon="ic_blocked_list" -->
+    <com.bsb.hike.view.IconPreference
+		icon="ic_blocked_list_settings"
+		android:layout="@layout/icon_preference"
+        android:key="blockedList"
+        android:summary="@string/blocked_list_hinttext"
+        android:title="@string/blocked_list" />
+    
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_last_seen"
         android:defaultValue="true"
@@ -13,48 +21,11 @@
         android:widgetLayout="@layout/checkbox_widget" />
     
     <com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_auto_download_pref"
-        android:defaultValue="true"
-        android:key="autoDownloadImagePref"
-        android:layout="@layout/icon_preference"
-        android:summary="@string/auto_download_image_info"
-        android:title="@string/auto_download_image_header"
-        android:widgetLayout="@layout/checkbox_widget" />
-    
-    <com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_ssl"
         android:key="sslPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/ssl_info"
         android:title="@string/ssl"
         android:widgetLayout="@layout/checkbox_widget" />
-
-    <com.bsb.hike.view.IconPreference
-		icon="ic_delete_priv"
-		android:layout="@layout/icon_preference"
-        android:key="deleteAccount"
-        android:summary="@string/delete_account_msg"
-        android:title="@string/delete_account" />
-
-	<com.bsb.hike.view.IconPreference
-		icon="ic_unlink_priv"
-		android:layout="@layout/icon_preference"
-		android:key="unlinkAccount"
-		android:summary="@string/unlink_account_msg"
-		android:title="@string/unlink_account" />
-	
-	<com.bsb.hike.view.IconPreference
-		icon="ic_fb_priv"
-		android:layout="@layout/icon_preference"
-		android:key="unlinkFacebook"
-		android:summary="@string/unlink_facebook_account_msg"
-		android:title="@string/unlink_facebook_account" />
-	
-	<com.bsb.hike.view.IconPreference
-		icon="ic_twitter_priv"
-		android:layout="@layout/icon_preference"
-		android:key="unlinkTwitter"
-		android:summary="@string/unlink_twitter_account_msg"
-		android:title="@string/unlink_twitter_account" />
 
 </PreferenceScreen>

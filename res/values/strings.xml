@@ -656,4 +656,8 @@
 	<string name="account_hintttext">Your Hike Account Settings</string>
 	<string name="status_notification_hinttext"> Receive push notifications for Status Updates on Hike</string>
 	<string name="status_notification">Status Update Notifications</string>
+	<string name="blocked_list_hinttext">Manage people you\'ve blocked</string>
+	<string name="help_hinttext">Hike FAQs, system status and contact</string>
+	<string name="system_health_hinttext">See hike system status</string>
+	<string name="sms_setting_hinttext">SMS settings</string>
 </resources>

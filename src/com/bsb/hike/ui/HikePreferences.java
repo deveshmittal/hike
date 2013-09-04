@@ -7,10 +7,14 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -37,6 +41,7 @@ import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
+import com.bsb.hike.view.IconPreference;
 import com.facebook.Session;
 
 public class HikePreferences extends HikeAppStateBasePreferenceActivity
@@ -104,7 +109,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				.findPreference(HikeConstants.UNLINK_FB);
 		if (unlinkFacebookPreference != null) {
 			Session session = Session.getActiveSession();
-			if (Session.getActiveSession() != null && session.isOpened()) {
+			if (Session.getActiveSession() != null) {
 				unlinkFacebookPreference.setOnPreferenceClickListener(this);
 			} else {
 				getPreferenceScreen()
@@ -147,6 +152,42 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				.findPreference(HikeConstants.SSL_PREF);
 		if (sslPreference != null) {
 			sslPreference.setOnPreferenceChangeListener(this);
+		}
+		
+		Preference blockedListPreference = getPreferenceScreen()
+				.findPreference(HikeConstants.BLOKED_LIST_PREF);
+		if (blockedListPreference != null) {
+			Log.d(getClass().getSimpleName(), "blockedListPreference preference not null" + blockedListPreference.getKey());
+			blockedListPreference.setOnPreferenceClickListener(this);
+		} else{
+			Log.d(getClass().getSimpleName(), "blockedListPreference preference is null");
+		}
+		
+		Preference systemHealthPreference = getPreferenceScreen()
+				.findPreference(HikeConstants.SYSTEM_HEALTH_PREF);
+		if (systemHealthPreference != null) {
+			Log.d(getClass().getSimpleName(), "systemHealthPreference preference is not null");
+			systemHealthPreference.setOnPreferenceClickListener(this);
+		} else{
+			Log.d(getClass().getSimpleName(), "systemHealthPreference preference is null");
+		}
+		
+		Preference helpFaqsPreference = getPreferenceScreen()
+				.findPreference(HikeConstants.HELP_FAQS_PREF);
+		if (helpFaqsPreference != null) {
+			Log.d(getClass().getSimpleName(), "helpFaqsPreference preference is not null" +helpFaqsPreference.getKey());
+			helpFaqsPreference.setOnPreferenceClickListener(this);
+		} else{
+			Log.d(getClass().getSimpleName(), "helpFaqsPreference preference is null");
+		}
+		
+		Preference helpContactPreference = getPreferenceScreen()
+				.findPreference(HikeConstants.HELP_FEEDBACK_PREF);
+		if (helpContactPreference != null) {
+			Log.d(getClass().getSimpleName(), "helpContactPreference preference is not null");
+			helpContactPreference.setOnPreferenceClickListener(this);
+		} else{
+			Log.d(getClass().getSimpleName(), "helpContactPreference preference is null");
 		}
 
 		if (savedInstanceState != null) {
@@ -336,6 +377,70 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			});
 			AlertDialog alertDialog = builder.create();
 			alertDialog.show();
+		} else if (HikeConstants.BLOKED_LIST_PREF.equals(preference.getKey())) {
+			Intent intent = new Intent(HikePreferences.this,
+					HikeListActivity.class);
+			intent.putExtra(HikeConstants.Extras.BLOCKED_LIST, true);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}  else if (HikeConstants.SYSTEM_HEALTH_PREF.equals(preference.getKey())) {
+			Log.d(getClass().getSimpleName(), "system health preference selected");
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(HikeConstants.SYSTEM_HEALTH_URL));
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			try {
+				startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Toast.makeText(getApplicationContext(),
+							R.string.system_health_error, Toast.LENGTH_SHORT)
+							.show();
+			}
+		}  else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey())) {
+			Log.d(getClass().getSimpleName(), "FAQ preference selected");
+			Intent intent = new Intent(HikePreferences.this,
+					WebViewActivity.class);
+			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
+					HikeConstants.HELP_URL);
+			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}  else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey())) {
+			Log.d(getClass().getSimpleName(), "contact preference selected");
+			Intent intent = new Intent(Intent.ACTION_SENDTO);
+			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
+
+			StringBuilder message = new StringBuilder("\n\n");
+			
+			try {
+				message.append(getString(R.string.hike_version)
+						+ " "
+						+ getPackageManager().getPackageInfo(getPackageName(),
+								0).versionName + "\n");
+			} catch (NameNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			message.append(getString(R.string.device_name) + " "
+					+ Build.MANUFACTURER + " " + Build.MODEL + "\n");
+
+			message.append(getString(R.string.android_version) + " "
+					+ Build.VERSION.RELEASE + "\n");
+
+			String msisdn = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+			message.append(getString(R.string.msisdn) + " " + msisdn);
+
+			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
+			intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_on_hike));
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			try {
+				startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Toast.makeText(getApplicationContext(), R.string.email_error,
+							Toast.LENGTH_SHORT).show();
+			}
 		}
 
 		return true;
@@ -430,7 +535,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		} else if (HikeConstants.SSL_PREF.equals(preference.getKey())) {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.SWITCHED_DATA_CONNECTION, null);
-		}
+		} 
 		return false;
 	}
 
