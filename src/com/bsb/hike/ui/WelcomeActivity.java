@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,11 +33,8 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 	private Button tcText;
 
 	private ViewGroup tcContinueLayout;
-	private ViewGroup booBooLayout;
 	private Button tryAgainBtn;
 	private View hiLogoView;
-	private ViewGroup headerLayout;
-	private ImageView errorImage;
 	private View hikeLogoContainer;
 	private ImageView micromaxImage;
 	private boolean isMicromaxDevice;
@@ -61,9 +57,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 		micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
-		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
-		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		String model = Build.MODEL;
 		String manufacturer = Build.MANUFACTURER;
@@ -79,10 +73,6 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 				}
 			}
 		}
-
-		headerLayout = (ViewGroup) booBooLayout
-				.findViewById(R.id.header_layout);
-		headerLayout.setVisibility(View.VISIBLE);
 
 		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
 				.getBoolean(HikeMessengerApp.SPLASH_SEEN, false)) {
@@ -120,16 +110,6 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 				startActivity(intent);
 			}
 		});
-
-		AnimationDrawable ad = new AnimationDrawable();
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large0), 600);
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large1), 600);
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large2), 600);
-		ad.setOneShot(false);
-		ad.setVisible(true, true);
-
-		errorImage.setImageDrawable(ad);
-		ad.start();
 	}
 
 	public void onHikeIconClicked(View v) {
@@ -211,7 +191,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING,
 				loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR,
-				booBooLayout.getVisibility() == View.VISIBLE);
+				tryAgainBtn.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -223,11 +203,9 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 			mAcceptButton.setVisibility(View.GONE);
 			SignupTask.startTask(this);
 		} else if (v.getId() == tryAgainBtn.getId()) {
-			tcContinueLayout.setVisibility(View.VISIBLE);
-			hikeLogoContainer.setVisibility(View.VISIBLE);
 			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE
 					: View.GONE);
-			booBooLayout.setVisibility(View.GONE);
+			tryAgainBtn.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
 	}
@@ -238,11 +216,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 
 	private void showError() {
 		Log.d("WelcomeActivity", "showError");
-		tcContinueLayout.setVisibility(View.GONE);
-		hikeLogoContainer.setVisibility(View.INVISIBLE);
-		booBooLayout.setVisibility(View.VISIBLE);
-		micromaxImage.setVisibility(isMicromaxDevice ? View.INVISIBLE
-				: View.GONE);
+		tryAgainBtn.setVisibility(View.VISIBLE);
 	}
 
 	@Override

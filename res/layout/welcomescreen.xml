@@ -66,6 +66,18 @@
                 android:singleLine="true"
                 android:text="@string/pulling_digits_signup" />
         </LinearLayout>
+        
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_try_again"
+            style="@style/SignupButton.Text.Bold.Button"
+            android:layout_height="48dp"
+            android:layout_below="@id/terms_and_conditions"
+            android:background="@drawable/bg_network_error"
+            android:onClick="onClick"
+            android:text="@string/network_error"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
     </RelativeLayout>
 
     <ImageView
@@ -122,9 +134,5 @@
         android:layout_marginTop="@dimen/micromax_margin"
         android:src="@drawable/micromax_logo"
         android:visibility="gone" />
-
-    <include
-        android:layout_below="@id/header_dropshadow"
-        layout="@layout/boo_boo" />
 
 </RelativeLayout>

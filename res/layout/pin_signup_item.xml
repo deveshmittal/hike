@@ -86,6 +86,17 @@
                 android:layout_toRightOf="@id/loading_progress"
                 android:text="@string/verify_pin_signup" />
         </RelativeLayout>
+        
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_try_again"
+            style="@style/SignupButton.Text.Bold.Button"
+            android:textSize="14sp"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_network_error"
+            android:onClick="onClick"
+            android:text="@string/network_error"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontButton

@@ -656,4 +656,5 @@
 	<string name="account_hintttext">Your Hike Account Settings</string>
 	<string name="status_notification_hinttext"> Receive push notifications for Status Updates on Hike</string>
 	<string name="status_notification">Status Update Notifications</string>
+	<string name="network_error">Network error. Tap to retry</string>
 </resources>

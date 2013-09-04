@@ -17,7 +17,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -86,7 +85,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private ViewGroup numLayout;
 	private ViewGroup pinLayout;
 	private ViewGroup nameLayout;
-	private ViewGroup booBooLayout;
 
 	private TextView header;
 	private TextView infoTxt;
@@ -96,7 +94,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private Button tapHereText;
 	private Button submitBtn;
 	private TextView invalidNum;
-	private ImageView errorImage;
 	private Button countryPicker;
 	private Button callmeBtn;
 	private ImageView mIconView;
@@ -168,9 +165,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
-		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
-		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
-		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof ActivityState) {
@@ -237,16 +231,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		setAnimation();
 		setListeners();
 		mTask = SignupTask.startTask(this);
-
-		AnimationDrawable ad = new AnimationDrawable();
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large0), 600);
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large1), 600);
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large2), 600);
-		ad.setOneShot(false);
-		ad.setVisible(true, true);
-
-		errorImage.setImageDrawable(ad);
-		ad.start();
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
@@ -315,6 +299,18 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 			submitClicked();
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			restartTask();
+			/*
+			 * Delaying this by 100 ms to allow the signup task to
+			 * setup to the last input point.
+			 */
+			this.mHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					submitClicked();
+				}
+			}, 100);
+			submitClicked();
 		} else if (tapHereText != null && v.getId() == tapHereText.getId()) {
 			if (countDownTimer != null) {
 				countDownTimer.cancel();
@@ -504,6 +500,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		countryPicker = (Button) layout.findViewById(R.id.country_picker);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
+		tryAgainBtn = (Button) layout.findViewById(R.id.btn_try_again);
 
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
@@ -721,7 +718,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	}
 
 	private void resetViewFlipper() {
-		booBooLayout.setVisibility(View.GONE);
+		tryAgainBtn.setVisibility(View.GONE);
+		submitBtn.setVisibility(View.VISIBLE);
 		viewFlipper.setVisibility(View.VISIBLE);
 		removeAnimation();
 		viewFlipper.setDisplayedChild(NUMBER);
@@ -735,11 +733,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	}
 
 	private void showErrorMsg() {
+		submitBtn.setVisibility(View.GONE);
+		tryAgainBtn.setVisibility(View.VISIBLE);
 		loadingLayout.setVisibility(View.GONE);
-		submitBtn.setVisibility(View.VISIBLE);
-		booBooLayout.setVisibility(View.VISIBLE);
-		viewFlipper.setVisibility(View.GONE);
-		Utils.hideSoftKeyboard(this, enterEditText);
 	}
 
 	private void setListeners() {
@@ -763,7 +759,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING,
 				loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR,
-				booBooLayout.getVisibility() == View.VISIBLE);
+				tryAgainBtn.getVisibility() == View.VISIBLE);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText
 				.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR,

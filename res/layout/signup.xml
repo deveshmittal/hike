@@ -45,8 +45,4 @@
         <include layout="@layout/name_signup_item" />
     </com.bsb.hike.view.MyViewFlipper>
 
-    <include
-        android:layout_below="@id/header_dropshadow"
-        layout="@layout/boo_boo" />
-
 </RelativeLayout>
