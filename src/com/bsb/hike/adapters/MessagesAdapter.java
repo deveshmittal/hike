@@ -123,6 +123,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ImageView sending;
 		ImageView typing;
 		ViewGroup avatarContainer;
+		ViewGroup typingAvatarContainer;
 	}
 
 	private Conversation conversation;
@@ -393,6 +394,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.participantNameFT = (TextView) v
 						.findViewById(R.id.participant_name_ft);
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
+				holder.avatarContainer = (ViewGroup) v
+						.findViewById(R.id.avatar_container);
 				if (holder.messageTextView == null) {
 					holder.messageTextView = (TextView) v
 							.findViewById(R.id.message_receive);
@@ -419,8 +422,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.typing = (ImageView) v.findViewById(R.id.typing);
 
-				holder.avatarContainer = (ViewGroup) v
-						.findViewById(R.id.avatar_container);
+				holder.typingAvatarContainer = (ViewGroup) v
+						.findViewById(R.id.typing_avatar_container);
 
 				holder.container.setVisibility(View.GONE);
 
@@ -442,10 +445,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (viewType == ViewType.RECEIVE) {
 			holder.typing.setVisibility(View.GONE);
-			holder.avatarContainer.setVisibility(View.GONE);
+			holder.typingAvatarContainer.setVisibility(View.GONE);
 		}
 		if (convMessage.getTypingNotification() != null) {
 			holder.image.setVisibility(View.GONE);
+			holder.avatarContainer.setVisibility(View.GONE);
 			holder.typing.setVisibility(View.VISIBLE);
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.dayContainer.setVisibility(View.GONE);
@@ -461,27 +465,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			ad.start();
 
 			if (isGroupChat) {
-				holder.avatarContainer.setVisibility(View.VISIBLE);
+				holder.typingAvatarContainer.setVisibility(View.VISIBLE);
 
 				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) convMessage
 						.getTypingNotification();
 				List<String> participantList = groupTypingNotification
 						.getGroupParticipantList();
 
-				int avatarSize = context.getResources().getDimensionPixelSize(
-						R.dimen.avatar_size_chat_thread);
-
-				LayoutParams layoutParams = new LayoutParams(avatarSize,
-						avatarSize);
-
-				holder.avatarContainer.removeAllViews();
+				holder.typingAvatarContainer.removeAllViews();
 				for (int i = participantList.size() - 1; i >= 0; i--) {
-					ImageView imageView = new ImageView(context);
+					View avatarContainer = inflater.inflate(
+							R.layout.small_avatar_container,
+							holder.typingAvatarContainer, false);
+
+					ImageView imageView = (ImageView) avatarContainer
+							.findViewById(R.id.avatar);
 					imageView.setImageDrawable(IconCacheManager.getInstance()
 							.getIconForMSISDN(participantList.get(i), true));
-					imageView.setLayoutParams(layoutParams);
 
-					holder.avatarContainer.addView(imageView);
+					holder.typingAvatarContainer.addView(avatarContainer);
 				}
 			}
 			return v;
@@ -1207,9 +1209,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.getInstance().getIconForMSISDN(
 									convMessage.getGroupParticipantMsisdn(),
 									true));
+					holder.avatarContainer.setVisibility(View.VISIBLE);
 				} else {
-					holder.image.setVisibility(isGroupChat ? View.INVISIBLE
-							: View.GONE);
+					holder.avatarContainer
+							.setVisibility(isGroupChat ? View.INVISIBLE
+									: View.GONE);
 				}
 			}
 			setSDRAndTimestamp(position, holder.messageInfo, holder.sending,

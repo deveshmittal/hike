@@ -57,14 +57,24 @@
 	    android:layout_alignParentLeft="true"
 	    android:layout_below="@id/day_container" >
 
-	    <ImageView
-	        android:id="@+id/avatar"
-	        android:layout_width="@dimen/avatar_size_chat_thread"
-	        android:layout_height="@dimen/avatar_size_chat_thread"
+	    <RelativeLayout
+	        android:id="@+id/avatar_container"
+	        android:layout_width="@dimen/small_avatar"
+	        android:layout_height="@dimen/small_avatar"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="2dp"
-	        android:src="@drawable/ic_avatar1"
-	        android:visibility="gone" />
+	        android:visibility="gone" >
+
+	        <ImageView
+	            android:id="@+id/avatar"
+	            style="@style/AvatarStyle.Padding"
+	            android:src="@drawable/ic_avatar1_rounded" />
+
+	        <ImageView
+	            android:id="@+id/avatar_frame"
+	            style="@style/AvatarStyle"
+	            android:src="@drawable/frame_avatar_small_selector" />
+	    </RelativeLayout>
 
 	    <RelativeLayout
 	        android:id="@+id/bubble_container"
@@ -72,8 +82,8 @@
 	        android:layout_height="wrap_content"
 	        android:minWidth="50dp"
 	        android:layout_alignParentTop="true"
-	        android:layout_alignTop="@id/avatar"
-	        android:layout_toRightOf="@id/avatar"
+	        android:layout_alignTop="@id/avatar_container"
+	        android:layout_toRightOf="@id/avatar_container"
 	        android:gravity="left" >
 
 	        <com.bsb.hike.view.CircularProgress
@@ -174,12 +184,13 @@
 
 	        </LinearLayout>
 	        
-	        
 	        <LinearLayout
-	            android:id="@+id/avatar_container"
+	            android:id="@+id/typing_avatar_container"
 	            android:layout_width="wrap_content"
+	            android:layout_alignParentLeft="true"
 	            android:layout_height="wrap_content"
 	            android:orientation="horizontal"
+	            android:gravity="left|center_vertical"
 	            android:layout_marginRight="2dp"
 	            android:visibility="gone" />
 
@@ -187,7 +198,7 @@
 	            android:id="@+id/typing"
 	            android:layout_width="46dp"
 	            android:layout_height="wrap_content"
-	            android:layout_toRightOf="@+id/avatar_container"
+	            android:layout_toRightOf="@+id/typing_avatar_container"
 	            android:background="@drawable/ic_bubble_white"
 	            android:src="@drawable/typing"
 	            android:scaleType="centerInside"
