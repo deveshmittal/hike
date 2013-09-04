@@ -17,5 +17,5 @@
         android:summary="@string/default_client_info"
         android:title="@string/default_client_header"
         android:widgetLayout="@layout/checkbox_widget" />
-
+    
 </PreferenceScreen>
