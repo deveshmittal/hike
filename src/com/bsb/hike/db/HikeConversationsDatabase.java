@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
@@ -45,7 +44,6 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.service.UpgradeIntentService;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
