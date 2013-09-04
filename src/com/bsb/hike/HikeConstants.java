@@ -175,6 +175,8 @@ public class HikeConstants {
 	public static final String DELETE_PREF = "deleteAccount";
 	public static final String UNLINK_FB = "unlinkFacebook";
 	public static final String UNLINK_TWITTER = "unlinkTwitter";
+	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
+	public static final String UPGRADE_AVATAR_CONV_DB ="upgradeAvtarProgressConv";
 
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";

@@ -42,6 +42,8 @@ public class HikeNotification {
 	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 	private static final String SEPERATOR = " ";
+	//adding this flag so that external process can control notif.
+	public static boolean shouldShowNotification = true; 
 
 	private Context context;
 
@@ -111,7 +113,10 @@ public class HikeNotification {
 		if (led) {
 			mBuilder.setLights(Color.BLUE, 300, 1000);
 		}
-		notificationManager.notify(notificationId, mBuilder.getNotification());
+		if (shouldShowNotification) {
+			notificationManager.notify(notificationId,
+					mBuilder.getNotification());
+		}
 
 	}
 
@@ -455,10 +460,12 @@ public class HikeNotification {
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(resultPendingIntent);
 
-		notificationManager.notify(notificationId, mBuilder.getNotification());
-
-		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-				: System.currentTimeMillis();
+		if (shouldShowNotification) {
+			notificationManager.notify(notificationId,
+					mBuilder.getNotification());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+					: System.currentTimeMillis();
+		}
 	}
 
 	public void pushBigPictureStatusNotifications(String[] profileStruct) {
@@ -533,10 +540,12 @@ public class HikeNotification {
 
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(profileStruct[1].hashCode(),
-				mBuilder.build());
-		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-				: System.currentTimeMillis();
+		if (shouldShowNotification) {
+			mNotificationManager.notify(profileStruct[1].hashCode(),
+					mBuilder.build());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+					: System.currentTimeMillis();
+		}
 	}
 
 	public void pushBigPictureMessageNotifications(Intent notificationIntent,
@@ -620,9 +629,11 @@ public class HikeNotification {
 
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(notificationId, mBuilder.build());
-		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-				: System.currentTimeMillis();
+		if (shouldShowNotification) {
+			mNotificationManager.notify(notificationId, mBuilder.build());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+					: System.currentTimeMillis();
+		}
 	}
 
 
