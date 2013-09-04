@@ -74,6 +74,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -1799,9 +1800,15 @@ public class Utils {
 				HikeConstants.VIBRATE_PREF, true)) {
 			return;
 		}
-		Vibrator vibrator = (Vibrator) context
-				.getSystemService(Context.VIBRATOR_SERVICE);
-		vibrator.vibrate(100);
+		AudioManager audioManager = (AudioManager) context
+				.getSystemService(Context.AUDIO_SERVICE);
+		int ringerMode = audioManager.getRingerMode();
+
+		if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
+			Vibrator vibrator = (Vibrator) context
+					.getSystemService(Context.VIBRATOR_SERVICE);
+			vibrator.vibrate(100);
+		}
 	}
 
 	private static String convertToHex(byte[] data) {
