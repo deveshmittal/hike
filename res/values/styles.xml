@@ -511,4 +511,23 @@
 	    <item name="android:textColor">@color/list_item_header</item>
 	</style>
     
+	<style name="StatusSocialButtons">
+	    <item name="android:layout_width">0dp</item>
+	    <item name="android:layout_height">match_parent</item>
+	    <item name="android:layout_weight">1</item>
+	    <item name="android:background">@drawable/transparent_white_rounded_rectangle</item>
+	    <item name="android:drawablePadding">5dp</item>
+	    <item name="android:textColor">@drawable/social_btn_text</item>
+	    <item name="android:textStyle">bold|italic</item>
+	    <item name="android:shadowColor">#40000000</item>
+	    <item name="android:shadowDy">1.0</item>
+	    <item name="android:shadowRadius">1.0</item>
+	    <item name="android:gravity">center</item>
+	    <item name="android:layout_marginBottom">5dp</item>
+	    <item name="android:layout_marginTop">5dp</item>
+	    <item name="android:layout_marginLeft">10dp</item>
+	    <item name="android:layout_marginRight">10dp</item>
+	    <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">20dp</item>
+	</style>
 </resources>

@@ -19,23 +19,21 @@
             android:background="#323638"
             android:orientation="horizontal" >
 
-            <ImageButton
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/post_fb_btn"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
+                style="@style/StatusSocialButtons"
                 android:onClick="onFacebookClick"
-                android:src="@drawable/post_fb" />
+                android:layout_marginRight="5dp"
+                android:text="@string/facebook"
+                android:drawableLeft="@drawable/post_fb" />
 
-            <ImageButton
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/post_twitter_btn"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
+                style="@style/StatusSocialButtons"
                 android:onClick="onTwitterClick"
-                android:src="@drawable/post_twitter" />
+                android:layout_marginLeft="5dp"
+                android:text="@string/twitter"
+                android:drawableLeft="@drawable/post_twitter" />
         </LinearLayout>
 
         <View
