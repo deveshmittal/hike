@@ -657,4 +657,9 @@
 	<string name="status_notification_hinttext"> Receive push notifications for Status Updates on Hike</string>
 	<string name="status_notification">Status Update Notifications</string>
 	<string name="network_error">Network error. Tap to retry</string>
+	<string name="contact_hinttext">Get in touch with folks at Hike</string>
+	<string name="blocked_list_hinttext">Manage people you\'ve blocked</string>
+	<string name="help_hinttext">Hike FAQs, system status and contact</string>
+	<string name="system_health_hinttext">See hike system status</string>
+	<string name="sms_setting_hinttext">SMS settings</string>
 </resources>
