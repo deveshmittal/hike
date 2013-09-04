@@ -417,9 +417,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				return ViewType.FRIEND.ordinal();
 			} else if (favoriteType == FavoriteType.REQUEST_RECEIVED) {
 				/*
-				 * Accounting for the friends header
+				 * Accounting for the friends header and the invite/create group
+				 * items
 				 */
-				if (position <= ((filteredFriendsList.size() - 1) + 1)) {
+				if (position <= ((filteredFriendsList.size() - 1) + 1 + 2)) {
 					return ViewType.FRIEND_REQUEST.ordinal();
 				}
 			}

@@ -142,7 +142,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.HIKE_INDEX);
 					} else if (HikePubSub.USER_LEFT.equals(type)) {
-						friendsAdapter.removeFromGroup(contactInfo,
+						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.SMS_INDEX);
 					}
 				}
@@ -158,6 +158,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					ContactInfo contactInfo = favoriteToggle.first;
 					contactInfo.setFavoriteType(favoriteType);
 					if ((favoriteType == FavoriteType.FRIEND)
+							|| (favoriteType == FavoriteType.REQUEST_SENT_REJECTED)
 							|| (favoriteType == FavoriteType.REQUEST_SENT)
 							|| (favoriteType == FavoriteType.REQUEST_RECEIVED)) {
 						friendsAdapter.addToGroup(contactInfo,
@@ -187,7 +188,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				public void run() {
 					if ((contactInfo.getFavoriteType() != FavoriteType.FRIEND)
 							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
-							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)) {
+							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
+							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED)) {
 						if (contactInfo.isOnhike()) {
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
