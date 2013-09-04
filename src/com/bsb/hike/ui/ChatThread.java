@@ -94,6 +94,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -3330,10 +3331,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				.findViewById(R.id.contact_details);
 		Button yesBtn = (Button) contactDialog.findViewById(R.id.btn_ok);
 		Button noBtn = (Button) contactDialog.findViewById(R.id.btn_cancel);
-		TextView targetAccount = (TextView) contactDialog
-				.findViewById(R.id.target_account);
+		View accountContainer = contactDialog
+				.findViewById(R.id.account_container);
 		final Spinner accounts = (Spinner) contactDialog
 				.findViewById(R.id.account_spinner);
+		final TextView accountInfo = (TextView) contactDialog
+				.findViewById(R.id.account_info);
 
 		int screenHeight = getResources().getDisplayMetrics().heightPixels;
 		int dialogWidth = (int) getResources().getDimension(
@@ -3352,14 +3355,37 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		yesBtn.setText(saveContact ? R.string.save : R.string.send);
 
 		if (saveContact) {
-			accounts.setVisibility(View.VISIBLE);
-			targetAccount.setVisibility(View.VISIBLE);
+			accountContainer.setVisibility(View.VISIBLE);
 			accounts.setAdapter(new AccountAdapter(getApplicationContext(),
 					getAccountList()));
+			accountInfo.setText(((AccountData) accounts.getSelectedItem())
+					.getName());
 		} else {
-			accounts.setVisibility(View.GONE);
-			targetAccount.setVisibility(View.GONE);
+			accountContainer.setVisibility(View.GONE);
 		}
+
+		accountContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				accounts.performClick();
+			}
+		});
+
+		accounts.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				accountInfo.setText(((AccountData) accounts.getSelectedItem())
+						.getName());
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+			}
+
+		});
 
 		contactName.setText(name);
 		contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(
