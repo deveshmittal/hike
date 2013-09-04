@@ -29,6 +29,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -61,7 +62,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	private EditText mInputNumberView;
 	private ListView mContactList;
 	private Set<ContactInfo> selectedContactSet;
-	private Button doneBtn;
+	private ViewGroup doneContainer;
+	private TextView doneText;
 	private TextView title;
 	private ImageView backIcon;
 
@@ -107,7 +109,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void init() {
-		doneBtn.setVisibility(View.GONE);
+		doneContainer.setVisibility(View.GONE);
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(
 				getResources().getDrawable(R.drawable.bg_header));
@@ -125,7 +127,9 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 
-		doneBtn = (Button) actionBarView.findViewById(R.id.done_btn);
+		doneContainer = (ViewGroup) actionBarView
+				.findViewById(R.id.done_container);
+		doneText = (TextView) actionBarView.findViewById(R.id.done_text);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
@@ -146,7 +150,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		});
 
-		doneBtn.setOnClickListener(new OnClickListener() {
+		doneContainer.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -494,8 +498,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 
 			if ((createGroup && selectedContactSet.size() > 1)
 					|| (!createGroup && !selectedContactSet.isEmpty())) {
-				doneBtn.setVisibility(View.VISIBLE);
-				doneBtn.setText(Integer.toString(selectedContactSet.size()));
+				doneContainer.setVisibility(View.VISIBLE);
+				doneText.setText(Integer.toString(selectedContactSet.size()));
 				getSupportActionBar().setBackgroundDrawable(
 						getResources()
 								.getDrawable(R.drawable.bg_header_compose));

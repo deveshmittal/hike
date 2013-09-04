@@ -18,6 +18,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -52,6 +53,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 	private Type type;
 	private Map<String, Boolean> toggleBlockMap;
 
+	private ViewGroup doneContainer;
+	private TextView doneText;
 	private Button doneBtn;
 	private TextView title;
 	private ImageView backIcon;
@@ -91,7 +94,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 	private void init() {
 		if (type != Type.BLOCK) {
 			selectedContacts.clear();
-			doneBtn.setVisibility(View.GONE);
+			doneContainer.setVisibility(View.GONE);
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(
@@ -112,12 +115,30 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
 		if (type != Type.BLOCK) {
-			doneBtn = (Button) actionBarView.findViewById(R.id.done_btn);
+			doneContainer = (ViewGroup) actionBarView
+					.findViewById(R.id.done_container);
+			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
+
+			doneContainer.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					showNativeSMSPopup();
+				}
+			});
 		} else {
 			doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
 			doneBtn.setVisibility(View.VISIBLE);
 			doneBtn.setText(R.string.save);
 			doneBtn.setEnabled(false);
+
+			doneBtn.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					onTitleIconClick(null);
+				}
+			});
 		}
 
 		backContainer.setOnClickListener(new OnClickListener() {
@@ -141,18 +162,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 
-			}
-		});
-
-		doneBtn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if (type == Type.INVITE) {
-					showNativeSMSPopup();
-				} else {
-					onTitleIconClick(null);
-				}
 			}
 		});
 
@@ -319,8 +328,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 				}
 
 				if (!selectedContacts.isEmpty()) {
-					doneBtn.setVisibility(View.VISIBLE);
-					doneBtn.setText(Integer.toString(selectedContacts.size()));
+					doneContainer.setVisibility(View.VISIBLE);
+					doneText.setText(Integer.toString(selectedContacts.size()));
 					getSupportActionBar().setBackgroundDrawable(
 							getResources().getDrawable(
 									R.drawable.bg_header_compose));

@@ -394,6 +394,12 @@
         <item name="android:textStyle">bold|italic</item>
     </style>
 
+    <style name="ActionBarText.Shadow">
+        <item name="android:shadowColor">#40000000</item>
+        <item name="android:shadowDy">1.0</item>
+        <item name="android:shadowRadius">1.0</item>
+    </style>
+    
     <style name="RequestBtn">
         <item name="android:layout_width">36dp</item>
         <item name="android:layout_height">32dp</item>

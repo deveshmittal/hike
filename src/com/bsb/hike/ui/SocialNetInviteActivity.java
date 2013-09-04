@@ -28,9 +28,9 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -82,7 +82,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 	private Menu mMenu;
 	private int MAX_INVITE_LIMIT = 10;
 
-	private Button doneBtn;
+	private ViewGroup doneContainer;
+	private TextView doneText;
 	private TextView title;
 	private ImageView backIcon;
 
@@ -128,7 +129,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 
 	private void init() {
 		selectedFriends.clear();
-		doneBtn.setVisibility(View.GONE);
+		doneContainer.setVisibility(View.GONE);
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(
 				getResources().getDrawable(R.drawable.bg_header));
@@ -146,7 +147,9 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 
-		doneBtn = (Button) actionBarView.findViewById(R.id.done_btn);
+		doneContainer = (ViewGroup) actionBarView
+				.findViewById(R.id.done_container);
+		doneText = (TextView) actionBarView.findViewById(R.id.done_text);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
@@ -162,7 +165,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 			}
 		});
 
-		doneBtn.setOnClickListener(new OnClickListener() {
+		doneContainer.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -540,8 +543,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 		}
 
 		if (!selectedFriends.isEmpty()) {
-			doneBtn.setVisibility(View.VISIBLE);
-			doneBtn.setText(Integer.toString(selectedFriends.size()));
+			doneContainer.setVisibility(View.VISIBLE);
+			doneText.setText(Integer.toString(selectedFriends.size()));
 			getSupportActionBar().setBackgroundDrawable(
 					getResources().getDrawable(R.drawable.bg_header_compose));
 

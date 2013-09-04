@@ -61,11 +61,12 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/char_counter"
-                android:layout_width="wrap_content"
+                android:layout_width="35dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_alignBottom="@+id/content"
                 android:layout_marginLeft="3dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center"
                 android:shadowColor="@color/white"
                 android:shadowDy="0.7"
@@ -76,14 +77,16 @@
                 android:textStyle="bold|italic" />
 
             <RelativeLayout
+                android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_toLeftOf="@id/char_counter"
                 android:layout_toRightOf="@id/avatar"
                 android:background="@drawable/bg_update_text_empty"
-                android:paddingLeft="3dp"
-                android:paddingRight="3dp" >
+                android:paddingBottom="8dp"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp" >
 
                 <ImageButton
                     android:id="@+id/emoji_btn"
@@ -104,8 +107,9 @@
                     android:gravity="top"
                     android:hint="@string/whats_up_user"
                     android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
-                    android:textColor="@color/subtext"
-                    android:textSize="18sp" />
+                    android:textColor="@color/list_item_header"
+                    android:textColorHint="@color/description_lightgrey"
+                    android:textSize="16sp" />
             </RelativeLayout>
         </RelativeLayout>
 

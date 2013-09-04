@@ -23,25 +23,39 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/title"
-            style="@style/ActionBarText"
+            style="@style/ActionBarText.Shadow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="1dp" />
     </LinearLayout>
 
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/done_btn"
-        style="@style/ActionBarText"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/done_container"
+        android:layout_width="56dp"
         android:layout_height="32dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="8dp"
         android:background="@drawable/bg_green_btn_selector"
-        android:drawableLeft="@drawable/ic_done"
-        android:paddingLeft="12dp"
-        android:paddingRight="8dp"
-        android:visibility="gone" />
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <ImageView
+            android:id="@+id/ic_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
+            android:src="@drawable/ic_done" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/done_text"
+            style="@style/ActionBarText.Shadow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:gravity="center" />
+    </LinearLayout>
 
     <com.bsb.hike.view.CustomFontButton
         android:id="@+id/post_btn"
