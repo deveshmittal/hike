@@ -412,7 +412,20 @@ public class MqttMessagesManager {
 
 			if (convMessage.getMetadata() != null) {
 				if (convMessage.getMetadata().isPokeMessage()) {
-					Utils.vibrateNudgeReceived(context);
+					Conversation conversation = convMessage.getConversation();
+					boolean vibrate = false;
+					if (conversation != null) {
+						if (conversation instanceof GroupConversation) {
+							if (!((GroupConversation) conversation).isMuted()) {
+								vibrate = true;
+							}
+						} else {
+							vibrate = true;
+						}
+					}
+					if (vibrate) {
+						Utils.vibrateNudgeReceived(context);
+					}
 				}
 			}
 			Log.d(getClass().getSimpleName(), "Receiver received Message : "

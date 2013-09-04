@@ -4006,7 +4006,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		}, 10);
 
-		Utils.vibrateNudgeReceived(this);
+		boolean vibrate = false;
+		if (mConversation != null) {
+			if (mConversation instanceof GroupConversation) {
+				if (!((GroupConversation) mConversation).isMuted()) {
+					vibrate = true;
+				}
+			} else {
+				vibrate = true;
+			}
+		}
+
+		if (vibrate) {
+			Utils.vibrateNudgeReceived(this);
+		}
 	}
 
 	public void sendSticker(Sticker sticker) {
