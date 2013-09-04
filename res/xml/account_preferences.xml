@@ -11,18 +11,6 @@
         android:title="@string/auto_download_image_header"
         android:widgetLayout="@layout/checkbox_widget" />
     <com.bsb.hike.view.IconPreference
-        icon="ic_fb_priv"
-        android:key="unlinkFacebook"
-        android:layout="@layout/icon_preference"
-        android:summary="@string/unlink_facebook_account_msg"
-        android:title="@string/unlink_facebook_account" />
-    <com.bsb.hike.view.IconPreference
-        icon="ic_twitter_priv"
-        android:key="unlinkTwitter"
-        android:layout="@layout/icon_preference"
-        android:summary="@string/unlink_twitter_account_msg"
-        android:title="@string/unlink_twitter_account" />
-    <com.bsb.hike.view.IconPreference
         icon="ic_unlink_account_settings"
         android:key="unlinkAccount"
         android:layout="@layout/icon_preference"
@@ -34,6 +22,16 @@
         android:layout="@layout/icon_preference"
         android:summary="@string/delete_account_msg"
         android:title="@string/delete_account" />
-    
-
+    <com.bsb.hike.view.IconPreference
+        icon="ic_fb_priv"
+        android:key="unlinkFacebook"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/unlink_facebook_account_msg"
+        android:title="@string/unlink_facebook_account" />
+    <com.bsb.hike.view.IconPreference
+        icon="ic_twitter_priv"
+        android:key="unlinkTwitter"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/unlink_twitter_account_msg"
+        android:title="@string/unlink_twitter_account" />
 </PreferenceScreen>
