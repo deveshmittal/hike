@@ -10,8 +10,13 @@
         android:layout_height="wrap_content"
         android:cacheColorHint="#00000000"
         android:choiceMode="none"
-        android:divider="@drawable/ic_thread_divider_profile"
+        android:divider="@drawable/home_list_divider"
         android:dividerHeight="1dp"
         android:fadingEdge="none" />
 
+    <View 
+        android:layout_below="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/home_list_divider"/>
 </RelativeLayout>

@@ -9,9 +9,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:cacheColorHint="#00000000"
-        android:divider="@drawable/ic_thread_divider_profile"
+        android:divider="@drawable/home_list_divider"
         android:dividerHeight="1dp"
         android:fadingEdge="none"
         android:footerDividersEnabled="false" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/settings_content"
+        android:background="@drawable/home_list_divider" />
 
 </RelativeLayout>
