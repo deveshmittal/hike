@@ -64,8 +64,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private int[] headers = { R.string.updates, R.string.chats,
 			R.string.friends };
 
-	private int[] tabIcons = { R.drawable.ic_updates, R.drawable.ic_chats,
-			R.drawable.ic_friends };
+	private int[] tabIcons = { R.drawable.updates_tab, R.drawable.chats_tab,
+			R.drawable.friends_tab };
 
 	private boolean deviceDetailsSent;
 
