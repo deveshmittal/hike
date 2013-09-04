@@ -39,7 +39,7 @@
 
         <View
             android:id="@+id/button_divider"
-            android:layout_width="2dp"
+            android:layout_width="1.5dp"
             android:layout_height="40dp"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/button_container"
@@ -72,7 +72,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textColor="@color/almost_white"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textStyle="bold|italic" />
         </LinearLayout>
 
        
