@@ -93,6 +93,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/status_txt"
+                    android:scaleType="centerInside"
                     android:layout_alignParentRight="true"
                     android:background="@null"
                     android:onClick="onEmojiClick"
