@@ -43,7 +43,7 @@
             android:layout_height="28dp"
             android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
-            android:indeterminateDrawable="@drawable/loading"
+            android:indeterminateDrawable="@drawable/custom_progress_bar_drawable"
             android:visibility="visible" />
 
         <com.bsb.hike.view.CustomFontTextView
