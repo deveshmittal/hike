@@ -22,8 +22,8 @@
 
         <RelativeLayout
             android:id="@+id/avatar_frame"
-            android:layout_width="@dimen/small_avatar"
-            android:layout_height="@dimen/small_avatar"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_gravity="left|center"
             android:layout_marginBottom="5dp"
             android:layout_marginRight="4dp"
