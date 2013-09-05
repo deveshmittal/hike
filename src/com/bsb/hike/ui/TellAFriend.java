@@ -122,11 +122,17 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Session session = Session.getActiveSession();
-		if (session != null) {
-			session.onActivityResult(this, requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == HikeConstants.FACEBOOK_REQUEST_CODE) {
+			Session session = Session.getActiveSession();
+			if (session != null && resultCode == RESULT_OK) {
+				session.onActivityResult(this, requestCode, resultCode, data);
+			} else if (session != null && resultCode == RESULT_CANCELED) {
+				Log.d("TellAFriend", "Facebook Permission Cancelled");
+				session.closeAndClearTokenInformation();
+				Session.setActiveSession(null);
+			}
 		}
-
 	}
 
 	@Override

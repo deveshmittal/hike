@@ -89,6 +89,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private View tipView;
 	private Button doneBtn;
 	private TextView title;
+	private View fb;
+	private View twitter;
 
 	@Override
 	public Object onRetainCustomNonConfigurationInstance() {
@@ -158,8 +160,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		});
 		statusTxt.addTextChangedListener(new EmoticonTextWatcher());
 
-		View fb = findViewById(R.id.post_fb_btn);
-		View twitter = findViewById(R.id.post_twitter_btn);
+		fb = findViewById(R.id.post_fb_btn);
+		twitter = findViewById(R.id.post_twitter_btn);
 
 		fb.setSelected(mActivityTask.fbSelected);
 		twitter.setSelected(mActivityTask.twitterSelected);
@@ -338,12 +340,18 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		if (!hasPublishPermission()) {
 			Log.d("StatusUpdate", "not hasPublishPermission");
 			session.requestNewPublishPermissions(new Session.NewPermissionsRequest(
-					this, Arrays.asList("publish_stream"))
+					this, Arrays.asList("basic_info", "publish_stream"))
 					.setCallback(new StatusCallback() {
 
 						@Override
 						public void call(Session session, SessionState state,
 								Exception exception) {
+							if (exception != null) {
+								Log.e("StatusUpdate ",
+										"Error Requesting NewPublishPermissions = "
+												+ exception.toString());
+								return;
+							}
 							if (hasPublishPermission()) {
 								Log.d("StatusUpdate", session
 										.getExpirationDate().toString());
@@ -357,6 +365,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 						}
 
 					}));
+
 		} else {
 			Log.d("StatusUpdate",
 					"time = "
@@ -708,10 +717,23 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Session session = Session.getActiveSession();
-		if (session != null) {
-			session.onActivityResult(this, requestCode,
-					resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == HikeConstants.FACEBOOK_REQUEST_CODE) {
+			Session session = Session.getActiveSession();
+			if (session != null && resultCode == RESULT_OK) {
+				fb.setSelected(true);
+				session.onActivityResult(this, requestCode, resultCode, data);
+			} else if (session != null && resultCode == RESULT_CANCELED) {
+				Log.d("StatusUpdate", "Facebook Permission Cancelled");
+				// if we do not close the session here then requesting publish
+				// permission just after canceling the permission will
+				// throw an exception telling can not request publish
+				// permission, there
+				// is already a publish request pending.
+				fb.setSelected(false);
+				session.closeAndClearTokenInformation();
+				Session.setActiveSession(null);
+			}
 		}
 	}
 

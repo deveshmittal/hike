@@ -273,6 +273,7 @@ public class HikeConstants {
 	public static final int AUDIO_TRANSFER_CODE = 1190;
 	public static final int SHARE_LOCATION_CODE = 1192;
 	public static final int SHARE_CONTACT_CODE = 1193;
+	public static final int FACEBOOK_REQUEST_CODE = 64206;
 
 	public static final int MAX_DURATION_RECORDING_SEC = 360;
 
@@ -757,5 +758,5 @@ public class HikeConstants {
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
-
+	
 }
