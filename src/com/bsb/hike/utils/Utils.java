@@ -142,6 +142,7 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -2604,12 +2605,6 @@ public class Utils {
 			HttpEntity entity = response.getEntity();
 			is = entity.getContent();
 
-		} catch (Exception e) {
-			Log.e("LogEvent", "Error in http connection " + e.toString());
-		}
-
-		// convert response to string
-		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					is, "UTF-8"), 8);
 			StringBuilder sb = new StringBuilder();
@@ -2780,4 +2775,5 @@ public class Utils {
 		return PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean(HikeConstants.SEND_SMS_PREF, false);
 	}
+	
 }
