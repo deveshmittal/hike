@@ -48,7 +48,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER,
 			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED,
-			HikePubSub.FRIENDS_TAB_QUERY };
+			HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED };
 
 	private SharedPreferences preferences;
 
@@ -305,6 +305,17 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				@Override
 				public void run() {
 					friendsAdapter.onQueryChanged(query);
+				}
+			});
+		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					friendsAdapter.toggleShowSMSContacts(PreferenceManager
+							.getDefaultSharedPreferences(getActivity())
+							.getBoolean(HikeConstants.FREE_SMS_PREF, true)
+							|| Utils.getSendSmsPref(getActivity()));
 				}
 			});
 		}

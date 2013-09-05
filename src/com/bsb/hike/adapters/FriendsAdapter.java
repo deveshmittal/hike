@@ -74,6 +74,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private ContactFilter contactFilter;
 	private String queryText;
 	private boolean lastSeenPref;
+	private boolean showSMSContacts;
 
 	public FriendsAdapter(final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
@@ -81,6 +82,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		this.contactFilter = new ContactFilter();
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
 				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		this.showSMSContacts = PreferenceManager.getDefaultSharedPreferences(
+				context).getBoolean(HikeConstants.FREE_SMS_PREF, true)
+				|| Utils.getSendSmsPref(context);
 
 		completeList = new ArrayList<ContactInfo>();
 
@@ -301,13 +305,20 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		completeList.addAll(filteredHikeContactsList);
 
-		smsContactsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(filteredSmsContactsList.size()),
-				context.getString(R.string.sms_contacts), CONTACT_PHONE_NUM);
-		completeList.add(smsContactsSection);
+		if (showSMSContacts) {
+			smsContactsSection = new ContactInfo(SECTION_ID,
+					Integer.toString(filteredSmsContactsList.size()),
+					context.getString(R.string.sms_contacts), CONTACT_PHONE_NUM);
+			completeList.add(smsContactsSection);
 
-		completeList.addAll(filteredSmsContactsList);
+			completeList.addAll(filteredSmsContactsList);
+		}
 
+		notifyDataSetChanged();
+	}
+
+	public void toggleShowSMSContacts(boolean showSMSOn) {
+		this.showSMSContacts = showSMSOn;
 		notifyDataSetChanged();
 	}
 
