@@ -310,7 +310,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 					submitClicked();
 				}
 			}, 100);
-			submitClicked();
 		} else if (tapHereText != null && v.getId() == tapHereText.getId()) {
 			if (countDownTimer != null) {
 				countDownTimer.cancel();
