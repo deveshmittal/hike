@@ -53,6 +53,8 @@
 	<dimen name="avatar_typing_margin">2dp</dimen>
 	<dimen name="sms_toggle_unchecked">12sp</dimen>
 	<dimen name="sms_toggle_checked">14sp</dimen>
+	<dimen name="version_item_marginTop">50dp</dimen>
+	<dimen name="version_item_marginBottom">10dp</dimen>
 	
     <!-- Default height of an action bar. -->
     <dimen name="st__action_bar_default_height">48dip</dimen>

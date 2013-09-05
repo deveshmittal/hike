@@ -304,7 +304,7 @@
 	<string name="nudge_info">Double tap anywhere on the\nchat to nudge your friend.</string>
 	<string name="led_notification">LED notification</string>
 	<string name="led_notification_info">Flash the LED on new message</string>
-	<string name="with_love">made with love in India</string>
+	<string name="with_love">Made with love in India</string>
 	<string name="love">love</string>
 	<string name="remove_from_group">Remove from group</string>
 	<string name="leave_group_confirm">Are you sure you want to leave this group?</string>
@@ -666,4 +666,5 @@
 	<string name="mute_status_notification_subtext">Show a notification for status updates posted by your friends</string>
 	<string name="work_in_progress">Work in progress</string>
 	<string name="upgrading_to_a_new_and_improvd_hike">Upgrading to a new and improved hike!</string>
+	<string name="app_version">Version %1$s</string>
 </resources>

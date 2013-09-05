@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +24,10 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		implements OnItemClickListener {
 
-	private ArrayList<String> itemsSummary = new ArrayList<String>();
-	
+	private enum ViewType {
+		SETTINGS, VERSION
+	};
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,7 +39,9 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		items.add(getString(R.string.sms));
 		items.add(getString(R.string.privacy));
 		items.add(getString(R.string.help));
-		
+		items.add(null);
+
+		final ArrayList<String> itemsSummary = new ArrayList<String>();
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.notifications_hintext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
@@ -49,19 +54,70 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		itemIcons.add(R.drawable.ic_sms_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
 		itemIcons.add(R.drawable.ic_help_settings);
-		
+
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this,
 				R.layout.setting_item, R.id.item, items) {
 
 			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(R.id.summary);
-				tv.setText(itemsSummary.get(position));
-				ImageView iconImage = (ImageView) v.findViewById(R.id.icon);
-				iconImage.setImageResource(itemIcons.get(position));
+			public int getItemViewType(int position) {
+				if (getItem(position) == null) {
+					return ViewType.VERSION.ordinal();
+				} else {
+					return ViewType.SETTINGS.ordinal();
+				}
+			}
 
-				return v;
+			@Override
+			public int getViewTypeCount() {
+				return ViewType.values().length;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				ViewType viewType = ViewType.values()[getItemViewType(position)];
+				if (convertView == null) {
+					switch (viewType) {
+					case SETTINGS:
+						convertView = getLayoutInflater().inflate(
+								R.layout.setting_item, null);
+						break;
+
+					case VERSION:
+						convertView = getLayoutInflater().inflate(
+								R.layout.app_version_item, parent, false);
+						break;
+					}
+				}
+
+				switch (viewType) {
+				case SETTINGS:
+					TextView header = (TextView) convertView
+							.findViewById(R.id.item);
+					TextView summary = (TextView) convertView
+							.findViewById(R.id.summary);
+					ImageView iconImage = (ImageView) convertView
+							.findViewById(R.id.icon);
+
+					header.setText(getItem(position));
+					summary.setText(itemsSummary.get(position));
+					iconImage.setImageResource(itemIcons.get(position));
+					break;
+
+				case VERSION:
+					TextView appVersion = (TextView) convertView
+							.findViewById(R.id.app_version);
+					try {
+						appVersion.setText(getString(
+								R.string.app_version,
+								getPackageManager().getPackageInfo(
+										getPackageName(), 0).versionName));
+					} catch (NameNotFoundException e) {
+						appVersion.setText("");
+					}
+					break;
+
+				}
+				return convertView;
 			}
 
 		};
@@ -108,7 +164,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 					R.xml.account_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
-			
+
 		case 1:
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF,
@@ -132,6 +188,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
 			break;
 		}
-		startActivity(intent);
+		if (intent != null) {
+			startActivity(intent);
+		}
 	}
 }
