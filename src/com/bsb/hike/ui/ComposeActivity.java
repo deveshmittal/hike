@@ -14,18 +14,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog.Builder;
-import android.content.DialogInterface;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,7 +35,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -201,52 +199,48 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			finish();
 		} else {
 			if (TextUtils.isEmpty(existingGroupId)) {
-				Builder builder = new Builder(this);
-				builder.setTitle(R.string.group_name);
+				final Dialog dialog = new Dialog(this,
+						R.style.Theme_CustomDialog_Keyboard);
+				dialog.setContentView(R.layout.group_name_change_dialog);
 
-				final EditText editText = new EditText(this);
+				TextView header = (TextView) dialog.findViewById(R.id.header);
+				header.setText(R.string.group_name);
 
-				int margin = (int) (Utils.densityMultiplier * 10);
-				int padding = (int) (Utils.densityMultiplier * 10);
+				final EditText editText = (EditText) dialog
+						.findViewById(R.id.group_name_edit);
 
-				editText.setPadding(padding, padding, padding, padding);
-				LayoutParams layoutParams = new LayoutParams(
-						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-				layoutParams.leftMargin = margin;
-				layoutParams.rightMargin = margin;
-				editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
-						30) });
-				editText.setLayoutParams(layoutParams);
-				builder.setView(editText);
+				Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+				Button cancelBtn = (Button) dialog
+						.findViewById(R.id.btn_cancel);
 
-				builder.setNegativeButton(R.string.cancel,
-						new DialogInterface.OnClickListener() {
+				cancelBtn.setOnClickListener(new OnClickListener() {
 
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								dialog.dismiss();
-							}
-						});
+					@Override
+					public void onClick(View v) {
+						dialog.dismiss();
+					}
+				});
 
-				builder.setPositiveButton(android.R.string.ok,
-						new DialogInterface.OnClickListener() {
+				okBtn.setOnClickListener(new OnClickListener() {
 
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								String groupName = editText.getText()
-										.toString();
-								if (TextUtils.isEmpty(groupName.trim())) {
-									Toast.makeText(ComposeActivity.this,
-											R.string.enter_valid_group_name,
-											Toast.LENGTH_SHORT).show();
-									return;
-								}
-								createGroup(selectedContactList, groupName);
-							}
-						});
-				builder.show();
+					@Override
+					public void onClick(View v) {
+						String groupName = editText.getText().toString();
+						if (TextUtils.isEmpty(groupName.trim())) {
+							Toast toast = Toast.makeText(ComposeActivity.this,
+									R.string.enter_valid_group_name,
+									Toast.LENGTH_SHORT);
+							toast.setGravity(Gravity.CENTER, 0, 0);
+							toast.show();
+							return;
+						}
+						dialog.dismiss();
+						createGroup(selectedContactList, groupName);
+					}
+				});
+
+				dialog.show();
+
 			} else {
 				createGroup(selectedContactList, null);
 			}
