@@ -10,7 +10,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.utils.HikeNotification;
 
 public class UpgradeIntentService extends IntentService {
 
@@ -20,16 +19,6 @@ public class UpgradeIntentService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent dbIntent) {
-
-		HikeNotification.shouldShowNotification = false;
-
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		makeRoundedThumbsForUserDb();
 
 		initialiseSharedMediaAndFileThumbnailTable();
@@ -43,6 +32,7 @@ public class UpgradeIntentService extends IntentService {
 		editor.putInt(com.bsb.hike.HikeConstants.UPGRADE_AVATAR_CONV_DB, 2);
 		editor.putInt(com.bsb.hike.HikeConstants.UPGRADE_AVATAR_PROGRESS_USER,
 				2);
+		editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
 		editor.commit();
 
 		// fire the pubsub event to let the HomeActivity class know that the
@@ -50,8 +40,6 @@ public class UpgradeIntentService extends IntentService {
 		// upgrade is done and it can stop the spinner
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE,
 				null);
-		HikeNotification.shouldShowNotification = true;
-
 	}
 
 	public UpgradeIntentService() {

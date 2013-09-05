@@ -158,6 +158,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String GCM_ID_SENT = "gcmIdSent";
 	
+	public static final String BLOCK_NOTIFICATIONS = "blockNotification";
+	
 	private static final boolean TEST = false;  //TODO:: test flag only : turn OFF for Production
 	
 	/*
@@ -499,12 +501,15 @@ public class HikeMessengerApp extends Application implements Listener {
 		//if the setting value is 1 , this means the DB onUpgrade was called successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1  
 				&& settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST) {
+			// turn off future push notifications as soon as the app has started.
+						// this has to be turned on whenever the upgrade finishes.
+						Editor editor = settings.edit();
+						editor.putBoolean(BLOCK_NOTIFICATIONS, true);
+						editor.commit();
+						
 		Intent msgIntent = new Intent(this, UpgradeIntentService.class);
 		startService(msgIntent);
 		}
-		//turn off future push notifications as soon as the app has started.
-		//this has to be turned on whenever the upgrade finishes.
-		HikeNotification.shouldShowNotification = false;
 
 		HikeMqttPersistence.init(this);
 		SmileyParser.init(this);
