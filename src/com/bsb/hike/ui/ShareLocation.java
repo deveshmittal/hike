@@ -91,6 +91,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 	private Dialog playServiceErrordialog;
 	private int selectedPosition = 0;
 	private LocationClient mLocationClient;
+	private int SEARCH_RADIUS = 2000; // 2KM
 	// These settings are the same as the settings for the map. They will in
 	// fact give you updates at
 	// the maximal rates currently possible.
@@ -256,12 +257,13 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 								+ lat
 								+ ","
 								+ lng
-								+ "radius=2000&sensor=true"
+								+ "&radius="
+								+ SEARCH_RADIUS
+								+ "&sensor=true"
 								+ "&key="
 								+ getResources().getString(
 										R.string.places_api_key);// ADD
 																	// KEY
-
 						isTextSearch = true;
 
 						executeTask(new GetPlaces(), searchStr);
@@ -496,30 +498,21 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 
 	private void updateNearbyPlaces() {
 		// build places query string
-		String types = "shopping_mall|airport|bank|bus_station|gas_station|hospital|museum|police|post_office|school|zoo|restaurant";
-
-		String typesStr;
-		try {
-			typesStr = URLEncoder.encode(types, "UTF-8");
-			if (searchStr == null) {
-				searchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/"
-						+ "json?location="
-						+ myLocation.getLatitude()
-						+ ","
-						+ myLocation.getLongitude()
-						+ "&types="
-						+ typesStr
-						+ "&radius=2000&sensor=true"
-						+ "&key="
-						+ getResources().getString(R.string.places_api_key);
-				;
-				isTextSearch = false;
-			}
-			executeTask(new GetPlaces(), searchStr);
-
-		} catch (UnsupportedEncodingException e) {
-			Log.w(getClass().getSimpleName(), "in text search url encoding", e);
+		if (searchStr == null) {
+			searchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/"
+					+ "json?location="
+					+ myLocation.getLatitude()
+					+ ","
+					+ myLocation.getLongitude()
+					+ "&radius="
+					+ SEARCH_RADIUS
+					+ "&sensor=true"
+					+ "&key="
+					+ getResources().getString(R.string.places_api_key);
+			;
+			isTextSearch = false;
 		}
+		executeTask(new GetPlaces(), searchStr);
 	}
 
 	private void executeTask(AsyncTask<String, Void, Integer> asyncTask,
