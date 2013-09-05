@@ -62,7 +62,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	public static HikeUserDatabase getInstance() {
 		return hikeUserDatabase;
 	}
-	
+
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.USERS_TABLE
@@ -261,21 +261,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		 */
 		if (oldVersion < 14) {
 			onCreate(db);
-			//set the preferences to 1 , for UserDBAvtar being called for upgrade/
-			//this will be used in hike messenger app and home activity while computing the spinner state.
+			// set the preferences to 1 , for UserDBAvtar being called for
+			// upgrade/
+			// this will be used in hike messenger app and home activity while
+			// computing the spinner state.
 			Editor editor = mContext.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-			editor.putInt(
-					HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
 			editor.commit();
 		}
 	}
 
-	public void makeOlderAvatarsRounded()
-	{
+	public void makeOlderAvatarsRounded() {
 		makeOlderAvatarsRounded(mDb);
 	}
-	
+
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync)
 			throws DbException {
 		SQLiteDatabase db = mDb;

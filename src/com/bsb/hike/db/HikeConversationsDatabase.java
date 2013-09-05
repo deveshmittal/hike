@@ -402,12 +402,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * parse through all the messages to populate these tables.
 		 */
 		if (oldVersion < 18) {
-			//Edit the preference to ensure that HikeMessenger app knows we've reached the
-			//upgrade flow for version 18
+			// Edit the preference to ensure that HikeMessenger app knows we've
+			// reached the
+			// upgrade flow for version 18
 			Editor editor = mContext.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-			editor.putInt(
-					HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
 			editor.commit();
 		}
 		/*
@@ -2816,11 +2816,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void initialiseSharedMediaAndFileThumbnailTable()
-	{
+	public void initialiseSharedMediaAndFileThumbnailTable() {
 		initialiseSharedMediaAndFileThumbnailTable(mDb);
 	}
-	
+
 	public void addSharedMedia(long messageId, long convId) {
 		ContentValues sharedMediaValues = getSharedMediaContentValues(
 				messageId, convId);
