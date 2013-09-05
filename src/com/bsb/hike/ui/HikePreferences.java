@@ -343,6 +343,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					Session session = Session.getActiveSession();
 					if (session != null) {
 						session.closeAndClearTokenInformation();
+						session.setActiveSession(null);
 					}
 					Toast.makeText(getApplicationContext(),
 							R.string.social_unlink_success, Toast.LENGTH_SHORT)
