@@ -6,6 +6,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -50,6 +51,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	public static final int UPDATES_TAB_INDEX = 0;
 	public static final int CHATS_TAB_INDEX = 1;
 	public static final int FRIENDS_TAB_INDEX = 2;
+	private static final boolean TEST = false;  //TODO: Test flag only, turn off for Production
 
 	private enum DialogShowing {
 		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING
@@ -69,10 +71,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private View parentLayout;
 	private Dialog dialog;
 	private SharedPreferences accountPrefs;
+	private ProgressDialog progDialog;
+	private boolean showingProgress = false;
 
 	private String[] pubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
-			HikePubSub.RESET_UNREAD_COUNT };
+			HikePubSub.RESET_UNREAD_COUNT, 
+			HikePubSub.FINISHED_AVTAR_UPGRADE};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +88,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				0);
 
+		//Checking whether the state of the avatar and conv DB Upgrade settings is 1
+		//If it's 1, it means we need to show a progress dialog and then wait for the
+		// pub sub thread event to cancel the dialog once the upgrade is done.
+		if (((accountPrefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1)
+				&& (accountPrefs.getInt(
+						HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1 ))|| TEST) {
+			progDialog = ProgressDialog.show(this,
+					getString(R.string.work_in_progress),
+					getString(R.string.upgrading_to_a_new_and_improvd_hike), true);
+			showingProgress=true;
+		}
+		
 		boolean justSignedUp = accountPrefs.getBoolean(
 				HikeMessengerApp.JUST_SIGNED_UP, false);
 
@@ -92,7 +109,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setIcon(R.drawable.hike_logo_top_bar);
-
 		setContentView(R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
@@ -121,6 +137,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
 		initialiseViewPager();
+		//make the view pager visibility GONE , as the spinner is showing
+		//We do not want to see messages till we are ready ! 
+		if (showingProgress) {
+			viewPager.setVisibility(View.GONE);
+		}
 		initialiseTabs();
 
 		if (savedInstanceState == null && dialogShowing == null) {
@@ -588,7 +609,22 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
 			showUpdateIcon = false;
 			runOnUiThread(refreshTabIcon);
+		} else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE)) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							progDialog.dismiss();
+							showingProgress = false;
+							viewPager.setVisibility(View.VISIBLE);
+						}
+					});
+				}
+			}).start();
 		}
+
 	}
 
 	Runnable refreshTabIcon = new Runnable() {
