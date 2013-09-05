@@ -630,7 +630,8 @@ public class HikeNotification {
 
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		if (shouldShowNotification) {
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
 			mNotificationManager.notify(notificationId, mBuilder.build());
 			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
 					: System.currentTimeMillis();
