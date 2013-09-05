@@ -149,41 +149,51 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		if (sslPreference != null) {
 			sslPreference.setOnPreferenceChangeListener(this);
 		}
-		
+
 		Preference blockedListPreference = getPreferenceScreen()
 				.findPreference(HikeConstants.BLOKED_LIST_PREF);
 		if (blockedListPreference != null) {
-			Log.d(getClass().getSimpleName(), "blockedListPreference preference not null" + blockedListPreference.getKey());
+			Log.d(getClass().getSimpleName(),
+					"blockedListPreference preference not null"
+							+ blockedListPreference.getKey());
 			blockedListPreference.setOnPreferenceClickListener(this);
-		} else{
-			Log.d(getClass().getSimpleName(), "blockedListPreference preference is null");
+		} else {
+			Log.d(getClass().getSimpleName(),
+					"blockedListPreference preference is null");
 		}
-		
+
 		Preference systemHealthPreference = getPreferenceScreen()
 				.findPreference(HikeConstants.SYSTEM_HEALTH_PREF);
 		if (systemHealthPreference != null) {
-			Log.d(getClass().getSimpleName(), "systemHealthPreference preference is not null");
+			Log.d(getClass().getSimpleName(),
+					"systemHealthPreference preference is not null");
 			systemHealthPreference.setOnPreferenceClickListener(this);
-		} else{
-			Log.d(getClass().getSimpleName(), "systemHealthPreference preference is null");
+		} else {
+			Log.d(getClass().getSimpleName(),
+					"systemHealthPreference preference is null");
 		}
-		
-		Preference helpFaqsPreference = getPreferenceScreen()
-				.findPreference(HikeConstants.HELP_FAQS_PREF);
+
+		Preference helpFaqsPreference = getPreferenceScreen().findPreference(
+				HikeConstants.HELP_FAQS_PREF);
 		if (helpFaqsPreference != null) {
-			Log.d(getClass().getSimpleName(), "helpFaqsPreference preference is not null" +helpFaqsPreference.getKey());
+			Log.d(getClass().getSimpleName(),
+					"helpFaqsPreference preference is not null"
+							+ helpFaqsPreference.getKey());
 			helpFaqsPreference.setOnPreferenceClickListener(this);
-		} else{
-			Log.d(getClass().getSimpleName(), "helpFaqsPreference preference is null");
+		} else {
+			Log.d(getClass().getSimpleName(),
+					"helpFaqsPreference preference is null");
 		}
-		
+
 		Preference helpContactPreference = getPreferenceScreen()
 				.findPreference(HikeConstants.HELP_FEEDBACK_PREF);
 		if (helpContactPreference != null) {
-			Log.d(getClass().getSimpleName(), "helpContactPreference preference is not null");
+			Log.d(getClass().getSimpleName(),
+					"helpContactPreference preference is not null");
 			helpContactPreference.setOnPreferenceClickListener(this);
-		} else{
-			Log.d(getClass().getSimpleName(), "helpContactPreference preference is null");
+		} else {
+			Log.d(getClass().getSimpleName(),
+					"helpContactPreference preference is null");
 		}
 
 		Preference mutePreference = getPreferenceScreen().findPreference(
@@ -385,8 +395,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			intent.putExtra(HikeConstants.Extras.BLOCKED_LIST, true);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
-		}  else if (HikeConstants.SYSTEM_HEALTH_PREF.equals(preference.getKey())) {
-			Log.d(getClass().getSimpleName(), "system health preference selected");
+		} else if (HikeConstants.SYSTEM_HEALTH_PREF.equals(preference.getKey())) {
+			Log.d(getClass().getSimpleName(),
+					"system health preference selected");
 			Intent intent = new Intent(Intent.ACTION_VIEW);
 			intent.setData(Uri.parse(HikeConstants.SYSTEM_HEALTH_URL));
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -394,10 +405,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Toast.makeText(getApplicationContext(),
-							R.string.system_health_error, Toast.LENGTH_SHORT)
-							.show();
+						R.string.system_health_error, Toast.LENGTH_SHORT)
+						.show();
 			}
-		}  else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey())) {
+		} else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey())) {
 			Log.d(getClass().getSimpleName(), "FAQ preference selected");
 			Intent intent = new Intent(HikePreferences.this,
 					WebViewActivity.class);
@@ -406,13 +417,13 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
-		}  else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey())) {
+		} else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey())) {
 			Log.d(getClass().getSimpleName(), "contact preference selected");
 			Intent intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 
 			StringBuilder message = new StringBuilder("\n\n");
-			
+
 			try {
 				message.append(getString(R.string.hike_version)
 						+ " "
@@ -435,13 +446,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			message.append(getString(R.string.msisdn) + " " + msisdn);
 
 			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
-			intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_on_hike));
+			intent.putExtra(Intent.EXTRA_SUBJECT,
+					getString(R.string.feedback_on_hike));
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			try {
 				startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Toast.makeText(getApplicationContext(), R.string.email_error,
-							Toast.LENGTH_SHORT).show();
+						Toast.LENGTH_SHORT).show();
 			}
 		} else if (HikeConstants.STATUS_BOOLEAN_PREF
 				.equals(preference.getKey())) {
@@ -573,7 +585,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		} else if (HikeConstants.SSL_PREF.equals(preference.getKey())) {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.SWITCHED_DATA_CONNECTION, null);
-		} 
+		}
 		return false;
 	}
 
