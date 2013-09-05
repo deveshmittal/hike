@@ -308,7 +308,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 							StatusMessageType.NO_STATUS,
 							System.currentTimeMillis() / 1000);
 					statusMessages.add(0, noStatusMessage);
-				} else if (statusMessages.isEmpty()) {
+				} else if (result.isEmpty()) {
 					noStatusMessage = new StatusMessage(
 							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID,
 							null, "12345", getString(R.string.team_hike),
