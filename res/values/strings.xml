@@ -667,4 +667,5 @@
 	<string name="work_in_progress">Work in progress</string>
 	<string name="upgrading_to_a_new_and_improvd_hike">Upgrading to a new and improved hike!</string>
 	<string name="app_version">Version %1$s</string>
+	<string name="tap_plus_add_friends">Tap + to add some friends</string>
 </resources>
