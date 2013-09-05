@@ -48,11 +48,11 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/downloading_sticker"
-            style="@style/ProfileButtonTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Downloading Expressions"
-            android:textColor="#989793" />
+            android:textColor="@color/actionbar_text"
+            android:textSize="14sp"
+            android:text="Downloading Expressions" />
     </LinearLayout>
 
 </RelativeLayout>
