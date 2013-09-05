@@ -65,15 +65,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (prefs.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0) > 0
-				|| prefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0) > 0) {
-			resetUnseenStatusCount();
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
-		}
-		HikeMessengerApp.getPubSub().publish(
-				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
-
 		if (centralTimelineAdapter != null) {
 			centralTimelineAdapter.restartImageLoaderThread();
 		}
@@ -85,13 +76,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 		if (centralTimelineAdapter != null) {
 			centralTimelineAdapter.stopImageLoaderThread();
 		}
-	}
-
-	private void resetUnseenStatusCount() {
-		Editor editor = prefs.edit();
-		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		editor.commit();
 	}
 
 	@Override
@@ -218,7 +202,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 		if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
 			final StatusMessage statusMessage = (StatusMessage) object;
 			final int startIndex = getStartIndex();
-			resetUnseenStatusCount();
+			Utils.resetUnseenStatusCount(prefs);
 
 			getActivity().runOnUiThread(new Runnable() {
 				@Override

@@ -75,9 +75,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
 
-	private String[] homePubSubListeners = {
-			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
-			HikePubSub.RESET_UNREAD_COUNT };
+	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -471,9 +469,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void initialiseTabs() {
 		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
-		tabIndicator.setViewPager(viewPager,
-				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
+
+		int position = getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX,
+				1);
+		tabIndicator.setViewPager(viewPager, position);
 		tabIndicator.setOnPageChangeListener(onPageChangeListener);
+
+		onPageChangeListener.onPageSelected(position);
 
 		invalidateOptionsMenu();
 		setBackground();
@@ -513,8 +515,23 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			 */
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY,
 					"");
+
 			if (position == UPDATES_TAB_INDEX) {
 				showUpdateIcon = false;
+
+				SharedPreferences prefs = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+				if (prefs.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0) > 0
+						|| prefs.getInt(
+								HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0) > 0) {
+					Utils.resetUnseenStatusCount(prefs);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.RESET_NOTIFICATION_COUNTER, null);
+				}
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
+
 				tabIndicator.notifyDataSetChanged();
 			}
 		}
@@ -623,9 +640,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		super.onEventReceived(type, object);
 		if (HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT.equals(type)) {
 			showUpdateIcon = true;
-			runOnUiThread(refreshTabIcon);
-		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
-			showUpdateIcon = false;
 			runOnUiThread(refreshTabIcon);
 		} else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE)) {
 			new Thread(new Runnable() {

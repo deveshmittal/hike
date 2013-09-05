@@ -2790,4 +2790,11 @@ public class Utils {
 			return false;
 		}
 	}
+	
+	public static void resetUnseenStatusCount(SharedPreferences prefs) {
+		Editor editor = prefs.edit();
+		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		editor.commit();
+	}
 }
