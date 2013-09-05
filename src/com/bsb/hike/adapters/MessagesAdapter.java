@@ -1015,6 +1015,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								holder.showFileBtn
 										.setImageResource(R.drawable.ic_open_received_file);
 							}
+							holder.showFileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 							holder.messageTextView
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
@@ -1256,6 +1257,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else {
 			button.setImageResource(R.drawable.ic_download_file);
 		}
+		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
 	}
 
 	private void setTextAndIconForSystemMessages(TextView textView,
@@ -2161,6 +2163,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_open_received_file
 					: R.drawable.ic_pause_audio);
+			fileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 		}
 
 		Runnable updateTimer = new Runnable() {
