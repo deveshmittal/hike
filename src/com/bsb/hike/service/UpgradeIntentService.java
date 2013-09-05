@@ -1,4 +1,5 @@
 package com.bsb.hike.service;
+
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
@@ -19,16 +20,23 @@ public class UpgradeIntentService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent dbIntent) {
-		
-		HikeNotification hikeNotif = new HikeNotification(this.getApplicationContext());
-		hikeNotif.shouldShowNotification = false;
+
+		HikeNotification.shouldShowNotification = false;
+
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		makeRoundedThumbsForUserDb();
-		
+
 		initialiseSharedMediaAndFileThumbnailTable();
 		context = this;
-		prefs =  context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		
+		prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0);
+
 		// setting the preferences to 2 to indicate we're done with the
 		// migration !
 		Editor editor = prefs.edit();
@@ -42,14 +50,14 @@ public class UpgradeIntentService extends IntentService {
 		// upgrade is done and it can stop the spinner
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE,
 				null);
-		hikeNotif.shouldShowNotification = true;
-		
+		HikeNotification.shouldShowNotification = true;
+
 	}
 
 	public UpgradeIntentService() {
 
 		super(TAG);
-		
+
 	}
 
 	private void makeRoundedThumbsForUserDb() {
