@@ -657,5 +657,5 @@
 	<string name="status_notification_hinttext"> Receive push notifications for Status Updates on Hike</string>
 	<string name="status_notification">Status Update Notifications</string>
 	<string name="work_in_progress">Work in progress</string>
-	<string name="upgrading_to_a_new_and_improvd_hike">Upgrading to a new and improvd hike!</string>
+	<string name="upgrading_to_a_new_and_improvd_hike">Upgrading to a new and improved hike!</string>
 </resources>
