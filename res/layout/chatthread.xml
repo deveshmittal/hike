@@ -149,7 +149,7 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/bg_dark_grey_btn"
+                    android:background="@drawable/bg_dark_grey_btn_selector"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker_btn" />
