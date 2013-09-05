@@ -484,11 +484,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 						jsonObject);
 
-				Toast.makeText(
-						this,
-						newValue == 0 ? R.string.status_notification_on
-								: R.string.status_notification_off,
-						Toast.LENGTH_SHORT).show();
 			} catch (JSONException e) {
 				Log.w(getClass().getSimpleName(), e);
 			}
