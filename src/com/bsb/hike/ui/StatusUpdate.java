@@ -708,8 +708,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Session.getActiveSession().onActivityResult(this, requestCode,
-				resultCode, data);
+		Session session = Session.getActiveSession();
+		if (session != null) {
+			session.onActivityResult(this, requestCode,
+					resultCode, data);
+		}
 	}
 
 	public void toggleEnablePostButton() {
