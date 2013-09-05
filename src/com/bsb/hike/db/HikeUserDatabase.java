@@ -48,12 +48,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	private SQLiteDatabase mReadDb;
 
-	private Context mContext;
+	private static Context mContext;
 
 	private static HikeUserDatabase hikeUserDatabase;
 
 	public static void init(Context context) {
 		if (hikeUserDatabase == null) {
+			mContext = context;
 			hikeUserDatabase = new HikeUserDatabase(context);
 		}
 	}
@@ -125,7 +126,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				DBConstants.USERS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
-		this.mContext = context;
 	}
 
 	@Override

@@ -53,11 +53,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	private SQLiteDatabase mDb;
 
 	private static HikeConversationsDatabase hikeConversationsDatabase;
-	
-	private Context mContext;
+
+	private static Context mContext;
 
 	public static void init(Context context) {
 		if (hikeConversationsDatabase == null) {
+			mContext = context;
 			hikeConversationsDatabase = new HikeConversationsDatabase(context);
 		}
 	}
@@ -70,7 +71,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		super(context, DBConstants.CONVERSATIONS_DATABASE_NAME, null,
 				DBConstants.CONVERSATIONS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
-		mContext = context;
 	}
 
 	@Override
