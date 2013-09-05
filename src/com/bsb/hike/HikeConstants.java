@@ -179,7 +179,7 @@ public class HikeConstants {
 	public static final String SYSTEM_HEALTH_PREF = "systemHealth";
 	public static final String HELP_FAQS_PREF = "helpFaqs";
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
-
+	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";

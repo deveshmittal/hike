@@ -3,13 +3,12 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
@@ -21,11 +20,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -179,7 +176,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem gamesItem = menu.findItem(R.id.games);
 		MenuItem rewardsItem = menu.findItem(R.id.rewards);
-		MenuItem muteItem = menu.findItem(R.id.mute_notification);
 		MenuItem freeSmsItem = menu.findItem(R.id.free_sms);
 
 		SharedPreferences prefs = this.getSharedPreferences(
@@ -197,12 +193,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		SharedPreferences appPref = PreferenceManager
 				.getDefaultSharedPreferences(this);
-
-		if (muteItem != null) {
-			int preference = appPref.getInt(HikeConstants.STATUS_PREF, 0);
-			muteItem.setTitle(preference == 0 ? R.string.mute_notifications
-					: R.string.unmute_notifications);
-		}
 
 		if (freeSmsItem != null) {
 			boolean preference = appPref.getBoolean(
@@ -275,9 +265,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		case R.id.games:
 			intent = getGamingIntent();
 			break;
-		case R.id.mute_notification:
-			toggleMute();
-			return true;
 		}
 
 		if (intent != null) {
@@ -331,43 +318,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 						+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.rewards));
 		return intent;
-	}
-
-	private void toggleMute() {
-		SharedPreferences settingPref = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		int preference = settingPref.getInt(HikeConstants.STATUS_PREF, 0);
-
-		int newValue;
-
-		Editor editor = settingPref.edit();
-		if (preference == 0) {
-			newValue = -1;
-			editor.putInt(HikeConstants.STATUS_PREF, newValue);
-		} else {
-			newValue = 0;
-			editor.putInt(HikeConstants.STATUS_PREF, newValue);
-		}
-		editor.commit();
-
-		try {
-			JSONObject jsonObject = new JSONObject();
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.PUSH_SU, newValue);
-			jsonObject.put(HikeConstants.DATA, data);
-			jsonObject.put(HikeConstants.TYPE,
-					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-					jsonObject);
-
-			Toast.makeText(
-					this,
-					newValue == 0 ? R.string.status_notification_on
-							: R.string.status_notification_off,
-					Toast.LENGTH_SHORT).show();
-		} catch (JSONException e) {
-			Log.w(getClass().getSimpleName(), e);
-		}
 	}
 
 	private void showSMSClientDialog() {

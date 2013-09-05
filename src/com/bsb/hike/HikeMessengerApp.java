@@ -521,6 +521,13 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
+		if (!preferenceManager.contains(HikeConstants.STATUS_BOOLEAN_PREF)) {
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF,
+					preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
+			editor.commit();
+		}
+
 		Utils.setupServerURL(
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 				Utils.switchSSLOn(getApplicationContext()));

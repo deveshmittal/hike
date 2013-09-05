@@ -662,4 +662,6 @@
 	<string name="help_hinttext">Hike FAQs, system status and contact</string>
 	<string name="system_health_hinttext">See hike system status</string>
 	<string name="sms_setting_hinttext">SMS settings</string>
+	<string name="mute_status_notification_header">Status update notifications</string>
+	<string name="mute_status_notification_subtext">Show a notification for status updates posted by your friends</string>
 </resources>
