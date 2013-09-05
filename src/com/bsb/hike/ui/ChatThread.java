@@ -2217,8 +2217,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (!show) {
 			showOverlay(false);
 		}
-		findViewById(R.id.emo_btn).setEnabled(false);
-		findViewById(R.id.sticker_btn).setEnabled(false);
+		if (!(mConversation instanceof GroupConversation)) {
+			findViewById(R.id.emo_btn).setEnabled(false);
+			findViewById(R.id.sticker_btn).setEnabled(false);
+		}
 	}
 
 	private void nonZeroCredits() {
