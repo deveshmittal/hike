@@ -168,6 +168,14 @@ public class ToastListener implements Listener {
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
+
+			if ((message.getConversation() instanceof GroupConversation)
+					&& ((GroupConversation) message.getConversation())
+					.isMuted()) {
+					Log.d(getClass().getSimpleName(), "Group has been muted");
+					return;
+			}
+			
 			ContactInfo contactInfo;
 			if (message.isGroupChat()) {
 				Log.d("ToastListener", "GroupName is "
@@ -179,6 +187,7 @@ public class ToastListener implements Listener {
 				contactInfo = this.db.getContactInfoFromMSISDN(
 						message.getMsisdn(), false);
 			}
+			
 			toaster.notifyMessage(contactInfo, message, true);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
