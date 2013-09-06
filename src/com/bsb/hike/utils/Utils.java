@@ -317,7 +317,7 @@ public class Utils {
 	public static Drawable getDefaultIconForUser(Context context,
 			String msisdn, boolean rounded) {
 		if (isGroupConversation(msisdn)) {
-			int count = 7;
+			int count = 6;
 			int id;
 			switch (iconHash(msisdn) % count) {
 			case 0:
@@ -329,22 +329,18 @@ public class Utils {
 						: R.drawable.ic_group_avatar2;
 				break;
 			case 2:
-				id = rounded ? R.drawable.ic_group_avatar3_rounded
-						: R.drawable.ic_group_avatar3;
-				break;
-			case 3:
 				id = rounded ? R.drawable.ic_group_avatar4_rounded
 						: R.drawable.ic_group_avatar4;
 				break;
-			case 4:
+			case 3:
 				id = rounded ? R.drawable.ic_group_avatar5_rounded
 						: R.drawable.ic_group_avatar5;
 				break;
-			case 5:
+			case 4:
 				id = rounded ? R.drawable.ic_group_avatar6_rounded
 						: R.drawable.ic_group_avatar6;
 				break;
-			case 6:
+			case 5:
 				id = rounded ? R.drawable.ic_group_avatar7_rounded
 						: R.drawable.ic_group_avatar7;
 				break;
