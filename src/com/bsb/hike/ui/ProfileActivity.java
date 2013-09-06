@@ -1378,7 +1378,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void openChatThread(ContactInfo contactInfo) {
-		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
+		Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 		intent.setClass(this, ChatThread.class);
 		if (!getIntent().getBooleanExtra(
 				HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
