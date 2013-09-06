@@ -241,6 +241,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private boolean setupMenuOptions(Menu menu) {
+
+		if (viewPager == null) {
+			return false;
+		}
+
 		switch (viewPager.getCurrentItem()) {
 		case UPDATES_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
