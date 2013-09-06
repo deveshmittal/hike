@@ -522,7 +522,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					if (!TextUtils.isEmpty(lastSeenString)) {
 						if (contactInfo.getOffline() == 0) {
 							lastSeen.setTextColor(context.getResources()
-									.getColor(R.color.unread_message));
+									.getColor(R.color.action_bar_disabled_text));
 							avatarFrame
 									.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
 						}
