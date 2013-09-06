@@ -7,4 +7,5 @@
     <dimen name="checkbox_marginRight">15dp</dimen>
     <dimen name="top_btn_padding">3dp</dimen>
     <dimen name="tutorial_button_margin">25dp</dimen>
+    <dimen name="version_item_marginTop">120dp</dimen>
 </resources>
