@@ -127,6 +127,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -2791,5 +2792,11 @@ public class Utils {
 		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		editor.commit();
+	}
+
+	public static boolean shouldIncrementCounter(ConvMessage convMessage) {
+		return !convMessage.isSent()
+				&& convMessage.getState() == State.RECEIVED_UNREAD
+				&& convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
 }

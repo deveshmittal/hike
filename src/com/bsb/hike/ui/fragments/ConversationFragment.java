@@ -581,8 +581,7 @@ public class ConversationFragment extends SherlockListFragment implements
 				return;
 			}
 
-			if (!message.isSent()
-					&& message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE) {
+			if (Utils.shouldIncrementCounter(message)) {
 				conv.setUnreadCount(conv.getUnreadCount() + 1);
 			}
 
