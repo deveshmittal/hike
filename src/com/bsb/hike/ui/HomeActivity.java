@@ -75,7 +75,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
 
-	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT };
+	private String[] homePubSubListeners = {
+			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
+			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -667,6 +669,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					});
 				}
 			}).start();
+		} else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type)
+				|| HikePubSub.SMS_SYNC_FAIL.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialog != null) {
+						dialog.dismiss();
+					}
+					dialogShowing = null;
+				}
+			});
 		}
 
 	}
