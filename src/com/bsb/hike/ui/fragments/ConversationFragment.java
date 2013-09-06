@@ -190,8 +190,9 @@ public class ConversationFragment extends SherlockListFragment implements
 
 				// TODO: add location and contact handling here.
 			}
-			chatLabel = (Utils.isFilenameValid(chatLabel))? chatLabel: "_";
-			File chatFile = createChatTextFile(sBuilder.toString(),
+			chatLabel = (Utils.isFilenameValid(chatLabel)) ? chatLabel : "_";
+			File chatFile = createChatTextFile(
+					sBuilder.toString(),
 					getString(R.string.chat_backup_) + "_"
 							+ +System.currentTimeMillis() + ".txt");
 			uris.add(Uri.fromFile(chatFile));
@@ -242,7 +243,7 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		@Override
 		protected void onPostExecute(Conversation[] result) {
-			if(isAdded())
+			if (isAdded())
 				dialog.dismiss();
 			super.onPostExecute(result);
 		}
