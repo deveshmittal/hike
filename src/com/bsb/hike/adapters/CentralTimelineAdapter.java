@@ -145,6 +145,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.btn_container);
+
+				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
 
 			case PROFILE_PIC_CHANGE:
@@ -164,6 +166,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						.findViewById(R.id.timestamp);
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.info_container);
+				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -348,6 +351,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 		}
 
+		if (viewHolder.parent != null && position == getCount() - 1) {
+			int bottomPadding = context.getResources().getDimensionPixelSize(
+					R.dimen.updates_margin);
+			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
+		}
+
 		return convertView;
 	}
 
@@ -364,6 +373,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		View buttonDivider;
 		ImageView largeProfilePic;
 		View infoContainer;
+		View parent;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
