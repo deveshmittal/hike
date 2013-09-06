@@ -57,6 +57,9 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 		setContentView(R.layout.settings);
 
+		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				MODE_PRIVATE);
+
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(R.string.sms));
 		items.add(getString(R.string.facebook));
