@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/avatar_container"
             android:orientation="vertical" >
 
@@ -66,10 +66,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/content"
             android:layout_toRightOf="@id/avatar_container"
+            android:layout_marginTop="1dp"
             android:ellipsize="end"
             android:maxLines="5"
-            android:textColor="@color/subtext"
-            android:textSize="16sp" />
+            android:textColor="@color/list_item_header"
+            android:textSize="14sp" />
     </RelativeLayout>
 
     <LinearLayout

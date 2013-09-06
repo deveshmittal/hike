@@ -38,7 +38,7 @@
         android:widgetLayout="@layout/checkbox_widget" />
 	
 	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_hike_jingle"
+        icon="ic_status_notification"
         android:defaultValue="true"
         android:key="statusBooleanPref"
         android:layout="@layout/icon_preference"

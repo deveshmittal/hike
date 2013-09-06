@@ -7,4 +7,5 @@
     <dimen name="free_hike_width">120dp</dimen>
     <dimen name="micromax_margin">0dp</dimen>
     <dimen name="hike_tag_width">300dp</dimen>
+    <dimen name="version_item_marginTop">10dp</dimen>
 </resources>

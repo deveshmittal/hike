@@ -113,7 +113,7 @@
                     android:onClick="onClick"
                     android:text="@string/network_error"
                     android:textSize="14sp"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
             </RelativeLayout>
 

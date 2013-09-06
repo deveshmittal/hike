@@ -11,12 +11,21 @@
         android:paddingLeft="12dp"
         android:paddingRight="12dp" >
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/name"
+        <ImageView
+            android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
+            android:src="@drawable/ic_header_friends" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="7dp"
+            android:layout_toRightOf="@id/icon"
             android:text="Friends"
             android:textColor="@color/list_item_subtext"
             android:textSize="14sp"

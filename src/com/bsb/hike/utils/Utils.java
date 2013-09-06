@@ -142,6 +142,7 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -2784,5 +2785,11 @@ public class Utils {
 			return false;
 		}
 	}
-	
+
+	public static void resetUnseenStatusCount(SharedPreferences prefs) {
+		Editor editor = prefs.edit();
+		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		editor.commit();
+	}
 }

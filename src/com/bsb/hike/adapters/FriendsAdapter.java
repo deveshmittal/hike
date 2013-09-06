@@ -7,7 +7,10 @@ import java.util.List;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,12 +42,16 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 	public static final String EXTRA_ID = "-910";
 	public static final String SECTION_ID = "-911";
+	public static final String EMPTY_ID = "-912";
 
 	public static final String INVITE_MSISDN = "-123";
 	public static final String GROUP_MSISDN = "-124";
 
+	public static final String FRIEND_PHONE_NUM = "-125";
+	public static final String CONTACT_PHONE_NUM = "--126";
+
 	public enum ViewType {
-		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST, EXTRA
+		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST, EXTRA, EMPTY
 	}
 
 	private LayoutInflater layoutInflater;
@@ -67,6 +74,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private ContactFilter contactFilter;
 	private String queryText;
 	private boolean lastSeenPref;
+	private boolean showSMSContacts;
 
 	public FriendsAdapter(final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
@@ -74,6 +82,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		this.contactFilter = new ContactFilter();
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
 				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		this.showSMSContacts = PreferenceManager.getDefaultSharedPreferences(
+				context).getBoolean(HikeConstants.FREE_SMS_PREF, true)
+				|| Utils.getSendSmsPref(context);
 
 		completeList = new ArrayList<ContactInfo>();
 
@@ -278,25 +289,36 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredFriendsList.size()),
-				context.getString(R.string.friends), null);
+				context.getString(R.string.friends), FRIEND_PHONE_NUM);
 		completeList.add(friendsSection);
 
-		completeList.addAll(filteredFriendsList);
+		if (friendsList.isEmpty()) {
+			completeList.add(new ContactInfo(EMPTY_ID, null, null, null));
+		} else {
+			completeList.addAll(filteredFriendsList);
+		}
 
 		hikeContactsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredHikeContactsList.size()),
-				context.getString(R.string.hike_contacts), null);
+				context.getString(R.string.hike_contacts), CONTACT_PHONE_NUM);
 		completeList.add(hikeContactsSection);
 
 		completeList.addAll(filteredHikeContactsList);
 
-		smsContactsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(filteredSmsContactsList.size()),
-				context.getString(R.string.sms_contacts), null);
-		completeList.add(smsContactsSection);
+		if (showSMSContacts) {
+			smsContactsSection = new ContactInfo(SECTION_ID,
+					Integer.toString(filteredSmsContactsList.size()),
+					context.getString(R.string.sms_contacts), CONTACT_PHONE_NUM);
+			completeList.add(smsContactsSection);
 
-		completeList.addAll(filteredSmsContactsList);
+			completeList.addAll(filteredSmsContactsList);
+		}
 
+		notifyDataSetChanged();
+	}
+
+	public void toggleShowSMSContacts(boolean showSMSOn) {
+		this.showSMSContacts = showSMSOn;
 		notifyDataSetChanged();
 	}
 
@@ -404,7 +426,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	@Override
 	public int getItemViewType(int position) {
 		ContactInfo contactInfo = getItem(position);
-		if (SECTION_ID.equals(contactInfo.getId())) {
+		if (EMPTY_ID.equals(contactInfo.getId())) {
+			return ViewType.EMPTY.ordinal();
+		} else if (SECTION_ID.equals(contactInfo.getId())) {
 			return ViewType.SECTION.ordinal();
 		} else if (EXTRA_ID.equals(contactInfo.getId())) {
 			return ViewType.EXTRA.ordinal();
@@ -457,6 +481,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			case EXTRA:
 				convertView = layoutInflater.inflate(
 						R.layout.friends_tab_extra_item, null);
+				break;
+			case EMPTY:
+				convertView = layoutInflater.inflate(
+						R.layout.friends_empty_view, parent, false);
+				break;
 			}
 		}
 
@@ -532,9 +561,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					.findViewById(R.id.name);
 			TextView headerCount = (TextView) convertView
 					.findViewById(R.id.count);
+			ImageView icon = (ImageView) convertView.findViewById(R.id.icon);
 
 			headerName.setText(contactInfo.getName());
 			headerCount.setText(contactInfo.getMsisdn());
+			icon.setImageResource(FRIEND_PHONE_NUM.equals(contactInfo
+					.getPhoneNum()) ? R.drawable.ic_header_friends
+					: R.drawable.ic_header_contacts);
+
 		} else if (viewType == ViewType.EXTRA) {
 			TextView headerName = (TextView) convertView
 					.findViewById(R.id.contact);
@@ -548,6 +582,17 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				headerIcon.setImageResource(R.drawable.ic_create_group);
 				headerName.setText(R.string.create_group);
 			}
+		} else if (viewType == ViewType.EMPTY) {
+			TextView emptyText = (TextView) convertView
+					.findViewById(R.id.empty_text);
+
+			String text = context.getString(R.string.tap_plus_add_friends);
+			int index = text.indexOf("+");
+
+			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
+			ssb.setSpan(new ImageSpan(context, R.drawable.ic_add_friend),
+					index, index + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			emptyText.setText(ssb);
 		}
 
 		return convertView;

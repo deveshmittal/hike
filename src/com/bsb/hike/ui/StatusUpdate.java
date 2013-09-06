@@ -727,7 +727,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				Log.d("StatusUpdate", "Facebook Permission Cancelled");
 				// if we do not close the session here then requesting publish
 				// permission just after canceling the permission will
-				// throw an exception telling can not request publish permission, there
+				// throw an exception telling can not request publish
+				// permission, there
 				// is already a publish request pending.
 				fb.setSelected(false);
 				session.closeAndClearTokenInformation();

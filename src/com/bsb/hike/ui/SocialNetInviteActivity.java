@@ -40,7 +40,6 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -186,27 +185,6 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// getSupportMenuInflater().inflate(R.menu.social_net_invite_menu,
-		// menu);
-		// menu.findItem(R.id.sendInvite).setTitle(
-		// getString(R.string.send_invite, 0));
-		// mMenu = menu;
-		// mMenu.findItem(R.id.sendInvite).setEnabled(false);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		if (item.getItemId() == R.id.sendInvite) {
-			sendInvite();
-		}
-
-		return true;
-	}
-
 	protected void onSaveInstanceState(Bundle outState) {
 
 		outState.putBoolean(HikeConstants.Extras.IS_FACEBOOK, isFacebook);
@@ -224,7 +202,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity
 	private void getFriends() {
 		Session activeSession = Session.getActiveSession();
 		Log.d("INFO", activeSession.getPermissions().toString());
-		if (activeSession.getState().isOpened()) {
+		if (activeSession != null && activeSession.getState().isOpened()) {
 			Log.d("SocialNetInviteActivity",
 					"active session is opened quering for friends");
 			Request friendRequest = Request.newMyFriendsRequest(activeSession,

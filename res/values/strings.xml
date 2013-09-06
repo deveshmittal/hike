@@ -140,7 +140,6 @@
 	<string name="quit">Quit</string>
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
-	<string name="unlink_confirmation">Are you sure you want logout your hike account from this device?</string>
 	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from Hike?</string>
 	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from Hike?</string>
 	<string name="unlink">Logout</string>
@@ -214,8 +213,6 @@
 	<string name="free_sms">Free SMS to India</string>
 	<string name="free_sms_msg">Turn on to send free SMS to India</string>
 	<string name="delete_account">Delete Account</string>
-	<string name="delete_account_msg">Permanently delete your account</string>
-	<string name="unlink_account">Unlink Account</string>
 	<string name="unlink_facebook_account">Unlink Facebook Account</string>
 	<string name="unlink_twitter_account">Unlink Twitter Account</string>
 	<string name="unlink_account_msg">Unlink your account from this phone</string>
@@ -304,7 +301,7 @@
 	<string name="nudge_info">Double tap anywhere on the\nchat to nudge your friend.</string>
 	<string name="led_notification">LED notification</string>
 	<string name="led_notification_info">Flash the LED on new message</string>
-	<string name="with_love">made with love in India</string>
+	<string name="with_love">Made with love in India</string>
 	<string name="love">love</string>
 	<string name="remove_from_group">Remove from group</string>
 	<string name="leave_group_confirm">Are you sure you want to leave this group?</string>
@@ -374,7 +371,6 @@
 	<string name="unmute_group">Unmute group</string>
 	<string name="account">Account</string>
 	<string name="deleting_account">Deleting Account</string>
-	<string name="unlinking_account">Unlinking Account</string>
 	<string name="enter_num">Please enter your phone number</string>
 	<string name="enter_pin">Please enter the PIN</string>
 	<string name="enter_name">Please enter your name</string>
@@ -664,6 +660,13 @@
 	<string name="sms_setting_hinttext">SMS settings</string>
 	<string name="mute_status_notification_header">Status update notifications</string>
 	<string name="mute_status_notification_subtext">Show a notification for status updates posted by your friends</string>
-	<string name="work_in_progress">Work in progress</string>
-	<string name="upgrading_to_a_new_and_improvd_hike">Upgrading to a new and improved hike!</string>
+	<string name="app_version">Version %1$s</string>
+	<string name="tap_plus_add_friends">Tap + to add some friends</string>
+	<string name="work_in_progress">Updating Hike</string>
+	<string name="upgrading_to_a_new_and_improvd_hike">Please wait while we make a few changes.</string>
+	<string name="protip_games">games</string>
+	<string name="unlink_account">Logout</string>
+	<string name="delete_account_msg">Permanently delete your account :(</string>
+	<string name="unlink_confirmation">Are you sure you want to log out of your hike account, on this device?</string>
+	<string name="unlinking_account">Logging out your Hike Account</string>
 </resources>

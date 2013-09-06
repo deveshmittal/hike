@@ -119,7 +119,7 @@
     <color name="exp_div">#d9a62b</color>
     <color name="sms_choice_unselected">#b8b6b0</color>
     <color name="sms_choice_selected">#73716d</color>
-    <color name="home_tab_bg">#36322b</color>
+    <color name="home_tab_bg">#323638</color>
     <color name="list_item_header">#33312e</color>
     <color name="list_item_subtext">#73716d</color>
     <color name="conversation_timestamp">#bfbcb6</color>

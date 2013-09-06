@@ -267,7 +267,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			// computing the spinner state.
 			Editor editor = mContext.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 1);
 			editor.commit();
 		}
 	}

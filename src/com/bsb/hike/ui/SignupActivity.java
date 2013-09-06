@@ -310,7 +310,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 					submitClicked();
 				}
 			}, 100);
-			submitClicked();
 		} else if (tapHereText != null && v.getId() == tapHereText.getId()) {
 			if (countDownTimer != null) {
 				countDownTimer.cancel();
@@ -946,6 +945,10 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	public void onFacebookConnectClick(View v) {
 		fbClicked = true;
 		Session session = Session.getActiveSession();
+		if (session == null) {
+			fbClicked = false;
+			return;
+		}
 
 		Log.d(getClass().getSimpleName(), "FB CLICKED");
 		if (!session.isOpened() && !session.isClosed()) {
@@ -985,7 +988,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 	public void updateView() {
 		Session session = Session.getActiveSession();
-		if (session.isOpened()) {
+		if (session != null && session.isOpened()) {
 			Request.executeMeRequestAsync(session, new GraphUserCallback() {
 				@Override
 				public void onCompleted(final GraphUser user, Response response) {
@@ -1153,7 +1156,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		}
 
 		Session session = Session.getActiveSession();
-		session.onActivityResult(this, requestCode, resultCode, data);
+		if (session != null) {
+			session.onActivityResult(this, requestCode, resultCode, data);
+		}
 		if (fbClicked) {
 			onFacebookConnectClick(null);
 			fbAuthing = false;

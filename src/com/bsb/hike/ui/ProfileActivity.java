@@ -1447,60 +1447,56 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 		mActivityState.groupEditDialogShowing = true;
 
-		Builder builder = new Builder(this);
-		builder.setTitle(R.string.edit_group_name);
+		groupEditDialog = new Dialog(this, R.style.Theme_CustomDialog_Keyboard);
+		groupEditDialog.setContentView(R.layout.group_name_change_dialog);
 
-		mNameEdit = new EditText(this);
+		TextView header = (TextView) groupEditDialog.findViewById(R.id.header);
+		header.setText(R.string.edit_group_name);
+
+		mNameEdit = (EditText) groupEditDialog
+				.findViewById(R.id.group_name_edit);
 		mNameEdit
 				.setText(TextUtils.isEmpty(mActivityState.edittedGroupName) ? groupConversation
 						.getLabel() : mActivityState.edittedGroupName);
-		mNameEdit.setFilters(new InputFilter[] {new InputFilter.LengthFilter(30)});
 		mNameEdit.setSelection(mNameEdit.length());
 
-		int margin = (int) (Utils.densityMultiplier * 10);
-		int padding = (int) (Utils.densityMultiplier * 10);
+		Button okBtn = (Button) groupEditDialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) groupEditDialog
+				.findViewById(R.id.btn_cancel);
 
-		mNameEdit.setPadding(padding, padding, padding, padding);
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		layoutParams.leftMargin = margin;
-		layoutParams.rightMargin = margin;
-
-		mNameEdit.setLayoutParams(layoutParams);
-
-		builder.setView(mNameEdit);
-
-		builder.setNegativeButton(R.string.cancel,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-						groupEditDialog.cancel();
-					}
-				});
-
-		builder.setPositiveButton(R.string.save,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-						groupEditDialog.cancel();
-						saveChanges();
-					}
-				});
-
-		builder.setOnCancelListener(new OnCancelListener() {
+		cancelBtn.setOnClickListener(new View.OnClickListener() {
 
 			@Override
-			public void onCancel(DialogInterface dialog) {
+			public void onClick(View v) {
+				groupEditDialog.dismiss();
 				mActivityState.groupEditDialogShowing = false;
 				mActivityState.edittedGroupName = null;
 			}
 		});
-		groupEditDialog = builder.create();
-		builder.show();
+
+		okBtn.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String groupName = mNameEdit.getText().toString();
+				if (TextUtils.isEmpty(groupName.trim())) {
+					Toast toast = Toast
+							.makeText(ProfileActivity.this,
+									R.string.enter_valid_group_name,
+									Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+					return;
+				}
+				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+				saveChanges();
+				mActivityState.groupEditDialogShowing = false;
+				groupEditDialog.cancel();
+				groupEditDialog.dismiss();
+			}
+		});
+
+		groupEditDialog.show();
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {

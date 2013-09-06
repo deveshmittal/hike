@@ -1015,6 +1015,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								holder.showFileBtn
 										.setImageResource(R.drawable.ic_open_received_file);
 							}
+							holder.showFileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 							holder.messageTextView
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
@@ -1190,6 +1191,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgress.setProgressAngle(fileTransferTask
 					.getProgress());
+
+			if (holder.messageInfo != null) {
+				holder.messageInfo.setVisibility(View.INVISIBLE);
+			}
+			if (holder.sending != null) {
+				holder.sending.setVisibility(View.INVISIBLE);
+			}
 		} else if (convMessage.isFileTransferMessage()
 				&& convMessage.isSent()
 				&& TextUtils.isEmpty(metadata.getHikeFiles().get(0)
@@ -1199,6 +1207,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			holder.image.setVisibility(View.VISIBLE);
 			holder.image.setImageResource(R.drawable.ic_download_failed);
+
+			if (holder.messageInfo != null) {
+				holder.messageInfo.setVisibility(View.INVISIBLE);
+			}
+			if (holder.sending != null) {
+				holder.sending.setVisibility(View.INVISIBLE);
+			}
 		} else {
 			if (holder.circularProgress != null) {
 				holder.circularProgress.setVisibility(View.INVISIBLE);
@@ -1242,6 +1257,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else {
 			button.setImageResource(R.drawable.ic_download_file);
 		}
+		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
 	}
 
 	private void setTextAndIconForSystemMessages(TextView textView,
@@ -2147,6 +2163,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_open_received_file
 					: R.drawable.ic_pause_audio);
+			fileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 		}
 
 		Runnable updateTimer = new Runnable() {
