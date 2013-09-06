@@ -423,8 +423,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							"Unable to open market");
 				}
 				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.GAMING_PROTIP_DOWNLOADED,
-						protip);
+						HikePubSub.GAMING_PROTIP_DOWNLOADED, protip);
 			}
 		}
 	};
@@ -472,9 +471,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				return;
 			}
 
-			Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(
-					null, statusMessage.getMsisdn(), statusMessage
-							.getNotNullName(), statusMessage.getMsisdn()), true);
+			Intent intent = Utils.createIntentFromContactInfo(
+					new ContactInfo(null, statusMessage.getMsisdn(),
+							statusMessage.getNotNullName(), statusMessage
+									.getMsisdn()), true);
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 			intent.setClass(context, ChatThread.class);
 			context.startActivity(intent);
