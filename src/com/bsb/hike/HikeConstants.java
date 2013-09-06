@@ -194,7 +194,7 @@ public class HikeConstants {
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms/android";
 	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
-
+	
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
@@ -553,6 +553,7 @@ public class HikeConstants {
 		public static final String EMOTICON_TYPE = "emoticonType";
 		public static final String CREATE_GROUP = "createGroup";
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
+		public static final String SHOW_KEYBOARD = "ShowKeyboard";
 	}
 
 	public static final class LogEvent {

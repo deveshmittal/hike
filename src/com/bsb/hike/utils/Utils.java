@@ -283,7 +283,7 @@ public class Utils {
 	}
 
 	public static Intent createIntentFromContactInfo(
-			final ContactInfo contactInfo) {
+			final ContactInfo contactInfo, boolean openKeyBoard) {
 		Intent intent = new Intent();
 
 		// If the contact info was made using a group conversation, then the
@@ -292,6 +292,7 @@ public class Utils {
 				HikeConstants.Extras.MSISDN,
 				Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo
 						.getId() : contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		return intent;
 	}
 
