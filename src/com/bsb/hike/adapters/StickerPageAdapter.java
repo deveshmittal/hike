@@ -3,7 +3,6 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.app.Activity;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,8 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
@@ -175,12 +176,19 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1) {
-					imageView
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS[sticker
-									.getStickerIndex()]);
+					if (sticker.getCategoryIndex() == 1) {
+						imageView
+								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_2[sticker
+										.getStickerIndex()]);
+					} else if (sticker.getCategoryIndex() == 0) {
+						imageView
+								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_1[sticker
+										.getStickerIndex()]);
+					}
 				} else {
-					imageView.setImageBitmap(BitmapFactory.decodeFile(sticker
-							.getSmallStickerPath(activity)));
+					imageView.setImageDrawable(IconCacheManager.getInstance()
+							.getStickerThumbnail(
+									sticker.getSmallStickerPath(activity)));
 				}
 				imageView.setTag(sticker);
 
@@ -195,24 +203,28 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			ProgressBar progressBar = (ProgressBar) convertView
 					.findViewById(R.id.download_progress);
 
-			if (ChatThread.stickerTaskMap.containsKey(categoryId)) {
+			if (HikeMessengerApp.stickerTaskMap.containsKey(categoryId)) {
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
+				updateText.setTextColor(activity.getResources().getColor(
+						R.color.downloading_sticker));
 				convertView.setClickable(false);
-				button.setBackgroundResource(R.drawable.invite_to_hike_pressed);
+				button.setBackgroundResource(R.drawable.bg_sticker_downloading);
 			} else {
 				progressBar.setVisibility(View.GONE);
 				updateText.setText(R.string.new_stickers_available);
+				updateText.setTextColor(activity.getResources().getColor(
+						R.color.actionbar_text));
 				convertView.setClickable(true);
-				button.setBackgroundResource(R.drawable.invite_chatthread_button);
+				button.setBackgroundResource(R.drawable.bg_download_sticker);
 				convertView.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 								activity, categoryIndex, DownloadType.UPDATE);
-						downloadStickerTask.execute();
+						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-						ChatThread.stickerTaskMap.put(categoryId,
+						HikeMessengerApp.stickerTaskMap.put(categoryId,
 								downloadStickerTask);
 						notifyDataSetChanged();
 					}

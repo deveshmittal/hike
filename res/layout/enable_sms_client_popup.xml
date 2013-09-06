@@ -1,66 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="288dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_sms_popup"
+    android:background="@color/white"
     android:orientation="vertical" >
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/header"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_height="45dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:text="@string/use_hike_for_sms"
-        android:textColor="@color/popup_header"
+        android:textColor="@color/sms_popup"
         android:textSize="18sp"
-        android:textStyle="italic" />
+        android:textStyle="bold|italic" />
 
-    <include layout="@layout/sms_popup_divider" />
+    <View
+        android:id="@+id/div1"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/header"
+        android:background="@color/sms_popup" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_below="@id/div1"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
         android:text="@string/use_hike_for_sms_info"
-        android:textColor="#333333"
-        android:textSize="14sp" />
+        android:textColor="@color/list_item_header"
+        android:textSize="16sp" />
 
     <ProgressBar
         android:id="@+id/loading_progress"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="8dp"
+        android:layout_width="40dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/body"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="8dp"
         android:indeterminateDrawable="@drawable/loading"
         android:visibility="gone" />
-    
-    <include
+
+    <View
         android:id="@+id/sms_divider"
-        layout="@layout/sms_popup_divider" />
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/body"
+        android:background="#f5f5f5" />
 
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp" >
+        android:layout_height="48dp"
+        android:layout_below="@id/sms_divider" >
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_cancel"
-            style="@style/UpdateText.StatusNoBtn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="8dp"
+            style="@style/SmsPopupButton"
             android:text="@string/cancel" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_below="@id/body"
+            android:background="#f5f5f5" />
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_ok"
-            style="@style/UpdateText.StatusYesBtn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            style="@style/SmsPopupButton"
             android:text="@string/continue_txt" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

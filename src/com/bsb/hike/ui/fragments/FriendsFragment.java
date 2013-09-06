@@ -1,35 +1,43 @@
 package com.bsb.hike.ui.fragments;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.FriendsAdapter;
+import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.TellAFriend;
+import com.bsb.hike.utils.Utils;
 
-public class FriendsFragment extends SherlockListFragment implements Listener {
+public class FriendsFragment extends SherlockListFragment implements Listener,
+		OnItemLongClickListener {
 
 	private FriendsAdapter friendsAdapter;
 
@@ -38,15 +46,11 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 			HikePubSub.USER_LEFT, HikePubSub.CONTACT_ADDED,
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER,
-			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED };
+			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED,
+			HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED };
 
 	private SharedPreferences preferences;
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setHasOptionsMenu(true);
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,6 +64,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 		friendsAdapter = new FriendsAdapter(getActivity());
 		friendsList.setAdapter(friendsAdapter);
 
+		friendsList.setOnItemLongClickListener(this);
 		return parent;
 	}
 
@@ -73,37 +78,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 	}
 
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		final SearchView searchView = new SearchView(getSherlockActivity()
-				.getSupportActionBar().getThemedContext());
-		searchView.setQueryHint(getString(R.string.search_hint));
-		searchView.setIconifiedByDefault(false);
-		searchView.setIconified(false);
-		searchView.setOnQueryTextListener(onQueryTextListener);
-
-		menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
-				.setIcon(R.drawable.ic_top_bar_search)
-				.setActionView(searchView)
-				.setShowAsAction(
-						MenuItem.SHOW_AS_ACTION_ALWAYS
-								| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-	}
-
-	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener() {
-
-		@Override
-		public boolean onQueryTextSubmit(String query) {
-			return false;
-		}
-
-		@Override
-		public boolean onQueryTextChange(String newText) {
-			friendsAdapter.onQueryChanged(newText);
-			return true;
-		}
-	};
-
-	@Override
 	public void onDestroy() {
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 		super.onDestroy();
@@ -113,18 +87,30 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		ContactInfo contactInfo = friendsAdapter.getItem(position);
 
-		if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId())) {
+		if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId())
+				|| FriendsAdapter.EMPTY_ID.equals(contactInfo.getId())) {
 			return;
 		}
 
-		Intent intent = new Intent(getActivity(), ChatThread.class);
-		if (contactInfo.getName() != null) {
-			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
+		if (FriendsAdapter.EXTRA_ID.equals(contactInfo.getId())) {
+			Intent intent;
+			if (FriendsAdapter.INVITE_MSISDN.equals(contactInfo.getMsisdn())) {
+				intent = new Intent(getActivity(), TellAFriend.class);
+			} else {
+				intent = new Intent(getActivity(), ComposeActivity.class);
+				intent.putExtra(HikeConstants.Extras.CREATE_GROUP, true);
+			}
+			startActivity(intent);
+		} else {
+			Intent intent = new Intent(getActivity(), ChatThread.class);
+			if (contactInfo.getName() != null) {
+				intent.putExtra(HikeConstants.Extras.NAME,
+						contactInfo.getName());
+			}
+			intent.putExtra(HikeConstants.Extras.MSISDN,
+					contactInfo.getMsisdn());
+			startActivity(intent);
 		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
-		startActivity(intent);
-
-		return;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -157,8 +143,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.HIKE_INDEX);
 					} else if (HikePubSub.USER_LEFT.equals(type)) {
-						friendsAdapter.removeFromGroup(contactInfo,
-								FriendsAdapter.HIKE_INDEX);
+						friendsAdapter.addToGroup(contactInfo,
+								FriendsAdapter.SMS_INDEX);
 					}
 				}
 			});
@@ -173,7 +159,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 					ContactInfo contactInfo = favoriteToggle.first;
 					contactInfo.setFavoriteType(favoriteType);
 					if ((favoriteType == FavoriteType.FRIEND)
-							|| (favoriteType == FavoriteType.REQUEST_SENT)) {
+							|| (favoriteType == FavoriteType.REQUEST_SENT_REJECTED)
+							|| (favoriteType == FavoriteType.REQUEST_SENT)
+							|| (favoriteType == FavoriteType.REQUEST_RECEIVED)) {
 						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.FRIEND_INDEX);
 					} else if (favoriteType == FavoriteType.NOT_FRIEND
@@ -182,8 +170,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
 						} else {
-							friendsAdapter.removeFromGroup(contactInfo,
-									FriendsAdapter.FRIEND_INDEX);
+							friendsAdapter.addToGroup(contactInfo,
+									FriendsAdapter.SMS_INDEX);
 						}
 					}
 				}
@@ -201,10 +189,14 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 				public void run() {
 					if ((contactInfo.getFavoriteType() != FavoriteType.FRIEND)
 							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
-							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)) {
+							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
+							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED)) {
 						if (contactInfo.isOnhike()) {
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
+						} else {
+							friendsAdapter.addToGroup(contactInfo,
+									FriendsAdapter.SMS_INDEX);
 						}
 					} else {
 						friendsAdapter.addToGroup(contactInfo,
@@ -216,17 +208,22 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 			String myMsisdn = preferences.getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
 
+			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
+
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
 			final List<ContactInfo> favoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(FavoriteType.FRIEND,
-							HikeConstants.BOTH_VALUE, myMsisdn);
+							HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn);
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
-					myMsisdn));
+					myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT_REJECTED,
-					HikeConstants.BOTH_VALUE, myMsisdn));
+					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
+			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
+					myMsisdn, nativeSMSOn, false));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 
@@ -255,6 +252,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 						if (contactInfo.isOnhike()) {
 							friendsAdapter.addToGroup(contactInfo,
 									FriendsAdapter.HIKE_INDEX);
+						} else {
+							friendsAdapter.addToGroup(contactInfo,
+									FriendsAdapter.SMS_INDEX);
 						}
 					}
 				}
@@ -275,6 +275,101 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 				}
 
 			});
+		} else if (HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type)) {
+			List<ContactInfo> friendsList = friendsAdapter.getFriendsList();
+			for (int i = 0; i < friendsList.size() - 1; i++) {
+				String msisdn = friendsList.get(i).getMsisdn();
+				long lastSeenUpdated = 0;
+				if (HikeMessengerApp.lastSeenFriendsMap.get(msisdn) != null) {
+					lastSeenUpdated = HikeMessengerApp.lastSeenFriendsMap.get(
+							msisdn).longValue();
+					long lastSeenPrevious = friendsList.get(i)
+							.getLastSeenTime();
+					if (lastSeenUpdated > lastSeenPrevious) {
+						friendsList.get(i).setLastSeenTime(lastSeenUpdated);
+					}
+				}
+			}
+			Collections.sort(friendsAdapter.getFriendsList(),
+					ContactInfo.lastSeenTimeComparator);
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					friendsAdapter.makeCompleteList(false);
+				}
+			});
+
+		} else if (HikePubSub.FRIENDS_TAB_QUERY.equals(type)) {
+			final String query = (String) object;
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					friendsAdapter.onQueryChanged(query);
+				}
+			});
+		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					friendsAdapter.toggleShowSMSContacts(PreferenceManager
+							.getDefaultSharedPreferences(getActivity())
+							.getBoolean(HikeConstants.FREE_SMS_PREF, true)
+							|| Utils.getSendSmsPref(getActivity()));
+				}
+			});
 		}
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		FriendsAdapter.ViewType viewType = FriendsAdapter.ViewType.values()[friendsAdapter
+				.getItemViewType(position)];
+		if (viewType != ViewType.FRIEND) {
+			return false;
+		}
+		final ContactInfo contactInfo = friendsAdapter.getItem(position);
+
+		ArrayList<String> optionsList = new ArrayList<String>();
+
+		optionsList.add(getString(R.string.remove_from_friends));
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(
+				getActivity(), R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (getString(R.string.remove_from_friends).equals(
+								option)) {
+							FavoriteType favoriteType;
+							if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+								favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+							} else {
+								favoriteType = FavoriteType.NOT_FRIEND;
+							}
+							Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
+									contactInfo, favoriteType);
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.FAVORITE_TOGGLED,
+									favoriteRemoved);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 }

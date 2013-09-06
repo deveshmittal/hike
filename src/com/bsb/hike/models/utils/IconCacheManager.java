@@ -4,12 +4,16 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.utils.Utils;
 
 public class IconCacheManager {
 	private class LRUCache<A, B> extends LinkedHashMap<A, B> {
@@ -57,15 +61,28 @@ public class IconCacheManager {
 	private static IconCacheManager mCacheManager;
 
 	public IconCacheManager() {
-		mIcons = Collections
-				.synchronizedMap(new LRUCache<String, Drawable>(20)); /*
-																	 * only keep
-																	 * 20
-																	 * entries @
-																	 * a time
-																	 */
+		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(
+				getCacheSize()));
 		mDb = HikeUserDatabase.getInstance();
 		hCDb = HikeConversationsDatabase.getInstance();
+	}
+
+	private int getCacheSize() {
+		int densityMultiplier = Utils.getResolutionId();
+		switch (densityMultiplier) {
+		case HikeConstants.XXHDPI_ID:
+			return HikeConstants.XXHDPI_CACHE;
+		case HikeConstants.XHDPI_ID:
+			return HikeConstants.XHDPI_CACHE;
+		case HikeConstants.HDPI_ID:
+			return HikeConstants.HDPI_CACHE;
+		case HikeConstants.MDPI_ID:
+			return HikeConstants.MDPI_CACHE;
+		case HikeConstants.LDPI_ID:
+			return HikeConstants.LDPI_CACHE;
+		default:
+			return HikeConstants.MDPI_CACHE;
+		}
 	}
 
 	public static void init() {
@@ -108,6 +125,18 @@ public class IconCacheManager {
 			}
 		}
 
+		return b;
+	}
+
+	public synchronized Drawable getStickerThumbnail(String stickerPath) {
+		Drawable b = mIcons.get(stickerPath);
+		if (b == null) {
+			b = new BitmapDrawable(BitmapFactory.decodeFile(stickerPath));
+
+			if (b != null) {
+				mIcons.put(stickerPath, b);
+			}
+		}
 		return b;
 	}
 

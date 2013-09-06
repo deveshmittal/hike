@@ -41,30 +41,28 @@
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sms_counter"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="45dp"
                 android:layout_alignParentBottom="true"
-                android:background="@drawable/compose_box"
+                android:background="@color/updates_text"
                 android:gravity="center_vertical"
                 android:paddingLeft="13dp"
+                android:drawablePadding="10dp"
                 android:text="99 SMS left"
-                android:textColor="@color/green"
-                android:textSize="14sp"
+                android:drawableLeft="@drawable/ic_sms_user"
+                android:textColor="#b3b2ae"
+                android:textSize="13sp"
                 android:visibility="invisible" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/conversation_mute"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_conversation_mute"
+                android:layout_height="35dp"
+                android:background="@color/updates_text"
                 android:gravity="center_vertical"
                 android:paddingLeft="18dp"
-                android:shadowColor="#66ffffff"
-                android:shadowDy="0.5"
-                android:shadowRadius="0.5"
                 android:text="@string/group_mute"
-                android:textColor="#7c6e57"
-                android:textSize="15sp"
-                android:textStyle="bold|italic"
+                android:textColor="@color/actionbar_text"
+                android:textSize="14sp"
                 android:visibility="gone" />
             
             <LinearLayout
@@ -117,17 +115,17 @@
                 android:id="@+id/compose_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:minHeight="48dp" >
 
                 <ImageButton
                     android:id="@+id/send_message"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="44dp"
+                    android:layout_height="40dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
                     android:onClick="onSendClick"
-                    android:background="@drawable/bg_red_btn"
+                    android:background="@drawable/bg_red_btn_selector"
                     android:src="@drawable/ic_msg_btn"
                     android:state_enabled="false" />
 
@@ -140,18 +138,18 @@
                     android:background="@null"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="9dp"
                     android:onClick="onEmoticonBtnClicked"
                     android:src="@drawable/emoticon_hike_btn" />
 
                 <ImageButton
                     android:id="@+id/sticker_btn"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="44dp"
+                    android:layout_height="40dp"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/bg_brown_btn"
+                    android:background="@drawable/bg_dark_grey_btn_selector"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker_btn" />
@@ -177,7 +175,7 @@
                         android:lineSpacingExtra="3dp"
                         android:maxLength="@integer/max_length_message"
                         android:maxLines="4"
-                        android:minHeight="32dp"
+                        android:minHeight="40dp"
                         android:paddingRight="5dp"
                         android:paddingLeft="5dp"
                         android:textColor="@color/chat_color"

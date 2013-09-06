@@ -18,6 +18,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
@@ -31,13 +32,14 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 	private static enum ViewType {
-		HEADER, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS
+		HEADER, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST
 	}
 
 	private Context context;
@@ -80,6 +82,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			viewType = ViewType.HEADER;
 		} else if (ProfileItem.EMPTY_ID == itemId) {
 			viewType = ViewType.EMPTY_STATUS;
+		} else if (ProfileItem.REQUEST_ID == itemId) {
+			viewType = ViewType.REQUEST;
 		} else {
 			if (groupProfile) {
 				viewType = ViewType.GROUP_PARTICIPANT;
@@ -140,12 +144,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v
 						.findViewById(R.id.change_profile);
-
-				viewHolder.imageBtn1 = (ImageButton) v
-						.findViewById(R.id.yes_btn);
-				viewHolder.imageBtn2 = (ImageButton) v
-						.findViewById(R.id.no_btn);
-
 				break;
 
 			case GROUP_PARTICIPANT:
@@ -156,6 +154,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				v = inflater.inflate(R.layout.profile_timeline_item, null);
 
 				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
+				viewHolder.iconFrame = (ImageView) v
+						.findViewById(R.id.avatar_frame);
 
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
@@ -171,6 +171,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile_pic);
+				viewHolder.timeStamp = (TextView) v
+						.findViewById(R.id.timestamp);
+				viewHolder.infoContainer = v.findViewById(R.id.info_container);
 				break;
 
 			case EMPTY_STATUS:
@@ -183,6 +186,25 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.btn2 = (Button) v
 						.findViewById(R.id.add_sms_friend_btn);
 				break;
+
+			case REQUEST:
+				v = inflater
+						.inflate(R.layout.profile_friend_request_item, null);
+
+				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
+
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.info);
+				viewHolder.extraInfo = (TextView) v
+						.findViewById(R.id.extra_info);
+
+				viewHolder.infoContainer = v.findViewById(R.id.btn_container);
+				viewHolder.imageBtn1 = (ImageButton) v
+						.findViewById(R.id.yes_btn);
+				viewHolder.imageBtn2 = (ImageButton) v
+						.findViewById(R.id.no_btn);
+
+				viewHolder.btn1 = (Button) v.findViewById(R.id.text_btn);
 			}
 
 			v.setTag(viewHolder);
@@ -207,7 +229,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			viewHolder.text.setText(name);
 
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null,
-					false);
+					false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null) {
 				imageLoader.loadImage(msisdn, viewHolder.image);
@@ -224,32 +246,30 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			}
 
 			if (mContactInfo != null) {
-				if (mContactInfo.isOnhike()) {
-					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
-						viewHolder.subText.setVisibility(View.VISIBLE);
-						viewHolder.subText
-								.setText(R.string.sent_you_friend_request);
-
-						viewHolder.btnContainer.setVisibility(View.VISIBLE);
-
-						viewHolder.imageBtn1.setTag(mContactInfo);
-						viewHolder.imageBtn2.setTag(mContactInfo);
-					} else if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
-
-					} else if (mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
-						viewHolder.subText.setText(Utils
-								.getLastSeenTimeAsString(context,
-										mContactInfo.getLastSeenTime(),
-										mContactInfo.getOffline()));
-					} else {
-						if (mContactInfo.getHikeJoinTime() > 0) {
-							viewHolder.subText.setText(context.getString(
-									R.string.on_hike_since,
-									mContactInfo.getFormattedHikeJoinTime()));
-						} else {
-							viewHolder.subText.setText(R.string.on_hike);
-						}
+				if (mContactInfo.getMsisdn().equals(mContactInfo.getId())) {
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(R.string.tap_to_save);
+				} else if (mContactInfo.isOnhike()) {
+					String subText = null;
+					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
+							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND
+							|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+						subText = Utils.getLastSeenTimeAsString(context,
+								mContactInfo.getLastSeenTime(),
+								mContactInfo.getOffline());
 					}
+
+					if (TextUtils.isEmpty(subText)
+							&& mContactInfo.getHikeJoinTime() != 0) {
+						subText = context.getString(R.string.on_hike_since,
+								mContactInfo.getFormattedHikeJoinTime());
+					} else if (TextUtils.isEmpty(subText)) {
+						subText = context.getString(R.string.on_hike);
+					}
+
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(subText);
+
 				} else {
 					viewHolder.subText.setText(R.string.on_sms);
 				}
@@ -307,15 +327,28 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 							.findViewById(R.id.avatar);
 					ImageView avatarFrame = (ImageView) groupParticipantParentView
 							.findViewById(R.id.avatar_frame);
+					View ownerIndicator = groupParticipantParentView
+							.findViewById(R.id.owner_indicator);
 
 					ContactInfo contactInfo = groupParticipant.getContactInfo();
+
+					if (contactInfo.getMsisdn().equals(
+							groupConversation.getGroupOwner())) {
+						ownerIndicator.setVisibility(View.VISIBLE);
+					} else {
+						ownerIndicator.setVisibility(View.GONE);
+					}
 
 					int offline = contactInfo.getOffline();
 
 					String lastSeenString = null;
-					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+					boolean showingLastSeen = false;
+					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+							&& !contactInfo.getMsisdn().equals(
+									contactInfo.getId())) {
 						lastSeenString = Utils.getLastSeenTimeAsString(context,
-								contactInfo.getLastSeenTime(), offline);
+								contactInfo.getLastSeenTime(), offline, true);
+						showingLastSeen = false;
 					}
 
 					nameTextView.setText(contactInfo.getFirstName());
@@ -327,7 +360,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						mainInfo.setText(lastSeenString);
 					}
 
-					if (offline == 0) {
+					if (showingLastSeen && offline == 0) {
 						mainInfo.setTextColor(context.getResources().getColor(
 								R.color.unread_message));
 						avatarFrame
@@ -367,7 +400,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		case STATUS:
 			StatusMessage statusMessage = ((ProfileStatusItem) profileItem)
 					.getStatusMessage();
-			viewHolder.text.setText(statusMessage.getNotNullName());
+			viewHolder.text.setText(myProfile ? context.getString(R.string.me)
+					: statusMessage.getNotNullName());
 
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.subText.setText(smileyParser.addSmileySpans(
@@ -380,12 +414,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					true, context));
 
 			if (statusMessage.hasMood()) {
-				viewHolder.icon
-						.setImageResource(Utils.getMoodsResource()[statusMessage
-								.getMoodId()]);
+				viewHolder.icon.setImageResource(EmoticonConstants.moodMapping
+						.get(statusMessage.getMoodId()));
+				viewHolder.iconFrame.setVisibility(View.GONE);
 			} else {
 				viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
 						.getIconForMSISDN(statusMessage.getMsisdn(), true));
+				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
 
@@ -410,6 +445,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			imageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
 					viewHolder.image);
 
+			viewHolder.timeStamp.setText(profilePicStatusUpdate
+					.getTimestampFormatted(true, context));
+
+			viewHolder.infoContainer.setTag(profilePicStatusUpdate);
+			viewHolder.infoContainer.setOnLongClickListener(profileActivity);
 			break;
 
 		case EMPTY_STATUS:
@@ -447,6 +487,77 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			}
 
 			break;
+
+		case REQUEST:
+			String contactFirstName = mContactInfo.getFirstName();
+
+			viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(mContactInfo.getMsisdn(), true));
+
+			viewHolder.text.setText(contactFirstName);
+
+			viewHolder.infoContainer.setVisibility(View.GONE);
+			if (mContactInfo.isOnhike()) {
+				switch (mContactInfo.getFavoriteType()) {
+				case NOT_FRIEND:
+				case REQUEST_SENT_REJECTED:
+				case REQUEST_RECEIVED_REJECTED:
+					viewHolder.subText.setText(mContactInfo.getMsisdn());
+
+					viewHolder.imageBtn1.setVisibility(View.GONE);
+					viewHolder.imageBtn2.setVisibility(View.GONE);
+
+					viewHolder.btn1.setVisibility(View.VISIBLE);
+					viewHolder.btn1.setText(R.string.add);
+					viewHolder.btn1
+							.setBackgroundResource(R.drawable.bg_blue_btn_selector);
+
+					viewHolder.extraInfo.setVisibility(View.VISIBLE);
+					viewHolder.extraInfo.setText(context.getString(
+							R.string.add_as_friend_profile, contactFirstName));
+					break;
+				case REQUEST_RECEIVED:
+					viewHolder.infoContainer.setVisibility(View.VISIBLE);
+
+					viewHolder.subText
+							.setText(R.string.sent_you_friend_request);
+
+					viewHolder.imageBtn1.setVisibility(View.VISIBLE);
+					viewHolder.imageBtn2.setVisibility(View.VISIBLE);
+
+					viewHolder.btn1.setVisibility(View.GONE);
+
+					viewHolder.extraInfo.setVisibility(View.GONE);
+					break;
+
+				case REQUEST_SENT:
+					viewHolder.subText.setText(R.string.request_pending);
+
+					viewHolder.imageBtn1.setVisibility(View.GONE);
+					viewHolder.imageBtn2.setVisibility(View.GONE);
+					viewHolder.btn1.setVisibility(View.GONE);
+					viewHolder.extraInfo.setVisibility(View.GONE);
+					break;
+				}
+			} else {
+				if (mContactInfo.getMsisdn().equals(mContactInfo.getId())) {
+					viewHolder.subText.setText(R.string.on_sms);
+				} else {
+					viewHolder.subText.setText(mContactInfo.getMsisdn());
+				}
+
+				viewHolder.imageBtn1.setVisibility(View.GONE);
+				viewHolder.imageBtn2.setVisibility(View.GONE);
+
+				viewHolder.btn1.setVisibility(View.VISIBLE);
+				viewHolder.btn1.setText(R.string.invite_1);
+				viewHolder.btn1
+						.setBackgroundResource(R.drawable.bg_green_btn_selector);
+
+				viewHolder.extraInfo.setVisibility(View.VISIBLE);
+				viewHolder.extraInfo.setText(R.string.invite_to_hike);
+			}
+			break;
 		}
 
 		return v;
@@ -455,14 +566,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private class ViewHolder {
 		TextView text;
 		TextView subText;
+		TextView extraInfo;
 		ImageView image;
 		ImageView icon;
+		ImageView iconFrame;
 		Button btn1;
 		Button btn2;
 		ImageButton imageBtn1;
 		ImageButton imageBtn2;
-		ViewGroup btnContainer;
 		TextView timeStamp;
+		View infoContainer;
 	}
 
 	public void setProfilePreview(Bitmap preview) {

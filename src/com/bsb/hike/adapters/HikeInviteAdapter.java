@@ -65,13 +65,13 @@ public class HikeInviteAdapter extends
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
 		if (v == null) {
-			v = inflater.inflate(R.layout.invite_item, parent, false);
+			v = inflater.inflate(R.layout.compose_list_item, parent, false);
 		}
-		ImageView imageView = (ImageView) v.findViewById(R.id.avatar);
+		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		imageView.setImageDrawable(pair != null ? IconCacheManager
 				.getInstance().getIconForMSISDN(contactInfo.getMsisdn(), true)
 				: getContext().getResources()
-						.getDrawable(R.drawable.ic_avatar1));
+						.getDrawable(R.drawable.ic_avatar1_rounded));
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
@@ -92,7 +92,7 @@ public class HikeInviteAdapter extends
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
 		checkBox.setVisibility(pair != null ? View.VISIBLE : View.GONE);
 		checkBox.setButtonDrawable(showingBlockedList ? R.drawable.block_button
-				: R.drawable.preference_checkbox);
+				: R.drawable.compose_checkbox);
 
 		if (pair != null) {
 			checkBox.setChecked(isChecked.get());

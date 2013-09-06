@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.preference.Preference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -12,7 +13,7 @@ import com.bsb.hike.R;
 public class IconPreference extends Preference {
 
 	private Drawable mIcon;
-
+	
 	public IconPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setIcon(context, attrs);
@@ -20,7 +21,7 @@ public class IconPreference extends Preference {
 
 	private void setIcon(Context context, AttributeSet attrs) {
 		String iconName = attrs.getAttributeValue(null, "icon");
-
+		
 		int id = context.getResources().getIdentifier(iconName, "drawable",
 				context.getPackageName());
 

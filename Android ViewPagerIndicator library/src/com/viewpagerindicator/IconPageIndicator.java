@@ -50,7 +50,7 @@ public class IconPageIndicator extends HorizontalScrollView implements PageIndic
         setHorizontalScrollBarEnabled(false);
 
         mIconsLayout = new IcsLinearLayout(context, R.attr.vpiIconPageIndicatorStyle);
-        addView(mIconsLayout, new LayoutParams(WRAP_CONTENT, FILL_PARENT, Gravity.CENTER));
+        addView(mIconsLayout, new LayoutParams(WRAP_CONTENT, FILL_PARENT, Gravity.LEFT));
     }
 
     private void animateToIcon(final int position) {
@@ -152,7 +152,7 @@ public class IconPageIndicator extends HorizontalScrollView implements PageIndic
             throw new IllegalStateException("ViewPager has not been bound.");
         }
         mSelectedIndex = item;
-        mViewPager.setCurrentItem(item);
+        mViewPager.setCurrentItem(item, false);
 
         int tabCount = mIconsLayout.getChildCount();
         for (int i = 0; i < tabCount; i++) {

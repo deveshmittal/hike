@@ -3,67 +3,72 @@
     android:id="@+id/parent"
     android:layout_width="240dp"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:background="@drawable/profile_bckg"
+    android:background="@color/white"
     android:orientation="vertical" >
 
-    <LinearLayout
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="15dp"
+        android:gravity="center"
+        android:text="@string/group_name"
+        android:textColor="@color/sms_popup"
+        android:textSize="18sp"
+        android:textStyle="bold|italic" />
+
+    <View
+        android:id="@+id/div1"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/header"
+        android:background="@color/sms_popup" />
+
+    <com.bsb.hike.view.CustomFontEditText
+        android:id="@+id/group_name_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="vertical" >
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_group_name"
+        android:maxLength="@integer/max_length_group_name"
+        android:paddingBottom="8dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:singleLine="true"
+        android:textColor="@color/list_item_header"
+        android:textSize="16sp"
+        android:textStyle="bold|italic" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rename_group"
-            android:textColor="@color/contact_item_header"
-            android:textSize="12sp"
-            android:textStyle="bold|italic" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/ic_thread_divider_profile" />
 
-        <com.bsb.hike.view.CustomFontEditText
-            android:id="@+id/group_name_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/target_account"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_tb_dialog"
-            android:paddingLeft="10dp"
-            android:singleLine="true"
-            android:maxLength="@integer/max_length_group_name"
-            android:textColor="@color/lightblack"
-            android:textSize="15sp"
-            android:textStyle="italic" />
+    <LinearLayout
+        android:id="@+id/button_container"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@id/sms_divider" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_cancel"
+            style="@style/SmsPopupButton"
+            android:text="@string/cancel" />
 
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@drawable/ic_thread_divider_profile" />
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_below="@id/body"
+            android:background="#f5f5f5" />
 
-        <LinearLayout
-            android:id="@+id/btn_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="13dp" >
-
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/btn_ok"
-                style="@style/UpdateText.StatusYesBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/send" />
-
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/btn_cancel"
-                style="@style/UpdateText.StatusNoBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"
-                android:text="@string/cancel" />
-        </LinearLayout>
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_ok"
+            style="@style/SmsPopupButton"
+            android:text="@android:string/ok" />
     </LinearLayout>
 
 </LinearLayout>

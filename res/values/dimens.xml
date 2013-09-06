@@ -6,7 +6,7 @@
 	<dimen name="credits_num_width">35dp</dimen>
 	<dimen name="credits_progress_layout_padding">20dp</dimen>
 	<dimen name="credits_num_container_margin">20dp</dimen>
-	<dimen name="credits_main_margin">10dp</dimen>
+	<dimen name="credits_main_margin">16dp</dimen>
 	<dimen name="credits_num_view_width">40dp</dimen>
 	<dimen name="credits_progress_margin">30dp</dimen>
 	<dimen name="credits_progress_curve_width">4dp</dimen>
@@ -37,15 +37,25 @@
 	<dimen name="hike_logo_margin">90dp</dimen>
 	<dimen name="list_margin">16dp</dimen>
 	<dimen name="divider_height">1dp</dimen>
-	<dimen name="larger_avatar">48dp</dimen>
+	<dimen name="larger_avatar">50dp</dimen>
 	<dimen name="medium_avatar">42dp</dimen>
 	<dimen name="small_avatar">30dp</dimen>
 	<dimen name="update_line_width">4dp</dimen>
-	<dimen name="avatar_size_chat_thread">32dp</dimen>
 	<dimen name="updates_margin">8dp</dimen>
 	<dimen name="small_avatar_margin">2dp</dimen>
 	<dimen name="medium_avatar_margin">2dp</dimen>
 	<dimen name="large_avatar_margin">1dp</dimen>
+	<dimen name="ic_fb_priv_left_margin">16dp</dimen>
+	<dimen name="ic_fb_priv_right_margin">10dp</dimen>
+	<dimen name="ic_twitter_priv_left_margin">12dp</dimen>
+	<dimen name="ic_twitter_priv_right_margin">2dp</dimen>
+	<dimen name="chat_bubble_edge_spacing">8dp</dimen>
+	<dimen name="avatar_typing_margin">2dp</dimen>
+	<dimen name="sms_toggle_unchecked">12sp</dimen>
+	<dimen name="sms_toggle_checked">14sp</dimen>
+	<dimen name="version_item_marginTop">50dp</dimen>
+	<dimen name="version_item_marginBottom">10dp</dimen>
+	<dimen name="chat_file_button_width">32dp</dimen>
 	
     <!-- Default height of an action bar. -->
     <dimen name="st__action_bar_default_height">48dip</dimen>

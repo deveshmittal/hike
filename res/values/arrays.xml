@@ -166,6 +166,31 @@
         <item>(yuush2)</item> <!-- 148 yuush -->
         <item>(brains2)</item> <!-- 149 brains -->
         <item>(sleeping2)</item> <!-- 150 sleeping -->
+        <item>(auto)</item>
+        <item>(batti)</item>
+        <item>(best)</item>
+        <item>(metro)</item>
+        <item>(biscuit)</item>
+        <item>(chai)</item>
+        <item>(chips)</item>
+        <item>(samosa)</item>
+        <item>(noodles)</item>
+        <item>(jalebi)</item>
+        <item>(icecream)</item>
+        <item>(nariyal)</item>
+        <item>(rum)</item>
+        <item>(paisa)</item>
+        <item>(tiranga)</item>
+        <item>(hero)</item>
+        <item>(neta)</item>
+        <item>(police)</item>
+        <item>(nimbu)</item>
+        <item>(patakha)</item>
+        <item>(love)</item>
+        <item>(cupid)</item>
+        <item>(shaktiman)</item>
+        <item>(tandoori)</item>
+        <item>(dd)</item>
     </string-array>
     
     <string-array name="file_transfer_items">
@@ -1182,6 +1207,13 @@
 	    <item>Gaming</item>
 	    <item>Coding</item>
 	    <item>Watching TV</item>
+	    <item>Music</item>
+	    <item>Partying Hard</item>
+	    <item>Singing</item>
+	    <item>Eating</item>
+	    <item>Working Out</item>
+	    <item>Cooking</item>
+	    <item>Beauty Saloon</item>
+	    <item>Sick</item>
 	</string-array>	
-	
 </resources>

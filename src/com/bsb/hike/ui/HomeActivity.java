@@ -5,57 +5,88 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
-public class HomeActivity extends HikeAppStateBaseFragmentActivity {
+public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
+		Listener {
+
+	public static final int UPDATES_TAB_INDEX = 0;
+	public static final int CHATS_TAB_INDEX = 1;
+	public static final int FRIENDS_TAB_INDEX = 2;
+	private static final boolean TEST = false; // TODO: Test flag only, turn off
+												// for Production
+
+	private enum DialogShowing {
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING
+	}
 
 	private ViewPager viewPager;
+	private DialogShowing dialogShowing;
 
 	private int[] headers = { R.string.updates, R.string.chats,
 			R.string.friends };
 
-	private int[] tabIcons = { R.drawable.ic_updates, R.drawable.ic_chats,
-			R.drawable.ic_friends };
+	private int[] tabIcons = { R.drawable.updates_tab, R.drawable.chats_tab,
+			R.drawable.friends_tab };
 
 	private boolean deviceDetailsSent;
 
 	private View parentLayout;
+	private Dialog dialog;
+	private SharedPreferences accountPrefs;
+	private ProgressDialog progDialog;
+	private boolean showingProgress = false;
+
+	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT };
+
+	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Utils.setDensityMultiplier(this);
 		if (Utils.requireAuth(this)) {
 			return;
 		}
-		SharedPreferences accountPrefs = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		boolean justSignedUp = accountPrefs.getBoolean(
-				HikeMessengerApp.JUST_SIGNED_UP, false);
+		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0);
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
 		app.connectToService();
@@ -64,6 +95,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setIcon(R.drawable.hike_logo_top_bar);
 
+		// Checking whether the state of the avatar and conv DB Upgrade settings
+		// is 1
+		// If it's 1, it means we need to show a progress dialog and then wait
+		// for the
+		// pub sub thread event to cancel the dialog once the upgrade is done.
+		if (((accountPrefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1) && (accountPrefs
+				.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1))
+				|| TEST) {
+			progDialog = ProgressDialog.show(this,
+					getString(R.string.work_in_progress),
+					getString(R.string.upgrading_to_a_new_and_improvd_hike),
+					true);
+			showingProgress = true;
+			HikeMessengerApp.getPubSub().addListeners(this,
+					progressPubSubListeners);
+		}
+
+		if (!showingProgress) {
+			initialiseHomeScreen(savedInstanceState);
+		}
+	}
+
+	private void initialiseHomeScreen(Bundle savedInstanceState) {
+		boolean justSignedUp = accountPrefs.getBoolean(
+				HikeMessengerApp.JUST_SIGNED_UP, false);
+
 		setContentView(R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
@@ -71,6 +128,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		if (savedInstanceState != null) {
 			deviceDetailsSent = savedInstanceState
 					.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+			int dialogShowingOrdinal = savedInstanceState.getInt(
+					HikeConstants.Extras.DIALOG_SHOWING, -1);
+			if (dialogShowingOrdinal != -1) {
+				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
+			}
 		}
 
 		if (justSignedUp) {
@@ -84,8 +146,288 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 			}
 		}
 
+		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
+
 		initialiseViewPager();
 		initialiseTabs();
+
+		if (savedInstanceState == null && dialogShowing == null) {
+			/*
+			 * Only show app rater if the tutorial is not being shown an the app
+			 * was just launched i.e not an orientation change
+			 */
+			AppRater.appLaunched(this);
+		} else if (dialogShowing != null) {
+			switch (dialogShowing) {
+			case SMS_CLIENT:
+				showSMSClientDialog();
+				break;
+
+			case SMS_SYNC_CONFIRMATION:
+			case SMS_SYNCING:
+				showSMSSyncDialog();
+				break;
+			}
+		}
+
+		if (!AppRater.showingDialog() && dialogShowing == null) {
+			if (!accountPrefs.getBoolean(
+					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
+				showSMSClientDialog();
+			}
+		}
+
+		HikeMessengerApp.getPubSub().addListeners(this, homePubSubListeners);
+
+	}
+
+	@Override
+	protected void onDestroy() {
+		if (progDialog != null) {
+			progDialog.dismiss();
+			progDialog = null;
+		}
+		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+
+		if (Utils.requireAuth(this)) {
+			return;
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		if (showingProgress) {
+			return false;
+		} else {
+			return setupMenuOptions(menu);
+		}
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem gamesItem = menu.findItem(R.id.games);
+		MenuItem rewardsItem = menu.findItem(R.id.rewards);
+		MenuItem freeSmsItem = menu.findItem(R.id.free_sms);
+
+		SharedPreferences prefs = this.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		if (rewardsItem != null) {
+			rewardsItem.setVisible(prefs.getBoolean(
+					HikeMessengerApp.SHOW_REWARDS, false));
+		}
+
+		if (gamesItem != null) {
+			gamesItem.setVisible(prefs.getBoolean(HikeMessengerApp.SHOW_GAMES,
+					false));
+		}
+
+		SharedPreferences appPref = PreferenceManager
+				.getDefaultSharedPreferences(this);
+
+		if (freeSmsItem != null) {
+			boolean preference = appPref.getBoolean(
+					HikeConstants.FREE_SMS_PREF, true);
+			freeSmsItem.setVisible(preference);
+		}
+
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	private boolean setupMenuOptions(Menu menu) {
+
+		if (viewPager == null) {
+			return false;
+		}
+
+		switch (viewPager.getCurrentItem()) {
+		case UPDATES_TAB_INDEX:
+			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
+			return true;
+		case CHATS_TAB_INDEX:
+			getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
+			return true;
+		case FRIENDS_TAB_INDEX:
+			getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
+
+			final SearchView searchView = new SearchView(getSupportActionBar()
+					.getThemedContext());
+			searchView.setQueryHint(getString(R.string.search_hint));
+			searchView.setIconifiedByDefault(false);
+			searchView.setIconified(false);
+			searchView.setOnQueryTextListener(onQueryTextListener);
+			searchView.clearFocus();
+
+			menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
+					.setIcon(R.drawable.ic_top_bar_search)
+					.setActionView(searchView)
+					.setShowAsAction(
+							MenuItem.SHOW_AS_ACTION_ALWAYS
+									| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent = null;
+
+		switch (item.getItemId()) {
+		case R.id.new_conversation:
+			intent = new Intent(this, ComposeActivity.class);
+			intent.putExtra(HikeConstants.Extras.EDIT, true);
+			break;
+		case R.id.new_update:
+			intent = new Intent(this, StatusUpdate.class);
+			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
+					true);
+			break;
+		case R.id.settings:
+			intent = new Intent(this, SettingsActivity.class);
+			break;
+		case R.id.invite:
+			intent = new Intent(this, TellAFriend.class);
+			break;
+		case R.id.free_sms:
+			intent = new Intent(this, CreditsActivity.class);
+			break;
+		case R.id.my_profile:
+			intent = new Intent(this, ProfileActivity.class);
+			break;
+		case R.id.rewards:
+			intent = getRewardsIntent();
+			break;
+		case R.id.games:
+			intent = getGamingIntent();
+			break;
+		}
+
+		if (intent != null) {
+			startActivity(intent);
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener() {
+
+		@Override
+		public boolean onQueryTextSubmit(String query) {
+			return false;
+		}
+
+		@Override
+		public boolean onQueryTextChange(String newText) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY,
+					newText);
+			return true;
+		}
+	};
+	private TabPageIndicator tabIndicator;
+
+	private Intent getGamingIntent() {
+
+		SharedPreferences prefs = this.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Intent intent = new Intent(this.getApplicationContext(),
+				WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
+		/*
+		 * using the same token as rewards token, as per DK sir's mail
+		 */
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl
+				+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.games));
+		return intent;
+	}
+
+	private Intent getRewardsIntent() {
+		SharedPreferences prefs = this.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Intent intent = new Intent(this.getApplicationContext(),
+				WebViewActivity.class);
+		intent.putExtra(
+				HikeConstants.Extras.URL_TO_LOAD,
+				AccountUtils.rewardsUrl
+						+ prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.rewards));
+		return intent;
+	}
+
+	private void showSMSClientDialog() {
+		dialogShowing = DialogShowing.SMS_CLIENT;
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sms_with_hike_popup);
+		dialog.setCancelable(false);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), true);
+
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						getApplicationContext()).edit();
+				editor.putBoolean(HikeConstants.SEND_SMS_PREF, true);
+				editor.commit();
+
+				dialogShowing = null;
+				dialog.dismiss();
+				if (!accountPrefs.getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					showSMSSyncDialog();
+				}
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), false);
+				dialogShowing = null;
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true);
+				editor.commit();
+			}
+		});
+		dialog.show();
+	}
+
+	private void showSMSSyncDialog() {
+		if (dialogShowing == null) {
+			dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION;
+		}
+
+		dialog = Utils.showSMSSyncDialog(this,
+				dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 	}
 
 	@Override
@@ -105,6 +447,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT,
 				deviceDetailsSent);
+		if (dialog != null && dialog.isShowing()) {
+			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+					dialogShowing != null ? dialogShowing.ordinal() : -1);
+		}
 		super.onSaveInstanceState(outState);
 	}
 
@@ -127,10 +473,36 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	}
 
 	private void initialiseTabs() {
-		TabPageIndicator tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
-		tabIndicator.setViewPager(viewPager,
-				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
+		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
+
+		int position = getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX,
+				1);
+		tabIndicator.setViewPager(viewPager, position);
 		tabIndicator.setOnPageChangeListener(onPageChangeListener);
+
+		onPageChangeListener.onPageSelected(position);
+
+		invalidateOptionsMenu();
+		setBackground();
+	}
+
+	int initialRed = 231;
+	int initialGreen = 226;
+	int initialBlue = 214;
+
+	int finalRed = 255;
+	int finalGreen = 255;
+	int finalBlue = 255;
+
+	private void setBackground() {
+		int position = viewPager.getCurrentItem();
+		if (position == 0) {
+			parentLayout.setBackgroundColor(getResources().getColor(
+					R.color.updates_bg));
+		} else {
+			parentLayout.setBackgroundColor(getResources().getColor(
+					R.color.white));
+		}
 	}
 
 	/*
@@ -139,22 +511,33 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	 */
 	OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
 
-		int initialRed = 231;
-		int initialGreen = 226;
-		int initialBlue = 214;
-
-		int finalRed = 255;
-		int finalGreen = 255;
-		int finalBlue = 255;
-
 		@Override
 		public void onPageSelected(int position) {
-			if (position == 0) {
-				parentLayout.setBackgroundColor(Color.argb(255, initialRed,
-						initialGreen, initialBlue));
-			} else {
-				parentLayout.setBackgroundColor(Color.argb(255, finalRed,
-						finalGreen, finalBlue));
+			invalidateOptionsMenu();
+			setBackground();
+			/*
+			 * Sending a blank query search to ensure all friends are shown.
+			 */
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY,
+					"");
+
+			if (position == UPDATES_TAB_INDEX) {
+				showUpdateIcon = false;
+
+				SharedPreferences prefs = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+				if (prefs.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0) > 0
+						|| prefs.getInt(
+								HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0) > 0) {
+					Utils.resetUnseenStatusCount(prefs);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.RESET_NOTIFICATION_COUNTER, null);
+				}
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
+
+				tabIndicator.notifyDataSetChanged();
 			}
 		}
 
@@ -185,6 +568,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 		}
 	};
+	private boolean showUpdateIcon;
 
 	private void initialiseViewPager() {
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -247,9 +631,51 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 		@Override
 		public int getIconResId(int index) {
-			return tabIcons[index];
+			if (index == UPDATES_TAB_INDEX && showUpdateIcon) {
+				return R.drawable.ic_new_update;
+			} else {
+				return tabIcons[index];
+			}
 		}
 
 	}
 
+	@Override
+	public void onEventReceived(String type, Object object) {
+		super.onEventReceived(type, object);
+		if (HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT.equals(type)) {
+			showUpdateIcon = true;
+			runOnUiThread(refreshTabIcon);
+		} else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE)) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							HikeMessengerApp.getPubSub().removeListeners(
+									HomeActivity.this, progressPubSubListeners);
+
+							showingProgress = false;
+							if (progDialog != null) {
+								progDialog.dismiss();
+								progDialog = null;
+							}
+							invalidateOptionsMenu();
+							initialiseHomeScreen(null);
+						}
+					});
+				}
+			}).start();
+		}
+
+	}
+
+	Runnable refreshTabIcon = new Runnable() {
+
+		@Override
+		public void run() {
+			tabIndicator.notifyDataSetChanged();
+		}
+	};
 }

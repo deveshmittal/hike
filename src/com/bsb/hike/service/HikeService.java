@@ -300,7 +300,7 @@ public class HikeService extends Service {
 				HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false)) {
 			Log.d(getClass().getSimpleName(), "SYNCING");
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
-			syncContactExtraInfo.execute();
+			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 	}
 
@@ -754,7 +754,7 @@ public class HikeService extends Service {
 			hikeHttpRequest.setJSONData(request);
 
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
-			hikeHTTPTask.execute(hikeHttpRequest);
+			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 		}
 	}
 
@@ -816,7 +816,7 @@ public class HikeService extends Service {
 			hikeHttpRequest.setJSONData(data);
 
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
-			hikeHTTPTask.execute(hikeHttpRequest);
+			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 		}
 	}
 
@@ -926,7 +926,7 @@ public class HikeService extends Service {
 		public void run() {
 			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
 					HikeService.this);
-			checkForUpdateTask.execute();
+			Utils.executeBoolResultAsyncTask(checkForUpdateTask);
 		}
 	};
 

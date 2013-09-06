@@ -3,36 +3,33 @@
     android:layout_width="match_parent"
     android:layout_height="72dp"
     android:layout_weight="1"
-    android:background="@drawable/bg_updates_white"
+    android:background="@drawable/updates_bg_selector"
     android:paddingLeft="8dp"
     android:paddingRight="8dp" >
 
     <LinearLayout
         android:id="@+id/image_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/medium_avatar"
+        android:layout_height="@dimen/medium_avatar"
         android:layout_centerVertical="true"
+        android:gravity="center"
         android:layout_marginRight="5dp" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/medium_avatar"
+            android:layout_height="@dimen/medium_avatar"
             android:layout_centerVertical="true"
             android:layout_marginRight="5dp" >
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="@dimen/medium_avatar"
-                android:layout_height="@dimen/medium_avatar"
-                android:layout_marginLeft="2dp"
-                android:layout_marginTop="2dp"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/AvatarStyle"
                 android:src="@drawable/frame_avatar_medium_selector" />
         </RelativeLayout>
 
@@ -41,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
             android:src="@drawable/ic_add_participant"
             android:visibility="gone" />
     </LinearLayout>
@@ -76,4 +73,13 @@
             android:textStyle="bold|italic" />
     </LinearLayout>
 
+    <ImageView 
+        android:id="@+id/owner_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_group_owner"
+        android:paddingTop="8dp"
+        android:visibility="gone"/>
 </RelativeLayout>

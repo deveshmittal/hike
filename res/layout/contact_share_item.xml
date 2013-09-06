@@ -7,20 +7,16 @@
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/info_head"
+        style="@style/SaveContactHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mobile"
-        android:textColor="@color/contact_item_header"
-        android:textSize="12sp"
-        android:textStyle="bold|italic" />
+        android:text="Mobile" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/info_value"
+        style="@style/SaveContactInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+911234567890"
-        android:textColor="@color/lightblack"
-        android:textSize="15sp"
-        android:textStyle="bold|italic" />
+        android:text="+911234567890" />
 
 </LinearLayout>

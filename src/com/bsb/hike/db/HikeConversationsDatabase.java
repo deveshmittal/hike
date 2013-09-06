@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
@@ -31,6 +32,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -52,8 +54,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	private static HikeConversationsDatabase hikeConversationsDatabase;
 
+	private static Context mContext;
+
 	public static void init(Context context) {
 		if (hikeConversationsDatabase == null) {
+			mContext = context;
 			hikeConversationsDatabase = new HikeConversationsDatabase(context);
 		}
 	}
@@ -161,7 +166,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT
 				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, "
 				+ DBConstants.IMAGE_URL + " TEXT, " + DBConstants.WAIT_TIME
-				+ " INTEGER" + " )";
+				+ " INTEGER, " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL
+				+ " TEXT" + " )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE
 				+ " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
@@ -378,7 +384,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 15 adds the sticker table. Version 16 adds the protips table.
 		 */
-
+		boolean protipGameUrlAdded = false;
+		if (oldVersion < 16) {
+			protipGameUrlAdded = true;
+		}
 		/*
 		 * Version 17 add the unread column.
 		 */
@@ -393,7 +402,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * parse through all the messages to populate these tables.
 		 */
 		if (oldVersion < 18) {
-			initialiseSharedMediaAndFileThumbnailTable(db);
+			// Edit the preference to ensure that HikeMessenger app knows we've
+			// reached the
+			// upgrade flow for version 18
+			Editor editor = mContext.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
+			editor.commit();
 		}
 		/*
 		 * Version 19 adds the 'read by' column in the messages table.
@@ -406,6 +421,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 20 adds an index for the file thumbnails table.
 		 */
+		if (!protipGameUrlAdded && oldVersion < 21) {
+			String alter = "ALTER TABLE " + DBConstants.PROTIP_TABLE
+					+ " ADD COLUMN " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL
+					+ " TEXT";
+			db.execSQL(alter);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -549,11 +570,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 							+ DBConstants.MESSAGE_ID + " IN " + sb.toString(),
 					new String[] { groupId }, null, null, null);
 
-			conversationCursor = mDb
-					.query(DBConstants.CONVERSATIONS_TABLE,
-							new String[] { DBConstants.MESSAGE_ID },
-							DBConstants.MSISDN + " = ?",
-							new String[] { msisdn }, null, null, null);
+			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE,
+					new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN
+							+ " = ?", new String[] { groupId }, null, null,
+					null);
 
 			long conversationMsgId = -1;
 			if (conversationCursor.moveToFirst()) {
@@ -578,10 +598,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					/*
 					 * Checking if this number has already been added.
 					 */
+					boolean alreadyAdded = false;
 					for (int i = 0; i < readByArray.length(); i++) {
 						if (readByArray.optString(i).equals(msisdn)) {
-							continue;
+							alreadyAdded = true;
+							break;
 						}
+					}
+					if (alreadyAdded) {
+						continue;
 					}
 					readByArray.put(msisdn);
 
@@ -595,7 +620,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					if (conversationMsgId == msgId) {
 						mDb.update(DBConstants.CONVERSATIONS_TABLE,
 								contentValues, DBConstants.MSISDN + "=?",
-								new String[] { msisdn });
+								new String[] { groupId });
 					}
 
 					contentValues.put(DBConstants.READ_BY,
@@ -668,10 +693,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MSG_STATUS, status);
+		int numRows = mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
+				updateStatement, null);
+
+		if (status == State.RECEIVED_READ.ordinal()) {
+			contentValues.put(DBConstants.UNREAD_COUNT, 0);
+		}
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
 				updateStatement, null);
-		return mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
-				updateStatement, null);
+
+		return numRows;
 	}
 
 	/**
@@ -862,7 +893,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 			conv.setMsgID(msgId);
 
-			if (conv.isFileTransferMessage()) {
+			if (conv.isFileTransferMessage() && conv.getConversation() != null) {
 				addSharedMedia(msgId, conv.getConversation().getConvId());
 			}
 
@@ -1030,7 +1061,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public List<ConvMessage> getConversationThread(String msisdn, long convid,
 			int limit, Conversation conversation, long maxMsgId) {
-		String limitStr = (limit == -1)? null:new Integer(limit).toString(); 
+		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
 		String selection = DBConstants.CONV_ID
 				+ " = ?"
 				+ (maxMsgId == -1 ? "" : " AND " + DBConstants.MESSAGE_ID + "<"
@@ -1095,7 +1126,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
-	
 
 	public Conversation getConversation(String msisdn, int limit) {
 		Log.d(getClass().getSimpleName(), "Fetching conversation with msisdn: "
@@ -2105,7 +2135,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	 * 
 	 * @return
 	 */
-	public List<Pair<AtomicBoolean, ContactInfo>> getGroupNameAndParticipantsAsContacts() {
+	public List<Pair<AtomicBoolean, ContactInfo>> getGroupNameAndParticipantsAsContacts(
+			Context context) {
 		Cursor groupCursor = null;
 		try {
 			List<Pair<AtomicBoolean, ContactInfo>> groups = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
@@ -2127,8 +2158,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 				// Here we make this string the msisdn so that it can be
 				// displayed in the list view when forwarding the message
-				String numberMembers = numMembers
-						+ (numMembers > 0 ? " Members" : " Member");
+				String numberMembers = context.getString(R.string.num_people,
+						(numMembers + 1));
 
 				ContactInfo group = new ContactInfo(groupId, numberMembers,
 						groupName, groupId, true);
@@ -2610,9 +2641,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void insertFirstStickerCategory() {
+	public void insertDoggyStickerCategory() {
+		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[1],
+				EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length, true);
+	}
+
+	public void insertHumanoidStickerCategory() {
 		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
-				EmoticonConstants.LOCAL_STICKER_RES_IDS.length, true);
+				EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length, true);
 	}
 
 	public long addProtip(Protip protip) {
@@ -2624,7 +2660,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		contentValues.put(DBConstants.IMAGE_URL, protip.getImageURL());
 		contentValues.put(DBConstants.WAIT_TIME, protip.getWaitTime());
 		contentValues.put(DBConstants.TIMESTAMP, protip.getTimeStamp());
-
+		contentValues.put(DBConstants.PROTIP_GAMING_DOWNLOAD_URL,
+				protip.getGameDownlodURL());
 		return mDb.insert(DBConstants.PROTIP_TABLE, null, contentValues);
 	}
 
@@ -2633,7 +2670,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				"max(" + DBConstants.ID + ") as " + DBConstants.ID,
 				DBConstants.PROTIP_MAPPED_ID, DBConstants.HEADER,
 				DBConstants.PROTIP_TEXT, DBConstants.IMAGE_URL,
-				DBConstants.WAIT_TIME, DBConstants.TIMESTAMP };
+				DBConstants.WAIT_TIME, DBConstants.TIMESTAMP,
+				DBConstants.PROTIP_GAMING_DOWNLOAD_URL };
 
 		return getProtip(columns, null, null);
 	}
@@ -2642,7 +2680,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		String[] columns = { DBConstants.ID, DBConstants.PROTIP_MAPPED_ID,
 				DBConstants.HEADER, DBConstants.PROTIP_TEXT,
 				DBConstants.IMAGE_URL, DBConstants.WAIT_TIME,
-				DBConstants.TIMESTAMP };
+				DBConstants.TIMESTAMP, DBConstants.PROTIP_GAMING_DOWNLOAD_URL };
 		String selection = DBConstants.ID + "=?";
 		String[] selectionArgs = { Long.toString(id) };
 
@@ -2668,12 +2706,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
 			long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
 			long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+			String gamingDownloadURL = c.getString(c
+					.getColumnIndex(DBConstants.PROTIP_GAMING_DOWNLOAD_URL));
 			if (mappedId == null) {
 				return null;
 			}
 
 			return new Protip(id, mappedId, header, text, url, waitTime,
-					timeStamp);
+					timeStamp, gamingDownloadURL);
 		} finally {
 			if (c != null) {
 				c.close();
@@ -2774,6 +2814,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				c.close();
 			}
 		}
+	}
+
+	public void initialiseSharedMediaAndFileThumbnailTable() {
+		initialiseSharedMediaAndFileThumbnailTable(mDb);
 	}
 
 	public void addSharedMedia(long messageId, long convId) {

@@ -37,4 +37,12 @@
         android:title="@string/native_jingle"
         android:widgetLayout="@layout/checkbox_widget" />
 	
+	<com.bsb.hike.view.IconCheckBoxPreference
+        icon="ic_status_notification"
+        android:defaultValue="true"
+        android:key="statusBooleanPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/mute_status_notification_subtext"
+        android:title="@string/mute_status_notification_header"
+        android:widgetLayout="@layout/checkbox_widget" />
 </PreferenceScreen>

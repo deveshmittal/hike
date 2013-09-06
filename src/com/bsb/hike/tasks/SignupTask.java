@@ -533,7 +533,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	public static SignupTask startTask(Activity activity) {
 		getSignupTask(activity);
 		if (!signupTask.isRunning()) {
-			signupTask.execute();
+			Utils.executeSignupTask(signupTask);
 		}
 		return signupTask;
 	}

@@ -14,25 +14,17 @@
         android:paddingRight="14dp" >
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="@dimen/medium_avatar"
+            android:layout_height="@dimen/medium_avatar" >
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="@dimen/medium_avatar"
-                android:layout_height="@dimen/medium_avatar"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/medium_avatar_margin"
-                android:layout_marginTop="@dimen/medium_avatar_margin"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
+                style="@style/AvatarStyle"
                 android:src="@drawable/frame_avatar_medium_selector" />
         </FrameLayout>
 
@@ -64,7 +56,7 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
-                android:textColor="@color/conversation_timestamp"
+                android:textColor="@color/list_item_subtext"
                 android:textSize="12sp"
                 android:textStyle="bold|italic"
                 android:visibility="visible" />

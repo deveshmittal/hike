@@ -65,7 +65,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 					.getIconForMSISDN(contactInfo.getMsisdn(), true));
 		} else {
 			imageView.setImageDrawable(Utils.getDefaultIconForUser(context,
-					contactInfo.getMsisdn()));
+					contactInfo.getMsisdn(), true));
 		}
 
 		ImageView blockImg = (ImageView) v.findViewById(R.id.contact_button);

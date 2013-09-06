@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.Context;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -15,6 +16,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.utils.EmoticonTextWatcher;
+import com.bsb.hike.utils.Utils;
 
 public class ComposeViewWatcher extends EmoticonTextWatcher implements
 		Runnable, Listener {
@@ -34,14 +36,17 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 
 	private int mCredits;
 
+	private Context context;
+
 	public ComposeViewWatcher(Conversation conversation, EditText composeView,
-			ImageButton sendButton, int initialCredits) {
+			ImageButton sendButton, int initialCredits, Context context) {
 		this.mConversation = conversation;
 		this.mUIThreadHandler = new Handler();
 		this.mPubSub = HikeMessengerApp.getPubSub();
 		this.mComposeView = composeView;
 		this.mButton = sendButton;
 		this.mCredits = initialCredits;
+		this.context = context;
 		setBtnEnabled();
 	}
 
@@ -70,6 +75,10 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 		 */
 		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation
 				.isOnhike() || mCredits > 0)));
+		if (!mConversation.isOnhike() && mCredits <= 0) {
+			boolean nativeSmsPref = Utils.getSendSmsPref(context);
+			canSend = nativeSmsPref;
+		}
 		if (!canSend) {
 			mButton.setImageResource(R.drawable.ic_msg_record);
 		} else {

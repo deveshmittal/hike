@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/help" >
+
+    <com.bsb.hike.view.IconPreference
+		icon="ic_system_status_settings"
+		android:layout="@layout/icon_preference"
+        android:key="systemHealth"
+        android:summary="@string/system_health_hinttext"
+        android:title="@string/system_health" />
+
+    <com.bsb.hike.view.IconPreference
+        icon="ic_faqs_settings"
+		android:key="helpFaqs"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/faq_hinttext"
+        android:title="@string/faq" />
+
+    <com.bsb.hike.view.IconPreference
+        icon="ic_feedback_settings"
+		android:key="helpFeedback"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/feedback_hinttext"
+        android:title="@string/feedback" />
+    
+</PreferenceScreen>

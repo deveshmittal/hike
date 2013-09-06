@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,9 +74,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
@@ -90,11 +93,11 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -110,14 +113,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.SMSSyncState;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.TipType;
-import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
@@ -126,16 +131,18 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
+import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -303,33 +310,46 @@ public class Utils {
 	}
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn) {
+		return getDefaultIconForUser(context, msisdn, false);
+	}
+
+	public static Drawable getDefaultIconForUser(Context context,
+			String msisdn, boolean rounded) {
 		if (isGroupConversation(msisdn)) {
 			int count = 7;
 			int id;
 			switch (iconHash(msisdn) % count) {
 			case 0:
-				id = R.drawable.ic_group_avatar1;
+				id = rounded ? R.drawable.ic_group_avatar1_rounded
+						: R.drawable.ic_group_avatar1;
 				break;
 			case 1:
-				id = R.drawable.ic_group_avatar2;
+				id = rounded ? R.drawable.ic_group_avatar2_rounded
+						: R.drawable.ic_group_avatar2;
 				break;
 			case 2:
-				id = R.drawable.ic_group_avatar3;
+				id = rounded ? R.drawable.ic_group_avatar3_rounded
+						: R.drawable.ic_group_avatar3;
 				break;
 			case 3:
-				id = R.drawable.ic_group_avatar4;
+				id = rounded ? R.drawable.ic_group_avatar4_rounded
+						: R.drawable.ic_group_avatar4;
 				break;
 			case 4:
-				id = R.drawable.ic_group_avatar5;
+				id = rounded ? R.drawable.ic_group_avatar5_rounded
+						: R.drawable.ic_group_avatar5;
 				break;
 			case 5:
-				id = R.drawable.ic_group_avatar6;
+				id = rounded ? R.drawable.ic_group_avatar6_rounded
+						: R.drawable.ic_group_avatar6;
 				break;
 			case 6:
-				id = R.drawable.ic_group_avatar7;
+				id = rounded ? R.drawable.ic_group_avatar7_rounded
+						: R.drawable.ic_group_avatar7;
 				break;
 			default:
-				id = R.drawable.ic_group_avatar1;
+				id = rounded ? R.drawable.ic_group_avatar1_rounded
+						: R.drawable.ic_group_avatar1;
 				break;
 			}
 			return context.getResources().getDrawable(id);
@@ -338,36 +358,43 @@ public class Utils {
 		int id;
 		switch (iconHash(msisdn) % count) {
 		case 0:
-			id = R.drawable.ic_avatar1;
+			id = rounded ? R.drawable.ic_avatar1_rounded
+					: R.drawable.ic_avatar1;
 			break;
 		case 1:
-			id = R.drawable.ic_avatar2;
+			id = rounded ? R.drawable.ic_avatar2_rounded
+					: R.drawable.ic_avatar2;
 			break;
 		case 2:
-			id = R.drawable.ic_avatar3;
+			id = rounded ? R.drawable.ic_avatar3_rounded
+					: R.drawable.ic_avatar3;
 			break;
 		case 3:
-			id = R.drawable.ic_avatar4;
+			id = rounded ? R.drawable.ic_avatar4_rounded
+					: R.drawable.ic_avatar4;
 			break;
 		case 4:
-			id = R.drawable.ic_avatar5;
+			id = rounded ? R.drawable.ic_avatar5_rounded
+					: R.drawable.ic_avatar5;
 			break;
 		case 5:
-			id = R.drawable.ic_avatar6;
+			id = rounded ? R.drawable.ic_avatar6_rounded
+					: R.drawable.ic_avatar6;
 			break;
 		case 6:
-			id = R.drawable.ic_avatar7;
+			id = rounded ? R.drawable.ic_avatar7_rounded
+					: R.drawable.ic_avatar7;
 			break;
 		default:
-			id = R.drawable.ic_avatar1;
+			id = rounded ? R.drawable.ic_avatar1_rounded
+					: R.drawable.ic_avatar1;
 			break;
 		}
 
 		return context.getResources().getDrawable(id);
 	}
 
-	public static String getDefaultAvatarServerName(Context context,
-			String msisdn) {
+	public static String getDefaultAvatarServerName(String msisdn) {
 		String name;
 		int count = 7;
 		int id = iconHash(msisdn) % count;
@@ -852,18 +879,15 @@ public class Utils {
 	 * 
 	 * @param activity
 	 */
-	public static void setDensityMultiplier(Activity activity) {
-		DisplayMetrics metrics = new DisplayMetrics();
-		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		Utils.densityMultiplier = metrics.scaledDensity;
+	public static void setDensityMultiplier(DisplayMetrics displayMetrics) {
+		Utils.densityMultiplier = displayMetrics.scaledDensity;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info,
 			String textToHighight) {
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new ForegroundColorSpan(0xff666666),
-				info.indexOf(textToHighight), info.indexOf(textToHighight)
-						+ textToHighight.length(),
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), info.indexOf(textToHighight),
+				info.indexOf(textToHighight) + textToHighight.length(),
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
@@ -1366,7 +1390,9 @@ public class Utils {
 		AccountUtils.rewardsUrl = httpString
 				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
 						: AccountUtils.REWARDS_STAGING_BASE);
-
+		AccountUtils.gamesUrl = httpString
+				+ (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE
+						: AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE
 						: AccountUtils.STICKERS_STAGING_BASE);
@@ -1434,13 +1460,11 @@ public class Utils {
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 				convMessage.serialize());
 
-		if (!HikeMessengerApp.isIndianUser()) {
-			ArrayList<String> messages = smsManager.divideMessage(convMessage
-					.getMessage());
+		ArrayList<String> messages = smsManager.divideMessage(convMessage
+				.getMessage());
 
-			smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
-					messages, null, null);
-		}
+		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+				messages, null, null);
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,
@@ -1774,9 +1798,15 @@ public class Utils {
 				HikeConstants.VIBRATE_PREF, true)) {
 			return;
 		}
-		Vibrator vibrator = (Vibrator) context
-				.getSystemService(Context.VIBRATOR_SERVICE);
-		vibrator.vibrate(100);
+		AudioManager audioManager = (AudioManager) context
+				.getSystemService(Context.AUDIO_SERVICE);
+		int ringerMode = audioManager.getRingerMode();
+
+		if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
+			Vibrator vibrator = (Vibrator) context
+					.getSystemService(Context.VIBRATOR_SERVICE);
+			vibrator.vibrate(100);
+		}
 	}
 
 	private static String convertToHex(byte[] data) {
@@ -1896,49 +1926,12 @@ public class Utils {
 			boolean countUsersStatus) {
 		int notificationCount = 0;
 
-		if (TextUtils.isEmpty(accountPrefs.getString(
-				HikeMessengerApp.LAST_STATUS, ""))
-				&& HikeConversationsDatabase.getInstance()
-						.getTimelineStatusMessageCount() < HikeConstants.MIN_STATUS_COUNT) {
-			notificationCount++;
-		}
-
-		if (HikeUserDatabase.getInstance().getFriendTableRowCount() == 0) {
-			notificationCount++;
-		} else {
-			notificationCount += HikeUserDatabase.getInstance()
-					.getPendingFriendRequestCount();
-		}
-
 		notificationCount += accountPrefs.getInt(
 				HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 
 		if (countUsersStatus) {
 			notificationCount += accountPrefs.getInt(
 					HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		}
-
-		long currentProtipId = accountPrefs.getLong(
-				HikeMessengerApp.CURRENT_PROTIP, -1);
-
-		if (currentProtipId == -1) {
-			Protip protip = HikeConversationsDatabase.getInstance()
-					.getLastProtip();
-			if (protip != null) {
-				if (showProtip(protip, accountPrefs)) {
-					notificationCount++;
-				}
-			}
-		} else {
-			Protip protip = HikeConversationsDatabase.getInstance()
-					.getProtipForId(currentProtipId);
-			if (protip == null) {
-				Editor editor = accountPrefs.edit();
-				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-				editor.commit();
-			} else {
-				notificationCount++;
-			}
 		}
 
 		return notificationCount;
@@ -1971,10 +1964,6 @@ public class Utils {
 		InputMethodManager imm = (InputMethodManager) context
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-	}
-
-	public static int[] getMoodsResource() {
-		return HikeMessengerApp.getMoodsResource();
 	}
 
 	public static void sendLocaleToServer(Context context) {
@@ -2048,7 +2037,7 @@ public class Utils {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SMS_SYNC_START,
 						null);
 
-				new SyncOldSMSTask(context).execute();
+				executeSMSSyncStateResultTask(new SyncOldSMSTask(context));
 
 				setupSyncDialogLayout(false, btnContainer, syncProgress, info,
 						btnDivider);
@@ -2148,15 +2137,15 @@ public class Utils {
 		Log.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
 
 		if (densityMultiplierX100 > 200) {
-			return 0;
+			return HikeConstants.XXHDPI_ID;
 		} else if (densityMultiplierX100 > 150) {
-			return 1;
+			return HikeConstants.XHDPI_ID;
 		} else if (densityMultiplierX100 > 100) {
-			return 2;
+			return HikeConstants.HDPI_ID;
 		} else if (densityMultiplierX100 > 75) {
-			return 3;
+			return HikeConstants.MDPI_ID;
 		} else {
-			return 4;
+			return HikeConstants.LDPI_ID;
 		}
 	}
 
@@ -2240,7 +2229,8 @@ public class Utils {
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED,
 						HikeMessengerApp.currentState == CurrentState.OPENED);
-
+				data.put(HikeConstants.BULK_LAST_SEEN, true); // adding this for
+																// bulk
 				object.put(HikeConstants.DATA, data);
 			} else {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
@@ -2255,6 +2245,11 @@ public class Utils {
 
 	public static String getLastSeenTimeAsString(Context context,
 			long lastSeenTime, int offline) {
+		return getLastSeenTimeAsString(context, lastSeenTime, offline, false);
+	}
+
+	public static String getLastSeenTimeAsString(Context context,
+			long lastSeenTime, int offline, boolean groupParticipant) {
 		/*
 		 * This refers to the setting being turned off
 		 */
@@ -2300,16 +2295,22 @@ public class Utils {
 		 */
 		if ((nowDay - lastSeenDay) > 1) {
 			String format;
-			if (is24Hour) {
-				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM, HH:mm";
+			if (groupParticipant) {
+				format = "dd/MM/yy";
+				DateFormat df = new SimpleDateFormat(format);
+				lastSeen = df.format(lastSeenDate);
 			} else {
-				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM, h:mmaaa";
+				if (is24Hour) {
+					format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+							+ "' MMM, HH:mm";
+				} else {
+					format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+							+ "' MMM, h:mmaaa";
+				}
+				DateFormat df = new SimpleDateFormat(format);
+				lastSeen = context.getString(R.string.last_seen_more,
+						df.format(lastSeenDate));
 			}
-			DateFormat df = new SimpleDateFormat(format);
-			lastSeen = context.getString(R.string.last_seen_more,
-					df.format(lastSeenDate));
 		} else {
 			String format;
 			if (is24Hour) {
@@ -2319,11 +2320,16 @@ public class Utils {
 			}
 
 			DateFormat df = new SimpleDateFormat(format);
-			lastSeen = context
-					.getString(
-							(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
-									: R.string.last_seen_today, df
-									.format(lastSeenDate));
+			if (groupParticipant) {
+				lastSeen = (nowDay > lastSeenDay) ? context
+						.getString(R.string.last_seen_yesterday_group_participant)
+						: df.format(lastSeenDate);
+			} else {
+				lastSeen = context.getString(
+						(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+								: R.string.last_seen_today, df
+								.format(lastSeenDate));
+			}
 		}
 
 		lastSeen = lastSeen.replace("AM", "am");
@@ -2393,19 +2399,15 @@ public class Utils {
 			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.last_seen_tip);
+			tipText.setText(R.string.last_seen_tip_friends);
 			break;
 		case MOOD:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
+			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(R.string.moods_tip);
 			break;
 		case STATUS:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(activity.getString(R.string.status_tip, name));
-			break;
-		case STICKER:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
-			tipText.setText(R.string.stickers_tip);
 			break;
 		case WALKIE_TALKIE:
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
@@ -2445,9 +2447,6 @@ public class Utils {
 			break;
 		case STATUS:
 			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case STICKER:
-			editor.putBoolean(HikeMessengerApp.SHOWN_STICKERS_TIP, true);
 			break;
 		case WALKIE_TALKIE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
@@ -2590,7 +2589,7 @@ public class Utils {
 		}
 
 	}
-	
+
 	public static JSONObject getJSONfromURL(String url) {
 
 		// initialize
@@ -2606,14 +2605,8 @@ public class Utils {
 			HttpEntity entity = response.getEntity();
 			is = entity.getContent();
 
-		} catch (Exception e) {
-			Log.e("LogEvent", "Error in http connection " + e.toString());
-		}
-
-		// convert response to string
-		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					is, "iso-8859-1"), 8);
+					is, "UTF-8"), 8);
 			StringBuilder sb = new StringBuilder();
 			String line = null;
 			while ((line = reader.readLine()) != null) {
@@ -2633,5 +2626,170 @@ public class Utils {
 		}
 
 		return jObject;
+	}
+
+	public static Bitmap drawableToBitmap(Drawable drawable) {
+		if (drawable instanceof BitmapDrawable) {
+			return ((BitmapDrawable) drawable).getBitmap();
+		}
+		/*
+		 * http://developer.android.com/reference/android/graphics/Bitmap.Config.
+		 * html
+		 */
+		Bitmap bitmap = Bitmap.createBitmap((int) (48 * densityMultiplier),
+				(int) (48 * densityMultiplier), Config.ARGB_8888);
+
+		Canvas canvas = new Canvas(bitmap);
+		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+		drawable.draw(canvas);
+		return bitmap;
+	}
+
+	public static boolean isHoneycombOrHigher() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+
+	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeFtResultAsyncTask(
+			AsyncTask<Void, Void, FTResult> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeIntProgFtResultAsyncTask(
+			AsyncTask<Void, Integer, FTResult> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeBoolResultAsyncTask(
+			AsyncTask<Void, Void, Boolean> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeHttpTask(
+			AsyncTask<HikeHttpRequest, Integer, Boolean> asyncTask,
+			HikeHttpRequest... hikeHttpRequests) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					hikeHttpRequests);
+		} else {
+			asyncTask.execute(hikeHttpRequests);
+		}
+	}
+
+	public static void executeSignupTask(
+			AsyncTask<Void, SignupTask.StateValue, Boolean> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeLongResultTask(
+			AsyncTask<Void, Void, Long> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeContactListResultTask(
+			AsyncTask<Void, Void, List<Pair<AtomicBoolean, ContactInfo>>> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeStringResultTask(
+			AsyncTask<Void, Void, String> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static void executeSMSSyncStateResultTask(
+			AsyncTask<Void, Void, SMSSyncState> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
+	public static Bitmap returnScaledBitmap(Bitmap src, Context context) {
+		Resources res = context.getResources();
+		if (isHoneycombOrHigher()) {
+			int height = (int) res
+					.getDimension(android.R.dimen.notification_large_icon_height);
+			int width = (int) res
+					.getDimension(android.R.dimen.notification_large_icon_width);
+			return src = Bitmap.createScaledBitmap(src, width, height, false);
+		} else
+			return src;
+
+	}
+
+	public static boolean isProtipNotificationShowable(SharedPreferences prefs) {
+
+		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
+				-1);
+
+		Protip protip = null;
+		boolean showProtipNotification = false;
+		if (currentProtipId == -1) {
+			protip = HikeConversationsDatabase.getInstance().getLastProtip();
+			if (protip != null) {
+				if (Utils.showProtip(protip, prefs)) {
+					showProtipNotification = true;
+				}
+			}
+		}
+		return (showProtipNotification);
+	}
+
+	public static boolean getSendSmsPref(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean(HikeConstants.SEND_SMS_PREF, false);
+	}
+
+	public static boolean isFilenameValid(String file) {
+		File f = new File(file);
+		try {
+			f.getCanonicalPath();
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	public static void resetUnseenStatusCount(SharedPreferences prefs) {
+		Editor editor = prefs.edit();
+		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		editor.commit();
 	}
 }

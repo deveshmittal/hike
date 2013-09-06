@@ -1,6 +1,8 @@
 package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +28,9 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.utils.Utils;
 
 @SuppressWarnings("unchecked")
 public class HikeSearchContactAdapter extends
@@ -39,18 +39,15 @@ public class HikeSearchContactAdapter extends
 	private List<Pair<AtomicBoolean, ContactInfo>> filteredList;
 	private List<Pair<AtomicBoolean, ContactInfo>> completeList;
 	private ContactFilter contactFilter;
-	private boolean isGroupChat;
 	private EditText inputNumber;
 	private String groupId;
 	private Map<String, GroupParticipant> groupParticipants;
-	private boolean freeSMSOn;
-	private boolean nativeSMSOn;
 	private boolean forwarding;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<Pair<AtomicBoolean, ContactInfo>> contactList,
-			EditText inputNumber, boolean isGroupChat, String groupId,
-			boolean freeSMSOn, boolean nativeSMSOn, boolean forwarding) {
+			EditText inputNumber, String groupId, boolean forwarding,
+			Map<String, GroupParticipant> groupParticipants) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
@@ -58,15 +55,41 @@ public class HikeSearchContactAdapter extends
 		this.context = context;
 		this.contactFilter = new ContactFilter();
 		this.inputNumber = inputNumber;
-		this.isGroupChat = isGroupChat;
 		this.groupId = groupId;
-		this.freeSMSOn = freeSMSOn;
-		this.nativeSMSOn = nativeSMSOn;
 		this.forwarding = forwarding;
-		if (!TextUtils.isEmpty(groupId)) {
-			groupParticipants = HikeConversationsDatabase.getInstance()
-					.getGroupParticipants(groupId, true, false);
+		this.groupParticipants = groupParticipants;
+	}
+
+	Comparator<Pair<AtomicBoolean, ContactInfo>> comparator = new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
+
+		@Override
+		public int compare(Pair<AtomicBoolean, ContactInfo> lhs,
+				Pair<AtomicBoolean, ContactInfo> rhs) {
+			AtomicBoolean lhsIsCheck = lhs.first;
+			AtomicBoolean rhsIsCheck = rhs.first;
+
+			if (lhsIsCheck.get() != rhsIsCheck.get()) {
+				if (lhsIsCheck.get()) {
+					return -1;
+				} else {
+					return 1;
+				}
+			}
+
+			if (lhs.second == null) {
+				return 1;
+			}
+			return lhs.second.compareTo(rhs.second);
 		}
+	};
+
+	public void sort() {
+		Collections.sort(completeList, comparator);
+		Collections.sort(filteredList, comparator);
+	}
+
+	public void addItemToCompleteList(Pair<AtomicBoolean, ContactInfo> pair) {
+		completeList.add(0, pair);
 	}
 
 	@Override
@@ -82,36 +105,28 @@ public class HikeSearchContactAdapter extends
 
 		v.setTag(item);
 
-		boolean inviteOnly = isContactInviteOnly(contactInfo);
-
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo != null ? contactInfo.getName()
 				: getNumber(inputNumber.getText().toString()));
 
 		TextView numberTextView = (TextView) v.findViewById(R.id.number);
 		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn()
-				: isGroupChat ? context.getString(R.string.tap_to_add)
-						: context.getString(R.string.tap_to_message));
+				: context.getString(R.string.tap_to_add));
 
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
 		checkBox.setVisibility(forwarding ? View.GONE : View.VISIBLE);
 		checkBox.setChecked(item.first.get());
 
-		if (contactInfo != null) {
-			if (inviteOnly) {
-				numberTextView.append(" ("
-						+ context.getString(R.string.tap_to_invite) + ")");
-			} else if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
-				numberTextView.append(" (" + contactInfo.getMsisdnType() + ")");
-			}
+		if (contactInfo != null
+				&& !TextUtils.isEmpty(contactInfo.getMsisdnType())) {
+			numberTextView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}
 
-		// ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
-		// onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike()
-		// ? R.drawable.ic_hike_user
-		// : inviteOnly ? R.drawable.ic_invite_user
-		// : R.drawable.ic_sms_user)
-		// : 0);
+		ImageView onhike = (ImageView) v.findViewById(R.id.hike_status);
+		onhike.setVisibility(View.VISIBLE);
+		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user
+				: R.drawable.ic_sms_user)
+				: 0);
 
 		ImageView avatar = (ImageView) v.findViewById(R.id.contact_image);
 		if (contactInfo != null
@@ -122,12 +137,11 @@ public class HikeSearchContactAdapter extends
 			avatar.setImageDrawable(contactInfo != null ? IconCacheManager
 					.getInstance().getIconForMSISDN(contactInfo.getMsisdn(),
 							true) : context.getResources().getDrawable(
-					R.drawable.ic_avatar1));
+					R.drawable.ic_avatar1_rounded));
 		}
 
 		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE
 				: View.INVISIBLE);
-		// onhike.setVisibility(isEnabled(position) ? View.VISIBLE : View.GONE);
 		return v;
 	}
 
@@ -193,23 +207,11 @@ public class HikeSearchContactAdapter extends
 					if (currentSelectionSet.contains(textToBeFiltered)) {
 						filteredContacts
 								.add(new Pair<AtomicBoolean, ContactInfo>(
-										new AtomicBoolean(true),
-										new ContactInfo(
-												textToBeFiltered,
-												Utils.normalizeNumber(
-														textToBeFiltered, "+91"),
-												textToBeFiltered,
-												textToBeFiltered)));
+										new AtomicBoolean(true), null));
 					} else {
 						filteredContacts
 								.add(new Pair<AtomicBoolean, ContactInfo>(
-										new AtomicBoolean(),
-										new ContactInfo(
-												textToBeFiltered,
-												Utils.normalizeNumber(
-														textToBeFiltered, "+91"),
-												textToBeFiltered,
-												textToBeFiltered)));
+										new AtomicBoolean(), null));
 					}
 				}
 				results.count = filteredContacts.size();
@@ -250,7 +252,7 @@ public class HikeSearchContactAdapter extends
 
 	@Override
 	public boolean isEnabled(int position) {
-		if (filteredList.get(position) == null) {
+		if (getItem(position) == null) {
 			return getNumber(inputNumber.getText().toString()).matches(
 					HikeConstants.VALID_MSISDN_REGEX);
 		}
@@ -266,12 +268,4 @@ public class HikeSearchContactAdapter extends
 				: textInEditText.substring(indexTextToBeFiltered);
 	}
 
-	private boolean isContactInviteOnly(ContactInfo contactInfo) {
-		return contactInfo != null
-				&& !nativeSMSOn
-				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
-						&& (!contactInfo.getMsisdn().startsWith(
-								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
-							.isOnhike()));
-	}
 }

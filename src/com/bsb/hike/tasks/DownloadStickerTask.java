@@ -70,7 +70,11 @@ public class DownloadStickerTask extends StickerTaskBase {
 		 * stickers as well.
 		 */
 		if (categoryIndex == 0) {
-			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS) {
+			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS_1) {
+				existingStickerIds.put(stickerId);
+			}
+		} else if (categoryIndex == 1) {
+			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS_2) {
 				existingStickerIds.put(stickerId);
 			}
 		}
@@ -144,7 +148,7 @@ public class DownloadStickerTask extends StickerTaskBase {
 
 	@Override
 	protected void onPostExecute(FTResult result) {
-		ChatThread.stickerTaskMap.remove(catId);
+		HikeMessengerApp.stickerTaskMap.remove(catId);
 		if (result != FTResult.SUCCESS) {
 			HikeMessengerApp.getPubSub()
 					.publish(

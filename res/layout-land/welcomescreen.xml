@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/welcome_bckg" >
+    android:background="@color/signup_bg" >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:src="@drawable/welcome_bckg" />
 
     <RelativeLayout
         android:id="@+id/tc_continue_layout"
@@ -15,13 +20,18 @@
         android:gravity="center"
         android:visibility="invisible" >
 
-        <Button
+        <com.bsb.hike.view.CustomFontButton
             android:id="@+id/terms_and_conditions"
+            style="@style/SignupButton.Text.Info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="15dp"
-            android:background="@drawable/t_c_btn" />
+            android:background="@drawable/t_c"
+            android:paddingLeft="50dp"
+            android:paddingRight="15dp"
+            android:text="@string/terms_privacy"
+            android:textSize="12sp" />
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_continue"
@@ -29,8 +39,7 @@
             android:layout_below="@id/terms_and_conditions"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
-            android:text="@string/a_and_c_signup"
-            hike:font="omnes" />
+            android:text="@string/a_and_c_signup" />
 
         <LinearLayout
             android:id="@+id/loading_layout"
@@ -55,9 +64,19 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="3dp"
                 android:singleLine="true"
-                android:text="@string/pulling_digits_signup"
-                hike:font="omnes" />
+                android:text="@string/pulling_digits_signup" />
         </LinearLayout>
+
+		<com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_try_again"
+            style="@style/SignupButton.Text.Bold.Button"
+            android:textSize="14sp"
+            android:layout_height="48dp"
+            android:layout_below="@id/terms_and_conditions"
+            android:background="@drawable/bg_network_error"
+            android:onClick="onClick"
+            android:text="@string/network_error"
+            android:visibility="gone" />        
     </RelativeLayout>
 
     <ImageView
@@ -99,12 +118,11 @@
             android:shadowColor="#5A000000"
             android:shadowDy="1.3"
             android:shadowRadius="1.3"
-            android:text="@string/fun_free_messaging"
-            android:textColor="#e9e8e1"
+            android:text="@string/hike_tag"
+            android:textColor="#faf8f2"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:gravity="center"
-            hike:font="omnes" />
+            android:gravity="center" />
         
         <ImageView
             android:id="@+id/ic_micromax"
@@ -117,10 +135,5 @@
             android:visibility="gone" />
 
     </LinearLayout>
-
-    
-    <include
-        android:layout_below="@id/header_dropshadow"
-        layout="@layout/boo_boo" />
 
 </RelativeLayout>

@@ -14,6 +14,7 @@
         android:drawablePadding="7dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
+        android:hint="@string/search_hint"
         android:singleLine="true" />
 
     <View
@@ -27,12 +28,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/search_text"
+        android:fastScrollEnabled="true"
         android:divider="@drawable/compose_list_divider"
         android:dividerHeight="1dp" >
     </ListView>
 
     <ProgressBar
-        android:id="@android:id/empty"
+        android:id="@+id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />

@@ -2,6 +2,7 @@ package com.bsb.hike.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,12 +13,20 @@ import com.viewpagerindicator.IconPagerAdapter;
 
 public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 
+	private int screenWidth;
+	private int minWidth;
+
 	public StickerEmoticonIconPageIndicator(Context context) {
-		super(context, null);
+		this(context, null);
 	}
 
 	public StickerEmoticonIconPageIndicator(Context context, AttributeSet attrs) {
 		super(context, attrs);
+
+		screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+
+		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		minWidth = (int) (40 * metrics.density);
 	}
 
 	@Override
@@ -29,6 +38,13 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 		LayoutInflater inflater = LayoutInflater.from(getContext());
 
 		int count = iconAdapter.getCount();
+
+		int itemWidth = (int) (screenWidth / count);
+
+		if (itemWidth < minWidth) {
+			itemWidth = minWidth;
+		}
+
 		for (int i = 0; i < count; i++) {
 			View stickerParent = inflater.inflate(R.layout.sticker_btn, null);
 
@@ -44,6 +60,10 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 
 			stickerParent.setTag(i);
 			stickerParent.setOnClickListener(mTabClickListener);
+
+			LayoutParams layoutParams = new LayoutParams(itemWidth,
+					LayoutParams.MATCH_PARENT);
+			stickerParent.setLayoutParams(layoutParams);
 
 			mIconsLayout.addView(stickerParent);
 		}

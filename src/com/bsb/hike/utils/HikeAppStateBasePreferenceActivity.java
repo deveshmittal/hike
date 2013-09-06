@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.util.Log;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 
 public abstract class HikeAppStateBasePreferenceActivity extends
-		PreferenceActivity {
+		SherlockPreferenceActivity {
 
 	private static final String TAG = "HikeAppState";
 
@@ -22,6 +24,7 @@ public abstract class HikeAppStateBasePreferenceActivity extends
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.sendAppState(this);
 		}
+		
 		super.onCreate(savedInstanceState);
 	}
 
@@ -39,6 +42,7 @@ public abstract class HikeAppStateBasePreferenceActivity extends
 			Log.d(TAG + getClass().getSimpleName(), "App was resumed");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.sendAppState(this);
+
 		}
 		super.onStart();
 	}

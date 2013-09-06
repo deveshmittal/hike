@@ -42,6 +42,14 @@
 	    <item>Beim Zocken</item>
 	    <item>Beim Coden</item>
 	    <item>Fernsehen</item>
-	</string-array>	
+	    <item>Musik</item>
+	    <item>Heftig Feiern</item>
+	    <item>Beim Singen</item>
+	    <item>Beim Essen</item>
+	    <item>Beim Training</item>
+	    <item>Beim Kochen</item>
+	    <item>Kosmetikstudio</item>
+	    <item>Krank</item>
+	</string-array>
 	
 </resources>

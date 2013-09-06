@@ -245,26 +245,60 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 		@Override
 		public int compare(ContactInfo lhs, ContactInfo rhs) {
-			if (lhs.getFavoriteType() != rhs.getFavoriteType()) {
-				if (lhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+			FavoriteType lhsFavoriteType = lhs.getFavoriteType();
+			FavoriteType rhsFavoriteType = rhs.getFavoriteType();
+
+			if (lhsFavoriteType != rhsFavoriteType) {
+				if (lhsFavoriteType == FavoriteType.REQUEST_RECEIVED) {
 					return -1;
-				} else if (rhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+				} else if (rhsFavoriteType == FavoriteType.REQUEST_RECEIVED) {
 					return 1;
 				}
 			}
-			if (lhs.getOffline() != rhs.getOffline()) {
-				if (lhs.getOffline() == 0) {
-					return -1;
-				} else if (rhs.getOffline() == 0) {
+
+			if (hasLastSeenValue(lhsFavoriteType)) {
+				if (!hasLastSeenValue(rhsFavoriteType)) {
+					if (lhs.getOffline() == 0) {
+						return -1;
+					}
+				}
+				int value = compareOfflineValues(lhs.getOffline(),
+						rhs.getOffline());
+				if (value != 0) {
+					return value;
+				}
+			} else if (hasLastSeenValue(rhsFavoriteType)
+					&& !hasLastSeenValue(lhsFavoriteType)) {
+				if (rhs.getOffline() == 0) {
 					return 1;
 				}
 			}
+
 			return lhs.compareTo(rhs);
+		}
+
+		private boolean hasLastSeenValue(FavoriteType favoriteType) {
+			return favoriteType == FavoriteType.FRIEND
+					|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED;
+		}
+
+		private int compareOfflineValues(int lhs, int rhs) {
+			if (lhs != rhs) {
+				if (lhs == 0) {
+					return -1;
+				} else if (rhs == 0) {
+					return 1;
+				}
+			}
+			return 0;
 		}
 	};
 
 	@Override
 	public int compareTo(ContactInfo rhs) {
+		if (rhs == null) {
+			return -1;
+		}
 		if (TextUtils.isEmpty(this.name) && TextUtils.isEmpty(rhs.name)) {
 			return (this.msisdn.toLowerCase()
 					.compareTo(((ContactInfo) rhs).msisdn.toLowerCase()));
