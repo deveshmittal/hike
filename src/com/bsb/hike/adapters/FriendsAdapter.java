@@ -550,8 +550,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					}
 				}
 			} else {
+				TextView info = (TextView) convertView.findViewById(R.id.info);
 				ImageView addFriend = (ImageView) convertView
 						.findViewById(R.id.add_friend);
+
+				info.setText(contactInfo.isOnhike() ? R.string.tap_chat
+						: R.string.tap_sms);
+
 				addFriend.setTag(contactInfo);
 				addFriend.setOnClickListener(this);
 			}
