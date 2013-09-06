@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
@@ -53,11 +54,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	private static HikeConversationsDatabase hikeConversationsDatabase;
 
+	private static Context mContext;
+
 	public static void init(Context context) {
 		if (hikeConversationsDatabase == null) {
-			
-			HikeMessengerApp.isUpgrading = true;
-
+			mContext = context;
 			hikeConversationsDatabase = new HikeConversationsDatabase(context);
 		}
 	}
@@ -401,7 +402,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * parse through all the messages to populate these tables.
 		 */
 		if (oldVersion < 18) {
-			initialiseSharedMediaAndFileThumbnailTable(db);
+			// Edit the preference to ensure that HikeMessenger app knows we've
+			// reached the
+			// upgrade flow for version 18
+			Editor editor = mContext.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
+			editor.commit();
 		}
 		/*
 		 * Version 19 adds the 'read by' column in the messages table.
@@ -2807,6 +2814,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				c.close();
 			}
 		}
+	}
+
+	public void initialiseSharedMediaAndFileThumbnailTable() {
+		initialiseSharedMediaAndFileThumbnailTable(mDb);
 	}
 
 	public void addSharedMedia(long messageId, long convId) {

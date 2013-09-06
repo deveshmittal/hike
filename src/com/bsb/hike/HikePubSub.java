@@ -279,6 +279,8 @@ public class HikePubSub implements Runnable {
 	public static final String INCREMENTED_UNSEEN_STATUS_COUNT = "incrementedUnseenStatusCount";
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
+	
+	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
 
 	private final Thread mThread;
 

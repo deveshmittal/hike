@@ -664,4 +664,6 @@
 	<string name="sms_setting_hinttext">SMS settings</string>
 	<string name="mute_status_notification_header">Status update notifications</string>
 	<string name="mute_status_notification_subtext">Show a notification for status updates posted by your friends</string>
+	<string name="work_in_progress">Work in progress</string>
+	<string name="upgrading_to_a_new_and_improvd_hike">Upgrading to a new and improved hike!</string>
 </resources>

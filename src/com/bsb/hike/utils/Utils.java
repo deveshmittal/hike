@@ -142,7 +142,6 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -2774,6 +2773,16 @@ public class Utils {
 	public static boolean getSendSmsPref(Context context) {
 		return PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean(HikeConstants.SEND_SMS_PREF, false);
+	}
+
+	public static boolean isFilenameValid(String file) {
+		File f = new File(file);
+		try {
+			f.getCanonicalPath();
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 	
 }

@@ -48,12 +48,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	private SQLiteDatabase mReadDb;
 
-	private Context mContext;
+	private static Context mContext;
 
 	private static HikeUserDatabase hikeUserDatabase;
 
 	public static void init(Context context) {
 		if (hikeUserDatabase == null) {
+			mContext = context;
 			hikeUserDatabase = new HikeUserDatabase(context);
 		}
 	}
@@ -125,7 +126,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				DBConstants.USERS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
-		this.mContext = context;
 	}
 
 	@Override
@@ -261,8 +261,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		 */
 		if (oldVersion < 14) {
 			onCreate(db);
-			makeOlderAvatarsRounded(db);
+			// set the preferences to 1 , for UserDBAvtar being called for
+			// upgrade/
+			// this will be used in hike messenger app and home activity while
+			// computing the spinner state.
+			Editor editor = mContext.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
+			editor.commit();
 		}
+	}
+
+	public void makeOlderAvatarsRounded() {
+		makeOlderAvatarsRounded(mDb);
 	}
 
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync)
@@ -1904,4 +1915,5 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		db.replace(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, contentValues);
 	}
+
 }

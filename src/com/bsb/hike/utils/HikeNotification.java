@@ -111,7 +111,11 @@ public class HikeNotification {
 		if (led) {
 			mBuilder.setLights(Color.BLUE, 300, 1000);
 		}
-		notificationManager.notify(notificationId, mBuilder.getNotification());
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			notificationManager.notify(notificationId,
+					mBuilder.getNotification());
+		}
 
 	}
 
@@ -455,10 +459,13 @@ public class HikeNotification {
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(resultPendingIntent);
 
-		notificationManager.notify(notificationId, mBuilder.getNotification());
-
-		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-				: System.currentTimeMillis();
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			notificationManager.notify(notificationId,
+					mBuilder.getNotification());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+					: System.currentTimeMillis();
+		}
 	}
 
 	public void pushBigPictureStatusNotifications(String[] profileStruct) {
@@ -533,10 +540,13 @@ public class HikeNotification {
 
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(profileStruct[1].hashCode(),
-				mBuilder.build());
-		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-				: System.currentTimeMillis();
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			mNotificationManager.notify(profileStruct[1].hashCode(),
+					mBuilder.build());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+					: System.currentTimeMillis();
+		}
 	}
 
 	public void pushBigPictureMessageNotifications(Intent notificationIntent,
@@ -620,9 +630,12 @@ public class HikeNotification {
 
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(notificationId, mBuilder.build());
-		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-				: System.currentTimeMillis();
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			mNotificationManager.notify(notificationId, mBuilder.build());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
+					: System.currentTimeMillis();
+		}
 	}
 
 
