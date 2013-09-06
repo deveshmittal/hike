@@ -63,7 +63,7 @@
                     android:textColor="@color/list_item_header"
                     android:textSize="14sp"
                     android:drawablePadding="3dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold|italic" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -114,9 +114,11 @@
                     android:layout_toRightOf="@id/msg_status_indicator"
                     android:ellipsize="end"
                     android:singleLine="true"
+                    android:layout_marginTop="1dp"
                     android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                     android:textColor="@color/list_item_header"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
+                    android:textStyle="italic"
                     android:visibility="invisible" />
             </RelativeLayout>
         </LinearLayout>
