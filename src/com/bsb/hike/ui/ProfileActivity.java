@@ -1178,8 +1178,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public void onChangeImageClicked(View v) {
 		/*
-		 * The user wants to change their profile picture. Open a dialog to allow
-		 * them pick Camera or Gallery
+		 * The user wants to change their profile picture. Open a dialog to
+		 * allow them pick Camera or Gallery
 		 */
 		final CharSequence[] items = getResources().getStringArray(
 				R.array.profile_pic_dialog);
