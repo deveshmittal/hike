@@ -230,7 +230,7 @@
 	<string name="downloading">Downloading file...</string>
 	<string name="hike">hike</string>
 	<string name="emoji">Emoji</string>
-	<string name="group_profile">Group Profile</string>
+	<string name="group_profile">Group info</string>
 	<string name="group_name">Group Name</string>
 	<string name="participants">Participants</string>
 	<string name="group_owner">Group Owner</string>
@@ -367,8 +367,8 @@
 	<string name="accepted_friend_request">Confirmed as a friend</string>
 	<string name="invite_free_sms">Invite via free SMS</string>
 	<string name="leave">Leave</string>
-	<string name="mute_group">Mute group</string>
-	<string name="unmute_group">Unmute group</string>
+	<string name="mute_group">Mute Group</string>
+	<string name="unmute_group">Unmute Group</string>
 	<string name="account">Account</string>
 	<string name="deleting_account">Deleting Account</string>
 	<string name="enter_num">Please enter your phone number</string>
