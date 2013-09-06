@@ -12,4 +12,5 @@
     <dimen name="checkbox_marginRight">3dp</dimen>
     <dimen name="top_btn_padding">0dp</dimen>
     <dimen name="hike_logo_margin">90dp</dimen>
+    <dimen name="version_item_marginTop">75dp</dimen>
 </resources>

@@ -145,6 +145,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.btn_container);
+
+				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
 
 			case PROFILE_PIC_CHANGE:
@@ -164,6 +166,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						.findViewById(R.id.timestamp);
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.info_container);
+				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -173,7 +176,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		switch (viewType) {
 		case OTHER_UPDATE:
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP
+					|| EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else if (statusMessage.hasMood()) {
@@ -348,6 +354,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 		}
 
+		if (viewHolder.parent != null && position == getCount() - 1) {
+			int bottomPadding = context.getResources().getDimensionPixelSize(
+					R.dimen.updates_margin);
+			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
+		}
+
 		return convertView;
 	}
 
@@ -364,6 +376,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		View buttonDivider;
 		ImageView largeProfilePic;
 		View infoContainer;
+		View parent;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
@@ -410,8 +423,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							"Unable to open market");
 				}
 				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.GAMING_PROTIP_DOWNLOADED,
-						protip);
+						HikePubSub.GAMING_PROTIP_DOWNLOADED, protip);
 			}
 		}
 	};
@@ -459,9 +471,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				return;
 			}
 
-			Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(
-					null, statusMessage.getMsisdn(), statusMessage
-							.getNotNullName(), statusMessage.getMsisdn()));
+			Intent intent = Utils.createIntentFromContactInfo(
+					new ContactInfo(null, statusMessage.getMsisdn(),
+							statusMessage.getNotNullName(), statusMessage
+									.getMsisdn()), true);
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 			intent.setClass(context, ChatThread.class);
 			context.startActivity(intent);

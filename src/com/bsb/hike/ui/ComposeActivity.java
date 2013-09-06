@@ -193,7 +193,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				&& TextUtils.isEmpty(existingGroupId)) {
 			conversationContactInfo = selectedContactList.get(0);
 			Intent intent = Utils
-					.createIntentFromContactInfo(conversationContactInfo);
+					.createIntentFromContactInfo(conversationContactInfo, true);
 			intent.setClass(this, ChatThread.class);
 			startActivity(intent);
 			finish();
@@ -320,7 +320,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId,
 				groupId, groupId);
 		Intent intent = Utils
-				.createIntentFromContactInfo(conversationContactInfo);
+				.createIntentFromContactInfo(conversationContactInfo, true);
 		intent.setClass(this, ChatThread.class);
 		startActivity(intent);
 		finish();
@@ -473,7 +473,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			mInputNumberView.setText("");
 
 			view.setTag(pair);
-
+				
 			adapter.sort();
 			adapter.notifyDataSetChanged();
 
@@ -514,9 +514,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				String msisdn = getNormalisedMsisdn();
 				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
 			}
-			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
+			Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 			intent.setClass(this, ChatThread.class);
-
 			String type = presentIntent.getType();
 
 			if ("text/plain".equals(type)

@@ -125,7 +125,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null,
 				statusMessage.getMsisdn(), statusMessage.getNotNullName(),
-				statusMessage.getMsisdn()));
+				statusMessage.getMsisdn()), true);
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		intent.setClass(getActivity(), ChatThread.class);
 		startActivity(intent);

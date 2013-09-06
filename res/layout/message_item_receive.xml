@@ -59,8 +59,8 @@
 
 	    <RelativeLayout
 	        android:id="@+id/avatar_container"
-	        android:layout_width="@dimen/small_avatar"
-	        android:layout_height="@dimen/small_avatar"
+	        android:layout_width="@dimen/chatthread_avatar"
+	        android:layout_height="@dimen/chatthread_avatar"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="2dp"
 	        android:visibility="gone" >
