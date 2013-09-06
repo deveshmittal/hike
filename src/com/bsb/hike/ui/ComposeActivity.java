@@ -436,12 +436,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 
 			ContactInfo contactInfo = pair.second;
 			if (contactInfo == null) {
-				String textEntered = mInputNumberView.getText().toString();
-				String msisdn = Utils.normalizeNumber(
-						textEntered,
-						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-								0).getString(HikeMessengerApp.COUNTRY_CODE,
-								HikeConstants.INDIA_COUNTRY_CODE));
+				String msisdn = getNormalisedMsisdn();
 
 				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
 
@@ -512,7 +507,14 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		} else {
 			Intent presentIntent = getIntent();
 
-			Intent intent = Utils.createIntentFromContactInfo(pair.second);
+			ContactInfo contactInfo;
+			if (pair.second != null) {
+				contactInfo = pair.second;
+			} else {
+				String msisdn = getNormalisedMsisdn();
+				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
+			}
+			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 			intent.setClass(this, ChatThread.class);
 
 			String type = presentIntent.getType();
@@ -553,5 +555,14 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 			startActivity(intent);
 		}
+	}
+
+	private String getNormalisedMsisdn() {
+		String textEntered = mInputNumberView.getText().toString();
+		return Utils.normalizeNumber(
+				textEntered,
+				getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+						.getString(HikeMessengerApp.COUNTRY_CODE,
+								HikeConstants.INDIA_COUNTRY_CODE));
 	}
 }
