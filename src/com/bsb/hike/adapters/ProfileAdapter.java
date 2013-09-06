@@ -389,6 +389,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					layoutParams.rightMargin = margin;
 				}
 
+				if (position == getCount() -1 ) {
+					layoutParams.bottomMargin = margin;
+				}
 				groupParticipantParentView.setTag(groupParticipant);
 
 				groupParticipantParentView.setOnClickListener(profileActivity);
