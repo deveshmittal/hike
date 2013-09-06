@@ -176,7 +176,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		switch (viewType) {
 		case OTHER_UPDATE:
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP
+					|| EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else if (statusMessage.hasMood()) {
