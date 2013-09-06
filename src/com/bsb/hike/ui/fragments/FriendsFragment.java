@@ -87,7 +87,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		ContactInfo contactInfo = friendsAdapter.getItem(position);
 
-		if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId())) {
+		if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId())
+				|| FriendsAdapter.EMPTY_ID.equals(contactInfo.getId())) {
 			return;
 		}
 
