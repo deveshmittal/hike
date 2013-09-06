@@ -109,6 +109,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			}
 			intent.putExtra(HikeConstants.Extras.MSISDN,
 					contactInfo.getMsisdn());
+			intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 			startActivity(intent);
 		}
 	}
