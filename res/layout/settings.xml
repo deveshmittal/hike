@@ -15,4 +15,12 @@
         android:fadingEdge="none"
         android:footerDividersEnabled="false" />
 
+     <View
+         android:id="@+id/divider"
+         android:layout_width="match_parent"
+         android:layout_height="1dp"
+         android:layout_below="@id/settings_content"
+         android:background="@drawable/home_list_divider"
+         android:visibility="gone" />
+     
 </RelativeLayout>
