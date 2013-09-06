@@ -277,6 +277,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			return;
 		}
 
+		if ((friendsList.isEmpty() && hikeContactsList.isEmpty() && smsContactsList
+				.isEmpty())
+				|| (filteredFriendsList.isEmpty()
+						&& filteredHikeContactsList.isEmpty() && filteredSmsContactsList
+							.isEmpty())) {
+			return;
+		}
+
 		completeList.clear();
 
 		inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
