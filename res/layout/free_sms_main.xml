@@ -90,15 +90,6 @@
                 android:text="@string/free_sms_left" />
 
             <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/free_sms_subtxt"
-                style="@style/FreeSmsSubtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/free_sms_txt"
-                android:layout_toRightOf="@id/free_sms_icon"
-                android:text="@string/sms_renew" />
-
-            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/credits_num"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -107,6 +98,16 @@
                 android:textColor="@color/list_item_header"
                 android:textSize="36sp"
                 android:textStyle="italic" />
+            
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/free_sms_subtxt"
+                style="@style/FreeSmsSubtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/credits_num"
+                android:layout_below="@id/free_sms_txt"
+                android:layout_toRightOf="@id/free_sms_icon"
+                android:text="@string/sms_renew" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -114,7 +115,7 @@
                 android:layout_below="@id/free_sms_icon"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="20dp" >
+                android:layout_marginTop="22dp" >
 
                 <ProgressBar
                     android:id="@+id/credits_progress"
