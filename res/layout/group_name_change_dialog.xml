@@ -33,6 +33,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="16dp"
+        android:inputType="textCapSentences"
         android:background="@drawable/bg_group_name"
         android:maxLength="@integer/max_length_group_name"
         android:paddingBottom="8dp"

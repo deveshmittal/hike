@@ -858,7 +858,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		int unreadMessageCount = 0;
 
 		for (ConvMessage conv : convMessages) {
-			if (!conv.isSent()) {
+			if (Utils.shouldIncrementCounter(conv)) {
 				unreadMessageCount++;
 			}
 

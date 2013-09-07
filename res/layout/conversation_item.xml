@@ -8,8 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="@drawable/list_item"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
         android:gravity="center_vertical"
         android:orientation="horizontal" >
 
@@ -63,7 +63,7 @@
                     android:textColor="@color/list_item_header"
                     android:textSize="14sp"
                     android:drawablePadding="3dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold|italic" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -94,6 +94,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_unread_counter"
+                        android:paddingLeft="2dp"
+                        android:paddingRight="2dp"
                         android:gravity="center"
                         android:text="99"
                         android:textColor="@color/white"
@@ -112,9 +114,11 @@
                     android:layout_toRightOf="@id/msg_status_indicator"
                     android:ellipsize="end"
                     android:singleLine="true"
+                    android:layout_marginTop="1dp"
                     android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                     android:textColor="@color/list_item_header"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
+                    android:textStyle="italic"
                     android:visibility="invisible" />
             </RelativeLayout>
         </LinearLayout>

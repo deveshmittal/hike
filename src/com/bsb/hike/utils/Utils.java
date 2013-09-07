@@ -127,6 +127,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -317,7 +318,7 @@ public class Utils {
 	public static Drawable getDefaultIconForUser(Context context,
 			String msisdn, boolean rounded) {
 		if (isGroupConversation(msisdn)) {
-			int count = 7;
+			int count = 6;
 			int id;
 			switch (iconHash(msisdn) % count) {
 			case 0:
@@ -329,22 +330,18 @@ public class Utils {
 						: R.drawable.ic_group_avatar2;
 				break;
 			case 2:
-				id = rounded ? R.drawable.ic_group_avatar3_rounded
-						: R.drawable.ic_group_avatar3;
-				break;
-			case 3:
 				id = rounded ? R.drawable.ic_group_avatar4_rounded
 						: R.drawable.ic_group_avatar4;
 				break;
-			case 4:
+			case 3:
 				id = rounded ? R.drawable.ic_group_avatar5_rounded
 						: R.drawable.ic_group_avatar5;
 				break;
-			case 5:
+			case 4:
 				id = rounded ? R.drawable.ic_group_avatar6_rounded
 						: R.drawable.ic_group_avatar6;
 				break;
-			case 6:
+			case 5:
 				id = rounded ? R.drawable.ic_group_avatar7_rounded
 						: R.drawable.ic_group_avatar7;
 				break;
@@ -2792,5 +2789,11 @@ public class Utils {
 		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		editor.commit();
+	}
+
+	public static boolean shouldIncrementCounter(ConvMessage convMessage) {
+		return !convMessage.isSent()
+				&& convMessage.getState() == State.RECEIVED_UNREAD
+				&& convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
 }

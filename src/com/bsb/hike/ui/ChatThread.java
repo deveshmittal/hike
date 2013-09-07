@@ -3647,10 +3647,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				int offset = 0;
 				int emoticonsListSize = 0;
 				tabDrawables = new int[] { R.drawable.ic_recents_emo,
-						R.drawable.emo_im_01_bigsmile,
-						R.drawable.emo_im_81_exciting,
-						R.drawable.emo_im_111_grin,
-						R.drawable.emo_im_165_tiranga,
+						R.drawable.emo_1_tab,
+						R.drawable.emo_2_tab,
+						R.drawable.emo_3_tab,
+						R.drawable.emo_4_tab,
 						EmoticonConstants.EMOJI_RES_IDS[0],
 						EmoticonConstants.EMOJI_RES_IDS[109],
 						EmoticonConstants.EMOJI_RES_IDS[162],

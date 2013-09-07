@@ -161,6 +161,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
 				viewHolder.timeStamp = (TextView) v
 						.findViewById(R.id.timestamp);
+				viewHolder.parent = v.findViewById(R.id.main_content);
 				break;
 
 			case PROFILE_PIC_UPDATE:
@@ -174,6 +175,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.timeStamp = (TextView) v
 						.findViewById(R.id.timestamp);
 				viewHolder.infoContainer = v.findViewById(R.id.info_container);
+				viewHolder.parent = v.findViewById(R.id.main_content);
 				break;
 
 			case EMPTY_STATUS:
@@ -205,6 +207,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						.findViewById(R.id.no_btn);
 
 				viewHolder.btn1 = (Button) v.findViewById(R.id.text_btn);
+				viewHolder.parent = v.findViewById(R.id.main_content);
 			}
 
 			v.setTag(viewHolder);
@@ -389,6 +392,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					layoutParams.rightMargin = margin;
 				}
 
+				if (position == getCount() - 1) {
+					layoutParams.bottomMargin = margin;
+				}
 				groupParticipantParentView.setTag(groupParticipant);
 
 				groupParticipantParentView.setOnClickListener(profileActivity);
@@ -560,6 +566,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			break;
 		}
 
+		if (viewHolder.parent != null && position == getCount() - 1) {
+			int bottomPadding = context.getResources().getDimensionPixelSize(
+					R.dimen.updates_margin);
+			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
+		}
+
 		return v;
 	}
 
@@ -576,6 +588,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		ImageButton imageBtn2;
 		TextView timeStamp;
 		View infoContainer;
+		View parent;
 	}
 
 	public void setProfilePreview(Bitmap preview) {

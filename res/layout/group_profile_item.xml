@@ -18,9 +18,7 @@
         <RelativeLayout
             android:id="@+id/avatar_container"
             android:layout_width="@dimen/medium_avatar"
-            android:layout_height="@dimen/medium_avatar"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp" >
+            android:layout_height="@dimen/medium_avatar" >
 
             <ImageView
                 android:id="@+id/avatar"

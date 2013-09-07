@@ -277,6 +277,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			return;
 		}
 
+		if ((friendsList.isEmpty() && hikeContactsList.isEmpty() && smsContactsList
+				.isEmpty())
+				|| (filteredFriendsList.isEmpty()
+						&& filteredHikeContactsList.isEmpty() && filteredSmsContactsList
+							.isEmpty())) {
+			return;
+		}
+
 		completeList.clear();
 
 		inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
@@ -522,7 +530,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					if (!TextUtils.isEmpty(lastSeenString)) {
 						if (contactInfo.getOffline() == 0) {
 							lastSeen.setTextColor(context.getResources()
-									.getColor(R.color.unread_message));
+									.getColor(R.color.action_bar_disabled_text));
 							avatarFrame
 									.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
 						}
@@ -550,8 +558,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					}
 				}
 			} else {
+				TextView info = (TextView) convertView.findViewById(R.id.info);
 				ImageView addFriend = (ImageView) convertView
 						.findViewById(R.id.add_friend);
+
+				info.setText(contactInfo.isOnhike() ? R.string.tap_chat
+						: R.string.tap_sms);
+
 				addFriend.setTag(contactInfo);
 				addFriend.setOnClickListener(this);
 			}

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -334,9 +335,19 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 			statusMessages.addAll(result);
 			Log.d(getClass().getSimpleName(), "Updating...");
-			centralTimelineAdapter.notifyDataSetChanged();
-			HikeMessengerApp.getPubSub().addListeners(UpdatesFragment.this,
-					pubSubListeners);
+			/*
+			 * added this to delay updating the adapter while the viewpager is
+			 * swiping since it break that animation.
+			 */
+			new Handler().postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					centralTimelineAdapter.notifyDataSetChanged();
+					HikeMessengerApp.getPubSub().addListeners(
+							UpdatesFragment.this, pubSubListeners);
+				}
+			}, 300);
 		}
 
 	}

@@ -1178,8 +1178,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public void onChangeImageClicked(View v) {
 		/*
-		 * The user wants to change their profile picture. Open a dialog to allow
-		 * them pick Camera or Gallery
+		 * The user wants to change their profile picture. Open a dialog to
+		 * allow them pick Camera or Gallery
 		 */
 		final CharSequence[] items = getResources().getStringArray(
 				R.array.profile_pic_dialog);
@@ -1532,13 +1532,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void inviteToHike(String msisdn) {
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-				Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
+		Utils.sendInvite(msisdn, this);
 
-		Toast toast = Toast.makeText(ProfileActivity.this,
-				R.string.invite_sent, Toast.LENGTH_SHORT);
-		toast.setGravity(Gravity.BOTTOM, 0, 0);
-		toast.show();
+		Toast.makeText(getApplicationContext(), R.string.invite_sent,
+				Toast.LENGTH_SHORT).show();
 	}
 
 	public void onCallClicked(View v) {
