@@ -285,8 +285,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				groupConversation.getGroupParticipantList());
 		if (newGroup) {
 			mConversationDb.addConversation(groupConversation.getMsisdn(),
-					false, "", groupConversation.getGroupOwner());
-			mConversationDb.setGroupName(groupId, groupName);
+					false, groupName, groupConversation.getGroupOwner());
 		}
 
 		try {

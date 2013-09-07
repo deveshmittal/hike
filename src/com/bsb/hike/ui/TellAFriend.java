@@ -15,8 +15,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -52,6 +52,10 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 	boolean pickFriendsWhenSessionOpened;
 
+	private enum ViewType {
+		ITEM, EXTRA
+	};
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -60,14 +64,13 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
 
-		findViewById(R.id.divider).setVisibility(View.VISIBLE);
-
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(R.string.sms));
 		items.add(getString(R.string.facebook));
 		items.add(getString(R.string.twitter));
 		items.add(getString(R.string.email));
 		items.add(getString(R.string.share_via_other));
+		items.add(null);
 
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
 		itemIcons.add(R.drawable.ic_invite_sms);
@@ -79,15 +82,61 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this,
 				R.layout.setting_item, R.id.item, items) {
 
+			public int getItemViewType(int position) {
+				if (getItem(position) == null) {
+					return ViewType.EXTRA.ordinal();
+				} else {
+					return ViewType.ITEM.ordinal();
+				}
+			}
+
+			@Override
+			public int getViewTypeCount() {
+				return ViewType.values().length;
+			}
+
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
-				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(R.id.summary);
-				tv.setVisibility(View.GONE);
-				ImageView iconImage = (ImageView) v.findViewById(R.id.icon);
-				iconImage.setImageResource(itemIcons.get(position));
+				ViewType viewType = ViewType.values()[getItemViewType(position)];
+				if (convertView == null) {
+					switch (viewType) {
+					case ITEM:
+						convertView = getLayoutInflater().inflate(
+								R.layout.setting_item, null);
+						break;
 
-				return v;
+					case EXTRA:
+						convertView = getLayoutInflater().inflate(
+								R.layout.free_sms_item, null);
+						break;
+					}
+				}
+				switch (viewType) {
+				case ITEM:
+					TextView itemText = (TextView) convertView
+							.findViewById(R.id.item);
+					TextView tv = (TextView) convertView
+							.findViewById(R.id.summary);
+
+					itemText.setText(getItem(position));
+					tv.setVisibility(View.GONE);
+					ImageView iconImage = (ImageView) convertView
+							.findViewById(R.id.icon);
+					iconImage.setImageResource(itemIcons.get(position));
+					break;
+
+				case EXTRA:
+					TextView text = (TextView) convertView
+							.findViewById(R.id.item);
+					TextView subText = (TextView) convertView
+							.findViewById(R.id.summary);
+
+					text.setText(R.string.invite_friends);
+					subText.setText(R.string.invite_subtext);
+					break;
+				}
+
+				return convertView;
 			}
 
 		};

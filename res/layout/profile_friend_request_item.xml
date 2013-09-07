@@ -89,7 +89,7 @@
                 android:text="Rishabh Sharma"
                 android:textColor="@color/updates_text"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/info"
@@ -98,8 +98,7 @@
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
                 android:textColor="@color/profile_small_text"
-                android:textSize="12sp"
-                android:textStyle="bold|italic" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <com.bsb.hike.view.CustomFontTextView
@@ -111,7 +110,8 @@
             android:layout_marginTop="5dp"
             android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
             android:textColor="@color/updates_text"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="italic" />
     </RelativeLayout>
 
 </RelativeLayout>

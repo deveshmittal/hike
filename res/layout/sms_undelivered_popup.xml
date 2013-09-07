@@ -44,7 +44,8 @@
         <com.bsb.hike.view.CustomFontTextView
             style="@style/UndeliveredInfo"
             android:layout_width="48dp"
-            android:layout_height="24dp"
+            android:layout_height="wrap_content"
+            android:minHeight="24dp"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@id/hike_sms_checkbox"
@@ -65,11 +66,35 @@
         android:id="@+id/native_sms_container"
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        android:paddingBottom="16dp"
+        android:paddingBottom="6dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="16dp" >
 
+        <CheckBox
+            android:id="@+id/native_sms_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:button="@drawable/preference_radio_btn"
+            android:clickable="true" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/red_box"
+            style="@style/UndeliveredInfo"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:minHeight="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@id/native_sms_checkbox"
+            android:background="@drawable/red_rounded_rectangle"
+            android:gravity="center"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="@string/at_sms_rate" />
+        
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/native_sms_header"
             style="@style/UndeliveredPopup.Header"
@@ -82,31 +107,12 @@
             style="@style/UndeliveredPopup.Subtext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/native_sms_header"
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@id/red_box"
             android:text="@string/from_your_number" />
-
-        <CheckBox
-            android:id="@+id/native_sms_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:button="@drawable/preference_radio_btn"
-            android:clickable="true" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            style="@style/UndeliveredInfo"
-            android:layout_width="87dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@id/native_sms_checkbox"
-            android:background="@drawable/red_rounded_rectangle"
-            android:gravity="center"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:text="@string/at_sms_rate" />
+        
     </RelativeLayout>
 
     <View
