@@ -268,8 +268,6 @@
 	<string name="msisdn">फोन नं.:</string>
 	<string name="tap_to_invite">हाइक पर आमंत्रित करे</string>
 	<string name="file_transferring">कृपया फाइल ट्रांसफर होने तक प्रतीक्षा करें</string>
-	<string name="unobfuscated_map_api">0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA</string>
-	<string name="production_map_api">0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw</string>
 	<string name="enter_some_text">कृपया टेक्स्ट दर्ज करें।</string>
 	<string name="t_and_p_signup">शर्तें और गोपनीयता</string>
 	<string name="a_and_c_signup">स्वीकार करें और जारी रखें</string>		
@@ -563,7 +561,6 @@
 	<string name="read_by_everyone">प्रत्येक व्यक्ति के  द्वारा पढ़ी गई</string>
 	<string name="attach">संलग्न करें</string>
 	<string name="new_chat">नई चैट</string>
-	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">मित्र अनुरोध भेजा गया</string>
 	<string name="xyz_posted_update">%1$s ने अपडेट पोस्ट किया है</string>
 	<string name="sent_you_friend_request">ने आपको मित्र अनुरोध भेजा है</string>
@@ -600,7 +597,6 @@
     <string name="audio">ऑडियो</string>
     <string name="video">वीडियो</string>
     <string name="location">लोकेशन</string>
-    <string name="places_api_key">AIzaSyA91tJgFfEPKOXjXm_dyL1mgGP1ys2hU04</string>
     <string name="enter_valid_group_name">कृपया मान्य समूह नाम दर्ज करें</string>
 	<string name="add_as_friend_profile">क्या अपडेट साझा करने के लिए आप  %1$s को दोस्त के रूप में जोड़ना चाहेंगे?</string>
 	<string name="request_pending">दोस्त बनाने का अनुरोध पेंडिंग</string>
@@ -661,7 +657,18 @@
 	<string name="sms_setting_hinttext">SMS सेटिंग्स</string>
 	<string name="mute_status_notification_header">स्थिति अपडेट अधिसूचनाएँ</string>
 	<string name="mute_status_notification_subtext">आपके दोस्तों द्वारा पोस्ट स्थिति अधिसूचनाएँ दिखाएँ</string>
-	<string name="work_in_progress">कार्य प्रगति पर</string>
-	<string name="upgrading_to_a_new_and_improvd_hike">नए और बेहतर hike में अपग्रेड कर रहे हैं!</string>
-	
+	<string name="tap_plus_add_friends">टेप करें + कुछ मित्रों को जोड़ने के लिए</string>
+	<string name="work_in_progress">अपडेट hike</string>
+	<string name="upgrading_to_a_new_and_improvd_hike">कृपया प्रतीक्षा करें जब तक हम कुछ परिवर्तन कर रहे हैं।</string>
+	<string name="protip_games">खेल</string>
+	<string name="unlink_account">लॉगआउट</string>
+	<string name="delete_account_msg">स्थायी रूप से अपने खाते को हटाएँ:(</string>
+	<string name="unlink_confirmation">आप सुनिश्चित करें कि आप इस डिवाइस पर अपने hike के खाते से लॉग आउट करना चाहते हैं?</string>
+	<string name="unlinking_account">आपके hike खाते का लॉग आउट</string>
+	<string name="unlink_facebook_account">Facebook खाते को हटाएँ</string>
+	<string name="unlink_twitter_account">Twitter खाते को हटाएँ</string>
+	<string name="unlink_facebook_account_msg">Facebook खाते को Hike से हटाएँ</string>
+	<string name="unlink_twitter_account_msg">Twitter खाते को Hike से हटाएँ</string>
+	<string name="unlink_facebook_confirmation">क्या आप Hike से अपने Facebook खाते को लॉगआउट करना चाहते हैं?</string>
+	<string name="unlink_twitter_confirmation">क्या आप Hike से अपने Twitter खाते को लॉगआउट करना चाहते हैं?</string>
 </resources>
