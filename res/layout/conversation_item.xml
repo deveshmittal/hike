@@ -61,7 +61,7 @@
                     android:singleLine="true"
                     android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
                     android:textColor="@color/list_item_header"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:drawablePadding="3dp"
                     android:textStyle="bold|italic" />
             </RelativeLayout>
