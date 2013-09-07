@@ -266,8 +266,6 @@
 	<string name="msisdn">N° téléphone :</string>
 	<string name="tap_to_invite">Inviter sur hike</string>
 	<string name="file_transferring">Patientez pendant le transfert du fichier.</string>
-	<string name="unobfuscated_map_api">0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA</string>
-	<string name="production_map_api">0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw</string>
 	<string name="enter_some_text">Saisis du texte.</string>
 	<string name="t_and_p_signup">Conditions &amp; Confid.</string>
 	<string name="a_and_c_signup">Accepter et continuer</string>		
@@ -592,7 +590,6 @@
     <string name="audio">Audio</string>
     <string name="video">Vidéo</string>
     <string name="location">Lieu</string>
-    <string name="places_api_key">AIzaSyA91tJgFfEPKOXjXm_dyL1mgGP1ys2hU04</string>
     <string name="enter_valid_group_name">Entre un nom de groupe valide</string>
 	<string name="add_as_friend_profile">Veux-tu ajouter %1$s à tes amis pour partager des mises à jour ?</string>
 	<string name="request_pending">Demande d\'ami en attente</string>
@@ -651,7 +648,19 @@
 	<string name="sms_setting_hinttext">Réglages SMS</string>
 	<string name="mute_status_notification_header">Alertes mises à jour de statut</string>
 	<string name="mute_status_notification_subtext">Afficher une alerte dès qu\'un ami met son statut à jour</string>
-	<string name="work_in_progress">Opération en cours</string>
-	<string name="upgrading_to_a_new_and_improvd_hike">Mise à niveau en cours vers un hike encore meilleur !</string>
+	<string name="tap_plus_add_friends">Appuyez sur + pour ajouter des amis</string>
+	<string name="work_in_progress">Mise à jour de hike</string>
+	<string name="upgrading_to_a_new_and_improvd_hike">Veuillez patienter pendant que nous apporter quelques modifications.</string>
+	<string name="protip_games">Jeux</string>
+	<string name="unlink_account">Fermer la session</string>
+	<string name="delete_account_msg">Supprimer définitivement votre compte :(</string>
+	<string name="unlink_confirmation">Êtes-vous certain de que vouloir vous déconnecter de votre compte de hike, sur cet appareil ?</string>
+	<string name="unlinking_account">Déconnexion de votre compte hike</string>
+	<string name="unlink_facebook_account">Dissocier le compte Facebook</string>
+	<string name="unlink_twitter_account">Dissocier le compte Twitter</string>
+	<string name="unlink_facebook_account_msg">Dissocier votre compte facebook de randonnée</string>
+	<string name="unlink_twitter_account_msg">Dissocier votre compte twitter de randonnée</string>
+	<string name="unlink_facebook_confirmation">Êtes-vous sûr de vouloir dissocier votre compte facebook de randonnée?</string>
+	<string name="unlink_twitter_confirmation">Êtes-vous sûr de vouloir dissocier votre compte twitter de randonnée?</string>
 	
 </resources>
