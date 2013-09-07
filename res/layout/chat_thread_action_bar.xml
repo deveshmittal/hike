@@ -20,10 +20,10 @@
             android:paddingRight="8dp"
             android:src="@drawable/ic_back" />
 
-        <FrameLayout
+        <RelativeLayout
             android:id="@+id/avatar_frame"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_gravity="left|center"
             android:layout_marginBottom="5dp"
             android:layout_marginRight="4dp"
@@ -31,22 +31,15 @@
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="@dimen/small_avatar"
-                android:layout_height="@dimen/small_avatar"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/small_avatar_margin"
-                android:layout_marginTop="@dimen/small_avatar_margin"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
+                style="@style/AvatarStyle"
                 android:src="@drawable/frame_avatar_small_selector" />
-        </FrameLayout>
+        </RelativeLayout>
+
     </LinearLayout>
 
     <LinearLayout
@@ -77,6 +70,7 @@
             android:layout_marginTop="@dimen/abs__action_bar_subtitle_top_margin"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="1"
+            android:textStyle="normal"
             android:textSize="12sp"
             android:visibility="gone" />
     </LinearLayout>

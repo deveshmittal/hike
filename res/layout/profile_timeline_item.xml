@@ -7,31 +7,23 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/updates_margin"
-        android:background="@drawable/bg_updates_white"
-        android:paddingBottom="10dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp" >
+        style="@style/UpdatesContainer" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="10dp" >
+            android:layout_width="@dimen/small_avatar"
+            android:layout_height="@dimen/small_avatar"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp" >
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="@dimen/small_avatar"
-                android:layout_height="@dimen/small_avatar"
-                android:layout_marginLeft="@dimen/small_avatar_margin"
-                android:layout_marginTop="@dimen/small_avatar_margin"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/AvatarStyle"
                 android:src="@drawable/frame_avatar_small_selector" />
         </RelativeLayout>
 
@@ -72,7 +64,7 @@
                 android:text="Rishabh Sharma"
                 android:textColor="@color/updates_text"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/main_info"
@@ -81,7 +73,8 @@
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
                 android:textColor="@color/updates_text"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="italic" />
         </LinearLayout>
     </RelativeLayout>
 

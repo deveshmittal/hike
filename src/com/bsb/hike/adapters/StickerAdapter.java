@@ -95,7 +95,7 @@ public class StickerAdapter extends PagerAdapter implements
 
 		final String categoryId = Utils.getCategoryIdForIndex(position);
 
-		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) ChatThread.stickerTaskMap
+		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) HikeMessengerApp.stickerTaskMap
 				.get(categoryId);
 
 		if (currentStickerTask != null
@@ -122,9 +122,9 @@ public class StickerAdapter extends PagerAdapter implements
 				public void onClick(View v) {
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 							activity, position, downloadTypeBeforeFail);
-					downloadStickerTask.execute();
+					Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-					ChatThread.stickerTaskMap.put(categoryId,
+					HikeMessengerApp.stickerTaskMap.put(categoryId,
 							downloadStickerTask);
 					setupStickerPage(parent, position, false, null);
 				}
@@ -132,19 +132,22 @@ public class StickerAdapter extends PagerAdapter implements
 		} else {
 			stickerList.setVisibility(View.VISIBLE);
 
-			new AsyncTask<Void, Void, List<Sticker>>() {
+			AsyncTask<Void, Void, List<Sticker>> stickerTask = new AsyncTask<Void, Void, List<Sticker>>() {
 
 				boolean updateAvailable;
 
 				@Override
 				protected List<Sticker> doInBackground(Void... params) {
 					List<Sticker> stickerList = new ArrayList<Sticker>();
-					if (position == 0) {
-						for (int i = 0; i < EmoticonConstants.LOCAL_STICKER_IDS.length; i++) {
-							stickerList.add(new Sticker(position,
-									EmoticonConstants.LOCAL_STICKER_IDS[i], i));
-						}
+
+					if (position == 1) {
+						addDefaultStickers(stickerList,
+								EmoticonConstants.LOCAL_STICKER_IDS_2);
+					} else if (position == 0) {
+						addDefaultStickers(stickerList,
+								EmoticonConstants.LOCAL_STICKER_IDS_1);
 					}
+
 					File categoryDir = new File(
 							Utils.getStickerDirectoryForCategoryId(activity,
 									categoryId)
@@ -162,6 +165,14 @@ public class StickerAdapter extends PagerAdapter implements
 					Collections.sort(stickerList);
 
 					return stickerList;
+				}
+
+				private void addDefaultStickers(List<Sticker> stickerList,
+						String[] stickerIds) {
+					for (int i = 0; i < stickerIds.length; i++) {
+						stickerList
+								.add(new Sticker(position, stickerIds[i], i));
+					}
 				}
 
 				@Override
@@ -207,7 +218,7 @@ public class StickerAdapter extends PagerAdapter implements
 											.hasReachedStickerEnd(categoryId)) {
 								return;
 							}
-							if (!ChatThread.stickerTaskMap
+							if (!HikeMessengerApp.stickerTaskMap
 									.containsKey(categoryId)) {
 								if (firstVisibleItem + visibleItemCount >= totalItemCount - 1) {
 									Log.d(getClass().getSimpleName(),
@@ -218,10 +229,10 @@ public class StickerAdapter extends PagerAdapter implements
 									DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 											activity, position,
 											DownloadType.MORE_STICKERS);
-									downloadStickerTask.execute();
+									Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-									ChatThread.stickerTaskMap.put(categoryId,
-											downloadStickerTask);
+									HikeMessengerApp.stickerTaskMap.put(
+											categoryId, downloadStickerTask);
 									stickerPageAdapter.notifyDataSetChanged();
 								}
 							}
@@ -229,7 +240,12 @@ public class StickerAdapter extends PagerAdapter implements
 					});
 				}
 
-			}.execute();
+			};
+			if (Utils.isHoneycombOrHigher()) {
+				stickerTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			} else {
+				stickerTask.execute();
+			}
 		}
 	}
 

@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="8dp"
-    android:paddingLeft="10dp"
-	android:paddingRight="10dp">
+    android:paddingLeft="@dimen/chat_bubble_edge_spacing"
+	android:paddingRight="@dimen/chat_bubble_edge_spacing">
 
 	<LinearLayout
 		android:layout_marginBottom="5dp"
@@ -16,7 +16,7 @@
 		android:layout_marginTop="10dp">
 
 		<View 
-		    android:layout_height="1px"
+		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
@@ -31,14 +31,12 @@
         	android:layout_alignParentTop="true"
         	android:layout_centerHorizontal="true"
         	android:text="This is the timestamp"
-        	android:textSize="13sp"
-        	android:textColor="@color/timestampcolor"
-        	android:shadowColor="#80FFFFFF"
-        	android:shadowDy="0.4"
-        	android:shadowRadius="0.3" />
+        	android:textSize="12sp"
+        	android:textColor="@color/list_item_header"
+        	android:textStyle="bold|italic" />
 
 	    <View 
-		    android:layout_height="1px"
+		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
@@ -59,14 +57,24 @@
 	    android:layout_alignParentLeft="true"
 	    android:layout_below="@id/day_container" >
 
-	    <ImageView
-	        android:id="@+id/avatar"
-	        android:layout_width="@dimen/avatar_size_chat_thread"
-	        android:layout_height="@dimen/avatar_size_chat_thread"
+	    <RelativeLayout
+	        android:id="@+id/avatar_container"
+	        android:layout_width="@dimen/chatthread_avatar"
+	        android:layout_height="@dimen/chatthread_avatar"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="2dp"
-	        android:src="@drawable/ic_avatar1"
-	        android:visibility="gone" />
+	        android:visibility="gone" >
+
+	        <ImageView
+	            android:id="@+id/avatar"
+	            style="@style/AvatarStyle.Padding"
+	            android:src="@drawable/ic_avatar1_rounded" />
+
+	        <ImageView
+	            android:id="@+id/avatar_frame"
+	            style="@style/AvatarStyle"
+	            android:src="@drawable/frame_avatar_small_selector" />
+	    </RelativeLayout>
 
 	    <RelativeLayout
 	        android:id="@+id/bubble_container"
@@ -74,8 +82,8 @@
 	        android:layout_height="wrap_content"
 	        android:minWidth="50dp"
 	        android:layout_alignParentTop="true"
-	        android:layout_alignTop="@id/avatar"
-	        android:layout_toRightOf="@id/avatar"
+	        android:layout_alignTop="@id/avatar_container"
+	        android:layout_toRightOf="@id/avatar_container"
 	        android:gravity="left" >
 
 	        <com.bsb.hike.view.CircularProgress
@@ -102,12 +110,12 @@
 	                    android:gravity="left"
 	                    android:text="Thanks lksad"
 	                    android:textColor="@color/chat_color"
-	                    android:textSize="16sp"
+	                    android:textSize="14sp"
 	                    android:textStyle="bold"
 	                    android:visibility="gone"
 	                    android:layout_marginLeft="5dp"
 	                    android:layout_marginRight="5dp"
-	                    android:layout_marginBottom="5dp" />
+	                    android:layout_marginBottom="3dp" />
 	            
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -153,37 +161,48 @@
 
 	                <ImageView
 	                    android:id="@+id/btn_open_file"
-	                    android:layout_width="wrap_content"
+	                    android:layout_width="@dimen/chat_file_button_width"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center_vertical"
 	                    android:layout_marginLeft="5dp"
+	                    android:scaleType="centerInside"
 	                    android:background="@null"
 	                    android:src="@drawable/ic_open_received_file"
 	                    android:visibility="gone" />
 	            </LinearLayout>
+	            
+	            <ImageView
+	                android:id="@+id/poke_receive"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:gravity="center_vertical"
+	                android:src="@drawable/ic_nudge_hike_receive"
+	                android:visibility="visible"
+	                android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginLeft="7dp" />
+
 	        </LinearLayout>
-	        <ImageView
-	            android:id="@+id/poke_receive"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:gravity="center_vertical"
-	            android:visibility="gone"
-	            android:src="@drawable/ic_nudge_hike_received" />
 	        
 	        <LinearLayout
-	            android:id="@+id/avatar_container"
+	            android:id="@+id/typing_avatar_container"
 	            android:layout_width="wrap_content"
+	            android:layout_alignParentLeft="true"
 	            android:layout_height="wrap_content"
 	            android:orientation="horizontal"
+	            android:gravity="left|center_vertical"
+	            android:layout_marginRight="2dp"
 	            android:visibility="gone" />
 
 	        <ImageView
 	            android:id="@+id/typing"
-	            android:layout_width="wrap_content"
+	            android:layout_width="46dp"
 	            android:layout_height="wrap_content"
-	            android:layout_toRightOf="@+id/avatar_container"
+	            android:layout_toRightOf="@+id/typing_avatar_container"
 	            android:background="@drawable/ic_bubble_white"
 	            android:src="@drawable/typing"
+	            android:scaleType="centerInside"
 	            android:visibility="gone" />
 	        
 	        <RelativeLayout
@@ -201,7 +220,7 @@
 	                android:textColor="@color/chat_color"
 	                android:textStyle="bold"
 	                android:paddingLeft="5dp"
-	                android:textSize="16sp"
+	                android:textSize="14sp"
 	                android:visibility="gone" />
 	            
 	            <ProgressBar
@@ -230,10 +249,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/bubble_container"
             android:layout_alignLeft="@id/bubble_container"
-            android:layout_marginTop="4dp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginLeft="15dp"
             android:gravity="right"
-            android:textColor="#999999"
+            android:textColor="@color/list_item_subtext"
+            android:textStyle="bold|italic"
             android:textSize="12sp"
             android:visibility="invisible" />
 	    

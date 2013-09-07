@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/manage_account">
+    android:title="@string/privacy">
 
+<!--     icon="ic_blocked_list" -->
+    <com.bsb.hike.view.IconPreference
+		icon="ic_blocked_list_settings"
+		android:layout="@layout/icon_preference"
+        android:key="blockedList"
+        android:summary="@string/blocked_list_hinttext"
+        android:title="@string/blocked_list" />
+    
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_last_seen"
         android:defaultValue="true"
@@ -19,19 +27,5 @@
         android:summary="@string/ssl_info"
         android:title="@string/ssl"
         android:widgetLayout="@layout/checkbox_widget" />
-
-    <com.bsb.hike.view.IconPreference
-		icon="ic_delete_priv"
-		android:layout="@layout/icon_preference"
-        android:key="@string/delete_key"
-        android:summary="@string/delete_account_msg"
-        android:title="@string/delete_account" />
-
-	<com.bsb.hike.view.IconPreference
-		icon="ic_unlink_priv"
-		android:layout="@layout/icon_preference"
-		android:key="@string/unlink_key"
-		android:summary="@string/unlink_account_msg"
-		android:title="@string/unlink_account" />
 
 </PreferenceScreen>

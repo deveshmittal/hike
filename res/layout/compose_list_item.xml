@@ -16,8 +16,8 @@
 
     <FrameLayout
         android:id="@+id/avatar_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/small_avatar"
+        android:layout_height="@dimen/small_avatar"
         android:layout_centerVertical="true"
         android:layout_marginLeft="11dp"
         android:layout_marginRight="11dp"
@@ -25,22 +25,24 @@
 
         <ImageView
             android:id="@+id/contact_image"
-            android:layout_width="@dimen/small_avatar"
-            android:layout_height="@dimen/small_avatar"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="2dp"
+            style="@style/AvatarStyle.Padding"
             android:src="@drawable/ic_avatar1" />
 
         <ImageView
             android:id="@+id/avatar_frame"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
+            style="@style/AvatarStyle"
             android:src="@drawable/frame_avatar_small_selector" />
     </FrameLayout>
+
+    <ImageView
+        android:id="@+id/hike_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp"
+        android:src="@drawable/ic_hike_user"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/name_num_layout"
@@ -48,6 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/avatar_container"
+        android:layout_toLeftOf="@id/hike_status"
         android:orientation="vertical"
         android:paddingBottom="10dp"
         android:paddingRight="5dp"

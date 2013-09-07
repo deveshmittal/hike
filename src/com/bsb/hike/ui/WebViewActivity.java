@@ -1,21 +1,26 @@
 package com.bsb.hike.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.MailTo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
-public class WebViewActivity extends HikeAppStateBaseActivity {
-
-	private boolean rewardsPage;
+public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,9 +30,6 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		String urlToLoad = getIntent().getStringExtra(
 				HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
-
-		rewardsPage = getIntent().getBooleanExtra(
-				HikeConstants.Extras.REWARDS_PAGE, false);
 
 		WebView webView = (WebView) findViewById(R.id.t_and_c_page);
 
@@ -59,6 +61,15 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 					Intent i = new Intent(WebViewActivity.this,
 							HikeListActivity.class);
 					startActivity(i);
+				} else if (url.startsWith("market://")
+						|| url.contains("play.google.com/store/apps/details?id")) {
+					try {
+						view.getContext().startActivity(
+								new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+					} catch (ActivityNotFoundException e) {
+						Log.w(getClass().getSimpleName(), e);
+						view.loadUrl(url);
+					}
 				} else {
 					view.loadUrl(url);
 				}
@@ -69,15 +80,7 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
-	}
-
-	@Override
-	public void onBackPressed() {
-		if (rewardsPage) {
-			super.onBackPressed();
-		} else {
-			finish();
-		}
+		setupActionBar(title);
 	}
 
 	public Intent newEmailIntent(Context context, String address,
@@ -89,5 +92,30 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 		intent.putExtra(Intent.EXTRA_CC, cc);
 		intent.setType("message/rfc822");
 		return intent;
+	}
+
+	private void setupActionBar(String titleString) {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(titleString);
+		backContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(WebViewActivity.this,
+						HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 }

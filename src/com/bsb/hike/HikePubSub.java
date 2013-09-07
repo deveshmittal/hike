@@ -188,6 +188,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String TOGGLE_REWARDS = "toggleRewards";
 
+	public static final String TOGGLE_GAMES = "toggleGames";
+
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
 
 	public static final String SHOW_STATUS_DIALOG = "showStatusDialog";
@@ -246,15 +248,39 @@ public class HikePubSub implements Runnable {
 
 	public static final String LAST_SEEN_TIME_UPDATED = "lastSeenTimeUpdated";
 
+	public static final String LAST_SEEN_TIME_BULK_UPDATED = "lastSeenTimeBulkUpdated";
+
 	public static final String REMOVE_PROTIP = "removeProtip";
 
 	public static final String PROTIP_ADDED = "protipAdded";
+
+	public static final String GAMING_PROTIP_DOWNLOADED = "gamingProtipDownloaded";
 
 	public static final String DISMISS_POSTING_DIALOG = "dismissPostingDialog";
 
 	public static final String SHOW_IMAGE = "showImage";
 
 	public static final String RESET_UNREAD_COUNT = "resetUnreadCount";
+
+	public static final String PUSH_FILE_DOWNLOADED = "pushFileDownloaded";
+
+	public static final String PUSH_AVATAR_DOWNLOADED = "pushAvtarDownloaded";
+
+	public static final String PUSH_STICKER_DOWNLOADED = "pushStickerDownloaded";
+
+	public static final String CANCEL_ALL_NOTIFICATIONS = "cancelAllNotifications";
+
+	public static final String LARGER_IMAGE_DOWNLOADED = "largerImageDownloaded";
+
+	public static final String LARGER_UPDATE_IMAGE_DOWNLOADED = "largerUpdateImageDownloaded";
+
+	public static final String FRIENDS_TAB_QUERY = "friendsTabQuery";
+
+	public static final String INCREMENTED_UNSEEN_STATUS_COUNT = "incrementedUnseenStatusCount";
+
+	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
+	
+	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
 
 	private final Thread mThread;
 

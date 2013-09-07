@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="255dp"
     android:layout_height="255dp"
-    android:background="@color/dialog_bg"
+    android:background="@color/white"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
@@ -37,24 +37,25 @@
                 android:id="@+id/record_img"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="2dp"
+                android:paddingRight="4dp"
+                android:paddingTop="1dp"
                 android:layout_toLeftOf="@id/record_info"
                 android:layout_centerVertical="true" />
         </RelativeLayout>
 
         <ImageButton
             android:id="@+id/btn_record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/record_btn_selector"
-            android:src="@drawable/ic_record" />
+            android:layout_width="144dp"
+            android:layout_height="144dp"
+            android:src="@drawable/ic_record_selector"
+            android:background="@drawable/record_btn_selector" />
     </LinearLayout>
 
     <View
         android:id="@+id/dropshadow"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/ic_thread_divider_profile" />
+        android:layout_height="2dp"
+        android:background="@color/voice_message_stroke" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -73,9 +74,9 @@
             android:textSize="14sp" />
 
         <View
-            android:layout_width="1dp"
+            android:layout_width="2dp"
             android:layout_height="match_parent"
-            android:background="@drawable/button_divider" />
+            android:background="@color/voice_message_stroke" />
 
         <Button
             android:id="@+id/send_btn"

@@ -1,8 +1,5 @@
 package com.bsb.hike.utils;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,14 +23,13 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.view.TwitterOAuthView;
 import com.bsb.hike.view.TwitterOAuthView.Result;
 import com.bsb.hike.view.TwitterOAuthView.TwitterAuthListener;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.model.GraphUser;
 
 public abstract class AuthSocialAccountBaseActivity extends
-		HikeAppStateBaseFragmentActivity implements DialogListener,
-		TwitterAuthListener {
+		HikeAppStateBaseFragmentActivity implements TwitterAuthListener {
 
 	public static final int FB_AUTH_REQUEST_CODE = 64206;
 	private static final String CALLBACK_URL = "http://get.hike.in/";
@@ -43,14 +39,6 @@ public abstract class AuthSocialAccountBaseActivity extends
 	private boolean shouldPost;
 	protected TwitterOAuthView twitterOAuthView;
 	protected boolean facebookAuthPopupShowing;
-
-	public void startFBAuth(boolean post) {
-		shouldPost = post;
-		facebookAuthPopupShowing = true;
-		HikeMessengerApp.getFacebook().authorize(this,
-				new String[] { "publish_stream" }, Facebook.FORCE_DIALOG_AUTH,
-				this);
-	}
 
 	public void startTwitterAuth(boolean post) {
 		shouldPost = post;
@@ -145,61 +133,49 @@ public abstract class AuthSocialAccountBaseActivity extends
 				false);
 	}
 
-	@Override
-	public void onComplete(Bundle values) {
+	public void onCompleteFacebookAuth(String aToken, long expirationDate,
+			String userId) {
 		facebookAuthPopupShowing = false;
-		Facebook facebook = HikeMessengerApp.getFacebook();
 
 		final Editor editor = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
-				facebook.getAccessToken());
-		editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
-				facebook.getAccessExpires());
+		editor.putString(HikeMessengerApp.FACEBOOK_TOKEN, aToken);
+		editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, expirationDate);
 
-		String userId = null;
-		try {
-			JSONObject me = new JSONObject(facebook.request("me"));
-			userId = me.optString("id");
-			editor.putString(HikeMessengerApp.FACEBOOK_USER_ID, userId);
-			editor.commit();
-			sendCredentialsToServer(userId, facebook.getAccessToken(),
-					facebook.getAccessExpires(), true);
-			return;
-		} catch (MalformedURLException e1) {
-			Log.e(getClass().getSimpleName(), "Malformed URL", e1);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-					true);
-		} catch (JSONException e2) {
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e2);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-					true);
-		} catch (IOException e3) {
-			Log.e(getClass().getSimpleName(), "IOException", e3);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-					true);
-		}
+		editor.putString(HikeMessengerApp.FACEBOOK_USER_ID, userId);
+		editor.commit();
+		sendCredentialsToServer(userId, aToken, expirationDate, true);
+		return;
 	}
 
-	@Override
-	public void onFacebookError(FacebookError error) {
-		facebookAuthPopupShowing = false;
+	public void makeMeRequest(final Session session, final String aToken,
+			final long expirationDate) {
+		// Make an API call to get user data and define a
+		// new callback to handle the response.
+		Request request = Request.newMeRequest(session,
+				new Request.GraphUserCallback() {
+					@Override
+					public void onCompleted(GraphUser user, Response response) {
+						// If the response is successful
+						if (session == Session.getActiveSession()) {
+							if (user != null) {
+								onCompleteFacebookAuth(aToken, expirationDate,
+										user.getId());
+							}
+						}
+						if (response.getError() != null) {
+							Log.e(getClass().getSimpleName(),
+									"Facebook Get newMeRequest Failled",
+									response.getError().getException());
+							facebookError();
+						}
+					}
+				});
+		request.executeAsync();
+	}
+
+	public void facebookError() {
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
-		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-				true);
-	}
-
-	@Override
-	public void onError(DialogError e) {
-		facebookAuthPopupShowing = false;
-		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
-		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-				true);
-	}
-
-	@Override
-	public void onCancel() {
-		facebookAuthPopupShowing = false;
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
 				true);
 	}
@@ -258,9 +234,6 @@ public abstract class AuthSocialAccountBaseActivity extends
 						// Fail the whole process if the request to our server
 						// fails.
 						if (facebook) {
-							HikeMessengerApp.getFacebook().setAccessExpires(0);
-							HikeMessengerApp.getFacebook().setAccessToken("");
-
 							editor.remove(HikeMessengerApp.FACEBOOK_TOKEN);
 							editor.remove(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES);
 							editor.remove(HikeMessengerApp.FACEBOOK_USER_ID);
@@ -278,9 +251,10 @@ public abstract class AuthSocialAccountBaseActivity extends
 				});
 		hikeHttpRequest.setJSONData(request);
 		hikeHTTPTask = new HikeHTTPTask(null, 0);
-		hikeHTTPTask.execute(hikeHttpRequest);
+		Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 
-		dialog = ProgressDialog.show(this, null,
-				getString(R.string.saving_social));
+		if (!this.isFinishing())
+			dialog = ProgressDialog.show(this, null,
+					getString(R.string.saving_social));
 	}
 }

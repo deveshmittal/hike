@@ -33,17 +33,26 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	private String fileName;
 	private String filePath;
 	private boolean isSslON;
-
-	public DownloadProfileImageTask(Context context, String id,
-			String fileName, boolean hasCustomIcon, boolean statusImage) {
-		this(context, id, fileName, hasCustomIcon, statusImage, null);
-	}
+	private String msisdn;
+	private String name;
+	private boolean statusImage;
+	private boolean showToast;
 
 	public DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage,
-			String url) {
+			String msisdn, String name, boolean showToast) {
+		this(context, id, fileName, hasCustomIcon, statusImage, null, msisdn,
+				name, showToast);
+	}
+
+	private DownloadProfileImageTask(Context context, String id,
+			String fileName, boolean hasCustomIcon, boolean statusImage,
+			String url, String msisdn, String name, boolean showToast) {
 		this.context = context;
 		this.id = id;
+		this.msisdn = msisdn;
+		this.statusImage = statusImage;
+		this.name = name;
 
 		if (TextUtils.isEmpty(url)) {
 			if (statusImage) {
@@ -74,6 +83,8 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 		this.fileName = filePath + "/" + fileName;
+
+		this.showToast = showToast;
 	}
 
 	@Override
@@ -144,8 +155,10 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result == false) {
-			Toast.makeText(context, R.string.error_download, Toast.LENGTH_SHORT)
-					.show();
+			if (showToast) {
+				Toast.makeText(context, R.string.error_download,
+						Toast.LENGTH_SHORT).show();
+			}
 			File file = new File(fileName);
 			file.delete();
 			HikeMessengerApp.getPubSub().publish(
@@ -153,6 +166,14 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 		} else {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.PROFILE_IMAGE_DOWNLOADED, id);
+			if (this.name == null)
+				this.name = this.msisdn;  //show the msisdn if its an unsaved contact
+			if (statusImage && !TextUtils.isEmpty(this.fileName)
+					&& !TextUtils.isEmpty(this.msisdn)) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.PUSH_AVATAR_DOWNLOADED,
+						new String[] { this.fileName, this.msisdn, this.name });
+			}
 		}
 	}
 

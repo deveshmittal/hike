@@ -7,39 +7,31 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/updates_margin"
-        android:background="@drawable/bg_updates_white"
-        android:paddingBottom="10dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp" >
+        style="@style/UpdatesContainer" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/medium_avatar"
+            android:layout_height="@dimen/medium_avatar"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp" >
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="@dimen/medium_avatar"
-                android:layout_height="@dimen/medium_avatar"
-                android:layout_marginLeft="@dimen/medium_avatar_margin"
-                android:layout_marginTop="@dimen/medium_avatar_margin"
+                style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/AvatarStyle"
                 android:src="@drawable/frame_avatar_medium_selector" />
         </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/side_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@id/avatar_container"
             android:layout_alignTop="@id/avatar_container"
             android:gravity="right"
             android:orientation="vertical" >
@@ -48,31 +40,35 @@
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
                 android:text="2 mins ago"
-                android:textColor="@color/timestampcolor"
+                android:textColor="@color/conversation_timestamp"
                 android:textSize="12sp"
                 android:textStyle="bold|italic" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/details_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/avatar_container"
-            android:layout_marginRight="5dp"
-            android:layout_toRightOf="@id/avatar_container"
-            android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/timestamp"
+                android:layout_alignWithParentIfMissing="true"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="Rishabh Sharma"
                 android:textColor="@color/updates_text"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold|italic" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/details_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/side_content"
+            android:layout_marginRight="5dp"
+            android:layout_toRightOf="@id/avatar_container"
+            android:orientation="vertical" >
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/main_info"
@@ -81,7 +77,8 @@
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
                 android:textColor="@color/updates_text"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="italic" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/details"
@@ -91,7 +88,8 @@
                 android:text="I just added you aas  a firend . do the same?"
                 android:textColor="@color/list_item_subtext"
                 android:visibility="gone"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textStyle="italic" />
 
             <ImageView
                 android:id="@+id/status_pic"
@@ -112,16 +110,13 @@
             android:layout_toRightOf="@id/avatar_container"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone" >
+            android:visibility="visible" >
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/yes_btn"
-                style="@style/UpdateText.StatusYesBtn"
+                style="@style/ProtipBtn.YesBtn"
                 android:focusable="false"
                 android:onClick="onYesBtnClick"
-                android:paddingBottom="2dp"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
                 android:text="@string/confirm" />
 
             <View
@@ -131,12 +126,9 @@
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/no_btn"
-                style="@style/UpdateText.StatusNoBtn"
+                style="@style/ProtipBtn.NoBtn"
                 android:focusable="false"
                 android:onClick="onNoBtnClick"
-                android:paddingBottom="2dp"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
                 android:text="@string/not_now" />
         </LinearLayout>
     </RelativeLayout>

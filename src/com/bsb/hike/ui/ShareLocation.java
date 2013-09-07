@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,14 +21,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
@@ -40,13 +40,18 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -56,13 +61,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class ShareLocation extends HikeAppStateBaseFragmentActivity {
+public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
+		ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
 	private GoogleMap map;
 	private SupportMapFragment MapFragment;
 	private boolean fullScreenFlag = true;
 	private LocationManager locManager;
-	private LocationListener locListener;
 	private Location myLocation = null;
 	private boolean gpsDialogShown = false;
 	private Marker userMarker;
@@ -83,74 +88,121 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 	private final int GPS_ENABLED = 1;
 	private final int GPS_DISABLED = 2;
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
+	private Dialog playServiceErrordialog;
+	private int selectedPosition = 0;
+	private LocationClient mLocationClient;
+	private int SEARCH_RADIUS = 2000; // 2KM
+	// These settings are the same as the settings for the map. They will in
+	// fact give you updates at
+	// the maximal rates currently possible.
+	private static final LocationRequest REQUEST = LocationRequest.create()
+			.setInterval(1000)
+			// 1 seconds
+			.setFastestInterval(16)
+			// 16ms = 60fps
+			.setSmallestDisplacement(4)
+			.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+	private Button doneBtn;
+	private TextView title;
+	private ImageView backIcon;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.share_location);
-		gpsDialogShown = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
-		initMyLocationManager();
-		listview = (ListView) findViewById(R.id.itemListView);
-		list = new ArrayList<ItemDetails>();
-		adapter = new ItemListBaseAdapter(this, list);
-		listview.setAdapter(adapter);
-		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, final View view,
-					int position, long id) {
-				lastMarker.setVisible(false);
-				Marker currentMarker = adapter.getMarker(position);
-				currentMarker.setVisible(true);
-				currentMarker.setIcon(BitmapDescriptorFactory
-						.fromResource(R.drawable.yellow_point));
-				lastMarker = currentMarker;
-				map.animateCamera(CameraUpdateFactory.newLatLng(currentMarker
-						.getPosition()));
-			}
-		});
-		if (map == null) {
-			/*
-			 * if isGooglePlayServicesAvailable method returns
-			 * 2=ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED this implies
-			 * we need to update our playservice library if it returns
-			 * 0=ConnectionResult.SUCCESS this implies we have correct version
-			 * and working playservice api
-			 */
-			Log.d(getClass().getSimpleName(),
-					"is play service available = "
-							+ Integer
-									.valueOf(
-											GooglePlayServicesUtil
-													.isGooglePlayServicesAvailable(this))
-									.toString());
+		/*
+		 * if isGooglePlayServicesAvailable method returns
+		 * 2=ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED this implies we
+		 * need to update our playservice library if it returns
+		 * 0=ConnectionResult.SUCCESS this implies we have correct version and
+		 * working playservice api
+		 */
+		Log.d(getClass().getSimpleName(),
+				"is play service available = "
+						+ Integer.valueOf(
+								GooglePlayServicesUtil
+										.isGooglePlayServicesAvailable(this))
+								.toString());
+
+		// Getting Google Play availability status
+		int status = GooglePlayServicesUtil
+				.isGooglePlayServicesAvailable(getBaseContext());
+
+		// Showing status
+		if (status != ConnectionResult.SUCCESS) { // Google Play Services// are
+													// not available
+			int requestCode = 10;
+			playServiceErrordialog = GooglePlayServicesUtil.getErrorDialog(
+					status, this, requestCode);
+			playServiceErrordialog.show();
+			playServiceErrordialog
+					.setOnDismissListener(new Dialog.OnDismissListener() {
+
+						@Override
+						public void onDismiss(DialogInterface arg0) {
+							finish();
+						}
+
+					});
+			return;
+
+		} else { // Google Play Services are available
+
+			setContentView(R.layout.share_location);
+			gpsDialogShown = savedInstanceState != null
+					&& savedInstanceState
+							.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
+			listview = (ListView) findViewById(R.id.itemListView);
+			list = new ArrayList<ItemDetails>();
+			adapter = new ItemListBaseAdapter(this, list);
+			listview.setAdapter(adapter);
+			listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> parent, final View view,
+						int position, long id) {
+					if (lastMarker != null) {
+						lastMarker.setVisible(false);
+					}
+					selectedPosition = position;
+					Marker currentMarker = adapter.getMarker(position);
+					currentMarker.setVisible(true);
+					currentMarker.setIcon(BitmapDescriptorFactory
+							.fromResource(R.drawable.ic_share_location_item));
+					lastMarker = currentMarker;
+					map.animateCamera(CameraUpdateFactory
+							.newLatLng(currentMarker.getPosition()));
+					adapter.notifyDataSetChanged();
+					if (selectedPosition != 0) {
+						mLocationClient.disconnect();
+					} else {
+						mLocationClient.connect();
+					}
+				}
+			});
 
 			MapFragment = (SupportMapFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.map);
 			map = MapFragment.getMap();
-
 			map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 			map.getUiSettings().setZoomControlsEnabled(false);
 			map.getUiSettings().setCompassEnabled(false);
 			map.getUiSettings().setMyLocationButtonEnabled(true);
+
 			map.setTrafficEnabled(false);
+			// map.setMyLocationEnabled(true);
+			setUpLocationClientIfNeeded();
+			mLocationClient.connect(); // onConnected is called when connection
+										// is made.
 
 			places = new MarkerOptions[MAX_PLACES];
 			placeMarkers = new Marker[MAX_PLACES + 1];
-			updateMyLocation();
 
 			if (savedInstanceState != null) {
 				isTextSearch = savedInstanceState
 						.getBoolean(HikeConstants.Extras.IS_TEXT_SEARCH);
 				searchStr = savedInstanceState
 						.getString(HikeConstants.Extras.HTTP_SEARCH_STR);
-				new GetPlaces().execute(searchStr);
-			} else {
-				Log.d(getClass().getSimpleName(),
-						"savedInstanceState is null updating nearby places");
-				if (myLocation != null)
-					updateNearbyPlaces();
+				executeTask(new GetPlaces(), searchStr);
 			}
 
 		}
@@ -170,7 +222,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 					((View) findViewById(R.id.frame))
 							.setLayoutParams(new TableLayout.LayoutParams(
 									LayoutParams.MATCH_PARENT,
-									LayoutParams.MATCH_PARENT, 1.5f));
+									LayoutParams.MATCH_PARENT, 5.68f));
 				}
 			}
 		});
@@ -183,8 +235,21 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 							.getText().toString();
 					if (!searchString.equals("")) {
 						searchString = URLEncoder.encode(searchString, "UTF-8");
-						double lat = myLocation.getLatitude();
-						double lng = myLocation.getLongitude();
+						double lat = 0;
+						double lng = 0;
+						if (myLocation != null) {
+							lat = myLocation.getLatitude();
+							lng = myLocation.getLongitude();
+
+							lastMarker.setVisible(false);
+							lastMarker = userMarker;
+							lastMarker.setVisible(true);
+							selectedPosition = 0;
+							map.animateCamera(CameraUpdateFactory
+									.newLatLng(lastMarker.getPosition()));
+							adapter.notifyDataSetChanged();
+
+						}
 						searchStr = "https://maps.googleapis.com/maps/api/place/textsearch/"
 								+ "json?query="
 								+ searchString
@@ -192,15 +257,20 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 								+ lat
 								+ ","
 								+ lng
-								+ "radius=2000&sensor=true"
+								+ "&radius="
+								+ SEARCH_RADIUS
+								+ "&sensor=true"
 								+ "&key="
 								+ getResources().getString(
 										R.string.places_api_key);// ADD
 																	// KEY
-
 						isTextSearch = true;
 
-						new GetPlaces().execute(searchStr);
+						executeTask(new GetPlaces(), searchStr);
+
+						if (!mLocationClient.isConnected()) {
+							mLocationClient.connect();
+						}
 					}
 				} catch (UnsupportedEncodingException e) {
 					Log.w(getClass().getSimpleName(),
@@ -209,32 +279,159 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 			}
 		});
 
+		setupActionBar();
+	}
+
+	private void init() {
+		backIcon.setImageResource(R.drawable.ic_back);
+		getSupportActionBar().setBackgroundDrawable(
+				getResources().getDrawable(R.drawable.bg_header));
+	}
+
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
+		title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(R.string.share_location);
+
+		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn.setVisibility(View.VISIBLE);
+		doneBtn.setText(R.string.send);
+
+		backContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+
+		doneBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				sendSelectedLocation();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		init();
+	}
+
+	private void setUpLocationClientIfNeeded() {
+		if (mLocationClient == null) {
+			mLocationClient = new LocationClient(getApplicationContext(), this, // ConnectionCallbacks
+					this); // OnConnectionFailedListener
+		}
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.share_location_menu, menu);
-		return true;
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mLocationClient != null) {
+			mLocationClient.disconnect();
+		}
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		
-		if (item.getItemId() == R.id.sendLocation) {
-			sendSelectedLocation();
+	public void onLocationChanged(Location newLocation) {
+		if (myLocation != null) {
+			userMarker.setPosition(new LatLng(newLocation.getLatitude(),
+					newLocation.getLongitude()));
+			map.animateCamera(CameraUpdateFactory.newLatLng(userMarker
+					.getPosition()));
+			Log.d("ShareLocation",
+					"is Location changed = "
+							+ Double.valueOf(myLocation.distanceTo(newLocation))
+									.toString());
+			if ((currentLocationDevice == GPS_ENABLED && myLocation
+					.distanceTo(newLocation) > 100)
+					|| (currentLocationDevice == GPS_DISABLED && myLocation
+							.distanceTo(newLocation) > 800)) {
+
+				myLocation = newLocation;
+				userMarker.setPosition(new LatLng(newLocation.getLatitude(),
+						newLocation.getLongitude()));
+				updateLocationAddress(myLocation.getLatitude(),
+						myLocation.getLongitude(), userMarker);
+				// do something on location change
+				Log.d("ShareLocation", "my longi in loc listener = "
+						+ Double.valueOf(newLocation.getLongitude()).toString());
+				Log.d("ShareLocation", "my lati in loc listener = "
+						+ Double.valueOf(newLocation.getLatitude()).toString());
+				if (!isTextSearch) {
+					lastMarker = userMarker;
+					selectedPosition = 0;
+					lastMarker.setVisible(true);
+					adapter.notifyDataSetChanged();
+					updateNearbyPlaces();
+				}
+			}
+		} else {
+			myLocation = newLocation;
+			setMyLocation(newLocation);
+			updateNearbyPlaces();
 		}
 
-		return true;
 	}
-	
+
+	@Override
+	public void onConnectionFailed(ConnectionResult arg0) {
+
+	}
+
+	@Override
+	public void onConnected(Bundle arg0) {
+		Log.d("ShareLocation", "LocationClient Connected");
+		if (myLocation == null) {
+			Log.d("ShareLocation", "LocationClient Connected inside if");
+			updateMyLocation();
+		}
+		mLocationClient.requestLocationUpdates(REQUEST, this); // LocationListener
+	}
+
+	@Override
+	public void onDisconnected() {
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setUpLocationClientIfNeeded();
+		if (selectedPosition == 0)
+			mLocationClient.connect();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		Log.d("ShareLocation", "onPause");
+		if (mLocationClient != null) {
+			Log.d("ShareLocation", "Disconnecting LocationClient");
+			mLocationClient.disconnect();
+		}
+	}
+
 	public void sendSelectedLocation() {
 		if (lastMarker == null) {
+			Log.d("ShareLocation", "sendSelectedLocation");
 			Toast.makeText(getApplicationContext(), R.string.select_location,
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent result = new Intent();
-		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, HikeConstants.DEFAULT_ZOOM_LEVEL);
+
+		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL,
+				(int) map.getCameraPosition().zoom);
 		result.putExtra(HikeConstants.Extras.LATITUDE,
 				lastMarker.getPosition().latitude);
 		result.putExtra(HikeConstants.Extras.LONGITUDE,
@@ -243,7 +440,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 		finish();
 	}
-	
+
 	protected void onSaveInstanceState(Bundle outState) {
 
 		outState.putBoolean(HikeConstants.Extras.IS_TEXT_SEARCH, isTextSearch);
@@ -253,121 +450,21 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		super.onSaveInstanceState(outState);
 	}
 
-	public void onTitleIconClick(View v) {
-		if (myLocation == null) {
-			Toast.makeText(getApplicationContext(),
-					getString(R.string.select_location), Toast.LENGTH_SHORT)
-					.show();
-			return;
-		}
-		Intent result = new Intent();
-		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, 15);
-		result.putExtra(HikeConstants.Extras.LATITUDE,
-				lastMarker.getPosition().latitude);
-		result.putExtra(HikeConstants.Extras.LONGITUDE,
-				lastMarker.getPosition().longitude);
-		setResult(RESULT_OK, result);
-
-		finish();
-	}
-
-	private void initMyLocationManager() {
-		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-		locListener = new LocationListener() {
-			public void onLocationChanged(Location newLocation) {
-				if (myLocation != null) {
-					userMarker.setPosition(new LatLng(
-							newLocation.getLatitude(), newLocation
-									.getLongitude()));
-					Log.d(getClass().getSimpleName(),
-							"is Location changed = "
-									+ Double.valueOf(
-											myLocation.distanceTo(newLocation))
-											.toString());
-					if ((currentLocationDevice == GPS_ENABLED && myLocation
-							.distanceTo(newLocation) > 300)
-							|| (currentLocationDevice == GPS_DISABLED && myLocation
-									.distanceTo(newLocation) > 1000)) {
-
-						myLocation = newLocation;
-						userMarker.setPosition(new LatLng(newLocation
-								.getLatitude(), newLocation.getLongitude()));
-						updateLocationAddress(myLocation.getLongitude(),
-								myLocation.getLatitude(), userMarker);
-						// do something on location change
-						Log.d(getClass().getSimpleName(),
-								"my longi in loc listener = "
-										+ Double.valueOf(
-												newLocation.getLongitude())
-												.toString());
-						Log.d(getClass().getSimpleName(),
-								"my lati in loc listener = "
-										+ Double.valueOf(
-												newLocation.getLatitude())
-												.toString());
-						if (!isTextSearch)
-							updateNearbyPlaces();
-					}
-				} else {
-					myLocation = newLocation;
-					setMyLocation(newLocation);
-					updateNearbyPlaces();
-				}
-			}
-
-			public void onProviderDisabled(String arg0) {
-			}
-
-			public void onProviderEnabled(String arg0) {
-			}
-
-			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-			}
-		};
-		try {
-			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-					50, locListener);
-			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-					0, 1000, locListener);
-
-		} catch (IllegalStateException e) {
-			Log.d(getClass().getSimpleName(), "No listener found");
-			showLocationDialog();
-		}
-	}
-
 	private void updateMyLocation() {
 		// get location manager
 		showLocationDialog();
-		myLocation = null;
+		myLocation = mLocationClient.getLastLocation();
+		if (myLocation == null)
+			myLocation = locManager
+					.getLastKnownLocation(currentLocationDevice == GPS_ENABLED ? LocationManager.GPS_PROVIDER
+							: LocationManager.NETWORK_PROVIDER);
+		// myLocation = map.getMyLocation();
 		Log.d(getClass().getSimpleName(), "inside updateMyLocation");
 
-		if (currentLocationDevice == GPS_ENABLED) {
-			Log.d(getClass().getSimpleName(), "gps provider getting location");
-			myLocation = locManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (myLocation == null) {
-				Log.d(getClass().getSimpleName(),
-						"gps enabled but gps not working properly");
-				currentLocationDevice = GPS_DISABLED;
-			}
+		if (myLocation != null) {
+			setMyLocation(myLocation);
+			updateNearbyPlaces();
 		}
-		if (currentLocationDevice == GPS_DISABLED) {
-			Log.d(getClass().getSimpleName(), "gps disabled");
-			myLocation = locManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if (myLocation == null) {
-				Log.d(getClass().getSimpleName(),
-						"gps disabled but Network provider not working properly");
-				currentLocationDevice = NO_LOCATION_DEVICE_ENABLED;
-			}
-		}
-		if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
-			return;
-		}
-
-		setMyLocation(myLocation);
 	}
 
 	private void setMyLocation(Location loc) {
@@ -384,9 +481,10 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				.position(myLatLng)
 				.title("My Location")
 				.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.yellow_point)));
+						.fromResource(R.drawable.ic_share_location_item)));
 
 		lastMarker = userMarker;
+		selectedPosition = 0;
 		updateLocationAddress(lat, lng, userMarker);
 
 		CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -394,37 +492,36 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
 				.build(); // Creates a CameraPosition from the builder
 		Log.d(getClass().getSimpleName(), "stting up camera in set my location");
-		map.animateCamera(
-				CameraUpdateFactory.newCameraPosition(cameraPosition), 3000,
-				null);
+		map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 	}
 
 	private void updateNearbyPlaces() {
 		// build places query string
-		String types = "shopping_mall|airport|bank|bus_station|gas_station|hospital|museum|police|post_office|school|zoo|restaurant";
+		if (searchStr == null) {
+			searchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/"
+					+ "json?location="
+					+ myLocation.getLatitude()
+					+ ","
+					+ myLocation.getLongitude()
+					+ "&radius="
+					+ SEARCH_RADIUS
+					+ "&sensor=true"
+					+ "&key="
+					+ getResources().getString(R.string.places_api_key);
+			;
+			isTextSearch = false;
+		}
+		executeTask(new GetPlaces(), searchStr);
+	}
 
-		String typesStr;
-		try {
-			typesStr = URLEncoder.encode(types, "UTF-8");
-			if (searchStr == null) {
-				searchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/"
-						+ "json?location="
-						+ myLocation.getLatitude()
-						+ ","
-						+ myLocation.getLongitude()
-						+ "&types="
-						+ typesStr
-						+ "&radius=1000&sensor=true"
-						+ "&key="
-						+ getResources().getString(R.string.places_api_key);
-				;
-				isTextSearch = false;
-			}
-			new GetPlaces().execute(searchStr);
-
-		} catch (UnsupportedEncodingException e) {
-			Log.w(getClass().getSimpleName(), "in text search url encoding", e);
+	private void executeTask(AsyncTask<String, Void, Integer> asyncTask,
+			String... strings) {
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, strings);
+		} else {
+			asyncTask.execute(strings);
 		}
 	}
 
@@ -491,7 +588,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 								.position(placeLL)
 								.title(placeName)
 								.icon(BitmapDescriptorFactory
-										.fromResource(R.drawable.yellow_point))
+										.fromResource(R.drawable.ic_share_location_item))
 								.snippet(address);
 					}
 				}
@@ -505,11 +602,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			findViewById(R.id.progress_dialog).setVisibility(View.VISIBLE);
-		}
 
-		// process data retrieved from doInBackground
-		protected void onPostExecute(Integer totalPlaces) {
 			for (int pm = 1; pm < placeMarkers.length; pm++) {
 				if (placeMarkers[pm] != null) {
 					placeMarkers[pm].remove();
@@ -526,6 +619,14 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 			adapter.notifyDataSetChanged();
 			Log.d(getClass().getSimpleName(), "list length after = "
 					+ Integer.valueOf(list.size()).toString());
+
+			Log.d(getClass().getSimpleName(),
+					"GetPlaces Async Task do in background");
+			findViewById(R.id.progress_dialog).setVisibility(View.VISIBLE);
+		}
+
+		// process data retrieved from doInBackground
+		protected void onPostExecute(Integer totalPlaces) {
 			for (int p = 0; p < totalPlaces; p++) {
 				if (places[p] != null) {
 					placeMarkers[p] = map.addMarker(places[p]);
@@ -557,6 +658,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		if (alert != null && alert.isShowing()) {
 			return;
 		}
+		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
 		boolean hasGps = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_LOCATION_GPS);
 
@@ -668,7 +771,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder;
-
 			if (convertView == null) {
 				convertView = l_Inflater.inflate(R.layout.item_details_view,
 						null);
@@ -678,8 +780,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 				holder.txt_itemDescription = (TextView) convertView
 						.findViewById(R.id.itemDescription);
-				// holder.itemImage = (ImageView)
-				// convertView.findViewById(R.id.photo);
 
 				convertView.setTag(holder);
 			} else {
@@ -705,9 +805,18 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						.setCompoundDrawablePadding((int) getResources()
 								.getDimension(
 										R.dimen.share_my_location_drawable_padding));
-			} else
+			} else {
 				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(0,
 						0, 0, 0);
+			}
+
+			if (position == selectedPosition) {
+				convertView.findViewById(R.id.isChecked).setVisibility(
+						View.VISIBLE);
+			} else {
+				convertView.findViewById(R.id.isChecked).setVisibility(
+						View.GONE);
+			}
 
 			holder.txt_itemDescription.setText(itemDetailsrrayList
 					.get(position).getItemDescription());
@@ -728,7 +837,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		class ViewHolder {
 			TextView txt_itemName;
 			TextView txt_itemDescription;
-			ImageView itemImage;
 		}
 
 	}
@@ -739,7 +847,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		 * Getting the address blocks the UI so we run this code in a background
 		 * thread.
 		 */
-		(new AsyncTask<Void, Void, String>() {
+		AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
 
 			@Override
 			protected String doInBackground(Void... params) {
@@ -755,7 +863,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 						true);
 				adapter.notifyDataSetChanged();
 			}
-		}).execute();
+		};
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
 	}
 
 	public static String getAddressFromPosition(double lat, double lng,
@@ -766,27 +879,20 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 					.getJSONfromURL("http://maps.googleapis.com/maps/api/geocode/json?latlng="
 							+ lat + "," + lng + "&sensor=true");
 			String Status = resultObj.getString("status");
+			Log.d("ShareLocation",
+					"url = "
+							+ "http://maps.googleapis.com/maps/api/geocode/json?latlng="
+							+ lat + "," + lng + "&sensor=true");
 			if (Status.equalsIgnoreCase("OK")) {
 				JSONArray Results = resultObj.getJSONArray("results");
 				JSONObject zero = Results.getJSONObject(0);
 				address = zero.getString("formatted_address");
+				Log.d("ShareLocation", "my address = " + address);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return address;
-	}
-
-	private void removeMyLocationListeners() {
-		if (locManager != null) {
-			locManager.removeUpdates(locListener);
-		}
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		removeMyLocationListeners();
 	}
 
 }

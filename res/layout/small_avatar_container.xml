@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/avatar_container"
+    android:layout_width="@dimen/chatthread_avatar"
+    android:layout_height="@dimen/chatthread_avatar" >
+
+    <ImageView
+        android:id="@+id/avatar"
+        style="@style/AvatarStyle.Padding"
+        android:src="@drawable/ic_avatar1_rounded" />
+
+    <ImageView
+        android:id="@+id/avatar_frame"
+        style="@style/AvatarStyle"
+        android:src="@drawable/frame_avatar_small_selector" />
+
+</RelativeLayout>

@@ -23,9 +23,9 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -36,20 +36,32 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private String fileKey;
 	private Context context;
 	private long msgId;
+	private ConvMessage convMessage;
 	private HikeFileType hikeFileType;
+	private boolean showToast;
 
 	public DownloadFileTask(Context context, File destinationFile,
-			String fileKey, long msgId, HikeFileType hikeFileType) {
+			String fileKey, ConvMessage convMessage, HikeFileType hikeFileType,
+			long msgId) {
+		this(context, destinationFile, fileKey, convMessage, hikeFileType,
+				msgId, true);
+	}
+
+	public DownloadFileTask(Context context, File destinationFile,
+			String fileKey, ConvMessage convMessage, HikeFileType hikeFileType,
+			long msgId, boolean showToast) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
-		this.msgId = msgId;
 		this.hikeFileType = hikeFileType;
+		this.msgId = msgId;
+		this.convMessage = convMessage;
+		this.showToast = showToast;
 	}
 
 	@Override
 	protected void onPreExecute() {
-		ChatThread.fileTransferTaskMap.put(msgId, this);
+		HikeMessengerApp.fileTransferTaskMap.put(msgId, this);
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 	}
@@ -133,19 +145,30 @@ public class DownloadFileTask extends FileTransferTaskBase {
 					: result == FTResult.CANCELLED ? R.string.download_cancelled
 							: result == FTResult.FILE_EXPIRED ? R.string.file_expire
 									: R.string.download_failed;
-			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
-			destinationFile.delete();
+			if (showToast) {
+				Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT)
+						.show();
+			}
+			if (destinationFile != null) {
+				destinationFile.delete();
+			}
 		}
 
-		if (destinationFile.exists()
-				&& hikeFileType != HikeFileType.AUDIO_RECORDING) {
-			context.sendBroadcast(new Intent(
-					Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
-							.fromFile(destinationFile)));
+		if (destinationFile != null) {
+			if (destinationFile.exists()
+					&& hikeFileType != HikeFileType.AUDIO_RECORDING) {
+				context.sendBroadcast(new Intent(
+						Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+								.fromFile(destinationFile)));
+			}
 		}
 
-		ChatThread.fileTransferTaskMap.remove(msgId);
+		HikeMessengerApp.fileTransferTaskMap.remove(msgId);
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+		if (HikeFileType.IMAGE == hikeFileType)
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.PUSH_FILE_DOWNLOADED, convMessage);
+
 	}
 }

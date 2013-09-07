@@ -3,47 +3,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="30dp"
-    android:paddingBottom="5dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp" >
+    android:paddingLeft="@dimen/chat_bubble_edge_spacing"
+    android:paddingRight="@dimen/chat_bubble_edge_spacing"
+    android:paddingBottom="5dp" >
 
     <LinearLayout
-        android:id="@+id/day_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal" >
+		android:layout_marginBottom="5dp"
+	    android:orientation="horizontal"
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/day_container"
+		android:gravity="center_vertical"
+		android:layout_marginTop="10dp">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_gravity="center"
-            android:layout_weight="10"
-            android:background="@drawable/ic_chatthread_divider" />
+		<View 
+		    android:layout_height="2dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@drawable/ic_chatthread_divider"/>
+		    
+	    <com.bsb.hike.view.CustomFontTextView
+	        android:id="@+id/day"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_marginLeft="7dp"
+        	android:layout_marginRight="7dp"
+        	android:layout_alignParentTop="true"
+        	android:layout_centerHorizontal="true"
+        	android:text="This is the timestamp"
+        	android:textSize="12sp"
+        	android:textColor="@color/list_item_header"
+        	android:textStyle="bold|italic" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/day"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="7dp"
-            android:layout_marginRight="7dp"
-            android:shadowColor="#80FFFFFF"
-            android:shadowDy="0.4"
-            android:shadowRadius="0.3"
-            android:text="This is the timestamp"
-            android:textColor="@color/timestampcolor"
-            android:textSize="13sp" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_gravity="center"
-            android:layout_weight="10"
-            android:background="@drawable/ic_chatthread_divider" />
-    </LinearLayout>
+	    <View 
+		    android:layout_height="2dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@drawable/ic_chatthread_divider"/>
+	</LinearLayout>
 
     <RelativeLayout
         android:id="@+id/relativeLayout1"
@@ -82,8 +81,6 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/file_transfer_progress"
                 android:background="@drawable/ic_bubble_green_selector"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal" >
 
@@ -126,7 +123,7 @@
                 
                 <ImageView
                     android:id="@+id/btn_open_file"
-                    android:layout_width="wrap_content"
+                    android:layout_width="@dimen/chat_file_button_width"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
@@ -135,16 +132,20 @@
                     android:src="@drawable/ic_play_audio"
                     android:visibility="gone" />
 
-            </LinearLayout>
+                <ImageView
+                    android:id="@+id/poke_sent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/msg_status_indicator"
+                    android:gravity="center_vertical"
+                    android:src="@drawable/ic_nudge_hike_sent"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="10dp"
+                    android:visibility="gone" />
 
-            <ImageView
-                android:id="@+id/poke_sent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
-                android:gravity="center_vertical"
-                android:src="@drawable/ic_nudge_hike_sent"
-                android:visibility="gone" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/sticker_placeholder"
@@ -184,23 +185,27 @@
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/msg_info"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="16dp"
             android:layout_below="@id/bubble_container"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="15dp"
             android:gravity="right"
-            android:textColor="#999999"
+            android:textColor="@color/list_item_subtext"
+            android:textStyle="bold|italic"
             android:textSize="12sp"
-            android:visibility="gone" />
+            android:visibility="visible" />
         
         <ImageView
             android:id="@+id/sending_anim"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="16dp"
             android:layout_below="@id/bubble_container"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="4dp"
+            android:layout_marginRight="17dp"
+            android:layout_marginTop="1dp"
             android:gravity="right"
+            android:scaleType="centerInside"
             android:src="@drawable/sending"
             android:visibility="gone" />
     </RelativeLayout>

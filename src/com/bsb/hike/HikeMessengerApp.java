@@ -2,6 +2,7 @@ package com.bsb.hike;
 
 import static org.acra.ACRA.LOG_TAG;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -53,15 +54,18 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
+import com.bsb.hike.service.UpgradeIntentService;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.FileTransferTaskBase;
+import com.bsb.hike.utils.HikeNotification;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
-import com.facebook.android.Facebook;
 
 @ReportsCrashes(formKey = "", customReportContent = {
 		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
@@ -153,7 +157,11 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
 
 	public static final String GCM_ID_SENT = "gcmIdSent";
-
+	
+	public static final String BLOCK_NOTIFICATIONS = "blockNotification";
+	
+	private static final boolean TEST = false;  //TODO:: test flag only : turn OFF for Production
+	
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -182,6 +190,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String REWARDS_TOKEN = "rewardsToken";
 	public static final String SHOW_REWARDS = "showRewards";
 	public static final String TALK_TIME = "talkTime";
+
+	public static final String GAMES_TOKEN = "gamesToken";
+
+	public static final String SHOW_GAMES = "showGames";
 
 	public static final String GCK_SHOWN = "gckShown";
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
@@ -222,17 +234,21 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
 
-	public static final String SHOWN_DEFAULT_STICKER_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
+	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
+
+	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
 
 	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
 
+	public static final String SECOND_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
+
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
-	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip";
+	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip1";
 
 	public static final String SHOWN_STICKERS_TIP = "shownStickerTip";
 
-	public static final String SHOWN_MOODS_TIP = "shownMoodsTip";
+	public static final String SHOWN_MOODS_TIP = "shownMoodsTip1";
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
@@ -260,11 +276,13 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
 
+	public static final String REMOVE_HUMANOID_STICKERS = "removeHumanoiStickers";
+
+	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
-
-	private static Facebook facebook;
 
 	private static Twitter twitter;
 
@@ -275,8 +293,6 @@ public class HikeMessengerApp extends Application implements Listener {
 	private static Messenger mMessenger;
 
 	private static Map<String, TypingNotification> typingNotificationMap;
-
-	private static int[] moodsResource;
 
 	private Messenger mService;
 
@@ -293,6 +309,12 @@ public class HikeMessengerApp extends Application implements Listener {
 	private ToastListener toastListener;
 
 	private ActivityTimeLogger activityTimeLogger;
+
+	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
+
+	public static Map<String, StickerTaskBase> stickerTaskMap;
+
+	public static Map<String, Long> lastSeenFriendsMap;
 
 	class IncomingHandler extends Handler {
 		@Override
@@ -330,6 +352,15 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	static {
 		mPubSubInstance = new HikePubSub();
+		if (HikeMessengerApp.fileTransferTaskMap == null) {
+			HikeMessengerApp.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
+		}
+		if (HikeMessengerApp.stickerTaskMap == null) {
+			HikeMessengerApp.stickerTaskMap = new HashMap<String, StickerTaskBase>();
+		}
+		if (HikeMessengerApp.lastSeenFriendsMap == null) {
+			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
+		}
 	}
 
 	public void sendToService(Message message) {
@@ -438,23 +469,51 @@ public class HikeMessengerApp extends Application implements Listener {
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-
+		//this is the setting to check whether the avtar DB migration has started or not
+		int avtarInt = settings.getInt(
+				HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
+		//this is the setting to check whether the conv DB migration has started or not
+		//-1 in both cases means an uninitialized setting, mostly on first launch or interrupted upgrades.
+		int convInt = settings.getInt(
+				HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
 
 		super.onCreate();
 
+		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
+		
+		//first time or failed DB upgrade.
+		if (avtarInt == -1 && convInt == -1) {  
+			Editor mEditor = settings.edit();
+			//set the pref to 0 to indicate we've reached the state to init the hike conversation database.
+			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 0);
+			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 0);
+			mEditor.commit();
+		}
+		
+		//we're basically banking on the fact here that init() would be succeeded by the
+		//onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
 		HikeUserDatabase.init(this);
+		
+		//if the setting value is 1 , this means the DB onUpgrade was called successfully.
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1  
+				&& settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST) {
+			// turn off future push notifications as soon as the app has started.
+						// this has to be turned on whenever the upgrade finishes.
+						Editor editor = settings.edit();
+						editor.putBoolean(BLOCK_NOTIFICATIONS, true);
+						editor.commit();
+						
+		Intent msgIntent = new Intent(this, UpgradeIntentService.class);
+		startService(msgIntent);
+		}
+
 		HikeMqttPersistence.init(this);
-
 		SmileyParser.init(this);
-
 		IconCacheManager.init();
-
-		facebook = new Facebook(HikeConstants.APP_FACEBOOK_ID);
-		makeFacebookInstance(settings);
 
 		String twitterToken = settings.getString(
 				HikeMessengerApp.TWITTER_TOKEN, "");
@@ -495,6 +554,13 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
+		if (!preferenceManager.contains(HikeConstants.STATUS_BOOLEAN_PREF)) {
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF,
+					preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
+			editor.commit();
+		}
+
 		Utils.setupServerURL(
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 				Utils.switchSSLOn(getApplicationContext()));
@@ -502,8 +568,6 @@ public class HikeMessengerApp extends Application implements Listener {
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		initialiseListeners();
-
-		setMoodsResource();
 
 		mMessenger = new Messenger(new IncomingHandler());
 
@@ -520,16 +584,59 @@ public class HikeMessengerApp extends Application implements Listener {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
 
-		if (!settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
+		/*
+		 * We will increase the unseen status count by one if the user has not
+		 * posted any updates and if we have never notified the user of this
+		 * before.
+		 */
+		if (!settings.contains(NOTIFIED_NO_STATUS)) {
+			String lastStatus = settings.getString(
+					HikeMessengerApp.LAST_STATUS, "");
+
+			Editor editor = settings.edit();
+			if (TextUtils.isEmpty(lastStatus)) {
+				int count = settings.getInt(
+						HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+				count++;
+				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
+			}
+			editor.putBoolean(NOTIFIED_NO_STATUS, true);
+			editor.commit();
+		}
+
+		/*
+		 * If we had earlier removed bollywood stickers we need to display them
+		 * again.
+		 */
+		if (settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
 			setupBollywoodCategoryVisibility(settings);
 		}
 		setupStickerCategoryList(settings);
 
+		if (!settings.contains(REMOVE_HUMANOID_STICKERS)) {
+			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
+					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
+			File categoryDir = new File(categoryDirPath);
+			Utils.deleteFile(categoryDir);
+
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
+			editor.commit();
+		}
+
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
 			HikeConversationsDatabase.getInstance()
-					.insertFirstStickerCategory();
+					.insertDoggyStickerCategory();
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(FIRST_CATEGORY_INSERT_TO_DB, true);
+			editor.commit();
+		}
+
+		if (!preferenceManager.getBoolean(SECOND_CATEGORY_INSERT_TO_DB, false)) {
+			HikeConversationsDatabase.getInstance()
+					.insertHumanoidStickerCategory();
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(SECOND_CATEGORY_INSERT_TO_DB, true);
 			editor.commit();
 		}
 
@@ -538,48 +645,15 @@ public class HikeMessengerApp extends Application implements Listener {
 	}
 
 	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
-		String countryCode = prefs.getString(COUNTRY_CODE, "");
-
-		if (TextUtils.isEmpty(countryCode)) {
-			return;
-		}
-
-		boolean showBollywoodCategory = false;
-		for (String bollywoodCountryCode : HikeConstants.BOLLYWOOD_COUNTRY_CODES) {
-			if (bollywoodCountryCode.equals(countryCode)) {
-				showBollywoodCategory = true;
-				break;
-			}
-		}
+		/*
+		 * We now show the bollywood category for all users.
+		 */
 		Editor editor = prefs.edit();
-		editor.putBoolean(SHOW_BOLLYWOOD_STICKERS, showBollywoodCategory);
-		if (!showBollywoodCategory) {
-			try {
-				JSONArray removedIdArray = new JSONArray(prefs.getString(
-						REMOVED_CATGORY_IDS, "[]"));
-				removedIdArray.put(HikeConstants.BOLLYWOOD_CATEGORY);
-				editor.putString(REMOVED_CATGORY_IDS, removedIdArray.toString());
-			} catch (JSONException e) {
-				editor.remove(REMOVED_CATGORY_IDS);
-				Log.w("HikeMessengerApp", "Removed id array pref corrupted", e);
-			}
-		}
+		editor.remove(SHOW_BOLLYWOOD_STICKERS);
+		editor.remove(REMOVED_CATGORY_IDS);
 		editor.commit();
-		if (!showBollywoodCategory) {
-			setupStickerCategoryList(prefs);
-		}
-	}
 
-	public void setMoodsResource() {
-		moodsResource = EmoticonConstants.MOOD_WITH_IPL_RES_IDS;
-	}
-
-	public static int[] getMoodsResource() {
-		return moodsResource;
-	}
-
-	public static Facebook getFacebook() {
-		return facebook;
+		setupStickerCategoryList(prefs);
 	}
 
 	public static HikePubSub getPubSub() {
@@ -600,13 +674,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static boolean isIndianUser() {
 		return isIndianUser;
-	}
-
-	public static void makeFacebookInstance(SharedPreferences settings) {
-		facebook.setAccessExpires(settings.getLong(
-				HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
-		facebook.setAccessToken(settings.getString(
-				HikeMessengerApp.FACEBOOK_TOKEN, ""));
 	}
 
 	public static void makeTwitterInstance(String token, String tokenSecret) {

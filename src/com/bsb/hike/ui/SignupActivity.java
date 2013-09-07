@@ -17,7 +17,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -58,8 +57,6 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadImageTask;
-import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -88,8 +85,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private ViewGroup numLayout;
 	private ViewGroup pinLayout;
 	private ViewGroup nameLayout;
-	private ViewGroup booBooLayout;
 
+	private TextView header;
 	private TextView infoTxt;
 	private TextView loadingText;
 	private ViewGroup loadingLayout;
@@ -97,7 +94,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private Button tapHereText;
 	private Button submitBtn;
 	private TextView invalidNum;
-	private ImageView errorImage;
 	private Button countryPicker;
 	private Button callmeBtn;
 	private ImageView mIconView;
@@ -136,10 +132,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
-		public DownloadImageTask downloadImageTask; /*
-													 * the task to download the
-													 * picasa image
-													 */
+		public Thread downloadImageTask; /*
+										 * the task to download the picasa image
+										 */
 
 		public String destFilePath = null;
 
@@ -165,13 +160,11 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
 
+		header = (TextView) findViewById(R.id.header);
 		viewFlipper = (ViewFlipper) findViewById(R.id.signup_viewflipper);
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
-		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
-		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
-		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof ActivityState) {
@@ -182,7 +175,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 						getString(R.string.calling_you));
 				dialog.setCancelable(true);
 				dialog.setOnCancelListener(this);
-			} else if (mActivityState.downloadImageTask != null) {
+			} else if (mActivityState.downloadImageTask != null
+					&& mActivityState.downloadImageTask.getState() != java.lang.Thread.State.TERMINATED) {
 				dialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -237,16 +231,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		setAnimation();
 		setListeners();
 		mTask = SignupTask.startTask(this);
-
-		AnimationDrawable ad = new AnimationDrawable();
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large0), 600);
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large1), 600);
-		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large2), 600);
-		ad.setOneShot(false);
-		ad.setVisible(true, true);
-
-		errorImage.setImageDrawable(ad);
-		ad.start();
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
@@ -315,6 +299,17 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 			submitClicked();
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			restartTask();
+			/*
+			 * Delaying this by 100 ms to allow the signup task to
+			 * setup to the last input point.
+			 */
+			this.mHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					submitClicked();
+				}
+			}, 100);
 		} else if (tapHereText != null && v.getId() == tapHereText.getId()) {
 			if (countDownTimer != null) {
 				countDownTimer.cancel();
@@ -340,7 +335,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 			mActivityState.task = new HikeHTTPTask(this, R.string.call_me_fail,
 					false);
-			mActivityState.task.execute(hikeHttpRequest);
+			Utils.executeHttpTask(mActivityState.task, hikeHttpRequest);
 
 			dialog = ProgressDialog.show(this, null,
 					getResources().getString(R.string.calling_you));
@@ -504,6 +499,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		countryPicker = (Button) layout.findViewById(R.id.country_picker);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
+		tryAgainBtn = (Button) layout.findViewById(R.id.btn_try_again);
 
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
@@ -511,6 +507,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 	private void prepareLayoutForFetchingNumber() {
 		initializeViews(numLayout);
+
+		header.setText(R.string.phone);
 
 		countryPicker.setEnabled(true);
 
@@ -599,6 +597,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private void prepareLayoutForGettingPin(long timeLeft) {
 		initializeViews(pinLayout);
 
+		header.setText(R.string.verify);
+
 		callmeBtn.setVisibility(View.VISIBLE);
 
 		enterEditText.setText("");
@@ -682,6 +682,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 			Utils.hideSoftKeyboard(this, enterEditText);
 		}
 
+		header.setText(R.string.profile_title);
+
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
 				null);
 		if (TextUtils.isEmpty(msisdn)) {
@@ -702,7 +704,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 		if (mActivityState.profileBitmap == null) {
 			mIconView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(msisdn));
+					.getIconForMSISDN(msisdn, true));
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}
@@ -715,7 +717,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	}
 
 	private void resetViewFlipper() {
-		booBooLayout.setVisibility(View.GONE);
+		tryAgainBtn.setVisibility(View.GONE);
+		submitBtn.setVisibility(View.VISIBLE);
 		viewFlipper.setVisibility(View.VISIBLE);
 		removeAnimation();
 		viewFlipper.setDisplayedChild(NUMBER);
@@ -729,11 +732,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	}
 
 	private void showErrorMsg() {
+		submitBtn.setVisibility(View.GONE);
+		tryAgainBtn.setVisibility(View.VISIBLE);
 		loadingLayout.setVisibility(View.GONE);
-		submitBtn.setVisibility(View.VISIBLE);
-		booBooLayout.setVisibility(View.VISIBLE);
-		viewFlipper.setVisibility(View.GONE);
-		Utils.hideSoftKeyboard(this, enterEditText);
 	}
 
 	private void setListeners() {
@@ -757,7 +758,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING,
 				loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR,
-				booBooLayout.getVisibility() == View.VISIBLE);
+				tryAgainBtn.getVisibility() == View.VISIBLE);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText
 				.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR,
@@ -944,6 +945,10 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	public void onFacebookConnectClick(View v) {
 		fbClicked = true;
 		Session session = Session.getActiveSession();
+		if (session == null) {
+			fbClicked = false;
+			return;
+		}
 
 		Log.d(getClass().getSimpleName(), "FB CLICKED");
 		if (!session.isOpened() && !session.isClosed()) {
@@ -983,7 +988,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 	public void updateView() {
 		Session session = Session.getActiveSession();
-		if (session.isOpened()) {
+		if (session != null && session.isOpened()) {
 			Request.executeMeRequestAsync(session, new GraphUserCallback() {
 				@Override
 				public void onCompleted(final GraphUser user, Response response) {
@@ -999,19 +1004,24 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 								.getString(HikeMessengerApp.MSISDN_SETTING, ""));
 
 						final File destFile = new File(directory, fileName);
-						mActivityState.downloadImageTask = new DownloadImageTask(
-								getApplicationContext(), destFile, Uri
-										.parse(fbProfileUrl),
+						downloadImage(destFile, Uri.parse(fbProfileUrl),
 								new ImageDownloadResult() {
 
 									@Override
 									public void downloadFinished(boolean result) {
 										mActivityState = new ActivityState();
 										if (!result) {
-											Toast.makeText(
-													getApplicationContext(),
-													R.string.fb_fetch_image_error,
-													Toast.LENGTH_SHORT).show();
+											runOnUiThread(new Runnable() {
+
+												@Override
+												public void run() {
+													Toast.makeText(
+															getApplicationContext(),
+															R.string.fb_fetch_image_error,
+															Toast.LENGTH_SHORT)
+															.show();
+												}
+											});
 										} else {
 											mActivityState.destFilePath = destFile
 													.getPath();
@@ -1025,7 +1035,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 														result);
 									}
 								});
-						mActivityState.downloadImageTask.execute();
 						dialog = ProgressDialog.show(SignupActivity.this, null,
 								getResources()
 										.getString(R.string.fetching_info));
@@ -1033,6 +1042,49 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				}
 			});
 		}
+	}
+
+	private void downloadImage(final File destFile, Uri picasaUri,
+			ImageDownloadResult imageDownloadResult) {
+		mActivityState.downloadImageTask = new Thread(new DownloadImageTask(
+				getApplicationContext(), destFile, picasaUri,
+				imageDownloadResult));
+
+		mActivityState.downloadImageTask.start();
+	}
+
+	public interface ImageDownloadResult {
+		public void downloadFinished(boolean result);
+	}
+
+	private class DownloadImageTask implements Runnable {
+
+		private File destFile;
+		private Uri imageUri;
+		private Context context;
+		private ImageDownloadResult imageDownloadResult;
+
+		public DownloadImageTask(Context context, File destFile, Uri picasaUri,
+				ImageDownloadResult imageDownloadResult) {
+			this.destFile = destFile;
+			this.imageUri = picasaUri;
+			this.context = context;
+			this.imageDownloadResult = imageDownloadResult;
+		}
+
+		@Override
+		public void run() {
+			Log.d(getClass().getSimpleName(), "Downloading profileImage");
+			try {
+				Utils.downloadAndSaveFile(context, destFile, imageUri);
+				imageDownloadResult.downloadFinished(true);
+			} catch (Exception e) {
+				Log.e(getClass().getSimpleName(), "Error while fetching image",
+						e);
+				imageDownloadResult.downloadFinished(false);
+			}
+		}
+
 	}
 
 	public void onChangeImageClicked(View v) {
@@ -1104,7 +1156,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		}
 
 		Session session = Session.getActiveSession();
-		session.onActivityResult(this, requestCode, resultCode, data);
+		if (session != null) {
+			session.onActivityResult(this, requestCode, resultCode, data);
+		}
 		if (fbClicked) {
 			onFacebookConnectClick(null);
 			fbAuthing = false;
@@ -1172,21 +1226,33 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				Utils.startCropActivity(this, path, destFilePath);
 			} else {
 				final File destFile = new File(path);
-				mActivityState.downloadImageTask = new DownloadImageTask(
-						getApplicationContext(), destFile, selectedFileUri,
+				downloadImage(destFile, selectedFileUri,
 						new ImageDownloadResult() {
 
 							@Override
 							public void downloadFinished(boolean result) {
-								if (dialog != null) {
-									dialog.dismiss();
-									dialog = null;
-								}
+								runOnUiThread(new Runnable() {
+
+									@Override
+									public void run() {
+										if (dialog != null) {
+											dialog.dismiss();
+											dialog = null;
+										}
+									}
+								});
 								mActivityState = new ActivityState();
 								if (!result) {
-									Toast.makeText(getApplicationContext(),
-											R.string.error_download,
-											Toast.LENGTH_SHORT).show();
+									runOnUiThread(new Runnable() {
+
+										@Override
+										public void run() {
+											Toast.makeText(
+													getApplicationContext(),
+													R.string.error_download,
+													Toast.LENGTH_SHORT).show();
+										}
+									});
 								} else {
 									Utils.startCropActivity(
 											SignupActivity.this,
@@ -1195,7 +1261,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 								}
 							}
 						});
-				mActivityState.downloadImageTask.execute();
+
 				dialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -1217,10 +1283,14 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-		mActivityState.profileBitmap = Utils.scaleDownImage(
-				mActivityState.destFilePath,
+		Bitmap tempBitmap = Utils.scaleDownImage(mActivityState.destFilePath,
 				HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
+
+		mActivityState.profileBitmap = Utils.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
+
+		tempBitmap.recycle();
+		tempBitmap = null;
 	}
 
 	@Override
@@ -1236,6 +1306,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 						dialog = null;
 					}
 					if (!result) {
+						return;
+					}
+					if (mActivityState.destFilePath == null) {
 						return;
 					}
 					setProfileImage();

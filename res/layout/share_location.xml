@@ -2,13 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@color/home_bg"
     android:orientation="vertical" >
 
     <FrameLayout
         android:id="@+id/frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1.5" >
+        android:layout_weight="5.68" >
 
         <fragment
             android:id="@+id/map"
@@ -18,54 +19,71 @@
 
         <Button
             android:id="@+id/full_screen_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|left"
-            android:layout_margin="5dp"
-            android:background="@drawable/full_screen_button" />
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="12dp"
+            android:background="@drawable/full_screen_btn" />
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/search_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_search_bar" >
 
         <EditText
             android:id="@+id/search"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:layout_weight="1"
+            android:layout_marginLeft="8dp"
+            android:background="@null"
             android:hint="@string/search_hint" />
 
-        <Button
+        <com.bsb.hike.view.CustomFontButton
             android:id="@+id/search_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Search" />
+            android:layout_width="56dp"
+            android:layout_height="32dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/bg_blue_btn"
+            android:text="@string/search_hint"
+            android:textColor="@drawable/action_bar_btn_text"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="visible" />
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/offwhite"
-        android:layout_weight="1" >
+        android:layout_weight="3.82"
+        android:background="@color/offwhite" >
 
         <ListView
             android:id="@+id/itemListView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:cacheColorHint="#00000000"
-            android:visibility="visible" >
+            android:visibility="visible"
+            android:padding="8dp" >
         </ListView>
 
-         <RelativeLayout 
-            android:id="@+id/progress_dialog" 
-		    android:layout_width="match_parent"
-            android:layout_height="match_parent" 
-            android:layout_below="@id/itemListView">
-        	<ProgressBar
-        	    android:layout_width="wrap_content"
-            	android:layout_height="wrap_content" 
-            	android:layout_centerInParent="true" />
+        <RelativeLayout
+            android:id="@+id/progress_dialog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/itemListView" >
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true" />
         </RelativeLayout>
     </RelativeLayout>
 

@@ -10,21 +10,25 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Dialog;
-import android.content.SharedPreferences.Editor;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -32,11 +36,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
-public class HikeListActivity extends HikeAppStateBaseActivity implements
-		OnItemClickListener {
+public class HikeListActivity extends HikeAppStateBaseFragmentActivity
+		implements OnItemClickListener {
 
 	private enum Type {
 		INVITE, BLOCK
@@ -48,6 +52,12 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 	private Set<String> selectedContacts;
 	private Type type;
 	private Map<String, Boolean> toggleBlockMap;
+
+	private ViewGroup doneContainer;
+	private TextView doneText;
+	private Button doneBtn;
+	private TextView title;
+	private ImageView backIcon;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +87,95 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		case INVITE:
 			break;
 		}
+		setupActionBar();
+		Utils.executeContactListResultTask(new SetupContactList());
+	}
 
-		new SetupContactList().execute();
+	private void init() {
+		if (type != Type.BLOCK) {
+			selectedContacts.clear();
+			doneContainer.setVisibility(View.GONE);
+		}
+		backIcon.setImageResource(R.drawable.ic_back);
+		getSupportActionBar().setBackgroundDrawable(
+				getResources().getDrawable(R.drawable.bg_header));
+		setLabel();
+	}
+
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
+		title = (TextView) actionBarView.findViewById(R.id.title);
+
+		if (type != Type.BLOCK) {
+			doneContainer = (ViewGroup) actionBarView
+					.findViewById(R.id.done_container);
+			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
+
+			doneContainer.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					showNativeSMSPopup();
+				}
+			});
+		} else {
+			doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+			doneBtn.setVisibility(View.VISIBLE);
+			doneBtn.setText(R.string.save);
+			doneBtn.setEnabled(false);
+
+			doneBtn.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					onTitleIconClick(null);
+				}
+			});
+		}
+
+		backContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = null;
+				if (type != Type.BLOCK) {
+					if (getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CREDITS_SCREEN, false)) {
+						intent = new Intent(HikeListActivity.this,
+								CreditsActivity.class);
+					} else {
+						intent = new Intent(HikeListActivity.this,
+								TellAFriend.class);
+					}
+				} else {
+					intent = new Intent(HikeListActivity.this,
+							SettingsActivity.class);
+				}
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		init();
+	}
+
+	private void setLabel() {
+		if (type != Type.BLOCK) {
+			title.setText(R.string.invite_sms);
+		} else {
+			title.setText(R.string.blocked_list);
+		}
 	}
 
 	private void showNativeSMSPopup() {
@@ -99,14 +196,6 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 
 			@Override
 			public void onClick(View v) {
-				Editor editor = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-				editor.putBoolean(
-						HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP, true);
-				editor.commit();
-
-				dialog.dismiss();
-
 				onTitleIconClick(null);
 			}
 		});
@@ -185,24 +274,10 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		super.onDestroy();
 	}
 
-	public void onTitleIconLeftClick(View v) {
-		selectedContacts.clear();
-		onTitleIconClick(v);
-	}
-
 	public void onTitleIconClick(View v) {
 		if (type != Type.BLOCK) {
-			Iterator<String> iterator = selectedContacts.iterator();
 
-			if (type == Type.INVITE
-					&& !HikeMessengerApp.isIndianUser()
-					&& !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-							MODE_PRIVATE).getBoolean(
-							HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP,
-							false)) {
-				showNativeSMSPopup();
-				return;
-			}
+			Iterator<String> iterator = selectedContacts.iterator();
 
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();
@@ -251,7 +326,19 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 				} else {
 					selectedContacts.add(msisdn);
 				}
+
+				if (!selectedContacts.isEmpty()) {
+					doneContainer.setVisibility(View.VISIBLE);
+					doneText.setText(Integer.toString(selectedContacts.size()));
+					getSupportActionBar().setBackgroundDrawable(
+							getResources().getDrawable(
+									R.drawable.bg_header_compose));
+				} else {
+					init();
+				}
+
 			} else {
+				doneBtn.setEnabled(true);
 				boolean blocked = pair.first.get();
 				toggleBlockMap.put(msisdn, blocked);
 			}

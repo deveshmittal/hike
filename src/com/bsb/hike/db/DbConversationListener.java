@@ -32,6 +32,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -80,6 +81,8 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.SEND_HIKE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
+		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
+
 	}
 
 	@Override
@@ -111,10 +114,7 @@ public class DbConversationListener implements Listener {
 				Log.d("DBCONVERSATION LISTENER",
 						"Sending Message : " + convMessage.getMessage()
 								+ "	;	to : " + convMessage.getMsisdn());
-				if (!convMessage.isSMS()
-						|| !PreferenceManager.getDefaultSharedPreferences(
-								context).getBoolean(
-								HikeConstants.SEND_SMS_PREF, false)) {
+				if (!convMessage.isSMS() || !Utils.getSendSmsPref(context)) {
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH,
 							convMessage.serialize());
 				} else {
@@ -335,8 +335,8 @@ public class DbConversationListener implements Listener {
 			 */
 			Collections.reverse(messages);
 
-			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(),
-					Utils.isUserOnline(context), messages.size());
+			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation()
+					.isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages) {
 				sendNativeSMS(convMessage);
@@ -351,12 +351,22 @@ public class DbConversationListener implements Listener {
 			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
 			mConversationDb.deleteProtip(mappedId);
 
-			sendDismissTipLogEvent(mappedId);
+			sendDismissTipLogEvent(mappedId, null);
+		} else if (HikePubSub.GAMING_PROTIP_DOWNLOADED.equals(type)) {
+			Protip protip = (Protip) object;
+
+			String mappedId = protip.getMappedId();
+			String url = protip.getGameDownlodURL();
+
+			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
+			mConversationDb.deleteProtip(mappedId);
+			sendDismissTipLogEvent(mappedId, url);
 		}
+
 	}
 
-	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline,
-			int numMessages) {
+	private void sendNativeSMSFallbackLogEvent(boolean onHike,
+			boolean userOnline, int numMessages) {
 		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 		try {
@@ -374,12 +384,13 @@ public class DbConversationListener implements Listener {
 		}
 	}
 
-	private void sendDismissTipLogEvent(String tipId) {
+	private void sendDismissTipLogEvent(String tipId, String URL) {
 		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 		try {
 			metadata.put(HikeConstants.TIP_ID, tipId);
-
+			if (!TextUtils.isEmpty(URL))
+				metadata.put(HikeConstants.TIP_URL, URL);
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
 			data.put(HikeConstants.METADATA, metadata);
 

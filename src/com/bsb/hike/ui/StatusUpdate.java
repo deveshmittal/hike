@@ -1,7 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.util.Arrays;
 import java.util.Calendar;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,13 +52,19 @@ import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.facebook.Session;
+import com.facebook.Session.StatusCallback;
+import com.facebook.SessionState;
 
 public class StatusUpdate extends AuthSocialAccountBaseActivity implements
-		Listener {
+		Listener, OnSoftKeyboardListener {
 
 	private class ActivityTask {
 		int moodId = -1;
+		int moodIndex = -1;
 		HikeHTTPTask hikeHTTPTask = null;
 		boolean fbSelected = false;
 		boolean twitterSelected = false;
@@ -77,10 +83,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private ViewGroup emojiParent;
 	private EditText statusTxt;
 
+	private CustomLinearLayout parentLayout;
 	private Handler handler;
 	private TextView charCounter;
 	private View tipView;
 	private Button doneBtn;
+	private TextView title;
+	private View fb;
+	private View twitter;
 
 	@Override
 	public Object onRetainCustomNonConfigurationInstance() {
@@ -90,8 +100,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.status_dialog);
-
-		setupActionBar();
 
 		Object o = getLastCustomNonConfigurationInstance();
 
@@ -113,6 +121,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		emojiParent = (ViewGroup) findViewById(R.id.emoji_container);
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
 
+		setupActionBar();
+
+		parentLayout = (CustomLinearLayout) findViewById(R.id.parent_layout);
+		parentLayout.setOnSoftKeyboardListener(this);
+
 		avatar = (ImageView) findViewById(R.id.avatar);
 
 		charCounter = (TextView) findViewById(R.id.char_counter);
@@ -125,7 +138,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		charCounter.setText(Integer.toString(statusTxt.length()));
 
-		setMood(mActivityTask.moodId);
+		setMood(mActivityTask.moodId, mActivityTask.moodIndex);
 
 		statusTxt.addTextChangedListener(new TextWatcher() {
 
@@ -147,8 +160,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		});
 		statusTxt.addTextChangedListener(new EmoticonTextWatcher());
 
-		View fb = findViewById(R.id.post_fb_btn);
-		View twitter = findViewById(R.id.post_twitter_btn);
+		fb = findViewById(R.id.post_fb_btn);
+		twitter = findViewById(R.id.post_twitter_btn);
 
 		fb.setSelected(mActivityTask.fbSelected);
 		twitter.setSelected(mActivityTask.twitterSelected);
@@ -175,9 +188,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
 
-		if (preferences.getInt(HikeMessengerApp.LAST_MOOD, -1) == -1
-				&& !preferences.getBoolean(HikeMessengerApp.SHOWN_MOODS_TIP,
-						false)) {
+		if (!preferences.getBoolean(HikeMessengerApp.SHOWN_MOODS_TIP, false)) {
 			tipView = findViewById(R.id.mood_tip);
 
 			/*
@@ -204,14 +215,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		View backContainer = actionBarView.findViewById(R.id.back);
 
-		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title = (TextView) actionBarView.findViewById(R.id.title);
 		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
-
-		title.setText(R.string.new_update);
 
 		doneBtn.setVisibility(View.VISIBLE);
 		doneBtn.setText(R.string.post);
 		doneBtn.setEnabled(false);
+
+		setTitle();
 
 		backContainer.setOnClickListener(new OnClickListener() {
 			@Override
@@ -232,6 +243,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void setTitle() {
+		title.setText(moodParent.getVisibility() == View.VISIBLE ? R.string.moods
+				: R.string.new_update);
 	}
 
 	private Runnable cancelStatusPost = new Runnable() {
@@ -256,7 +272,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	public void onTwitterClick(View v) {
 		setSelectionSocialButton(false, !v.isSelected());
-
 		if (!v.isSelected()
 				|| preferences.getBoolean(
 						HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
@@ -272,11 +287,103 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 						HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false)) {
 			return;
 		}
-		startFBAuth(false);
+
+		startFbSession();
+	}
+
+	private void startFbSession() {
+		if (ensureOpenSession()) {
+			ensurePublishPermissions();
+		}
+	}
+
+	private boolean ensureOpenSession() {
+		Log.d("StatusUpdate", "entered in ensureOpenSession");
+		if (Session.getActiveSession() == null
+				|| !Session.getActiveSession().isOpened()) {
+
+			Log.d("StatusUpdate", "active session is either null or closed");
+			Session.openActiveSession(this, true, new Session.StatusCallback() {
+				@Override
+				public void call(Session session, SessionState state,
+						Exception exception) {
+					onSessionStateChanged(session, state, exception);
+				}
+			});
+			return false;
+		}
+
+		return true;
+	}
+
+	private void onSessionStateChanged(Session session, SessionState state,
+			Exception exception) {
+		Log.d("StatusUpdate", "inside onSessionStateChanged");
+		Log.d("StatusUpdate", "state = " + state.toString());
+		if (state.isOpened()) {
+			startFbSession();
+		}
+		if (exception != null) {
+			Log.e("StatusUpdate", "error trying to open the session", exception);
+		}
+	}
+
+	private boolean hasPublishPermission() {
+		Session session = Session.getActiveSession();
+		return session != null
+				&& session.getPermissions().contains("publish_stream");
+	}
+
+	private void ensurePublishPermissions() {
+		Session session = Session.getActiveSession();
+		Log.d("StatusUpdate", "ensurePublishPermissions");
+		if (!hasPublishPermission()) {
+			Log.d("StatusUpdate", "not hasPublishPermission");
+			session.requestNewPublishPermissions(new Session.NewPermissionsRequest(
+					this, Arrays.asList("basic_info", "publish_stream"))
+					.setCallback(new StatusCallback() {
+
+						@Override
+						public void call(Session session, SessionState state,
+								Exception exception) {
+							if (exception != null) {
+								Log.e("StatusUpdate ",
+										"Error Requesting NewPublishPermissions = "
+												+ exception.toString());
+								return;
+							}
+							if (hasPublishPermission()) {
+								Log.d("StatusUpdate", session
+										.getExpirationDate().toString());
+								makeMeRequest(session,
+										session.getAccessToken(), session
+												.getExpirationDate().getTime());
+							} else {
+
+							}
+
+						}
+
+					}));
+
+		} else {
+			Log.d("StatusUpdate",
+					"time = "
+							+ Long.valueOf(
+									session.getExpirationDate().getTime())
+									.toString());
+			makeMeRequest(session, session.getAccessToken(), session
+					.getExpirationDate().getTime());
+		}
 	}
 
 	public void onEmojiClick(View v) {
-		showEmojiSelector();
+		if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
+			emojiParent.setVisibility(View.GONE);
+		} else {
+			showEmojiSelector();
+		}
 	}
 
 	public void onMoodClick(View v) {
@@ -289,13 +396,19 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		if (tipView != null) {
 			Utils.closeTip(TipType.MOOD, tipView, preferences);
 		}
+		if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
+			emojiParent.setVisibility(View.GONE);
+		}
 		showMoodSelector();
+		setTitle();
 	}
 
 	@Override
 	public void onBackPressed() {
 		if (isEmojiOrMoodLayoutVisible()) {
 			hideEmojiOrMoodLayout();
+			setTitle();
 		} else {
 			super.onBackPressed();
 		}
@@ -427,7 +540,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		hikeHttpRequest.setJSONData(data);
 		mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
-		mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
+		Utils.executeHttpTask(mActivityTask.hikeHTTPTask, hikeHttpRequest);
 
 		/*
 		 * Starting the manual cancel as well.
@@ -538,12 +651,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				tabDrawable, true);
 
 		ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
-		emoticonViewPager.setCurrentItem(whichSubcategory);
 		emoticonViewPager.setAdapter(statusEmojiAdapter);
 		emoticonViewPager.invalidate();
 
 		StickerEmoticonIconPageIndicator pageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
 		pageIndicator.setViewPager(emoticonViewPager);
+		pageIndicator.setCurrentItem(whichSubcategory);
 	}
 
 	private void showMoodSelector() {
@@ -567,17 +680,18 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		moodPager.setOnItemClickListener(moodAdapter);
 	}
 
-	public void setMood(int moodId) {
+	public void setMood(int moodId, int moodIndex) {
 		if (moodId == -1) {
 			return;
 		}
 		mActivityTask.moodId = moodId;
+		mActivityTask.moodIndex = moodIndex;
 
-		avatar.setImageResource(Utils.getMoodsResource()[moodId]);
+		avatar.setImageResource(EmoticonConstants.moodMapping.get(moodId));
 
 		String[] moodsArray = getResources().getStringArray(
 				R.array.mood_headings);
-		statusTxt.setHint(moodsArray[moodId]);
+		statusTxt.setHint(moodsArray[moodIndex]);
 
 		toggleEnablePostButton();
 		if (isEmojiOrMoodLayoutVisible()) {
@@ -603,8 +717,24 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		HikeMessengerApp.getFacebook().authorizeCallback(requestCode,
-				resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == HikeConstants.FACEBOOK_REQUEST_CODE) {
+			Session session = Session.getActiveSession();
+			if (session != null && resultCode == RESULT_OK) {
+				fb.setSelected(true);
+				session.onActivityResult(this, requestCode, resultCode, data);
+			} else if (session != null && resultCode == RESULT_CANCELED) {
+				Log.d("StatusUpdate", "Facebook Permission Cancelled");
+				// if we do not close the session here then requesting publish
+				// permission just after canceling the permission will
+				// throw an exception telling can not request publish
+				// permission, there
+				// is already a publish request pending.
+				fb.setSelected(false);
+				session.closeAndClearTokenInformation();
+				Session.setActiveSession(null);
+			}
+		}
 	}
 
 	public void toggleEnablePostButton() {
@@ -658,5 +788,17 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			progressDialog.dismiss();
 			progressDialog = null;
 		}
+	}
+
+	@Override
+	public void onShown() {
+		if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
+			emojiParent.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
+	public void onHidden() {
 	}
 }

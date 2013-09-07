@@ -1,6 +1,11 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import android.content.Context;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +18,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.EmoticonConstants;
 
 public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 
@@ -25,7 +30,7 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 	private final int moodHeight;
 	private final int moodWidth;
 
-	private int[] moods;
+	private List<Integer> moods;
 
 	public MoodAdapter(Context context, int columns) {
 		this.inflater = LayoutInflater.from(context);
@@ -38,8 +43,10 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 		moodWidth = (int) (width / columns);
 		moodHeight = moodWidth;
 
-		this.moods = Utils.getMoodsResource();
-		this.moodCount = moods.length;
+		this.moods = new ArrayList<Integer>();
+		this.moods.addAll(EmoticonConstants.moodMapping.keySet());
+		Collections.sort(this.moods);
+		this.moodCount = moods.size();
 	}
 
 	@Override
@@ -48,13 +55,13 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 	}
 
 	@Override
-	public Object getItem(int position) {
-		return null;
+	public Integer getItem(int position) {
+		return moods.get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return 0;
+		return position;
 	}
 
 	@Override
@@ -66,12 +73,15 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 		LayoutParams lp = new LayoutParams(moodWidth, moodHeight);
 		convertView.setLayoutParams(lp);
 
-		convertView.setTag(Integer.valueOf(position));
+		Pair<Integer, Integer> tag = new Pair<Integer, Integer>(
+				getItem(position), position);
+		convertView.setTag(tag);
 
 		ImageView moodImage = (ImageView) convertView.findViewById(R.id.mood);
 		TextView moodText = (TextView) convertView.findViewById(R.id.mood_text);
 
-		moodImage.setImageResource(moods[position]);
+		moodImage.setImageResource(EmoticonConstants.moodMapping
+				.get(getItem(position)));
 		moodText.setText(moodHeadings[position]);
 
 		return convertView;
@@ -80,7 +90,8 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
-		int moodId = (Integer) view.getTag();
-		((StatusUpdate) context).setMood(moodId);
+		@SuppressWarnings("unchecked")
+		Pair<Integer, Integer> tag = (Pair<Integer, Integer>) view.getTag();
+		((StatusUpdate) context).setMood(tag.first, tag.second);
 	}
 }

@@ -42,6 +42,15 @@
 	    <item>Jugando</item>
 	    <item>Programando</item>
 	    <item>Viendo la tele</item>
+	   	<item>Música</item>
+	    <item>Fiesta a tope</item>
+	    <item>Cantando</item>
+	    <item>Comiendo</item>
+	    <item>Haciendo ejercicio</item>
+	    <item>Cocinando</item>
+	    <item>Salón de belleza</item>
+	    <item>Enfermo</item>
+	    
 	</string-array>	
 	
 </resources>

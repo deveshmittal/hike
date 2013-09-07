@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2008 Esmertec AG.
+ * Copyright (C) 2008 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ -->
+ <resources>
+	<string-array name="mood_headings">
+	    <item>खुश</item>
+		<item>उदास</item>
+		<item>प्यार में</item>
+		<item>हैरान होना!</item>
+		<item>भ्रमित</item>
+		<item>गुस्से में</item>
+		<item>नींद में</item>		
+		<item>ख़ुमारी में</item>		
+		<item>मज़े करते हुए</item>		
+		<item>पढाई करते हुए</item>		
+		<item>व्यस्त</item>		
+		<item>अच्छा लगा</item>		
+		<item>मध्य ऊँगली</item>		
+		<item>पीते हुए</item>		
+		<item>मूवी में</item>		
+		<item>कैफीन पीते हुए</item>		
+		<item>निद्राहीन</item>		
+		<item>वाहन चलाते हुए</item>		
+		<item>जाम में फंसे हुए</item>		
+		<item>देरी से चलते हुए</item>		
+		<item>खरीददारी करते हुए</item>		
+		<item>खेलते हुए</item>		
+		<item>कोडिंग करते हुए</item>		
+		<item>टीवी देखते हुए |</item>		
+		<item>संगीत</item>		
+		<item>जोरदार पार्टी</item>		
+		<item>गायन</item>		
+		<item>भोजन</item>		
+		<item>वर्किंग आउट</item>		
+		<item>कुकिंग</item>		
+		<item>ब्यूटी सैलून</item>		
+		<item>बीमार</item>
+	</string-array>	
+</resources>

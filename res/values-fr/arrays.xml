@@ -42,6 +42,15 @@
 	    <item>Jeu vidéo</item>
 	    <item>Programme des trucs</item>
 	    <item>Regarde la TV</item>
+	    <item>Musique</item>
+	    <item>Fait la fête</item>
+	    <item>Chante</item>
+	    <item>Mange</item>
+	    <item>Fait du sport</item>
+	    <item>Cuisine</item>
+	    <item>Salon de beauté</item>
+	    <item>Malade</item>
+	    
 	</string-array>	
 	
 </resources>

@@ -32,17 +32,16 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -63,8 +62,6 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
-import com.bsb.hike.ui.SettingsActivity;
-import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
@@ -193,9 +190,10 @@ public class ConversationFragment extends SherlockListFragment implements
 
 				// TODO: add location and contact handling here.
 			}
-
-			File chatFile = createChatTextFile(sBuilder.toString(),
-					getString(R.string.chat_backup_) + chatLabel + "_"
+			chatLabel = (Utils.isFilenameValid(chatLabel)) ? chatLabel : "_";
+			File chatFile = createChatTextFile(
+					sBuilder.toString(),
+					getString(R.string.chat_backup_) + "_"
 							+ +System.currentTimeMillis() + ".txt");
 			uris.add(Uri.fromFile(chatFile));
 
@@ -245,7 +243,8 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		@Override
 		protected void onPostExecute(Conversation[] result) {
-			dialog.dismiss();
+			if (isAdded())
+				dialog.dismiss();
 			super.onPostExecute(result);
 		}
 
@@ -284,7 +283,7 @@ public class ConversationFragment extends SherlockListFragment implements
 			HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.RESET_UNREAD_COUNT };
+			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
@@ -293,15 +292,26 @@ public class ConversationFragment extends SherlockListFragment implements
 	private Handler messageRefreshHandler;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setHasOptionsMenu(true);
-	}
-
-	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.conversations, null);
+		View parent = inflater.inflate(R.layout.conversations, null);
+
+		ListView friendsList = (ListView) parent
+				.findViewById(android.R.id.list);
+		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
+
+		Button startChat = (Button) parent.findViewById(R.id.start_chat_btn);
+		startChat.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(getActivity(), ComposeActivity.class);
+				intent.putExtra(HikeConstants.Extras.EDIT, true);
+				startActivity(intent);
+			}
+		});
+
+		return parent;
 	}
 
 	@Override
@@ -315,32 +325,6 @@ public class ConversationFragment extends SherlockListFragment implements
 				.getTypingNotificationSet().values()) {
 			toggleTypingNotification(true, typingNotification);
 		}
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.chats_menu, menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.new_conversation:
-			Intent intent = new Intent(getActivity(), ComposeActivity.class);
-			intent.putExtra(HikeConstants.Extras.EDIT, true);
-			startActivity(intent);
-			return true;
-		case R.id.settings:
-			Intent settingsIntent = new Intent(getActivity(),
-					SettingsActivity.class);
-			startActivity(settingsIntent);
-			return true;
-		case R.id.invite:
-			Intent inviteIntent = new Intent(getActivity(), TellAFriend.class);
-			startActivity(inviteIntent);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -425,7 +409,7 @@ public class ConversationFragment extends SherlockListFragment implements
 							Utils.logEvent(getActivity(),
 									HikeConstants.LogEvent.DELETE_CONVERSATION);
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-							task.execute(conv);
+							executeAsyncTask(task, conv);
 						} else if (getString(R.string.delete_leave).equals(
 								option)) {
 							Utils.logEvent(getActivity(),
@@ -434,7 +418,7 @@ public class ConversationFragment extends SherlockListFragment implements
 						} else if (getString(R.string.email_conversation)
 								.equals(option)) {
 							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask();
-							task.execute(conv);
+							executeAsyncTask(task, conv);
 						}
 
 					}
@@ -502,8 +486,23 @@ public class ConversationFragment extends SherlockListFragment implements
 				.publish(
 						HikePubSub.MQTT_PUBLISH,
 						conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+		deleteConversation(conv);
+	}
+
+	private void deleteConversation(Conversation conv) {
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-		task.execute(conv);
+		executeAsyncTask(task, conv);
+	}
+
+	private void executeAsyncTask(
+			AsyncTask<Conversation, Void, Conversation[]> asyncTask,
+			Conversation... conversations) {
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					conversations);
+		} else {
+			asyncTask.execute(conversations);
+		}
 	}
 
 	private void toggleTypingNotification(boolean isTyping,
@@ -583,8 +582,7 @@ public class ConversationFragment extends SherlockListFragment implements
 				return;
 			}
 
-			if (!message.isSent()
-					&& message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE) {
+			if (Utils.shouldIncrementCounter(message)) {
 				conv.setUnreadCount(conv.getUnreadCount() + 1);
 			}
 
@@ -801,6 +799,19 @@ public class ConversationFragment extends SherlockListFragment implements
 			conv.setUnreadCount(0);
 
 			getActivity().runOnUiThread(this);
+		} else if (HikePubSub.GROUP_LEFT.equals(type)) {
+			String groupId = (String) object;
+			final Conversation conversation = mConversationsByMSISDN
+					.get(groupId);
+			if (conversation == null) {
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					deleteConversation(conversation);
+				}
+			});
 		}
 	}
 

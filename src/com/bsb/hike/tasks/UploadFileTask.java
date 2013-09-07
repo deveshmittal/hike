@@ -292,7 +292,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED,
 				convMessage);
 
-		ChatThread.fileTransferTaskMap.put(convMessage.getMsgID(), this);
+		HikeMessengerApp.fileTransferTaskMap.put(convMessage.getMsgID(), this);
 		return convMessage;
 	}
 
@@ -307,7 +307,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 			if (result == FTResult.SUCCESS) {
 				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 			}
-			ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
+			HikeMessengerApp.fileTransferTaskMap.remove(convMessage.getMsgID());
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 		}

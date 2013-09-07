@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:id="@+id/pin_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,14 +9,13 @@
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img1"
         style="@style/SignupButton.Text.Info"
-        android:text="@string/enter_pin_signup"
-        hike:font="omnes" />
+        android:text="@string/enter_pin_signup" />
 
     <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_pin"
-        style="@style/SignupButton"
+        style="@style/SignupButton.Input"
         android:layout_marginTop="12dp"
-        android:background="@drawable/tb_pin"
+        android:drawableLeft="@drawable/ic_pin"
         android:hint="@string/pin"
         android:imeOptions="actionDone"
         android:inputType="number"
@@ -46,8 +44,7 @@
                 android:onClick="onClick"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:text="@string/call_me_signup"
-                hike:font="omnes" />
+                android:text="@string/call_me_signup" />
 
             <View
                 android:layout_width="5dp"
@@ -61,8 +58,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/signup_button"
                 android:onClick="onClick"
-                android:text="@string/next_signup"
-                hike:font="omnes" />
+                android:text="@string/next_signup" />
         </LinearLayout>
 
         <RelativeLayout
@@ -70,7 +66,7 @@
             style="@style/SignupButton"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:background="@drawable/signup_loading_bckg"
+            android:background="@drawable/signup_btn_loading"
             android:gravity="center_horizontal"
             android:orientation="horizontal"
             android:visibility="invisible" >
@@ -88,9 +84,19 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="3dp"
                 android:layout_toRightOf="@id/loading_progress"
-                android:text="@string/verify_pin_signup"
-                hike:font="omnes" />
+                android:text="@string/verify_pin_signup" />
         </RelativeLayout>
+        
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_try_again"
+            style="@style/SignupButton.Text.Bold.Button"
+            android:textSize="14sp"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_network_error"
+            android:onClick="onClick"
+            android:text="@string/network_error"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontButton
@@ -99,7 +105,6 @@
         android:layout_marginTop="10dp"
         android:background="@null"
         android:text="@string/wrong_num_signup"
-        android:textSize="14sp"
-        hike:font="omnes" />
+        android:textSize="14sp" />
 
 </LinearLayout>
