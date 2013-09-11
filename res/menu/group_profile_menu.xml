@@ -2,16 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/edit_group_name"
-        android:showAsAction="never"
-        android:title="@string/edit_group_name"/>
-    <item
-        android:id="@+id/leave_group"
-        android:showAsAction="never"
-        android:title="@string/leave_group"/>
-    <item
-        android:id="@+id/mute_group"
-        android:showAsAction="never"
-        android:title="@string/mute_group"/>
+        android:id="@+id/overflow_menu"
+        android:icon="@drawable/ic_overflow"
+        android:showAsAction="always"
+        android:title="@string/other">
+        <menu>
+            <item
+                android:id="@+id/edit_group_name"
+                android:showAsAction="never"
+                android:title="@string/edit_group_name"/>
+            <item
+                android:id="@+id/leave_group"
+                android:showAsAction="never"
+                android:title="@string/leave_group"/>
+            <item
+                android:id="@+id/mute_group"
+                android:showAsAction="never"
+                android:title="@string/mute_group"/>
+        </menu>
+    </item>
 
 </menu>

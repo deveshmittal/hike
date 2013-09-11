@@ -48,6 +48,7 @@ import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -81,6 +82,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
@@ -324,6 +326,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private ImageView avatar;
 
 	private PopupWindow attachmentWindow;
+	
+	private Menu mMenu;
 
 	@Override
 	protected void onPause() {
@@ -700,7 +704,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
-
+		mMenu = menu;
 		MenuItem profileItem = menu.findItem(R.id.profile);
 		if (mConversation instanceof GroupConversation) {
 			profileItem.setTitle(R.string.group_profile);
@@ -4328,5 +4332,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		}
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (Build.VERSION.SDK_INT <= 10
+				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
+						.hasPermanentMenuKey())) {
+			if (event.getAction() == KeyEvent.ACTION_UP
+					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 }

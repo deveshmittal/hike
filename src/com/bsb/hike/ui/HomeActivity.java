@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -21,8 +22,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -74,7 +78,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private SharedPreferences accountPrefs;
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
-
+	private Menu mMenu;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL };
@@ -117,6 +121,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		if (!showingProgress) {
 			initialiseHomeScreen(savedInstanceState);
 		}
+
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState) {
@@ -209,6 +214,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		} else {
 			return setupMenuOptions(menu);
 		}
+
 	}
 
 	@Override
@@ -251,13 +257,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		switch (viewPager.getCurrentItem()) {
 		case UPDATES_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
+			mMenu = menu;
 			return true;
 		case CHATS_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
+			mMenu = menu;
 			return true;
 		case FRIENDS_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
-
+			mMenu = menu;
 			final SearchView searchView = new SearchView(getSupportActionBar()
 					.getThemedContext());
 			searchView.setQueryHint(getString(R.string.search_hint));
@@ -692,4 +700,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			tabIndicator.notifyDataSetChanged();
 		}
 	};
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (Build.VERSION.SDK_INT <= 10
+				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
+						.hasPermanentMenuKey())) {
+			if (event.getAction() == KeyEvent.ACTION_UP
+					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
+	}
 }
