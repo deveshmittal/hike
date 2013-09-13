@@ -263,7 +263,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private Dialog recordingDialog;
 
 	private RecorderState recorderState;
-	
+
 	private boolean showKeyboard = false;
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
@@ -413,13 +413,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		setContentView(R.layout.chatthread);
 
-		//we are getting the intent which has started our activity here.
-		//we fetch the boolean extra to check if the keyboard has to be expanded.
-		
+		// we are getting the intent which has started our activity here.
+		// we fetch the boolean extra to check if the keyboard has to be
+		// expanded.
+
 		Intent fromIntent = getIntent();
-		if(fromIntent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD, false))
+		if (fromIntent.getBooleanExtra(HikeConstants.Extras.SHOW_KEYBOARD,
+				false))
 			showKeyboard = true;
-		
+
 		mHandler = new Handler();
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
@@ -429,7 +431,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		isOverlayShowing = savedInstanceState == null ? false
 				: savedInstanceState
 						.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
-		
+
 		config = getResources().getConfiguration();
 
 		/* bind views to variables */
@@ -446,7 +448,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		 * than the sen button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
-		
+
 		/*
 		 * Fix for android bug, where the focus is removed from the edittext
 		 * when you have a layout with tabs (Emoticon layout) for hard keyboard
@@ -1212,12 +1214,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		mLabel = mConversation.getLabel();
-		
-		
-		if(showKeyboard && !wasOrientationChanged)
+
+		if (showKeyboard && !wasOrientationChanged)
 			getWindow().setSoftInputMode(
 					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-	
+
 		setupActionBar();
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
@@ -3648,10 +3649,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				int offset = 0;
 				int emoticonsListSize = 0;
 				tabDrawables = new int[] { R.drawable.ic_recents_emo,
-						R.drawable.emo_1_tab,
-						R.drawable.emo_2_tab,
-						R.drawable.emo_3_tab,
-						R.drawable.emo_4_tab,
+						R.drawable.emo_1_tab, R.drawable.emo_2_tab,
+						R.drawable.emo_3_tab, R.drawable.emo_4_tab,
 						EmoticonConstants.EMOJI_RES_IDS[0],
 						EmoticonConstants.EMOJI_RES_IDS[109],
 						EmoticonConstants.EMOJI_RES_IDS[162],
