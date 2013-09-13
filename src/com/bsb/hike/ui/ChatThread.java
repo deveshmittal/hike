@@ -2692,7 +2692,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setFocusable(true);
 		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 184));
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
+		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor),
+				0, -(int) (1 * Utils.densityMultiplier));
 	}
 
 	private class AudioActivityInfo {
