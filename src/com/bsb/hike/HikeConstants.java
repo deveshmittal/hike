@@ -183,6 +183,8 @@ public class HikeConstants {
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 	public static final String UPGRADE_AVATAR_CONV_DB ="upgradeAvtarProgressConv";
 
+	public static final String IS_GAMES_ITEM_CLICKED ="isGamesItemClicked";
+	public static final String IS_REWARDS_ITEM_CLICKED ="isRewardsItemClicked";
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
@@ -554,6 +556,7 @@ public class HikeConstants {
 		public static final String CREATE_GROUP = "createGroup";
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
 		public static final String SHOW_KEYBOARD = "ShowKeyboard";
+		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
 	}
 
 	public static final class LogEvent {
