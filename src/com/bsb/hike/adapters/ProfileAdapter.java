@@ -566,9 +566,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			break;
 		}
 
-		if (viewHolder.parent != null && position == getCount() - 1) {
-			int bottomPadding = context.getResources().getDimensionPixelSize(
-					R.dimen.updates_margin);
+		if (viewHolder.parent != null) {
+			int bottomPadding;
+
+			if (position == getCount() - 1) {
+				bottomPadding = context.getResources().getDimensionPixelSize(
+						R.dimen.updates_margin);
+			} else {
+				bottomPadding = 0;
+			}
+
 			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
 		}
 
