@@ -143,7 +143,6 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -2795,5 +2794,13 @@ public class Utils {
 		return !convMessage.isSent()
 				&& convMessage.getState() == State.RECEIVED_UNREAD
 				&& convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
+	}
+	
+	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current){
+		 String dateFormat = "dd/MM/yyyy hh:mm:ss a";
+		 DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+	     Calendar calendar = Calendar.getInstance();
+	     calendar.setTimeInMillis(milliSeconds*1000);
+	     return formatter.format(calendar.getTime());
 	}
 }

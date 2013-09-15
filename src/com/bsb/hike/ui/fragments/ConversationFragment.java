@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -181,8 +182,8 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 
 				// finally construct the backup string here
-				sBuilder.append(cMessage.getTimestampFormatted(false,
-						getSherlockActivity())
+				sBuilder.append(Utils.getFormattedDateTimeFromTimestamp(cMessage.getTimestamp(), 
+						getResources().getConfiguration().locale)
 						+ ":"
 						+ fromString
 						+ "- "
@@ -841,7 +842,6 @@ public class ConversationFragment extends SherlockListFragment implements
 			mConversationsAdded.add(conv.getMsisdn());
 			mAdapter.add(conv);
 		}
-
 		conv.addMessage(convMessage);
 		Log.d(getClass().getSimpleName(), "new message is " + convMessage);
 		mAdapter.sort(mConversationsComparator);
