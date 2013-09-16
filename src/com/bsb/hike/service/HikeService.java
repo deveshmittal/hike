@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
@@ -30,6 +31,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -45,6 +47,7 @@ import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
@@ -782,9 +785,18 @@ public class HikeService extends Service {
 			} catch (NameNotFoundException e) {
 				Log.e("AccountUtils", "Unable to get app version");
 			}
-
+			TelephonyManager manager = (TelephonyManager) context
+					.getSystemService(Context.TELEPHONY_SERVICE);
 			JSONObject data = new JSONObject();
 			try {
+				if(HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER))
+				{
+					String deviceId = Utils.getEncryptedDeviceId(context);
+					boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
+					AccountUtils.processMicromaxLogs(isMmxPreload, deviceId, data, context);
+					String deviceKey = manager.getDeviceId();
+					data.put("device_key", deviceKey);
+				}
 				data.put(HikeConstants.DEV_TYPE, devType);
 				data.put(HikeConstants.APP_VERSION, appVersion);
 				data.put(HikeConstants.LogEvent.OS, os);
