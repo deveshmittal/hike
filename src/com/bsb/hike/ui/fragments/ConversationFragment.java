@@ -199,24 +199,7 @@ public class ConversationFragment extends SherlockListFragment implements
 						if (getString(R.string.shortcut).equals(option)) {
 							Utils.logEvent(getActivity(),
 									HikeConstants.LogEvent.ADD_SHORTCUT);
-							Intent shortcutIntent = Utils.createIntentForConversation(getSherlockActivity(), conv);
-							Intent intent = new Intent();
-							intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
-									shortcutIntent);
-							intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-									conv.getLabel());
-							Drawable d = IconCacheManager.getInstance()
-									.getIconForMSISDN(conv.getMsisdn());
-							Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-
-							int dimension = (int) (Utils.densityMultiplier * 48);
-
-							Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
-									dimension, dimension, false);
-							bitmap = null;
-							intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
-							intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-							getActivity().sendBroadcast(intent);
+							Utils.createShortcut(getSherlockActivity(), conv);
 						} else if (getString(R.string.delete).equals(option)) {
 							Utils.logEvent(getActivity(),
 									HikeConstants.LogEvent.DELETE_CONVERSATION);

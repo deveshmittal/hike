@@ -39,6 +39,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -157,6 +159,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
+import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
@@ -780,6 +783,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			break;
 		case R.id.call:
 			Utils.onCallClicked(ChatThread.this, mContactNumber);
+			break;
+		case R.id.email_conv:
+			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
+			Utils.executeConvAsyncTask(emailTask, mConversation);
+			break;
+		case R.id.add_shortcut:
+			Utils.logEvent(ChatThread.this,
+						HikeConstants.LogEvent.ADD_SHORTCUT);
+			Utils.createShortcut(ChatThread.this, mConversation);
 			break;
 		}
 
