@@ -15,7 +15,7 @@
             <item
                 android:id="@+id/profile"
                 android:showAsAction="never"
-                android:title="@string/profile_title"/>
+                android:title="@string/view_profile"/>
             <item
                 android:id="@+id/call"
                 android:showAsAction="never"
