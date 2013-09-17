@@ -129,6 +129,7 @@ import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
@@ -140,6 +141,7 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -2737,6 +2739,17 @@ public class Utils {
 			asyncTask.execute();
 		}
 	}
+	
+	public static void executeConvAsyncTask(
+			AsyncTask<Conversation, Void, Conversation[]> asyncTask,
+			Conversation... conversations) {
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					conversations);
+		} else {
+			asyncTask.execute(conversations);
+		}
+	}
 
 	public static Bitmap returnScaledBitmap(Bitmap src, Context context) {
 		Resources res = context.getResources();
@@ -2795,5 +2808,15 @@ public class Utils {
 		return !convMessage.isSent()
 				&& convMessage.getState() == State.RECEIVED_UNREAD
 				&& convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
+	}
+	
+	public static Intent createIntentForConversation(Context context, Conversation conversation) {
+		Intent intent = new Intent(context, ChatThread.class);
+		if (conversation.getContactName() != null) {
+			intent.putExtra(HikeConstants.Extras.NAME,
+					conversation.getContactName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		return intent;
 	}
 }
