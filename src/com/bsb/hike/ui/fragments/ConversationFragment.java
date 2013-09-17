@@ -182,6 +182,7 @@ public class ConversationFragment extends SherlockListFragment implements
 		} else {
 			optionsList.add(getString(R.string.delete));
 		}
+		optionsList.add(getString(R.string.deleteconversations));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -214,7 +215,11 @@ public class ConversationFragment extends SherlockListFragment implements
 								.equals(option)) {
 							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
 							Utils.executeConvAsyncTask(task, conv);
-						}
+						} else if (getString(R.string.deleteconversations).equals(option)) {
+							Utils.logEvent(getActivity(),
+									HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
+							DeleteAllConversations();
+						} 
 
 					}
 				});
@@ -634,4 +639,45 @@ public class ConversationFragment extends SherlockListFragment implements
 			messageRefreshHandler = new Handler();
 		}
 	}
+	
+	public void DeleteAllConversations() {
+		DialogInterface.OnClickListener dialoagOnClickListener = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialogInterfaceClickListener(dialog, which);
+			}
+		};
+		if (!mAdapter.isEmpty()) {
+				Utils.logEvent(getActivity(),
+						HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						getActivity());
+				builder.setMessage(R.string.delete_all_question)
+						.setPositiveButton(R.string.delete,
+								dialoagOnClickListener)
+						.setNegativeButton(R.string.cancel,
+								dialoagOnClickListener).show();
+			}
+	}
+
+	public void dialogInterfaceClickListener(DialogInterface dialog, int which) {
+		switch (which) {
+		case DialogInterface.BUTTON_POSITIVE:
+			Conversation[] convs = new Conversation[mAdapter.getCount()];
+			for (int i = 0; i < convs.length; i++) {
+				convs[i] = mAdapter.getItem(i);
+				if ((convs[i] instanceof GroupConversation)) {
+					HikeMessengerApp
+							.getPubSub()
+							.publish(
+									HikePubSub.MQTT_PUBLISH,
+									convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+				}
+			}
+			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+			task.execute(convs);
+			break;
+		default:
+		}
+	}	
 }
