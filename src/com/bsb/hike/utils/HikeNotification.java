@@ -366,7 +366,12 @@ public class HikeNotification {
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
 			message = context.getString(R.string.confirmed_friend_2, key);
 			text = message;
-		} else {
+		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+			message = context.getString(
+					R.string.status_profile_pic_notification, key);
+			text = message;
+		}
+		else {
 			/*
 			 * We don't know how to display this type. Just return.
 			 */
