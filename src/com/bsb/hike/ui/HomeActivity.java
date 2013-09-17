@@ -94,6 +94,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean showingProgress = false;
 	private Menu mMenu;
 	private PopupWindow overFlowWindow;
+	private TextView totalCreditsView;
 	private TextView creditsNum;
 	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
@@ -274,6 +275,23 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		default:
 			return false;
 		}
+		totalCreditsView = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.totalCredits);
+		if(!accountPrefs.getBoolean(HikeConstants.IS_OF_ICON_CLICKED, false)){
+			totalCreditsView.setVisibility(View.VISIBLE);
+		} else{
+			totalCreditsView.setVisibility(View.GONE);
+		}
+		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeConstants.IS_OF_ICON_CLICKED, true);
+				editor.commit();
+				totalCreditsView.setVisibility(View.GONE);
+				showOverFlowMenu();
+			}
+		});
 
 		mMenu = menu;
 		return true;

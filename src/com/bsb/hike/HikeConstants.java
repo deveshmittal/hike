@@ -185,6 +185,8 @@ public class HikeConstants {
 
 	public static final String IS_GAMES_ITEM_CLICKED ="isGamesItemClicked";
 	public static final String IS_REWARDS_ITEM_CLICKED ="isRewardsItemClicked";
+	public static final String IS_OF_ICON_CLICKED ="isOfIconClicked";
+	
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
