@@ -47,9 +47,12 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
@@ -384,7 +387,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.call:
-			onCallClicked(null);
+			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 			break;
 		case R.id.unfriend:
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
@@ -1544,31 +1547,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 		Toast.makeText(getApplicationContext(), R.string.invite_sent,
 				Toast.LENGTH_SHORT).show();
-	}
-
-	public void onCallClicked(View v) {
-		Builder builder = new Builder(this);
-		builder.setTitle(R.string.call_not_free_head);
-		builder.setMessage(R.string.call_not_free_body);
-		builder.setPositiveButton(R.string.call, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				Utils.logEvent(ProfileActivity.this,
-						HikeConstants.LogEvent.MENU_CALL);
-				Intent callIntent = new Intent(Intent.ACTION_CALL);
-				callIntent.setData(Uri.parse("tel:" + mLocalMSISDN));
-				startActivity(callIntent);
-			}
-		});
-		builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		builder.show();
 	}
 
 	public void onBlockUserClicked(View v) {

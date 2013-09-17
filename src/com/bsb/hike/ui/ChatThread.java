@@ -101,6 +101,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -706,10 +709,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
 		mMenu = menu;
 		MenuItem profileItem = menu.findItem(R.id.profile);
+		MenuItem callItem = menu.findItem(R.id.call);
 		if (mConversation instanceof GroupConversation) {
 			profileItem.setTitle(R.string.group_profile);
+			callItem.setVisible(false);
 		} else {
-			profileItem.setTitle(R.string.profile_title);
+			profileItem.setTitle(R.string.view_profile);
+			callItem.setVisible(true);
 		}
 
 		MenuItem muteItem = menu.findItem(R.id.mute);
@@ -771,6 +777,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikePubSub.MUTE_CONVERSATION_TOGGLED,
 					new Pair<String, Boolean>(groupConversation.getMsisdn(),
 							groupConversation.isMuted()));
+			break;
+		case R.id.call:
+			Utils.onCallClicked(ChatThread.this, mContactNumber);
 			break;
 		}
 

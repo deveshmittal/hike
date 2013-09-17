@@ -47,6 +47,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -107,10 +108,13 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
@@ -136,6 +140,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
@@ -2818,5 +2823,82 @@ public class Utils {
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
 		return intent;
+	}
+	
+	public static void createShortcut(Activity activity, Conversation conv){
+		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv);
+		Intent intent = new Intent();
+		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
+				shortcutIntent);
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+				conv.getLabel());
+		Drawable d = IconCacheManager.getInstance()
+				.getIconForMSISDN(conv.getMsisdn());
+		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+
+		int dimension = (int) (Utils.densityMultiplier * 48);
+
+		Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
+				dimension, dimension, false);
+		bitmap = null;
+		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
+		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+		activity.sendBroadcast(intent);
+	}
+	
+	public static void onCallClicked(Activity activity, final String mContactNumber) {
+		final Activity mActivity = activity;
+		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				activity.MODE_PRIVATE);
+		View callAlertCheckBox = View.inflate(activity,
+				R.layout.call_aleart_checkbox, null);
+		CheckBox checkBox = (CheckBox) callAlertCheckBox
+				.findViewById(R.id.callAlertCheckBox);
+		checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				Editor editor = settings.edit();
+				editor.putBoolean(
+						HikeConstants.NO_CALL_ALERT_CHECKED, isChecked);
+				editor.commit();
+			}
+		});
+		checkBox.setText(activity.getResources().getString(R.string.not_show_call_alert_msg));
+
+		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false)) {
+			Builder builder = new Builder(activity);
+			builder.setTitle(R.string.call_not_free_head);
+			builder.setMessage(R.string.call_not_free_body);
+			builder.setView(callAlertCheckBox);
+			builder.setPositiveButton(R.string.call,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Utils.logEvent(mActivity,
+									HikeConstants.LogEvent.MENU_CALL);
+							Intent callIntent = new Intent(Intent.ACTION_CALL);
+							callIntent.setData(Uri.parse("tel:"
+									+ mContactNumber));
+							mActivity.startActivity(callIntent);
+						}
+					});
+			builder.setNegativeButton(R.string.cancel,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
+			builder.show();
+		} else {
+			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
+			Intent callIntent = new Intent(Intent.ACTION_CALL);
+			callIntent.setData(Uri.parse("tel:" + mContactNumber));
+			activity.startActivity(callIntent);
+		}
 	}
 }

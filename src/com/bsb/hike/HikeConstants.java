@@ -182,7 +182,7 @@ public class HikeConstants {
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 	public static final String UPGRADE_AVATAR_CONV_DB ="upgradeAvtarProgressConv";
-
+	public static final String NO_CALL_ALERT_CHECKED ="noCallAlertChecked";
 	public static final String IS_GAMES_ITEM_CLICKED ="isGamesItemClicked";
 	public static final String IS_REWARDS_ITEM_CLICKED ="isRewardsItemClicked";
 	public static final String IS_OF_ICON_CLICKED ="isOfIconClicked";
