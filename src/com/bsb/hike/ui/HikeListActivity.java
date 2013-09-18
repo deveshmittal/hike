@@ -362,10 +362,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 								HikeMessengerApp.COUNTRY_CODE,
 								HikeConstants.INDIA_COUNTRY_CODE));
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(msisdn, this)
-								.serialize());
+				Utils.sendInvite(msisdn, this);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
 						.show();
 			}
