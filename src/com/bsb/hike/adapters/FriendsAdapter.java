@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -51,7 +52,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public static final String CONTACT_PHONE_NUM = "--126";
 
 	public enum ViewType {
-		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST, EXTRA, EMPTY
+		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY
 	}
 
 	private LayoutInflater layoutInflater;
@@ -454,8 +455,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				if (position <= ((filteredFriendsList.size() - 1) + 1 + 2)) {
 					return ViewType.FRIEND_REQUEST.ordinal();
 				}
+			} else if (contactInfo.isOnhike()) {
+				return ViewType.NOT_FRIEND_HIKE.ordinal();
 			}
-			return ViewType.NOT_FRIEND.ordinal();
+			return ViewType.NOT_FRIEND_SMS.ordinal();
 		}
 	}
 
@@ -473,9 +476,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						R.layout.friends_child_view, null);
 				break;
 
-			case NOT_FRIEND:
+			case NOT_FRIEND_HIKE:
 				convertView = layoutInflater.inflate(
-						R.layout.contact_child_view, null);
+						R.layout.hike_contact_child_view, null);
+				break;
+
+			case NOT_FRIEND_SMS:
+				convertView = layoutInflater.inflate(
+						R.layout.sms_contact_child_view, null);
 				break;
 
 			case SECTION:
@@ -497,8 +505,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			}
 		}
 
-		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND
-				|| viewType == ViewType.FRIEND_REQUEST) {
+		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND_HIKE
+				|| viewType == ViewType.FRIEND_REQUEST
+				|| viewType == ViewType.NOT_FRIEND_SMS) {
 			ImageView avatar = (ImageView) convertView
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
@@ -559,14 +568,39 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				}
 			} else {
 				TextView info = (TextView) convertView.findViewById(R.id.info);
-				ImageView addFriend = (ImageView) convertView
-						.findViewById(R.id.add_friend);
-
 				info.setText(contactInfo.isOnhike() ? R.string.tap_chat
 						: R.string.tap_sms);
+				if (viewType == ViewType.NOT_FRIEND_HIKE) {
+					ImageView addFriend = (ImageView) convertView
+							.findViewById(R.id.add_friend);
 
-				addFriend.setTag(contactInfo);
-				addFriend.setOnClickListener(this);
+					addFriend.setTag(contactInfo);
+					addFriend.setOnClickListener(this);
+				} else {
+					Button inviteBtn = (Button) convertView
+							.findViewById(R.id.invite_btn);
+
+					inviteBtn.setEnabled(true);
+					inviteBtn
+							.setBackgroundResource(R.drawable.bg_red_btn_selector);
+					inviteBtn.setOnClickListener(inviteOnClickListener);
+					inviteBtn.setTag(contactInfo);
+					if (contactInfo.getInviteTime() == 0) {
+						inviteBtn.setText(R.string.invite_1);
+					} else {
+						long inviteTime = contactInfo.getInviteTime();
+
+						/*
+						 * If the contact was invited more than an hour back, we
+						 * give the option to remind this contact
+						 */
+						if ((System.currentTimeMillis() / 1000 - inviteTime) > 60 * 60) {
+							inviteBtn.setText(R.string.remind);
+						} else {
+							setInvited(inviteBtn);
+						}
+					}
+				}
 			}
 
 		} else if (viewType == ViewType.SECTION) {
@@ -609,6 +643,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		return convertView;
+	}
+
+	private void setInvited(Button inviteBtn) {
+		inviteBtn.setEnabled(false);
+		inviteBtn.setText(R.string.invited);
 	}
 
 	@Override
@@ -666,6 +705,17 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		public void onClick(View v) {
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 			respondToFriendRequest(contactInfo, false);
+		}
+	};
+
+	private OnClickListener inviteOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+			Utils.sendInvite(contactInfo.getMsisdn(), context);
+
+			setInvited((Button) v);
 		}
 	};
 

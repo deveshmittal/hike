@@ -787,7 +787,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.ONHIKE + ", " + DBConstants.PHONE + ", "
 				+ DBConstants.MSISDN_TYPE + ", " + DBConstants.HAS_CUSTOM_PHOTO
 				+ ", " + DBConstants.LAST_MESSAGED + ", "
-				+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE);
+				+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", "
+				+ DBConstants.INVITE_TIMESTAMP);
 		if (favoriteType != null) {
 			if (favoriteType == FavoriteType.NOT_FRIEND) {
 				queryBuilder.append(" FROM " + DBConstants.USERS_TABLE
@@ -863,6 +864,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 			int lastSeenIdx = c.getColumnIndex(DBConstants.LAST_SEEN);
 			int isOfflineIdx = c.getColumnIndex(DBConstants.IS_OFFLINE);
+			int inviteTimeIdx = c.getColumnIndex(DBConstants.INVITE_TIMESTAMP);
 
 			Set<String> msisdnSet = null;
 
@@ -897,6 +899,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 					contactInfo.setOffline(c.getInt(isOfflineIdx));
 					contactInfo.setLastSeenTime(c.getLong(lastSeenIdx));
+					contactInfo.setInviteTime(c.getLong(inviteTimeIdx));
 				}
 
 				contactInfo.setFavoriteType(favoriteType);
