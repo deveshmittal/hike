@@ -307,12 +307,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			completeList.addAll(filteredFriendsList);
 		}
 
-		hikeContactsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(filteredHikeContactsList.size()),
-				context.getString(R.string.hike_contacts), CONTACT_PHONE_NUM);
-		completeList.add(hikeContactsSection);
+		if (!hikeContactsList.isEmpty()) {
+			hikeContactsSection = new ContactInfo(SECTION_ID,
+					Integer.toString(filteredHikeContactsList.size()),
+					context.getString(R.string.hike_contacts),
+					CONTACT_PHONE_NUM);
+			completeList.add(hikeContactsSection);
 
-		completeList.addAll(filteredHikeContactsList);
+			completeList.addAll(filteredHikeContactsList);
+		}
 
 		if (showSMSContacts) {
 			smsContactsSection = new ContactInfo(SECTION_ID,
