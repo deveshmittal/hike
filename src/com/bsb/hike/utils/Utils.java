@@ -2720,6 +2720,15 @@ public class Utils {
 		}
 	}
 
+	public static void executeContactInfoListResultTask(
+			AsyncTask<Void, Void, List<ContactInfo>> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
 	public static void executeStringResultTask(
 			AsyncTask<Void, Void, String> asyncTask) {
 		if (isHoneycombOrHigher()) {

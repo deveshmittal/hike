@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -35,6 +36,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -51,6 +54,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	public static final int UPDATES_TAB_INDEX = 0;
 	public static final int CHATS_TAB_INDEX = 1;
 	public static final int FRIENDS_TAB_INDEX = 2;
+	public static List<ContactInfo> ftueList = new ArrayList<ContactInfo>(0);
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
@@ -181,6 +185,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		HikeMessengerApp.getPubSub().addListeners(this, homePubSubListeners);
 
+		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
+		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 	}
 
 	@Override
@@ -692,4 +698,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			tabIndicator.notifyDataSetChanged();
 		}
 	};
+
+	private class GetFTUEContactsTask extends
+			AsyncTask<Void, Void, List<ContactInfo>> {
+
+		@Override
+		protected List<ContactInfo> doInBackground(Void... params) {
+			return HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+		}
+
+		@Override
+		protected void onPostExecute(List<ContactInfo> result) {
+			ftueList = result;
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FTUE_LIST_FETCHED,
+					null);
+		}
+	}
 }
