@@ -580,7 +580,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					addFriend.setTag(contactInfo);
 					addFriend.setOnClickListener(this);
 				} else {
-					Button inviteBtn = (Button) convertView
+					TextView inviteBtn = (TextView) convertView
 							.findViewById(R.id.invite_btn);
 
 					inviteBtn.setEnabled(true);
@@ -648,7 +648,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		return convertView;
 	}
 
-	private void setInvited(Button inviteBtn) {
+	private void setInvited(TextView inviteBtn) {
 		inviteBtn.setEnabled(false);
 		inviteBtn.setText(R.string.invited);
 	}
@@ -718,7 +718,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 			Utils.sendInvite(contactInfo.getMsisdn(), context);
 
-			setInvited((Button) v);
+			setInvited((TextView) v);
 		}
 	};
 

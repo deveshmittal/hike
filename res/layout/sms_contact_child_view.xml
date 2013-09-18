@@ -30,12 +30,13 @@
                 android:src="@drawable/frame_avatar_small_selector" />
         </RelativeLayout>
 
-        <com.bsb.hike.view.CustomFontButton
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/invite_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:gravity="center"
             android:background="@drawable/bg_red_btn"
             android:text="@string/invite_1"
             android:textColor="@color/white"
