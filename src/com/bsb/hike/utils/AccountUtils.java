@@ -353,7 +353,16 @@ public class AccountUtils {
 
 			String deviceKey = manager.getDeviceId();
 
-			if(HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER))
+			boolean isMicromaxDevice = false;
+			if (Build.MODEL != null) 
+			{
+				if (HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER)|| (Build.MODEL.toUpperCase()).contains(HikeConstants.MICROMAX)) 
+				{
+					isMicromaxDevice = true;
+				} 
+			}
+			
+			if(isMicromaxDevice)
 			{
 				boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
 				processMicromaxLogs(isMmxPreload, deviceId, data, context);

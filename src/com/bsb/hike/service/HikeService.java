@@ -789,7 +789,20 @@ public class HikeService extends Service {
 					.getSystemService(Context.TELEPHONY_SERVICE);
 			JSONObject data = new JSONObject();
 			try {
-				if(HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER))
+				
+				boolean isMicromaxDevice = false;
+				if (Build.MODEL != null) 
+				{
+					if (HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER)) 
+					{
+						isMicromaxDevice = true;
+					} 
+					else if((Build.MODEL.toUpperCase()).contains(HikeConstants.MICROMAX))
+					{
+						isMicromaxDevice = true;
+					}
+				}
+				if(isMicromaxDevice)
 				{
 					String deviceId = Utils.getEncryptedDeviceId(context);
 					boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
