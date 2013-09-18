@@ -353,16 +353,7 @@ public class AccountUtils {
 
 			String deviceKey = manager.getDeviceId();
 
-			boolean isMicromaxDevice = false;
-			if (Build.MODEL != null) 
-			{
-				if (HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER)|| (Build.MODEL.toUpperCase()).contains(HikeConstants.MICROMAX)) 
-				{
-					isMicromaxDevice = true;
-				} 
-			}
-			
-			if(isMicromaxDevice)
+			if(Utils.isMicromaxDevice())
 			{
 				boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
 				processMicromaxLogs(isMmxPreload, deviceId, data, context);
@@ -435,7 +426,7 @@ public class AccountUtils {
 
 	public static void processMicromaxLogs(boolean isMmxPreload,String deviceId,JSONObject data,Context context) throws JSONException
 	{
-		data.put("isPreInstallMx",isMmxPreload);
+		data.put("preinstall",HikeConstants.MICROMAX.toLowerCase());
 		/* This section is primarily for analystics */
 		Utils.MMX mx = Utils.getMicromaxData(context);
 		if(mx == null) // if mx file does not exist (should be play store version)

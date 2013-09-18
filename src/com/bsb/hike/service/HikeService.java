@@ -790,19 +790,7 @@ public class HikeService extends Service {
 			JSONObject data = new JSONObject();
 			try {
 				
-				boolean isMicromaxDevice = false;
-				if (Build.MODEL != null) 
-				{
-					if (HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER)) 
-					{
-						isMicromaxDevice = true;
-					} 
-					else if((Build.MODEL.toUpperCase()).contains(HikeConstants.MICROMAX))
-					{
-						isMicromaxDevice = true;
-					}
-				}
-				if(isMicromaxDevice)
+				if(Utils.isMicromaxDevice())
 				{
 					String deviceId = Utils.getEncryptedDeviceId(context);
 					boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
