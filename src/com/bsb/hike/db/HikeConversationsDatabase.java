@@ -610,7 +610,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					}
 					readByArray.put(msisdn);
 
-					String whereClause = DBConstants.MESSAGE_ID + "=?";
+					int minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
+					int maxStatusOrdinal = State.SENT_DELIVERED_READ.ordinal();
+
+					/*
+					 * Making sure we only set the status of sent messages.
+					 */
+					String whereClause = DBConstants.MESSAGE_ID + "=?"
+							+ " AND " + DBConstants.MSG_STATUS + " >= "
+							+ minStatusOrdinal + " AND "
+							+ DBConstants.MSG_STATUS + " <= "
+							+ maxStatusOrdinal;
 
 					// TODO find a better way to perform this update.
 					ContentValues contentValues = new ContentValues();
