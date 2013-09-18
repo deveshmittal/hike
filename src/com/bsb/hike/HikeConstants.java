@@ -447,6 +447,8 @@ public class HikeConstants {
 	public static final int EMPTY_CONVERSATIONS_PREFILL_LIMIT = 6;
 	public static final int FTUE_LIMIT = 5;
 
+	public static final String FTUE_MSISDN_TYPE = "ftueContact";
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

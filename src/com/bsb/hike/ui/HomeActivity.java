@@ -742,7 +742,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		@Override
 		protected List<ContactInfo> doInBackground(Void... params) {
-			return HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+			List<ContactInfo> contactList = HikeUserDatabase.getInstance()
+					.getFTUEContacts(accountPrefs);
+			/*
+			 * This msisdn type will be the identifier for ftue contacts in the
+			 * friends tab.
+			 */
+			for (ContactInfo contactInfo : contactList) {
+				contactInfo.setMsisdnType(HikeConstants.FTUE_MSISDN_TYPE);
+			}
+			return contactList;
 		}
 
 		@Override
