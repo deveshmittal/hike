@@ -77,7 +77,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.LAST_MESSAGED + " INTEGER, "
 				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0, "
 				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, "
-				+ DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1" + " )";
+				+ DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1, "
+				+ DBConstants.INVITE_TIMESTAMP + " INTEGER DEFAULT 0" + " )";
 
 		db.execSQL(create);
 
@@ -271,6 +272,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 			editor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 1);
 			editor.commit();
+		}
+		/*
+		 * Version 15 adds the invited timestamp column
+		 */
+		if (oldVersion < 15) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.INVITE_TIMESTAMP
+					+ " INTEGER DEFAULT 0";
+			db.execSQL(alter);
 		}
 	}
 
