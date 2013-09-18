@@ -177,7 +177,7 @@ public class HikeNotification {
 						// check if this is a sticker or a file and populate the big picture
 						// accordingly
 						Bitmap bigPictureImage = null;
-						boolean doesStickerExist = false;
+						boolean doesBigPictureExist = false;
 						HikeFile hikeFile = null;
 						if (convMsg.isStickerMessage()) {
 
@@ -203,7 +203,7 @@ public class HikeNotification {
 									final Drawable dr = context.getResources()
 											.getDrawable(resourceId);
 									bigPictureImage = Utils.drawableToBitmap(dr);
-									doesStickerExist = true;
+									doesBigPictureExist = true;
 								}
 
 							} else {
@@ -211,7 +211,7 @@ public class HikeNotification {
 								if (!TextUtils.isEmpty(filePath)) {
 									bigPictureImage = BitmapFactory.decodeFile(filePath);
 									if (bigPictureImage != null)
-										doesStickerExist = true;
+										doesBigPictureExist = true;
 								}
 							}
 
@@ -225,7 +225,7 @@ public class HikeNotification {
 										final String filePath = hikeFile.getFilePath(); // check
 										bigPictureImage = BitmapFactory.decodeFile(filePath);
 										if (bigPictureImage != null)
-											doesStickerExist = true;
+											doesBigPictureExist = true;
 									}
 								}
 							}
@@ -267,10 +267,10 @@ public class HikeNotification {
 						final Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 								key, message));
 
-						if ((convMsg.isStickerMessage() && doesStickerExist)
+						if ((convMsg.isStickerMessage())
 								|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
 								.getFileTypeString().toLowerCase().startsWith("image"))
-								&& isRich) {
+								&& isRich && doesBigPictureExist) {
 
 							final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
 									.getMessage() : HikeFileType.getFileTypeMessage(context,
