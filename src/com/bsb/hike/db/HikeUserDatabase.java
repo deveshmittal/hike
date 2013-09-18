@@ -2034,4 +2034,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		return contactInfoList;
 	}
 
+	public void updateInvitedTimestamp(String msisdn, long timestamp) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.INVITE_TIMESTAMP, timestamp);
+
+		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
+				+ "=?", new String[] { msisdn });
+	}
 }

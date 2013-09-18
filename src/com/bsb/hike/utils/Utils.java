@@ -122,6 +122,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
@@ -1463,6 +1464,9 @@ public class Utils {
 
 		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
 				messages, null, null);
+
+		HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
+				System.currentTimeMillis() / 1000);
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,
