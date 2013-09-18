@@ -35,11 +35,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
@@ -62,6 +66,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
@@ -276,6 +281,37 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 	}
 
+	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo> {
+
+		public FTUEGridAdapter(Context context, int textViewResourceId,
+				List<ContactInfo> objects) {
+			super(context, textViewResourceId, objects);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ContactInfo contactInfo = getItem(position);
+
+			if (convertView == null) {
+				convertView = getLayoutInflater(null).inflate(
+						R.layout.ftue_grid_item, parent, false);
+			}
+
+			ImageView avatarImage = (ImageView) convertView
+					.findViewById(R.id.avatar);
+			TextView contactName = (TextView) convertView
+					.findViewById(R.id.name);
+
+			avatarImage.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			contactName.setText(contactInfo.getName());
+
+			convertView.setTag(contactInfo);
+
+			return convertView;
+		}
+	}
+
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ,
 			HikePubSub.MESSAGE_DELIVERED, HikePubSub.NEW_CONVERSATION,
@@ -283,13 +319,15 @@ public class ConversationFragment extends SherlockListFragment implements
 			HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT };
+			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
+			HikePubSub.FTUE_LIST_FETCHED };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
 	private HashSet<String> mConversationsAdded;
 	private Comparator<? super Conversation> mConversationsComparator;
 	private Handler messageRefreshHandler;
+	private View emptyView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -298,7 +336,11 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		ListView friendsList = (ListView) parent
 				.findViewById(android.R.id.list);
-		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
+
+		emptyView = parent.findViewById(android.R.id.empty);
+		setupEmptyView();
+
+		friendsList.setEmptyView(emptyView);
 
 		Button startChat = (Button) parent.findViewById(R.id.start_chat_btn);
 		startChat.setOnClickListener(new OnClickListener() {
@@ -312,6 +354,41 @@ public class ConversationFragment extends SherlockListFragment implements
 		});
 
 		return parent;
+	}
+
+	private void setupEmptyView() {
+
+		if (emptyView == null || !isAdded()) {
+			return;
+		}
+
+		View ftueNotEmptyView = emptyView.findViewById(R.id.ftue_not_empty);
+		View ftueEmptyView = emptyView.findViewById(R.id.ftue_empty);
+
+		if (HomeActivity.ftueList.isEmpty()) {
+			ftueEmptyView.setVisibility(View.VISIBLE);
+			ftueNotEmptyView.setVisibility(View.GONE);
+		} else {
+			ftueEmptyView.setVisibility(View.GONE);
+			ftueNotEmptyView.setVisibility(View.VISIBLE);
+
+			GridView ftueGrid = (GridView) emptyView
+					.findViewById(R.id.ftue_grid);
+			ftueGrid.setAdapter(new FTUEGridAdapter(getActivity(), -1,
+					HomeActivity.ftueList));
+			ftueGrid.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> adapterView, View view,
+						int position, long id) {
+					ContactInfo contactInfo = (ContactInfo) view.getTag();
+					Intent intent = Utils.createIntentFromContactInfo(
+							contactInfo, true);
+					intent.setClass(getActivity(), ChatThread.class);
+					startActivity(intent);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -810,6 +887,14 @@ public class ConversationFragment extends SherlockListFragment implements
 				@Override
 				public void run() {
 					deleteConversation(conversation);
+				}
+			});
+		} else if (HikePubSub.FTUE_LIST_FETCHED.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setupEmptyView();
 				}
 			});
 		}
