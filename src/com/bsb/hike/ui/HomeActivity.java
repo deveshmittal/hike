@@ -13,7 +13,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -22,10 +24,23 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -40,6 +55,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -80,7 +96,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private SharedPreferences accountPrefs;
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
-
+	private Menu mMenu;
+	private PopupWindow overFlowWindow;
+	private TextView totalCreditsView;
+	private TextView creditsNum;
+	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
@@ -200,6 +220,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			progDialog.dismiss();
 			progDialog = null;
 		}
+		if (overFlowWindow != null && overFlowWindow.isShowing())
+			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
 		super.onDestroy();
 	}
@@ -220,35 +242,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		} else {
 			return setupMenuOptions(menu);
 		}
+
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MenuItem gamesItem = menu.findItem(R.id.games);
-		MenuItem rewardsItem = menu.findItem(R.id.rewards);
-		MenuItem freeSmsItem = menu.findItem(R.id.free_sms);
-
-		SharedPreferences prefs = this.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		if (rewardsItem != null) {
-			rewardsItem.setVisible(prefs.getBoolean(
-					HikeMessengerApp.SHOW_REWARDS, false));
-		}
-
-		if (gamesItem != null) {
-			gamesItem.setVisible(prefs.getBoolean(HikeMessengerApp.SHOW_GAMES,
-					false));
-		}
-
-		SharedPreferences appPref = PreferenceManager
-				.getDefaultSharedPreferences(this);
-
-		if (freeSmsItem != null) {
-			boolean preference = appPref.getBoolean(
-					HikeConstants.FREE_SMS_PREF, true);
-			freeSmsItem.setVisible(preference);
-		}
 
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -262,13 +260,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		switch (viewPager.getCurrentItem()) {
 		case UPDATES_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
-			return true;
+			break;
 		case CHATS_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
-			return true;
+			break;
 		case FRIENDS_TAB_INDEX:
 			getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
-
 			final SearchView searchView = new SearchView(getSupportActionBar()
 					.getThemedContext());
 			searchView.setQueryHint(getString(R.string.search_hint));
@@ -283,9 +280,30 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					.setShowAsAction(
 							MenuItem.SHOW_AS_ACTION_ALWAYS
 									| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-			return true;
+			break;
+		default:
+			return false;
 		}
-		return false;
+		totalCreditsView = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.totalCredits);
+		if(!accountPrefs.getBoolean(HikeConstants.IS_OF_ICON_CLICKED, false)){
+			totalCreditsView.setVisibility(View.VISIBLE);
+		} else{
+			totalCreditsView.setVisibility(View.GONE);
+		}
+		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeConstants.IS_OF_ICON_CLICKED, true);
+				editor.commit();
+				totalCreditsView.setVisibility(View.GONE);
+				showOverFlowMenu();
+			}
+		});
+
+		mMenu = menu;
+		return true;
 	}
 
 	@Override
@@ -301,24 +319,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			intent = new Intent(this, StatusUpdate.class);
 			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
 					true);
-			break;
-		case R.id.settings:
-			intent = new Intent(this, SettingsActivity.class);
-			break;
-		case R.id.invite:
-			intent = new Intent(this, TellAFriend.class);
-			break;
-		case R.id.free_sms:
-			intent = new Intent(this, CreditsActivity.class);
-			break;
-		case R.id.my_profile:
-			intent = new Intent(this, ProfileActivity.class);
-			break;
-		case R.id.rewards:
-			intent = getRewardsIntent();
-			break;
-		case R.id.games:
-			intent = getGamingIntent();
 			break;
 		}
 
@@ -464,6 +464,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
 					dialogShowing != null ? dialogShowing.ordinal() : -1);
 		}
+		outState.putBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING,
+				overFlowWindow != null && overFlowWindow.isShowing());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -528,6 +530,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		public void onPageSelected(int position) {
 			invalidateOptionsMenu();
 			setBackground();
+
 			/*
 			 * Sending a blank query search to ensure all friends are shown.
 			 */
@@ -760,5 +763,195 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
 		}
+	}
+
+		@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		Log.d(getClass().getSimpleName(), "Key Event is triggered");
+		if (Build.VERSION.SDK_INT <= 10
+				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
+						.hasPermanentMenuKey())) {
+			if (event.getAction() == KeyEvent.ACTION_UP
+					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				if (overFlowWindow == null || !overFlowWindow.isShowing()) {
+					mMenu.findItem(R.id.overflow_menu).getActionView().callOnClick();
+				} else {
+					overFlowWindow.dismiss();
+				}
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
+	}
+
+	private class OverFlowMenuItem{
+		private String name;
+		private int key;
+		OverFlowMenuItem(String name, int key){
+			this.name = name;
+			this.key = key;
+		}
+		public String getName() {
+			return name;
+		}
+		public int getKey() {
+			return key;
+		}
+	}
+	private void showOverFlowMenu() {
+
+		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
+
+		SharedPreferences appPref = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		
+		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		myProfileImage = IconCacheManager.getInstance()
+				.getIconForMSISDN(msisdn, true);
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
+
+		if (appPref.getBoolean(HikeConstants.FREE_SMS_PREF, true)) {
+			optionsList.add(new OverFlowMenuItem(getString(R.string.free_sms_txt), 1));
+		}
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
+
+		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false)) {
+			optionsList.add(new OverFlowMenuItem(getString(R.string.games), 3));
+		}
+		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false)) {
+			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
+		}
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
+
+		overFlowWindow = new PopupWindow(this);
+
+		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
+
+		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu,
+				homeScreen, false);
+
+		overFlowWindow.setContentView(parentView);
+
+		ListView overFlowListView = (ListView) parentView
+				.findViewById(R.id.overflow_menu_list);
+		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this,
+				R.layout.over_flow_menu_item, R.id.item_title, optionsList) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (convertView == null) {
+					convertView = getLayoutInflater().inflate(
+							R.layout.over_flow_menu_item, parent, false);
+				}
+				
+				OverFlowMenuItem item = getItem(position);
+
+				TextView itemTextView = (TextView) convertView
+						.findViewById(R.id.item_title);
+				itemTextView.setText(item.getName());
+				
+				ImageView itemImageView = (ImageView) convertView
+						.findViewById(R.id.item_icon);
+				if(item.getKey() == 0){
+					itemImageView.setImageDrawable(myProfileImage);
+					itemImageView.setVisibility(View.VISIBLE);
+				} else
+					itemImageView.setVisibility(View.GONE);
+				
+				creditsNum = (TextView) convertView.findViewById(R.id.credit_num);
+				creditsNum.setText(Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+				
+				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
+				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
+				if(item.getKey() == 1 || (item.getKey()==3 && !isGamesClicked) || (item.getKey()==4&& !isRewardsClicked) ){
+					creditsNum.setText(item.getKey()==1?Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)) : "1");
+					creditsNum.setVisibility(View.VISIBLE);
+				}
+				else
+					creditsNum.setVisibility(View.GONE);
+				return convertView;
+			}
+		});
+
+		overFlowListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				Log.d(getClass().getSimpleName(), "Onclick: " + position);
+
+				overFlowWindow.dismiss();
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
+				Intent intent = null;
+				Editor editor = accountPrefs.edit();
+				
+				switch (item.getKey()) {
+				case 0:
+					intent = new Intent(HomeActivity.this,
+							ProfileActivity.class);
+					break;
+				case 1:
+					intent = new Intent(HomeActivity.this,
+							CreditsActivity.class);
+					break;
+				case 2:
+					intent = new Intent(HomeActivity.this, TellAFriend.class);
+					break;
+				case 3:
+					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
+					editor.commit();
+					intent = getGamingIntent();
+					break;
+				case 4:
+					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
+					editor.commit();
+					intent = getRewardsIntent();
+					break;
+				case 5:
+					intent = new Intent(HomeActivity.this,
+							SettingsActivity.class);
+					break;
+				}
+
+				if (intent != null) {
+					startActivity(intent);
+				}
+			}
+		});
+
+		overFlowWindow.setBackgroundDrawable(getResources().getDrawable(
+				android.R.color.transparent));
+		overFlowWindow.setOutsideTouchable(true);
+		overFlowWindow.setFocusable(true);
+		overFlowWindow.setWidth((int) (Utils.densityMultiplier * 184));
+		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
+		overFlowWindow.getContentView().setFocusableInTouchMode(true);
+		overFlowWindow.getContentView().setOnKeyListener(
+				new View.OnKeyListener() {
+					@Override
+					public boolean onKey(View v, int keyCode, KeyEvent event) {
+						return onKeyUp(keyCode, event);
+					}
+				});
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		if (savedInstanceState
+				.getBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING))
+			//showOverFlowMenu() method should not be called until all lifecycle 
+			//methods of activity creation have executed successfully otherwise activity will
+			//crash while looking for anchor view of popup menu
+			findViewById(R.id.overflow_anchor).post(new Runnable() {
+				public void run() {
+					showOverFlowMenu();
+				}
+			});
+
+		super.onRestoreInstanceState(savedInstanceState);
 	}
 }

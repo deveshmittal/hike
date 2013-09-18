@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -35,8 +36,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -44,9 +47,12 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
@@ -171,6 +177,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	private List<ProfileItem> profileItems;
 
 	private boolean isGroupOwner;
+	
+	private Menu mMenu;
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -325,7 +333,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		switch (profileType) {
 		case CONTACT_INFO:
 			getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
-
+			mMenu = menu;
 			MenuItem callItem = menu.findItem(R.id.call);
 			if (callItem != null) {
 				callItem.setVisible(getPackageManager().hasSystemFeature(
@@ -334,11 +342,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			return true;
 		case GROUP_INFO:
 			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			mMenu = menu;
 			return true;
 		case USER_PROFILE:
 			getSupportMenuInflater().inflate(R.menu.my_profile_menu, menu);
+			mMenu = menu;
 			return true;
 		}
+		mMenu = menu;
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -376,7 +387,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.call:
-			onCallClicked(null);
+			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 			break;
 		case R.id.unfriend:
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
@@ -1538,31 +1549,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				Toast.LENGTH_SHORT).show();
 	}
 
-	public void onCallClicked(View v) {
-		Builder builder = new Builder(this);
-		builder.setTitle(R.string.call_not_free_head);
-		builder.setMessage(R.string.call_not_free_body);
-		builder.setPositiveButton(R.string.call, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				Utils.logEvent(ProfileActivity.this,
-						HikeConstants.LogEvent.MENU_CALL);
-				Intent callIntent = new Intent(Intent.ACTION_CALL);
-				callIntent.setData(Uri.parse("tel:" + mLocalMSISDN));
-				startActivity(callIntent);
-			}
-		});
-		builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		builder.show();
-	}
-
 	public void onBlockUserClicked(View v) {
 		Button blockBtn = (Button) v;
 		HikeMessengerApp.getPubSub().publish(
@@ -2072,5 +2058,19 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					contactInfo.isOnhike());
 			startActivity(intent);
 		}
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (Build.VERSION.SDK_INT <= 10
+				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
+						.hasPermanentMenuKey())) {
+			if (event.getAction() == KeyEvent.ACTION_UP
+					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 }
