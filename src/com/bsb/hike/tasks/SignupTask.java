@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
@@ -343,6 +344,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				List<String> blockList = AccountUtils
 						.getBlockList(jsonForAddressBookAndBlockList);
 
+				if (jsonForAddressBookAndBlockList.has(HikeConstants.PREF)) {
+					JSONObject prefJson = jsonForAddressBookAndBlockList
+							.getJSONObject(HikeConstants.PREF);
+					JSONArray contactsArray = prefJson
+							.optJSONArray(HikeConstants.CONTACTS);
+					if (contactsArray != null) {
+						Editor editor = settings.edit();
+						editor.putString(
+								HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,
+								contactsArray.toString());
+						editor.commit();
+					}
+				}
 				// List<>
 				// TODO this exception should be raised from the postAddressBook
 				// code

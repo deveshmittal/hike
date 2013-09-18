@@ -157,6 +157,8 @@ public class HikeConstants {
 	public static final String LOGEVENT_TAG = "mob";
 	public static final String FREE_SMS_ON = "free_sms_on";
 	public static final String NATIVE_INVITES = "nativeinvites";
+	public static final String PREF = "pref";
+	public static final String CONTACTS = "contacts";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
