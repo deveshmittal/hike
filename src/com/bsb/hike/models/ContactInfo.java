@@ -47,6 +47,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	private int offline = 1;
 
+	private long inviteTime;
+
 	public String getName() {
 		return name;
 	}
@@ -156,6 +158,14 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	public void setOffline(int offline) {
 		this.offline = offline;
+	}
+
+	public long getInviteTime() {
+		return inviteTime;
+	}
+
+	public void setInviteTime(long inviteTime) {
+		this.inviteTime = inviteTime;
 	}
 
 	public String getFormattedHikeJoinTime() {
