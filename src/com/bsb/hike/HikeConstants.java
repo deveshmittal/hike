@@ -183,7 +183,7 @@ public class HikeConstants {
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	public static final String UPGRADE_AVATAR_CONV_DB ="upgradeAvtarProgressConv";
+	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";
@@ -196,7 +196,7 @@ public class HikeConstants {
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms/android";
 	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
-	
+
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
@@ -764,5 +764,5 @@ public class HikeConstants {
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
-	
+
 }
