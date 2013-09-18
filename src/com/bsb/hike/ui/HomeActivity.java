@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -38,6 +39,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -81,7 +83,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
-			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL };
+			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED,
+			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
+			HikePubSub.REJECT_FRIEND_REQUEST };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -687,6 +692,39 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					dialogShowing = null;
 				}
 			});
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
+				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
+				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
+			if (ftueList.isEmpty()) {
+				return;
+			}
+			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+			ContactInfo favoriteToggleContact = favoriteToggle.first;
+
+			for (ContactInfo contactInfo : ftueList) {
+				if (contactInfo.getMsisdn().equals(
+						favoriteToggleContact.getMsisdn())) {
+					contactInfo.setFavoriteType(favoriteToggle.second);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
+					break;
+				}
+			}
+
+		} else if (HikePubSub.USER_JOINED.equals(type)
+				|| HikePubSub.USER_LEFT.equals(type)) {
+			if (ftueList.isEmpty()) {
+				return;
+			}
+			String msisdn = (String) object;
+			for (ContactInfo contactInfo : ftueList) {
+				if (contactInfo.getMsisdn().equals(msisdn)) {
+					contactInfo.setOnhike(HikePubSub.USER_JOINED.equals(type));
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
+					break;
+				}
+			}
 		}
 
 	}
@@ -710,8 +748,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		@Override
 		protected void onPostExecute(List<ContactInfo> result) {
 			ftueList = result;
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FTUE_LIST_FETCHED,
-					null);
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
 		}
 	}
 }

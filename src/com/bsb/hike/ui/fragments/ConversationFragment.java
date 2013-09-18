@@ -320,7 +320,7 @@ public class ConversationFragment extends SherlockListFragment implements
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
 			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
-			HikePubSub.FTUE_LIST_FETCHED };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
@@ -889,7 +889,7 @@ public class ConversationFragment extends SherlockListFragment implements
 					deleteConversation(conversation);
 				}
 			});
-		} else if (HikePubSub.FTUE_LIST_FETCHED.equals(type)) {
+		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override

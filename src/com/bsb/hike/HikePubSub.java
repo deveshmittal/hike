@@ -282,7 +282,7 @@ public class HikePubSub implements Runnable {
 
 	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
 
-	public static final String FTUE_LIST_FETCHED = "ftueListFetched";
+	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
 	private final Thread mThread;
 
