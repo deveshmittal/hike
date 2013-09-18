@@ -1248,16 +1248,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private void setFileButtonResource(ImageView button,
 			ConvMessage convMessage, HikeFile hikeFile) {
+		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
 		if (HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
 				.getMsgID())) {
-			button.setImageResource(R.drawable.ic_open_file_disabled);
+			button.setImageResource(R.drawable.ic_download_file);
+			button.setBackgroundResource(R.drawable.bg_red_btn_disabled);
 		} else if (hikeFile.wasFileDownloaded()
 				&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
 			button.setImageResource(R.drawable.ic_open_received_file);
 		} else {
 			button.setImageResource(R.drawable.ic_download_file);
 		}
-		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
 	}
 
 	private void setTextAndIconForSystemMessages(TextView textView,

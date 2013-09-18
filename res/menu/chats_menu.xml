@@ -7,30 +7,10 @@
         android:showAsAction="always"
         android:title="@string/start_new_chat"/>
     <item
-        android:id="@+id/my_profile"
-        android:showAsAction="never"
-        android:title="@string/my_profile"/>
-    <item
-        android:id="@+id/free_sms"
-        android:showAsAction="never"
-        android:title="@string/free_sms_txt"/>
-    <item
-        android:id="@+id/invite"
-        android:showAsAction="never"
-        android:title="@string/invite_friends"/>
-    <item
-        android:id="@+id/games"
-        android:showAsAction="never"
-        android:title="@string/games"
-        android:visible="false"/>
-    <item
-        android:id="@+id/rewards"
-        android:showAsAction="never"
-        android:title="@string/rewards"
-        android:visible="false"/>
-    <item
-        android:id="@+id/settings"
-        android:showAsAction="never"
-        android:title="@string/settings"/>
+        android:id="@+id/overflow_menu"
+        android:actionLayout="@layout/overflow_icon_view"
+        android:showAsAction="always"
+        android:menuCategory="secondary" >
+    </item>
 
 </menu>

@@ -39,6 +39,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -48,6 +50,7 @@ import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -81,6 +84,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
@@ -99,6 +103,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -152,6 +159,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
+import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
@@ -324,6 +332,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private ImageView avatar;
 
 	private PopupWindow attachmentWindow;
+	
+	private Menu mMenu;
 
 	@Override
 	protected void onPause() {
@@ -700,12 +710,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
-
+		mMenu = menu;
 		MenuItem profileItem = menu.findItem(R.id.profile);
+		MenuItem callItem = menu.findItem(R.id.call);
 		if (mConversation instanceof GroupConversation) {
 			profileItem.setTitle(R.string.group_profile);
+			callItem.setVisible(false);
 		} else {
-			profileItem.setTitle(R.string.profile_title);
+			profileItem.setTitle(R.string.view_profile);
+			callItem.setVisible(true);
 		}
 
 		MenuItem muteItem = menu.findItem(R.id.mute);
@@ -767,6 +780,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikePubSub.MUTE_CONVERSATION_TOGGLED,
 					new Pair<String, Boolean>(groupConversation.getMsisdn(),
 							groupConversation.isMuted()));
+			break;
+		case R.id.call:
+			Utils.onCallClicked(ChatThread.this, mContactNumber);
+			break;
+		case R.id.email_conv:
+			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
+			Utils.executeConvAsyncTask(emailTask, mConversation);
+			break;
+		case R.id.add_shortcut:
+			Utils.logEvent(ChatThread.this,
+						HikeConstants.LogEvent.ADD_SHORTCUT);
+			Utils.createShortcut(ChatThread.this, mConversation);
 			break;
 		}
 
@@ -4328,5 +4353,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		}
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (Build.VERSION.SDK_INT <= 10
+				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
+						.hasPermanentMenuKey())) {
+			if (event.getAction() == KeyEvent.ACTION_UP
+					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 }
