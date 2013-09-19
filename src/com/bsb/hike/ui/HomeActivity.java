@@ -92,7 +92,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private SharedPreferences accountPrefs;
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
-	private Menu mMenu;
 	private PopupWindow overFlowWindow;
 	private TextView totalCreditsView;
 	private TextView creditsNum;
@@ -282,18 +281,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			totalCreditsView.setVisibility(View.GONE);
 		}
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeConstants.IS_OF_ICON_CLICKED, true);
-				editor.commit();
-				totalCreditsView.setVisibility(View.GONE);
-				showOverFlowMenu();
+				onOverFlowMenuClick();
 			}
 		});
-
-		mMenu = menu;
+		
 		return true;
 	}
 
@@ -707,7 +700,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			if (event.getAction() == KeyEvent.ACTION_UP
 					&& keyCode == KeyEvent.KEYCODE_MENU) {
 				if (overFlowWindow == null || !overFlowWindow.isShowing()) {
-					mMenu.findItem(R.id.overflow_menu).getActionView().callOnClick();
+					onOverFlowMenuClick();
 				} else {
 					overFlowWindow.dismiss();
 				}
@@ -717,6 +710,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		return super.onKeyUp(keyCode, event);
 	}
 
+	public void onOverFlowMenuClick() {
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeConstants.IS_OF_ICON_CLICKED, true);
+		editor.commit();
+		totalCreditsView.setVisibility(View.GONE);
+		showOverFlowMenu();
+	}
+	
 	private class OverFlowMenuItem{
 		private String name;
 		private int key;
