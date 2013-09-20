@@ -7,6 +7,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.Pair;
 
@@ -21,6 +23,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
@@ -46,7 +49,7 @@ public class ToastListener implements Listener {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
-			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED };
+			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED};
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -187,12 +190,23 @@ public class ToastListener implements Listener {
 				contactInfo = this.db.getContactInfoFromMSISDN(
 						message.getMsisdn(), false);
 			}
-			
-			toaster.notifyMessage(contactInfo, message, true);
+			HikeFile hikeFile=null;
+			boolean isRichPush = true;
+			if (message.isFileTransferMessage()) {
+				hikeFile = message.getMetadata().getHikeFiles().get(0);
+				if (hikeFile != null) {
+					if (hikeFile.getFileTypeString().toLowerCase()
+							.startsWith("image")) {
+						isRichPush = (hikeFile.wasFileDownloaded() && !HikeMessengerApp.fileTransferTaskMap
+								.containsKey(message.getMsgID()) && hikeFile.getThumbnail()!=null) ? true
+								: false;
+					}
+				}
+			}
+			toaster.notifyMessage(contactInfo, message, isRichPush);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
-
 			Protip proTip = (Protip) object;
 			boolean whetherToShow = false;
 			;
@@ -205,7 +219,7 @@ public class ToastListener implements Listener {
 
 			if (proTip.isShowPush() && whetherToShow)
 				toaster.notifyMessage(proTip);
-		}
+		} 
 	}
 
 	private void notifyConnStatus(MQTTConnectionStatus status) {

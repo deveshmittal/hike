@@ -118,7 +118,7 @@ public class HikeNotification {
 	}
 
 	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg,
-			final boolean isRich) {
+			 boolean isRich) {
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
@@ -215,20 +215,18 @@ public class HikeNotification {
 								}
 							}
 
-						} else {
-							if (convMsg.isFileTransferMessage()) {
+						} 
+						//extract the bigpicture image out of the file transfer, if its an image transfer message
+						if (convMsg.isFileTransferMessage() && isRich) {
+							hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
+							if (hikeFile != null) {
+								final String filePath = hikeFile.getFilePath(); // check
+								bigPictureImage = BitmapFactory.decodeFile(filePath);
+								if (bigPictureImage == null)
+									isRich = false;
 
-								hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
-								if (hikeFile != null) {
-									if (hikeFile.getFileTypeString().toLowerCase()
-											.startsWith("image")) {
-										final String filePath = hikeFile.getFilePath(); // check
-										bigPictureImage = BitmapFactory.decodeFile(filePath);
-										if (bigPictureImage != null)
-											doesBigPictureExist = true;
-									}
-								}
-							}
+							} 
+
 						}
 						String partName = "";
 						// For showing the name of the contact that sent the message in a group
@@ -267,11 +265,12 @@ public class HikeNotification {
 						final Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 								key, message));
 
-						if ((convMsg.isStickerMessage())
+
+						if ((convMsg.isStickerMessage()&&doesBigPictureExist)
 								|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
 								.getFileTypeString().toLowerCase().startsWith("image"))
-								&& isRich && doesBigPictureExist) {
-
+								&& isRich ) {
+							
 							final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
 									.getMessage() : HikeFileType.getFileTypeMessage(context,
 											convMsg.getMetadata().getHikeFiles().get(0)
@@ -300,6 +299,7 @@ public class HikeNotification {
 									notificationId, text, key, message, msisdn); // regular text
 						// messages
 	}
+
 
 	public void notifyFavorite(final ContactInfo contactInfo) {
 		final int notificationId = contactInfo.getMsisdn().hashCode();
