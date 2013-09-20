@@ -93,7 +93,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
 	private PopupWindow overFlowWindow;
-	private TextView totalCreditsView;
+	private TextView topBarIndicator;
 	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
@@ -273,16 +273,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		default:
 			return false;
 		}
-		totalCreditsView = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.totalCredits);
-		if(!accountPrefs.getBoolean(HikeConstants.IS_OF_ICON_CLICKED, false)){
-			totalCreditsView.setVisibility(View.VISIBLE);
-		} else{
-			totalCreditsView.setVisibility(View.GONE);
-		}
+		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				onOverFlowMenuClick();
+				showOverFlowMenu();
 			}
 		});
 		
@@ -699,7 +694,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			if (event.getAction() == KeyEvent.ACTION_UP
 					&& keyCode == KeyEvent.KEYCODE_MENU) {
 				if (overFlowWindow == null || !overFlowWindow.isShowing()) {
-					onOverFlowMenuClick();
+					showOverFlowMenu();
 				} else {
 					overFlowWindow.dismiss();
 				}
@@ -709,14 +704,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		return super.onKeyUp(keyCode, event);
 	}
 
-	public void onOverFlowMenuClick() {
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeConstants.IS_OF_ICON_CLICKED, true);
-		editor.commit();
-		totalCreditsView.setVisibility(View.GONE);
-		showOverFlowMenu();
-	}
-	
 	private class OverFlowMenuItem{
 		private String name;
 		private int key;
