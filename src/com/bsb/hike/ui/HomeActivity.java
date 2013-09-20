@@ -791,9 +791,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 						.findViewById(R.id.item_icon);
 				if(item.getKey() == 0){
 					itemImageView.setImageDrawable(myProfileImage);
-					itemImageView.setVisibility(View.VISIBLE);
-				} else
-					itemImageView.setVisibility(View.GONE);
+					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
+				} else{
+					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+				}
 				
 				creditsNum = (TextView) convertView.findViewById(R.id.credit_num);
 				creditsNum.setText(Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
