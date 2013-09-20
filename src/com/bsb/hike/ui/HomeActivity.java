@@ -94,7 +94,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean showingProgress = false;
 	private PopupWindow overFlowWindow;
 	private TextView totalCreditsView;
-	private TextView creditsNum;
 	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
@@ -795,9 +794,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				} else{
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 				}
+
+				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
+				int totalCredits = Integer.parseInt(accountPrefs.getString(
+						HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 				
-				creditsNum = (TextView) convertView.findViewById(R.id.credit_num);
-				creditsNum.setText(Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
+				freeSmsCount.setText(currentCredits+"/"+totalCredits);
+				if(item.getKey() == 1){
+					freeSmsCount.setVisibility(View.VISIBLE);
+				} else{
+					freeSmsCount.setVisibility(View.GONE);
+				}
 				
 				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
