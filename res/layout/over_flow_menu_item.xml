@@ -28,12 +28,12 @@
             android:textSize="18sp" />
         
         <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/credit_num"
+            android:id="@+id/new_games_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/bg_unread_counter"
+            android:background="@drawable/ic_games_indicator"
             android:gravity="center"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"

@@ -798,14 +798,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				creditsNum = (TextView) convertView.findViewById(R.id.credit_num);
 				creditsNum.setText(Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
 				
+				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
+				newGamesIndicator.setText("1");
 				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
-				if(item.getKey() == 1 || (item.getKey()==3 && !isGamesClicked) || (item.getKey()==4&& !isRewardsClicked) ){
-					creditsNum.setText(item.getKey()==1?Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)) : "1");
-					creditsNum.setVisibility(View.VISIBLE);
+				if((item.getKey()==3 && !isGamesClicked) || (item.getKey()==4&& !isRewardsClicked) ){
+					newGamesIndicator.setVisibility(View.VISIBLE);
 				}
 				else
-					creditsNum.setVisibility(View.GONE);
+					newGamesIndicator.setVisibility(View.GONE);
 				return convertView;
 			}
 		});
