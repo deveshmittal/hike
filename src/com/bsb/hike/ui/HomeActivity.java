@@ -97,7 +97,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
-			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL };
+			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
+			HikePubSub.UPDATE_OF_MENU_NOTIFICATION};
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -274,6 +275,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			return false;
 		}
 		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
+		updateOverFlowMenuNotification();
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -673,8 +675,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					dialogShowing = null;
 				}
 			});
-		}
+		} else if (HikePubSub.UPDATE_OF_MENU_NOTIFICATION.equals(type)) {
+			runOnUiThread(new Runnable() {
 
+				@Override
+				public void run() {
+					updateOverFlowMenuNotification();
+				}
+			});
+		}  
 	}
 
 	Runnable refreshTabIcon = new Runnable() {
@@ -834,11 +843,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				case 3:
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
+					updateOverFlowMenuNotification();
 					intent = getGamingIntent();
 					break;
 				case 4:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
+					updateOverFlowMenuNotification();
 					intent = getRewardsIntent();
 					break;
 				case 5:
@@ -884,5 +895,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			});
 
 		super.onRestoreInstanceState(savedInstanceState);
+	}
+	
+	public void updateOverFlowMenuNotification(){
+		if(accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)){
+			topBarIndicator.setVisibility(View.INVISIBLE);
+		} else{
+			topBarIndicator.setVisibility(View.VISIBLE);
+		}
 	}
 }

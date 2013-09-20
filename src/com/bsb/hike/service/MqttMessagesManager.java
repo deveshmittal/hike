@@ -565,8 +565,8 @@ public class MqttMessagesManager {
 
 			boolean inviteTokenAdded = false;
 			boolean inviteeNumChanged = false;
-			boolean toggleRewards = false;
-			boolean toggleGames = false;
+			boolean showNewRewards = false;
+			boolean showNewGames = false;
 			boolean talkTimeChanged = false;
 			int newTalkTime = 0;
 
@@ -664,11 +664,11 @@ public class MqttMessagesManager {
 				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_GAMES));
 				
 				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
-					toggleRewards = true;
+					showNewRewards = true;
 				}
 
 				if (account.optBoolean(HikeConstants.SHOW_GAMES)) {
-					toggleGames = true;
+					showNewGames = true;
 				}
 
 				if (account.has(HikeConstants.REWARDS)) {
@@ -699,14 +699,11 @@ public class MqttMessagesManager {
 			if (inviteeNumChanged) {
 				pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
 			}
-			if (toggleRewards) {
-				pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
-			}
-			if (toggleGames) {
-				pubSub.publish(HikePubSub.TOGGLE_GAMES, null);
-			}
 			if (talkTimeChanged) {
 				pubSub.publish(HikePubSub.TALK_TIME_CHANGED, newTalkTime);
+			}
+			if(showNewGames || showNewRewards){
+				this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 			}
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
@@ -804,9 +801,7 @@ public class MqttMessagesManager {
 			}
 
 			editor.commit();
-
-			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
-			this.pubSub.publish(HikePubSub.TOGGLE_GAMES, null);
+			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 
 		} else if (HikeConstants.MqttMessageTypes.REWARDS.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
