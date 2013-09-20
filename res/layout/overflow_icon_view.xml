@@ -8,7 +8,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:paddingRight="2dp"
-        android:src="@drawable/ic_overflow" />
+        android:src="@drawable/ic_overflow"
+        android:layout_centerInParent="true" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/top_bar_indicator"
