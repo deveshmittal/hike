@@ -96,17 +96,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private SharedPreferences accountPrefs;
 	private ProgressDialog progDialog;
 	private boolean showingProgress = false;
-	private Menu mMenu;
 	private PopupWindow overFlowWindow;
-	private TextView totalCreditsView;
-	private TextView creditsNum;
+	private TextView topBarIndicator;
 	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
-			HikePubSub.REJECT_FRIEND_REQUEST };
+			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -284,25 +282,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		default:
 			return false;
 		}
-		totalCreditsView = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.totalCredits);
-		if(!accountPrefs.getBoolean(HikeConstants.IS_OF_ICON_CLICKED, false)){
-			totalCreditsView.setVisibility(View.VISIBLE);
-		} else{
-			totalCreditsView.setVisibility(View.GONE);
-		}
+		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
+		updateOverFlowMenuNotification();
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeConstants.IS_OF_ICON_CLICKED, true);
-				editor.commit();
-				totalCreditsView.setVisibility(View.GONE);
 				showOverFlowMenu();
 			}
 		});
-
-		mMenu = menu;
+		
 		return true;
 	}
 
@@ -728,8 +716,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					break;
 				}
 			}
-		}
+		} else if (HikePubSub.UPDATE_OF_MENU_NOTIFICATION.equals(type)) {
+			runOnUiThread(new Runnable() {
 
+				@Override
+				public void run() {
+					updateOverFlowMenuNotification();
+				}
+			});
+		}  
 	}
 
 	Runnable refreshTabIcon = new Runnable() {
@@ -774,7 +769,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			if (event.getAction() == KeyEvent.ACTION_UP
 					&& keyCode == KeyEvent.KEYCODE_MENU) {
 				if (overFlowWindow == null || !overFlowWindow.isShowing()) {
-					mMenu.findItem(R.id.overflow_menu).getActionView().callOnClick();
+					showOverFlowMenu();
 				} else {
 					overFlowWindow.dismiss();
 				}
@@ -857,21 +852,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 						.findViewById(R.id.item_icon);
 				if(item.getKey() == 0){
 					itemImageView.setImageDrawable(myProfileImage);
-					itemImageView.setVisibility(View.VISIBLE);
-				} else
-					itemImageView.setVisibility(View.GONE);
+					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
+				} else{
+					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+				}
+
+				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
+				int totalCredits = Integer.parseInt(accountPrefs.getString(
+						HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 				
-				creditsNum = (TextView) convertView.findViewById(R.id.credit_num);
-				creditsNum.setText(Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
+				freeSmsCount.setText(currentCredits+"/"+totalCredits);
+				if(item.getKey() == 1){
+					freeSmsCount.setVisibility(View.VISIBLE);
+				} else{
+					freeSmsCount.setVisibility(View.GONE);
+				}
 				
+				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
+				newGamesIndicator.setText("1");
 				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
-				if(item.getKey() == 1 || (item.getKey()==3 && !isGamesClicked) || (item.getKey()==4&& !isRewardsClicked) ){
-					creditsNum.setText(item.getKey()==1?Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)) : "1");
-					creditsNum.setVisibility(View.VISIBLE);
+				if((item.getKey()==3 && !isGamesClicked) || (item.getKey()==4&& !isRewardsClicked) ){
+					newGamesIndicator.setVisibility(View.VISIBLE);
 				}
 				else
-					creditsNum.setVisibility(View.GONE);
+					newGamesIndicator.setVisibility(View.GONE);
 				return convertView;
 			}
 		});
@@ -903,11 +909,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				case 3:
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
+					updateOverFlowMenuNotification();
 					intent = getGamingIntent();
 					break;
 				case 4:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
+					updateOverFlowMenuNotification();
 					intent = getRewardsIntent();
 					break;
 				case 5:
@@ -953,5 +961,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			});
 
 		super.onRestoreInstanceState(savedInstanceState);
+	}
+	
+	public void updateOverFlowMenuNotification(){
+		if(accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)){
+			topBarIndicator.setVisibility(View.INVISIBLE);
+		} else{
+			topBarIndicator.setVisibility(View.VISIBLE);
+		}
 	}
 }
