@@ -204,8 +204,7 @@ public class StickerAdapter extends PagerAdapter implements
 						public void onScroll(AbsListView view,
 								int firstVisibleItem, int visibleItemCount,
 								int totalItemCount) {
-							if (position == 0
-									|| result.isEmpty()
+							if (result.isEmpty()
 									|| ((ChatThread) activity).getCurrentPage() != position
 									|| !activity
 											.getSharedPreferences(

@@ -283,6 +283,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
 
+	public static final String RESET_REACHED_END_FOR_DEFAULT_STICKERS = "resetReachedEndForDefaultStickers";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -653,6 +655,19 @@ public class HikeMessengerApp extends Application implements Listener {
 					.insertHumanoidStickerCategory();
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(SECOND_CATEGORY_INSERT_TO_DB, true);
+			editor.commit();
+		}
+
+		if (!settings.getBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
+			HikeConversationsDatabase.getInstance()
+					.updateReachedEndForCategory(
+							EmoticonConstants.STICKER_CATEGORY_IDS[0], false);
+			HikeConversationsDatabase.getInstance()
+					.updateReachedEndForCategory(
+							EmoticonConstants.STICKER_CATEGORY_IDS[1], false);
+
+			Editor editor = settings.edit();
+			editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
 			editor.commit();
 		}
 

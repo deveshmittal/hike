@@ -2552,6 +2552,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		addOrUpdateStickerCategory(categoryId, totalNum, false);
 	}
 
+	public void updateReachedEndForCategory(String categoryId,
+			boolean reachedEnd) {
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.REACHED_END, reachedEnd);
+
+		mDb.update(DBConstants.STICKERS_TABLE, values, DBConstants.CATEGORY_ID + "=?",
+				new String[] { categoryId });
+	}
+
 	public void addOrUpdateStickerCategory(String categoryId, int totalNum,
 			boolean reachedEnd) {
 		SQLiteStatement insertStatement = null;
