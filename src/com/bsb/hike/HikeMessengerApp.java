@@ -615,7 +615,11 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 		setupStickerCategoryList(settings);
 
-		if (!settings.contains(REMOVE_HUMANOID_STICKERS)) {
+		/*
+		 * This preference has been used here because of a bug where we were
+		 * inserting this key in the settings preference
+		 */
+		if (!preferenceManager.contains(REMOVE_HUMANOID_STICKERS)) {
 			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
 					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
 			File categoryDir = new File(categoryDirPath);
