@@ -301,7 +301,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				context.getString(R.string.friends), FRIEND_PHONE_NUM);
 		completeList.add(friendsSection);
 
-		if (!HomeActivity.ftueList.isEmpty()
+		if (!HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText)
 				&& friendsList.size() < HikeConstants.FTUE_LIMIT) {
 			int limit = HikeConstants.FTUE_LIMIT - friendsList.size();
 
