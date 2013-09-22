@@ -233,6 +233,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 			});
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
 			if (!shouldAddFTUEItem()) {
+				removeFTUEItemIfExists();
 				return;
 			}
 			addFTUEItem(statusMessages);
@@ -278,14 +279,18 @@ public class UpdatesFragment extends SherlockListFragment implements
 	}
 
 	private void addFTUEItem(List<StatusMessage> statusMessages) {
+		removeFTUEItemIfExists();
+		statusMessages.add(new StatusMessage(
+				CentralTimelineAdapter.FTUE_ITEM_ID, null, null, null, null,
+				null, 0));
+	}
+
+	private void removeFTUEItemIfExists() {
 		if (!statusMessages.isEmpty()) {
 			if (statusMessages.get(statusMessages.size() - 1).getId() == CentralTimelineAdapter.FTUE_ITEM_ID) {
 				statusMessages.remove(statusMessages.size() - 1);
 			}
 		}
-		statusMessages.add(new StatusMessage(
-				CentralTimelineAdapter.FTUE_ITEM_ID, null, null, null, null,
-				null, 0));
 	}
 
 	private class FetchUpdates extends
@@ -316,6 +321,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 			if (shouldAddFTUEItem()) {
 				addFTUEItem(statusMessages);
+			} else {
+				removeFTUEItemIfExists();
 			}
 
 			return statusMessages;
