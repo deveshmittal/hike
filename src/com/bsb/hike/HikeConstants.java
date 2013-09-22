@@ -393,7 +393,7 @@ public class HikeConstants {
 
 	public static final String FONT = "font";
 
-	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 40;
+	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 300;
 
 	public static final String FACEBOOK_PROFILEPIC_URL_FORMAT = "https://graph.facebook.com/%1$s/picture?height=%2$d&width=%2$d";
 
