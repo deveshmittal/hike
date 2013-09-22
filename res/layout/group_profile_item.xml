@@ -59,7 +59,7 @@
             android:text="Rishabh Sharma"
             android:textColor="@color/updates_text"
             android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textStyle="bold|italic" />
 
         <com.bsb.hike.view.LinkedTextView
             android:id="@+id/main_info"
@@ -67,8 +67,7 @@
             android:layout_height="wrap_content"
             android:text="2:45"
             android:textColor="@color/participant_last_seen"
-            android:textSize="12sp"
-            android:textStyle="bold|italic" />
+            android:textSize="12sp" />
     </LinearLayout>
 
     <ImageView 

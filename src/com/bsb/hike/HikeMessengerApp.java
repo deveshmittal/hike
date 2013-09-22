@@ -280,6 +280,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
+	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
+			
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

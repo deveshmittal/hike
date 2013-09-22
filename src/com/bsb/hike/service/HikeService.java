@@ -265,7 +265,6 @@ public class HikeService extends Service {
 			postDeviceDetails = new PostDeviceDetails();
 			registerReceiver(postDeviceDetails, new IntentFilter(
 					SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
 		}
 		/*
 		 * register with the Contact list to get an update whenever the phone

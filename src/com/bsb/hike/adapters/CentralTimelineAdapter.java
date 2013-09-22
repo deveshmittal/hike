@@ -11,19 +11,23 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -31,6 +35,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -41,6 +46,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
+	public static final long FTUE_ITEM_ID = -6;
 
 	private List<StatusMessage> statusMessages;
 	private Context context;
@@ -48,7 +54,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private ImageLoader imageLoader;
 
 	private enum ViewType {
-		PROFILE_PIC_CHANGE, OTHER_UPDATE
+		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
 	}
 
 	public CentralTimelineAdapter(Context context,
@@ -93,7 +99,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	@Override
 	public int getItemViewType(int position) {
 		StatusMessage message = getItem(position);
-		if (message.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+		if (message.getId() == FTUE_ITEM_ID) {
+			return ViewType.FTUE_ITEM.ordinal();
+		} else if (message.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 			return ViewType.PROFILE_PIC_CHANGE.ordinal();
 		}
 		return ViewType.OTHER_UPDATE.ordinal();
@@ -149,6 +157,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
 
+			case FTUE_ITEM:
+				convertView = inflater
+						.inflate(R.layout.ftue_updates_item, null);
+
+				viewHolder.name = (TextView) convertView
+						.findViewById(R.id.name);
+				viewHolder.mainInfo = (TextView) convertView
+						.findViewById(R.id.main_info);
+
+				viewHolder.contactsContainer = (ViewGroup) convertView
+						.findViewById(R.id.contacts_container);
+				viewHolder.parent = convertView.findViewById(R.id.main_content);
+
+				break;
 			case PROFILE_PIC_CHANGE:
 				convertView = inflater.inflate(
 						R.layout.profile_pic_timeline_item, null);
@@ -352,11 +374,55 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.infoContainer
 					.setOnClickListener(onProfileInfoClickListener);
 			break;
+
+		case FTUE_ITEM:
+			viewHolder.name.setText("Close Friends (Placeholder)");
+			viewHolder.mainInfo
+					.setText("Updates are fun with close friends. Luckily, we found some people you can add.(Placeholder)");
+
+			viewHolder.contactsContainer.removeAllViews();
+
+			for (ContactInfo contactInfo : HomeActivity.ftueList) {
+				FavoriteType favoriteType = contactInfo.getFavoriteType();
+				if (favoriteType == FavoriteType.FRIEND
+						|| favoriteType == FavoriteType.REQUEST_SENT
+						|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED
+						|| favoriteType == FavoriteType.REQUEST_RECEIVED) {
+					continue;
+				}
+
+				View parentView = inflater.inflate(
+						R.layout.ftue_updates_contact_item, parent, false);
+
+				ImageView avatar = (ImageView) parentView
+						.findViewById(R.id.avatar);
+				TextView name = (TextView) parentView
+						.findViewById(R.id.contact);
+				TextView addBtn = (TextView) parentView
+						.findViewById(R.id.invite_btn);
+
+				avatar.setImageDrawable(IconCacheManager.getInstance()
+						.getIconForMSISDN(contactInfo.getMsisdn(), true));
+				name.setText(contactInfo.getName());
+
+				addBtn.setTag(contactInfo);
+				addBtn.setOnClickListener(addOnClickListener);
+
+				viewHolder.contactsContainer.addView(parentView);
+			}
+			break;
 		}
 
-		if (viewHolder.parent != null && position == getCount() - 1) {
-			int bottomPadding = context.getResources().getDimensionPixelSize(
-					R.dimen.updates_margin);
+		if (viewHolder.parent != null) {
+			int bottomPadding;
+
+			if (position == getCount() - 1) {
+				bottomPadding = context.getResources().getDimensionPixelSize(
+						R.dimen.updates_margin);
+			} else {
+				bottomPadding = 0;
+			}
+
 			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
 		}
 
@@ -377,6 +443,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView largeProfilePic;
 		View infoContainer;
 		View parent;
+		ViewGroup contactsContainer;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
@@ -478,6 +545,44 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 			intent.setClass(context, ChatThread.class);
 			context.startActivity(intent);
+		}
+	};
+
+	private OnClickListener addOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+
+			FavoriteType favoriteType;
+			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+				favoriteType = FavoriteType.FRIEND;
+			} else {
+				favoriteType = FavoriteType.REQUEST_SENT;
+				Toast.makeText(context, R.string.friend_request_sent,
+						Toast.LENGTH_SHORT).show();
+			}
+
+			/*
+			 * Cloning the object since we don't want to send the ftue
+			 * reference.
+			 */
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo.getId(),
+					contactInfo.getMsisdn(), contactInfo.getName(),
+					contactInfo.getPhoneNum(), contactInfo.isOnhike(), "",
+					contactInfo.getLastMessaged(),
+					contactInfo.hasCustomPhoto(), contactInfo.getHikeJoinTime());
+			contactInfo2.setFavoriteType(contactInfo.getFavoriteType());
+			contactInfo2.setInviteTime(contactInfo.getInviteTime());
+			contactInfo2.setLastSeenTime(contactInfo.getLastSeenTime());
+			contactInfo2.setOffline(contactInfo.getOffline());
+
+			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+					contactInfo2, favoriteType);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteAdded);
+
+			Utils.sendInvite(contactInfo.getMsisdn(), context);
 		}
 	};
 

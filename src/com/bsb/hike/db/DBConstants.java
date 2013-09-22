@@ -6,7 +6,7 @@ public class DBConstants {
 
 	public static final int CONVERSATIONS_DATABASE_VERSION = 21;
 
-	public static final int USERS_DATABASE_VERSION = 14;
+	public static final int USERS_DATABASE_VERSION = 15;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 
@@ -181,4 +181,6 @@ public class DBConstants {
 	public static final String ROUNDED_THUMBNAIL_INDEX = "roundedThumbnailIndex";
 
 	public static final String FILE_THUMBNAIL_INDEX = "fileThumbnailIndex";
+
+	public static final String INVITE_TIMESTAMP = "inviteTimestamp";
 }
