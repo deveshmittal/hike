@@ -33,6 +33,7 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -48,7 +49,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 	private boolean loadingMoreMessages;
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
-			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED };
+			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED,
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED };
 	private String[] friendMsisdns;
 
 	@Override
@@ -112,7 +114,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
-		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
+		if (statusMessage.getId() == CentralTimelineAdapter.FTUE_ITEM_ID
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)) {
 			return;
@@ -228,6 +231,18 @@ public class UpdatesFragment extends SherlockListFragment implements
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
+		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (!shouldAddFTUEItem()) {
+				return;
+			}
+			addFTUEItem(statusMessages);
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
 		}
 	}
 
@@ -237,6 +252,40 @@ public class UpdatesFragment extends SherlockListFragment implements
 			startIndex++;
 		}
 		return startIndex;
+	}
+
+	private boolean shouldAddFTUEItem() {
+		if (HomeActivity.ftueList.isEmpty()
+				|| statusMessages.size() > HikeConstants.MIN_STATUS_COUNT) {
+			return false;
+		}
+
+		/*
+		 * To add an ftue item, we need to make sure the user does not have 5
+		 * friends.
+		 */
+		int friendCounter = 0;
+		for (ContactInfo contactInfo : HomeActivity.ftueList) {
+			FavoriteType favoriteType = contactInfo.getFavoriteType();
+			if (favoriteType == FavoriteType.FRIEND
+					|| favoriteType == FavoriteType.REQUEST_RECEIVED
+					|| favoriteType == FavoriteType.REQUEST_SENT
+					|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED) {
+				friendCounter++;
+			}
+		}
+		return friendCounter < HikeConstants.FTUE_LIMIT;
+	}
+
+	private void addFTUEItem(List<StatusMessage> statusMessages) {
+		if (!statusMessages.isEmpty()) {
+			if (statusMessages.get(statusMessages.size() - 1).getId() == CentralTimelineAdapter.FTUE_ITEM_ID) {
+				statusMessages.remove(statusMessages.size() - 1);
+			}
+		}
+		statusMessages.add(new StatusMessage(
+				CentralTimelineAdapter.FTUE_ITEM_ID, null, null, null, null,
+				null, 0));
 	}
 
 	private class FetchUpdates extends
@@ -264,6 +313,10 @@ public class UpdatesFragment extends SherlockListFragment implements
 					.getInstance().getStatusMessages(true,
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 							friendMsisdns);
+
+			if (shouldAddFTUEItem()) {
+				addFTUEItem(statusMessages);
+			}
 
 			return statusMessages;
 		}

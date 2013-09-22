@@ -157,6 +157,8 @@ public class HikeConstants {
 	public static final String LOGEVENT_TAG = "mob";
 	public static final String FREE_SMS_ON = "free_sms_on";
 	public static final String NATIVE_INVITES = "nativeinvites";
+	public static final String PREF = "pref";
+	public static final String CONTACTS = "contacts";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -181,7 +183,7 @@ public class HikeConstants {
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	public static final String UPGRADE_AVATAR_CONV_DB ="upgradeAvtarProgressConv";
+	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 	public static final String NO_CALL_ALERT_CHECKED ="noCallAlertChecked";
 	public static final String IS_GAMES_ITEM_CLICKED ="isGamesItemClicked";
 	public static final String IS_REWARDS_ITEM_CLICKED ="isRewardsItemClicked";
@@ -198,7 +200,7 @@ public class HikeConstants {
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms/android";
 	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
-	
+
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
@@ -445,6 +447,11 @@ public class HikeConstants {
 	public static final int HDPI_CACHE = 25;
 	public static final int XHDPI_CACHE = 30;
 	public static final int XXHDPI_CACHE = 30;
+
+	public static final int EMPTY_CONVERSATIONS_PREFILL_LIMIT = 6;
+	public static final int FTUE_LIMIT = 5;
+
+	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -764,5 +771,5 @@ public class HikeConstants {
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
-	
+
 }

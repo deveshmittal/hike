@@ -12,10 +12,9 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +25,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,6 +52,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
@@ -69,6 +72,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	public static final int UPDATES_TAB_INDEX = 0;
 	public static final int CHATS_TAB_INDEX = 1;
 	public static final int FRIENDS_TAB_INDEX = 2;
+	public static List<ContactInfo> ftueList = new ArrayList<ContactInfo>(0);
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
@@ -99,7 +103,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private Drawable myProfileImage;
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
-			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL };
+			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED,
+			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
+			HikePubSub.REJECT_FRIEND_REQUEST };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -203,6 +210,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		HikeMessengerApp.getPubSub().addListeners(this, homePubSubListeners);
 
+		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
+		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 	}
 
 	@Override
@@ -686,6 +695,39 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					dialogShowing = null;
 				}
 			});
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
+				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
+				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
+			if (ftueList.isEmpty()) {
+				return;
+			}
+			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+			ContactInfo favoriteToggleContact = favoriteToggle.first;
+
+			for (ContactInfo contactInfo : ftueList) {
+				if (contactInfo.getMsisdn().equals(
+						favoriteToggleContact.getMsisdn())) {
+					contactInfo.setFavoriteType(favoriteToggle.second);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
+					break;
+				}
+			}
+
+		} else if (HikePubSub.USER_JOINED.equals(type)
+				|| HikePubSub.USER_LEFT.equals(type)) {
+			if (ftueList.isEmpty()) {
+				return;
+			}
+			String msisdn = (String) object;
+			for (ContactInfo contactInfo : ftueList) {
+				if (contactInfo.getMsisdn().equals(msisdn)) {
+					contactInfo.setOnhike(HikePubSub.USER_JOINED.equals(type));
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
+					break;
+				}
+			}
 		}
 
 	}
@@ -698,7 +740,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 	};
 
-	@Override
+	private class GetFTUEContactsTask extends
+			AsyncTask<Void, Void, List<ContactInfo>> {
+
+		@Override
+		protected List<ContactInfo> doInBackground(Void... params) {
+			List<ContactInfo> contactList = HikeUserDatabase.getInstance()
+					.getFTUEContacts(accountPrefs);
+			/*
+			 * This msisdn type will be the identifier for ftue contacts in the
+			 * friends tab.
+			 */
+			for (ContactInfo contactInfo : contactList) {
+				contactInfo.setMsisdnType(HikeConstants.FTUE_MSISDN_TYPE);
+			}
+			return contactList;
+		}
+
+		@Override
+		protected void onPostExecute(List<ContactInfo> result) {
+			ftueList = result;
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
+		}
+	}
+
+		@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		Log.d(getClass().getSimpleName(), "Key Event is triggered");
 		if (Build.VERSION.SDK_INT <= 10
