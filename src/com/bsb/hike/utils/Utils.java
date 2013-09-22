@@ -50,6 +50,7 @@ import android.app.Dialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -2845,56 +2846,67 @@ public class Utils {
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 		activity.sendBroadcast(intent);
 	}
-	
+
 	public static void onCallClicked(Activity activity, final String mContactNumber) {
 		final Activity mActivity = activity;
-		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				activity.MODE_PRIVATE);
-		View callAlertCheckBox = View.inflate(activity,
-				R.layout.call_aleart_checkbox, null);
-		CheckBox checkBox = (CheckBox) callAlertCheckBox
-				.findViewById(R.id.callAlertCheckBox);
-		checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-				Editor editor = settings.edit();
-				editor.putBoolean(
-						HikeConstants.NO_CALL_ALERT_CHECKED, isChecked);
-				editor.commit();
-			}
-		});
-		checkBox.setText(activity.getResources().getString(R.string.not_show_call_alert_msg));
+		final SharedPreferences settings = activity.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false)) {
-			Builder builder = new Builder(activity);
-			builder.setTitle(R.string.call_not_free_head);
-			builder.setMessage(R.string.call_not_free_body);
-			builder.setView(callAlertCheckBox);
-			builder.setPositiveButton(R.string.call,
-					new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							Utils.logEvent(mActivity,
-									HikeConstants.LogEvent.MENU_CALL);
-							Intent callIntent = new Intent(Intent.ACTION_CALL);
-							callIntent.setData(Uri.parse("tel:"
-									+ mContactNumber));
-							mActivity.startActivity(callIntent);
-						}
-					});
-			builder.setNegativeButton(R.string.cancel,
-					new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					});
-			builder.show();
-		} else {
+			final Dialog dialog = new Dialog(activity, R.style.Theme_CustomDialog);
+			dialog.setContentView(R.layout.operator_alert_popup);
+			dialog.setCancelable(true);
+	
+			TextView header = (TextView) dialog.findViewById(R.id.header);
+			TextView body = (TextView) dialog.findViewById(R.id.body_text);
+			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+	
+			header.setText(R.string.call_not_free_head);
+			body.setText(R.string.call_not_free_body);
+	
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.call);
+	
+			CheckBox checkBox = (CheckBox) dialog
+					.findViewById(R.id.body_checkbox);
+			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					Editor editor = settings.edit();
+					editor.putBoolean(
+							HikeConstants.NO_CALL_ALERT_CHECKED, isChecked);
+					editor.commit();
+				}
+			});
+			checkBox.setText(activity.getResources().getString(R.string.not_show_call_alert_msg));
+			
+			btnOk.setOnClickListener(new OnClickListener() {
+	
+				@Override
+				public void onClick(View v) {
+					Utils.logEvent(mActivity,
+							HikeConstants.LogEvent.MENU_CALL);
+					Intent callIntent = new Intent(Intent.ACTION_CALL);
+					callIntent.setData(Uri.parse("tel:"
+							+ mContactNumber));
+					mActivity.startActivity(callIntent);
+					dialog.dismiss();
+				}
+			});
+	
+			btnCancel.setOnClickListener(new OnClickListener() {
+	
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
+	
+			dialog.show();
+		}else {
 			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
 			Intent callIntent = new Intent(Intent.ACTION_CALL);
 			callIntent.setData(Uri.parse("tel:" + mContactNumber));
