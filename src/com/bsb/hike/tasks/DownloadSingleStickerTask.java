@@ -98,12 +98,14 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 			Utils.saveBase64StringToFile(new File(largeStickerPath),
 					stickerData);
 
-			Bitmap thumbnail = Utils
-					.scaleDownImage(largeStickerPath, -1, false);
-
-			File smallImage = new File(smallStickerPath);
-			Utils.saveBitmapToFile(smallImage, thumbnail);
-
+			boolean isDisabled = data.optBoolean(HikeConstants.DISABLED_ST);
+			if(!isDisabled){
+				Bitmap thumbnail = Utils
+						.scaleDownImage(largeStickerPath, -1, false);
+	
+				File smallImage = new File(smallStickerPath);
+				Utils.saveBitmapToFile(smallImage, thumbnail);
+			}
 		} catch (JSONException e) {
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			return FTResult.DOWNLOAD_FAILED;

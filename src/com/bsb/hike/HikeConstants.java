@@ -123,6 +123,7 @@ public class HikeConstants {
 	public static final String ADD_STICKER = "addStk";
 	public static final String REMOVE_STICKER = "remStk";
 	public static final String REMOVE_CATEGORY = "remCat";
+	public static final String DISABLED_ST = "disabled";
 	public static final String STATUS = "stat";
 	public static final String OK = "ok";
 	public static final String REACHED_STICKER_END = "st";
