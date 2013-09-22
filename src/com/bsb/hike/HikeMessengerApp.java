@@ -157,11 +157,12 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
 
 	public static final String GCM_ID_SENT = "gcmIdSent";
-	
+
 	public static final String BLOCK_NOTIFICATIONS = "blockNotification";
-	
-	private static final boolean TEST = false;  //TODO:: test flag only : turn OFF for Production
-	
+
+	private static final boolean TEST = false; // TODO:: test flag only : turn
+												// OFF for Production
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -281,7 +282,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
-			
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -471,13 +472,15 @@ public class HikeMessengerApp extends Application implements Listener {
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		//this is the setting to check whether the avtar DB migration has started or not
+		// this is the setting to check whether the avtar DB migration has
+		// started or not
 		int avtarInt = settings.getInt(
 				HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
-		//this is the setting to check whether the conv DB migration has started or not
-		//-1 in both cases means an uninitialized setting, mostly on first launch or interrupted upgrades.
-		int convInt = settings.getInt(
-				HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
+		// this is the setting to check whether the conv DB migration has
+		// started or not
+		// -1 in both cases means an uninitialized setting, mostly on first
+		// launch or interrupted upgrades.
+		int convInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
@@ -485,32 +488,37 @@ public class HikeMessengerApp extends Application implements Listener {
 		super.onCreate();
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
-		
-		//first time or failed DB upgrade.
-		if (avtarInt == -1 && convInt == -1) {  
+
+		// first time or failed DB upgrade.
+		if (avtarInt == -1 && convInt == -1) {
 			Editor mEditor = settings.edit();
-			//set the pref to 0 to indicate we've reached the state to init the hike conversation database.
+			// set the pref to 0 to indicate we've reached the state to init the
+			// hike conversation database.
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 0);
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 0);
 			mEditor.commit();
 		}
-		
-		//we're basically banking on the fact here that init() would be succeeded by the
-		//onUpgrade() calls being triggered in the respective databases.
+
+		// we're basically banking on the fact here that init() would be
+		// succeeded by the
+		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
 		HikeUserDatabase.init(this);
-		
-		//if the setting value is 1 , this means the DB onUpgrade was called successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1  
-				&& settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST) {
-			// turn off future push notifications as soon as the app has started.
-						// this has to be turned on whenever the upgrade finishes.
-						Editor editor = settings.edit();
-						editor.putBoolean(BLOCK_NOTIFICATIONS, true);
-						editor.commit();
-						
-		Intent msgIntent = new Intent(this, UpgradeIntentService.class);
-		startService(msgIntent);
+
+		// if the setting value is 1 , this means the DB onUpgrade was called
+		// successfully.
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings
+				.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)
+				|| TEST) {
+			// turn off future push notifications as soon as the app has
+			// started.
+			// this has to be turned on whenever the upgrade finishes.
+			Editor editor = settings.edit();
+			editor.putBoolean(BLOCK_NOTIFICATIONS, true);
+			editor.commit();
+
+			Intent msgIntent = new Intent(this, UpgradeIntentService.class);
+			startService(msgIntent);
 		}
 
 		HikeMqttPersistence.init(this);
