@@ -415,7 +415,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 			try {
 				final String reportUrl = AccountUtils.base + "/logs/android";
-				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
+				Log.d(HikeMessengerApp.this.getClass().getSimpleName(),
+						"Connect to " + reportUrl.toString());
 
 				final String login = msisdn;
 				final String password = token;
@@ -425,13 +426,14 @@ public class HikeMessengerApp extends Application implements Listener {
 					request.setLogin(login);
 					request.setPassword(password);
 					String paramsAsString = getParamsAsString(crashReportData);
-					Log.e(getClass().getSimpleName(), "Params: "
-							+ paramsAsString);
+					Log.e(HikeMessengerApp.this.getClass().getSimpleName(),
+							"Params: " + paramsAsString);
 					request.send(new URL(reportUrl), HttpSender.Method.POST,
 							paramsAsString, HttpSender.Type.FORM);
 				}
 			} catch (IOException e) {
-				Log.e(getClass().getSimpleName(), "IOException", e);
+				Log.e(HikeMessengerApp.this.getClass().getSimpleName(),
+						"IOException", e);
 			}
 		}
 
