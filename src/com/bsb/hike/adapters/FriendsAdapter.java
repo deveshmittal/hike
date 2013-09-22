@@ -390,9 +390,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		case HIKE_INDEX:
 			hikeContactsList.add(contactInfo);
 			Collections.sort(hikeContactsList);
+			break;
 		case SMS_INDEX:
 			smsContactsList.add(contactInfo);
 			Collections.sort(smsContactsList);
+			break;
 		}
 
 		makeCompleteList(false);
