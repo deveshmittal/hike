@@ -698,8 +698,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						+ DBConstants.CONVERSATIONS_TABLE + " WHERE "
 						+ DBConstants.MSISDN + " ="
 						+ DatabaseUtils.sqlEscapeString(msisdn) + ")") : "");
-		Log.d(getClass().getSimpleName(), "UPDATE STATEMENT: "
-				+ updateStatement);
 
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MSG_STATUS, status);
@@ -821,9 +819,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public boolean wasMessageReceived(ConvMessage conv) {
-		Log.d("HikeConversationsDatabase",
-				"CHECKING MESSAGE ID: " + conv.getMappedMsgID()
-						+ " MESSAGE TIMESTAMP: " + conv.getTimestamp());
 		Cursor c = null;
 		try {
 			c = mDb.query(
@@ -1017,8 +1012,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					conv = new GroupConversation(msisdn, id,
 							(contactInfo != null) ? contactInfo.getName()
 									: null, groupOwner, true);
-					Log.d(getClass().getSimpleName(),
-							"Adding a new group conversation: " + msisdn);
 					InsertHelper groupInfoIH = null;
 					try {
 						groupInfoIH = new InsertHelper(mDb,
@@ -1041,14 +1034,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						}
 					}
 
-					Log.d(getClass().getSimpleName(),
-							"Fetching participants...");
 					((GroupConversation) conv)
 							.setGroupParticipantList(getGroupParticipants(
 									msisdn, false, false));
-					Log.d(getClass().getSimpleName(), "Participants size: "
-							+ ((GroupConversation) conv)
-									.getGroupParticipantList().size());
 				} else {
 					conv = new Conversation(msisdn, id,
 							(contactInfo != null) ? contactInfo.getName()
@@ -1138,8 +1126,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public Conversation getConversation(String msisdn, int limit) {
-		Log.d(getClass().getSimpleName(), "Fetching conversation with msisdn: "
-				+ msisdn);
 		Cursor c = null;
 		HikeUserDatabase huDb = null;
 		Conversation conv = null;
@@ -1189,8 +1175,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	 * @return
 	 */
 	public Conversation getConversationWithLastMessage(String msisdn) {
-		Log.d(getClass().getSimpleName(), "Fetching conversation with msisdn: "
-				+ msisdn);
 		Cursor c = null;
 		HikeUserDatabase huDb = null;
 		Conversation conv = null;
@@ -1747,9 +1731,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			} else {
 				GroupParticipant currentParticipant = currentParticipants
 						.get(newParticipantEntry.getKey());
-				Log.d(getClass().getSimpleName(), "COMPARING current: "
-						+ currentParticipant.onDnd() + " new: "
-						+ newParticipantEntry.getValue().onDnd());
 				if (currentParticipant.onDnd() != newParticipantEntry
 						.getValue().onDnd()) {
 					participantsAlreadyAdded = false;
@@ -1913,8 +1894,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 								.getColumnIndex(DBConstants.HAS_LEFT)) != 0,
 						c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 				participantList.put(msisdn, groupParticipant);
-				Log.d(getClass().getSimpleName(), "Fetching participant: "
-						+ msisdn);
 			}
 			return participantList;
 		} finally {
@@ -2094,9 +2073,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 							+ " AND " + DBConstants.CONV_ID + " =?",
 					new String[] { convId + "" }, null, null, null);
 
-			Log.d(getClass().getSimpleName(),
-					"Number of unread messages for conversation " + convId
-							+ " = " + cursor.getCount());
 			if (!cursor.moveToFirst()) {
 				return null;
 			}
@@ -2105,7 +2081,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			int idIdx = cursor.getColumnIndex(DBConstants.MESSAGE_ID);
 			do {
 				ids[i++] = cursor.getLong(idIdx);
-				Log.d(getClass().getSimpleName(), "Inserting id: " + ids[i - 1]);
 			} while (cursor.moveToNext());
 			return ids;
 		} finally {
@@ -2214,7 +2189,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ startOffset
 					+ (endOffset != 0 ? " AND " + DBConstants.EMOTICON_NUM
 							+ "<" + (endOffset) : "");
-			Log.d(getClass().getSimpleName(), selection);
 			String orderBy = DBConstants.LAST_USED + " DESC "
 					+ (limit != -1 ? (" LIMIT " + limit) : "");
 
@@ -2226,8 +2200,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			while (c.moveToNext()) {
 				emoticonIndices[i++] = c.getInt(emoticonIndexIdx);
 			}
-			Log.d(getClass().getSimpleName(), "Emoticon RES ID size: "
-					+ emoticonIndices.length);
 			return emoticonIndices;
 		} finally {
 			if (c != null) {
@@ -2440,9 +2412,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				try {
 					MessageMetadata messageMetadata = new MessageMetadata(
 							new JSONObject(metadataString));
-					Log.d(getClass().getSimpleName(), "Deleting: " + statusId
-							+ " LASt Status ID: "
-							+ messageMetadata.getStatusMessage().getMappedId());
 
 					if (statusId.equals(messageMetadata.getStatusMessage()
 							.getMappedId())) {

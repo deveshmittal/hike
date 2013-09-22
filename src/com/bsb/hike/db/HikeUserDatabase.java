@@ -357,8 +357,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 								additionalInfo.getInt(typeIdx),
 								additionalInfo.getString(labelIdx)).toString());
 					}
-					Log.d(getClass().getSimpleName(),
-							"Msisdn Type: " + contact.getMsisdnType());
 					additionalInfo.close();
 
 					ih.bind(msisdnTypeColumn, contact.getMsisdnType());
@@ -739,8 +737,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ (onHike != -1 ? " AND " + DBConstants.ONHIKE + "=" + onHike
 						: "");
 
-		Log.d(getClass().getSimpleName(), "Selection: " + selection);
-
 		String orderBy = DBConstants.LAST_MESSAGED + " DESC, "
 				+ DBConstants.NAME + " COLLATE NOCASE"
 				+ (limit > -1 ? " LIMIT " + limit : "");
@@ -846,7 +842,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			queryBuilder.append(")");
 		}
 		String query = queryBuilder.toString();
-		Log.d(getClass().getSimpleName(), "Favorites query: " + query);
 
 		Cursor c = null;
 		try {
@@ -935,8 +930,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 
 		String selection = selectionBuilder.toString();
-
-		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
 		String[] columns = { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
@@ -1443,7 +1436,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						this.mContext.getResources(),
 						extraInfo.getInt(typeIdx),
 						extraInfo.getString(labelIdx)).toString();
-				Log.d(getClass().getSimpleName(), "Msisdntype: " + msisdnType);
 				ContentValues contentValues = new ContentValues(1);
 				contentValues.put(DBConstants.MSISDN_TYPE, msisdnType);
 				String whereClause = DBConstants.PHONE + " =? ";
@@ -1553,7 +1545,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 
 		String selection = selectionBuilder.toString();
-		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
 
 		Cursor c = null;
 		try {
@@ -1650,8 +1641,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		String selection = DBConstants.PHONE + " IN " + selectionNumbers
 				+ " AND " + DBConstants.MSISDN + "!='null' AND "
 				+ DBConstants.ONHIKE + "=0 LIMIT " + limit;
-
-		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
 
 		Cursor c = null;
 		try {
@@ -1754,7 +1743,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				String msisdn = c.getString(msisdnIdx);
 				String name = c.getString(nameIdx);
 				boolean onHike = c.getInt(onHikeIdx) != 0;
-				Log.d(getClass().getSimpleName(), "Name: " + name);
 				contactList.add(new ContactInfo(null, msisdn, name, null,
 						onHike));
 			}
@@ -1818,7 +1806,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 
-			Log.d(getClass().getSimpleName(), favorites.length() + "updated");
 			if (favorites.length() > 0) {
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.REFRESH_FAVORITES, null);
@@ -1920,8 +1907,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			int thumbnailIdx = c.getColumnIndex(DBConstants.IMAGE);
 			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 
-			Log.d(getClass().getSimpleName(),
-					"Making avatars rounded: " + c.getCount());
 			while (c.moveToNext()) {
 				byte[] data = c.getBlob(thumbnailIdx);
 				String msisdn = c.getString(msisdnIdx);
