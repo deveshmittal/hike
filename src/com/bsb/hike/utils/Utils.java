@@ -47,10 +47,8 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -111,11 +109,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
@@ -152,7 +150,6 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -2758,7 +2755,7 @@ public class Utils {
 			asyncTask.execute();
 		}
 	}
-	
+
 	public static void executeConvAsyncTask(
 			AsyncTask<Conversation, Void, Conversation[]> asyncTask,
 			Conversation... conversations) {
@@ -2828,8 +2825,9 @@ public class Utils {
 				&& convMessage.getState() == State.RECEIVED_UNREAD
 				&& convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
 	}
-	
-	public static Intent createIntentForConversation(Context context, Conversation conversation) {
+
+	public static Intent createIntentForConversation(Context context,
+			Conversation conversation) {
 		Intent intent = new Intent(context, ChatThread.class);
 		if (conversation.getContactName() != null) {
 			intent.putExtra(HikeConstants.Extras.NAME,
@@ -2838,92 +2836,101 @@ public class Utils {
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
 		return intent;
 	}
-	
-	public static void createShortcut(Activity activity, Conversation conv){
-		Intent shortcutIntent = Utils.createIntentForConversation(activity, conv);
+
+	public static void createShortcut(Activity activity, Conversation conv) {
+		Intent shortcutIntent = Utils.createIntentForConversation(activity,
+				conv);
 		Intent intent = new Intent();
-		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
-				shortcutIntent);
-		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-				conv.getLabel());
-		Drawable d = IconCacheManager.getInstance()
-				.getIconForMSISDN(conv.getMsisdn());
+		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
+		Drawable d = IconCacheManager.getInstance().getIconForMSISDN(
+				conv.getMsisdn());
 		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
-		Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
-				dimension, dimension, false);
+		Bitmap scaled = Bitmap.createScaledBitmap(bitmap, dimension, dimension,
+				false);
 		bitmap = null;
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 		activity.sendBroadcast(intent);
 	}
 
-	public static void onCallClicked(Activity activity, final String mContactNumber) {
+	public static void onCallClicked(Activity activity,
+			final String mContactNumber) {
 		final Activity mActivity = activity;
 		final SharedPreferences settings = activity.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false)) {
-			final Dialog dialog = new Dialog(activity, R.style.Theme_CustomDialog);
+			final Dialog dialog = new Dialog(activity,
+					R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);
 			dialog.setCancelable(true);
-	
+
 			TextView header = (TextView) dialog.findViewById(R.id.header);
 			TextView body = (TextView) dialog.findViewById(R.id.body_text);
 			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
 			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-	
+
 			header.setText(R.string.call_not_free_head);
 			body.setText(R.string.call_not_free_body);
-	
+
 			btnCancel.setText(R.string.cancel);
 			btnOk.setText(R.string.call);
-	
+
 			CheckBox checkBox = (CheckBox) dialog
 					.findViewById(R.id.body_checkbox);
 			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-	
+
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView,
 						boolean isChecked) {
 					Editor editor = settings.edit();
-					editor.putBoolean(
-							HikeConstants.NO_CALL_ALERT_CHECKED, isChecked);
+					editor.putBoolean(HikeConstants.NO_CALL_ALERT_CHECKED,
+							isChecked);
 					editor.commit();
 				}
 			});
-			checkBox.setText(activity.getResources().getString(R.string.not_show_call_alert_msg));
-			
+			checkBox.setText(activity.getResources().getString(
+					R.string.not_show_call_alert_msg));
+
 			btnOk.setOnClickListener(new OnClickListener() {
-	
+
 				@Override
 				public void onClick(View v) {
-					Utils.logEvent(mActivity,
-							HikeConstants.LogEvent.MENU_CALL);
+					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
 					Intent callIntent = new Intent(Intent.ACTION_CALL);
-					callIntent.setData(Uri.parse("tel:"
-							+ mContactNumber));
+					callIntent.setData(Uri.parse("tel:" + mContactNumber));
 					mActivity.startActivity(callIntent);
 					dialog.dismiss();
 				}
 			});
-	
+
 			btnCancel.setOnClickListener(new OnClickListener() {
-	
+
 				@Override
 				public void onClick(View v) {
 					dialog.dismiss();
 				}
 			});
-	
+
 			dialog.show();
-		}else {
+		} else {
 			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
 			Intent callIntent = new Intent(Intent.ACTION_CALL);
 			callIntent.setData(Uri.parse("tel:" + mContactNumber));
 			activity.startActivity(callIntent);
 		}
+	}
+
+	public static String getFormattedDateTimeFromTimestamp(long milliSeconds,
+			Locale current) {
+		String dateFormat = "dd/MM/yyyy hh:mm:ss a";
+		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliSeconds * 1000);
+		return formatter.format(calendar.getTime());
 	}
 }

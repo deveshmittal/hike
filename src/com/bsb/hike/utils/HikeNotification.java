@@ -118,7 +118,7 @@ public class HikeNotification {
 	}
 
 	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg,
-			final boolean isRich) {
+			 boolean isRich) {
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
@@ -177,7 +177,7 @@ public class HikeNotification {
 						// check if this is a sticker or a file and populate the big picture
 						// accordingly
 						Bitmap bigPictureImage = null;
-						boolean doesStickerExist = false;
+						boolean doesBigPictureExist = false;
 						HikeFile hikeFile = null;
 						if (convMsg.isStickerMessage()) {
 
@@ -203,7 +203,7 @@ public class HikeNotification {
 									final Drawable dr = context.getResources()
 											.getDrawable(resourceId);
 									bigPictureImage = Utils.drawableToBitmap(dr);
-									doesStickerExist = true;
+									doesBigPictureExist = true;
 								}
 
 							} else {
@@ -211,24 +211,22 @@ public class HikeNotification {
 								if (!TextUtils.isEmpty(filePath)) {
 									bigPictureImage = BitmapFactory.decodeFile(filePath);
 									if (bigPictureImage != null)
-										doesStickerExist = true;
+										doesBigPictureExist = true;
 								}
 							}
 
-						} else {
-							if (convMsg.isFileTransferMessage()) {
+						} 
+						//extract the bigpicture image out of the file transfer, if its an image transfer message
+						if (convMsg.isFileTransferMessage() && isRich) {
+							hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
+							if (hikeFile != null) {
+								final String filePath = hikeFile.getFilePath(); // check
+								bigPictureImage = BitmapFactory.decodeFile(filePath);
+								if (bigPictureImage == null)
+									isRich = false;
 
-								hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
-								if (hikeFile != null) {
-									if (hikeFile.getFileTypeString().toLowerCase()
-											.startsWith("image")) {
-										final String filePath = hikeFile.getFilePath(); // check
-										bigPictureImage = BitmapFactory.decodeFile(filePath);
-										if (bigPictureImage != null)
-											doesStickerExist = true;
-									}
-								}
-							}
+							} 
+
 						}
 						String partName = "";
 						// For showing the name of the contact that sent the message in a group
@@ -267,11 +265,12 @@ public class HikeNotification {
 						final Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 								key, message));
 
-						if ((convMsg.isStickerMessage() && doesStickerExist)
+
+						if ((convMsg.isStickerMessage()&&doesBigPictureExist)
 								|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
 								.getFileTypeString().toLowerCase().startsWith("image"))
-								&& isRich) {
-
+								&& isRich ) {
+							
 							final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
 									.getMessage() : HikeFileType.getFileTypeMessage(context,
 											convMsg.getMetadata().getHikeFiles().get(0)
@@ -300,6 +299,7 @@ public class HikeNotification {
 									notificationId, text, key, message, msisdn); // regular text
 						// messages
 	}
+
 
 	public void notifyFavorite(final ContactInfo contactInfo) {
 		final int notificationId = contactInfo.getMsisdn().hashCode();
@@ -366,7 +366,12 @@ public class HikeNotification {
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
 			message = context.getString(R.string.confirmed_friend_2, key);
 			text = message;
-		} else {
+		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+			message = context.getString(
+					R.string.status_profile_pic_notification, key);
+			text = message;
+		}
+		else {
 			/*
 			 * We don't know how to display this type. Just return.
 			 */

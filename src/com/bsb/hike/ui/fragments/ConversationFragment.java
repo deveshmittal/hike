@@ -98,7 +98,6 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 	}
 
-
 	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo> {
 
 		public FTUEGridAdapter(Context context, int textViewResourceId,
@@ -234,11 +233,10 @@ public class ConversationFragment extends SherlockListFragment implements
 		if (conv == null) {
 			return;
 		}
-		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
+		Intent intent = Utils.createIntentForConversation(
+				getSherlockActivity(), conv);
 		startActivity(intent);
 	}
-
-
 
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
@@ -288,13 +286,17 @@ public class ConversationFragment extends SherlockListFragment implements
 							leaveGroup(conv);
 						} else if (getString(R.string.email_conversation)
 								.equals(option)) {
-							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
+							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(
+									getSherlockActivity(),
+									ConversationFragment.this);
 							Utils.executeConvAsyncTask(task, conv);
-						} else if (getString(R.string.deleteconversations).equals(option)) {
-							Utils.logEvent(getActivity(),
+						} else if (getString(R.string.deleteconversations)
+								.equals(option)) {
+							Utils.logEvent(
+									getActivity(),
 									HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 							DeleteAllConversations();
-						} 
+						}
 
 					}
 				});
@@ -713,7 +715,6 @@ public class ConversationFragment extends SherlockListFragment implements
 			mConversationsAdded.add(conv.getMsisdn());
 			mAdapter.add(conv);
 		}
-
 		conv.addMessage(convMessage);
 		Log.d(getClass().getSimpleName(), "new message is " + convMessage);
 		mAdapter.sort(mConversationsComparator);
@@ -722,7 +723,7 @@ public class ConversationFragment extends SherlockListFragment implements
 			messageRefreshHandler = new Handler();
 		}
 	}
-	
+
 	public void DeleteAllConversations() {
 		DialogInterface.OnClickListener dialoagOnClickListener = new DialogInterface.OnClickListener() {
 			@Override
@@ -731,16 +732,14 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 		};
 		if (!mAdapter.isEmpty()) {
-				Utils.logEvent(getActivity(),
-						HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						getActivity());
-				builder.setMessage(R.string.delete_all_question)
-						.setPositiveButton(R.string.delete,
-								dialoagOnClickListener)
-						.setNegativeButton(R.string.cancel,
-								dialoagOnClickListener).show();
-			}
+			Utils.logEvent(getActivity(),
+					HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setMessage(R.string.delete_all_question)
+					.setPositiveButton(R.string.delete, dialoagOnClickListener)
+					.setNegativeButton(R.string.cancel, dialoagOnClickListener)
+					.show();
+		}
 	}
 
 	public void dialogInterfaceClickListener(DialogInterface dialog, int which) {
@@ -762,5 +761,5 @@ public class ConversationFragment extends SherlockListFragment implements
 			break;
 		default:
 		}
-	}	
+	}
 }
