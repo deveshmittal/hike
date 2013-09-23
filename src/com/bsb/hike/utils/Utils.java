@@ -1500,7 +1500,9 @@ public class Utils {
 			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
 			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
 
-			btnCancel.setVisibility(View.GONE);
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.ok);
+			
 			headerView.setText(header);
 			bodyView.setText(body);
 	
