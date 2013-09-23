@@ -1543,10 +1543,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void inviteToHike(String msisdn) {
-		Utils.sendInvite(msisdn, this);
+		Utils.sendInviteUtil(msisdn, this, 
+				null, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, getString(R.string.native_header), getString(R.string.native_info));
 
-		Toast.makeText(getApplicationContext(), R.string.invite_sent,
-				Toast.LENGTH_SHORT).show();
 	}
 
 	public void onBlockUserClicked(View v) {
