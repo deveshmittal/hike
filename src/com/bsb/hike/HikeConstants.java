@@ -188,6 +188,7 @@ public class HikeConstants {
 	public static final String NO_CALL_ALERT_CHECKED ="noCallAlertChecked";
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
+	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 	public static final String IS_GAMES_ITEM_CLICKED ="isGamesItemClicked";
 	public static final String IS_REWARDS_ITEM_CLICKED ="isRewardsItemClicked";
 	public static final String IS_OF_ICON_CLICKED ="isOfIconClicked";
