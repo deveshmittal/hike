@@ -2902,4 +2902,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
+	
+	public void deleteAllProtips(){
+		mDb.delete(DBConstants.PROTIP_TABLE,null, null);
+	}
 }
