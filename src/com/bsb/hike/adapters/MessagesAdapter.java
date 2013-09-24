@@ -1131,8 +1131,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				if (stickerImage.exists() && !downloadingSticker) {
 					holder.stickerImage.setVisibility(View.VISIBLE);
-					holder.stickerImage.setImageBitmap(BitmapFactory
-							.decodeFile(stickerImage.getPath()));
+					holder.stickerImage.setImageDrawable(IconCacheManager
+							.getInstance().getSticker(context,
+									stickerImage.getPath()));
 				} else {
 					holder.stickerLoader.setVisibility(View.VISIBLE);
 					holder.stickerPlaceholder
