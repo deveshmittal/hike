@@ -54,6 +54,7 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
@@ -116,9 +117,14 @@ public class ConversationFragment extends SherlockListFragment implements
 
 			ImageView avatarImage = (ImageView) convertView
 					.findViewById(R.id.avatar);
+			ImageView avatarFrame = (ImageView) convertView
+					.findViewById(R.id.avatar_frame);
 			TextView contactName = (TextView) convertView
 					.findViewById(R.id.name);
 
+			avatarFrame
+					.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike
+							: R.drawable.frame_avatar_ftue_sms);
 			avatarImage.setImageDrawable(IconCacheManager.getInstance()
 					.getIconForMSISDN(contactInfo.getMsisdn(), true));
 			contactName.setText(contactInfo.getName());
@@ -188,6 +194,26 @@ public class ConversationFragment extends SherlockListFragment implements
 		} else {
 			ftueEmptyView.setVisibility(View.GONE);
 			ftueNotEmptyView.setVisibility(View.VISIBLE);
+
+			Button invite = (Button) emptyView.findViewById(R.id.invite);
+			Button newChat = (Button) emptyView.findViewById(R.id.new_chat);
+
+			invite.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(getActivity(), TellAFriend.class));
+				}
+			});
+
+			newChat.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(getActivity(),
+							ComposeActivity.class));
+				}
+			});
 
 			GridView ftueGrid = (GridView) emptyView
 					.findViewById(R.id.ftue_grid);
