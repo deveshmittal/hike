@@ -1112,6 +1112,26 @@ public class MqttMessagesManager {
 			incrementUnseenStatusCount();
 		
 			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
+		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
+			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String version = data.optString(HikeConstants.UPDATE_VERSION);
+			Editor editor = settings.edit();
+			int update = Utils.isUpdateRequired(version, context) ? (data
+					.optBoolean(HikeConstants.CRITICAL_UPDATE_KEY) ? HikeConstants.CRITICAL_UPDATE
+					: HikeConstants.NORMAL_UPDATE)
+					: HikeConstants.NO_UPDATE;
+			if (update == HikeConstants.CRITICAL_UPDATE
+					|| update == HikeConstants.NORMAL_UPDATE) {
+				if (Utils.isUpdateRequired(version, context)) {
+					editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE, update);
+					editor.putString(HikeConstants.Extras.UPDATE_MESSAGE,
+							data.optString(HikeConstants.MESSAGE));
+					editor.putString(HikeConstants.Extras.LATEST_VERSION,
+							version);
+					editor.commit();
+					this.pubSub.publish(HikePubSub.UPDATE_PUSH, update);
+				}
+			}
 		}
 	}
 

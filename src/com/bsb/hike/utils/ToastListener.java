@@ -46,7 +46,8 @@ public class ToastListener implements Listener {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
-			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED };
+			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED,
+			HikePubSub.UPDATE_PUSH};
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -200,6 +201,17 @@ public class ToastListener implements Listener {
 			//the only check we now need is to check whether the pro tip has to push flag true or not
 			if (proTip.isShowPush())
 				toaster.notifyMessage(proTip);
+		}else if (HikePubSub.UPDATE_PUSH.equals(type)) {
+			int update = ((Integer) object).intValue();
+			// todo: possibly handle the case where the alert has been shown in
+			// the app once for the update and
+			// now the user has got a push update from our server.
+			// if its critical, let it go through, if its normal, check the
+			// preference.
+			toaster.notifyHikeUpdate(
+					update,context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+									HikeConstants.Extras.UPDATE_MESSAGE, ""));
 		}
 	}
 

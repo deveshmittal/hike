@@ -50,6 +50,7 @@ public class HikeConstants {
 	public static final String GENDER = "gender";
 	public static final String VERSION = "v";
 	public static final String CRITICAL = "c";
+	public static final String CRITICAL_UPDATE_KEY ="critical";
 	public static final String INVITE_TOKEN = "invite_token";
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 	public static final String DND_NUMBERS = "dndnumbers";
@@ -109,6 +110,7 @@ public class HikeConstants {
 	public static final String UPGRADE = "upgrade";
 	public static final String DEV_TYPE = "dev_type";
 	public static final String APP_VERSION = "app_version";
+	public static final String UPDATE_VERSION ="version";
 	public static final String DEVICE_VERSION = "deviceversion";
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
@@ -185,6 +187,7 @@ public class HikeConstants {
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
+	public static final String CRITICAL_STRING = "critical";
 	public static final String NO_CALL_ALERT_CHECKED ="noCallAlertChecked";
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 	public static final String IS_GAMES_ITEM_CLICKED ="isGamesItemClicked";
@@ -727,6 +730,7 @@ public class HikeConstants {
 		public static final String PROTIP = "pt";
 		public static final String BULK_LAST_SEEN = "bls";
 		public static final String FACEBOOK = "fb";
+		public static final String UPDATE_PUSH = "update";
 	}
 
 	public static final class SMSNative {
