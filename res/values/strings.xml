@@ -135,8 +135,6 @@
 	<string name="free_sms_left">hike to SMS</string>
 	<string name="normal_update">Update to the new version of hike to discover amazing new ways to message</string>
 	<string name="critical_update">To continue using hike, an update is required.</string>
-	<string name="normal_update_head">Update available</string>
-	<string name="critical_update_head">Important update</string>
 	<string name="quit">Quit</string>
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
@@ -673,4 +671,7 @@
 	<string name="invited">Invited</string>
 	<string name="not_show_call_alert_msg">Do Not show this alert again.</string>
 	<string name="view_profile">View Profile</string>
+	<string name="normal_update_head">Important Update available</string>
+  	<string name="critical_update_head">Critical Update required</string>
+  	<string name="downloading_string">Downloading...</string>
 </resources>
