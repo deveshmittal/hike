@@ -71,7 +71,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
@@ -81,7 +81,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
-public class SignupActivity extends HikeAppStateBaseActivity implements
+public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
 		OnClickListener, FinishableEvent, OnCancelListener,
 		DialogInterface.OnClickListener, Listener {
@@ -180,7 +180,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 
-		Object o = getLastNonConfigurationInstance();
+		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof ActivityState) {
 			mActivityState = (ActivityState) o;
 			if (mActivityState.task != null) {
@@ -359,7 +359,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainCustomNonConfigurationInstance() {
 		return mActivityState;
 	}
 
