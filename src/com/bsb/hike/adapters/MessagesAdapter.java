@@ -1015,7 +1015,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								holder.showFileBtn
 										.setImageResource(R.drawable.ic_open_received_file);
 							}
-							holder.showFileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+							holder.showFileBtn
+									.setBackgroundResource(R.drawable.bg_red_btn_selector);
 							holder.messageTextView
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
