@@ -269,6 +269,7 @@ public class HikeConstants {
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
 	public static final int PROFILE_IMAGE_DIMENSIONS = 120;
+	public static final int SIGNUP_PROFILE_IMAGE_DIMENSIONS = 200;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
