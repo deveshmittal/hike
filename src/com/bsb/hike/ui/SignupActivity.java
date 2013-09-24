@@ -314,8 +314,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			restartTask();
 			/*
-			 * Delaying this by 100 ms to allow the signup task to
-			 * setup to the last input point.
+			 * Delaying this by 100 ms to allow the signup task to setup to the
+			 * last input point.
 			 */
 			this.mHandler.postDelayed(new Runnable() {
 
