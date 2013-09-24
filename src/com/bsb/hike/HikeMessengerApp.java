@@ -1,7 +1,5 @@
 package com.bsb.hike;
 
-import static org.acra.ACRA.LOG_TAG;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -60,7 +58,6 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
-import com.bsb.hike.utils.HikeNotification;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
