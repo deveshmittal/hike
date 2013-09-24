@@ -642,6 +642,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+	
+		Utils.setupMicromaxBuild(getApplicationContext());
 	}
 
 	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
