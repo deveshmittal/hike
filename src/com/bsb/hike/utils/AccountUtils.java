@@ -389,6 +389,11 @@ public class AccountUtils {
 			Log.wtf("AccountUtils",
 					"creating a string entity from an entry string threw!", e);
 		}
+		catch(Exception e){
+			Log.wtf("AccountUtils",
+					"generic exception while using SYSTEM FLAGS !", e);
+		}
+		
 		httppost.setEntity(entity);
 
 		JSONObject obj = executeRequest(httppost);
