@@ -431,7 +431,9 @@ public class AccountUtils {
 
 	public static void processMicromaxLogs(boolean isMmxPreload,String deviceId,JSONObject data,Context context) throws JSONException
 	{
-		data.put("preinstall",HikeConstants.MICROMAX.toLowerCase());
+		if(isMmxPreload)			
+			data.put("preload",HikeConstants.MICROMAX.toLowerCase());
+		
 		/* This section is primarily for analystics */
 		Utils.MMX mx = Utils.getMicromaxData(context);
 		if(mx == null) // if mx file does not exist (should be play store version)
