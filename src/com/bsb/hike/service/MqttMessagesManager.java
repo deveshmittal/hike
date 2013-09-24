@@ -1096,11 +1096,10 @@ public class MqttMessagesManager {
 				this.userDb.setIcon(protip.getMappedId(),
 						Base64.decode(iconBase64, Base64.DEFAULT), false);
 			}
-
-			if (Utils.isProtipNotificationShowable(settings)) {
-				incrementUnseenStatusCount();
-			}
-
+			//increment the unseen status count straight away.
+			//we've got a new pro tip.
+			incrementUnseenStatusCount();
+		
 			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		}
 	}

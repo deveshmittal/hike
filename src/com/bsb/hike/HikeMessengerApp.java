@@ -256,8 +256,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
-	public static final String PROTIP_DISMISS_TIME = "protipDismissTime";
-
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
 
 	public static final String CURRENT_PROTIP = "currentProtip";

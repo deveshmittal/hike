@@ -194,16 +194,11 @@ public class ToastListener implements Listener {
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
 
 			Protip proTip = (Protip) object;
-			boolean whetherToShow = false;
-			;
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
-			SharedPreferences accountPrefs = context.getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			whetherToShow = Utils.isProtipNotificationShowable(accountPrefs);
-
-			if (proTip.isShowPush() && whetherToShow)
+			//the only check we now need is to check whether the pro tip has to push flag true or not
+			if (proTip.isShowPush())
 				toaster.notifyMessage(proTip);
 		}
 	}

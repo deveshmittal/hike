@@ -510,8 +510,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				Editor editor = context.getSharedPreferences(
 						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
-						System.currentTimeMillis() / 1000);
 				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
 				editor.commit();
 

@@ -362,26 +362,12 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 			Protip protip = null;
 			boolean showProtip = false;
-			if (currentProtipId == -1) {
-				protip = HikeConversationsDatabase.getInstance()
-						.getLastProtip();
-				if (protip != null) {
-					if (Utils.showProtip(protip, prefs)) {
-						showProtip = true;
-						Editor editor = prefs.edit();
-						editor.putLong(HikeMessengerApp.CURRENT_PROTIP,
-								protip.getId());
-						editor.putLong(HikeMessengerApp.PROTIP_WAIT_TIME,
-								protip.getWaitTime());
-						editor.commit();
-					}
-				}
-			} else {
+			if (currentProtipId !=-1) {
 				showProtip = true;
 				protip = HikeConversationsDatabase.getInstance()
 						.getProtipForId(currentProtipId);
-			}
-
+			} 
+			
 			if (showProtip && protip != null) {
 				statusMessages.add(0, new StatusMessage(protip));
 			}
