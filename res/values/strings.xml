@@ -3,7 +3,7 @@
     <string name="app_name">hike</string>
     <string name="app_label">&#160;hike</string>
     <string name="invite">Tell a friend</string>
-    <string name="deleteconversations">Delete Conversations</string>
+    <string name="deleteconversations">Delete all conversations</string>
     <string name="send">Send</string>
     <string name="type_to_compose">Type to Compose</string>
     <string name="delete">Delete</string>
