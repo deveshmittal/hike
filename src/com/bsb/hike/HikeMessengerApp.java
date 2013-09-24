@@ -670,9 +670,34 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
 			editor.commit();
 		}
+		makeNoMediaFiles();
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+	}
+
+	private void makeNoMediaFiles() {
+		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
+
+		File profileRoot = new File(root + HikeConstants.PROFILE_ROOT);
+		makeNoMediaFile(profileRoot);
+
+		File recordingRoot = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
+		makeNoMediaFile(recordingRoot);
+	}
+
+	private void makeNoMediaFile(File root) {
+		if (!root.exists()) {
+			root.mkdirs();
+		}
+		File file = new File(root, ".nomedia");
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				Log.d(getClass().getSimpleName(), "failed to make nomedia file");
+			}
+		}
 	}
 
 	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
