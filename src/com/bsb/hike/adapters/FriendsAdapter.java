@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -497,6 +499,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		if (convertView == null) {
 			switch (viewType) {
+			case FTUE_CONTACT:
 			case FRIEND:
 				convertView = layoutInflater.inflate(
 						R.layout.friends_child_view, null);
@@ -527,10 +530,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			case EMPTY:
 				convertView = layoutInflater.inflate(
 						R.layout.friends_empty_view, parent, false);
-				break;
-			case FTUE_CONTACT:
-				convertView = layoutInflater.inflate(
-						R.layout.ftue_friends_item, null);
 				break;
 			}
 		}
@@ -582,6 +581,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.request_pending);
+
+						if (!contactInfo.isOnhike()) {
+							TextView inviteBtn = (TextView) convertView
+									.findViewById(R.id.invite_btn);
+							setInviteButton(contactInfo, inviteBtn, null);
+						}
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.sent_friend_request);
@@ -596,12 +601,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 						acceptBtn.setOnClickListener(acceptOnClickListener);
 						rejectBtn.setOnClickListener(rejectOnClickListener);
+
 					} else if (viewType == ViewType.FTUE_CONTACT) {
-						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText("FTUE placeholder string. Need to replace");
+						lastSeen.setVisibility(View.GONE);
 
 						TextView addBtn = (TextView) convertView
 								.findViewById(R.id.invite_btn);
+
+						addBtn.setVisibility(View.VISIBLE);
 						addBtn.setText(R.string.add);
 						addBtn.setTag(contactInfo);
 						addBtn.setOnClickListener(addOnClickListener);
@@ -620,26 +627,21 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					TextView inviteBtn = (TextView) convertView
 							.findViewById(R.id.invite_btn);
+					ImageView inviteIcon = (ImageView) convertView
+							.findViewById(R.id.invite_icon);
+					ViewGroup infoContainer = (ViewGroup) convertView
+							.findViewById(R.id.info_container);
 
-					inviteBtn.setEnabled(true);
-					inviteBtn
-							.setBackgroundResource(R.drawable.bg_red_btn_selector);
-					inviteBtn.setOnClickListener(inviteOnClickListener);
-					inviteBtn.setTag(contactInfo);
-					if (contactInfo.getInviteTime() == 0) {
-						inviteBtn.setText(R.string.invite_1);
+					setInviteButton(contactInfo, inviteBtn, inviteIcon);
+
+					LayoutParams layoutParams = (LayoutParams) infoContainer
+							.getLayoutParams();
+					if (inviteIcon.getVisibility() == View.VISIBLE) {
+						layoutParams.addRule(RelativeLayout.LEFT_OF,
+								inviteIcon.getId());
 					} else {
-						long inviteTime = contactInfo.getInviteTime();
-
-						/*
-						 * If the contact was invited more than an hour back, we
-						 * give the option to remind this contact
-						 */
-						if ((System.currentTimeMillis() / 1000 - inviteTime) > 60 * 60) {
-							inviteBtn.setText(R.string.remind);
-						} else {
-							Utils.setInvited(inviteBtn);
-						}
+						layoutParams.addRule(RelativeLayout.LEFT_OF,
+								inviteBtn.getId());
 					}
 				}
 			}
@@ -684,6 +686,53 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		return convertView;
+	}
+
+	private void setInviteButton(ContactInfo contactInfo, TextView inviteBtn,
+			ImageView inviteIcon) {
+
+		inviteBtn.setEnabled(true);
+		inviteBtn.setBackgroundResource(R.drawable.bg_green_btn_selector);
+		inviteBtn.setTextColor(context.getResources().getColor(R.color.white));
+
+		inviteBtn.setOnClickListener(inviteOnClickListener);
+		inviteBtn.setTag(contactInfo);
+
+		if (inviteIcon != null) {
+			inviteIcon.setOnClickListener(inviteOnClickListener);
+			inviteIcon.setTag(contactInfo);
+		}
+
+		if (contactInfo.getInviteTime() == 0) {
+			if (inviteIcon != null) {
+				inviteIcon.setVisibility(View.VISIBLE);
+				inviteBtn.setVisibility(View.GONE);
+			} else {
+				inviteBtn.setVisibility(View.VISIBLE);
+				inviteBtn.setText(R.string.invite_1);
+			}
+		} else {
+			if (inviteIcon != null) {
+				inviteIcon.setVisibility(View.GONE);
+			}
+			inviteBtn.setVisibility(View.VISIBLE);
+
+			long inviteTime = contactInfo.getInviteTime();
+
+			/*
+			 * If the contact was invited more than an hour back, we give the
+			 * option to remind this contact
+			 */
+			if ((System.currentTimeMillis() / 1000 - inviteTime) > 60 * 60) {
+				inviteBtn.setText(R.string.remind);
+			} else {
+				inviteBtn.setEnabled(false);
+				inviteBtn.setText(R.string.invited);
+				inviteBtn.setBackgroundResource(0);
+				inviteBtn.setTextColor(context.getResources().getColor(
+						R.color.description_lightgrey));
+			}
+		}
 	}
 
 	@Override
@@ -749,11 +798,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		@Override
 		public void onClick(View v) {
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
-			Utils.sendInviteUtil(contactInfo, context, v,
+			Utils.sendInviteUtil(contactInfo, context,
 					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
 					context.getString(R.string.native_header),
 					context.getString(R.string.native_info));
-
 		}
 	};
 
@@ -784,10 +832,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					favoriteAdded);
 
 			if (!contactInfo.isOnhike())
-				Utils.sendInviteUtil(contactInfo2, context, null,
+				Utils.sendInviteUtil(contactInfo2, context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
 						context.getString(R.string.native_header),
 						context.getString(R.string.native_info));
+
 		}
 	};
 

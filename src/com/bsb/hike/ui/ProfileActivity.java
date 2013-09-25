@@ -1543,7 +1543,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void inviteToHike(ContactInfo contactInfo) {
-		Utils.sendInviteUtil(contactInfo, this, null,
+		Utils.sendInviteUtil(contactInfo, this,
 				HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
 				getString(R.string.native_header),
 				getString(R.string.native_info));

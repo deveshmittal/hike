@@ -284,6 +284,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String SERVICE_STARTED = "serviceStarted";
 
+	public static final String INVITE_SENT = "inviteSent";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

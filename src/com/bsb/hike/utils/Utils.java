@@ -1478,8 +1478,8 @@ public class Utils {
 	 * popup body : body text message of dialog popup
 	 */
 	public static void sendInviteUtil(final ContactInfo contactInfo,
-			final Context context, final View inviteBtn,
-			final String checkPref, String header, String body) {
+			final Context context, final String checkPref, String header,
+			String body) {
 		final SharedPreferences settings = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -1498,7 +1498,7 @@ public class Utils {
 			btnOk.setText(R.string.ok);
 
 			headerView.setText(header);
-			bodyView.setText(body);
+			bodyView.setText(String.format(body, contactInfo.getFirstName()));
 
 			CheckBox checkBox = (CheckBox) dialog
 					.findViewById(R.id.body_checkbox);
@@ -1520,7 +1520,7 @@ public class Utils {
 				@Override
 				public void onClick(View v) {
 					dialog.dismiss();
-					invite(context, contactInfo, (TextView) inviteBtn);
+					invite(context, contactInfo);
 				}
 			});
 
@@ -1534,30 +1534,22 @@ public class Utils {
 
 			dialog.show();
 		} else {
-			invite(context, contactInfo, (TextView) inviteBtn);
+			invite(context, contactInfo);
 		}
 	}
 
-	private static void invite(Context context, ContactInfo contactInfo,
-			TextView inviteBtn) {
+	private static void invite(Context context, ContactInfo contactInfo) {
 		sendInvite(contactInfo.getMsisdn(), context, true);
-		if (inviteBtn != null) {
-			setInvited(inviteBtn);
-		} else {
-			Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
-					.show();
-		}
+		Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
+				.show();
 
 		long inviteTime = System.currentTimeMillis() / 1000;
 		contactInfo.setInviteTime(inviteTime);
 
 		HikeUserDatabase.getInstance().updateInvitedTimestamp(
 				contactInfo.getMsisdn(), inviteTime);
-	}
 
-	public static void setInvited(TextView inviteBtn) {
-		inviteBtn.setEnabled(false);
-		inviteBtn.setText(R.string.invited);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,

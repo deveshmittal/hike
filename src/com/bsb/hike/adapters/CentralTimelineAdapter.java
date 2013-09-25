@@ -630,7 +630,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					favoriteAdded);
 
 			if (!contactInfo.isOnhike())
-				Utils.sendInviteUtil(contactInfo2, context, null,
+				Utils.sendInviteUtil(contactInfo2, context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
 						context.getString(R.string.native_header),
 						context.getString(R.string.native_info));
