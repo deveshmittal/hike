@@ -9,7 +9,7 @@
         android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="20dp"
         android:gravity="center"
         android:text="@string/use_hike_for_sms"
         android:textColor="@color/sms_popup"
@@ -29,17 +29,16 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/div1"
         android:layout_marginBottom="15dp"
-        android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="15dp"
-        android:gravity="center"
+        android:layout_marginLeft="20dp"
+        android:gravity="center_vertical"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/body_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:text="@string/call_not_free_body"
             android:textColor="@color/list_item_header"
             android:textSize="16sp" />
@@ -48,7 +47,9 @@
             android:id="@+id/body_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:button="@drawable/compose_checkbox"
+            android:paddingLeft="10dp"
+            android:layout_marginTop="15dp"
             android:text="@string/not_show_call_alert_msg" 
             android:textColor="@color/list_item_header"
             android:textSize="16sp" />
