@@ -376,9 +376,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 
 		case FTUE_ITEM:
-			viewHolder.name.setText("Close Friends (Placeholder)");
+			viewHolder.name.setText(R.string.friends_ftue_item_label);
 			viewHolder.mainInfo
-					.setText("Updates are fun with close friends. Luckily, we found some people you can add.(Placeholder)");
+					.setText(R.string.updates_are_fun_with_friends);
 
 			viewHolder.contactsContainer.removeAllViews();
 

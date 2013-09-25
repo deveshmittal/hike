@@ -1080,37 +1080,47 @@ public class MqttMessagesManager {
 			// the older pro tips once the latest pro tips come in.
 			long currentProtipId = settings.getLong(
 					HikeMessengerApp.CURRENT_PROTIP, -1);
-			if (currentProtipId != -1)
-				convDb.deleteAllProtips();
+			boolean isValidProtip = false;
 
 			Protip protip = new Protip(jsonObj);
-			/*
-			 * Applying the offset.
-			 */
-			protip.setTimeStamp(Utils.applyServerTimeOffset(context,
-					protip.getTimeStamp()));
+			// check upfront if this protip is a valid protip
+			if (protip!=null && currentProtipId != protip.getId()) {
+				isValidProtip = true;
+			}
+			//only if its a valid protip, proceed with the display
+			if (isValidProtip) {
 
-			long id = convDb.addProtip(protip);
-			if (id == -1) {
-				Log.d(getClass().getSimpleName(),
-						"This protip was already added");
-				return;
+				/*
+				 * Applying the offset.
+				 */
+				protip.setTimeStamp(Utils.applyServerTimeOffset(context,
+						protip.getTimeStamp()));
+				long id = convDb.addProtip(protip);
+				if (id == -1) {
+					Log.d(getClass().getSimpleName(),
+							"Error adding this protip");
+					return; // for some reason the insertion failed,
+				}
+				//delete all pro tips before these.
+				//we dont need them anymore.
+				
+				convDb.deleteAllProtipsBeforeThisId(id);
+				protip.setId(id);
+				Editor editor = settings.edit();
+				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, protip.getId());
+				editor.commit();
+				String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
+						.optString(HikeConstants.THUMBNAIL);
+				if (!TextUtils.isEmpty(iconBase64)) {
+					this.userDb.setIcon(protip.getMappedId(),
+							Base64.decode(iconBase64, Base64.DEFAULT), false);
+				}
+				// increment the unseen status count straight away.
+				// we've got a new pro tip.
+				incrementUnseenStatusCount();
+				pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 			}
-			protip.setId(id);
-			Editor editor = settings.edit();
-			editor.putLong(HikeMessengerApp.CURRENT_PROTIP, protip.getId());
-			editor.commit();
 			
-			String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
-					.optString(HikeConstants.THUMBNAIL);
-			if (!TextUtils.isEmpty(iconBase64)) {
-				this.userDb.setIcon(protip.getMappedId(),
-						Base64.decode(iconBase64, Base64.DEFAULT), false);
-			}
-			//increment the unseen status count straight away.
-			//we've got a new pro tip.
-			incrementUnseenStatusCount();
-			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String devType = data.optString(HikeConstants.DEV_TYPE);

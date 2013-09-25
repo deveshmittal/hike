@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,7 +49,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
+			HikePubSub.PROTIP_ADDED};
 	private String[] friendMsisdns;
 
 	@Override
@@ -243,6 +243,14 @@ public class UpdatesFragment extends SherlockListFragment implements
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
+		}else if (HikePubSub.PROTIP_ADDED.equals(type)){
+			addProtip((Protip)object);
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
 		}
 	}
 
@@ -390,4 +398,10 @@ public class UpdatesFragment extends SherlockListFragment implements
 		}
 
 	}
+	
+	private void addProtip(Protip protip){	
+		if(protip!=null)
+			statusMessages.add(getStartIndex(), new StatusMessage(protip));
+	}
+	
 }

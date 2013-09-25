@@ -222,6 +222,7 @@ public class HikeNotification {
 			notificationManager.notify(notificationId,
 					mBuilder.getNotification());
 		}
+		//TODO:: we should reset the gaming download message from preferences
 	}
 	
 	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg,
