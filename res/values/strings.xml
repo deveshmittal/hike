@@ -671,6 +671,7 @@
 	<string name="ftue_grid_string">Start a conversation with one\nof your friends.</string>
 	<string name="remind">Remind</string>
 	<string name="invited">Invited</string>
-	<string name="not_show_call_alert_msg">Do Not show this alert again.</string>
+	<string name="not_show_call_alert_msg">Do not show this again</string>
 	<string name="view_profile">View Profile</string>
+	<string name="ok">OK</string>
 </resources>

@@ -638,7 +638,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						if ((System.currentTimeMillis() / 1000 - inviteTime) > 60 * 60) {
 							inviteBtn.setText(R.string.remind);
 						} else {
-							setInvited(inviteBtn);
+							Utils.setInvited(inviteBtn);
 						}
 					}
 				}
@@ -684,11 +684,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		return convertView;
-	}
-
-	private void setInvited(TextView inviteBtn) {
-		inviteBtn.setEnabled(false);
-		inviteBtn.setText(R.string.invited);
 	}
 
 	@Override
@@ -754,9 +749,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		@Override
 		public void onClick(View v) {
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
-			Utils.sendInvite(contactInfo.getMsisdn(), context);
+			Utils.sendInviteUtil(contactInfo.getMsisdn(), context, 
+					v, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, context.getString(R.string.native_header), context.getString(R.string.native_info));
 
-			setInvited((TextView) v);
 		}
 	};
 
@@ -794,7 +789,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			Utils.sendInvite(contactInfo.getMsisdn(), context);
+			if(!contactInfo.isOnhike())
+				Utils.sendInviteUtil(contactInfo.getMsisdn(), context, 
+						null, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.native_header), context.getString(R.string.native_info));
 		}
 	};
 

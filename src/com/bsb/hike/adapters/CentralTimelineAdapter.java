@@ -638,7 +638,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			Utils.sendInvite(contactInfo.getMsisdn(), context);
+			if(!contactInfo.isOnhike())
+				Utils.sendInviteUtil(contactInfo.getMsisdn(), context, 
+						null, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.native_header), context.getString(R.string.native_info));
 		}
 	};
 

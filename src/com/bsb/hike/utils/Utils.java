@@ -114,7 +114,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.SMSSyncState;
@@ -1461,6 +1461,91 @@ public class Utils {
 
 		HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
 				System.currentTimeMillis() / 1000);
+	}
+
+	/*
+	 * msisdn : mobile number to which we need to send the invite context :
+	 * context of calling activity v : View of invite button which need to be
+	 * set invited if not then send this as null checkPref : preference which
+	 * need to set to not show this dialog. header : header text of the dialog
+	 * popup body : body text message of dialog popup
+	 */
+	public static void sendInviteUtil(final String msisdn,
+			final Context context, final View inviteBtn,
+			final String checkPref, String header, String body) {
+		final SharedPreferences settings = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		if (!settings.getBoolean(checkPref, false)) {
+			final Dialog dialog = new Dialog(context,
+					R.style.Theme_CustomDialog);
+			dialog.setContentView(R.layout.operator_alert_popup);
+			dialog.setCancelable(true);
+
+			TextView headerView = (TextView) dialog.findViewById(R.id.header);
+			TextView bodyView = (TextView) dialog.findViewById(R.id.body_text);
+			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.ok);
+
+			headerView.setText(header);
+			bodyView.setText(body);
+
+			CheckBox checkBox = (CheckBox) dialog
+					.findViewById(R.id.body_checkbox);
+			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					Editor editor = settings.edit();
+					editor.putBoolean(checkPref, isChecked);
+					editor.commit();
+				}
+			});
+			checkBox.setText(context.getResources().getString(
+					R.string.not_show_call_alert_msg));
+
+			btnOk.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					sendInvite(msisdn, context);
+					dialog.dismiss();
+					if (inviteBtn != null) {
+						setInvited((TextView) inviteBtn);
+					} else {
+						Toast.makeText(context, R.string.invite_sent,
+								Toast.LENGTH_SHORT).show();
+					}
+				}
+			});
+
+			btnCancel.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
+
+			dialog.show();
+		} else {
+			sendInvite(msisdn, context);
+			if (inviteBtn != null) {
+				setInvited((TextView) inviteBtn);
+			} else {
+				Toast.makeText(context, R.string.invite_sent,
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
+
+	public static void setInvited(TextView inviteBtn) {
+		inviteBtn.setEnabled(false);
+		inviteBtn.setText(R.string.invited);
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,

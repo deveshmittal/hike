@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -947,7 +948,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				android.R.color.transparent));
 		overFlowWindow.setOutsideTouchable(true);
 		overFlowWindow.setFocusable(true);
-		overFlowWindow.setWidth((int) (Utils.densityMultiplier * 184));
+		overFlowWindow.setWidth((int) (Utils.densityMultiplier * 188));
 		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
 		overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
 		overFlowWindow.getContentView().setFocusableInTouchMode(true);

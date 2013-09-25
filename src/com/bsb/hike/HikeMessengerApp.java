@@ -317,6 +317,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static Map<String, StickerTaskBase> stickerTaskMap;
 
 	public static Map<String, Long> lastSeenFriendsMap;
+	
+	public static HashMap<String, String> hikeBotNamesMap;
 
 	class IncomingHandler extends Handler {
 		@Override
@@ -671,6 +673,12 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+		
+		hikeBotNamesMap = new HashMap<String, String>(){{
+			put("+Hike+", "team hike");
+			put("+Hike1+", "Emma from hike");
+			put("+Hike2+", "Games on hike"); 
+	    }};
 	}
 
 	private void makeNoMediaFiles() {

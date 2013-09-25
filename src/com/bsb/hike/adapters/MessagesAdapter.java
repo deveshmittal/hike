@@ -965,6 +965,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
 						.getIntrinsicHeight());
+				/*
+				 * fixed the bug when imagethumbnail is very big. 
+				 * By specifying a maximum width for the thumbnail
+				 * so that download button can also fit to the screen.
+				 */
+				int maxWidth = (int) (250 * Utils.densityMultiplier);
+				fileThumbParams.width = Math.max(fileThumbParams.width, maxWidth);
 			} else {
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileThumbParams.height = LayoutParams.WRAP_CONTENT;
