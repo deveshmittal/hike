@@ -56,7 +56,7 @@
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right_noalpha</item>
     </style>
 
-    <style name="NoTitleBar" parent="@android:style/Theme.NoTitleBar">
+    <style name="NoTitleBar" parent="@style/Theme.Sherlock.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
     </style>
 
