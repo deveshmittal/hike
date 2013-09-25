@@ -1322,6 +1322,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				}
 				conv = new Conversation(msisdn, convid);
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
+				
+				if(HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn)){
+					conv.setContactName(HikeMessengerApp.hikeBotNamesMap.get(msisdn));	
+				} 
 
 				/*
 				 * If the message does not contain any text or metadata, its an
