@@ -269,15 +269,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		default:
 			return false;
 		}
-		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
+		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu)
+				.getActionView().findViewById(R.id.top_bar_indicator);
 		updateOverFlowMenuNotification();
-		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showOverFlowMenu();
-			}
-		});
-		
+		menu.findItem(R.id.overflow_menu).getActionView()
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						showOverFlowMenu();
+					}
+				});
+
 		return true;
 	}
 
@@ -753,7 +755,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 	}
 
-		@Override
+	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		Log.d(getClass().getSimpleName(), "Key Event is triggered");
 		if (Build.VERSION.SDK_INT <= 10
@@ -772,44 +774,53 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		return super.onKeyUp(keyCode, event);
 	}
 
-	private class OverFlowMenuItem{
+	private class OverFlowMenuItem {
 		private String name;
 		private int key;
-		OverFlowMenuItem(String name, int key){
+
+		OverFlowMenuItem(String name, int key) {
 			this.name = name;
 			this.key = key;
 		}
+
 		public String getName() {
 			return name;
 		}
+
 		public int getKey() {
 			return key;
 		}
 	}
+
 	private void showOverFlowMenu() {
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		SharedPreferences appPref = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		
-		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		myProfileImage = IconCacheManager.getInstance()
-				.getIconForMSISDN(msisdn, true);
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
+		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
+				null);
+		myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
+				msisdn, true);
+
+		optionsList
+				.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
 
 		if (appPref.getBoolean(HikeConstants.FREE_SMS_PREF, true)) {
-			optionsList.add(new OverFlowMenuItem(getString(R.string.free_sms_txt), 1));
+			optionsList.add(new OverFlowMenuItem(
+					getString(R.string.free_sms_txt), 1));
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
+		optionsList.add(new OverFlowMenuItem(
+				getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false)) {
 			optionsList.add(new OverFlowMenuItem(getString(R.string.games), 3));
 		}
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false)) {
-			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
+			optionsList
+					.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
@@ -834,42 +845,49 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					convertView = getLayoutInflater().inflate(
 							R.layout.over_flow_menu_item, parent, false);
 				}
-				
+
 				OverFlowMenuItem item = getItem(position);
 
 				TextView itemTextView = (TextView) convertView
 						.findViewById(R.id.item_title);
 				itemTextView.setText(item.getName());
-				
+
 				ImageView itemImageView = (ImageView) convertView
 						.findViewById(R.id.item_icon);
-				if(item.getKey() == 0){
+				if (item.getKey() == 0) {
 					itemImageView.setImageDrawable(myProfileImage);
-					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
-				} else{
-					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+					convertView.findViewById(R.id.profile_image_view)
+							.setVisibility(View.VISIBLE);
+				} else {
+					convertView.findViewById(R.id.profile_image_view)
+							.setVisibility(View.GONE);
 				}
 
-				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
+				int currentCredits = accountPrefs.getInt(
+						HikeMessengerApp.SMS_SETTING, 0);
 				int totalCredits = Integer.parseInt(accountPrefs.getString(
 						HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
-				
-				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
-				freeSmsCount.setText(currentCredits+"/"+totalCredits);
-				if(item.getKey() == 1){
+
+				TextView freeSmsCount = (TextView) convertView
+						.findViewById(R.id.free_sms_count);
+				freeSmsCount.setText(currentCredits + "/" + totalCredits);
+				if (item.getKey() == 1) {
 					freeSmsCount.setVisibility(View.VISIBLE);
-				} else{
+				} else {
 					freeSmsCount.setVisibility(View.GONE);
 				}
-				
-				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
+
+				TextView newGamesIndicator = (TextView) convertView
+						.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
-				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
-				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
-				if((item.getKey()==3 && !isGamesClicked) || (item.getKey()==4&& !isRewardsClicked) ){
+				boolean isGamesClicked = accountPrefs.getBoolean(
+						HikeConstants.IS_GAMES_ITEM_CLICKED, false);
+				boolean isRewardsClicked = accountPrefs.getBoolean(
+						HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
+				if ((item.getKey() == 3 && !isGamesClicked)
+						|| (item.getKey() == 4 && !isRewardsClicked)) {
 					newGamesIndicator.setVisibility(View.VISIBLE);
-				}
-				else
+				} else
 					newGamesIndicator.setVisibility(View.GONE);
 				return convertView;
 			}
@@ -883,10 +901,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
 				overFlowWindow.dismiss();
-				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView
+						.getItemAtPosition(position);
 				Intent intent = null;
 				Editor editor = accountPrefs.edit();
-				
+
 				switch (item.getKey()) {
 				case 0:
 					intent = new Intent(HomeActivity.this,
@@ -906,7 +925,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					intent = getGamingIntent();
 					break;
 				case 4:
-					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
+					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED,
+							true);
 					editor.commit();
 					updateOverFlowMenuNotification();
 					intent = getRewardsIntent();
@@ -944,9 +964,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		if (savedInstanceState
 				.getBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING))
-			//showOverFlowMenu() method should not be called until all lifecycle 
-			//methods of activity creation have executed successfully otherwise activity will
-			//crash while looking for anchor view of popup menu
+			// showOverFlowMenu() method should not be called until all
+			// lifecycle
+			// methods of activity creation have executed successfully otherwise
+			// activity will
+			// crash while looking for anchor view of popup menu
 			findViewById(R.id.overflow_anchor).post(new Runnable() {
 				public void run() {
 					showOverFlowMenu();
@@ -955,11 +977,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		super.onRestoreInstanceState(savedInstanceState);
 	}
-	
-	public void updateOverFlowMenuNotification(){
-		if(accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)){
+
+	public void updateOverFlowMenuNotification() {
+		if (accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)
+				&& accountPrefs.getBoolean(
+						HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) {
 			topBarIndicator.setVisibility(View.INVISIBLE);
-		} else{
+		} else {
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
 	}
