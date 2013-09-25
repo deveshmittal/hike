@@ -82,6 +82,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.remove(HikeConstants.Extras.UPDATE_TO_IGNORE);
 				editor.remove(HikeConstants.Extras.LATEST_VERSION);
 				editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+				editor.remove(HikeConstants.Extras.URL);
 				editor.commit();
 			}
 			/*

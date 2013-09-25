@@ -219,9 +219,7 @@ public class ToastListener implements Listener {
 						packageName,
 						context.getSharedPreferences(
 								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
-								.getString(
-										HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
-										""));
+								.getString(HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE, ""));
 			}
 
 		}

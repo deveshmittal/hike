@@ -1110,7 +1110,6 @@ public class MqttMessagesManager {
 			//increment the unseen status count straight away.
 			//we've got a new pro tip.
 			incrementUnseenStatusCount();
-		
 			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
@@ -1118,6 +1117,7 @@ public class MqttMessagesManager {
 			if (!TextUtils.isEmpty(devType)
 					&& devType.equals(HikeConstants.ANDROID)) {
 				String version = data.optString(HikeConstants.UPDATE_VERSION);
+				String updateURL = data.optString(HikeConstants.Extras.URL);
 				int update = Utils.isUpdateRequired(version, context) ? (data
 						.optBoolean(HikeConstants.CRITICAL_UPDATE_KEY) ? HikeConstants.CRITICAL_UPDATE
 						: HikeConstants.NORMAL_UPDATE)
@@ -1131,6 +1131,8 @@ public class MqttMessagesManager {
 								data.optString(HikeConstants.MESSAGE));
 						editor.putString(HikeConstants.Extras.LATEST_VERSION,
 								version);
+						if(!TextUtils.isEmpty(updateURL))
+							editor.putString(HikeConstants.Extras.URL, updateURL);
 						editor.commit();
 						this.pubSub.publish(HikePubSub.UPDATE_PUSH, update);
 					}
