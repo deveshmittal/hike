@@ -531,6 +531,9 @@ public class ConversationFragment extends SherlockListFragment implements
 
 			final ConvMessage finalMessage = message;
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -561,6 +564,9 @@ public class ConversationFragment extends SherlockListFragment implements
 					return;
 				}
 				messageList.add(message);
+			}
+			if (getActivity() == null) {
+				return;
 			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
@@ -596,6 +602,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 
 			mConversationsAdded.add(conversation.getMsisdn());
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				public void run() {
 					mAdapter.add(conversation);
@@ -632,6 +642,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 			}
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) {
 			long msgId = ((Long) object).longValue();
@@ -639,6 +652,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			if (Utils.shouldChangeMessageState(msg,
 					ConvMessage.State.SENT_CONFIRMED.ordinal())) {
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type)) {
@@ -658,6 +675,10 @@ public class ConversationFragment extends SherlockListFragment implements
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				}
 			}
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.MESSAGE_DELIVERED.equals(type)) {
 			Pair<String, Long> pair = (Pair<String, Long>) object;
@@ -671,9 +692,16 @@ public class ConversationFragment extends SherlockListFragment implements
 					return;
 				}
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
+			if (getActivity() == null) {
+				return;
+			}
 			/* an icon changed, so update the view */
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) {
@@ -688,6 +716,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 			conv.setContactName(groupName);
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
@@ -700,6 +731,10 @@ public class ConversationFragment extends SherlockListFragment implements
 					.get(contactInfo.getMsisdn());
 			if (conversation != null) {
 				conversation.setContactName(contactInfo.getName());
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)
@@ -719,12 +754,19 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 			conv.setUnreadCount(0);
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.GROUP_LEFT.equals(type)) {
 			String groupId = (String) object;
 			final Conversation conversation = mConversationsByMSISDN
 					.get(groupId);
 			if (conversation == null) {
+				return;
+			}
+
+			if (getActivity() == null) {
 				return;
 			}
 			getActivity().runOnUiThread(new Runnable() {
@@ -734,6 +776,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 			});
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
