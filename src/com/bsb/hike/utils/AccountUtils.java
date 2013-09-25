@@ -474,7 +474,7 @@ public class AccountUtils {
 
 		try {
 			data.put("name", name);
-			data.put("gender", isFemale ? 2 : 1);
+			data.put("gender", isFemale ? "f" : "m");
 			if (birthdate != null) {
 				JSONObject bday = new JSONObject();
 				bday.put("day", birthdate.day);

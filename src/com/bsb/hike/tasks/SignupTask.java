@@ -436,6 +436,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, name);
+			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
 			editor.commit();
 		}
 
