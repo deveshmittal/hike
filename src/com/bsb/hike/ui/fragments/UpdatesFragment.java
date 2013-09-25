@@ -357,7 +357,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 				if (TextUtils.isEmpty(lastStatus)) {
 					noStatusMessage = new StatusMessage(
 							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID,
-							null, "12345", getString(R.string.team_hike),
+							null, "12345", getString(R.string.mood_update),
 							getString(R.string.hey_name, name),
 							StatusMessageType.NO_STATUS,
 							System.currentTimeMillis() / 1000);
@@ -365,7 +365,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 				} else if (result.isEmpty()) {
 					noStatusMessage = new StatusMessage(
 							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID,
-							null, "12345", getString(R.string.team_hike),
+							null, "12345", getString(R.string.mood_update),
 							getString(R.string.hey_name, name),
 							StatusMessageType.NO_STATUS, System
 									.currentTimeMillis() / 1000);

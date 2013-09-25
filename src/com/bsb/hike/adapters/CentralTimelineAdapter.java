@@ -278,10 +278,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
 						|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 								.getId()) {
-					viewHolder.extraInfo
-							.setText(EMPTY_STATUS_NO_STATUS_ID == statusMessage
-									.getId() ? R.string.no_status
-									: R.string.no_status_recently);
+
+					viewHolder.extraInfo.setText(R.string.no_status);
 					viewHolder.yesBtn.setText(R.string.post);
 
 					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
@@ -421,8 +419,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		case FTUE_ITEM:
 			viewHolder.name.setText(R.string.friends_ftue_item_label);
-			viewHolder.mainInfo
-					.setText(R.string.updates_are_fun_with_friends);
+			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_friends);
 
 			viewHolder.contactsContainer.removeAllViews();
 
@@ -639,10 +636,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK);
 
 			if (!contactInfo.isOnhike())
-				Utils.sendInviteUtil(contactInfo2, context,
+				Utils.sendInviteUtil(
+						contactInfo2,
+						context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
-						context.getString(R.string.native_header),
-						context.getString(R.string.native_info),
+						context.getString(R.string.ftue_add_prompt_invite_title),
+						context.getString(R.string.ftue_add_prompt_invite),
 						WhichScreen.UPDATES_TAB);
 		}
 	};

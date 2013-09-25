@@ -838,8 +838,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(contactInfo2, context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
-						context.getString(R.string.native_header),
-						context.getString(R.string.native_info),
+						context.getString(R.string.ftue_add_prompt_invite_title),
+						context.getString(R.string.ftue_add_prompt_invite),
 						WhichScreen.FRIENDS_TAB);
 
 		}
