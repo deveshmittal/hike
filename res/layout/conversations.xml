@@ -77,7 +77,7 @@
                 <GridView
                     android:id="@+id/ftue_grid"
                     android:layout_width="260dp"
-                    android:layout_height="195dp"
+                    android:layout_height="210dp"
                     android:background="@drawable/bg_ftue_grid"
                     android:columnWidth="0dp"
                     android:gravity="center"
