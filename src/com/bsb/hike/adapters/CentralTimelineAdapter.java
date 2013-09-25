@@ -570,13 +570,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
 					editor.commit();
 
-					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.REMOVE_PROTIP,
 							statusMessage.getProtip().getMappedId());
 				} catch (IndexOutOfBoundsException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 		}
 	};
@@ -666,7 +667,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * @param protipIndex the protipIndex to set
+	 * @param protipIndex
+	 *            the protipIndex to set
 	 */
 	public void setProtipIndex(int protipIndex) {
 		this.protipIndex = protipIndex;
