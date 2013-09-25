@@ -262,8 +262,8 @@ public class HikeNotification {
 									message, "*");
 						}
 
-						final Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
-								key, message));
+						final String text = String.format("%1$s: %2$s",
+								key, message);
 
 
 						if ((convMsg.isStickerMessage()&&doesBigPictureExist)
@@ -319,8 +319,8 @@ public class HikeNotification {
 				final String message = context
 						.getString(R.string.add_as_friend_notification_line);
 
-				final Spanned text = Html.fromHtml(context.getString(
-						R.string.add_as_friend_notification, key));
+				final String text = context.getString(
+						R.string.add_as_friend_notification, key);
 
 				showNotification(notificationIntent, icon, timeStamp, notificationId,
 						text, key, message, msisdn);
