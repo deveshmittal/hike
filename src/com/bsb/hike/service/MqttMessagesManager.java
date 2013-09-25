@@ -42,7 +42,6 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
@@ -656,14 +655,16 @@ public class MqttMessagesManager {
 						account.optString(HikeConstants.REWARDS_TOKEN));
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS,
 						account.optBoolean(HikeConstants.SHOW_REWARDS));
-				editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_REWARDS));
+				editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED,
+						!account.optBoolean(HikeConstants.SHOW_REWARDS));
 
 				editor.putString(HikeMessengerApp.GAMES_TOKEN,
 						account.optString(HikeConstants.REWARDS_TOKEN));
 				editor.putBoolean(HikeMessengerApp.SHOW_GAMES,
 						account.optBoolean(HikeConstants.SHOW_GAMES));
-				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_GAMES));
-				
+				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED,
+						!account.optBoolean(HikeConstants.SHOW_GAMES));
+
 				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
 					showNewRewards = true;
 				}
@@ -703,8 +704,9 @@ public class MqttMessagesManager {
 			if (talkTimeChanged) {
 				pubSub.publish(HikePubSub.TALK_TIME_CHANGED, newTalkTime);
 			}
-			if(showNewGames || showNewRewards){
-				this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
+			if (showNewGames || showNewRewards) {
+				this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
+						null);
 			}
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
@@ -786,12 +788,14 @@ public class MqttMessagesManager {
 				boolean showRewards = data
 						.getBoolean(HikeConstants.SHOW_REWARDS);
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
-				editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, !showRewards);
+				editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED,
+						!showRewards);
 			}
 			if (data.has(HikeConstants.SHOW_GAMES)) {
 				boolean showGames = data.getBoolean(HikeConstants.SHOW_GAMES);
 				editor.putBoolean(HikeMessengerApp.SHOW_GAMES, showGames);
-				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, !showGames);
+				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED,
+						!showGames);
 			}
 			if (data.has(HikeConstants.ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS)) {
 				JSONArray array = data

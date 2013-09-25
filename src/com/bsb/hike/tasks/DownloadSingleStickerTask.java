@@ -103,10 +103,10 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 					stickerData);
 
 			boolean isDisabled = data.optBoolean(HikeConstants.DISABLED_ST);
-			if(!isDisabled){
-				Bitmap thumbnail = Utils
-						.scaleDownImage(largeStickerPath, -1, false);
-	
+			if (!isDisabled) {
+				Bitmap thumbnail = Utils.scaleDownImage(largeStickerPath, -1,
+						false);
+
 				File smallImage = new File(smallStickerPath);
 				Utils.saveBitmapToFile(smallImage, thumbnail);
 			}
