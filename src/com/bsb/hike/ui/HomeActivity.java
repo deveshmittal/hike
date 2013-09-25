@@ -17,7 +17,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -104,7 +103,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
-			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION };
+			HikePubSub.REJECT_FRIEND_REQUEST,
+			HikePubSub.UPDATE_OF_MENU_NOTIFICATION, HikePubSub.SERVICE_STARTED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -147,8 +147,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState) {
-		boolean justSignedUp = accountPrefs.getBoolean(
-				HikeMessengerApp.JUST_SIGNED_UP, false);
 
 		setContentView(R.layout.home);
 
@@ -161,17 +159,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					HikeConstants.Extras.DIALOG_SHOWING, -1);
 			if (dialogShowingOrdinal != -1) {
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
-			}
-		}
-
-		if (justSignedUp) {
-
-			Editor editor = accountPrefs.edit();
-			editor.remove(HikeMessengerApp.JUST_SIGNED_UP);
-			editor.commit();
-
-			if (!deviceDetailsSent) {
-				sendDeviceDetails();
 			}
 		}
 
@@ -458,20 +445,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void sendDeviceDetails() {
-		// We're adding this delay to ensure that the service is alive before
-		// sending the message
-		(new Handler()).postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
-				if (obj != null) {
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.MQTT_PUBLISH, obj);
-				}
-				Utils.requestAccountInfo(false);
-				Utils.sendLocaleToServer(HomeActivity.this);
-			}
-		}, 5 * 1000);
+		JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
+		if (obj != null) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		Utils.requestAccountInfo(false, true);
+		Utils.sendLocaleToServer(HomeActivity.this);
 		deviceDetailsSent = true;
 	}
 
@@ -724,7 +703,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					updateOverFlowMenuNotification();
 				}
 			});
-		}  
+		} else if (HikePubSub.SERVICE_STARTED.equals(type)) {
+			boolean justSignedUp = accountPrefs.getBoolean(
+					HikeMessengerApp.JUST_SIGNED_UP, false);
+			if (justSignedUp) {
+
+				Editor editor = accountPrefs.edit();
+				editor.remove(HikeMessengerApp.JUST_SIGNED_UP);
+				editor.commit();
+
+				if (!deviceDetailsSent) {
+					sendDeviceDetails();
+				}
+			}
+
+		}
 	}
 
 	Runnable refreshTabIcon = new Runnable() {

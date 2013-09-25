@@ -282,6 +282,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
+	public static final String SERVICE_STARTED = "serviceStarted";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

@@ -50,7 +50,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.MQTT_PUBLISH, obj);
 					}
-					Utils.requestAccountInfo(true);
+					Utils.requestAccountInfo(true, false);
 
 					/*
 					 * Resetting the boolean preference to post details again

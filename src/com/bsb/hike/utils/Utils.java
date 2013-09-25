@@ -1032,7 +1032,7 @@ public class Utils {
 	/**
 	 * Requests the server to send an account info packet
 	 */
-	public static void requestAccountInfo(boolean upgrade) {
+	public static void requestAccountInfo(boolean upgrade, boolean sendbot) {
 		Log.d("Utils", "Requesting account info");
 		JSONObject requestAccountInfo = new JSONObject();
 		try {
@@ -1041,6 +1041,7 @@ public class Utils {
 
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.UPGRADE, upgrade);
+			data.put(HikeConstants.SENDBOT, sendbot);
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
