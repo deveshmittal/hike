@@ -44,6 +44,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 	private String userMsisdn;
 	private SharedPreferences prefs;
 	private List<StatusMessage> statusMessages;
+	public static boolean isFuxVisible = false;
+	public static boolean isProtipVisible = false;
+	public static boolean isStatusVisible = false;;
 	private boolean reachedEnd;
 	private boolean loadingMoreMessages;
 
@@ -205,18 +208,20 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 		if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
 			final StatusMessage statusMessage = (StatusMessage) object;
-			final int startIndex = getStartIndex();
+			final int startIndex = getStartIndex(HikeConstants.STATUS_ORDINAL);
 			Utils.resetUnseenStatusCount(prefs);
 
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					statusMessages.add(startIndex, statusMessage);
+					isStatusVisible = true;
 					if (noStatusMessage != null
 							&& (statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT || statusMessage
 									.getMsisdn().equals(userMsisdn))) {
 						statusMessages.remove(noStatusMessage);
 						noStatusMessage = null;
+						isFuxVisible = false;
 					}
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
@@ -244,22 +249,43 @@ public class UpdatesFragment extends SherlockListFragment implements
 				}
 			});
 		}else if (HikePubSub.PROTIP_ADDED.equals(type)){
-			addProtip((Protip)object);
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					centralTimelineAdapter.notifyDataSetChanged();
-				}
-			});
+			if (object instanceof Protip) {
+				addProtip((Protip) object);
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						centralTimelineAdapter.notifyDataSetChanged();
+					}
+				});
+			}
 		}
 	}
 
-	private int getStartIndex() {
-		int startIndex = 0;
-		if (noStatusMessage != null) {
-			startIndex++;
+	public static int getStartIndex(int typeOfUpdate) {
+
+		int index = 0;
+		switch (typeOfUpdate) {
+		case HikeConstants.FUX_ORDINAL:
+			// FUX return 0, highest priority
+			break;
+		case HikeConstants.PROTIP_ORDINAL:
+			// Protip, second priority
+			if (isFuxVisible) {
+				index+=1;
+			}
+			break;
+		case HikeConstants.STATUS_ORDINAL:
+			// statusupdate assuming at least FUX is minimum in timeline always
+			if (isFuxVisible && isProtipVisible) {
+				index += 2;
+			} 
+			else {
+				if(isFuxVisible || isProtipVisible)
+				index += 1;
+			}
+			break;
 		}
-		return startIndex;
+		return index;
 	}
 
 	private boolean shouldAddFTUEItem() {
@@ -354,6 +380,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 							StatusMessageType.NO_STATUS,
 							System.currentTimeMillis() / 1000);
 					statusMessages.add(0, noStatusMessage);
+					isFuxVisible = true;
 				} else if (result.isEmpty()) {
 					noStatusMessage = new StatusMessage(
 							CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID,
@@ -362,6 +389,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 							StatusMessageType.NO_STATUS, System
 									.currentTimeMillis() / 1000);
 					statusMessages.add(0, noStatusMessage);
+					isFuxVisible = true;
 				}
 			}
 
@@ -377,7 +405,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 			} 
 			
 			if (showProtip && protip != null) {
-				statusMessages.add(0, new StatusMessage(protip));
+				statusMessages.add(getStartIndex(HikeConstants.PROTIP_ORDINAL), new StatusMessage(protip));
+				isProtipVisible = true;
 			}
 
 			statusMessages.addAll(result);
@@ -401,7 +430,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 	
 	private void addProtip(Protip protip){	
 		if(protip!=null)
-			statusMessages.add(getStartIndex(), new StatusMessage(protip));
+			statusMessages.add(getStartIndex(HikeConstants.PROTIP_ORDINAL), new StatusMessage(protip));
 	}
 	
 }

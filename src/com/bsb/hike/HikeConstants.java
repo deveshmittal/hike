@@ -458,6 +458,10 @@ public class HikeConstants {
 	public static final int FTUE_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
+	
+	public static final int FUX_ORDINAL = 0;
+	public static final int PROTIP_ORDINAL = 1;
+	public static final int STATUS_ORDINAL = 2;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
