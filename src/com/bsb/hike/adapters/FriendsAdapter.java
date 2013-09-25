@@ -34,6 +34,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class FriendsAdapter extends BaseAdapter implements OnClickListener,
@@ -801,7 +802,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			Utils.sendInviteUtil(contactInfo, context,
 					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
 					context.getString(R.string.native_header),
-					context.getString(R.string.native_info));
+					context.getString(R.string.native_info),
+					WhichScreen.SMS_SECTION);
 		}
 	};
 
@@ -831,11 +833,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK);
+
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(contactInfo2, context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
 						context.getString(R.string.native_header),
-						context.getString(R.string.native_info));
+						context.getString(R.string.native_info),
+						WhichScreen.FRIENDS_TAB);
 
 		}
 	};

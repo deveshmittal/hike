@@ -292,11 +292,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		case R.id.new_conversation:
 			intent = new Intent(this, ComposeActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
+
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
 		case R.id.new_update:
 			intent = new Intent(this, StatusUpdate.class);
 			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
 					true);
+
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
 		}
 

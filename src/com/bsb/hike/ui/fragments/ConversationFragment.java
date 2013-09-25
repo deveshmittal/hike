@@ -208,6 +208,8 @@ public class ConversationFragment extends SherlockListFragment implements
 				@Override
 				public void onClick(View v) {
 					startActivity(new Intent(getActivity(), TellAFriend.class));
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
 				}
 			});
 
@@ -217,6 +219,8 @@ public class ConversationFragment extends SherlockListFragment implements
 				public void onClick(View v) {
 					startActivity(new Intent(getActivity(),
 							ComposeActivity.class));
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
 				}
 			});
 
@@ -234,6 +238,9 @@ public class ConversationFragment extends SherlockListFragment implements
 							contactInfo, true);
 					intent.setClass(getActivity(), ChatThread.class);
 					startActivity(intent);
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.GRID_6,
+							contactInfo.getMsisdn());
 				}
 			});
 		}

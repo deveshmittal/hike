@@ -1470,6 +1470,10 @@ public class Utils {
 		}
 	}
 
+	public static enum WhichScreen {
+		FRIENDS_TAB, UPDATES_TAB, SMS_SECTION, OTHER
+	}
+
 	/*
 	 * msisdn : mobile number to which we need to send the invite context :
 	 * context of calling activity v : View of invite button which need to be
@@ -1480,6 +1484,13 @@ public class Utils {
 	public static void sendInviteUtil(final ContactInfo contactInfo,
 			final Context context, final String checkPref, String header,
 			String body) {
+		sendInviteUtil(contactInfo, context, checkPref, header, body,
+				WhichScreen.OTHER);
+	}
+
+	public static void sendInviteUtil(final ContactInfo contactInfo,
+			final Context context, final String checkPref, String header,
+			String body, final WhichScreen whichScreen) {
 		final SharedPreferences settings = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -1520,7 +1531,7 @@ public class Utils {
 				@Override
 				public void onClick(View v) {
 					dialog.dismiss();
-					invite(context, contactInfo);
+					invite(context, contactInfo, whichScreen);
 				}
 			});
 
@@ -1534,14 +1545,17 @@ public class Utils {
 
 			dialog.show();
 		} else {
-			invite(context, contactInfo);
+			invite(context, contactInfo, whichScreen);
 		}
 	}
 
-	private static void invite(Context context, ContactInfo contactInfo) {
+	private static void invite(Context context, ContactInfo contactInfo,
+			WhichScreen whichScreen) {
 		sendInvite(contactInfo.getMsisdn(), context, true);
 		Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
 				.show();
+
+		boolean isReminding = contactInfo.getInviteTime() != 0;
 
 		long inviteTime = System.currentTimeMillis() / 1000;
 		contactInfo.setInviteTime(inviteTime);
@@ -1550,6 +1564,21 @@ public class Utils {
 				contactInfo.getMsisdn(), inviteTime);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
+
+		switch (whichScreen) {
+		case FRIENDS_TAB:
+			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
+					: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);
+			break;
+		case UPDATES_TAB:
+			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
+					: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+			break;
+		case SMS_SECTION:
+			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
+					: HikeConstants.LogEvent.REMIND_SMS_CLICK);
+			break;
+		}
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,
@@ -3010,5 +3039,36 @@ public class Utils {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(milliSeconds * 1000);
 		return formatter.format(calendar.getTime());
+	}
+
+	public static void sendFTUELogEvent(String key) {
+		sendFTUELogEvent(key, null);
+	}
+
+	public static void sendFTUELogEvent(String key, String msisdn) {
+		try {
+			JSONObject mqttMessage = new JSONObject();
+			mqttMessage.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			mqttMessage.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.CLICK);
+			metadata.put(HikeConstants.EVENT_KEY, key);
+
+			if (!TextUtils.isEmpty(msisdn)) {
+				JSONArray msisdns = new JSONArray();
+				msisdns.put(msisdn);
+
+				metadata.put(HikeConstants.TO, msisdns);
+			}
+
+			mqttMessage.put(HikeConstants.METADATA, metadata);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					mqttMessage);
+		} catch (JSONException e) {
+			Log.w("LE", "Invalid json");
+		}
 	}
 }

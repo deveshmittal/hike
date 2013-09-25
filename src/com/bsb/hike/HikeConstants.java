@@ -161,6 +161,8 @@ public class HikeConstants {
 	public static final String PREF = "pref";
 	public static final String CONTACTS = "contacts";
 	public static final String SENDBOT = "sendbot";
+	public static final String EVENT_TYPE = "et";
+	public static final String EVENT_KEY = "ek";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -686,6 +688,24 @@ public class HikeConstants {
 		public static final String HELP_CONTACT = "helpSconT";
 		public static final String HELP_FAQ = "helpSfaQ";
 
+		/*
+		 * FTUE
+		 */
+		public static final String CLICK = "click";
+		public static final String GRID_6 = "grid6";
+		public static final String ADD_FRIENDS_CLICK = "addFriends";
+		public static final String ADD_UPDATES_CLICK = "addUpdates";
+		public static final String INVITE_FTUE_FRIENDS_CLICK = "inviteFTUEFriendsClick";
+		public static final String REMIND_FTUE_FRIENDS_CLICK = "remindFTUEFriendsClick";
+		public static final String INVITE_SMS_CLICK = "inviteSMSClick";
+		public static final String REMIND_SMS_CLICK = "remindSMSClick";
+		public static final String INVITE_FTUE_UPDATES_CLICK = "inviteFTUEUpdatesClick";
+		public static final String REMIND_FTUE_UPDATES_CLICK = "remindFTUEUpdatesClick";
+		public static final String POST_UPDATE_FROM_CARD = "postUpdateFromCard";
+		public static final String POST_UPDATE_FROM_TOP_BAR = "postUpdateFromTopBar";
+		public static final String NEW_CHAT_FROM_GRID = "newChatFromGrid";
+		public static final String NEW_CHAT_FROM_TOP_BAR = "newChatFromTopBar";
+		public static final String INVITE_FROM_GRID = "inviteFromGrid";
 	}
 
 	public static final class MqttMessageTypes {

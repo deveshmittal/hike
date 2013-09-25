@@ -42,6 +42,7 @@ import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
@@ -531,6 +532,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							.getId()) {
 				Intent intent = new Intent(context, StatusUpdate.class);
 				context.startActivity(intent);
+
+				Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				Protip protip = statusMessage.getProtip();
 				String url = protip.getGameDownlodURL();
@@ -629,11 +632,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK);
+
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(contactInfo2, context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
 						context.getString(R.string.native_header),
-						context.getString(R.string.native_info));
+						context.getString(R.string.native_info),
+						WhichScreen.UPDATES_TAB);
 		}
 	};
 
