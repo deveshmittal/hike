@@ -177,7 +177,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	private List<ProfileItem> profileItems;
 
 	private boolean isGroupOwner;
-	
+
 	private Menu mMenu;
 
 	/* store the task so we can keep keep the progress dialog going */
@@ -2060,7 +2060,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			startActivity(intent);
 		}
 	}
-	
+
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (Build.VERSION.SDK_INT <= 10
