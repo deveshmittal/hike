@@ -71,53 +71,54 @@ public class ToastListener implements Listener {
 		} else if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
 			if (message.isShouldShowPush()) {
-			HikeConversationsDatabase hCDB = HikeConversationsDatabase
-					.getInstance();
-			message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+				HikeConversationsDatabase hCDB = HikeConversationsDatabase
+						.getInstance();
+				message.setConversation(hCDB.getConversation(
+						message.getMsisdn(), 0));
 
-			if (message.getConversation() == null) {
-				Log.w(getClass().getSimpleName(),
-						"The client did not get a GCJ message for us to handle this message.");
-				return;
-			}
-			if ((message.getConversation() instanceof GroupConversation)
-					&& ((GroupConversation) message.getConversation())
-							.isMuted()) {
-				Log.d(getClass().getSimpleName(), "Group has been muted");
-				return;
-			}
-			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO
-					|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-					|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-				Activity activity = (currentActivity != null) ? currentActivity
-						.get() : null;
-				if ((activity instanceof ChatThread)) {
-					String contactNumber = ((ChatThread) activity)
-							.getContactNumber();
-					if (message.getMsisdn().equals(contactNumber)) {
-						return;
+				if (message.getConversation() == null) {
+					Log.w(getClass().getSimpleName(),
+							"The client did not get a GCJ message for us to handle this message.");
+					return;
+				}
+				if ((message.getConversation() instanceof GroupConversation)
+						&& ((GroupConversation) message.getConversation())
+								.isMuted()) {
+					Log.d(getClass().getSimpleName(), "Group has been muted");
+					return;
+				}
+				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO
+						|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+					Activity activity = (currentActivity != null) ? currentActivity
+							.get() : null;
+					if ((activity instanceof ChatThread)) {
+						String contactNumber = ((ChatThread) activity)
+								.getContactNumber();
+						if (message.getMsisdn().equals(contactNumber)) {
+							return;
+						}
 					}
+
+					/*
+					 * the foreground activity isn't going to show this message
+					 * so Toast it
+					 */
+					ContactInfo contactInfo;
+					if (message.isGroupChat()) {
+						Log.d("ToastListener", "GroupName is "
+								+ message.getConversation().getLabel());
+						contactInfo = new ContactInfo(message.getMsisdn(),
+								message.getMsisdn(), message.getConversation()
+										.getLabel(), message.getMsisdn());
+					} else {
+						contactInfo = this.db.getContactInfoFromMSISDN(
+								message.getMsisdn(), false);
+					}
+					this.toaster.notifyMessage(contactInfo, message, true);
 				}
 
-				/*
-				 * the foreground activity isn't going to show this message so
-				 * Toast it
-				 */
-				ContactInfo contactInfo;
-				if (message.isGroupChat()) {
-					Log.d("ToastListener", "GroupName is "
-							+ message.getConversation().getLabel());
-					contactInfo = new ContactInfo(message.getMsisdn(),
-							message.getMsisdn(), message.getConversation()
-									.getLabel(), message.getMsisdn());
-				} else {
-					contactInfo = this.db.getContactInfoFromMSISDN(
-							message.getMsisdn(), false);
-				}
-				this.toaster.notifyMessage(contactInfo, message, true);
 			}
-				
-		 }
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
 			mCurrentUnnotifiedStatus = status;
