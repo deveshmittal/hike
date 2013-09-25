@@ -212,6 +212,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 				@Override
 				public void run() {
 					statusMessages.add(startIndex, statusMessage);
+					
 					if (noStatusMessage != null
 							&& (statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT || statusMessage
 									.getMsisdn().equals(userMsisdn))) {
@@ -340,7 +341,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 					HikeMessengerApp.NAME_SETTING, null));
 			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS,
 					"");
-
+			
 			/*
 			 * If we already have a few status messages in the timeline, no need
 			 * to prompt the user to post his/her own message.
@@ -377,7 +378,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 			} 
 			
 			if (showProtip && protip != null) {
-				statusMessages.add(0, new StatusMessage(protip));
+				final int startIndex = getStartIndex();
+				statusMessages.add(startIndex, new StatusMessage(protip));
+				centralTimelineAdapter.setProtipIndex(startIndex);
 			}
 
 			statusMessages.addAll(result);
@@ -400,8 +403,11 @@ public class UpdatesFragment extends SherlockListFragment implements
 	}
 	
 	private void addProtip(Protip protip){	
-		if(protip!=null)
+		if(protip!=null){
+			final int startIndex = getStartIndex();
 			statusMessages.add(getStartIndex(), new StatusMessage(protip));
+			centralTimelineAdapter.setProtipIndex(startIndex);
+		}
 	}
 	
 }

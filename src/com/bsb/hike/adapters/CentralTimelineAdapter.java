@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,7 +46,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
 	public static final long FTUE_ITEM_ID = -6;
-
+	private int protipIndex;
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
@@ -63,6 +62,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.imageLoader = new ImageLoader(context);
+		this.protipIndex = -1;
 	}
 
 	@Override
@@ -504,17 +504,22 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				/*
 				 * Removing the protip
 				 */
-				statusMessages.remove(0);
+				try {
+					statusMessages.remove(getProtipIndex());
+					notifyDataSetChanged();
 
-				notifyDataSetChanged();
+					Editor editor = context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+					editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+					editor.commit();
 
-				Editor editor = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-				editor.commit();
-
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-						statusMessage.getProtip().getMappedId());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+							statusMessage.getProtip().getMappedId());
+				} catch (IndexOutOfBoundsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		}
 	};
@@ -593,5 +598,19 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	public void restartImageLoaderThread() {
 		imageLoader = new ImageLoader(context);
+	}
+
+	/**
+	 * @return the protipIndex
+	 */
+	public int getProtipIndex() {
+		return protipIndex;
+	}
+
+	/**
+	 * @param protipIndex the protipIndex to set
+	 */
+	public void setProtipIndex(int protipIndex) {
+		this.protipIndex = protipIndex;
 	}
 }
