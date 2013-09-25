@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="47dp"
     android:gravity="center"
-    android:paddingBottom="8dp"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:paddingTop="8dp" >
+    android:paddingLeft="20dp"
+    android:paddingRight="16dp" >
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -33,10 +31,9 @@
             android:id="@+id/item_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
             android:layout_alignParentLeft="true"
-            android:textColor="#f7eee2"
-            android:textSize="18sp" />
+            android:textColor="@color/white"
+            android:textSize="16sp" />
         
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/new_games_indicator"
@@ -46,11 +43,9 @@
             android:layout_centerVertical="true"
             android:background="@drawable/ic_games_indicator"
             android:gravity="center"
-            android:paddingLeft="2dp"
-            android:paddingRight="2dp"
             android:text="0"
             android:textColor="@color/white"
-            android:textSize="12dp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:visibility="gone" />
         
@@ -61,11 +56,9 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:paddingLeft="2dp"
-            android:paddingRight="2dp"
             android:text="0"
             android:textColor="#a59b94"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:visibility="gone" />
     </RelativeLayout>

@@ -14,6 +14,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -146,6 +147,7 @@ public class ConversationFragment extends SherlockListFragment implements
 	private Comparator<? super Conversation> mConversationsComparator;
 	private Handler messageRefreshHandler;
 	private View emptyView;
+	private enum hikeBotConvStat{NOTVIEWED, VIEWED, DELETED};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -236,6 +238,15 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
 		startActivity(intent);
+		
+		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if(conv.getMsisdn().equals(HikeConstants.FTUE_HIKEBOT_MSISDN) 
+				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.NOTVIEWED.ordinal()){
+			Editor editor = prefs.edit();
+			editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.VIEWED.ordinal());
+			editor.commit();
+		}
+
 	}
 
 
@@ -529,6 +540,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			});
 		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
 			final Conversation conversation = (Conversation) object;
+			if(HikeMessengerApp.hikeBotNamesMap.containsKey(conversation.getMsisdn())){
+				conversation.setContactName(HikeMessengerApp.hikeBotNamesMap.get(conversation.getMsisdn()));	
+			} 
 			Log.d(getClass().getSimpleName(),
 					"New Conversation. Group Conversation? "
 							+ (conversation instanceof GroupConversation));
@@ -762,5 +776,27 @@ public class ConversationFragment extends SherlockListFragment implements
 			break;
 		default:
 		}
-	}	
+	}
+	
+	@Override
+	public void onResume() {
+		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if(prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED.ordinal()){
+			/* 
+			 * if there is a HikeBotConversation in Conversation list also it is Viewed by user then delete this.
+			 */
+			Conversation conv = null;
+			conv = mConversationsByMSISDN.get(HikeConstants.FTUE_HIKEBOT_MSISDN);
+			if(conv != null){
+				Editor editor = prefs.edit();
+				editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.DELETED.ordinal());
+				editor.commit();
+				Utils.logEvent(getActivity(),
+						HikeConstants.LogEvent.DELETE_CONVERSATION);
+				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+				Utils.executeConvAsyncTask(task, conv);
+			}
+		}
+		super.onResume();
+	}
 }
