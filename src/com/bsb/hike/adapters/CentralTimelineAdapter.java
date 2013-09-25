@@ -278,6 +278,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
 						|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 								.getId()) {
+					viewHolder.timeStamp.setVisibility(View.GONE);
 
 					viewHolder.extraInfo.setText(R.string.no_status);
 					viewHolder.yesBtn.setText(R.string.post);
