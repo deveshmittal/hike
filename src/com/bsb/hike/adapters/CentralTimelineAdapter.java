@@ -49,7 +49,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
 	public static final long FTUE_ITEM_ID = -6;
-
+	private int protipIndex;
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
@@ -81,6 +81,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.imageLoader = new ImageLoader(context);
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.protipIndex = -1;
 	}
 
 	@Override
@@ -419,9 +420,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 
 		case FTUE_ITEM:
-			viewHolder.name.setText("Close Friends (Placeholder)");
+			viewHolder.name.setText(R.string.friends_ftue_item_label);
 			viewHolder.mainInfo
-					.setText("Updates are fun with close friends. Luckily, we found some people you can add.(Placeholder)");
+					.setText(R.string.updates_are_fun_with_friends);
 
 			viewHolder.contactsContainer.removeAllViews();
 
@@ -562,19 +563,22 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				/*
 				 * Removing the protip
 				 */
-				statusMessages.remove(0);
+				try {
+					statusMessages.remove(getProtipIndex());
+					notifyDataSetChanged();
 
-				notifyDataSetChanged();
+					Editor editor = context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+					editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+					editor.commit();
 
-				Editor editor = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
-						System.currentTimeMillis() / 1000);
-				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-				editor.commit();
-
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-						statusMessage.getProtip().getMappedId());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+							statusMessage.getProtip().getMappedId());
+				} catch (IndexOutOfBoundsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		}
 	};
@@ -652,5 +656,19 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	public void restartImageLoaderThread() {
 		imageLoader = new ImageLoader(context);
+	}
+
+	/**
+	 * @return the protipIndex
+	 */
+	public int getProtipIndex() {
+		return protipIndex;
+	}
+
+	/**
+	 * @param protipIndex the protipIndex to set
+	 */
+	public void setProtipIndex(int protipIndex) {
+		this.protipIndex = protipIndex;
 	}
 }

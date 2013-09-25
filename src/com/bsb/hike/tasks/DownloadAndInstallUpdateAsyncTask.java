@@ -48,7 +48,7 @@ public class DownloadAndInstallUpdateAsyncTask extends
 				intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		notification = new Notification(R.drawable.ic_contact_logo,
-				"Downloading file...", System.currentTimeMillis());
+				context.getString(R.string.downloading), System.currentTimeMillis());
 		notification.flags = notification.flags
 				| Notification.FLAG_ONGOING_EVENT;
 		notification.contentIntent = pendingIntent;

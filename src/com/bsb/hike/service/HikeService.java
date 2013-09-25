@@ -901,34 +901,6 @@ public class HikeService extends Service {
 		}
 	};
 
-	public void scheduleNextUpdateCheck() {
-		// Randomizing the time when we will poll the server for an update
-		Random random = new Random();
-
-		Calendar wakeUpTime = Calendar.getInstance();
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true)) {
-			int hour = random.nextInt(48) + 1;
-			wakeUpTime.add(Calendar.HOUR, hour);
-		} else {
-			int min = random.nextInt(2) + 1;
-			wakeUpTime.add(Calendar.MINUTE, min);
-		}
-		long scheduleTime = getScheduleTime(wakeUpTime.getTimeInMillis());
-
-		postRunnableWithDelay(checkForUpdates, scheduleTime);
-	}
-
-	private Runnable checkForUpdates = new Runnable() {
-
-		@Override
-		public void run() {
-			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
-					HikeService.this);
-			Utils.executeBoolResultAsyncTask(checkForUpdateTask);
-		}
-	};
-
 	public boolean appIsConnected() {
 		return mApp != null;
 	}

@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,13 +7,16 @@ import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,8 +26,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,6 +60,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -77,7 +82,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 												// for Production
 
 	private enum DialogShowing {
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -95,6 +100,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private Dialog dialog;
 	private SharedPreferences accountPrefs;
 	private ProgressDialog progDialog;
+	private Dialog updateAlert;
+	private Button updateAlertOkBtn;
+	private static int updateType;
 	private boolean showingProgress = false;
 	private PopupWindow overFlowWindow;
 	private TextView topBarIndicator;
@@ -105,7 +113,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.UPDATE_OF_MENU_NOTIFICATION, HikePubSub.SERVICE_STARTED };
+			HikePubSub.UPDATE_OF_MENU_NOTIFICATION, HikePubSub.SERVICE_STARTED,
+			HikePubSub.UPDATE_PUSH };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -162,6 +171,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 			}
 		}
+		// check the preferences and show update
+		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
+				HikeConstants.NO_UPDATE);
+		showUpdatePopup(updateType);
 
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
@@ -183,6 +196,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			case SMS_SYNC_CONFIRMATION:
 			case SMS_SYNCING:
 				showSMSSyncDialog();
+				break;
+			case UPGRADE_POPUP:
+				showUpdatePopup(updateType);
 				break;
 			}
 		}
@@ -461,6 +477,35 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		deviceDetailsSent = true;
 	}
 
+	private void updateApp(int updateType) {
+		if (TextUtils.isEmpty(this.accountPrefs.getString(
+				HikeConstants.Extras.UPDATE_URL, ""))) {
+			Intent marketIntent = new Intent(Intent.ACTION_VIEW,
+					Uri.parse("market://details?id=" + getPackageName()));
+			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+					| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+			try {
+				startActivity(marketIntent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(HomeActivity.class.getSimpleName(),
+						"Unable to open market");
+			}
+			if (updateType == HikeConstants.NORMAL_UPDATE) {
+				updateAlert.dismiss();
+			}
+		} else {
+			// In app update!
+
+			updateAlertOkBtn.setText(R.string.downloading_string);
+			updateAlertOkBtn.setEnabled(false);
+
+			DownloadAndInstallUpdateAsyncTask downloadAndInstallUpdateAsyncTask = new DownloadAndInstallUpdateAsyncTask(
+					this, accountPrefs.getString(
+							HikeConstants.Extras.UPDATE_URL, ""));
+			downloadAndInstallUpdateAsyncTask.execute();
+		}
+	}
+
 	private void initialiseTabs() {
 		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
 
@@ -630,6 +675,110 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	}
 
+	private void showUpdatePopup(final int updateType) {
+		if (updateType == HikeConstants.NO_UPDATE) {
+			return;
+		}
+
+		if (updateType == HikeConstants.NORMAL_UPDATE) {
+			// Here we check if the user cancelled the update popup for this
+			// version earlier
+			String updateToIgnore = accountPrefs.getString(
+					HikeConstants.Extras.UPDATE_TO_IGNORE, "");
+			if (!TextUtils.isEmpty(updateToIgnore)
+					&& updateToIgnore.equals(accountPrefs.getString(
+							HikeConstants.Extras.LATEST_VERSION, ""))) {
+				return;
+			}
+		}
+
+		// If we are already showing an update we don't need to do anything else
+		if (updateAlert != null && updateAlert.isShowing()) {
+			return;
+		}
+		dialogShowing = DialogShowing.UPGRADE_POPUP;
+		updateAlert = new Dialog(HomeActivity.this, R.style.Theme_CustomDialog);
+		updateAlert.setContentView(R.layout.alert_box);
+
+		((ImageView) updateAlert.findViewById(R.id.alert_image))
+				.setVisibility(View.GONE);
+
+		int padding = (int) (10 * Utils.densityMultiplier);
+
+		TextView updateText = ((TextView) updateAlert
+				.findViewById(R.id.alert_text));
+		TextView updateTitle = (TextView) updateAlert
+				.findViewById(R.id.alert_title);
+
+		updateText.setPadding(padding, 0, padding, padding);
+		updateText.setGravity(Gravity.CENTER);
+		updateText.setText(accountPrefs.getString(
+				HikeConstants.Extras.UPDATE_MESSAGE, ""));
+
+		updateTitle.setPadding(padding, padding, padding, padding);
+		updateTitle.setGravity(Gravity.CENTER);
+		updateTitle
+				.setText(updateType == HikeConstants.CRITICAL_UPDATE ? R.string.critical_update_head
+						: R.string.normal_update_head);
+
+		Button cancelBtn = null;
+		if (updateType == HikeConstants.CRITICAL_UPDATE) {
+			((Button) updateAlert.findViewById(R.id.alert_ok_btn))
+					.setVisibility(View.GONE);
+			((Button) updateAlert.findViewById(R.id.alert_cancel_btn))
+					.setVisibility(View.GONE);
+			(updateAlert.findViewById(R.id.btn_divider))
+					.setVisibility(View.GONE);
+
+			updateAlertOkBtn = (Button) updateAlert
+					.findViewById(R.id.alert_center_btn);
+			updateAlertOkBtn.setVisibility(View.VISIBLE);
+		} else {
+			updateAlertOkBtn = (Button) updateAlert
+					.findViewById(R.id.alert_ok_btn);
+			cancelBtn = (Button) updateAlert
+					.findViewById(R.id.alert_cancel_btn);
+			cancelBtn.setText(R.string.cancel);
+		}
+		updateAlertOkBtn.setText(R.string.update_app);
+
+		updateAlert.setCancelable(true);
+
+		updateAlertOkBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				updateApp(updateType);
+			}
+		});
+
+		if (cancelBtn != null) {
+			cancelBtn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					updateAlert.cancel();
+					dialogShowing = null;
+				}
+			});
+		}
+
+		updateAlert.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if (updateType == HikeConstants.CRITICAL_UPDATE) {
+					finish();
+				} else {
+					Editor editor = accountPrefs.edit();
+					editor.putString(HikeConstants.Extras.UPDATE_TO_IGNORE,
+							accountPrefs.getString(
+									HikeConstants.Extras.LATEST_VERSION, ""));
+					editor.commit();
+				}
+			}
+		});
+
+		updateAlert.show();
+	}
+
 	@Override
 	public void onEventReceived(String type, Object object) {
 		super.onEventReceived(type, object);
@@ -723,7 +872,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					sendDeviceDetails();
 				}
 			}
-
+		} else if (HikePubSub.UPDATE_PUSH.equals(type)) {
+			final int updateType = ((Integer) object).intValue();
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					showUpdatePopup(updateType);
+				}
+			});
 		}
 	}
 

@@ -2051,17 +2051,6 @@ public class Utils {
 		return notificationCount;
 	}
 
-	public static boolean showProtip(Protip protip, SharedPreferences prefs) {
-		if (protip == null) {
-			return false;
-		}
-		long lastDismissTime = prefs.getLong(
-				HikeMessengerApp.PROTIP_DISMISS_TIME, 0);
-		long waitTime = prefs.getLong(HikeMessengerApp.PROTIP_WAIT_TIME,
-				HikeConstants.DEFAULT_PROTIP_WAIT_TIME);
-		return System.currentTimeMillis() / 1000 > (lastDismissTime + waitTime);
-	}
-
 	/*
 	 * This method returns whether the device is an mdpi or ldpi device. The
 	 * assumption is that these devices are low end and hence a DB call may
@@ -2898,24 +2887,6 @@ public class Utils {
 		} else
 			return src;
 
-	}
-
-	public static boolean isProtipNotificationShowable(SharedPreferences prefs) {
-
-		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
-				-1);
-
-		Protip protip = null;
-		boolean showProtipNotification = false;
-		if (currentProtipId == -1) {
-			protip = HikeConversationsDatabase.getInstance().getLastProtip();
-			if (protip != null) {
-				if (Utils.showProtip(protip, prefs)) {
-					showProtipNotification = true;
-				}
-			}
-		}
-		return (showProtipNotification);
 	}
 
 	public static boolean getSendSmsPref(Context context) {
