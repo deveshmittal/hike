@@ -774,15 +774,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			 * Cloning the object since we don't want to send the ftue
 			 * reference.
 			 */
-			ContactInfo contactInfo2 = new ContactInfo(contactInfo.getId(),
-					contactInfo.getMsisdn(), contactInfo.getName(),
-					contactInfo.getPhoneNum(), contactInfo.isOnhike(), "",
-					contactInfo.getLastMessaged(),
-					contactInfo.hasCustomPhoto(), contactInfo.getHikeJoinTime());
-			contactInfo2.setFavoriteType(contactInfo.getFavoriteType());
-			contactInfo2.setInviteTime(contactInfo.getInviteTime());
-			contactInfo2.setLastSeenTime(contactInfo.getLastSeenTime());
-			contactInfo2.setOffline(contactInfo.getOffline());
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
 
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 					contactInfo2, favoriteType);
