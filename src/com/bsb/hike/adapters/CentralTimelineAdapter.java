@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,8 +18,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private Context context;
 	private String userMsisdn;
 	private ImageLoader imageLoader;
+	private LayoutInflater inflater;
+
+	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
+			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
+			R.drawable.mood_13_middle_finger };
+
+	private int[] moodsRow2 = { R.drawable.mood_15_movie,
+			R.drawable.mood_34_music, R.drawable.mood_37_eating,
+			R.drawable.mood_03_in_love };
+
+	private int[] moodsRowLand = { R.drawable.mood_09_chilling,
+			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
+			R.drawable.mood_13_middle_finger, R.drawable.mood_15_movie,
+			R.drawable.mood_34_music, R.drawable.mood_37_eating };
 
 	private enum ViewType {
 		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
@@ -63,6 +78,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.imageLoader = new ImageLoader(context);
+		this.inflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	@Override
@@ -109,9 +126,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final StatusMessage statusMessage = getItem(position);
@@ -153,6 +167,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.btn_container);
+
+				viewHolder.moodsContainer = (ViewGroup) convertView
+						.findViewById(R.id.moods_container);
 
 				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
@@ -198,10 +215,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		switch (viewType) {
 		case OTHER_UPDATE:
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP
-					|| EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+
+			viewHolder.avatar.setScaleType(ScaleType.FIT_CENTER);
+			viewHolder.avatar.setBackgroundResource(0);
+
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
 					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 							.getId()) {
+				viewHolder.avatar.setScaleType(ScaleType.CENTER_INSIDE);
+				viewHolder.avatar
+						.setImageResource(R.drawable.ic_ftue_moods_tip);
+				viewHolder.avatar
+						.setBackgroundResource(R.drawable.bg_ftue_updates_tip);
+				viewHolder.avatarFrame.setVisibility(View.GONE);
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else if (statusMessage.hasMood()) {
@@ -244,14 +271,30 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
 				viewHolder.yesBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setVisibility(View.GONE);
+				viewHolder.moodsContainer.setVisibility(View.GONE);
 
-				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()) {
-					viewHolder.extraInfo.setText(R.string.no_status);
+				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+						|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+								.getId()) {
+					viewHolder.extraInfo
+							.setText(EMPTY_STATUS_NO_STATUS_ID == statusMessage
+									.getId() ? R.string.no_status
+									: R.string.no_status_recently);
 					viewHolder.yesBtn.setText(R.string.post);
-				} else if (EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
-						.getId()) {
-					viewHolder.extraInfo.setText(R.string.no_status_recently);
-					viewHolder.yesBtn.setText(R.string.post);
+
+					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
+
+					ViewGroup container1 = (ViewGroup) viewHolder.moodsContainer
+							.findViewById(R.id.container1);
+					ViewGroup container2 = (ViewGroup) viewHolder.moodsContainer
+							.findViewById(R.id.container2);
+
+					if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+						addMoods(container1, moodsRow1);
+						addMoods(container2, moodsRow2);
+					} else {
+						addMoods(container1, moodsRowLand);
+					}
 				}
 				viewHolder.yesBtn.setTag(statusMessage);
 				viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
@@ -429,6 +472,18 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		return convertView;
 	}
 
+	private void addMoods(ViewGroup container, int[] moods) {
+		container.removeAllViews();
+
+		for (int moodRes : moods) {
+			ImageView imageView = (ImageView) inflater.inflate(
+					R.layout.ftue_mood_item, container, false);
+			imageView.setImageResource(moodRes);
+
+			container.addView(imageView);
+		}
+	}
+
 	private class ViewHolder {
 		ImageView avatar;
 		ImageView avatarFrame;
@@ -444,6 +499,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		View infoContainer;
 		View parent;
 		ViewGroup contactsContainer;
+		ViewGroup moodsContainer;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
