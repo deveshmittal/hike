@@ -38,7 +38,6 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -505,8 +504,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				/*
 				 * Removing the protip
 				 */
-				statusMessages.remove(UpdatesFragment.getStartIndex(HikeConstants.FUX_ORDINAL));  
-				UpdatesFragment.isProtipVisible = false;
+				statusMessages.remove(0);
+
 				notifyDataSetChanged();
 
 				Editor editor = context.getSharedPreferences(
