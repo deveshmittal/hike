@@ -352,16 +352,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				}
 
 				if (!TextUtils.isEmpty(protip.getImageURL())) {
-					viewHolder.statusImg.setImageDrawable(IconCacheManager
-							.getInstance().getIconForMSISDN(
-									protip.getMappedId()));
-					viewHolder.statusImg.setVisibility(View.VISIBLE);
 
 					ImageViewerInfo imageViewerInfo = new ImageViewerInfo(
 							statusMessage.getMappedId(), protip.getImageURL(),
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
+					imageLoader.loadImage(protip.getMappedId(),
+							viewHolder.statusImg);
+					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
 				}
