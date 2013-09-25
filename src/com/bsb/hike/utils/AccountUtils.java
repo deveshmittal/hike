@@ -482,6 +482,7 @@ public class AccountUtils {
 				bday.put("year", birthdate.year);
 				data.put("dob", bday);
 			}
+			data.put("screen", "signup");
 
 			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString()
 					.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
