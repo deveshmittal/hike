@@ -1131,13 +1131,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String categoryDirPath = Utils
 						.getStickerDirectoryForCategoryId(context, categoryId)
 						+ HikeConstants.LARGE_STICKER_ROOT;
-				File stickerImage = new File(categoryDirPath, stickerId);
+				File stickerImage = null;
+				if (categoryDirPath != null) {
+					stickerImage = new File(categoryDirPath, stickerId);
+				}
 
 				String key = categoryId + stickerId;
 				boolean downloadingSticker = HikeMessengerApp.stickerTaskMap
 						.containsKey(key);
 
-				if (stickerImage.exists() && !downloadingSticker) {
+				if (stickerImage != null && stickerImage.exists()
+						&& !downloadingSticker) {
 					holder.stickerImage.setVisibility(View.VISIBLE);
 					holder.stickerImage.setImageDrawable(IconCacheManager
 							.getInstance().getSticker(context,

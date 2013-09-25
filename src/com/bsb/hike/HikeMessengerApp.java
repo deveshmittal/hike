@@ -633,12 +633,14 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (!preferenceManager.contains(REMOVE_HUMANOID_STICKERS)) {
 			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
 					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
-			File categoryDir = new File(categoryDirPath);
-			Utils.deleteFile(categoryDir);
+			if (categoryDirPath != null) {
+				File categoryDir = new File(categoryDirPath);
+				Utils.deleteFile(categoryDir);
 
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
-			editor.commit();
+				Editor editor = preferenceManager.edit();
+				editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
+				editor.commit();
+			}
 		}
 
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {

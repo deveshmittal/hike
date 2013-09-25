@@ -2197,8 +2197,11 @@ public class Utils {
 
 	private static String getExternalStickerDirectoryForCategoryId(
 			Context context, String catId) {
-		return context.getExternalFilesDir(null).getPath()
-				+ HikeConstants.STICKERS_ROOT + "/" + catId;
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null) {
+			return null;
+		}
+		return dir.getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
 
 	private static String getInternalStickerDirectoryForCategoryId(
@@ -2229,8 +2232,15 @@ public class Utils {
 		boolean externalAvailable = false;
 		if (getExternalStorageState() == ExternalStorageState.WRITEABLE) {
 			externalAvailable = true;
-			File stickerDir = new File(
-					getExternalStickerDirectoryForCategoryId(context, catId));
+			String stickerDirPath = getExternalStickerDirectoryForCategoryId(
+					context, catId);
+
+			if (stickerDirPath == null) {
+				return null;
+			}
+
+			File stickerDir = new File(stickerDirPath);
+
 			if (stickerDir.exists()) {
 				return stickerDir.getPath();
 			}
@@ -2266,6 +2276,9 @@ public class Utils {
 	public static boolean checkIfStickerCategoryExists(Context context,
 			String categoryId) {
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
+		if (path == null) {
+			return false;
+		}
 		File category = new File(path + HikeConstants.LARGE_STICKER_ROOT);
 		if (category.exists() && category.list().length > 0) {
 			return true;

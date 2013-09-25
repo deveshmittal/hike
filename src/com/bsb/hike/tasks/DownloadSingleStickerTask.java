@@ -51,6 +51,10 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 
 	@Override
 	protected FTResult doInBackground(Void... arg0) {
+		if (dirPath == null) {
+			return FTResult.DOWNLOAD_FAILED;
+		}
+
 		FileOutputStream fos = null;
 		try {
 			File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);

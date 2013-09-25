@@ -954,6 +954,11 @@ public class MqttMessagesManager {
 
 				String categoryDirPath = Utils
 						.getStickerDirectoryForCategoryId(context, categoryId);
+
+				if (categoryDirPath == null) {
+					return;
+				}
+
 				File categoryDir = new File(categoryDirPath);
 
 				/*
