@@ -749,8 +749,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		@Override
 		public void onClick(View v) {
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
-			Utils.sendInviteUtil(contactInfo.getMsisdn(), context, 
-					v, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, context.getString(R.string.native_header), context.getString(R.string.native_info));
+			Utils.sendInviteUtil(contactInfo, context, v,
+					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
+					context.getString(R.string.native_header),
+					context.getString(R.string.native_info));
 
 		}
 	};
@@ -781,9 +783,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			if(!contactInfo.isOnhike())
-				Utils.sendInviteUtil(contactInfo.getMsisdn(), context, 
-						null, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.native_header), context.getString(R.string.native_info));
+			if (!contactInfo.isOnhike())
+				Utils.sendInviteUtil(contactInfo2, context, null,
+						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
+						context.getString(R.string.native_header),
+						context.getString(R.string.native_info));
 		}
 	};
 

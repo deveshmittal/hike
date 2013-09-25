@@ -1446,6 +1446,11 @@ public class Utils {
 	}
 
 	public static void sendInvite(String msisdn, Context context) {
+		sendInvite(msisdn, context, false);
+	}
+
+	public static void sendInvite(String msisdn, Context context,
+			boolean dbUpdated) {
 		SmsManager smsManager = SmsManager.getDefault();
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
@@ -1459,8 +1464,10 @@ public class Utils {
 		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
 				messages, null, null);
 
-		HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
-				System.currentTimeMillis() / 1000);
+		if (!dbUpdated) {
+			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
+					System.currentTimeMillis() / 1000);
+		}
 	}
 
 	/*
@@ -1470,7 +1477,7 @@ public class Utils {
 	 * need to set to not show this dialog. header : header text of the dialog
 	 * popup body : body text message of dialog popup
 	 */
-	public static void sendInviteUtil(final String msisdn,
+	public static void sendInviteUtil(final ContactInfo contactInfo,
 			final Context context, final View inviteBtn,
 			final String checkPref, String header, String body) {
 		final SharedPreferences settings = context.getSharedPreferences(
@@ -1512,14 +1519,8 @@ public class Utils {
 
 				@Override
 				public void onClick(View v) {
-					sendInvite(msisdn, context);
 					dialog.dismiss();
-					if (inviteBtn != null) {
-						setInvited((TextView) inviteBtn);
-					} else {
-						Toast.makeText(context, R.string.invite_sent,
-								Toast.LENGTH_SHORT).show();
-					}
+					invite(context, contactInfo, (TextView) inviteBtn);
 				}
 			});
 
@@ -1533,14 +1534,25 @@ public class Utils {
 
 			dialog.show();
 		} else {
-			sendInvite(msisdn, context);
-			if (inviteBtn != null) {
-				setInvited((TextView) inviteBtn);
-			} else {
-				Toast.makeText(context, R.string.invite_sent,
-						Toast.LENGTH_SHORT).show();
-			}
+			invite(context, contactInfo, (TextView) inviteBtn);
 		}
+	}
+
+	private static void invite(Context context, ContactInfo contactInfo,
+			TextView inviteBtn) {
+		sendInvite(contactInfo.getMsisdn(), context, true);
+		if (inviteBtn != null) {
+			setInvited(inviteBtn);
+		} else {
+			Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
+					.show();
+		}
+
+		long inviteTime = System.currentTimeMillis() / 1000;
+		contactInfo.setInviteTime(inviteTime);
+
+		HikeUserDatabase.getInstance().updateInvitedTimestamp(
+				contactInfo.getMsisdn(), inviteTime);
 	}
 
 	public static void setInvited(TextView inviteBtn) {
