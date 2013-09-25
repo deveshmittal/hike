@@ -674,7 +674,8 @@
   	<string name="friends_ftue_item_label">Add friends</string>
   	<string name="updates_are_fun_with_friends">Updates are more fun with friends. We\'ve found some of them that you can add to hike.</string>
   	<string name="no_status">Happy and singing or the Monday blues? We\'ve got the right mood just for you.</string>
-  	<string name="post">Post a mood</string>
+  	<string name="post">Post</string>
+  	<string name="post_a_mood">Post a mood</string>
   	<string name="mood_update">Mood Updates</string>
   	<string name ="invite_contacts">Invite Contacts</string>
   	<string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
