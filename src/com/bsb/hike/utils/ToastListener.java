@@ -70,7 +70,7 @@ public class ToastListener implements Listener {
 			currentActivity = new WeakReference<Activity>(activity);
 		} else if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
-
+			if (message.isShouldShowPush()) {
 			HikeConversationsDatabase hCDB = HikeConversationsDatabase
 					.getInstance();
 			message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
@@ -114,11 +114,10 @@ public class ToastListener implements Listener {
 					contactInfo = this.db.getContactInfoFromMSISDN(
 							message.getMsisdn(), false);
 				}
-
-				if (message.isShouldShowPush()) {
-					this.toaster.notifyMessage(contactInfo, message, true);
-				}
+				this.toaster.notifyMessage(contactInfo, message, true);
 			}
+				
+		 }
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
 			mCurrentUnnotifiedStatus = status;
