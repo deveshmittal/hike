@@ -47,7 +47,7 @@ public class ToastListener implements Listener {
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
 			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED,
-			HikePubSub.UPDATE_PUSH};
+			HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH};
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -203,7 +203,7 @@ public class ToastListener implements Listener {
 				toaster.notifyMessage(proTip);
 		}else if (HikePubSub.UPDATE_PUSH.equals(type)) {
 			int update = ((Integer) object).intValue();
-			// todo: possibly handle the case where the alert has been shown in
+			// future todo: possibly handle the case where the alert has been shown in
 			// the app once for the update and
 			// now the user has got a push update from our server.
 			// if its critical, let it go through, if its normal, check the
@@ -212,6 +212,18 @@ public class ToastListener implements Listener {
 					update,context.getSharedPreferences(
 							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 									HikeConstants.Extras.UPDATE_MESSAGE, ""));
+		} else if (HikePubSub.APPLICATIONS_PUSH.equals(type)) {
+			if (object instanceof String) {
+				String packageName = ((String) object);
+				toaster.notifyApplicationsPushUpdate(
+						packageName,
+						context.getSharedPreferences(
+								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+								.getString(
+										HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
+										""));
+			}
+
 		}
 	}
 

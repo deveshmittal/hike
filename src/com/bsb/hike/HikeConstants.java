@@ -162,6 +162,7 @@ public class HikeConstants {
 	public static final String NATIVE_INVITES = "nativeinvites";
 	public static final String PREF = "pref";
 	public static final String CONTACTS = "contacts";
+	public static final String PACKAGE ="pkg";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -504,6 +505,7 @@ public class HikeConstants {
 		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip";
 		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
 		public static final String UPDATE_MESSAGE = "updateMessage";
+		public static final String APPLICATIONSPUSH_MESSAGE = "applicationsPushMessage";
 		public static final String URL_TO_LOAD = "urlToLoad";
 		public static final String TITLE = "title";
 		public static final String FIRST_TIME_USER = "firstTimeUser";
@@ -731,6 +733,7 @@ public class HikeConstants {
 		public static final String BULK_LAST_SEEN = "bls";
 		public static final String FACEBOOK = "fb";
 		public static final String UPDATE_PUSH = "update";
+		public static final String APPLICATIONS_PUSH = "applications";
 	}
 
 	public static final class SMSNative {

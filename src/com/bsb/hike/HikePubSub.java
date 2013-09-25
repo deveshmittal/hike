@@ -281,6 +281,8 @@ public class HikePubSub implements Runnable {
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 	
 	public static final String UPDATE_PUSH = "updatePush";
+	
+	public static final String APPLICATIONS_PUSH ="applicationsPush";
 
 	public static final String  UPDATE_AVAILABLE ="updateAvailable"; //TODO: get rid of this.
 

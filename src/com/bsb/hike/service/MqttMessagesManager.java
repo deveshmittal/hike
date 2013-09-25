@@ -1118,13 +1118,13 @@ public class MqttMessagesManager {
 			if (!TextUtils.isEmpty(devType)
 					&& devType.equals(HikeConstants.ANDROID)) {
 				String version = data.optString(HikeConstants.UPDATE_VERSION);
-				Editor editor = settings.edit();
 				int update = Utils.isUpdateRequired(version, context) ? (data
 						.optBoolean(HikeConstants.CRITICAL_UPDATE_KEY) ? HikeConstants.CRITICAL_UPDATE
 						: HikeConstants.NORMAL_UPDATE)
 						: HikeConstants.NO_UPDATE;
 				if ((update == HikeConstants.CRITICAL_UPDATE || update == HikeConstants.NORMAL_UPDATE)) {
 					if (Utils.isUpdateRequired(version, context)) {
+						Editor editor = settings.edit();
 						editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE,
 								update);
 						editor.putString(HikeConstants.Extras.UPDATE_MESSAGE,
@@ -1135,6 +1135,22 @@ public class MqttMessagesManager {
 						this.pubSub.publish(HikePubSub.UPDATE_PUSH, update);
 					}
 				}
+			}
+		} else if (HikeConstants.MqttMessageTypes.APPLICATIONS_PUSH
+				.equals(type)) {
+			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String devType = data.optString(HikeConstants.DEV_TYPE);
+			String message = data.optString(HikeConstants.MESSAGE);
+			String packageName = data.optString(HikeConstants.PACKAGE);
+			if (!TextUtils.isEmpty(devType)
+					&& devType.equals(HikeConstants.ANDROID)
+					&& !TextUtils.isEmpty(message)
+					&& !TextUtils.isEmpty(packageName)) {
+				Editor editor = settings.edit();
+				editor.putString(HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
+						data.optString(HikeConstants.MESSAGE));
+				editor.commit();
+				this.pubSub.publish(HikePubSub.APPLICATIONS_PUSH, packageName);
 			}
 		}
 	}
