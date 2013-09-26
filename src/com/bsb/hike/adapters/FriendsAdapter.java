@@ -583,10 +583,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.request_pending);
 
+						TextView inviteBtn = (TextView) convertView
+								.findViewById(R.id.invite_btn);
 						if (!contactInfo.isOnhike()) {
-							TextView inviteBtn = (TextView) convertView
-									.findViewById(R.id.invite_btn);
 							setInviteButton(contactInfo, inviteBtn, null);
+						} else {
+							inviteBtn.setVisibility(View.GONE);
 						}
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
