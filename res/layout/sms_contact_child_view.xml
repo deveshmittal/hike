@@ -37,13 +37,25 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:background="@drawable/bg_red_btn"
+            android:background="@drawable/bg_green_btn_selector"
             android:text="@string/invite_1"
             android:textColor="@color/white"
             android:textSize="13sp"
-            android:textStyle="bold|italic" />
+            android:textStyle="bold|italic"
+            android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/invite_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:paddingLeft="15dp"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:src="@drawable/ic_invite" />
+        
         <LinearLayout
+            android:id="@+id/info_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

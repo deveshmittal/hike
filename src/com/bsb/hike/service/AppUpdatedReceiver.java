@@ -50,7 +50,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.MQTT_PUBLISH, obj);
 					}
-					Utils.requestAccountInfo(true);
+					Utils.requestAccountInfo(true, false);
 
 					/*
 					 * Resetting the boolean preference to post details again
@@ -82,6 +82,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.remove(HikeConstants.Extras.UPDATE_TO_IGNORE);
 				editor.remove(HikeConstants.Extras.LATEST_VERSION);
 				editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+				editor.remove(HikeConstants.Extras.URL);
 				editor.commit();
 			}
 			/*

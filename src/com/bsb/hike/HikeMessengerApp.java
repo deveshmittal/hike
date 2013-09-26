@@ -1,7 +1,5 @@
 package com.bsb.hike;
 
-import static org.acra.ACRA.LOG_TAG;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -60,7 +58,6 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
-import com.bsb.hike.utils.HikeNotification;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
@@ -157,11 +154,12 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
 
 	public static final String GCM_ID_SENT = "gcmIdSent";
-	
+
 	public static final String BLOCK_NOTIFICATIONS = "blockNotification";
-	
-	private static final boolean TEST = false;  //TODO:: test flag only : turn OFF for Production
-	
+
+	private static final boolean TEST = false; // TODO:: test flag only : turn
+												// OFF for Production
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -256,8 +254,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
-	public static final String PROTIP_DISMISS_TIME = "protipDismissTime";
-
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
 
 	public static final String CURRENT_PROTIP = "currentProtip";
@@ -281,7 +277,9 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
-			
+
+	public static final String RESET_REACHED_END_FOR_DEFAULT_STICKERS = "resetReachedEndForDefaultStickers";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -317,7 +315,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static Map<String, StickerTaskBase> stickerTaskMap;
 
 	public static Map<String, Long> lastSeenFriendsMap;
-	
+
 	public static HashMap<String, String> hikeBotNamesMap;
 
 	class IncomingHandler extends Handler {
@@ -416,7 +414,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 			try {
 				final String reportUrl = AccountUtils.base + "/logs/android";
-				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
+				Log.d(HikeMessengerApp.this.getClass().getSimpleName(),
+						"Connect to " + reportUrl.toString());
 
 				final String login = msisdn;
 				final String password = token;
@@ -426,13 +425,14 @@ public class HikeMessengerApp extends Application implements Listener {
 					request.setLogin(login);
 					request.setPassword(password);
 					String paramsAsString = getParamsAsString(crashReportData);
-					Log.e(getClass().getSimpleName(), "Params: "
-							+ paramsAsString);
+					Log.e(HikeMessengerApp.this.getClass().getSimpleName(),
+							"Params: " + paramsAsString);
 					request.send(new URL(reportUrl), HttpSender.Method.POST,
 							paramsAsString, HttpSender.Type.FORM);
 				}
 			} catch (IOException e) {
-				Log.e(getClass().getSimpleName(), "IOException", e);
+				Log.e(HikeMessengerApp.this.getClass().getSimpleName(),
+						"IOException", e);
 			}
 		}
 
@@ -473,13 +473,15 @@ public class HikeMessengerApp extends Application implements Listener {
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		//this is the setting to check whether the avtar DB migration has started or not
+		// this is the setting to check whether the avtar DB migration has
+		// started or not
 		int avtarInt = settings.getInt(
 				HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
-		//this is the setting to check whether the conv DB migration has started or not
-		//-1 in both cases means an uninitialized setting, mostly on first launch or interrupted upgrades.
-		int convInt = settings.getInt(
-				HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
+		// this is the setting to check whether the conv DB migration has
+		// started or not
+		// -1 in both cases means an uninitialized setting, mostly on first
+		// launch or interrupted upgrades.
+		int convInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
@@ -487,32 +489,37 @@ public class HikeMessengerApp extends Application implements Listener {
 		super.onCreate();
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
-		
-		//first time or failed DB upgrade.
-		if (avtarInt == -1 && convInt == -1) {  
+
+		// first time or failed DB upgrade.
+		if (avtarInt == -1 && convInt == -1) {
 			Editor mEditor = settings.edit();
-			//set the pref to 0 to indicate we've reached the state to init the hike conversation database.
+			// set the pref to 0 to indicate we've reached the state to init the
+			// hike conversation database.
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 0);
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 0);
 			mEditor.commit();
 		}
-		
-		//we're basically banking on the fact here that init() would be succeeded by the
-		//onUpgrade() calls being triggered in the respective databases.
+
+		// we're basically banking on the fact here that init() would be
+		// succeeded by the
+		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
 		HikeUserDatabase.init(this);
-		
-		//if the setting value is 1 , this means the DB onUpgrade was called successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1  
-				&& settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST) {
-			// turn off future push notifications as soon as the app has started.
-						// this has to be turned on whenever the upgrade finishes.
-						Editor editor = settings.edit();
-						editor.putBoolean(BLOCK_NOTIFICATIONS, true);
-						editor.commit();
-						
-		Intent msgIntent = new Intent(this, UpgradeIntentService.class);
-		startService(msgIntent);
+
+		// if the setting value is 1 , this means the DB onUpgrade was called
+		// successfully.
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings
+				.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)
+				|| TEST) {
+			// turn off future push notifications as soon as the app has
+			// started.
+			// this has to be turned on whenever the upgrade finishes.
+			Editor editor = settings.edit();
+			editor.putBoolean(BLOCK_NOTIFICATIONS, true);
+			editor.commit();
+
+			Intent msgIntent = new Intent(this, UpgradeIntentService.class);
+			startService(msgIntent);
 		}
 
 		HikeMqttPersistence.init(this);
@@ -617,15 +624,21 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 		setupStickerCategoryList(settings);
 
-		if (!settings.contains(REMOVE_HUMANOID_STICKERS)) {
+		/*
+		 * This preference has been used here because of a bug where we were
+		 * inserting this key in the settings preference
+		 */
+		if (!preferenceManager.contains(REMOVE_HUMANOID_STICKERS)) {
 			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
 					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
-			File categoryDir = new File(categoryDirPath);
-			Utils.deleteFile(categoryDir);
+			if (categoryDirPath != null) {
+				File categoryDir = new File(categoryDirPath);
+				Utils.deleteFile(categoryDir);
 
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
-			editor.commit();
+				Editor editor = preferenceManager.edit();
+				editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
+				editor.commit();
+			}
 		}
 
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
@@ -644,14 +657,54 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
+		if (!settings.getBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
+			HikeConversationsDatabase.getInstance()
+					.updateReachedEndForCategory(
+							EmoticonConstants.STICKER_CATEGORY_IDS[0], false);
+			HikeConversationsDatabase.getInstance()
+					.updateReachedEndForCategory(
+							EmoticonConstants.STICKER_CATEGORY_IDS[1], false);
+
+			Editor editor = settings.edit();
+			editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
+			editor.commit();
+		}
+		makeNoMediaFiles();
+
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
-		
-		hikeBotNamesMap = new HashMap<String, String>(){{
-			put("+Hike+", "team hike");
-			put("+Hike1+", "Emma from hike");
-			put("+Hike2+", "Games on hike"); 
-	    }};
+
+		hikeBotNamesMap = new HashMap<String, String>() {
+			{
+				put("+Hike+", "team hike");
+				put("+Hike1+", "Emma from hike");
+				put("+Hike2+", "Games on hike");
+			}
+		};
+	}
+
+	private void makeNoMediaFiles() {
+		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
+
+		File profileRoot = new File(root + HikeConstants.PROFILE_ROOT);
+		makeNoMediaFile(profileRoot);
+
+		File recordingRoot = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
+		makeNoMediaFile(recordingRoot);
+	}
+
+	private void makeNoMediaFile(File root) {
+		if (!root.exists()) {
+			root.mkdirs();
+		}
+		File file = new File(root, ".nomedia");
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				Log.d(getClass().getSimpleName(), "failed to make nomedia file");
+			}
+		}
 	}
 
 	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {

@@ -32,6 +32,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
@@ -88,6 +89,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	private HikeHttpRequest profilePicRequest;
 	private Bitmap profilePicSmall;
 	public static boolean isAlreadyFetchingNumber = false;
+	private Birthday birthdate;
+	private boolean isFemale = false;
 
 	private static final String INDIA_ISO = "IN";
 
@@ -125,6 +128,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				RequestType.PROFILE_PIC, null);
 		profilePicRequest.setFilePath(path);
 		this.profilePicSmall = profilePic;
+	}
+
+	public void addBirthdate(Birthday birthdate) {
+		this.birthdate = birthdate;
+	}
+
+	public void addGender(boolean isFemale) {
+		this.isFemale = isFemale;
 	}
 
 	@Override
@@ -407,7 +418,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					}
 				}
 				name = this.data;
-				AccountUtils.setName(name);
+				AccountUtils.setProfile(name, birthdate, isFemale);
 			} catch (InterruptedException e) {
 				Log.e("SignupTask",
 						"Interrupted exception while waiting for name", e);
@@ -425,6 +436,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, name);
+			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
 			editor.commit();
 		}
 

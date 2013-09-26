@@ -966,9 +966,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
 						.getIntrinsicHeight());
 				/*
-				 * fixed the bug when imagethumbnail is very big. 
-				 * By specifying a maximum width for the thumbnail
-				 * so that download button can also fit to the screen.
+				 * fixed the bug when imagethumbnail is very big. By specifying
+				 * a maximum width for the thumbnail so that download button can
+				 * also fit to the screen.
 				 */
 				int maxWidth = (int) (250 * Utils.densityMultiplier);
 				fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
@@ -1022,7 +1022,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								holder.showFileBtn
 										.setImageResource(R.drawable.ic_open_received_file);
 							}
-							holder.showFileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+							holder.showFileBtn
+									.setBackgroundResource(R.drawable.bg_red_btn_selector);
 							holder.messageTextView
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
@@ -1130,16 +1131,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String categoryDirPath = Utils
 						.getStickerDirectoryForCategoryId(context, categoryId)
 						+ HikeConstants.LARGE_STICKER_ROOT;
-				File stickerImage = new File(categoryDirPath, stickerId);
+				File stickerImage = null;
+				if (categoryDirPath != null) {
+					stickerImage = new File(categoryDirPath, stickerId);
+				}
 
 				String key = categoryId + stickerId;
 				boolean downloadingSticker = HikeMessengerApp.stickerTaskMap
 						.containsKey(key);
 
-				if (stickerImage.exists() && !downloadingSticker) {
+				if (stickerImage != null && stickerImage.exists()
+						&& !downloadingSticker) {
 					holder.stickerImage.setVisibility(View.VISIBLE);
-					holder.stickerImage.setImageBitmap(BitmapFactory
-							.decodeFile(stickerImage.getPath()));
+					holder.stickerImage.setImageDrawable(IconCacheManager
+							.getInstance().getSticker(context,
+									stickerImage.getPath()));
 				} else {
 					holder.stickerLoader.setVisibility(View.VISIBLE);
 					holder.stickerPlaceholder

@@ -3,7 +3,7 @@
     <string name="app_name">hike</string>
     <string name="app_label">&#160;hike</string>
     <string name="invite">Tell a friend</string>
-    <string name="deleteconversations">Delete Conversations</string>
+    <string name="deleteconversations">Delete all conversations</string>
     <string name="send">Send</string>
     <string name="type_to_compose">Type to Compose</string>
     <string name="delete">Delete</string>
@@ -41,7 +41,6 @@
 	<string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
 	<string name="shortcut">Add Shortcut</string>
 	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
-	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 50 more!</string>
 	<string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. For %1$s to receive hike messages, %1$s needs to opt-in to hike by giving a missed call to %2$s.\n\nYou\'ll get an extra 10 free SMS\' per month if %1$s opts-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
 	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
 	<string name="edit_profile">Edit Profile</string>
@@ -135,8 +134,6 @@
 	<string name="free_sms_left">hike to SMS</string>
 	<string name="normal_update">Update to the new version of hike to discover amazing new ways to message</string>
 	<string name="critical_update">To continue using hike, an update is required.</string>
-	<string name="normal_update_head">Update available</string>
-	<string name="critical_update_head">Important update</string>
 	<string name="quit">Quit</string>
 	<string name="update_app">Update</string>
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
@@ -353,11 +350,9 @@
 	<string name="recent_updates">Recent Updates</string>
 	<string name="whats_up_user">What\'s up, %1$s?</string>
 	<string name="status">Status</string>
-	<string name="post">Post</string>
 	<string name="waiting_for_accept">Waiting for %1$s to accept your friend request</string>
 	<string name="status_update">Status update</string>
 	<string name="remove_friend">Remove</string>
-	<string name="no_status">Looks like you haven\'t posted any status updates yet.</string>
 	<string name="update_status">Update status</string>
 	<string name="free_sms_txt">Free SMS</string>
 	<string name="on_dnd">on DND</string>
@@ -670,8 +665,23 @@
 	<string name="unlinking_account">Logging out your Hike Account</string>
 	<string name="ftue_grid_string">Start a conversation with one\nof your friends.</string>
 	<string name="remind">Remind</string>
-	<string name="invited">Invited</string>
+	<string name="invited">...Invited</string>
 	<string name="not_show_call_alert_msg">Do not show this again</string>
 	<string name="view_profile">View Profile</string>
 	<string name="ok">OK</string>
+	<string name="not_show_call_alert_msg">Do not show again</string>
+	<string name="view_profile">View Profile</string>
+	<string name="normal_update_head">Important Update available</string>
+  	<string name="critical_update_head">Critical Update required</string>
+  	<string name="downloading_string">Downloading...</string>
+  	<string name="friends_ftue_item_label">Add friends</string>
+  	<string name="updates_are_fun_with_friends">Updates are more fun with friends. We\'ve found some of them that you can add to hike.</string>
+  	<string name="no_status">Happy and singing or the Monday blues? We\'ve got the right mood just for you.</string>
+  	<string name="post">Post</string>
+  	<string name="post_a_mood">Post a mood</string>
+  	<string name="mood_update">Mood Updates</string>
+  	<string name="invite_contacts">Invite Contacts</string>
+  	<string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
+  	<string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet!.Invite %1$s to hike by tapping on Continue.Standard operator SMS rates apply.</string> 
+  	<string name="ftue_add_prompt_invite_title">Invite to hike</string>
 </resources>

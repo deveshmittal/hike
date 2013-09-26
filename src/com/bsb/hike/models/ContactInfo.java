@@ -204,6 +204,17 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.hikeJoinTime = hikeJoinTime;
 	}
 
+	public ContactInfo(ContactInfo contactInfo) {
+		this(contactInfo.getId(), contactInfo.getMsisdn(), contactInfo
+				.getName(), contactInfo.getPhoneNum(), contactInfo.isOnhike(),
+				"", contactInfo.getLastMessaged(),
+				contactInfo.hasCustomPhoto(), contactInfo.getHikeJoinTime());
+		this.favoriteType = contactInfo.getFavoriteType();
+		this.inviteTime = contactInfo.getInviteTime();
+		this.lastSeenTime = contactInfo.getLastSeenTime();
+		this.offline = contactInfo.getOffline();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
