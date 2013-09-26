@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,8 +18,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,17 +42,32 @@ import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
 	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
 	public static final long FTUE_ITEM_ID = -6;
-
+	private int protipIndex;
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
 	private ImageLoader imageLoader;
+	private LayoutInflater inflater;
+
+	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
+			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
+			R.drawable.mood_13_middle_finger };
+
+	private int[] moodsRow2 = { R.drawable.mood_15_movie,
+			R.drawable.mood_34_music, R.drawable.mood_37_eating,
+			R.drawable.mood_03_in_love };
+
+	private int[] moodsRowLand = { R.drawable.mood_09_chilling,
+			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
+			R.drawable.mood_13_middle_finger, R.drawable.mood_15_movie,
+			R.drawable.mood_34_music, R.drawable.mood_37_eating };
 
 	private enum ViewType {
 		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
@@ -63,6 +79,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.imageLoader = new ImageLoader(context);
+		this.inflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.protipIndex = -1;
 	}
 
 	@Override
@@ -109,9 +128,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final StatusMessage statusMessage = getItem(position);
@@ -153,6 +169,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.btn_container);
+
+				viewHolder.moodsContainer = (ViewGroup) convertView
+						.findViewById(R.id.moods_container);
 
 				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
@@ -198,10 +217,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		switch (viewType) {
 		case OTHER_UPDATE:
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP
-					|| EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+
+			viewHolder.avatar.setScaleType(ScaleType.FIT_CENTER);
+			viewHolder.avatar.setBackgroundResource(0);
+
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
 					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 							.getId()) {
+				viewHolder.avatar.setScaleType(ScaleType.CENTER_INSIDE);
+				viewHolder.avatar
+						.setImageResource(R.drawable.ic_ftue_moods_tip);
+				viewHolder.avatar
+						.setBackgroundResource(R.drawable.bg_ftue_updates_tip);
+				viewHolder.avatarFrame.setVisibility(View.GONE);
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else if (statusMessage.hasMood()) {
@@ -244,14 +273,29 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
 				viewHolder.yesBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setVisibility(View.GONE);
+				viewHolder.moodsContainer.setVisibility(View.GONE);
 
-				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()) {
+				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+						|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+								.getId()) {
+					viewHolder.timeStamp.setVisibility(View.GONE);
+
 					viewHolder.extraInfo.setText(R.string.no_status);
 					viewHolder.yesBtn.setText(R.string.post);
-				} else if (EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
-						.getId()) {
-					viewHolder.extraInfo.setText(R.string.no_status_recently);
-					viewHolder.yesBtn.setText(R.string.post);
+
+					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
+
+					ViewGroup container1 = (ViewGroup) viewHolder.moodsContainer
+							.findViewById(R.id.container1);
+					ViewGroup container2 = (ViewGroup) viewHolder.moodsContainer
+							.findViewById(R.id.container2);
+
+					if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+						addMoods(container1, moodsRow1);
+						addMoods(container2, moodsRow2);
+					} else {
+						addMoods(container1, moodsRowLand);
+					}
 				}
 				viewHolder.yesBtn.setTag(statusMessage);
 				viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
@@ -309,16 +353,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				}
 
 				if (!TextUtils.isEmpty(protip.getImageURL())) {
-					viewHolder.statusImg.setImageDrawable(IconCacheManager
-							.getInstance().getIconForMSISDN(
-									protip.getMappedId()));
-					viewHolder.statusImg.setVisibility(View.VISIBLE);
 
 					ImageViewerInfo imageViewerInfo = new ImageViewerInfo(
 							statusMessage.getMappedId(), protip.getImageURL(),
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
+					imageLoader.loadImage(protip.getMappedId(),
+							viewHolder.statusImg);
+					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
 				}
@@ -376,9 +419,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 
 		case FTUE_ITEM:
-			viewHolder.name.setText("Close Friends (Placeholder)");
-			viewHolder.mainInfo
-					.setText("Updates are fun with close friends. Luckily, we found some people you can add.(Placeholder)");
+			viewHolder.name.setText(R.string.friends_ftue_item_label);
+			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_friends);
 
 			viewHolder.contactsContainer.removeAllViews();
 
@@ -429,6 +471,18 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		return convertView;
 	}
 
+	private void addMoods(ViewGroup container, int[] moods) {
+		container.removeAllViews();
+
+		for (int moodRes : moods) {
+			ImageView imageView = (ImageView) inflater.inflate(
+					R.layout.ftue_mood_item, container, false);
+			imageView.setImageResource(moodRes);
+
+			container.addView(imageView);
+		}
+	}
+
 	private class ViewHolder {
 		ImageView avatar;
 		ImageView avatarFrame;
@@ -444,6 +498,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		View infoContainer;
 		View parent;
 		ViewGroup contactsContainer;
+		ViewGroup moodsContainer;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
@@ -476,6 +531,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							.getId()) {
 				Intent intent = new Intent(context, StatusUpdate.class);
 				context.startActivity(intent);
+
+				Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				Protip protip = statusMessage.getProtip();
 				String url = protip.getGameDownlodURL();
@@ -504,19 +561,23 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				/*
 				 * Removing the protip
 				 */
-				statusMessages.remove(0);
+				try {
+					statusMessages.remove(getProtipIndex());
+					notifyDataSetChanged();
 
-				notifyDataSetChanged();
+					Editor editor = context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+					editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+					editor.commit();
 
-				Editor editor = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
-						System.currentTimeMillis() / 1000);
-				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-				editor.commit();
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.REMOVE_PROTIP,
+							statusMessage.getProtip().getMappedId());
+				} catch (IndexOutOfBoundsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-						statusMessage.getProtip().getMappedId());
 			}
 		}
 	};
@@ -567,24 +628,23 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			 * Cloning the object since we don't want to send the ftue
 			 * reference.
 			 */
-			ContactInfo contactInfo2 = new ContactInfo(contactInfo.getId(),
-					contactInfo.getMsisdn(), contactInfo.getName(),
-					contactInfo.getPhoneNum(), contactInfo.isOnhike(), "",
-					contactInfo.getLastMessaged(),
-					contactInfo.hasCustomPhoto(), contactInfo.getHikeJoinTime());
-			contactInfo2.setFavoriteType(contactInfo.getFavoriteType());
-			contactInfo2.setInviteTime(contactInfo.getInviteTime());
-			contactInfo2.setLastSeenTime(contactInfo.getLastSeenTime());
-			contactInfo2.setOffline(contactInfo.getOffline());
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
 
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 					contactInfo2, favoriteType);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			if(!contactInfo.isOnhike())
-				Utils.sendInviteUtil(contactInfo.getMsisdn(), context, 
-						null, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.native_header), context.getString(R.string.native_info));
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK);
+
+			if (!contactInfo.isOnhike())
+				Utils.sendInviteUtil(
+						contactInfo2,
+						context,
+						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
+						context.getString(R.string.ftue_add_prompt_invite_title),
+						context.getString(R.string.ftue_add_prompt_invite),
+						WhichScreen.UPDATES_TAB);
 		}
 	};
 
@@ -597,5 +657,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	public void restartImageLoaderThread() {
 		imageLoader = new ImageLoader(context);
+	}
+
+	/**
+	 * @return the protipIndex
+	 */
+	public int getProtipIndex() {
+		return protipIndex;
+	}
+
+	/**
+	 * @param protipIndex
+	 *            the protipIndex to set
+	 */
+	public void setProtipIndex(int protipIndex) {
+		this.protipIndex = protipIndex;
 	}
 }

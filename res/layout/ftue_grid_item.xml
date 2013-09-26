@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="85dp"
-    android:layout_height="95dp"
-    android:gravity="center"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+	android:paddingTop="5dp"
+	android:paddingBottom="5dp"        
     android:orientation="vertical" >
 
     <FrameLayout
-        android:layout_width="@dimen/larger_avatar"
-        android:layout_height="@dimen/larger_avatar" >
+        android:layout_width="@dimen/ftue_avatar"
+        android:layout_height="@dimen/ftue_avatar" >
 
         <ImageView
             android:id="@+id/avatar"

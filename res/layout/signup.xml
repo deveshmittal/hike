@@ -22,6 +22,20 @@
         android:textSize="20dp"
         android:textStyle="bold" />
 
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/btn_continue"
+        style="@style/SignupButton.Text.Bold.Button"
+        android:layout_width="66dp"
+        android:layout_height="32dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/bg_blue_signup_btn_selector"
+        android:onClick="onClick"
+        android:text="@string/next_signup"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+    
     <View
         android:id="@+id/header_dropshadow"
         android:layout_width="match_parent"
@@ -35,8 +49,7 @@
         android:id="@+id/signup_viewflipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header_dropshadow"
-        android:layout_marginTop="17dp" >
+        android:layout_below="@id/header_dropshadow" >
 
         <include layout="@layout/number_signup_item" />
 

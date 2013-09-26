@@ -29,13 +29,13 @@ import com.bsb.hike.utils.Utils;
 
 public class EmailConversationsAsyncTask extends
 		AsyncTask<Conversation, Void, Conversation[]> {
-	
+
 	Activity activity;
 	Fragment fragment;
 	ProgressDialog dialog;
 	List<String> listValues = new ArrayList<String>();
-	
-	public EmailConversationsAsyncTask(Activity activity, Fragment fragment){
+
+	public EmailConversationsAsyncTask(Activity activity, Fragment fragment) {
 		this.activity = activity;
 		this.fragment = fragment;
 	}
@@ -61,7 +61,8 @@ public class EmailConversationsAsyncTask extends
 				participantMap = gConv.getGroupParticipantList();
 			}
 			// initialize with a label
-			sBuilder.append(activity.getResources().getString(R.string.chat_with_prefix)
+			sBuilder.append(activity.getResources().getString(
+					R.string.chat_with_prefix)
 					+ chatLabel + "\n");
 
 			// iterate through the messages and construct a meaningful
@@ -83,15 +84,18 @@ public class EmailConversationsAsyncTask extends
 							.getGroupParticipantMsisdn());
 
 					if (gPart != null) {
-						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key)
-								: gPart.getContactInfo().getName();
+						fromString = (isSent == true) ? activity.getResources()
+								.getString(R.string.me_key) : gPart
+								.getContactInfo().getName();
 					} else {
-						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key)
-								: "";
+						fromString = (isSent == true) ? activity.getResources()
+								.getString(R.string.me_key) : "";
 					}
 				} else
-					fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key)
-							: chatLabel; // 1:1 message logic
+					fromString = (isSent == true) ? activity.getResources()
+							.getString(R.string.me_key) : chatLabel; // 1:1
+																		// message
+																		// logic
 
 				if (cMessage.isFileTransferMessage()) {
 					// TODO: can make this generic and add support for
@@ -107,27 +111,25 @@ public class EmailConversationsAsyncTask extends
 						listValues.add(hikeFile.getFilePath());
 					}
 					// tweak the message here based on the file
-					messageMask = activity.getResources().getString(R.string.file_transfer_of_type)
+					messageMask = activity.getResources().getString(
+							R.string.file_transfer_of_type)
 							+ " " + fileType;
 
 				}
 
 				// finally construct the backup string here
-				sBuilder.append(cMessage.getTimestampFormatted(false,
-						activity)
-						+ ":"
-						+ fromString
-						+ "- "
-						+ messageMask + "\n");
+				sBuilder.append(Utils.getFormattedDateTimeFromTimestamp(
+						cMessage.getTimestamp(), activity.getResources()
+								.getConfiguration().locale)
+						+ ":" + fromString + "- " + messageMask + "\n");
 
 				// TODO: add location and contact handling here.
 			}
-			chatLabel = (Utils.isFilenameValid(chatLabel)) ? chatLabel
-					: "_";
-			File chatFile = createChatTextFile(
-					sBuilder.toString(),
-					activity.getResources().getString(R.string.chat_backup_) + "_"
-							+ +System.currentTimeMillis() + ".txt");
+			chatLabel = (Utils.isFilenameValid(chatLabel)) ? chatLabel : "_";
+			File chatFile = createChatTextFile(sBuilder.toString(), activity
+					.getResources().getString(R.string.chat_backup_)
+					+ "_"
+					+ +System.currentTimeMillis() + ".txt");
 			uris.add(Uri.fromFile(chatFile));
 		}
 		// append the attachments in hike messages in form of URI's. Dodo
@@ -137,25 +139,26 @@ public class EmailConversationsAsyncTask extends
 			Uri u = Uri.fromFile(tFile);
 			uris.add(u);
 		}
-		
-		//TODO: change chatlabel if more than one chats
+
+		// TODO: change chatlabel if more than one chats
 
 		// create an email intent to attach the text file and other chat
 		// attachments
 		Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 		intent.setType("text/plain");
 		intent.putExtra(Intent.EXTRA_EMAIL, "");
-		intent.putExtra(Intent.EXTRA_SUBJECT,
-				activity.getResources().getString(R.string.backup_of_conversation_with_prefix)
-						+ chatLabel);
+		intent.putExtra(Intent.EXTRA_SUBJECT, activity.getResources()
+				.getString(R.string.backup_of_conversation_with_prefix)
+				+ chatLabel);
 		intent.putExtra(
 				Intent.EXTRA_TEXT,
-				activity.getResources().getString(R.string.attached_is_the_conversation_backup_string));
+				activity.getResources().getString(
+						R.string.attached_is_the_conversation_backup_string));
 		intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
 		// give the hike user a choice of intents
-		activity.startActivity(Intent.createChooser(intent,
-				activity.getResources().getString(R.string.email_your_conversation)));
+		activity.startActivity(Intent.createChooser(intent, activity
+				.getResources().getString(R.string.email_your_conversation)));
 
 		// TODO: Delete this temp file, although it might be useful for the
 		// user to have local chat backups ? Also we need to see
@@ -165,8 +168,8 @@ public class EmailConversationsAsyncTask extends
 
 	@Override
 	protected void onPreExecute() {
-		dialog = ProgressDialog.show(activity, null,
-				activity.getResources().getString(R.string.exporting_conversations_prefix));
+		dialog = ProgressDialog.show(activity, null, activity.getResources()
+				.getString(R.string.exporting_conversations_prefix));
 
 		super.onPreExecute();
 	}
@@ -178,12 +181,11 @@ public class EmailConversationsAsyncTask extends
 
 	@Override
 	protected void onPostExecute(Conversation[] result) {
-		if (fragment != null){
-			if(fragment.isAdded())
+		if (fragment != null) {
+			if (fragment.isAdded())
 				dialog.dismiss();
-		}
-		else{
-			if(!activity.isFinishing() || !activity.isDestroyed())
+		} else {
+			if (!activity.isFinishing() || !activity.isDestroyed())
 				dialog.dismiss();
 		}
 		super.onPostExecute(result);
@@ -204,8 +206,8 @@ public class EmailConversationsAsyncTask extends
 		}
 
 		try {
-			BufferedWriter buf = new BufferedWriter(new FileWriter(
-					chatFile, true));
+			BufferedWriter buf = new BufferedWriter(new FileWriter(chatFile,
+					true));
 			buf.append(text);
 			buf.newLine();
 			buf.close();
@@ -216,4 +218,3 @@ public class EmailConversationsAsyncTask extends
 		}
 	}
 }
-

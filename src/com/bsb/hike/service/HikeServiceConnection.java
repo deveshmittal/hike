@@ -50,6 +50,10 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 			msg.what = HikeService.MSG_APP_CONNECTED;
 			msg.replyTo = this.mMessenger;
 			mService.send(msg);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED,
+					null);
+
 		} catch (RemoteException e) {
 			Log.e("HikeServiceConncetion", "Couldn't connect to service", e);
 			// In this case the service has crashed before we could even

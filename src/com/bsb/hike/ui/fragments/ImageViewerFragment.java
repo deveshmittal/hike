@@ -153,6 +153,14 @@ public class ImageViewerFragment extends SherlockFragment implements
 
 	@Override
 	public void onClick(View v) {
+		/*
+		 * This object can become null, if the method is called when the
+		 * fragment is not attached with the activity. In that case we do
+		 * nothing and return.
+		 */
+		if (getActivity() == null) {
+			return;
+		}
 		getActivity().onBackPressed();
 	}
 }

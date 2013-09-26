@@ -552,6 +552,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
 			startActivity(intent);
+			finish();
 		}
 	}
 

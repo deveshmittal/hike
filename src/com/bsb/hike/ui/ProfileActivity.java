@@ -177,7 +177,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	private List<ProfileItem> profileItems;
 
 	private boolean isGroupOwner;
-	
+
 	private Menu mMenu;
 
 	/* store the task so we can keep keep the progress dialog going */
@@ -1308,7 +1308,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteToggle);
 		} else {
-			inviteToHike(contactInfo.getMsisdn());
+			inviteToHike(contactInfo);
 		}
 	}
 
@@ -1435,7 +1435,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 			} else {
-				inviteToHike(contactInfo.getMsisdn());
+				inviteToHike(contactInfo);
 			}
 		}
 	}
@@ -1539,12 +1539,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onInviteToHikeClicked(View v) {
-		inviteToHike(contactInfo.getMsisdn());
+		inviteToHike(contactInfo);
 	}
 
-	private void inviteToHike(String msisdn) {
-		Utils.sendInviteUtil(msisdn, this, 
-				null, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, getString(R.string.native_header), getString(R.string.native_info));
+	private void inviteToHike(ContactInfo contactInfo) {
+		Utils.sendInviteUtil(contactInfo, this,
+				HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
+				getString(R.string.native_header),
+				getString(R.string.native_info));
 
 	}
 
@@ -1855,7 +1857,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 								openChatThread(contactInfo);
 							} else if (getString(R.string.invite_to_hike)
 									.equals(option)) {
-								inviteToHike(contactInfo.getMsisdn());
+								inviteToHike(contactInfo);
 							} else if (getString(R.string.add_to_contacts)
 									.equals(option)) {
 								addToContacts(contactInfo.getMsisdn());
@@ -2058,7 +2060,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			startActivity(intent);
 		}
 	}
-	
+
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (Build.VERSION.SDK_INT <= 10

@@ -37,6 +37,7 @@
 	<dimen name="hike_logo_margin">90dp</dimen>
 	<dimen name="list_margin">16dp</dimen>
 	<dimen name="divider_height">1dp</dimen>
+	<dimen name="ftue_avatar">65dp</dimen>
 	<dimen name="larger_avatar">50dp</dimen>
 	<dimen name="medium_avatar">42dp</dimen>
 	<dimen name="small_avatar">30dp</dimen>

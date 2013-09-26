@@ -55,6 +55,7 @@ import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
@@ -99,7 +100,6 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 	}
 
-
 	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo> {
 
 		public FTUEGridAdapter(Context context, int textViewResourceId,
@@ -118,9 +118,14 @@ public class ConversationFragment extends SherlockListFragment implements
 
 			ImageView avatarImage = (ImageView) convertView
 					.findViewById(R.id.avatar);
+			ImageView avatarFrame = (ImageView) convertView
+					.findViewById(R.id.avatar_frame);
 			TextView contactName = (TextView) convertView
 					.findViewById(R.id.name);
 
+			avatarFrame
+					.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike
+							: R.drawable.frame_avatar_ftue_sms);
 			avatarImage.setImageDrawable(IconCacheManager.getInstance()
 					.getIconForMSISDN(contactInfo.getMsisdn(), true));
 			contactName.setText(contactInfo.getName());
@@ -147,7 +152,10 @@ public class ConversationFragment extends SherlockListFragment implements
 	private Comparator<? super Conversation> mConversationsComparator;
 	private Handler messageRefreshHandler;
 	private View emptyView;
-	private enum hikeBotConvStat{NOTVIEWED, VIEWED, DELETED};
+
+	private enum hikeBotConvStat {
+		NOTVIEWED, VIEWED, DELETED
+	};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -192,6 +200,30 @@ public class ConversationFragment extends SherlockListFragment implements
 			ftueEmptyView.setVisibility(View.GONE);
 			ftueNotEmptyView.setVisibility(View.VISIBLE);
 
+			Button invite = (Button) emptyView.findViewById(R.id.invite);
+			Button newChat = (Button) emptyView.findViewById(R.id.new_chat);
+
+			invite.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(getActivity(), TellAFriend.class));
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
+				}
+			});
+
+			newChat.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(getActivity(),
+							ComposeActivity.class));
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
+				}
+			});
+
 			GridView ftueGrid = (GridView) emptyView
 					.findViewById(R.id.ftue_grid);
 			ftueGrid.setAdapter(new FTUEGridAdapter(getActivity(), -1,
@@ -206,6 +238,9 @@ public class ConversationFragment extends SherlockListFragment implements
 							contactInfo, true);
 					intent.setClass(getActivity(), ChatThread.class);
 					startActivity(intent);
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.GRID_6,
+							contactInfo.getMsisdn());
 				}
 			});
 		}
@@ -236,20 +271,22 @@ public class ConversationFragment extends SherlockListFragment implements
 		if (conv == null) {
 			return;
 		}
-		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
+		Intent intent = Utils.createIntentForConversation(
+				getSherlockActivity(), conv);
 		startActivity(intent);
-		
-		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if(conv.getMsisdn().equals(HikeConstants.FTUE_HIKEBOT_MSISDN) 
-				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.NOTVIEWED.ordinal()){
+
+		SharedPreferences prefs = getActivity().getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (conv.getMsisdn().equals(HikeConstants.FTUE_HIKEBOT_MSISDN)
+				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.NOTVIEWED
+						.ordinal()) {
 			Editor editor = prefs.edit();
-			editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.VIEWED.ordinal());
+			editor.putInt(HikeConstants.HIKEBOT_CONV_STATE,
+					hikeBotConvStat.VIEWED.ordinal());
 			editor.commit();
 		}
 
 	}
-
-
 
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
@@ -299,13 +336,17 @@ public class ConversationFragment extends SherlockListFragment implements
 							leaveGroup(conv);
 						} else if (getString(R.string.email_conversation)
 								.equals(option)) {
-							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
+							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(
+									getSherlockActivity(),
+									ConversationFragment.this);
 							Utils.executeConvAsyncTask(task, conv);
-						} else if (getString(R.string.deleteconversations).equals(option)) {
-							Utils.logEvent(getActivity(),
+						} else if (getString(R.string.deleteconversations)
+								.equals(option)) {
+							Utils.logEvent(
+									getActivity(),
 									HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 							DeleteAllConversations();
-						} 
+						}
 
 					}
 				});
@@ -490,6 +531,9 @@ public class ConversationFragment extends SherlockListFragment implements
 
 			final ConvMessage finalMessage = message;
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -521,6 +565,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 				messageList.add(message);
 			}
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -540,9 +587,11 @@ public class ConversationFragment extends SherlockListFragment implements
 			});
 		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
 			final Conversation conversation = (Conversation) object;
-			if(HikeMessengerApp.hikeBotNamesMap.containsKey(conversation.getMsisdn())){
-				conversation.setContactName(HikeMessengerApp.hikeBotNamesMap.get(conversation.getMsisdn()));	
-			} 
+			if (HikeMessengerApp.hikeBotNamesMap.containsKey(conversation
+					.getMsisdn())) {
+				conversation.setContactName(HikeMessengerApp.hikeBotNamesMap
+						.get(conversation.getMsisdn()));
+			}
 			Log.d(getClass().getSimpleName(),
 					"New Conversation. Group Conversation? "
 							+ (conversation instanceof GroupConversation));
@@ -553,6 +602,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 
 			mConversationsAdded.add(conversation.getMsisdn());
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				public void run() {
 					mAdapter.add(conversation);
@@ -589,6 +642,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 			}
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) {
 			long msgId = ((Long) object).longValue();
@@ -596,6 +652,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			if (Utils.shouldChangeMessageState(msg,
 					ConvMessage.State.SENT_CONFIRMED.ordinal())) {
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type)) {
@@ -615,6 +675,10 @@ public class ConversationFragment extends SherlockListFragment implements
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				}
 			}
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.MESSAGE_DELIVERED.equals(type)) {
 			Pair<String, Long> pair = (Pair<String, Long>) object;
@@ -628,9 +692,16 @@ public class ConversationFragment extends SherlockListFragment implements
 					return;
 				}
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
+			if (getActivity() == null) {
+				return;
+			}
 			/* an icon changed, so update the view */
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) {
@@ -645,6 +716,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 			conv.setContactName(groupName);
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
@@ -657,6 +731,10 @@ public class ConversationFragment extends SherlockListFragment implements
 					.get(contactInfo.getMsisdn());
 			if (conversation != null) {
 				conversation.setContactName(contactInfo.getName());
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)
@@ -676,12 +754,19 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 			conv.setUnreadCount(0);
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.GROUP_LEFT.equals(type)) {
 			String groupId = (String) object;
 			final Conversation conversation = mConversationsByMSISDN
 					.get(groupId);
 			if (conversation == null) {
+				return;
+			}
+
+			if (getActivity() == null) {
 				return;
 			}
 			getActivity().runOnUiThread(new Runnable() {
@@ -691,6 +776,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 			});
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -727,7 +815,6 @@ public class ConversationFragment extends SherlockListFragment implements
 			mConversationsAdded.add(conv.getMsisdn());
 			mAdapter.add(conv);
 		}
-
 		conv.addMessage(convMessage);
 		Log.d(getClass().getSimpleName(), "new message is " + convMessage);
 		mAdapter.sort(mConversationsComparator);
@@ -736,7 +823,7 @@ public class ConversationFragment extends SherlockListFragment implements
 			messageRefreshHandler = new Handler();
 		}
 	}
-	
+
 	public void DeleteAllConversations() {
 		DialogInterface.OnClickListener dialoagOnClickListener = new DialogInterface.OnClickListener() {
 			@Override
@@ -745,16 +832,14 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 		};
 		if (!mAdapter.isEmpty()) {
-				Utils.logEvent(getActivity(),
-						HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						getActivity());
-				builder.setMessage(R.string.delete_all_question)
-						.setPositiveButton(R.string.delete,
-								dialoagOnClickListener)
-						.setNegativeButton(R.string.cancel,
-								dialoagOnClickListener).show();
-			}
+			Utils.logEvent(getActivity(),
+					HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setMessage(R.string.delete_all_question)
+					.setPositiveButton(R.string.delete, dialoagOnClickListener)
+					.setNegativeButton(R.string.cancel, dialoagOnClickListener)
+					.show();
+		}
 	}
 
 	public void dialogInterfaceClickListener(DialogInterface dialog, int which) {
@@ -777,19 +862,24 @@ public class ConversationFragment extends SherlockListFragment implements
 		default:
 		}
 	}
-	
+
 	@Override
 	public void onResume() {
-		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if(prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED.ordinal()){
-			/* 
-			 * if there is a HikeBotConversation in Conversation list also it is Viewed by user then delete this.
+		SharedPreferences prefs = getActivity().getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
+				.ordinal()) {
+			/*
+			 * if there is a HikeBotConversation in Conversation list also it is
+			 * Viewed by user then delete this.
 			 */
 			Conversation conv = null;
-			conv = mConversationsByMSISDN.get(HikeConstants.FTUE_HIKEBOT_MSISDN);
-			if(conv != null){
+			conv = mConversationsByMSISDN
+					.get(HikeConstants.FTUE_HIKEBOT_MSISDN);
+			if (conv != null) {
 				Editor editor = prefs.edit();
-				editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.DELETED.ordinal());
+				editor.putInt(HikeConstants.HIKEBOT_CONV_STATE,
+						hikeBotConvStat.DELETED.ordinal());
 				editor.commit();
 				Utils.logEvent(getActivity(),
 						HikeConstants.LogEvent.DELETE_CONVERSATION);

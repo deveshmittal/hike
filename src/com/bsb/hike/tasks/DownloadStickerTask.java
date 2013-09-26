@@ -56,6 +56,10 @@ public class DownloadStickerTask extends StickerTaskBase {
 
 		String directoryPath = Utils.getStickerDirectoryForCategoryId(context,
 				catId);
+		if (directoryPath == null) {
+			return FTResult.DOWNLOAD_FAILED;
+		}
+
 		File largeStickerDir = new File(directoryPath
 				+ HikeConstants.LARGE_STICKER_ROOT);
 		File smallStickerDir = new File(directoryPath

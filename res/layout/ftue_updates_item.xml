@@ -19,7 +19,9 @@
             <ImageView
                 android:id="@+id/avatar"
                 style="@style/AvatarStyle.Padding"
-                android:src="@drawable/ic_ftue_friends" />
+                android:background="@drawable/bg_ftue_updates_tip"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_ftue_friends_tip" />
 
         </RelativeLayout>
 

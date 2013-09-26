@@ -15,8 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -71,6 +69,7 @@ import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
+import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils {
@@ -120,13 +119,13 @@ public class AccountUtils {
 	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
 
 	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
-	
+
 	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/android/";
 
 	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/android/";
 
 	public static String gamesUrl = HTTP_STRING + GAMES_PRODUCTION_BASE;
-	
+
 	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
 	public static final String STICKERS_STAGING_BASE = "staging.im.hike.in/s/%1$s/%2$s";
@@ -340,7 +339,7 @@ public class AccountUtils {
 			try {
 				deviceId = Utils.getHashedDeviceId(Secure.getString(
 						context.getContentResolver(), Secure.ANDROID_ID));
-				Log.d("AccountUtils", "Android ID is "+ Secure.ANDROID_ID);
+				Log.d("AccountUtils", "Android ID is " + Secure.ANDROID_ID);
 			} catch (NoSuchAlgorithmException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -463,17 +462,28 @@ public class AccountUtils {
 	}
 
 	private static void assertIfTokenNull() {
-//		Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
+		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
-	public static void setName(String name) throws NetworkErrorException,
+	public static void setProfile(String name, Birthday birthdate,
+			boolean isFemale) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost httppost = new HttpPost(base + "/account/name");
+		HttpPost httppost = new HttpPost(base + "/account/profile");
 		addToken(httppost);
 		JSONObject data = new JSONObject();
 
 		try {
 			data.put("name", name);
+			data.put("gender", isFemale ? "f" : "m");
+			if (birthdate != null) {
+				JSONObject bday = new JSONObject();
+				bday.put("day", birthdate.day);
+				bday.put("month", birthdate.month);
+				bday.put("year", birthdate.year);
+				data.put("dob", bday);
+			}
+			data.put("screen", "signup");
+
 			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString()
 					.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");

@@ -9,6 +9,7 @@
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img1"
         style="@style/SignupButton.Text.Info"
+        android:layout_marginTop="17dp"
         android:text="@string/enter_num_signup" />
 
     <LinearLayout
@@ -18,9 +19,9 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingBottom="4dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="4dp"
-        android:paddingTop="1dp" >
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:paddingTop="2dp" >
 
         <Button
             android:id="@+id/country_picker"
@@ -59,14 +60,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/btn_continue"
-            style="@style/SignupButton.Text.Bold.Button"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/signup_button"
-            android:onClick="onClick"
-            android:text="@string/next_signup" />
 
         <RelativeLayout
             android:id="@+id/loading_layout"
