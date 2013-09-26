@@ -481,10 +481,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					ImageView imageView = (ImageView) avatarContainer
 							.findViewById(R.id.avatar);
-					imageView.setImageDrawable(IconCacheManager.getInstance()
-							.getIconForMSISDN(participantList.get(i), true));
+					/*
+					 * Catching OOB here since the participant list can be
+					 * altered by another thread. In that case an OOB will be
+					 * thrown here. The only impact that will have is that the
+					 * image which has been removed will be skipped.
+					 */
+					try {
+						imageView.setImageDrawable(IconCacheManager
+								.getInstance().getIconForMSISDN(
+										participantList.get(i), true));
 
-					holder.typingAvatarContainer.addView(avatarContainer);
+						holder.typingAvatarContainer.addView(avatarContainer);
+					} catch (IndexOutOfBoundsException e) {
+
+					}
 				}
 			}
 			return v;
