@@ -682,7 +682,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		setupNameViewForGender();
 		if (mActivityState.birthday != null) {
 			onDateSetListener.onDateSet(null, mActivityState.birthday.year,
-					mActivityState.birthday.month,
+					mActivityState.birthday.month - 1,
 					mActivityState.birthday.day);
 		}
 
@@ -772,12 +772,26 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onBirthdayClick(View v) {
-		Calendar calendar = Calendar.getInstance();
-		int day = calendar.get(Calendar.DAY_OF_MONTH);
-		int month = calendar.get(Calendar.MONTH);
-		int year = calendar.get(Calendar.YEAR);
 
-		new DatePickerDialog(this, onDateSetListener, year, month, day).show();
+		int day;
+		int month;
+		int year;
+
+		Calendar calendar = Calendar.getInstance();
+
+		if (mActivityState.birthday == null) {
+			day = calendar.get(Calendar.DAY_OF_MONTH);
+			month = calendar.get(Calendar.MONTH);
+			year = calendar.get(Calendar.YEAR);
+		} else {
+			day = mActivityState.birthday.day;
+			month = mActivityState.birthday.month;
+			year = mActivityState.birthday.year;
+		}
+
+		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener,
+				year, month, day);
+		dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
 	}
 
 	private OnDateSetListener onDateSetListener = new OnDateSetListener() {
@@ -792,8 +806,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 			birthdayText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/"
 					+ year);
 
-			mActivityState.birthday = new Birthday(dayOfMonth,
-					monthOfYear + 1, year);
+			mActivityState.birthday = new Birthday(dayOfMonth, monthOfYear + 1,
+					year);
 			if (mTask != null) {
 				mTask.addBirthdate(mActivityState.birthday);
 			}
