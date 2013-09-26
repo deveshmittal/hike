@@ -698,46 +698,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 		dialogShowing = DialogShowing.UPGRADE_POPUP;
 		updateAlert = new Dialog(HomeActivity.this, R.style.Theme_CustomDialog);
-		updateAlert.setContentView(R.layout.alert_box);
+		updateAlert.setContentView(R.layout.operator_alert_popup);
 
-		((ImageView) updateAlert.findViewById(R.id.alert_image))
-				.setVisibility(View.GONE);
-
-		int padding = (int) (10 * Utils.densityMultiplier);
-
+		updateAlert.findViewById(R.id.body_checkbox).setVisibility(View.GONE);
 		TextView updateText = ((TextView) updateAlert
-				.findViewById(R.id.alert_text));
+				.findViewById(R.id.body_text));
 		TextView updateTitle = (TextView) updateAlert
-				.findViewById(R.id.alert_title);
+				.findViewById(R.id.header);
 
-		updateText.setPadding(padding, 0, padding, padding);
-		updateText.setGravity(Gravity.CENTER);
 		updateText.setText(accountPrefs.getString(
 				HikeConstants.Extras.UPDATE_MESSAGE, ""));
 
-		updateTitle.setPadding(padding, padding, padding, padding);
-		updateTitle.setGravity(Gravity.CENTER);
 		updateTitle
 				.setText(updateType == HikeConstants.CRITICAL_UPDATE ? R.string.critical_update_head
 						: R.string.normal_update_head);
 
 		Button cancelBtn = null;
+		updateAlertOkBtn = (Button) updateAlert
+				.findViewById(R.id.btn_ok);
 		if (updateType == HikeConstants.CRITICAL_UPDATE) {
-			((Button) updateAlert.findViewById(R.id.alert_ok_btn))
-					.setVisibility(View.GONE);
-			((Button) updateAlert.findViewById(R.id.alert_cancel_btn))
-					.setVisibility(View.GONE);
-			(updateAlert.findViewById(R.id.btn_divider))
+			((Button) updateAlert.findViewById(R.id.btn_cancel))
 					.setVisibility(View.GONE);
 
-			updateAlertOkBtn = (Button) updateAlert
-					.findViewById(R.id.alert_center_btn);
 			updateAlertOkBtn.setVisibility(View.VISIBLE);
 		} else {
-			updateAlertOkBtn = (Button) updateAlert
-					.findViewById(R.id.alert_ok_btn);
 			cancelBtn = (Button) updateAlert
-					.findViewById(R.id.alert_cancel_btn);
+					.findViewById(R.id.btn_cancel);
 			cancelBtn.setText(R.string.cancel);
 		}
 		updateAlertOkBtn.setText(R.string.update_app);
