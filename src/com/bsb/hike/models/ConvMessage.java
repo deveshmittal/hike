@@ -57,7 +57,7 @@ public class ConvMessage {
 
 	private JSONArray readByArray;
 	
-	private boolean shouldShowPush;
+	private boolean shouldShowPush = true;
 
 	public boolean isInvite() {
 		return mInvite;
