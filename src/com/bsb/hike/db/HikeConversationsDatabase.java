@@ -1146,12 +1146,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				conv = getGroupConversation(msisdn, convid);
 			} else {
 				huDb = HikeUserDatabase.getInstance();
-				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn,
-						false);
 
-				onhike |= contactInfo.isOnhike();
-				conv = new Conversation(msisdn, convid, contactInfo.getName(),
-						onhike);
+				String name;
+				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn)) {
+					name = HikeMessengerApp.hikeBotNamesMap.get(msisdn);
+					onhike = true;
+				} else {
+					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(
+							msisdn, false);
+					name = contactInfo.getName();
+					onhike |= contactInfo.isOnhike();
+				}
+				conv = new Conversation(msisdn, convid, name, onhike);
 
 			}
 
