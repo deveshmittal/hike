@@ -684,4 +684,5 @@
   	<string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
   	<string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet!.Invite %1$s to hike by tapping on Continue.Standard operator SMS rates apply.</string> 
   	<string name="ftue_add_prompt_invite_title">Invite to hike</string>
+  	<string name="from_hike_number">from a hike number</string>
 </resources>
