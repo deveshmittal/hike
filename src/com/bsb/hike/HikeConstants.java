@@ -181,7 +181,9 @@ public class HikeConstants {
 	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String HIKEBOT = "TD-HIKE";
 	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";
-	public static final String FTUE_HIKEBOT_MSISDN = "+Hike1+";
+	public static final String FTUE_TEAMHIKE_MSISDN = "+hike+";
+	public static final String FTUE_HIKEBOT_MSISDN = "+hike1+";
+	public static final String FTUE_GAMING_MSISDN ="+hike2+";
 	public static final String UNLINK_PREF = "unlinkAccount";
 	public static final String DELETE_PREF = "deleteAccount";
 	public static final String UNLINK_FB = "unlinkFacebook";
