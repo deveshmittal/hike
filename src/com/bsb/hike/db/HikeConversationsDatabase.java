@@ -1312,10 +1312,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				}
 				conv = new Conversation(msisdn, convid);
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
-				
-				if(HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn)){
-					conv.setContactName(HikeMessengerApp.hikeBotNamesMap.get(msisdn));	
-				} 
+
+				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn)) {
+					conv.setContactName(HikeMessengerApp.hikeBotNamesMap
+							.get(msisdn));
+				}
 
 				/*
 				 * If the message does not contain any text or metadata, its an
@@ -2567,8 +2568,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.REACHED_END, reachedEnd);
 
-		mDb.update(DBConstants.STICKERS_TABLE, values, DBConstants.CATEGORY_ID + "=?",
-				new String[] { categoryId });
+		mDb.update(DBConstants.STICKERS_TABLE, values, DBConstants.CATEGORY_ID
+				+ "=?", new String[] { categoryId });
 	}
 
 	public void addOrUpdateStickerCategory(String categoryId, int totalNum,
@@ -2890,7 +2891,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
-	
+
 	public void deleteAllProtipsBeforeThisId(long id) {
 		mDb.delete(DBConstants.PROTIP_TABLE, DBConstants.ID + "< ?",
 				new String[] { Long.toString(id) });
