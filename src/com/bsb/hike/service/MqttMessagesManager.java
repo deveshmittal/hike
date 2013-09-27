@@ -1133,8 +1133,12 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String devType = data.optString(HikeConstants.DEV_TYPE);
+			String id = jsonObj.optString(HikeConstants.ID);
+			String lastPushPacketId = settings.getString(
+					HikeConstants.Extras.LAST_UPDATE_PACKET_ID, "");
 			if (!TextUtils.isEmpty(devType)
-					&& devType.equals(HikeConstants.ANDROID)) {
+					&& devType.equals(HikeConstants.ANDROID)
+					&& !TextUtils.isEmpty(id) && !lastPushPacketId.equals(id)) {
 				String version = data.optString(HikeConstants.UPDATE_VERSION);
 				String updateURL = data.optString(HikeConstants.Extras.URL);
 				int update = Utils.isUpdateRequired(version, context) ? (data
@@ -1150,8 +1154,10 @@ public class MqttMessagesManager {
 								data.optString(HikeConstants.MESSAGE));
 						editor.putString(HikeConstants.Extras.LATEST_VERSION,
 								version);
-						if(!TextUtils.isEmpty(updateURL))
-							editor.putString(HikeConstants.Extras.URL, updateURL);
+						editor.putString(HikeConstants.Extras.LAST_UPDATE_PACKET_ID, id);
+						if (!TextUtils.isEmpty(updateURL))
+							editor.putString(HikeConstants.Extras.URL,
+									updateURL);
 						editor.commit();
 						this.pubSub.publish(HikePubSub.UPDATE_PUSH, update);
 					}
@@ -1160,16 +1166,23 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.APPLICATIONS_PUSH
 				.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String id = jsonObj.optString(HikeConstants.ID);
+			String lastPushPacketId = settings.getString(
+					HikeConstants.Extras.LAST_APPLICATION_PUSH_PACKET_ID, "");
 			String devType = data.optString(HikeConstants.DEV_TYPE);
 			String message = data.optString(HikeConstants.MESSAGE);
 			String packageName = data.optString(HikeConstants.PACKAGE);
 			if (!TextUtils.isEmpty(devType)
 					&& devType.equals(HikeConstants.ANDROID)
 					&& !TextUtils.isEmpty(message)
-					&& !TextUtils.isEmpty(packageName)) {
+					&& !TextUtils.isEmpty(packageName)
+					&& !TextUtils.isEmpty(id) && !lastPushPacketId.equals(id)) {
 				Editor editor = settings.edit();
 				editor.putString(HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
 						data.optString(HikeConstants.MESSAGE));
+				editor.putString(
+						HikeConstants.Extras.LAST_APPLICATION_PUSH_PACKET_ID,
+						id);
 				editor.commit();
 				this.pubSub.publish(HikePubSub.APPLICATIONS_PUSH, packageName);
 			}
