@@ -266,6 +266,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.noBtn.setText(R.string.not_now);
 
 			viewHolder.infoContainer.setVisibility(View.GONE);
+			viewHolder.moodsContainer.setVisibility(View.GONE);
 
 			switch (statusMessage.getStatusMessageType()) {
 			case NO_STATUS:
@@ -273,7 +274,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
 				viewHolder.yesBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setVisibility(View.GONE);
-				viewHolder.moodsContainer.setVisibility(View.GONE);
 
 				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
 						|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
