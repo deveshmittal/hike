@@ -631,7 +631,6 @@
 	<string name="x_regular_sms">%1$d x Regular SMS</string>
 	<string name="last_seen_yesterday_group_participant">Yesterday</string>
 	<string name="invite_friends_hike">Invite friends to hike</string>
-	<string name="create_group">Create group</string>
 	<string name="hike_contacts">HIKE CONTACTS</string>
 	<string name="sms_contacts">SMS CONTACTS</string>
 	<string name="invite_subtext">Earn additional free SMS for every friend that joins hike through your SMS invite.</string>
@@ -679,9 +678,14 @@
   	<string name="no_status">Happy and singing or the Monday blues? We\'ve got the right mood just for you.</string>
   	<string name="post">Post</string>
   	<string name="post_a_mood">Post a mood</string>
-  	<string name="mood_update">Mood Updates</string>
+  	<string name="mood_update">Introducing moods</string>
   	<string name="invite_contacts">Invite Contacts</string>
   	<string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
   	<string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet!.Invite %1$s to hike by tapping on Continue.Standard operator SMS rates apply.</string> 
   	<string name="ftue_add_prompt_invite_title">Invite to hike</string>
+  	<string name="create_group">New group chat</string>
+  	<string name="create_group_1">New group</string>
+  	<string name="create_group_2">Create new group</string>
+  	<string name="number_confirmation_string">Is %1s your number?</string>
+  	<string name="ftue_friends_subtext">Add as a friend</string>
 </resources>
