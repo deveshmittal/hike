@@ -677,7 +677,7 @@ public class HikeMessengerApp extends Application implements Listener {
 		hikeBotNamesMap = new HashMap<String, String>() {
 			{
 				put("+hike+", "team hike");
-				put("+hike1+", "Emma from hike");
+				put("+hike1+", "Emma");
 				put("+hike2+", "Games on hike");
 			}
 		};
