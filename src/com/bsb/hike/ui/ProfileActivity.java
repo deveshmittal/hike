@@ -1967,24 +1967,21 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void showDeleteStatusConfirmationDialog(final String statusId) {
-		AlertDialog.Builder builder = new Builder(this);
-		builder.setMessage(R.string.delete_status_confirmation);
-
-		builder.setNegativeButton(R.string.no, new OnClickListener() {
-
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
+		confirmDialog.setHeader(R.string.delete_status);
+		confirmDialog.setBody(R.string.delete_status_confirmation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-
-		builder.setPositiveButton(R.string.yes, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(View v) {
 				deleteStatus(statusId);
+				confirmDialog.dismiss();
 			}
-		});
-		builder.show();
+		}; 
+		
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
 	}
 
 	private void deleteStatus(final String statusId) {
