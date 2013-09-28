@@ -58,7 +58,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
 			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
-			R.drawable.mood_13_middle_finger };
+			R.drawable.mood_01_happy };
 
 	private int[] moodsRow2 = { R.drawable.mood_15_movie,
 			R.drawable.mood_34_music, R.drawable.mood_37_eating,
@@ -66,7 +66,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	private int[] moodsRowLand = { R.drawable.mood_09_chilling,
 			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
-			R.drawable.mood_13_middle_finger, R.drawable.mood_15_movie,
+			R.drawable.mood_01_happy, R.drawable.mood_15_movie,
 			R.drawable.mood_34_music, R.drawable.mood_37_eating };
 
 	private enum ViewType {
