@@ -36,7 +36,7 @@
         android:layout_below="@+id/overlay_message"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="25dp"
-        android:background="@drawable/rounded_button"
+        android:background="@drawable/bg_blue_btn_selector"
         android:onClick="onOverlayButtonClick"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
