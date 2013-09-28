@@ -1008,7 +1008,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				&& !TextUtils
 						.isEmpty(enterEditText.getText().toString().trim())
 				&& loadingLayout.getVisibility() != View.VISIBLE) {
-			submitClicked();
+			if (viewFlipper.getDisplayedChild() == NAME) {
+				Utils.hideSoftKeyboard(this, enterEditText);
+				onBirthdayClick(null);
+			} else {
+				submitClicked();
+			}
 		}
 		return true;
 	}
