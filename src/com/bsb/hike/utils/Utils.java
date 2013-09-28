@@ -3031,10 +3031,8 @@ public class Utils {
 
 	public static void sendFTUELogEvent(String key, String msisdn) {
 		try {
-			JSONObject mqttMessage = new JSONObject();
-			mqttMessage.put(HikeConstants.TYPE,
-					HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-			mqttMessage.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
 
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.CLICK);
@@ -3047,10 +3045,9 @@ public class Utils {
 				metadata.put(HikeConstants.TO, msisdns);
 			}
 
-			mqttMessage.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.METADATA, metadata);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-					mqttMessage);
+			sendLogEvent(data);
 		} catch (JSONException e) {
 			Log.w("LE", "Invalid json");
 		}

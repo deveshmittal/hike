@@ -30,7 +30,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="5dp"
-            android:text="@string/free_hike_sms" />
+            android:text="@string/from_hike_number" />
 
         <CheckBox
             android:id="@+id/hike_sms_checkbox"
