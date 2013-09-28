@@ -3,13 +3,9 @@ package com.bsb.hike.ui;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -35,6 +31,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
@@ -289,51 +286,55 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 	public boolean onPreferenceClick(final Preference preference) {
 		Log.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF)) {
-			Builder builder = new Builder(HikePreferences.this);
-			builder.setMessage(R.string.delete_confirmation);
-			builder.setPositiveButton(R.string.delete, new OnClickListener() {
+			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
+			confirmDialog.setHeader(R.string.delete_account);
+			confirmDialog.setBody(R.string.delete_confirmation);
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+				
 				@Override
-				public void onClick(DialogInterface dialog, int which) {
+				public void onClick(View v) {
 					DeleteAccountTask task = new DeleteAccountTask(
 							HikePreferences.this, true);
 					isDeleting = true;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
+					confirmDialog.dismiss();
 				}
-			});
-			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-				}
-			});
-			AlertDialog alertDialog = builder.create();
-			alertDialog.show();
+			}; 
+			
+			confirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			confirmDialog.show();
+
 		} else if (preference.getKey().equals(HikeConstants.UNLINK_PREF)) {
-			Builder builder = new Builder(HikePreferences.this);
-			builder.setMessage(R.string.unlink_confirmation);
-			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
+			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
+			confirmDialog.setHeader(R.string.unlink_account);
+			confirmDialog.setBody(R.string.unlink_confirmation);
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+				
 				@Override
-				public void onClick(DialogInterface dialog, int which) {
+				public void onClick(View v) {
 					DeleteAccountTask task = new DeleteAccountTask(
 							HikePreferences.this, false);
 					isDeleting = false;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
+					confirmDialog.dismiss();
 				}
-			});
-			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-				}
-			});
-			AlertDialog alertDialog = builder.create();
-			alertDialog.show();
+			}; 
+			
+			confirmDialog.setOkButton(R.string.unlink_account, dialogOkClickListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			confirmDialog.show();
+			
 		} else if (preference.getKey().equals(HikeConstants.UNLINK_FB)) {
-			Builder builder = new Builder(HikePreferences.this);
-			builder.setMessage(R.string.unlink_facebook_confirmation);
-			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
+			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
+			confirmDialog.setHeader(R.string.unlink_facebook);
+			confirmDialog.setBody(R.string.unlink_facebook_confirmation);
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+				
 				@Override
-				public void onClick(DialogInterface dialog, int which) {
+				public void onClick(View v) {
 					Editor editor = getSharedPreferences(
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 							.edit();
@@ -351,21 +352,22 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					getPreferenceScreen().removePreference(
 							getPreferenceScreen().findPreference(
 									HikeConstants.UNLINK_FB));
+					confirmDialog.dismiss();
 				}
-			});
-			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-				}
-			});
-			AlertDialog alertDialog = builder.create();
-			alertDialog.show();
+			}; 
+			
+			confirmDialog.setOkButton(R.string.unlink, dialogOkClickListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			confirmDialog.show();
+			
 		} else if (preference.getKey().equals(HikeConstants.UNLINK_TWITTER)) {
-			Builder builder = new Builder(HikePreferences.this);
-			builder.setMessage(R.string.unlink_twitter_confirmation);
-			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
+			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
+			confirmDialog.setHeader(R.string.unlink_twitter);
+			confirmDialog.setBody(R.string.unlink_twitter_confirmation);
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+				
 				@Override
-				public void onClick(DialogInterface dialog, int which) {
+				public void onClick(View v) {
 					Editor editor = getSharedPreferences(
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 							.edit();
@@ -381,15 +383,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					getPreferenceScreen().removePreference(
 							getPreferenceScreen().findPreference(
 									HikeConstants.UNLINK_TWITTER));
+					confirmDialog.dismiss();
 				}
-			});
-			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-				}
-			});
-			AlertDialog alertDialog = builder.create();
-			alertDialog.show();
+			}; 
+			
+			confirmDialog.setOkButton(R.string.unlink, dialogOkClickListener);
+			confirmDialog.setCancelButton(R.string.cancel);
+			confirmDialog.show();
+			
 		} else if (HikeConstants.BLOKED_LIST_PREF.equals(preference.getKey())) {
 			Intent intent = new Intent(HikePreferences.this,
 					HikeListActivity.class);

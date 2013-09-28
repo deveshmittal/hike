@@ -13,12 +13,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -31,7 +28,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -39,20 +35,16 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.View.OnLongClickListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
@@ -88,6 +80,7 @@ import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -1878,51 +1871,44 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void removeFromGroup(final ContactInfo contactInfo) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				ProfileActivity.this);
-
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(ProfileActivity.this);
+		confirmDialog.setHeader(R.string.remove_from_group);
 		String message = getString(R.string.remove_confirm,
 				contactInfo.getFirstName());
+		confirmDialog.setBody(message);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				JSONObject object = new JSONObject();
+				try {
+					object.put(HikeConstants.TO,
+							groupConversation.getMsisdn());
+					object.put(
+							HikeConstants.TYPE,
+							HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
 
-		builder.setMessage(message);
-		builder.setPositiveButton(R.string.yes,
-				new DialogInterface.OnClickListener() {
+					JSONObject data = new JSONObject();
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						JSONObject object = new JSONObject();
-						try {
-							object.put(HikeConstants.TO,
-									groupConversation.getMsisdn());
-							object.put(
-									HikeConstants.TYPE,
-									HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
+					JSONArray msisdns = new JSONArray();
+					msisdns.put(contactInfo.getMsisdn());
 
-							JSONObject data = new JSONObject();
+					data.put(HikeConstants.MSISDNS, msisdns);
 
-							JSONArray msisdns = new JSONArray();
-							msisdns.put(contactInfo.getMsisdn());
-
-							data.put(HikeConstants.MSISDNS, msisdns);
-
-							object.put(HikeConstants.DATA, data);
-						} catch (JSONException e) {
-							Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-						}
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.MQTT_PUBLISH, object);
-					}
-				});
-		builder.setNegativeButton(R.string.no,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-					}
-				});
-		builder.setCancelable(true);
-		AlertDialog alertDialog = builder.create();
-		alertDialog.show();
+					object.put(HikeConstants.DATA, data);
+				} catch (JSONException e) {
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH, object);
+				confirmDialog.dismiss();
+			}
+		}; 
+		
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
+		
 	}
 
 	@Override
@@ -1973,24 +1959,21 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void showDeleteStatusConfirmationDialog(final String statusId) {
-		AlertDialog.Builder builder = new Builder(this);
-		builder.setMessage(R.string.delete_status_confirmation);
-
-		builder.setNegativeButton(R.string.no, new OnClickListener() {
-
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
+		confirmDialog.setHeader(R.string.delete_status);
+		confirmDialog.setBody(R.string.delete_status_confirmation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-
-		builder.setPositiveButton(R.string.yes, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(View v) {
 				deleteStatus(statusId);
+				confirmDialog.dismiss();
 			}
-		});
-		builder.show();
+		}; 
+		
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
 	}
 
 	private void deleteStatus(final String statusId) {
