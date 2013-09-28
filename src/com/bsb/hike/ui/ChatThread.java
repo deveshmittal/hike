@@ -1152,9 +1152,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		if (!mConversation.isOnhike()) {
-			Utils.sendInvite(mContactNumber, this);
-			Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
-					.show();
+			Utils.sendInviteUtil(new ContactInfo(mContactNumber,
+					mContactNumber, mContactName, mContactNumber), this,
+					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
+					getString(R.string.native_header),
+					getString(R.string.native_info));
 		} else if (mConversation instanceof GroupConversation) {
 			startActivity(new Intent(ChatThread.this, HikeListActivity.class));
 		} else {
