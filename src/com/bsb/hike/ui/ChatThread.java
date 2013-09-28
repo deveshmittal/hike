@@ -1298,6 +1298,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 
 			if (shouldShowLastSeen()) {
+				mLastSeenView.setText("");
 				/*
 				 * Fetching last seen value.
 				 */
