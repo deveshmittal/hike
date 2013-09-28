@@ -351,7 +351,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		if (hideSuggestions) {
 			if (friendsList.isEmpty()) {
-				completeList.add(new ContactInfo(EMPTY_ID, null, null, null));
+				if (TextUtils.isEmpty(queryText)) {
+					completeList
+							.add(new ContactInfo(EMPTY_ID, null, null, null));
+				}
 			} else {
 				completeList.addAll(filteredFriendsList);
 			}
