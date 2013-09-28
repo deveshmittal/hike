@@ -695,13 +695,11 @@ public class HikeMessengerApp extends Application implements Listener {
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 
-		hikeBotNamesMap = new HashMap<String, String>() {
-			{
-				put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
-				put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
-				put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
-			}
-		};
+		hikeBotNamesMap = new HashMap<String, String>();
+		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
+		hikeBotNamesMap
+				.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
+		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 	}
 
 	private void makeNoMediaFiles() {
