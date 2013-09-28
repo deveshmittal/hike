@@ -234,9 +234,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
 			if (!shouldAddFTUEItem()) {
 				removeFTUEItemIfExists();
-				return;
+			} else {
+				addFTUEItem(statusMessages);
 			}
-			addFTUEItem(statusMessages);
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
