@@ -16,7 +16,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
