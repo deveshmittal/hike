@@ -293,13 +293,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		completeList.clear();
 
-		inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
-				context.getString(R.string.invite_friends_hike), null);
-		completeList.add(inviteExtraItem);
+		if (TextUtils.isEmpty(queryText)) {
+			inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
+					context.getString(R.string.invite_friends_hike), null);
+			completeList.add(inviteExtraItem);
 
-		groupExtraItem = new ContactInfo(EXTRA_ID, GROUP_MSISDN,
-				context.getString(R.string.create_group), null);
-		completeList.add(groupExtraItem);
+			groupExtraItem = new ContactInfo(EXTRA_ID, GROUP_MSISDN,
+					context.getString(R.string.create_group), null);
+			completeList.add(groupExtraItem);
+		}
 
 		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredFriendsList.size()),
