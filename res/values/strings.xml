@@ -8,7 +8,7 @@
     <string name="type_to_compose">Type to Compose</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
-    <string name="delete_all_question">Delete all your conversations?</string>
+    <string name="delete_all_question">Are you sure you want to delete all your conversations?</string>
     <string name="forward">Forward</string>
     <string name="copy">Copy</string>
     <string name="preferences">Preferences</string>
@@ -139,7 +139,7 @@
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
 	<string name="unlink_facebook_confirmation">Are you sure you want to unlink your facebook account from Hike?</string>
 	<string name="unlink_twitter_confirmation">Are you sure you want to unlink your twitter account from Hike?</string>
-	<string name="unlink">Logout</string>
+	<string name="unlink">Unlink</string>
 	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
 	<string name="plus">plus</string>
 	<string name="change_group_name">%1$s changed the group name.</string>
@@ -660,7 +660,7 @@
 	<string name="protip_games">games</string>
 	<string name="unlink_account">Logout</string>
 	<string name="delete_account_msg">Permanently delete your account :(</string>
-	<string name="unlink_confirmation">Are you sure you want to log out of your hike account, on this device?</string>
+	<string name="unlink_confirmation">Are you sure you want to log out of your hike account on this device?</string>
 	<string name="unlinking_account">Logging out your Hike Account</string>
 	<string name="ftue_grid_string">Start a conversation with one\nof your friends.</string>
 	<string name="remind">Remind</string>
@@ -688,6 +688,9 @@
   	<string name="create_group_2">Create new group</string>
   	<string name="number_confirmation_string">Is %1s your number?</string>
   	<string name="ftue_friends_subtext">Add as a friend</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">Tap here to dismiss friend suggestions</string>
   	<string name="from_hike_number">from a hike number</string>
   	<string name="sent_sticker_sms">I sent you a sticker. View it here - %1$s</string>
+  	<string name="unlink_facebook">Unlink Facebook</string>
+	<string name="unlink_twitter">Unlink Twitter</string>
 </resources>

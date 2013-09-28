@@ -10,11 +10,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -43,6 +41,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.common.ConnectionResult;
@@ -687,35 +686,32 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 		int messageId = currentLocationDevice == GPS_DISABLED ? R.string.gps_disabled
 				: R.string.location_disabled;
 
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-		alertDialogBuilder
-				.setMessage(messageId)
-				.setCancelable(false)
-				.setPositiveButton(android.R.string.ok,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								Intent callGPSSettingIntent = new Intent(
-										android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-								startActivity(callGPSSettingIntent);
-							}
-						});
-		alertDialogBuilder.setNegativeButton(R.string.cancel,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						gpsDialogShown = currentLocationDevice == GPS_DISABLED;
-						dialog.cancel();
-					}
-				});
-		alertDialogBuilder.setCancelable(true);
-		alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
-
+		final CustomAlertDialog alert = new CustomAlertDialog(this);
+		alert.setHeader(R.string.location);
+		alert.setBody(messageId);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
 			@Override
-			public void onCancel(DialogInterface dialog) {
-				gpsDialogShown = currentLocationDevice == GPS_DISABLED;
-
+			public void onClick(View v) {
+				Intent callGPSSettingIntent = new Intent(
+						android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				startActivity(callGPSSettingIntent);
+				alert.dismiss();
 			}
-		});
-		alert = alertDialogBuilder.create();
+		}; 
+		View.OnClickListener dialogCancelClickListener = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				gpsDialogShown = currentLocationDevice == GPS_DISABLED;
+				alert.dismiss();
+			}
+		}; 
+		
+		alert.setOkButton(android.R.string.ok, dialogOkClickListener);
+		alert.setCancelButton(R.string.cancel, dialogCancelClickListener);
+		alert.show();
+		
 		if (!ShareLocation.this.isFinishing())
 			alert.show();
 

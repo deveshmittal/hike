@@ -44,6 +44,13 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 		this(context, id, fileName, hasCustomIcon, statusImage, null, msisdn,
 				name, showToast);
 	}
+	
+	public DownloadProfileImageTask(Context context, String id,
+			String fileName, boolean hasCustomIcon, boolean statusImage,
+			String msisdn, String name, boolean showToast, String url){
+		this(context, id, fileName, hasCustomIcon, statusImage, url, msisdn,
+				name, showToast);
+	}
 
 	private DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage,
