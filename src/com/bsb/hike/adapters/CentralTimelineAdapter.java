@@ -281,7 +281,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					viewHolder.timeStamp.setVisibility(View.GONE);
 
 					viewHolder.extraInfo.setText(R.string.no_status);
-					viewHolder.yesBtn.setText(R.string.post);
+					viewHolder.yesBtn.setText(R.string.post_a_mood);
 
 					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
 
