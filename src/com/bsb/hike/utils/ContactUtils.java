@@ -395,17 +395,6 @@ public class ContactUtils {
 						whatsappContactIds.length(), ")");
 			}
 
-			/*
-			 * This number is required when the user does not have enough
-			 * whatsapp contacts.
-			 */
-			int otherContactsRequired = 0;
-			if (whatsappContactIds != null
-					&& whatsappContactsCursor.getCount() < limit) {
-				otherContactsRequired = limit
-						- whatsappContactsCursor.getCount();
-			}
-
 			String[] newProjection = new String[] { Phone.NUMBER,
 					Phone.TIMES_CONTACTED };
 			String newSelection = whatsappContactIds != null ? (Phone.CONTACT_ID
@@ -425,9 +414,19 @@ public class ContactUtils {
 				extractContactInfo(phoneContactsCursor, sb,
 						mostContactedNumbers, true);
 
+				/*
+				 * This number is required when the user does not have enough
+				 * whatsapp contacts.
+				 */
+				int otherContactsRequired = limit - mostContactedNumbers.size();
+
 				if (otherContactsRequired > 0) {
-					newSelection = Phone.CONTACT_ID + " NOT IN "
-							+ whatsappContactIds.toString();
+					if (whatsappContactIds != null) {
+						newSelection = Phone.CONTACT_ID + " NOT IN "
+								+ whatsappContactIds.toString();
+					} else {
+						newSelection = null;
+					}
 
 					otherContactsCursor = context.getContentResolver().query(
 							Phone.CONTENT_URI,
