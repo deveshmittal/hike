@@ -9,10 +9,10 @@
         android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:layout_centerHorizontal="true"
         android:gravity="center"
         android:text="@string/use_hike_for_sms"
         android:textColor="@color/sms_popup"
+        android:layout_marginLeft="20dp"
         android:textSize="18sp"
         android:textStyle="bold|italic" />
 
@@ -32,7 +32,6 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="15dp"
-        android:gravity="center"
         android:text="@string/use_hike_for_sms_info"
         android:textColor="@color/list_item_header"
         android:textSize="16sp" />

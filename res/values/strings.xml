@@ -689,4 +689,5 @@
   	<string name="number_confirmation_string">Is %1s your number?</string>
   	<string name="ftue_friends_subtext">Add as a friend</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tap here to dismiss friend suggestions</string>
+  	<string name="from_hike_number">from a hike number</string>
 </resources>

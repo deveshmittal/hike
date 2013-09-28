@@ -583,10 +583,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.request_pending);
 
+						TextView inviteBtn = (TextView) convertView
+								.findViewById(R.id.invite_btn);
 						if (!contactInfo.isOnhike()) {
-							TextView inviteBtn = (TextView) convertView
-									.findViewById(R.id.invite_btn);
 							setInviteButton(contactInfo, inviteBtn, null);
+						} else {
+							inviteBtn.setVisibility(View.GONE);
 						}
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
@@ -836,7 +838,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK);
 
 			if (!contactInfo.isOnhike())
-				Utils.sendInviteUtil(contactInfo2, context,
+				Utils.sendInviteUtil(
+						contactInfo2,
+						context,
 						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
 						context.getString(R.string.ftue_add_prompt_invite_title),
 						context.getString(R.string.ftue_add_prompt_invite),
