@@ -1638,7 +1638,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
-				DBConstants.HAS_CUSTOM_PHOTO };
+				DBConstants.HAS_CUSTOM_PHOTO,
+				DBConstants.FAVORITE_TYPE_SELECTION };
 
 		String selection = DBConstants.PHONE + " IN " + selectionNumbers
 				+ " AND " + DBConstants.MSISDN + "!='null' AND "
@@ -1658,6 +1659,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 			int hasCustomPhotoIdx = c
 					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+			int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
 
 			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
 
@@ -1687,6 +1689,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						msisdn, name, c.getString(phoneNumIdx),
 						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
 						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
+				contactInfo.setFavoriteType(FavoriteType.values()[c
+						.getInt(favoriteIdx)]);
 				contactList.add(contactInfo);
 			}
 
