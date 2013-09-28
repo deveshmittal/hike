@@ -57,6 +57,7 @@ import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.CustomAlertDialog;
 
 public class ConversationFragment extends SherlockListFragment implements
 		OnItemLongClickListener, Listener, Runnable {
@@ -825,43 +826,41 @@ public class ConversationFragment extends SherlockListFragment implements
 	}
 
 	public void DeleteAllConversations() {
-		DialogInterface.OnClickListener dialoagOnClickListener = new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialogInterfaceClickListener(dialog, which);
-			}
-		};
 		if (!mAdapter.isEmpty()) {
 			Utils.logEvent(getActivity(),
 					HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
-			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			builder.setMessage(R.string.delete_all_question)
-					.setPositiveButton(R.string.delete, dialoagOnClickListener)
-					.setNegativeButton(R.string.cancel, dialoagOnClickListener)
-					.show();
+			final CustomAlertDialog deleteDialog = new CustomAlertDialog(getActivity());
+			deleteDialog.setHeader(R.string.deleteconversations);
+			deleteDialog.setBody(R.string.delete_all_question);
+			OnClickListener deleteAllOkClickListener = new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					Conversation[] convs = new Conversation[mAdapter.getCount()];
+					for (int i = 0; i < convs.length; i++) {
+						convs[i] = mAdapter.getItem(i);
+						if ((convs[i] instanceof GroupConversation)) {
+							HikeMessengerApp
+									.getPubSub()
+									.publish(
+											HikePubSub.MQTT_PUBLISH,
+											convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+						}
+					}
+					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+					task.execute(convs);
+					deleteDialog.dismiss();
+				}
+			}; 
+			
+			deleteDialog.setOkButton(R.string.delete, deleteAllOkClickListener);
+			deleteDialog.setCancelButton(R.string.cancel);
+			
+			deleteDialog.show();
 		}
 	}
 
-	public void dialogInterfaceClickListener(DialogInterface dialog, int which) {
-		switch (which) {
-		case DialogInterface.BUTTON_POSITIVE:
-			Conversation[] convs = new Conversation[mAdapter.getCount()];
-			for (int i = 0; i < convs.length; i++) {
-				convs[i] = mAdapter.getItem(i);
-				if ((convs[i] instanceof GroupConversation)) {
-					HikeMessengerApp
-							.getPubSub()
-							.publish(
-									HikePubSub.MQTT_PUBLISH,
-									convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
-				}
-			}
-			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-			task.execute(convs);
-			break;
-		default:
-		}
-	}
+
 
 	@Override
 	public void onResume() {
