@@ -792,6 +792,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener,
 				year, month, day);
 		dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
+		dialog.show();
 	}
 
 	private OnDateSetListener onDateSetListener = new OnDateSetListener() {
