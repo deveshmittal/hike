@@ -280,6 +280,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String RESET_REACHED_END_FOR_DEFAULT_STICKERS = "resetReachedEndForDefaultStickers";
 
+	public static final String CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES = "correctDefaultStickerDialogPreferences";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -669,6 +671,25 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
 			editor.commit();
 		}
+
+		/*
+		 * Adding these preferences since they are used in the load more
+		 * stickers logic.
+		 */
+		if (!settings.getBoolean(CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES,
+				false)) {
+			Editor editor = settings.edit();
+			editor.putBoolean(stickerCategories.get(0).downloadDialogPref,
+					settings.getBoolean(
+							SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
+							false));
+			editor.putBoolean(stickerCategories.get(1).downloadDialogPref,
+					settings.getBoolean(
+							SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP, false));
+			editor.putBoolean(CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, true);
+			editor.commit();
+		}
+
 		makeNoMediaFiles();
 
 		HikeMessengerApp.getPubSub().addListener(

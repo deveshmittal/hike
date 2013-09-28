@@ -3749,27 +3749,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Log.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS) {
 				String categoryId = Utils.getCategoryIdForIndex(pageNum);
-				if (pageNum == 0
-						&& !prefs
-								.getBoolean(
-										HikeMessengerApp.SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
-										false)) {
-					showStickerPreviewDialog(pageNum);
-				} else if (pageNum == 1
-						&& !prefs
-								.getBoolean(
-										HikeMessengerApp.SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP,
-										false)) {
-					showStickerPreviewDialog(pageNum);
-				} else if (pageNum != 0
-						&& pageNum != 1
-						&& (!Utils.checkIfStickerCategoryExists(
+				if (!prefs
+						.getBoolean(
+								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
+								false)) {
+					if (pageNum != 0 && pageNum != 1) {
+						if ((!Utils.checkIfStickerCategoryExists(
 								ChatThread.this, categoryId) || !prefs
 								.getBoolean(HikeMessengerApp.stickerCategories
 										.get(pageNum).downloadDialogPref, false))
-						&& !HikeMessengerApp.stickerTaskMap
-								.containsKey(categoryId)) {
-					showStickerPreviewDialog(pageNum);
+								&& !HikeMessengerApp.stickerTaskMap
+										.containsKey(categoryId)) {
+							showStickerPreviewDialog(pageNum);
+						}
+					} else {
+						showStickerPreviewDialog(pageNum);
+					}
 				}
 			}
 		}
@@ -3801,15 +3796,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				dialog.dismiss();
 				Editor editor = prefs.edit();
 				try {
-					if (categoryIndex == 1) {
-						editor.putBoolean(
-								HikeMessengerApp.SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP,
-								true);
-						return;
-					} else if (categoryIndex == 0) {
-						editor.putBoolean(
-								HikeMessengerApp.SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
-								true);
+					editor.putBoolean(HikeMessengerApp.stickerCategories
+							.get(categoryIndex).downloadDialogPref, true);
+					if (categoryIndex == 0 || categoryIndex == 1) {
 						return;
 					}
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
@@ -3821,10 +3810,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							downloadStickerTask);
 					updateStickerCategoryUI(categoryIndex, false, null);
 
-					if (categoryIndex != 0) {
-						editor.putBoolean(HikeMessengerApp.stickerCategories
-								.get(categoryIndex).downloadDialogPref, true);
-					}
 				} finally {
 					editor.commit();
 				}
