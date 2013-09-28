@@ -49,8 +49,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.PROTIP_ADDED};
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.PROTIP_ADDED };
 	private String[] friendMsisdns;
 
 	@Override
@@ -212,7 +211,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 				@Override
 				public void run() {
 					statusMessages.add(startIndex, statusMessage);
-					
+
 					if (noStatusMessage != null
 							&& (statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT || statusMessage
 									.getMsisdn().equals(userMsisdn))) {
@@ -245,8 +244,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
-		}else if (HikePubSub.PROTIP_ADDED.equals(type)){
-			addProtip((Protip)object);
+		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			addProtip((Protip) object);
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -350,7 +349,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 					HikeMessengerApp.NAME_SETTING, null));
 			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS,
 					"");
-			
+
 			/*
 			 * If we already have a few status messages in the timeline, no need
 			 * to prompt the user to post his/her own message.
@@ -380,12 +379,12 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 			Protip protip = null;
 			boolean showProtip = false;
-			if (currentProtipId !=-1) {
+			if (currentProtipId != -1) {
 				showProtip = true;
 				protip = HikeConversationsDatabase.getInstance()
 						.getProtipForId(currentProtipId);
-			} 
-			
+			}
+
 			if (showProtip && protip != null) {
 				final int startIndex = getStartIndex();
 				statusMessages.add(startIndex, new StatusMessage(protip));
@@ -410,13 +409,13 @@ public class UpdatesFragment extends SherlockListFragment implements
 		}
 
 	}
-	
-	private void addProtip(Protip protip){	
-		if(protip!=null){
+
+	private void addProtip(Protip protip) {
+		if (protip != null) {
 			final int startIndex = getStartIndex();
 			statusMessages.add(getStartIndex(), new StatusMessage(protip));
 			centralTimelineAdapter.setProtipIndex(startIndex);
 		}
 	}
-	
+
 }
