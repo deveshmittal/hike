@@ -312,7 +312,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			for (ContactInfo contactInfo : HomeActivity.ftueList) {
 				FavoriteType favoriteType = contactInfo.getFavoriteType();
 				if (favoriteType == FavoriteType.NOT_FRIEND
-						|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED) {
+						|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED
+						|| favoriteType == null) {
 					completeList.add(contactInfo);
 					if (++counter == limit) {
 						break;
