@@ -643,7 +643,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						rejectBtn.setOnClickListener(rejectOnClickListener);
 
 					} else if (viewType == ViewType.FTUE_CONTACT) {
-						lastSeen.setVisibility(View.GONE);
+						lastSeen.setVisibility(View.VISIBLE);
+						lastSeen.setText(R.string.ftue_friends_subtext);
 
 						TextView addBtn = (TextView) convertView
 								.findViewById(R.id.invite_btn);
