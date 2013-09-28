@@ -332,7 +332,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private ImageView avatar;
 
 	private PopupWindow attachmentWindow;
-	
+
 	private Menu mMenu;
 
 	@Override
@@ -787,12 +787,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Utils.onCallClicked(ChatThread.this, mContactNumber);
 			break;
 		case R.id.email_conv:
-			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
+			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(
+					ChatThread.this, null);
 			Utils.executeConvAsyncTask(emailTask, mConversation);
 			break;
 		case R.id.add_shortcut:
-			Utils.logEvent(ChatThread.this,
-						HikeConstants.LogEvent.ADD_SHORTCUT);
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
 			Utils.createShortcut(ChatThread.this, mConversation);
 			break;
 		}
@@ -4355,7 +4355,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		}
 	}
-	
+
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (Build.VERSION.SDK_INT <= 10
