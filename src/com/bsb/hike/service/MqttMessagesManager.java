@@ -909,7 +909,7 @@ public class MqttMessagesManager {
 					 */
 					autoDownloadProfileImage(statusMessage, true);
 				}
-			}
+			} 
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
@@ -1093,10 +1093,10 @@ public class MqttMessagesManager {
 
 			Protip protip = new Protip(jsonObj);
 			// check upfront if this protip is a valid protip
-			if (protip!=null && currentProtipId != protip.getId()) {
+			if (protip != null && currentProtipId != protip.getId()) {
 				isValidProtip = true;
 			}
-			//only if its a valid protip, proceed with the display
+			// only if its a valid protip, proceed with the display
 			if (isValidProtip) {
 
 				/*
@@ -1110,9 +1110,9 @@ public class MqttMessagesManager {
 							"Error adding this protip");
 					return; // for some reason the insertion failed,
 				}
-				//delete all pro tips before these.
-				//we dont need them anymore.
-				
+				// delete all pro tips before these.
+				// we dont need them anymore.
+
 				convDb.deleteAllProtipsBeforeThisId(id);
 				protip.setId(id);
 				Editor editor = settings.edit();
@@ -1127,9 +1127,18 @@ public class MqttMessagesManager {
 				// increment the unseen status count straight away.
 				// we've got a new pro tip.
 				incrementUnseenStatusCount();
+
+				StatusMessage statusMessage = new StatusMessage(protip);
+				// download the protip only if the URL is non empty
+				// also respect the user's auto photo download setting.
+				if (!TextUtils.isEmpty(protip.getImageURL())
+						&& appPrefs.getBoolean(
+								HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+					autoDownloadProtipImage(statusMessage, true);
+				}
 				pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 			}
-			
+
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String devType = data.optString(HikeConstants.DEV_TYPE);
@@ -1194,6 +1203,7 @@ public class MqttMessagesManager {
 		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
 			return;
 		}
+		
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
@@ -1212,7 +1222,17 @@ public class MqttMessagesManager {
 				context, id, fileName, true, false, null, null, false);
 		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
-
+	
+	private void autoDownloadProtipImage(StatusMessage statusMessage, boolean statusUpdate) {
+		String fileName = Utils.getProfileImageFileName(statusMessage
+				.getMappedId());
+		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
+				context, statusMessage.getMappedId(), fileName, true,
+				statusUpdate, statusMessage.getMsisdn(),
+				statusMessage.getNotNullName(), false, statusMessage.getProtip().getImageURL());
+		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
+	}
+	
 	private void setDefaultSMSClientTutorialSetting() {
 		/*
 		 * If settings already contains this key, no need to do anything since
