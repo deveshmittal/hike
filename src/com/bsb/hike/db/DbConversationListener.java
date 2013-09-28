@@ -479,7 +479,8 @@ public class DbConversationListener implements Listener {
 		values.put(HikeConstants.SMSNative.NUMBER, convMessage.getMsisdn());
 		values.put(HikeConstants.SMSNative.DATE,
 				convMessage.getTimestamp() * 1000);
-		values.put(HikeConstants.SMSNative.MESSAGE, convMessage.getMessage());
+		values.put(HikeConstants.SMSNative.MESSAGE,
+				Utils.getMessageDisplayText(convMessage, context));
 
 		context.getContentResolver().insert(
 				HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
