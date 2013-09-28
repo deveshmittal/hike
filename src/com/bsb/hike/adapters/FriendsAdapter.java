@@ -535,10 +535,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			}
 		}
 
-		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND_HIKE
-				|| viewType == ViewType.FRIEND_REQUEST
-				|| viewType == ViewType.NOT_FRIEND_SMS
-				|| viewType == ViewType.FTUE_CONTACT) {
+		switch (viewType) {
+		case FRIEND:
+		case NOT_FRIEND_HIKE:
+		case FRIEND_REQUEST:
+		case NOT_FRIEND_SMS:
+		case FTUE_CONTACT:
+
 			ImageView avatar = (ImageView) convertView
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
@@ -648,8 +651,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					}
 				}
 			}
+			break;
 
-		} else if (viewType == ViewType.SECTION) {
+		case SECTION:
 			TextView headerName = (TextView) convertView
 					.findViewById(R.id.name);
 			TextView headerCount = (TextView) convertView
@@ -661,21 +665,24 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			icon.setImageResource(FRIEND_PHONE_NUM.equals(contactInfo
 					.getPhoneNum()) ? R.drawable.ic_header_friends
 					: R.drawable.ic_header_contacts);
+			break;
 
-		} else if (viewType == ViewType.EXTRA) {
-			TextView headerName = (TextView) convertView
+		case EXTRA:
+			TextView headerName2 = (TextView) convertView
 					.findViewById(R.id.contact);
 			ImageView headerIcon = (ImageView) convertView
 					.findViewById(R.id.icon);
 
 			if (contactInfo.getMsisdn().equals(INVITE_MSISDN)) {
 				headerIcon.setImageResource(R.drawable.ic_invite_to_hike);
-				headerName.setText(R.string.invite_friends_hike);
+				headerName2.setText(R.string.invite_friends_hike);
 			} else {
 				headerIcon.setImageResource(R.drawable.ic_create_group);
-				headerName.setText(R.string.create_group);
+				headerName2.setText(R.string.create_group);
 			}
-		} else if (viewType == ViewType.EMPTY) {
+			break;
+
+		case EMPTY:
 			TextView emptyText = (TextView) convertView
 					.findViewById(R.id.empty_text);
 
@@ -686,6 +693,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			ssb.setSpan(new ImageSpan(context, R.drawable.ic_add_friend),
 					index, index + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			emptyText.setText(ssb);
+			break;
 		}
 
 		return convertView;
