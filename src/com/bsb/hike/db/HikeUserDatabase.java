@@ -1970,6 +1970,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	private String getQueryableNumbersString(List<ContactInfo> contactInfos) {
+		if (contactInfos.isEmpty()) {
+			return null;
+		}
+		StringBuilder sb = new StringBuilder("(");
+		for (ContactInfo contactInfo : contactInfos) {
+			sb.append(DatabaseUtils.sqlEscapeString(contactInfo.getMsisdn())
+					+ ",");
+		}
+		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+
+		return sb.toString();
+	}
+
 	public List<ContactInfo> getFTUEContacts(SharedPreferences preferences) {
 
 		int limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT;
@@ -1993,13 +2007,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			limit = limit - friendList.size();
 		}
 
+		String currentSelection = getQueryableNumbersString(contactInfoList);
+
 		String recommendedContactsSelection = getServerRecommendedContactsSelection(
 				preferences.getString(
 						HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null),
 				myMsisdn);
 		if (!TextUtils.isEmpty(recommendedContactsSelection)) {
 			List<ContactInfo> recommendedContacts = getHikeContacts(limit,
-					recommendedContactsSelection, null, myMsisdn);
+					recommendedContactsSelection, currentSelection, myMsisdn);
 			contactInfoList.addAll(recommendedContacts);
 
 			if (recommendedContacts.size() == limit) {
@@ -2009,8 +2025,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			}
 		}
 
+		currentSelection = getQueryableNumbersString(contactInfoList);
+
 		List<ContactInfo> hikeContacts = getHikeContacts(limit, null,
-				recommendedContactsSelection, myMsisdn);
+				currentSelection, myMsisdn);
 		contactInfoList.addAll(hikeContacts);
 
 		if (hikeContacts.size() == limit) {
