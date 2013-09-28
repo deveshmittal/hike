@@ -88,6 +88,7 @@ import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -1878,51 +1879,44 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void removeFromGroup(final ContactInfo contactInfo) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				ProfileActivity.this);
-
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(ProfileActivity.this);
+		confirmDialog.setHeader(R.string.remove_from_group);
 		String message = getString(R.string.remove_confirm,
 				contactInfo.getFirstName());
+		confirmDialog.setBody(message);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				JSONObject object = new JSONObject();
+				try {
+					object.put(HikeConstants.TO,
+							groupConversation.getMsisdn());
+					object.put(
+							HikeConstants.TYPE,
+							HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
 
-		builder.setMessage(message);
-		builder.setPositiveButton(R.string.yes,
-				new DialogInterface.OnClickListener() {
+					JSONObject data = new JSONObject();
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						JSONObject object = new JSONObject();
-						try {
-							object.put(HikeConstants.TO,
-									groupConversation.getMsisdn());
-							object.put(
-									HikeConstants.TYPE,
-									HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
+					JSONArray msisdns = new JSONArray();
+					msisdns.put(contactInfo.getMsisdn());
 
-							JSONObject data = new JSONObject();
+					data.put(HikeConstants.MSISDNS, msisdns);
 
-							JSONArray msisdns = new JSONArray();
-							msisdns.put(contactInfo.getMsisdn());
-
-							data.put(HikeConstants.MSISDNS, msisdns);
-
-							object.put(HikeConstants.DATA, data);
-						} catch (JSONException e) {
-							Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-						}
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.MQTT_PUBLISH, object);
-					}
-				});
-		builder.setNegativeButton(R.string.no,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-					}
-				});
-		builder.setCancelable(true);
-		AlertDialog alertDialog = builder.create();
-		alertDialog.show();
+					object.put(HikeConstants.DATA, data);
+				} catch (JSONException e) {
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH, object);
+				confirmDialog.dismiss();
+			}
+		}; 
+		
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
+		
 	}
 
 	@Override
