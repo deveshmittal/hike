@@ -15,7 +15,7 @@
         android:key="unlinkAccount"
         android:layout="@layout/icon_preference"
         android:summary="@string/unlink_hinttext"
-        android:title="@string/unlink" />
+        android:title="@string/unlink_account" />
     <com.bsb.hike.view.IconPreference
         icon="ic_delete_account_settings"
         android:key="deleteAccount"
