@@ -282,6 +282,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES = "correctDefaultStickerDialogPreferences";
 
+	public static final String FIRST_VIEW_FTUE_LIST_TIMESTAMP = "firstViewFtueListTimestamp";
+
+	public static final String HIDE_FTUE_SUGGESTIONS = "hideFtueSuggestions";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

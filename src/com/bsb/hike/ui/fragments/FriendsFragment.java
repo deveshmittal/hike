@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Pair;
@@ -93,7 +94,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			return;
 		}
 
-		if (FriendsAdapter.EXTRA_ID.equals(contactInfo.getId())) {
+		if (FriendsAdapter.REMOVE_SUGGESTIONS_ID.equals(contactInfo.getId())) {
+			Editor editor = preferences.edit();
+			editor.putBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, true);
+			editor.commit();
+
+			friendsAdapter.makeCompleteList(true);
+		} else if (FriendsAdapter.EXTRA_ID.equals(contactInfo.getId())) {
 			Intent intent;
 			if (FriendsAdapter.INVITE_MSISDN.equals(contactInfo.getMsisdn())) {
 				intent = new Intent(getActivity(), TellAFriend.class);

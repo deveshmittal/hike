@@ -266,7 +266,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	private boolean shouldAddFTUEItem() {
 		if (HomeActivity.ftueList.isEmpty()
-				|| statusMessages.size() > HikeConstants.MIN_STATUS_COUNT) {
+				|| statusMessages.size() > HikeConstants.MIN_STATUS_COUNT
+				|| prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS,
+						false)) {
 			return false;
 		}
 

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
@@ -47,6 +48,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public static final String EXTRA_ID = "-910";
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_ID = "-912";
+	public static final String REMOVE_SUGGESTIONS_ID = "-913";
 
 	public static final String INVITE_MSISDN = "-123";
 	public static final String GROUP_MSISDN = "-124";
@@ -55,7 +57,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public static final String CONTACT_PHONE_NUM = "--126";
 
 	public enum ViewType {
-		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT
+		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS
 	}
 
 	private LayoutInflater layoutInflater;
@@ -304,29 +306,53 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				context.getString(R.string.friends), FRIEND_PHONE_NUM);
 		completeList.add(friendsSection);
 
+		boolean hideSuggestions = true;
+
 		if (!HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText)
 				&& friendsList.size() < HikeConstants.FTUE_LIMIT) {
-			int limit = HikeConstants.FTUE_LIMIT - friendsList.size();
+			SharedPreferences prefs = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-			int counter = 0;
-			for (ContactInfo contactInfo : HomeActivity.ftueList) {
-				FavoriteType favoriteType = contactInfo.getFavoriteType();
-				if (favoriteType == FavoriteType.NOT_FRIEND
-						|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED
-						|| favoriteType == null) {
-					completeList.add(contactInfo);
-					if (++counter == limit) {
-						break;
+			hideSuggestions = prefs.getBoolean(
+					HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false);
+
+			if (!hideSuggestions) {
+				long firstTimeViewFtueSuggestionsTs = prefs.getLong(
+						HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, 0);
+
+				long currentTime = System.currentTimeMillis() / 1000;
+
+				if (currentTime - firstTimeViewFtueSuggestionsTs > 60 * 60) {
+					completeList.add(new ContactInfo(REMOVE_SUGGESTIONS_ID,
+							null, null, null));
+				}
+
+				int limit = HikeConstants.FTUE_LIMIT - friendsList.size();
+
+				int counter = 0;
+				for (ContactInfo contactInfo : HomeActivity.ftueList) {
+					FavoriteType favoriteType = contactInfo.getFavoriteType();
+					if (favoriteType == FavoriteType.NOT_FRIEND
+							|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED
+							|| favoriteType == null) {
+						completeList.add(contactInfo);
+						if (++counter == limit) {
+							break;
+						}
 					}
 				}
+				if (!friendsList.isEmpty()) {
+					completeList.addAll(filteredFriendsList);
+				}
 			}
-			if (!friendsList.isEmpty()) {
+		}
+
+		if (hideSuggestions) {
+			if (friendsList.isEmpty()) {
+				completeList.add(new ContactInfo(EMPTY_ID, null, null, null));
+			} else {
 				completeList.addAll(filteredFriendsList);
 			}
-		} else if (friendsList.isEmpty()) {
-			completeList.add(new ContactInfo(EMPTY_ID, null, null, null));
-		} else {
-			completeList.addAll(filteredFriendsList);
 		}
 
 		if (!hikeContactsList.isEmpty()) {
@@ -468,6 +494,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			return ViewType.SECTION.ordinal();
 		} else if (EXTRA_ID.equals(contactInfo.getId())) {
 			return ViewType.EXTRA.ordinal();
+		} else if (REMOVE_SUGGESTIONS_ID.equals(contactInfo.getId())) {
+			return ViewType.REMOVE_SUGGESTIONS.ordinal();
 		} else {
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			if (favoriteType == FavoriteType.FRIEND
@@ -533,6 +561,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				convertView = layoutInflater.inflate(
 						R.layout.friends_empty_view, parent, false);
 				break;
+			case REMOVE_SUGGESTIONS:
+				convertView = layoutInflater.inflate(
+						R.layout.remove_suggestions, parent, false);
 			}
 		}
 

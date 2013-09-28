@@ -574,6 +574,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 				tabIndicator.notifyDataSetChanged();
 			}
+
+			if (position != CHATS_TAB_INDEX) {
+				long firstViewFtueTs = accountPrefs.getLong(
+						HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, 0);
+				if (firstViewFtueTs == 0) {
+					Editor editor = accountPrefs.edit();
+					editor.putLong(
+							HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP,
+							System.currentTimeMillis() / 1000);
+					editor.commit();
+				}
+			}
 		}
 
 		@Override
