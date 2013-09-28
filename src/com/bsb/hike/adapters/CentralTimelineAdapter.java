@@ -435,6 +435,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.contactsContainer.removeAllViews();
 
+			int limit = HikeConstants.FTUE_LIMIT;
+
 			for (ContactInfo contactInfo : HomeActivity.ftueList) {
 				FavoriteType favoriteType = contactInfo.getFavoriteType();
 				if (favoriteType == FavoriteType.FRIEND
@@ -462,6 +464,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				addBtn.setOnClickListener(addOnClickListener);
 
 				viewHolder.contactsContainer.addView(parentView);
+
+				if (--limit == 0) {
+					break;
+				}
 			}
 			break;
 		}
