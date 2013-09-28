@@ -107,6 +107,17 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	@Override
 	public boolean isEnabled(int position) {
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
+		if (viewType == ViewType.FTUE_ITEM) {
+			return false;
+		} else if (viewType == ViewType.OTHER_UPDATE) {
+			StatusMessage statusMessage = getItem(position);
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
+				return false;
+			}
+		}
 		return true;
 	}
 
