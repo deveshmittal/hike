@@ -329,12 +329,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 							friendMsisdns);
 
-			if (shouldAddFTUEItem()) {
-				addFTUEItem(statusMessages);
-			} else {
-				removeFTUEItemIfExists();
-			}
-
 			return statusMessages;
 		}
 
@@ -401,9 +395,16 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 				@Override
 				public void run() {
+					if (shouldAddFTUEItem()) {
+						addFTUEItem(statusMessages);
+					} else {
+						removeFTUEItemIfExists();
+					}
+
 					centralTimelineAdapter.notifyDataSetChanged();
 					HikeMessengerApp.getPubSub().addListeners(
 							UpdatesFragment.this, pubSubListeners);
+
 				}
 			}, 300);
 		}
