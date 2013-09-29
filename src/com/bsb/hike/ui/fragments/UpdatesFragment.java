@@ -49,8 +49,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.PROTIP_ADDED};
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.PROTIP_ADDED };
 	private String[] friendMsisdns;
 
 	@Override
@@ -212,7 +211,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 				@Override
 				public void run() {
 					statusMessages.add(startIndex, statusMessage);
-					
+
 					if (noStatusMessage != null
 							&& (statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT || statusMessage
 									.getMsisdn().equals(userMsisdn))) {
@@ -235,9 +234,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
 			if (!shouldAddFTUEItem()) {
 				removeFTUEItemIfExists();
-				return;
+			} else {
+				addFTUEItem(statusMessages);
 			}
-			addFTUEItem(statusMessages);
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -245,8 +244,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
-		}else if (HikePubSub.PROTIP_ADDED.equals(type)){
-			addProtip((Protip)object);
+		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			addProtip((Protip) object);
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -266,7 +265,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	private boolean shouldAddFTUEItem() {
 		if (HomeActivity.ftueList.isEmpty()
-				|| statusMessages.size() > HikeConstants.MIN_STATUS_COUNT) {
+				|| statusMessages.size() > HikeConstants.MIN_STATUS_COUNT
+				|| prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS,
+						false)) {
 			return false;
 		}
 
@@ -328,12 +329,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 							friendMsisdns);
 
-			if (shouldAddFTUEItem()) {
-				addFTUEItem(statusMessages);
-			} else {
-				removeFTUEItemIfExists();
-			}
-
 			return statusMessages;
 		}
 
@@ -348,7 +343,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 					HikeMessengerApp.NAME_SETTING, null));
 			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS,
 					"");
-			
+
 			/*
 			 * If we already have a few status messages in the timeline, no need
 			 * to prompt the user to post his/her own message.
@@ -378,12 +373,12 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 			Protip protip = null;
 			boolean showProtip = false;
-			if (currentProtipId !=-1) {
+			if (currentProtipId != -1) {
 				showProtip = true;
 				protip = HikeConversationsDatabase.getInstance()
 						.getProtipForId(currentProtipId);
-			} 
-			
+			}
+
 			if (showProtip && protip != null) {
 				final int startIndex = getStartIndex();
 				statusMessages.add(startIndex, new StatusMessage(protip));
@@ -400,21 +395,28 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 				@Override
 				public void run() {
+					if (shouldAddFTUEItem()) {
+						addFTUEItem(statusMessages);
+					} else {
+						removeFTUEItemIfExists();
+					}
+
 					centralTimelineAdapter.notifyDataSetChanged();
 					HikeMessengerApp.getPubSub().addListeners(
 							UpdatesFragment.this, pubSubListeners);
+
 				}
 			}, 300);
 		}
 
 	}
-	
-	private void addProtip(Protip protip){	
-		if(protip!=null){
+
+	private void addProtip(Protip protip) {
+		if (protip != null) {
 			final int startIndex = getStartIndex();
 			statusMessages.add(getStartIndex(), new StatusMessage(protip));
 			centralTimelineAdapter.setProtipIndex(startIndex);
 		}
 	}
-	
+
 }

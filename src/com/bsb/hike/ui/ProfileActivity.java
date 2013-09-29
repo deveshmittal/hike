@@ -483,8 +483,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				ProfileItem.HEADER_ID));
 
 		showingRequestItem = false;
-		if (!contactInfo.isOnhike()
-				|| contactInfo.getFavoriteType() != FavoriteType.FRIEND) {
+		if ((!contactInfo.isOnhike() || contactInfo.getFavoriteType() != FavoriteType.FRIEND)
+				&& !HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo
+						.getMsisdn())) {
 			profileItems.add(new ProfileItem.ProfileStatusItem(
 					ProfileItem.REQUEST_ID));
 			showingRequestItem = true;

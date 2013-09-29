@@ -690,7 +690,7 @@
   	<string name="ftue_friends_subtext">Add as a friend</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tap here to dismiss friend suggestions</string>
   	<string name="from_hike_number">from a hike number</string>
+  	<string name="sent_sticker_sms">I sent you a sticker. View it here - %1$s</string>
   	<string name="unlink_facebook">Unlink Facebook</string>
 	<string name="unlink_twitter">Unlink Twitter</string>
-  	
 </resources>

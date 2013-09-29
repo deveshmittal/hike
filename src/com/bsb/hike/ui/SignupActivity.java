@@ -434,10 +434,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 					String codeAndIso = countryPicker.getText().toString();
 					final String code = codeAndIso.substring(
 							codeAndIso.indexOf("+"), codeAndIso.length());
+					String number = code + input;
 
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setTitle(R.string.number_confirm_title);
-					builder.setMessage(code + input);
+					builder.setMessage(getString(
+							R.string.number_confirmation_string, number));
 					builder.setPositiveButton(R.string.confirm,
 							new DialogInterface.OnClickListener() {
 
@@ -792,6 +794,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener,
 				year, month, day);
 		dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
+		dialog.show();
 	}
 
 	private OnDateSetListener onDateSetListener = new OnDateSetListener() {
@@ -1005,7 +1008,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				&& !TextUtils
 						.isEmpty(enterEditText.getText().toString().trim())
 				&& loadingLayout.getVisibility() != View.VISIBLE) {
-			submitClicked();
+			if (viewFlipper.getDisplayedChild() == NAME) {
+				Utils.hideSoftKeyboard(this, enterEditText);
+				onBirthdayClick(null);
+			} else {
+				submitClicked();
+			}
 		}
 		return true;
 	}

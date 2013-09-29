@@ -574,6 +574,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 				tabIndicator.notifyDataSetChanged();
 			}
+
+			if (position != CHATS_TAB_INDEX) {
+				long firstViewFtueTs = accountPrefs.getLong(
+						HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, 0);
+				if (firstViewFtueTs == 0) {
+					Editor editor = accountPrefs.edit();
+					editor.putLong(
+							HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP,
+							System.currentTimeMillis() / 1000);
+					editor.commit();
+				}
+			}
 		}
 
 		@Override
@@ -703,8 +715,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		updateAlert.findViewById(R.id.body_checkbox).setVisibility(View.GONE);
 		TextView updateText = ((TextView) updateAlert
 				.findViewById(R.id.body_text));
-		TextView updateTitle = (TextView) updateAlert
-				.findViewById(R.id.header);
+		TextView updateTitle = (TextView) updateAlert.findViewById(R.id.header);
 
 		updateText.setText(accountPrefs.getString(
 				HikeConstants.Extras.UPDATE_MESSAGE, ""));
@@ -714,16 +725,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 						: R.string.normal_update_head);
 
 		Button cancelBtn = null;
-		updateAlertOkBtn = (Button) updateAlert
-				.findViewById(R.id.btn_ok);
+		updateAlertOkBtn = (Button) updateAlert.findViewById(R.id.btn_ok);
 		if (updateType == HikeConstants.CRITICAL_UPDATE) {
 			((Button) updateAlert.findViewById(R.id.btn_cancel))
 					.setVisibility(View.GONE);
 
 			updateAlertOkBtn.setVisibility(View.VISIBLE);
 		} else {
-			cancelBtn = (Button) updateAlert
-					.findViewById(R.id.btn_cancel);
+			cancelBtn = (Button) updateAlert.findViewById(R.id.btn_cancel);
 			cancelBtn.setText(R.string.cancel);
 		}
 		updateAlertOkBtn.setText(R.string.update_app);
@@ -1100,10 +1109,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		 * In some devices Activity crashes and a BadTokenException is thrown by
 		 * showAsDropDown method. Still need to find out exact repro of the bug.
 		 */
-		try{
+		try {
 			overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
-		}catch(BadTokenException e){
-			Log.e(getClass().getSimpleName(), "Excepetion in HomeActivity Overflow popup",e);
+		} catch (BadTokenException e) {
+			Log.e(getClass().getSimpleName(),
+					"Excepetion in HomeActivity Overflow popup", e);
 		}
 		overFlowWindow.getContentView().setFocusableInTouchMode(true);
 		overFlowWindow.getContentView().setOnKeyListener(

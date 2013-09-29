@@ -90,7 +90,8 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		int totalCredits = Integer.parseInt(settings.getString(
 				HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 
-		creditsMax.setText(Integer.toString(totalCredits));
+		creditsMax.setText(Integer.toString(currentCredits) + "/"
+				+ Integer.toString(totalCredits));
 		creditsCurrent.setText(Integer.toString(currentCredits));
 
 		creditsBar.setMax(totalCredits);

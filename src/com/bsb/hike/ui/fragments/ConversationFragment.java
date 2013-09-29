@@ -129,7 +129,7 @@ public class ConversationFragment extends SherlockListFragment implements
 							: R.drawable.frame_avatar_ftue_sms);
 			avatarImage.setImageDrawable(IconCacheManager.getInstance()
 					.getIconForMSISDN(contactInfo.getMsisdn(), true));
-			contactName.setText(contactInfo.getName());
+			contactName.setText(contactInfo.getFirstName());
 
 			convertView.setTag(contactInfo);
 

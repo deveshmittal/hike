@@ -58,7 +58,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
 			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
-			R.drawable.mood_13_middle_finger };
+			R.drawable.mood_01_happy };
 
 	private int[] moodsRow2 = { R.drawable.mood_15_movie,
 			R.drawable.mood_34_music, R.drawable.mood_37_eating,
@@ -66,7 +66,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	private int[] moodsRowLand = { R.drawable.mood_09_chilling,
 			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
-			R.drawable.mood_13_middle_finger, R.drawable.mood_15_movie,
+			R.drawable.mood_01_happy, R.drawable.mood_15_movie,
 			R.drawable.mood_34_music, R.drawable.mood_37_eating };
 
 	private enum ViewType {
@@ -107,6 +107,17 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	@Override
 	public boolean isEnabled(int position) {
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
+		if (viewType == ViewType.FTUE_ITEM) {
+			return false;
+		} else if (viewType == ViewType.OTHER_UPDATE) {
+			StatusMessage statusMessage = getItem(position);
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -281,7 +292,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					viewHolder.timeStamp.setVisibility(View.GONE);
 
 					viewHolder.extraInfo.setText(R.string.no_status);
-					viewHolder.yesBtn.setText(R.string.post);
+					viewHolder.yesBtn.setText(R.string.post_a_mood);
 
 					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
 
@@ -424,6 +435,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.contactsContainer.removeAllViews();
 
+			int limit = HikeConstants.FTUE_LIMIT;
+
 			for (ContactInfo contactInfo : HomeActivity.ftueList) {
 				FavoriteType favoriteType = contactInfo.getFavoriteType();
 				if (favoriteType == FavoriteType.FRIEND
@@ -451,6 +464,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				addBtn.setOnClickListener(addOnClickListener);
 
 				viewHolder.contactsContainer.addView(parentView);
+
+				if (--limit == 0) {
+					break;
+				}
 			}
 			break;
 		}

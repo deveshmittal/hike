@@ -2603,10 +2603,10 @@ public class Utils {
 			String stickerUrlId = stickerId
 					.substring(0, stickerId.indexOf("_"));
 
-			String message = context.getString(R.string.sent_sticker)
-					+ ". "
-					+ String.format(AccountUtils.stickersUrl,
-							sticker.getCategoryId(), stickerUrlId);
+			String message = context.getString(
+					R.string.sent_sticker_sms,
+					String.format(AccountUtils.stickersUrl,
+							sticker.getCategoryId(), stickerUrlId));
 			return message;
 		}
 		return convMessage.getMessage();
