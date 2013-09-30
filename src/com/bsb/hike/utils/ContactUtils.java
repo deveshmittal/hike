@@ -414,36 +414,42 @@ public class ContactUtils {
 				extractContactInfo(phoneContactsCursor, sb,
 						mostContactedNumbers, true);
 
-				/*
-				 * This number is required when the user does not have enough
-				 * whatsapp contacts.
-				 */
-				int otherContactsRequired = limit - mostContactedNumbers.size();
+			}
+			/*
+			 * This number is required when the user does not have enough
+			 * whatsapp contacts.
+			 */
+			int otherContactsRequired = limit - mostContactedNumbers.size();
 
-				if (otherContactsRequired > 0) {
-					if (whatsappContactIds != null) {
-						newSelection = Phone.CONTACT_ID + " NOT IN "
-								+ whatsappContactIds.toString();
-					} else {
-						newSelection = null;
-					}
-
-					otherContactsCursor = context.getContentResolver().query(
-							Phone.CONTENT_URI,
-							newProjection,
-							newSelection,
-							null,
-							Phone.TIMES_CONTACTED + " DESC LIMIT "
-									+ otherContactsRequired);
-
-					if (otherContactsCursor.getCount() > 0) {
-						extractContactInfo(otherContactsCursor, sb,
-								mostContactedNumbers, false);
-					}
+			if (otherContactsRequired > 0) {
+				if (whatsappContactIds != null) {
+					newSelection = Phone.CONTACT_ID + " NOT IN "
+							+ whatsappContactIds.toString();
+				} else {
+					newSelection = null;
 				}
-				sb.replace(sb.length() - 1, sb.length(), ")");
-			} else {
+
+				otherContactsCursor = context.getContentResolver().query(
+						Phone.CONTENT_URI,
+						newProjection,
+						newSelection,
+						null,
+						Phone.TIMES_CONTACTED + " DESC LIMIT "
+								+ otherContactsRequired);
+
+				if (otherContactsCursor.getCount() > 0) {
+					if (sb == null) {
+						sb = new StringBuilder("(");
+					}
+					extractContactInfo(otherContactsCursor, sb,
+							mostContactedNumbers, false);
+				}
+			}
+
+			if (mostContactedNumbers.isEmpty()) {
 				sb = new StringBuilder("()");
+			} else {
+				sb.replace(sb.length() - 1, sb.length(), ")");
 			}
 
 			return new Pair<String, Map<String, Integer>>(sb.toString(),
