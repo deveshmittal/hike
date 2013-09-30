@@ -838,6 +838,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 			if (mTask != null) {
 				mTask.addBirthdate(mActivityState.birthday);
 			}
+
+			getWindow().setSoftInputMode(
+					WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 		}
 	};
 
@@ -1034,7 +1037,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				&& loadingLayout.getVisibility() != View.VISIBLE) {
 			if (viewFlipper.getDisplayedChild() == NAME) {
 				Utils.hideSoftKeyboard(this, enterEditText);
-				onBirthdayClick(null);
 			} else {
 				submitClicked();
 			}
