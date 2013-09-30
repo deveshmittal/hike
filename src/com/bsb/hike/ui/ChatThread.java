@@ -2957,6 +2957,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				recordingDialog.dismiss();
+				if (selectedFile == null) {
+					return;
+				}
 				initialiseFileTransfer(selectedFile.getPath(),
 						HikeFileType.AUDIO_RECORDING,
 						HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true,
