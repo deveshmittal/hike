@@ -3811,6 +3811,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							downloadStickerTask);
 					updateStickerCategoryUI(categoryIndex, false, null);
 
+					getWindow().setSoftInputMode(
+							WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 				} finally {
 					editor.commit();
 				}
