@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
@@ -793,7 +794,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 
 		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener,
 				year, month, day);
-		dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
+		if (Utils.isHoneycombOrHigher()) {
+			dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
+		}
 		dialog.show();
 	}
 
@@ -804,6 +807,27 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				int dayOfMonth) {
 			if (birthdayText == null) {
 				return;
+			}
+			Calendar calendar = Calendar.getInstance();
+			boolean thisYear = false;
+
+			if (year >= calendar.get(Calendar.YEAR)) {
+				year = calendar.get(Calendar.YEAR);
+				thisYear = true;
+			}
+
+			if (thisYear) {
+				boolean thisMonth = false;
+				if (monthOfYear >= calendar.get(Calendar.MONTH)) {
+					monthOfYear = calendar.get(Calendar.MONTH);
+					thisMonth = true;
+				}
+
+				if (thisMonth) {
+					if (dayOfMonth > calendar.get(Calendar.DAY_OF_MONTH)) {
+						dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+					}
+				}
 			}
 
 			birthdayText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/"
