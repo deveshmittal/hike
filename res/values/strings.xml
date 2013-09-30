@@ -681,7 +681,7 @@
   	<string name="mood_update">Introducing moods</string>
   	<string name="invite_contacts">Invite Contacts</string>
   	<string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
-  	<string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet!.Invite %1$s to hike by tapping on Continue.Standard operator SMS rates apply.</string> 
+  	<string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet! Invite %1$s to hike. Standard operator SMS rates apply.</string> 
   	<string name="ftue_add_prompt_invite_title">Invite to hike</string>
   	<string name="create_group">New group chat</string>
   	<string name="create_group_1">New group</string>
