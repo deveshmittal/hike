@@ -594,6 +594,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				avatarFrame
 						.setImageResource(R.drawable.frame_avatar_medium_selector);
 
+				TextView inviteBtn = (TextView) convertView
+						.findViewById(R.id.invite_btn);
+				if (inviteBtn != null) {
+					inviteBtn.setVisibility(View.GONE);
+				}
+
 				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
 						&& lastSeenPref) {
 					String lastSeenString = Utils.getLastSeenTimeAsString(
@@ -614,12 +620,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.request_pending);
 
-						TextView inviteBtn = (TextView) convertView
-								.findViewById(R.id.invite_btn);
 						if (!contactInfo.isOnhike()) {
 							setInviteButton(contactInfo, inviteBtn, null);
-						} else {
-							inviteBtn.setVisibility(View.GONE);
 						}
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
