@@ -141,9 +141,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
 					myMsisdn, nativeSMSOn);
 			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.REQUEST_RECEIVED, HikeConstants.ON_HIKE_VALUE,
-					myMsisdn, nativeSMSOn, true));
-			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED_REJECTED,
 					HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn, true));
 			Collections.sort(hikeTaskList);
@@ -508,13 +505,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED) {
 				return ViewType.FRIEND.ordinal();
 			} else if (favoriteType == FavoriteType.REQUEST_RECEIVED) {
-				/*
-				 * Accounting for the friends header and the invite/create group
-				 * items
-				 */
-				if (position <= ((filteredFriendsList.size() - 1) + 1 + 2)) {
-					return ViewType.FRIEND_REQUEST.ordinal();
-				}
+				return ViewType.FRIEND_REQUEST.ordinal();
 			} else if (HikeConstants.FTUE_MSISDN_TYPE.equals(contactInfo
 					.getMsisdnType())) {
 				return ViewType.FTUE_CONTACT.ordinal();
