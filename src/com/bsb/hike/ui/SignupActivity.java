@@ -270,6 +270,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
+				accountEditor.putBoolean(HikeMessengerApp.FB_SIGNUP, true);
 				accountEditor.commit();
 
 				SharedPreferences prefs = PreferenceManager

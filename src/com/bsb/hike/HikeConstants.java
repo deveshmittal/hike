@@ -715,6 +715,7 @@ public class HikeConstants {
 		public static final String NEW_CHAT_FROM_GRID = "newChatFromGrid";
 		public static final String NEW_CHAT_FROM_TOP_BAR = "newChatFromTopBar";
 		public static final String INVITE_FROM_GRID = "inviteFromGrid";
+		public static final String FB_CLICK = "fbClick";
 	}
 
 	public static final class MqttMessageTypes {

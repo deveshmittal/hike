@@ -286,6 +286,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String HIDE_FTUE_SUGGESTIONS = "hideFtueSuggestions";
 
+	public static final String FB_SIGNUP = "fbSignup";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

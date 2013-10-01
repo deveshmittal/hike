@@ -865,6 +865,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 				if (!deviceDetailsSent) {
 					sendDeviceDetails();
+					if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP,
+							false)) {
+						Utils.sendFTUELogEvent(HikeConstants.LogEvent.FB_CLICK);
+					}
 				}
 			}
 		} else if (HikePubSub.UPDATE_PUSH.equals(type)) {
