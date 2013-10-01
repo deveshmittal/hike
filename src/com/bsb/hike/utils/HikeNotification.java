@@ -116,6 +116,7 @@ public class HikeNotification {
 					mBuilder.getNotification());
 		}
 	}
+	
 	public void notifyHikeUpdate(int updateType, String message) {
 		final SharedPreferences preferenceManager = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
@@ -325,7 +326,7 @@ public class HikeNotification {
 
 						} 
 						//extract the bigpicture image out of the file transfer, if its an image transfer message
-						if (convMsg.isFileTransferMessage() && isRich) {
+						if (isRich) {
 							hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
 							if (hikeFile != null) {
 								final String filePath = hikeFile.getFilePath(); // check
@@ -334,7 +335,6 @@ public class HikeNotification {
 									isRich = false;
 
 							} 
-
 						}
 						String partName = "";
 						// For showing the name of the contact that sent the message in a group
@@ -374,31 +374,18 @@ public class HikeNotification {
 								key, message);
 
 
-						if ((convMsg.isStickerMessage()&&doesBigPictureExist)
-								|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
-								.getFileTypeString().toLowerCase().startsWith("image"))
-								&& isRich ) {
+						if ((convMsg.isStickerMessage() && doesBigPictureExist) || isRich) {
 							
 							final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
 									.getMessage() : HikeFileType.getFileTypeMessage(context,
 											convMsg.getMetadata().getHikeFiles().get(0)
 											.getHikeFileType(), convMsg.isSent());
-
-									if (convMsg.isStickerMessage()) {
-										if (convMsg.isGroupChat()) {
-											message = partName + HikeConstants.SEPARATOR
-													+ messageString;
-										} else
-											message = messageString;
-									} else {
-										if (convMsg.isGroupChat()) {
-											message = partName + HikeConstants.SEPARATOR
-													+ messageString;
-
-										} else {
-											message = messageString;
-										}
+									message = messageString;
+									if (convMsg.isGroupChat() || convMsg.isStickerMessage()) {
+										message = partName + HikeConstants.SEPARATOR
+												+ messageString;
 									}
+									
 									// big picture messages ! intercept !
 									pushBigPictureMessageNotifications(notificationIntent, contactInfo,
 											convMsg, bigPictureImage, text, key, message, msisdn);
@@ -407,7 +394,6 @@ public class HikeNotification {
 									notificationId, text, key, message, msisdn); // regular text
 						// messages
 	}
-
 
 	public void notifyFavorite(final ContactInfo contactInfo) {
 		final int notificationId = contactInfo.getMsisdn().hashCode();
