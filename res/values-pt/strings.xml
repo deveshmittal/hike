@@ -681,5 +681,11 @@
   	<string name="no_credits">Você está sem SMS grátis. Convide %1$s para ganhar mais!</string>
   	<string name="ftue_add_prompt_invite">Parece que %1$s ainda não está no hike! Convide %1$s para o hike tocando em Continuar. Taxas padrão da operadora são aplicáveis.</string> 
   	<string name="ftue_add_prompt_invite_title">Convidar para o hike</string>
-  	
+  	<string name="create_group">Nova conversa de grupo</string>
+  	<string name="create_group_1">Novo grupo</string>
+  	<string name="create_group_2">Criar novo grupo</string>
+  	<string name="number_confirmation_string">%1s é seu número?</string>
+  	<string name="ftue_friends_subtext">Adicionado como amigo</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">Toque aqui para descartar sugestões de amigos</string>
+  		
 </resources>
