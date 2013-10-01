@@ -463,7 +463,7 @@ public class HikeNotification {
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 			message = context.getString(
 					R.string.status_profile_pic_notification, key);
-			text = message;
+			text = key + " " + message;
 		}
 		else {
 			/*
@@ -598,7 +598,7 @@ public class HikeNotification {
 		}
 	}
 
-	public void pushBigPictureStatusNotifications(final String[] profileStruct) {
+	public void pushBigPictureStatusNotifications(final String[] profileStruct) {  //TODO:: replace this with a bundle
 
 		if (PreferenceManager.getDefaultSharedPreferences(this.context).getInt(
 				HikeConstants.STATUS_PREF, 0) != 0) {
