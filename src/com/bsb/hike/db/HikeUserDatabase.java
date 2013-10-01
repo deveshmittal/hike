@@ -527,13 +527,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		try {
 			StringBuilder selectionBuilder = new StringBuilder();
 			if (!TextUtils.isEmpty(msisdnsIn)) {
-				selectionBuilder
-						.append(DBConstants.MSISDN + " IN " + msisdnsIn);
+				selectionBuilder.append(DBConstants.MSISDN + " IN " + msisdnsIn
+						+ " AND ");
 			}
 			if (!TextUtils.isEmpty(msisdnsNotIn)) {
-				if (!TextUtils.isEmpty(msisdnsIn)) {
-					selectionBuilder.append(" AND ");
-				}
 				selectionBuilder.append(DBConstants.MSISDN + " NOT IN "
 						+ msisdnsNotIn + " AND ");
 			}
