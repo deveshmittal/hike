@@ -679,5 +679,11 @@
   	<string name="no_credits">Tu es à court de SMS gratuits. Invite %1$s pour en recevoir !</string>
   	<string name="ftue_add_prompt_invite">On dirait que %1$s n\'a pas encore rejoint hike ! Invite %1$s sur hike en touchant Continuer. Le tarif appliqué est celui d\'un SMS normal de l\'opérateur.</string> 
   	<string name="ftue_add_prompt_invite_title">Inviter sur hike</string>
-	
+  	<string name="create_group">Nouveau groupe de tchat</string>
+  	<string name="create_group_1">Nouveau groupe</string>
+  	<string name="create_group_2">Créer nouveau groupe</string>
+  	<string name="number_confirmation_string">Ton numéro est-il le %1s ?</string>
+  	<string name="ftue_friends_subtext">Ajouter comme ami(e)</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">Touche ici pour rejeter les suggestions d\'amis</string>
+  		
 </resources>
