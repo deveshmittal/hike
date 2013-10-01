@@ -688,5 +688,11 @@
   	<string name="no_credits">У вас закончились бесплатные SMS. Пригласите %1$s, чтобы получить еще!</string>
   	<string name="ftue_add_prompt_invite">По-видимому, %1$s еще не в hike! Пригласите %1$s в hike, коснувшись "Продолжить". Будут действовать тарифы оператора на отправку SMS.</string> 
   	<string name="ftue_add_prompt_invite_title">Пригласить в hike </string>
-  		
+  	<string name="create_group">Новый групповой чат</string>
+  	<string name="create_group_1">Новая группа</string>
+  	<string name="create_group_2">Создать новую группу</string>
+  	<string name="number_confirmation_string">%1s — это ваш номер?</string>
+  	<string name="ftue_friends_subtext">Добавить в друзья</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">Коснитесь здесь, чтобы отклонить предложения дружбы</string>
+  			
 </resources>

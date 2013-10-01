@@ -671,5 +671,11 @@
   	<string name="no_credits">Du hast keine kostenlosen SMS mehr. Lade %1$s ein, um mehr zu erhalten!</string>
   	<string name="ftue_add_prompt_invite">Scheint als wäre %1$s noch nicht bei hike! Lade %1$s zu hike ein, indem du Weiter antippst. Standardpreise des Mobilfunkanbieters fallen an.</string> 
   	<string name="ftue_add_prompt_invite_title">Zu hike einladen</string>
-  		
+   	<string name="create_group">Neuer Gruppenchat</string>
+  	<string name="create_group_1">Neue Gruppe</string>
+  	<string name="create_group_2">Neue Gruppe erstellen</string>
+  	<string name="number_confirmation_string">Ist %1s deine Nummer?</string>
+  	<string name="ftue_friends_subtext">Als Freund hinzufügen</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">Tippe hier, um die Freundschaftsvorschläge zu schließen.</string>
+  			
 </resources>

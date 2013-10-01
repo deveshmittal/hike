@@ -688,5 +688,11 @@
   	<string name="no_credits">आपके मुफ़्त SMS समाप्त हो गए हैं। कुछ और प्राप्त करने के लिए %1$s को आमंत्रित करें!</string>
   	<string name="ftue_add_prompt_invite">लगता है कि %1$s अभी तक hike पर नहीं है! \'जारी रखें\' पर टैप करके %1$s को hike पर आमंत्रित करें। मानक ऑपरेटर एसएमएस दरें लागू होंगी।</string> 
   	<string name="ftue_add_prompt_invite_title">hike पर आमंत्रित करें।</string>
-  		
+  	<string name="create_group">नई समूह चैट</string>
+  	<string name="create_group_1">नया समूह</string>
+  	<string name="create_group_2">नया समूह बनाएँ</string>
+  	<string name="number_confirmation_string">क्या %1s आपका नंबर है?</string>
+  	<string name="ftue_friends_subtext">मित्र के भांति जोड़ें |</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">दोस्तों के सुझाव खारिज करने के लिए यहाँ टैप करें</string>
+  			
 </resources>

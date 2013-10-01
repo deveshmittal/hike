@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="188dp"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_attachments"
+    android:background="#303030"
     android:orientation="vertical" >
 
     <ListView
         android:id="@+id/overflow_menu_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:cacheColorHint="#00000000" />
+        android:cacheColorHint="#00000000"
+        android:divider="#4f4f4f"
+        android:dividerHeight="1dp" />
 
 </LinearLayout>

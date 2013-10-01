@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="47dp"
+    android:layout_height="48dp"
     android:gravity="center"
-    android:paddingLeft="20dp"
+    android:paddingLeft="15dp"
     android:paddingRight="16dp" >
 
     <RelativeLayout
@@ -32,9 +32,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textColor="#f3f3f3"
+            android:textSize="18sp"
+            android:layout_centerVertical="true" />
         
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/new_games_indicator"

@@ -1107,7 +1107,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				android.R.color.transparent));
 		overFlowWindow.setOutsideTouchable(true);
 		overFlowWindow.setFocusable(true);
-		overFlowWindow.setWidth((int) (Utils.densityMultiplier * 188));
+		overFlowWindow.setWidth((int) (Utils.densityMultiplier * 196));
 		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
 		/*
 		 * In some devices Activity crashes and a BadTokenException is thrown by
