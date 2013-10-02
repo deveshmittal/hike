@@ -16,8 +16,6 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.text.Html;
-import android.text.Spanned;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -27,12 +25,10 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
@@ -116,6 +112,7 @@ public class HikeNotification {
 					mBuilder.getNotification());
 		}
 	}
+	
 	public void notifyHikeUpdate(int updateType, String message) {
 		final SharedPreferences preferenceManager = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
@@ -225,189 +222,116 @@ public class HikeNotification {
 		//TODO:: we should reset the gaming download message from preferences
 	}
 	
-	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg,
-			 boolean isRich) {
+	public void notifyMessage(final ContactInfo contactInfo,
+			final ConvMessage convMsg, boolean isRich, Bitmap bigPictureImage) {
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
 
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg
 				.getMessage() : HikeFileType.getFileTypeMessage(context,
-						convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType(),
-						convMsg.isSent());
-				// Message will be empty for type 'uj' when the conversation does not
-				// exist
-				if (TextUtils.isEmpty(message)
-						&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-					message = String.format(
-							context.getString(R.string.joined_hike_new),
-							contactInfo.getFirstName());
-				}
-				final long timestamp = convMsg.getTimestamp();
+				convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType(),
+				convMsg.isSent());
+		// Message will be empty for type 'uj' when the conversation does not
+		// exist
+		if (TextUtils.isEmpty(message)
+				&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+			message = String.format(
+					context.getString(R.string.joined_hike_new),
+					contactInfo.getFirstName());
+		}
+		final long timestamp = convMsg.getTimestamp();
 
-				String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
-						.getName())) ? contactInfo.getName() : msisdn;
+		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
+				.getName())) ? contactInfo.getName() : msisdn;
 
-						// we've got to invoke the chat thread from here with the respective
-						// users
-						final Intent notificationIntent = new Intent(context, ChatThread.class);
-						if (contactInfo.getName() != null) {
-							notificationIntent.putExtra(HikeConstants.Extras.NAME,
-									contactInfo.getName());
-						}
-						notificationIntent.putExtra(HikeConstants.Extras.MSISDN,
-								contactInfo.getMsisdn());
+		// we've got to invoke the chat thread from here with the respective
+		// users
+		final Intent notificationIntent = new Intent(context, ChatThread.class);
+		if (contactInfo.getName() != null) {
+			notificationIntent.putExtra(HikeConstants.Extras.NAME,
+					contactInfo.getName());
+		}
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN,
+				contactInfo.getMsisdn());
 
-						/*
-						 * notifications appear to be cached, and their .equals doesn't check
-						 * 'Extra's. In order to prevent the wrong intent being fired, set a
-						 * data field that's unique to the conversation we want to open.
-						 * http://groups
-						 * .google.com/group/android-developers/browse_thread/thread
-						 * /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
-						 */
+		/*
+		 * notifications appear to be cached, and their .equals doesn't check
+		 * 'Extra's. In order to prevent the wrong intent being fired, set a
+		 * data field that's unique to the conversation we want to open.
+		 * http://groups
+		 * .google.com/group/android-developers/browse_thread/thread
+		 * /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
+		 */
 
-						notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
-						notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-						if (contactInfo != null) {
-							if (contactInfo.getName() != null) {
-								notificationIntent.putExtra(HikeConstants.Extras.NAME,
-										contactInfo.getName());
-							}
-						}
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		if (contactInfo != null) {
+			if (contactInfo.getName() != null) {
+				notificationIntent.putExtra(HikeConstants.Extras.NAME,
+						contactInfo.getName());
+			}
+		}
+		final int icon = returnSmallIcon();
 
-						// check if this is a sticker message and find if its non downloaded or
-						// non present.
-						// in that case we just show a normal notification instead of a rich
-						// notification.
+		/*
+		 * Jellybean has added support for emojis so we don't need to add a '*'
+		 * to replace them
+		 */
+		if (Build.VERSION.SDK_INT < 16) {
+			// Replace emojis with a '*'
+			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
+					message, "*");
+		}
 
-						// check if this is a sticker or a file and populate the big picture
-						// accordingly
-						Bitmap bigPictureImage = null;
-						boolean doesBigPictureExist = false;
-						HikeFile hikeFile = null;
-						if (convMsg.isStickerMessage()) {
+		String partName = "";
+		// For showing the name of the contact that sent the message in a group
+		// chat
+		if (convMsg.isGroupChat()
+				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
+				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
 
-							final Sticker sticker = convMsg.getMetadata().getSticker();
+			final GroupConversation gConv = ((GroupConversation) convMsg
+					.getConversation());
+			key = gConv.getGroupParticipantList()
+					.get(convMsg.getGroupParticipantMsisdn()).getContactInfo()
+					.getName();
 
-							/*
-							 * If this is the first category, then the sticker are a part of the
-							 * app bundle itself
-							 */
-							if (sticker.getStickerIndex() != -1) {
+			if (TextUtils.isEmpty(key)) {
+				key = gConv.getLabel();
+			}
+			partName = key;
 
-								int resourceId = 0;
+			message = key + HikeConstants.SEPARATOR + message;
+			key = gConv.getLabel();
+		}
 
-								if (sticker.getCategoryIndex() == 0) {
-									resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
-									                                                       .getStickerIndex()];
-								} else if (sticker.getCategoryIndex() == 1) {
-									resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
-									                                                       .getStickerIndex()];
-								}
+		boolean doesBigPictureExist = (bigPictureImage == null) ? false : true;
+		final String text = String.format("%1$s: %2$s", key, message);
+		// For showing the name of the contact that sent the message in a group
+		// chat
 
-								if (resourceId > 0) {
-									final Drawable dr = context.getResources()
-											.getDrawable(resourceId);
-									bigPictureImage = Utils.drawableToBitmap(dr);
-									doesBigPictureExist = true;
-								}
-
-							} else {
-								final String filePath = sticker.getStickerPath(context);
-								if (!TextUtils.isEmpty(filePath)) {
-									bigPictureImage = BitmapFactory.decodeFile(filePath);
-									if (bigPictureImage != null)
-										doesBigPictureExist = true;
-								}
-							}
-
-						} 
-						//extract the bigpicture image out of the file transfer, if its an image transfer message
-						if (convMsg.isFileTransferMessage() && isRich) {
-							hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
-							if (hikeFile != null) {
-								final String filePath = hikeFile.getFilePath(); // check
-								bigPictureImage = BitmapFactory.decodeFile(filePath);
-								if (bigPictureImage == null)
-									isRich = false;
-
-							} 
-
-						}
-						String partName = "";
-						// For showing the name of the contact that sent the message in a group
-						// chat
-						if (convMsg.isGroupChat()
-								&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
-								&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
-
-							final GroupConversation gConv = ((GroupConversation) convMsg
-									.getConversation());
-							key = gConv.getGroupParticipantList()
-									.get(convMsg.getGroupParticipantMsisdn()).getContactInfo()
-									.getName();
-
-							if (TextUtils.isEmpty(key)) {
-								key = gConv.getLabel();
-							}
-							partName = key;
-
-							message = key + HikeConstants.SEPARATOR + message;
-							key = gConv.getLabel();
-						}
-
-						final int icon = returnSmallIcon();
-
-						/*
-						 * Jellybean has added support for emojis so we don't need to add a '*'
-						 * to replace them
-						 */
-						if (Build.VERSION.SDK_INT < 16) {
-							// Replace emojis with a '*'
-							message = SmileyParser.getInstance().replaceEmojiWithCharacter(
-									message, "*");
-						}
-
-						final String text = String.format("%1$s: %2$s",
-								key, message);
-
-
-						if ((convMsg.isStickerMessage()&&doesBigPictureExist)
-								|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
-								.getFileTypeString().toLowerCase().startsWith("image"))
-								&& isRich ) {
-							
-							final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
-									.getMessage() : HikeFileType.getFileTypeMessage(context,
-											convMsg.getMetadata().getHikeFiles().get(0)
-											.getHikeFileType(), convMsg.isSent());
-
-									if (convMsg.isStickerMessage()) {
-										if (convMsg.isGroupChat()) {
-											message = partName + HikeConstants.SEPARATOR
-													+ messageString;
-										} else
-											message = messageString;
-									} else {
-										if (convMsg.isGroupChat()) {
-											message = partName + HikeConstants.SEPARATOR
-													+ messageString;
-
-										} else {
-											message = messageString;
-										}
-									}
-									// big picture messages ! intercept !
-									pushBigPictureMessageNotifications(notificationIntent, contactInfo,
-											convMsg, bigPictureImage, text, key, message, msisdn);
-						} else
-							showNotification(notificationIntent, icon, timestamp,
-									notificationId, text, key, message, msisdn); // regular text
-						// messages
+		if (doesBigPictureExist && isRich) {
+			final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
+					.getMessage() : HikeFileType.getFileTypeMessage(context,
+					convMsg.getMetadata().getHikeFiles().get(0)
+							.getHikeFileType(), convMsg.isSent());
+			
+			if (convMsg.isGroupChat()) {
+				message = partName + HikeConstants.SEPARATOR + messageString;
+			}
+			else
+				message = messageString;
+			// big picture messages ! intercept !
+			pushBigPictureMessageNotifications(notificationIntent, contactInfo,
+					convMsg, bigPictureImage, text, key, message, msisdn);
+		} else {
+			// regular message
+			showNotification(notificationIntent, icon, timestamp,
+					notificationId, text, key, message, msisdn);
+		}
 	}
-
 
 	public void notifyFavorite(final ContactInfo contactInfo) {
 		final int notificationId = contactInfo.getMsisdn().hashCode();
@@ -477,7 +401,7 @@ public class HikeNotification {
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 			message = context.getString(
 					R.string.status_profile_pic_notification, key);
-			text = message;
+			text = key + " " + message;
 		}
 		else {
 			/*
@@ -612,7 +536,7 @@ public class HikeNotification {
 		}
 	}
 
-	public void pushBigPictureStatusNotifications(final String[] profileStruct) {
+	public void pushBigPictureStatusNotifications(final String[] profileStruct) {  //TODO:: replace this with a bundle
 
 		if (PreferenceManager.getDefaultSharedPreferences(this.context).getInt(
 				HikeConstants.STATUS_PREF, 0) != 0) {

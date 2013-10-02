@@ -3051,4 +3051,62 @@ public class Utils {
 			Log.w("LE", "Invalid json");
 		}
 	}
+	
+	public static Bitmap returnBigPicture(ConvMessage convMessage,
+			Context context) {
+
+		HikeFile hikeFile = null;
+		Bitmap bigPictureImage = null;
+
+		// Check if this is a file transfer message of image type
+		// construct a bitmap only if the big picture condition matches
+		if (convMessage.isFileTransferMessage()) {
+			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			if (hikeFile != null) {
+				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
+						&& hikeFile.wasFileDownloaded()
+						&& !HikeMessengerApp.fileTransferTaskMap
+								.containsKey(convMessage.getMsgID())
+						&& hikeFile.getThumbnail() != null) {
+					final String filePath = hikeFile.getFilePath(); // check
+					bigPictureImage = BitmapFactory.decodeFile(filePath);
+				}
+			}
+
+		}
+		// check if this is a sticker message and find if its non-downloaded or
+		// non present.
+		if (convMessage.isStickerMessage()) {
+			final Sticker sticker = convMessage.getMetadata().getSticker();
+			/*
+			 * If this is the first category, then the sticker are a part of the
+			 * app bundle itself
+			 */
+			if (sticker.getStickerIndex() != -1) {
+
+				int resourceId = 0;
+
+				if (sticker.getCategoryIndex() == 0) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+							.getStickerIndex()];
+				} else if (sticker.getCategoryIndex() == 1) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+							.getStickerIndex()];
+				}
+
+				if (resourceId > 0) {
+					final Drawable dr = context.getResources().getDrawable(
+							resourceId);
+					bigPictureImage = Utils.drawableToBitmap(dr);
+				}
+
+			} else {
+				final String filePath = sticker.getStickerPath(context);
+				if (!TextUtils.isEmpty(filePath)) {
+					bigPictureImage = BitmapFactory.decodeFile(filePath);
+				}
+			}
+		}
+		return bigPictureImage;
+	}
 }
