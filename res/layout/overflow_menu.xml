@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="188dp"
+    android:layout_width="230dp"
     android:layout_height="match_parent"
-    android:background="#303030"
+    android:background="@drawable/bg_overflow"
     android:orientation="vertical" >
 
     <ListView
