@@ -3051,23 +3051,4 @@ public class Utils {
 			Log.w("LE", "Invalid json");
 		}
 	}
-	
-	public static boolean isQualifiedForRichPush(ConvMessage convMessage) {
-		boolean isRich = false;
-		HikeFile hikeFile = null;
-		if (convMessage.isFileTransferMessage()) {
-			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			if (hikeFile != null) {
-				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE) {
-					isRich = (hikeFile.wasFileDownloaded()
-							&& !HikeMessengerApp.fileTransferTaskMap
-									.containsKey(convMessage.getMsgID()) && hikeFile
-							.getThumbnail() != null) ? true : false;
-				}
-			}
-		}else if(convMessage.isStickerMessage()){
-			isRich = true;
-		}
-		return isRich;
-	}
 }

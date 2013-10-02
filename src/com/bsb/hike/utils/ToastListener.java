@@ -116,8 +116,7 @@ public class ToastListener implements Listener {
 						contactInfo = this.db.getContactInfoFromMSISDN(
 								message.getMsisdn(), false);
 					}
-					this.toaster.notifyMessage(contactInfo, message, 
-							Utils.isQualifiedForRichPush(message));
+					this.toaster.notifyMessage(contactInfo, message, true);
 				}
 
 			}
@@ -180,20 +179,32 @@ public class ToastListener implements Listener {
 				return;
 			}
 
-			if (Utils.isQualifiedForRichPush(message)) {
-				ContactInfo contactInfo;
-				if (message.isGroupChat()) {
-					Log.d("ToastListener", "GroupName is "
-							+ message.getConversation().getLabel());
-					contactInfo = new ContactInfo(message.getMsisdn(),
-							message.getMsisdn(), message.getConversation()
-									.getLabel(), message.getMsisdn());
-				} else {
-					contactInfo = this.db.getContactInfoFromMSISDN(
-							message.getMsisdn(), false);
-				}
-				toaster.notifyMessage(contactInfo, message, true);
+			ContactInfo contactInfo;
+			if (message.isGroupChat()) {
+				Log.d("ToastListener", "GroupName is "
+						+ message.getConversation().getLabel());
+				contactInfo = new ContactInfo(message.getMsisdn(),
+						message.getMsisdn(), message.getConversation()
+								.getLabel(), message.getMsisdn());
+			} else {
+				contactInfo = this.db.getContactInfoFromMSISDN(
+						message.getMsisdn(), false);
 			}
+			HikeFile hikeFile = null;
+			boolean isRichPush = true;
+			if (message.isFileTransferMessage()) {
+				hikeFile = message.getMetadata().getHikeFiles().get(0);
+				if (hikeFile != null) {
+					if (hikeFile.getFileTypeString().toLowerCase()
+							.startsWith("image")) {
+						isRichPush = (hikeFile.wasFileDownloaded()
+								&& !HikeMessengerApp.fileTransferTaskMap
+										.containsKey(message.getMsgID()) && hikeFile
+								.getThumbnail() != null) ? true : false;
+					}
+				}
+			}
+			toaster.notifyMessage(contactInfo, message, isRichPush);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
