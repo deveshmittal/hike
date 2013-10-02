@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -116,7 +117,13 @@ public class ToastListener implements Listener {
 						contactInfo = this.db.getContactInfoFromMSISDN(
 								message.getMsisdn(), false);
 					}
-					this.toaster.notifyMessage(contactInfo, message, true);
+					/*
+					 * Check if this is a big picture message, else 
+					 * toast a normal push message
+					 */
+					Bitmap bigPicture = Utils.returnBigPicture(message, context);
+					this.toaster.notifyMessage(contactInfo, message, 
+							bigPicture!=null ? true: false, bigPicture);
 				}
 
 			}
@@ -178,33 +185,21 @@ public class ToastListener implements Listener {
 				Log.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
-
-			ContactInfo contactInfo;
-			if (message.isGroupChat()) {
-				Log.d("ToastListener", "GroupName is "
-						+ message.getConversation().getLabel());
-				contactInfo = new ContactInfo(message.getMsisdn(),
-						message.getMsisdn(), message.getConversation()
-								.getLabel(), message.getMsisdn());
-			} else {
-				contactInfo = this.db.getContactInfoFromMSISDN(
-						message.getMsisdn(), false);
-			}
-			HikeFile hikeFile = null;
-			boolean isRichPush = true;
-			if (message.isFileTransferMessage()) {
-				hikeFile = message.getMetadata().getHikeFiles().get(0);
-				if (hikeFile != null) {
-					if (hikeFile.getFileTypeString().toLowerCase()
-							.startsWith("image")) {
-						isRichPush = (hikeFile.wasFileDownloaded()
-								&& !HikeMessengerApp.fileTransferTaskMap
-										.containsKey(message.getMsgID()) && hikeFile
-								.getThumbnail() != null) ? true : false;
-					}
+			final Bitmap bigPicture = Utils.returnBigPicture(message, context);
+			if (bigPicture!=null) {
+				ContactInfo contactInfo;
+				if (message.isGroupChat()) {
+					Log.d("ToastListener", "GroupName is "
+							+ message.getConversation().getLabel());
+					contactInfo = new ContactInfo(message.getMsisdn(),
+							message.getMsisdn(), message.getConversation()
+									.getLabel(), message.getMsisdn());
+				} else {
+					contactInfo = this.db.getContactInfoFromMSISDN(
+							message.getMsisdn(), false);
 				}
+				toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
-			toaster.notifyMessage(contactInfo, message, isRichPush);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
