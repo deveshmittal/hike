@@ -38,7 +38,12 @@ public class ContactUtils {
 		}
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 
-		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
+		List<ContactInfo> newContacts = getContacts(ctx);
+		if (newContacts == null) {
+			return;
+		}
+
+		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(newContacts);
 		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db
 				.getContacts(false));
 
@@ -182,6 +187,15 @@ public class ContactUtils {
 			contacts = ctx.getContentResolver().query(
 					ContactsContract.Contacts.CONTENT_URI, projection,
 					selection, null, null);
+
+			/*
+			 * Added this check for an issue where the cursor is null in some
+			 * random cases (We suspect that happens when hotmail contacts are
+			 * synced.)
+			 */
+			if (contacts == null) {
+				return null;
+			}
 
 			int idFieldColumnIndex = contacts
 					.getColumnIndex(ContactsContract.Contacts._ID);
