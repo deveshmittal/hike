@@ -1566,16 +1566,22 @@ public class Utils {
 
 		switch (whichScreen) {
 		case FRIENDS_TAB:
-			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
-					: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);
+			Utils.sendFTUELogEvent(
+					isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
+							: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK,
+					contactInfo.getMsisdn());
 			break;
 		case UPDATES_TAB:
-			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
-					: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+			Utils.sendFTUELogEvent(
+					isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
+							: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK,
+					contactInfo.getMsisdn());
 			break;
 		case SMS_SECTION:
-			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
-					: HikeConstants.LogEvent.REMIND_SMS_CLICK);
+			Utils.sendFTUELogEvent(
+					isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
+							: HikeConstants.LogEvent.REMIND_SMS_CLICK,
+					contactInfo.getMsisdn());
 			break;
 		}
 	}
