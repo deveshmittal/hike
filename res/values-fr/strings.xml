@@ -682,7 +682,7 @@
   	<string name="create_group">Nouveau groupe de tchat</string>
   	<string name="create_group_1">Nouveau groupe</string>
   	<string name="create_group_2">Créer nouveau groupe</string>
-  	<string name="number_confirmation_string">Ton numéro est-il le %1s ?</string>
+  	<string name="number_confirmation_string">Ton numéro est-il le %1$s ?</string>
   	<string name="ftue_friends_subtext">Ajouter comme ami(e)</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Touche ici pour rejeter les suggestions d\'amis</string>
   		

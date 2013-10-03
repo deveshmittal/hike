@@ -686,7 +686,7 @@
   	<string name="create_group">New group chat</string>
   	<string name="create_group_1">New group</string>
   	<string name="create_group_2">Create new group</string>
-  	<string name="number_confirmation_string">Is %1s your number?</string>
+  	<string name="number_confirmation_string">Is %1$s your number?</string>
   	<string name="ftue_friends_subtext">Add as a friend</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tap here to dismiss friend suggestions</string>
   	<string name="from_hike_number">from a hike number</string>

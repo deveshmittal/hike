@@ -691,7 +691,7 @@
   	<string name="create_group">Новый групповой чат</string>
   	<string name="create_group_1">Новая группа</string>
   	<string name="create_group_2">Создать новую группу</string>
-  	<string name="number_confirmation_string">%1s — это ваш номер?</string>
+  	<string name="number_confirmation_string">%1$s — это ваш номер?</string>
   	<string name="ftue_friends_subtext">Добавить в друзья</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Коснитесь здесь, чтобы отклонить предложения дружбы</string>
   			
