@@ -95,6 +95,7 @@
 				        android:id="@+id/invite"
 				        style="@style/FTUEButtons"
 				        android:background="@drawable/bg_green_btn_selector"
+				        android:singleLine="true"
 				        android:text="@string/invite_friends" />
 
 				    <View
@@ -105,6 +106,7 @@
 				        android:id="@+id/new_chat"
 				        style="@style/FTUEButtons"
 				        android:background="@drawable/bg_blue_btn_selector"
+				        android:singleLine="true"
 				        android:text="@string/start_new_chat" />
 				</LinearLayout>
                 
