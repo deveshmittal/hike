@@ -431,6 +431,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					HikeConstants.Extras.ON_HIKE, false));
 		}
 
+		/*
+		 * Setting the hike bot name if the msisnd is a hikebot msisdn.
+		 */
+		if (HikeMessengerApp.hikeBotNamesMap.containsKey(mLocalMSISDN)) {
+			contactInfo.setName(HikeMessengerApp.hikeBotNamesMap
+					.get(mLocalMSISDN));
+		}
+
 		profileItems = new ArrayList<ProfileItem>();
 		setupContactProfileList();
 
