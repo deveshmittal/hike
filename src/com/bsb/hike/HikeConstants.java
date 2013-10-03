@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.os.Environment;
 
 public class HikeConstants {
-	public static final String APP_PUSH_ID = "768395314950";
+	public static final String APP_PUSH_ID = "297726274089";
 	public static final String APP_FACEBOOK_ID = "425850510764995";
 	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
 	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
@@ -715,6 +715,7 @@ public class HikeConstants {
 		public static final String NEW_CHAT_FROM_GRID = "newChatFromGrid";
 		public static final String NEW_CHAT_FROM_TOP_BAR = "newChatFromTopBar";
 		public static final String INVITE_FROM_GRID = "inviteFromGrid";
+		public static final String FB_CLICK = "fbClick";
 	}
 
 	public static final class MqttMessageTypes {

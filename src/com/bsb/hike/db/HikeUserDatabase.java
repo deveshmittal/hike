@@ -527,13 +527,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		try {
 			StringBuilder selectionBuilder = new StringBuilder();
 			if (!TextUtils.isEmpty(msisdnsIn)) {
-				selectionBuilder
-						.append(DBConstants.MSISDN + " IN " + msisdnsIn);
+				selectionBuilder.append(DBConstants.MSISDN + " IN " + msisdnsIn
+						+ " AND ");
 			}
 			if (!TextUtils.isEmpty(msisdnsNotIn)) {
-				if (!TextUtils.isEmpty(msisdnsIn)) {
-					selectionBuilder.append(" AND ");
-				}
 				selectionBuilder.append(DBConstants.MSISDN + " NOT IN "
 						+ msisdnsNotIn + " AND ");
 			}
@@ -550,7 +547,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 							+ DBConstants.ONHIKE + "=1 LIMIT " + limit, null,
 					null, null, null);
 
-			contactInfos = extractContactInfo(c);
+			contactInfos = extractContactInfo(c, true);
 			return contactInfos;
 		} finally {
 			if (c != null) {
@@ -2031,11 +2028,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		currentSelection = getQueryableNumbersString(contactInfoList);
 
-		List<ContactInfo> hikeContacts = getHikeContacts(limit, null,
+		List<ContactInfo> hikeContacts = getHikeContacts(limit * 2, null,
 				currentSelection, myMsisdn);
-		contactInfoList.addAll(hikeContacts);
+		if (hikeContacts.size() >= limit) {
+			contactInfoList.addAll(hikeContacts.subList(0, limit));
+		} else {
+			contactInfoList.addAll(hikeContacts);
+		}
 
-		if (hikeContacts.size() == limit) {
+		if (hikeContacts.size() >= limit) {
 			return contactInfoList;
 		} else {
 			limit = limit - hikeContacts.size();

@@ -9,7 +9,7 @@
 
     <View
         android:id="@+id/overflow_anchor"
-        android:layout_width="204dp"
+        android:layout_width="190dp"
         android:layout_height="1dp"
         android:layout_gravity="right" />
     

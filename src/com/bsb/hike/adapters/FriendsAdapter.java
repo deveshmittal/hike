@@ -141,9 +141,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
 					myMsisdn, nativeSMSOn);
 			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.REQUEST_RECEIVED, HikeConstants.ON_HIKE_VALUE,
-					myMsisdn, nativeSMSOn, true));
-			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED_REJECTED,
 					HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn, true));
 			Collections.sort(hikeTaskList);
@@ -508,13 +505,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED) {
 				return ViewType.FRIEND.ordinal();
 			} else if (favoriteType == FavoriteType.REQUEST_RECEIVED) {
-				/*
-				 * Accounting for the friends header and the invite/create group
-				 * items
-				 */
-				if (position <= ((filteredFriendsList.size() - 1) + 1 + 2)) {
-					return ViewType.FRIEND_REQUEST.ordinal();
-				}
+				return ViewType.FRIEND_REQUEST.ordinal();
 			} else if (HikeConstants.FTUE_MSISDN_TYPE.equals(contactInfo
 					.getMsisdnType())) {
 				return ViewType.FTUE_CONTACT.ordinal();
@@ -603,6 +594,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				avatarFrame
 						.setImageResource(R.drawable.frame_avatar_medium_selector);
 
+				TextView inviteBtn = (TextView) convertView
+						.findViewById(R.id.invite_btn);
+				if (inviteBtn != null) {
+					inviteBtn.setVisibility(View.GONE);
+				}
+
 				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
 						&& lastSeenPref) {
 					String lastSeenString = Utils.getLastSeenTimeAsString(
@@ -623,12 +620,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.request_pending);
 
-						TextView inviteBtn = (TextView) convertView
-								.findViewById(R.id.invite_btn);
 						if (!contactInfo.isOnhike()) {
 							setInviteButton(contactInfo, inviteBtn, null);
-						} else {
-							inviteBtn.setVisibility(View.GONE);
 						}
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);

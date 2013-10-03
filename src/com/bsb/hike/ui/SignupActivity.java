@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
@@ -269,6 +270,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
+				accountEditor.putBoolean(HikeMessengerApp.FB_SIGNUP, true);
 				accountEditor.commit();
 
 				SharedPreferences prefs = PreferenceManager
@@ -793,7 +795,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 
 		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener,
 				year, month, day);
-		dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
+		if (Utils.isHoneycombOrHigher()) {
+			dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
+		}
 		dialog.show();
 	}
 
@@ -805,6 +809,27 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 			if (birthdayText == null) {
 				return;
 			}
+			Calendar calendar = Calendar.getInstance();
+			boolean thisYear = false;
+
+			if (year >= calendar.get(Calendar.YEAR)) {
+				year = calendar.get(Calendar.YEAR);
+				thisYear = true;
+			}
+
+			if (thisYear) {
+				boolean thisMonth = false;
+				if (monthOfYear >= calendar.get(Calendar.MONTH)) {
+					monthOfYear = calendar.get(Calendar.MONTH);
+					thisMonth = true;
+				}
+
+				if (thisMonth) {
+					if (dayOfMonth > calendar.get(Calendar.DAY_OF_MONTH)) {
+						dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+					}
+				}
+			}
 
 			birthdayText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/"
 					+ year);
@@ -814,6 +839,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 			if (mTask != null) {
 				mTask.addBirthdate(mActivityState.birthday);
 			}
+
+			getWindow().setSoftInputMode(
+					WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 		}
 	};
 
@@ -1010,7 +1038,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				&& loadingLayout.getVisibility() != View.VISIBLE) {
 			if (viewFlipper.getDisplayedChild() == NAME) {
 				Utils.hideSoftKeyboard(this, enterEditText);
-				onBirthdayClick(null);
 			} else {
 				submitClicked();
 			}

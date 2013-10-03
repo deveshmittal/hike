@@ -179,6 +179,8 @@ public class HikeService extends Service {
 
 	private PostDeviceDetails postDeviceDetails;
 
+	private ScreenOnReceiver screenOnReceiver;
+
 	private HikeMqttManager mMqttManager;
 	private ContactListChangeIntentReceiver contactsReceived;
 	private Handler mHandler;
@@ -300,6 +302,12 @@ public class HikeService extends Service {
 			Log.d(getClass().getSimpleName(), "SYNCING");
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
+		}
+
+		if (screenOnReceiver == null) {
+			screenOnReceiver = new ScreenOnReceiver();
+			registerReceiver(screenOnReceiver, new IntentFilter(
+					Intent.ACTION_SCREEN_ON));
 		}
 	}
 
@@ -441,6 +449,11 @@ public class HikeService extends Service {
 		if (postDeviceDetails != null) {
 			unregisterReceiver(postDeviceDetails);
 			postDeviceDetails = null;
+		}
+
+		if (screenOnReceiver != null) {
+			unregisterReceiver(screenOnReceiver);
+			screenOnReceiver = null;
 		}
 	}
 
@@ -676,6 +689,25 @@ public class HikeService extends Service {
 		public void onReceive(Context context, Intent intent) {
 			getContentResolver().notifyChange(
 					ContactsContract.Contacts.CONTENT_URI, null);
+		}
+	}
+
+	/**
+	 * Added this receiver to as a temporary fix for the issue where app
+	 * disconnects and never connects again. Here everytime the user turn on the
+	 * screen, we will check whether we are connected or not.
+	 */
+	private class ScreenOnReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (!mMqttManager.isConnected()) {
+				Log.d(getClass().getSimpleName(),
+						"App was not connected, trying to reconnect");
+				mMqttManager.connect();
+			} else {
+				Log.d(getClass().getSimpleName(), "App is connected!");
+			}
 		}
 	}
 
