@@ -693,4 +693,6 @@
   	<string name="sent_sticker_sms">I sent you a sticker. View it here - %1$s</string>
   	<string name="unlink_facebook">Unlink Facebook</string>
 	<string name="unlink_twitter">Unlink Twitter</string>
+	<string name="free_sms_use_tip">To send a free SMS, start a new chat with a contact who has a green bubble ( gb ) next to the name.</string>
+	<string name="green_bubble_abbr">gb</string>
 </resources>
