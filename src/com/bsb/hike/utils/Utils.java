@@ -3057,7 +3057,7 @@ public class Utils {
 			Log.w("LE", "Invalid json");
 		}
 	}
-	
+
 	public static Bitmap returnBigPicture(ConvMessage convMessage,
 			Context context) {
 
