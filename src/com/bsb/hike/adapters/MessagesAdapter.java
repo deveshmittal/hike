@@ -843,8 +843,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					TipType tipType = (TipType) chatThread.tipView.getTag();
 					if (tipType == TipType.STATUS
-							&& statusIdForTip.equals(statusMessage
-									.getMappedId())) {
+							&& statusMessage.getMappedId().equals(
+									statusIdForTip)) {
 						showTip = true;
 					}
 				}
