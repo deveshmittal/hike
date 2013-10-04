@@ -1441,6 +1441,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				.findViewById(R.id.contact_status);
 
 		mLastSeenView.setVisibility(View.VISIBLE);
+		mLastSeenView.setSelected(true);
 
 		if (mConversation instanceof GroupConversation) {
 			int numActivePeople = ((GroupConversation) mConversation)
