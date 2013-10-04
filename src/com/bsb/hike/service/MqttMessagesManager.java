@@ -122,7 +122,14 @@ public class MqttMessagesManager {
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
-			autoDownloadGroupImage(msisdn);
+			/*
+			 * Only auto download if the ic packet is not generated due to
+			 * signup.
+			 */
+			if (!HikeConstants.SIGNUP_IC.equals(jsonObj
+					.optString(HikeConstants.SUB_TYPE))) {
+				autoDownloadGroupImage(msisdn);
+			}
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);

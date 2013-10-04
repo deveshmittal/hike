@@ -166,6 +166,7 @@ public class HikeConstants {
 	public static final String EVENT_TYPE = "et";
 	public static final String EVENT_KEY = "ek";
 	public static final String PACKAGE ="pkg";
+	public static final String SIGNUP_IC = "signupIc";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
