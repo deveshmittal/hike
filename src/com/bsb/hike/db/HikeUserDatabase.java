@@ -505,8 +505,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 								.getInt(favoriteCursor
 										.getColumnIndex(DBConstants.FAVORITE_TYPE))];
 					}
+
+					String name = null;
+					/*
+					 * Setting the hike bot name if the msisdn is a hikebot
+					 * msisdn.
+					 */
+					if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn)) {
+						name = HikeMessengerApp.hikeBotNamesMap.get(msisdn);
+					}
+
 					ContactInfo contactInfo = new ContactInfo(msisdn, msisdn,
-							null, msisdn, false);
+							name, msisdn, false);
 					contactInfo.setFavoriteType(favoriteType);
 					return contactInfo;
 				} finally {
