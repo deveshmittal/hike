@@ -150,6 +150,7 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_info"
                 android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:padding="10dp" >
 
                 <ImageView
