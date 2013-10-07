@@ -114,7 +114,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.UPDATE_OF_MENU_NOTIFICATION, HikePubSub.SERVICE_STARTED,
-			HikePubSub.UPDATE_PUSH };
+			HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -895,6 +895,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					showUpdatePopup(updateType);
+				}
+			});
+		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					GetFTUEContactsTask ftueContactsTask = new GetFTUEContactsTask();
+					Utils.executeContactInfoListResultTask(ftueContactsTask);
 				}
 			});
 		}
