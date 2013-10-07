@@ -21,10 +21,11 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -292,11 +293,13 @@ public class HikeNotification {
 				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
 
-			final GroupConversation gConv = ((GroupConversation) convMsg
-					.getConversation());
-			key = gConv.getGroupParticipantList()
-					.get(convMsg.getGroupParticipantMsisdn()).getContactInfo()
-					.getName();
+			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
+			ContactInfo participant = hUDB.getContactInfoFromMSISDN(
+					convMsg.getGroupParticipantMsisdn(), false);
+
+			Conversation gConv = convMsg.getConversation();
+
+			key = participant.getName();
 
 			if (TextUtils.isEmpty(key)) {
 				key = gConv.getLabel();
