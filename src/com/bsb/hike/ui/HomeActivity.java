@@ -276,12 +276,30 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			searchView.setOnQueryTextListener(onQueryTextListener);
 			searchView.clearFocus();
 
-			menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
+			MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1,
+					R.string.search_hint);
+
+			searchItem
 					.setIcon(R.drawable.ic_top_bar_search)
 					.setActionView(searchView)
 					.setShowAsAction(
 							MenuItem.SHOW_AS_ACTION_ALWAYS
 									| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
+			searchItem
+					.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+
+						@Override
+						public boolean onMenuItemActionExpand(MenuItem item) {
+							return true;
+						}
+
+						@Override
+						public boolean onMenuItemActionCollapse(MenuItem item) {
+							searchView.setQuery("", true);
+							return true;
+						}
+					});
 			break;
 		default:
 			return false;
