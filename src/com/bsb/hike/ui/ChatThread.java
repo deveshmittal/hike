@@ -3796,6 +3796,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
+				getWindow().setSoftInputMode(
+						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 				Editor editor = prefs.edit();
 				try {
 					editor.putBoolean(HikeMessengerApp.stickerCategories
@@ -3812,8 +3814,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							downloadStickerTask);
 					updateStickerCategoryUI(categoryIndex, false, null);
 
-					getWindow().setSoftInputMode(
-							WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 				} finally {
 					editor.commit();
 				}
