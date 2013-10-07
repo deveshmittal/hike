@@ -110,7 +110,7 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 			// create a timer to clear the event
 			mUIThreadHandler.removeCallbacks(this);
 
-			mUIThreadHandler.postDelayed(this, 10 * 1000);
+			mUIThreadHandler.postDelayed(this, 3 * 1000);
 		}
 
 		mTextLastChanged = lastChanged;
@@ -128,12 +128,12 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 	@Override
 	public void run() {
 		long current = System.currentTimeMillis();
-		if (current - mTextLastChanged >= 5 * 1000) {
+		if (current - mTextLastChanged >= 3 * 1000) {
 			/* text hasn't changed in 10 seconds, send an event */
 			sendEndTyping();
 		} else {
 			/* text has changed, fire a new event */
-			long delta = 10 * 1000 - (current - mTextLastChanged);
+			long delta = 3 * 1000 - (current - mTextLastChanged);
 			mUIThreadHandler.postDelayed(this, delta);
 		}
 	}
