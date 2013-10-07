@@ -814,6 +814,10 @@ public class HikeService extends Service {
 				Log.e("AccountUtils", "Unable to get app version");
 			}
 
+			TelephonyManager manager = (TelephonyManager) context
+					.getSystemService(Context.TELEPHONY_SERVICE);
+			String deviceKey = manager.getDeviceId();
+
 			JSONObject data = new JSONObject();
 			try {
 				data.put(HikeConstants.DEV_TYPE, devType);
@@ -821,6 +825,7 @@ public class HikeService extends Service {
 				data.put(HikeConstants.LogEvent.OS, os);
 				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
+				data.put(HikeConstants.DEVICE_KEY, deviceKey);
 			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
