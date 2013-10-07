@@ -1,7 +1,6 @@
 package com.bsb.hike.service;
 
 import java.util.Calendar;
-import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +29,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -42,7 +42,6 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
-import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.ContactUtils;
