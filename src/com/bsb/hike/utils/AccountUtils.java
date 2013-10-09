@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +52,7 @@ import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.provider.Settings.Secure;
@@ -335,15 +335,10 @@ public class AccountUtils {
 
 			String osVersion = Build.VERSION.RELEASE;
 			String deviceId = "";
+			
+			deviceId = Utils.getEncryptedDeviceId(context);
+			Log.d("AccountUtils", "Android ID is "+ Secure.ANDROID_ID);
 
-			try {
-				deviceId = Utils.getHashedDeviceId(Secure.getString(
-						context.getContentResolver(), Secure.ANDROID_ID));
-				Log.d("AccountUtils", "Android ID is " + Secure.ANDROID_ID);
-			} catch (NoSuchAlgorithmException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 			String os = HikeConstants.ANDROID;
 			String carrier = manager.getNetworkOperatorName();
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
@@ -357,6 +352,12 @@ public class AccountUtils {
 
 			String deviceKey = manager.getDeviceId();
 
+			if(Utils.isMicromaxDevice())
+			{
+				boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
+				processMicromaxLogs(isMmxPreload, deviceId, data, context);
+			}
+			
 			data.put("set_cookie", "0");
 			data.put("devicetype", os);
 			data.put(HikeConstants.LogEvent.OS, os);
@@ -387,6 +388,11 @@ public class AccountUtils {
 			Log.wtf("AccountUtils",
 					"creating a string entity from an entry string threw!", e);
 		}
+		catch(Exception e){
+			Log.wtf("AccountUtils",
+					"generic exception while using SYSTEM FLAGS !", e);
+		}
+		
 		httppost.setEntity(entity);
 
 		JSONObject obj = executeRequest(httppost);
@@ -422,6 +428,31 @@ public class AccountUtils {
 				all_invitee, all_invitee_joined, country_code);
 	}
 
+	public static void processMicromaxLogs(boolean isMmxPreload,String deviceId,JSONObject data,Context context) throws JSONException
+	{
+		if(isMmxPreload)			
+			data.put("preload",HikeConstants.MICROMAX.toLowerCase());
+		
+		/* This section is primarily for analystics */
+		Utils.MMX mx = Utils.getMicromaxData(context);
+		if(mx == null) // if mx file does not exist (should be play store version)
+		{
+			data.put("mmx_log","Data file not found");
+		}
+		else if(deviceId != null && !deviceId.equals(mx.getId())) // file exist but data doesnot match (device may be factory reset)
+		{
+			data.put("mmx_log","Data file not found");
+		}
+		else if(!isMmxPreload) // everything matched but not system image
+		{
+			data.put("mmx_log","flag:non sysimage, logic:sysimage");
+		}
+		else
+		{
+			data.put("mmx_log","flag:sysimage, logic:sysimage");
+		}
+	}
+	
 	public static String validateNumber(String number) {
 		HttpPost httppost = new HttpPost(base + "/account/validate?digits=4");
 		AbstractHttpEntity entity = null;

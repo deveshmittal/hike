@@ -451,6 +451,8 @@ public class HikeConstants {
 	public static final int MAX_SMS_PULL_IN_SENTBOX = 1000;
 
 	public static final String MICROMAX = "MICROMAX";
+	
+	public static final String MICROMAX_DATA_FILE = "mmx.data";
 
 	public static final int MAX_READ_BY_NAMES = 3;
 

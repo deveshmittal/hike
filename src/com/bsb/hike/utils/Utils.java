@@ -10,7 +10,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.CharBuffer;
@@ -3114,5 +3118,115 @@ public class Utils {
 			}
 		}
 		return bigPictureImage;
+	}
+	
+	public static class MMX implements Serializable
+	{
+		private String id; //Android ID as an unique 64-bit hex string
+		public MMX(String _id)
+		{
+			id = _id;
+		}
+		public String getId()
+		{
+			return id;
+		}
+	}
+	
+	public static String getEncryptedDeviceId(Context ctx)
+	{
+		String deviceId = null;
+		try
+		{
+			deviceId = Utils.getHashedDeviceId(Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID));
+		}
+		catch (NoSuchAlgorithmException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		catch (UnsupportedEncodingException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return deviceId;
+	}
+	
+	public static MMX getMicromaxData(Context ctx)
+	{
+		FileInputStream fileIn;
+		MMX mx = null;
+		try
+		{
+			fileIn = ctx.openFileInput(HikeConstants.MICROMAX_DATA_FILE);
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			mx = (MMX) in.readObject();
+			in.close();
+			fileIn.close();
+		}
+		catch (FileNotFoundException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		catch (StreamCorruptedException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		catch (IOException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		catch (ClassNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return mx;
+	}
+	
+	public static void setupMicromaxBuild(Context ctx)
+	{
+		File f = ctx.getFileStreamPath(HikeConstants.MICROMAX_DATA_FILE);
+		if(f.exists())
+			return;
+		FileOutputStream fos;
+		try
+		{
+			fos = ctx.openFileOutput(HikeConstants.MICROMAX_DATA_FILE, Context.MODE_PRIVATE);
+			MMX m = new MMX(Utils.getHashedDeviceId(Secure.getString(ctx.getContentResolver(),Secure.ANDROID_ID)));
+			ObjectOutputStream out = new ObjectOutputStream(fos);
+			out.writeObject(m);
+			out.close();
+			fos.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			Log.e("HikeMessengerApp", ex.getMessage());
+		}
+		catch (IOException ex)
+		{
+			Log.e("HikeMessengerApp", ex.getMessage());
+		}
+		catch (NoSuchAlgorithmException ex)
+		{
+			Log.d("HikeMessengerApp", ex.getMessage());
+		}
+	}
+	
+	public static boolean isMicromaxDevice()
+	{
+		boolean isMicromaxDevice = false;
+		if (Build.MODEL != null) 
+		{
+			if (HikeConstants.MICROMAX.equalsIgnoreCase(Build.MANUFACTURER)|| (Build.MODEL.toUpperCase()).contains(HikeConstants.MICROMAX)) 
+			{
+				isMicromaxDevice = true;
+			} 
+		}
+		return isMicromaxDevice;
 	}
 }

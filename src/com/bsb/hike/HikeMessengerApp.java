@@ -704,6 +704,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		makeNoMediaFiles();
 
+		Utils.setupMicromaxBuild(getApplicationContext());
+
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 

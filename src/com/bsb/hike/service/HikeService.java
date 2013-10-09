@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
@@ -44,6 +45,7 @@ import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
@@ -819,6 +821,13 @@ public class HikeService extends Service {
 
 			JSONObject data = new JSONObject();
 			try {
+				
+				if(Utils.isMicromaxDevice())
+				{
+					String deviceId = Utils.getEncryptedDeviceId(context);
+					boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
+					AccountUtils.processMicromaxLogs(isMmxPreload, deviceId, data, context);
+				}
 				data.put(HikeConstants.DEV_TYPE, devType);
 				data.put(HikeConstants.APP_VERSION, appVersion);
 				data.put(HikeConstants.LogEvent.OS, os);
