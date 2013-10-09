@@ -1002,9 +1002,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		optionsList.add(new OverFlowMenuItem(
 				getString(R.string.invite_friends), 2));
 
-		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false)) {
-			optionsList.add(new OverFlowMenuItem(getString(R.string.games), 3));
-		}
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false)) {
 			optionsList
 					.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
@@ -1175,8 +1172,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void updateOverFlowMenuNotification() {
-		if (accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)
-				&& accountPrefs.getBoolean(
+		if (accountPrefs.getBoolean(
 						HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) {
 			topBarIndicator.setVisibility(View.INVISIBLE);
 		} else {
