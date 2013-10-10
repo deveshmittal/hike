@@ -156,4 +156,8 @@
 	<color name="free_sms_divider">#f5f5f2</color>
 	<color name="downloading_sticker">#a4a4a0</color>
 	<color name="timestamp">#adaca9</color>
+	<color name="signup_hint">#d0d0cf</color>
+	<color name="male_selected">#15b5ff</color>
+	<color name="female_selected">#ff5874</color>
+	<color name="signup_disabled">#40ffffff</color>
 </resources>

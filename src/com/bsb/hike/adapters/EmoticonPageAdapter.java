@@ -4,13 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.utils.Utils;
 
 public class EmoticonPageAdapter extends BaseAdapter {
 
@@ -18,7 +16,6 @@ public class EmoticonPageAdapter extends BaseAdapter {
 	int currentPage;
 	int offset;
 
-	private final int EMOTICON_SIZE = (int) (27 * Utils.densityMultiplier);
 	private int[] recentEmoticons;
 	private int[] emoticonSubCategories;
 	private int[] emoticonResIds;
@@ -71,14 +68,10 @@ public class EmoticonPageAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
-			convertView = inflater.inflate(R.layout.emoticon_item, null);
+			convertView = inflater.inflate(R.layout.emoticon_item, parent,
+					false);
 		}
 
-		LayoutParams lp;
-
-		lp = new LayoutParams(EMOTICON_SIZE, EMOTICON_SIZE);
-
-		convertView.setLayoutParams(lp);
 		if (currentPage == 0) {
 			convertView.setTag(Integer.valueOf(recentEmoticons[position]));
 			((ImageView) convertView)

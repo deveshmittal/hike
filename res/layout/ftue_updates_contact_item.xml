@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:background="@drawable/list_item"
+    android:orientation="horizontal"
+    android:paddingLeft="14dp"
+    android:paddingRight="14dp" >
+
+    <RelativeLayout
+        android:id="@+id/avatar_container"
+        android:layout_width="@dimen/small_avatar"
+        android:layout_height="@dimen/small_avatar"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true" >
+
+        <ImageView
+            android:id="@+id/avatar"
+            style="@style/AvatarStyle.Padding"
+            android:src="@drawable/ic_avatar1" />
+
+        <ImageView
+            android:id="@+id/avatar_frame"
+            style="@style/AvatarStyle"
+            android:src="@drawable/frame_avatar_small_selector" />
+    </RelativeLayout>
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/invite_btn"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/bg_green_btn_selector"
+        android:gravity="center"
+        android:text="@string/add"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:textStyle="bold|italic" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@id/invite_btn"
+        android:layout_toRightOf="@id/avatar_container"
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/contact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
+            android:textColor="@color/list_item_header"
+            android:textSize="14sp"
+            android:textStyle="bold|italic" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="#eeece7" />
+
+</RelativeLayout>

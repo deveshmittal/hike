@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:gravity="center"
+    android:paddingLeft="15dp"
+    android:paddingRight="16dp" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <RelativeLayout
+            android:id="@+id/profile_image_view"
+            android:layout_width="@dimen/small_avatar"
+            android:layout_height="@dimen/small_avatar"
+            android:layout_alignParentRight="true" >
+
+            <ImageView
+                android:id="@+id/item_icon"
+                style="@style/AvatarStyle.Padding"
+                android:src="@drawable/ic_avatar1" />
+
+            <ImageView
+                android:id="@+id/avatar_frame"
+                style="@style/AvatarStyle"
+                android:src="@drawable/frame_avatar_small_selector" />
+        </RelativeLayout>
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/item_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textColor="#f3f3f3"
+            android:textSize="18sp"
+            android:layout_centerVertical="true" />
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/new_games_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ic_games_indicator"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/free_sms_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="#a59b94"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+</LinearLayout>

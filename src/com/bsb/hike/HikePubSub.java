@@ -140,8 +140,6 @@ public class HikePubSub implements Runnable {
 
 	public static final String INVITEE_NUM_CHANGED = "inviteeNoChanged";
 
-	public static final String UPDATE_AVAILABLE = "updateAvailable";
-
 	public static final String INVITE_TOKEN_ADDED = "inviteTokenAdded";
 
 	public static final String CONTACT_ADDED = "contactAdded";
@@ -186,9 +184,7 @@ public class HikePubSub implements Runnable {
 
 	public static final String PROFILE_IMAGE_NOT_DOWNLOADED = "profileImageNotDownloaded";
 
-	public static final String TOGGLE_REWARDS = "toggleRewards";
-
-	public static final String TOGGLE_GAMES = "toggleGames";
+	public static final String UPDATE_OF_MENU_NOTIFICATION = "updateOfMenuNotification";
 
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
 
@@ -279,8 +275,20 @@ public class HikePubSub implements Runnable {
 	public static final String INCREMENTED_UNSEEN_STATUS_COUNT = "incrementedUnseenStatusCount";
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
-	
+
 	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
+
+	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
+	
+	public static final String UPDATE_PUSH = "updatePush";
+	
+	public static final String APPLICATIONS_PUSH ="applicationsPush";
+
+	public static final String  UPDATE_AVAILABLE ="updateAvailable"; //TODO: get rid of this.
+
+	public static final String SERVICE_STARTED = "serviceStarted";
+
+	public static final String INVITE_SENT = "inviteSent";
 
 	private final Thread mThread;
 

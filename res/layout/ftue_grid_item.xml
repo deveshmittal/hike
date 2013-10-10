@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="85dp"
+    android:layout_height="110dp"
+    android:gravity="center"
+	android:paddingTop="5dp"
+	android:paddingBottom="5dp"        
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:layout_width="@dimen/ftue_avatar"
+        android:layout_height="@dimen/ftue_avatar" >
+
+        <ImageView
+            android:id="@+id/avatar"
+            style="@style/AvatarStyle.MorePadding"
+            android:src="@drawable/ic_avatar1_rounded" />
+
+        <ImageView
+            android:id="@+id/avatar_frame"
+            style="@style/AvatarStyle"
+            android:src="@drawable/frame_avatar_large_selector" />
+    </FrameLayout>
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:gravity="center"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:singleLine="true"
+        android:text="Rishabh Sharma"
+        android:textColor="@color/list_item_subtext"
+        android:textSize="12sp"
+        android:textStyle="bold|italic" />
+
+</LinearLayout>

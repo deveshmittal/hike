@@ -148,17 +148,22 @@ public class StickerAdapter extends PagerAdapter implements
 								EmoticonConstants.LOCAL_STICKER_IDS_1);
 					}
 
-					File categoryDir = new File(
-							Utils.getStickerDirectoryForCategoryId(activity,
-									categoryId)
-									+ HikeConstants.SMALL_STICKER_ROOT);
+					String categoryDirPath = Utils
+							.getStickerDirectoryForCategoryId(activity,
+									categoryId);
 
-					if (categoryDir.exists()) {
-						String[] stickerIds = categoryDir.list();
-						for (String stickerId : stickerIds) {
-							stickerList.add(new Sticker(position, stickerId));
+					if (categoryDirPath != null) {
+						File categoryDir = new File(categoryDirPath
+								+ HikeConstants.SMALL_STICKER_ROOT);
+
+						if (categoryDir.exists()) {
+							String[] stickerIds = categoryDir.list();
+							for (String stickerId : stickerIds) {
+								stickerList
+										.add(new Sticker(position, stickerId));
+							}
+
 						}
-
 					}
 					updateAvailable = stickerCategoryList.get(position).updateAvailable;
 
@@ -204,8 +209,7 @@ public class StickerAdapter extends PagerAdapter implements
 						public void onScroll(AbsListView view,
 								int firstVisibleItem, int visibleItemCount,
 								int totalItemCount) {
-							if (position == 0
-									|| result.isEmpty()
+							if (result.isEmpty()
 									|| ((ChatThread) activity).getCurrentPage() != position
 									|| !activity
 											.getSharedPreferences(

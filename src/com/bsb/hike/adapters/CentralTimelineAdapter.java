@@ -6,24 +6,29 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -31,24 +36,41 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
 	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
-
+	public static final long FTUE_ITEM_ID = -6;
+	private int protipIndex;
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
 	private ImageLoader imageLoader;
+	private LayoutInflater inflater;
+
+	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
+			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
+			R.drawable.mood_01_happy };
+
+	private int[] moodsRow2 = { R.drawable.mood_15_movie,
+			R.drawable.mood_34_music, R.drawable.mood_37_eating,
+			R.drawable.mood_03_in_love };
+
+	private int[] moodsRowLand = { R.drawable.mood_09_chilling,
+			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
+			R.drawable.mood_01_happy, R.drawable.mood_15_movie,
+			R.drawable.mood_34_music, R.drawable.mood_37_eating };
 
 	private enum ViewType {
-		PROFILE_PIC_CHANGE, OTHER_UPDATE
+		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
 	}
 
 	public CentralTimelineAdapter(Context context,
@@ -57,6 +79,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.imageLoader = new ImageLoader(context);
+		this.inflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.protipIndex = -1;
 	}
 
 	@Override
@@ -82,6 +107,17 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	@Override
 	public boolean isEnabled(int position) {
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
+		if (viewType == ViewType.FTUE_ITEM) {
+			return false;
+		} else if (viewType == ViewType.OTHER_UPDATE) {
+			StatusMessage statusMessage = getItem(position);
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -93,7 +129,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	@Override
 	public int getItemViewType(int position) {
 		StatusMessage message = getItem(position);
-		if (message.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+		if (message.getId() == FTUE_ITEM_ID) {
+			return ViewType.FTUE_ITEM.ordinal();
+		} else if (message.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 			return ViewType.PROFILE_PIC_CHANGE.ordinal();
 		}
 		return ViewType.OTHER_UPDATE.ordinal();
@@ -101,9 +139,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final StatusMessage statusMessage = getItem(position);
@@ -146,9 +181,26 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.infoContainer = convertView
 						.findViewById(R.id.btn_container);
 
+				viewHolder.moodsContainer = (ViewGroup) convertView
+						.findViewById(R.id.moods_container);
+
 				viewHolder.parent = convertView.findViewById(R.id.main_content);
 				break;
 
+			case FTUE_ITEM:
+				convertView = inflater
+						.inflate(R.layout.ftue_updates_item, null);
+
+				viewHolder.name = (TextView) convertView
+						.findViewById(R.id.name);
+				viewHolder.mainInfo = (TextView) convertView
+						.findViewById(R.id.main_info);
+
+				viewHolder.contactsContainer = (ViewGroup) convertView
+						.findViewById(R.id.contacts_container);
+				viewHolder.parent = convertView.findViewById(R.id.main_content);
+
+				break;
 			case PROFILE_PIC_CHANGE:
 				convertView = inflater.inflate(
 						R.layout.profile_pic_timeline_item, null);
@@ -176,10 +228,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		switch (viewType) {
 		case OTHER_UPDATE:
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP
-					|| EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+
+			viewHolder.avatar.setScaleType(ScaleType.FIT_CENTER);
+			viewHolder.avatar.setBackgroundResource(0);
+
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
 					|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 							.getId()) {
+				viewHolder.avatar.setScaleType(ScaleType.CENTER_INSIDE);
+				viewHolder.avatar
+						.setImageResource(R.drawable.ic_ftue_moods_tip);
+				viewHolder.avatar
+						.setBackgroundResource(R.drawable.bg_ftue_updates_tip);
+				viewHolder.avatarFrame.setVisibility(View.GONE);
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else if (statusMessage.hasMood()) {
@@ -215,6 +277,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.noBtn.setText(R.string.not_now);
 
 			viewHolder.infoContainer.setVisibility(View.GONE);
+			viewHolder.moodsContainer.setVisibility(View.GONE);
 
 			switch (statusMessage.getStatusMessageType()) {
 			case NO_STATUS:
@@ -223,13 +286,27 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.yesBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setVisibility(View.GONE);
 
-				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()) {
+				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()
+						|| EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+								.getId()) {
+					viewHolder.timeStamp.setVisibility(View.GONE);
+
 					viewHolder.extraInfo.setText(R.string.no_status);
-					viewHolder.yesBtn.setText(R.string.post);
-				} else if (EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
-						.getId()) {
-					viewHolder.extraInfo.setText(R.string.no_status_recently);
-					viewHolder.yesBtn.setText(R.string.post);
+					viewHolder.yesBtn.setText(R.string.post_a_mood);
+
+					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
+
+					ViewGroup container1 = (ViewGroup) viewHolder.moodsContainer
+							.findViewById(R.id.container1);
+					ViewGroup container2 = (ViewGroup) viewHolder.moodsContainer
+							.findViewById(R.id.container2);
+
+					if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+						addMoods(container1, moodsRow1);
+						addMoods(container2, moodsRow2);
+					} else {
+						addMoods(container1, moodsRowLand);
+					}
 				}
 				viewHolder.yesBtn.setTag(statusMessage);
 				viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
@@ -287,16 +364,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				}
 
 				if (!TextUtils.isEmpty(protip.getImageURL())) {
-					viewHolder.statusImg.setImageDrawable(IconCacheManager
-							.getInstance().getIconForMSISDN(
-									protip.getMappedId()));
-					viewHolder.statusImg.setVisibility(View.VISIBLE);
 
 					ImageViewerInfo imageViewerInfo = new ImageViewerInfo(
 							statusMessage.getMappedId(), protip.getImageURL(),
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
+					imageLoader.loadImage(protip.getMappedId(),
+							viewHolder.statusImg);
+					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
 				}
@@ -352,15 +428,76 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.infoContainer
 					.setOnClickListener(onProfileInfoClickListener);
 			break;
+
+		case FTUE_ITEM:
+			viewHolder.name.setText(R.string.friends_ftue_item_label);
+			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_friends);
+
+			viewHolder.contactsContainer.removeAllViews();
+
+			int limit = HikeConstants.FTUE_LIMIT;
+
+			for (ContactInfo contactInfo : HomeActivity.ftueList) {
+				FavoriteType favoriteType = contactInfo.getFavoriteType();
+				if (favoriteType == FavoriteType.FRIEND
+						|| favoriteType == FavoriteType.REQUEST_SENT
+						|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED
+						|| favoriteType == FavoriteType.REQUEST_RECEIVED) {
+					continue;
+				}
+
+				View parentView = inflater.inflate(
+						R.layout.ftue_updates_contact_item, parent, false);
+
+				ImageView avatar = (ImageView) parentView
+						.findViewById(R.id.avatar);
+				TextView name = (TextView) parentView
+						.findViewById(R.id.contact);
+				TextView addBtn = (TextView) parentView
+						.findViewById(R.id.invite_btn);
+
+				avatar.setImageDrawable(IconCacheManager.getInstance()
+						.getIconForMSISDN(contactInfo.getMsisdn(), true));
+				name.setText(contactInfo.getName());
+
+				addBtn.setTag(contactInfo);
+				addBtn.setOnClickListener(addOnClickListener);
+
+				viewHolder.contactsContainer.addView(parentView);
+
+				if (--limit == 0) {
+					break;
+				}
+			}
+			break;
 		}
 
-		if (viewHolder.parent != null && position == getCount() - 1) {
-			int bottomPadding = context.getResources().getDimensionPixelSize(
-					R.dimen.updates_margin);
+		if (viewHolder.parent != null) {
+			int bottomPadding;
+
+			if (position == getCount() - 1) {
+				bottomPadding = context.getResources().getDimensionPixelSize(
+						R.dimen.updates_margin);
+			} else {
+				bottomPadding = 0;
+			}
+
 			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
 		}
 
 		return convertView;
+	}
+
+	private void addMoods(ViewGroup container, int[] moods) {
+		container.removeAllViews();
+
+		for (int moodRes : moods) {
+			ImageView imageView = (ImageView) inflater.inflate(
+					R.layout.ftue_mood_item, container, false);
+			imageView.setImageResource(moodRes);
+
+			container.addView(imageView);
+		}
 	}
 
 	private class ViewHolder {
@@ -377,6 +514,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView largeProfilePic;
 		View infoContainer;
 		View parent;
+		ViewGroup contactsContainer;
+		ViewGroup moodsContainer;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
@@ -409,6 +548,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							.getId()) {
 				Intent intent = new Intent(context, StatusUpdate.class);
 				context.startActivity(intent);
+
+				Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				Protip protip = statusMessage.getProtip();
 				String url = protip.getGameDownlodURL();
@@ -437,19 +578,23 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				/*
 				 * Removing the protip
 				 */
-				statusMessages.remove(0);
+				try {
+					statusMessages.remove(getProtipIndex());
+					notifyDataSetChanged();
 
-				notifyDataSetChanged();
+					Editor editor = context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+					editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+					editor.commit();
 
-				Editor editor = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
-						System.currentTimeMillis() / 1000);
-				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-				editor.commit();
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.REMOVE_PROTIP,
+							statusMessage.getProtip().getMappedId());
+				} catch (IndexOutOfBoundsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-						statusMessage.getProtip().getMappedId());
 			}
 		}
 	};
@@ -481,6 +626,45 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		}
 	};
 
+	private OnClickListener addOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+
+			FavoriteType favoriteType;
+			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+				favoriteType = FavoriteType.FRIEND;
+			} else {
+				favoriteType = FavoriteType.REQUEST_SENT;
+				Toast.makeText(context, R.string.friend_request_sent,
+						Toast.LENGTH_SHORT).show();
+			}
+
+			/*
+			 * Cloning the object since we don't want to send the ftue
+			 * reference.
+			 */
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
+
+			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+					contactInfo2, favoriteType);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteAdded);
+
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK);
+
+			if (!contactInfo.isOnhike())
+				Utils.sendInviteUtil(
+						contactInfo2,
+						context,
+						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
+						context.getString(R.string.ftue_add_prompt_invite_title),
+						context.getString(R.string.ftue_add_prompt_invite),
+						WhichScreen.UPDATES_TAB);
+		}
+	};
+
 	public void stopImageLoaderThread() {
 		if (imageLoader == null) {
 			return;
@@ -490,5 +674,20 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	public void restartImageLoaderThread() {
 		imageLoader = new ImageLoader(context);
+	}
+
+	/**
+	 * @return the protipIndex
+	 */
+	public int getProtipIndex() {
+		return protipIndex;
+	}
+
+	/**
+	 * @param protipIndex
+	 *            the protipIndex to set
+	 */
+	public void setProtipIndex(int protipIndex) {
+		this.protipIndex = protipIndex;
 	}
 }

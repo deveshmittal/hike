@@ -1,30 +1,21 @@
 package com.bsb.hike.ui.fragments;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONException;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,11 +26,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
@@ -54,15 +49,15 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.CustomAlertDialog;
 
 public class ConversationFragment extends SherlockListFragment implements
 		OnItemLongClickListener, Listener, Runnable {
@@ -106,173 +101,39 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 	}
 
-	private class EmailConversationsAsyncTask extends
-			AsyncTask<Conversation, Void, Conversation[]> {
+	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo> {
 
-		ProgressDialog dialog;
-		List<String> listValues = new ArrayList<String>();
-
-		@Override
-		protected Conversation[] doInBackground(Conversation... convs) {
-
-			HikeConversationsDatabase db = null;
-			String msisdn = convs[0].getMsisdn();
-			StringBuilder sBuilder = new StringBuilder();
-			ArrayList<Uri> uris = new ArrayList<Uri>();
-			Map<String, GroupParticipant> participantMap = null;
-			String chatLabel = "";
-			db = HikeConversationsDatabase.getInstance();
-			Conversation conv = db.getConversation(msisdn, -1);
-			boolean isGroup = Utils.isGroupConversation(msisdn);
-			chatLabel = conv.getLabel();
-
-			if (isGroup) {
-				sBuilder.append(R.string.group_name_email);
-				GroupConversation gConv = ((GroupConversation) convs[0]);
-				participantMap = gConv.getGroupParticipantList();
-			}
-			// initialize with a label
-			sBuilder.append(getString(R.string.chat_with_prefix) + chatLabel
-					+ "\n");
-
-			// iterate through the messages and construct a meaningful payload
-			List<ConvMessage> cList = conv.getMessages();
-			for (int i = 0; i < cList.size(); i++) {
-				ConvMessage cMessage = cList.get(i);
-				String messageMask = cMessage.getMessage().toString();
-				String fromString = null;
-				// find if this message was sent or received
-				// also find out the sender number, this is needed for the chat
-				// file backup
-				MessageMetadata cMetadata = cMessage.getMetadata();
-				boolean isSent = cMessage.isSent();
-				if (cMessage.isGroupChat()) // gc naming logic
-				{
-					GroupParticipant gPart = participantMap.get(cMessage
-							.getGroupParticipantMsisdn());
-
-					if (gPart != null) {
-						fromString = (isSent == true) ? getString(R.string.me_key)
-								: gPart.getContactInfo().getName();
-					} else {
-						fromString = (isSent == true) ? getString(R.string.me_key)
-								: "";
-					}
-				} else
-					fromString = (isSent == true) ? getString(R.string.me_key)
-							: chatLabel; // 1:1 message logic
-
-				if (cMessage.isFileTransferMessage()) {
-					// TODO: can make this generic and add support for multiple
-					// files.
-					HikeFile hikeFile = cMetadata.getHikeFiles().get(0);
-					HikeFileType fileType = hikeFile.getHikeFileType();
-					if (fileType == (HikeFileType.IMAGE)
-							|| fileType == (HikeFileType.AUDIO)
-							|| fileType == (HikeFileType.AUDIO_RECORDING)
-							|| fileType == (HikeFileType.VIDEO)) {
-
-						listValues.add(hikeFile.getFilePath());
-					}
-					// tweak the message here based on the file
-					messageMask = getString(R.string.file_transfer_of_type)
-							+ " " + fileType;
-
-				}
-
-				// finally construct the backup string here
-				sBuilder.append(cMessage.getTimestampFormatted(false,
-						getSherlockActivity())
-						+ ":"
-						+ fromString
-						+ "- "
-						+ messageMask + "\n");
-
-				// TODO: add location and contact handling here.
-			}
-			chatLabel = (Utils.isFilenameValid(chatLabel)) ? chatLabel : "_";
-			File chatFile = createChatTextFile(
-					sBuilder.toString(),
-					getString(R.string.chat_backup_) + "_"
-							+ +System.currentTimeMillis() + ".txt");
-			uris.add(Uri.fromFile(chatFile));
-
-			// append the attachments in hike messages in form of URI's. Dodo
-			// android needs uris duh!
-			for (String file : listValues) {
-				File tFile = new File(file);
-				Uri u = Uri.fromFile(tFile);
-				uris.add(u);
-			}
-
-			// create an email intent to attach the text file and other chat
-			// attachments
-			Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-			intent.setType("text/plain");
-			intent.putExtra(Intent.EXTRA_EMAIL, "");
-			intent.putExtra(Intent.EXTRA_SUBJECT,
-					getString(R.string.backup_of_conversation_with_prefix)
-							+ chatLabel);
-			intent.putExtra(
-					Intent.EXTRA_TEXT,
-					getString(R.string.attached_is_the_conversation_backup_string));
-			intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-
-			// give the hike user a choice of intents
-			startActivity(Intent.createChooser(intent,
-					getString(R.string.email_your_conversation)));
-
-			// TODO: Delete this temp file, although it might be useful for the
-			// user to have local chat backups ? Also we need to see
-
-			return null;
+		public FTUEGridAdapter(Context context, int textViewResourceId,
+				List<ContactInfo> objects) {
+			super(context, textViewResourceId, objects);
 		}
 
 		@Override
-		protected void onPreExecute() {
-			dialog = ProgressDialog.show(getActivity(), null,
-					getString(R.string.exporting_conversations_prefix));
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ContactInfo contactInfo = getItem(position);
 
-			super.onPreExecute();
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-			super.onProgressUpdate(values);
-		}
-
-		@Override
-		protected void onPostExecute(Conversation[] result) {
-			if (isAdded())
-				dialog.dismiss();
-			super.onPostExecute(result);
-		}
-
-		public File createChatTextFile(String text, String fileName) {
-
-			File chatFile = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
-					fileName);
-
-			if (!chatFile.exists()) {
-				try {
-					chatFile.createNewFile();
-				} catch (IOException e) {
-					e.printStackTrace();
-					return null;
-				}
+			if (convertView == null) {
+				convertView = getLayoutInflater(null).inflate(
+						R.layout.ftue_grid_item, parent, false);
 			}
 
-			try {
-				BufferedWriter buf = new BufferedWriter(new FileWriter(
-						chatFile, true));
-				buf.append(text);
-				buf.newLine();
-				buf.close();
-				return chatFile;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
+			ImageView avatarImage = (ImageView) convertView
+					.findViewById(R.id.avatar);
+			ImageView avatarFrame = (ImageView) convertView
+					.findViewById(R.id.avatar_frame);
+			TextView contactName = (TextView) convertView
+					.findViewById(R.id.name);
+
+			avatarFrame
+					.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike
+							: R.drawable.frame_avatar_ftue_sms);
+			avatarImage.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			contactName.setText(contactInfo.getFirstName());
+
+			convertView.setTag(contactInfo);
+
+			return convertView;
 		}
 	}
 
@@ -283,13 +144,19 @@ public class ConversationFragment extends SherlockListFragment implements
 			HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT };
+			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
 	private HashSet<String> mConversationsAdded;
 	private Comparator<? super Conversation> mConversationsComparator;
 	private Handler messageRefreshHandler;
+	private View emptyView;
+
+	private enum hikeBotConvStat {
+		NOTVIEWED, VIEWED, DELETED
+	};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -298,7 +165,11 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		ListView friendsList = (ListView) parent
 				.findViewById(android.R.id.list);
-		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
+
+		emptyView = parent.findViewById(android.R.id.empty);
+		setupEmptyView();
+
+		friendsList.setEmptyView(emptyView);
 
 		Button startChat = (Button) parent.findViewById(R.id.start_chat_btn);
 		startChat.setOnClickListener(new OnClickListener() {
@@ -312,6 +183,68 @@ public class ConversationFragment extends SherlockListFragment implements
 		});
 
 		return parent;
+	}
+
+	private void setupEmptyView() {
+
+		if (emptyView == null || !isAdded()) {
+			return;
+		}
+
+		View ftueNotEmptyView = emptyView.findViewById(R.id.ftue_not_empty);
+		View ftueEmptyView = emptyView.findViewById(R.id.ftue_empty);
+
+		if (HomeActivity.ftueList.isEmpty()) {
+			ftueEmptyView.setVisibility(View.VISIBLE);
+			ftueNotEmptyView.setVisibility(View.GONE);
+		} else {
+			ftueEmptyView.setVisibility(View.GONE);
+			ftueNotEmptyView.setVisibility(View.VISIBLE);
+
+			Button invite = (Button) emptyView.findViewById(R.id.invite);
+			Button newChat = (Button) emptyView.findViewById(R.id.new_chat);
+
+			invite.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(getActivity(), TellAFriend.class));
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
+				}
+			});
+
+			newChat.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(getActivity(),
+							ComposeActivity.class));
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
+				}
+			});
+
+			GridView ftueGrid = (GridView) emptyView
+					.findViewById(R.id.ftue_grid);
+			ftueGrid.setAdapter(new FTUEGridAdapter(getActivity(), -1,
+					HomeActivity.ftueList));
+			ftueGrid.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> adapterView, View view,
+						int position, long id) {
+					ContactInfo contactInfo = (ContactInfo) view.getTag();
+					Intent intent = Utils.createIntentFromContactInfo(
+							contactInfo, true);
+					intent.setClass(getActivity(), ChatThread.class);
+					startActivity(intent);
+
+					Utils.sendFTUELogEvent(HikeConstants.LogEvent.GRID_6,
+							contactInfo.getMsisdn());
+				}
+			});
+		}
 	}
 
 	@Override
@@ -339,18 +272,21 @@ public class ConversationFragment extends SherlockListFragment implements
 		if (conv == null) {
 			return;
 		}
-		Intent intent = createIntentForConversation(conv);
+		Intent intent = Utils.createIntentForConversation(
+				getSherlockActivity(), conv);
 		startActivity(intent);
-	}
 
-	private Intent createIntentForConversation(Conversation conversation) {
-		Intent intent = new Intent(getActivity(), ChatThread.class);
-		if (conversation.getContactName() != null) {
-			intent.putExtra(HikeConstants.Extras.NAME,
-					conversation.getContactName());
+		SharedPreferences prefs = getActivity().getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (conv.getMsisdn().equals(HikeConstants.FTUE_HIKEBOT_MSISDN)
+				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.NOTVIEWED
+						.ordinal()) {
+			Editor editor = prefs.edit();
+			editor.putInt(HikeConstants.HIKEBOT_CONV_STATE,
+					hikeBotConvStat.VIEWED.ordinal());
+			editor.commit();
 		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		return intent;
+
 	}
 
 	@Override
@@ -370,6 +306,7 @@ public class ConversationFragment extends SherlockListFragment implements
 		} else {
 			optionsList.add(getString(R.string.delete));
 		}
+		optionsList.add(getString(R.string.deleteconversations));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -387,29 +324,12 @@ public class ConversationFragment extends SherlockListFragment implements
 						if (getString(R.string.shortcut).equals(option)) {
 							Utils.logEvent(getActivity(),
 									HikeConstants.LogEvent.ADD_SHORTCUT);
-							Intent shortcutIntent = createIntentForConversation(conv);
-							Intent intent = new Intent();
-							intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
-									shortcutIntent);
-							intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-									conv.getLabel());
-							Drawable d = IconCacheManager.getInstance()
-									.getIconForMSISDN(conv.getMsisdn());
-							Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-
-							int dimension = (int) (Utils.densityMultiplier * 48);
-
-							Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
-									dimension, dimension, false);
-							bitmap = null;
-							intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
-							intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-							getActivity().sendBroadcast(intent);
+							Utils.createShortcut(getSherlockActivity(), conv);
 						} else if (getString(R.string.delete).equals(option)) {
 							Utils.logEvent(getActivity(),
 									HikeConstants.LogEvent.DELETE_CONVERSATION);
 							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-							executeAsyncTask(task, conv);
+							Utils.executeConvAsyncTask(task, conv);
 						} else if (getString(R.string.delete_leave).equals(
 								option)) {
 							Utils.logEvent(getActivity(),
@@ -417,8 +337,16 @@ public class ConversationFragment extends SherlockListFragment implements
 							leaveGroup(conv);
 						} else if (getString(R.string.email_conversation)
 								.equals(option)) {
-							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask();
-							executeAsyncTask(task, conv);
+							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(
+									getSherlockActivity(),
+									ConversationFragment.this);
+							Utils.executeConvAsyncTask(task, conv);
+						} else if (getString(R.string.deleteconversations)
+								.equals(option)) {
+							Utils.logEvent(
+									getActivity(),
+									HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
+							DeleteAllConversations();
 						}
 
 					}
@@ -491,18 +419,7 @@ public class ConversationFragment extends SherlockListFragment implements
 
 	private void deleteConversation(Conversation conv) {
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-		executeAsyncTask(task, conv);
-	}
-
-	private void executeAsyncTask(
-			AsyncTask<Conversation, Void, Conversation[]> asyncTask,
-			Conversation... conversations) {
-		if (Utils.isHoneycombOrHigher()) {
-			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-					conversations);
-		} else {
-			asyncTask.execute(conversations);
-		}
+		Utils.executeConvAsyncTask(task, conv);
 	}
 
 	private void toggleTypingNotification(boolean isTyping,
@@ -615,6 +532,9 @@ public class ConversationFragment extends SherlockListFragment implements
 
 			final ConvMessage finalMessage = message;
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -646,6 +566,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 				messageList.add(message);
 			}
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -665,6 +588,11 @@ public class ConversationFragment extends SherlockListFragment implements
 			});
 		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
 			final Conversation conversation = (Conversation) object;
+			if (HikeMessengerApp.hikeBotNamesMap.containsKey(conversation
+					.getMsisdn())) {
+				conversation.setContactName(HikeMessengerApp.hikeBotNamesMap
+						.get(conversation.getMsisdn()));
+			}
 			Log.d(getClass().getSimpleName(),
 					"New Conversation. Group Conversation? "
 							+ (conversation instanceof GroupConversation));
@@ -675,6 +603,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 
 			mConversationsAdded.add(conversation.getMsisdn());
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				public void run() {
 					mAdapter.add(conversation);
@@ -711,6 +643,9 @@ public class ConversationFragment extends SherlockListFragment implements
 				}
 			}
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) {
 			long msgId = ((Long) object).longValue();
@@ -718,6 +653,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			if (Utils.shouldChangeMessageState(msg,
 					ConvMessage.State.SENT_CONFIRMED.ordinal())) {
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type)) {
@@ -737,6 +676,10 @@ public class ConversationFragment extends SherlockListFragment implements
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				}
 			}
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.MESSAGE_DELIVERED.equals(type)) {
 			Pair<String, Long> pair = (Pair<String, Long>) object;
@@ -750,9 +693,16 @@ public class ConversationFragment extends SherlockListFragment implements
 					return;
 				}
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
+			if (getActivity() == null) {
+				return;
+			}
 			/* an icon changed, so update the view */
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) {
@@ -767,6 +717,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 			conv.setContactName(groupName);
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
@@ -779,6 +732,10 @@ public class ConversationFragment extends SherlockListFragment implements
 					.get(contactInfo.getMsisdn());
 			if (conversation != null) {
 				conversation.setContactName(contactInfo.getName());
+
+				if (getActivity() == null) {
+					return;
+				}
 				getActivity().runOnUiThread(this);
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)
@@ -798,6 +755,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			}
 			conv.setUnreadCount(0);
 
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(this);
 		} else if (HikePubSub.GROUP_LEFT.equals(type)) {
 			String groupId = (String) object;
@@ -806,10 +766,25 @@ public class ConversationFragment extends SherlockListFragment implements
 			if (conversation == null) {
 				return;
 			}
+
+			if (getActivity() == null) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					deleteConversation(conversation);
+				}
+			});
+		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (getActivity() == null) {
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setupEmptyView();
 				}
 			});
 		}
@@ -841,7 +816,6 @@ public class ConversationFragment extends SherlockListFragment implements
 			mConversationsAdded.add(conv.getMsisdn());
 			mAdapter.add(conv);
 		}
-
 		conv.addMessage(convMessage);
 		Log.d(getClass().getSimpleName(), "new message is " + convMessage);
 		mAdapter.sort(mConversationsComparator);
@@ -849,5 +823,69 @@ public class ConversationFragment extends SherlockListFragment implements
 		if (messageRefreshHandler == null) {
 			messageRefreshHandler = new Handler();
 		}
+	}
+
+	public void DeleteAllConversations() {
+		if (!mAdapter.isEmpty()) {
+			Utils.logEvent(getActivity(),
+					HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
+			final CustomAlertDialog deleteDialog = new CustomAlertDialog(getActivity());
+			deleteDialog.setHeader(R.string.deleteconversations);
+			deleteDialog.setBody(R.string.delete_all_question);
+			OnClickListener deleteAllOkClickListener = new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					Conversation[] convs = new Conversation[mAdapter.getCount()];
+					for (int i = 0; i < convs.length; i++) {
+						convs[i] = mAdapter.getItem(i);
+						if ((convs[i] instanceof GroupConversation)) {
+							HikeMessengerApp
+									.getPubSub()
+									.publish(
+											HikePubSub.MQTT_PUBLISH,
+											convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+						}
+					}
+					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+					task.execute(convs);
+					deleteDialog.dismiss();
+				}
+			}; 
+			
+			deleteDialog.setOkButton(R.string.delete, deleteAllOkClickListener);
+			deleteDialog.setCancelButton(R.string.cancel);
+			
+			deleteDialog.show();
+		}
+	}
+
+
+
+	@Override
+	public void onResume() {
+		SharedPreferences prefs = getActivity().getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
+				.ordinal()) {
+			/*
+			 * if there is a HikeBotConversation in Conversation list also it is
+			 * Viewed by user then delete this.
+			 */
+			Conversation conv = null;
+			conv = mConversationsByMSISDN
+					.get(HikeConstants.FTUE_HIKEBOT_MSISDN);
+			if (conv != null) {
+				Editor editor = prefs.edit();
+				editor.putInt(HikeConstants.HIKEBOT_CONV_STATE,
+						hikeBotConvStat.DELETED.ordinal());
+				editor.commit();
+				Utils.logEvent(getActivity(),
+						HikeConstants.LogEvent.DELETE_CONVERSATION);
+				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+				Utils.executeConvAsyncTask(task, conv);
+			}
+		}
+		super.onResume();
 	}
 }

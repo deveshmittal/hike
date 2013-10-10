@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +23,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -179,28 +184,50 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 	}
 
 	private void showNativeSMSPopup() {
-		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.enable_sms_client_popup);
-		dialog.setCancelable(true);
+		final SharedPreferences settings = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		TextView header = (TextView) dialog.findViewById(R.id.header);
-		TextView body = (TextView) dialog.findViewById(R.id.body);
-		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+		if (!settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
+			final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+			dialog.setContentView(R.layout.operator_alert_popup);
+			dialog.setCancelable(true);
+	
+			TextView header = (TextView) dialog.findViewById(R.id.header);
+			TextView body = (TextView) dialog.findViewById(R.id.body_text);
+			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+	
+			btnCancel.setVisibility(View.GONE);
+			header.setText(R.string.native_header);
+			body.setText(R.string.native_info);
 
-		btnCancel.setVisibility(View.GONE);
-		header.setText(R.string.native_header);
-		body.setText(R.string.native_info);
-
-		btnOk.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				onTitleIconClick(null);
-			}
-		});
-
-		dialog.show();
+			CheckBox checkBox = (CheckBox) dialog
+					.findViewById(R.id.body_checkbox);
+			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					Editor editor = settings.edit();
+					editor.putBoolean(
+							HikeConstants.OPERATOR_SMS_ALERT_CHECKED, isChecked);
+					editor.commit();
+				}
+			});
+			checkBox.setText(getResources().getString(R.string.not_show_call_alert_msg));
+			
+			btnOk.setOnClickListener(new OnClickListener() {
+	
+				@Override
+				public void onClick(View v) {
+					onTitleIconClick(null);
+				}
+			});
+	
+			dialog.show();
+		}else{
+			onTitleIconClick(null);
+		}
 	}
 
 	private class SetupContactList extends
@@ -362,10 +389,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 								HikeMessengerApp.COUNTRY_CODE,
 								HikeConstants.INDIA_COUNTRY_CODE));
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(msisdn, this)
-								.serialize());
+				Utils.sendInvite(msisdn, this);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
 						.show();
 			}

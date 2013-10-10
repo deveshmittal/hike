@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Pair;
@@ -48,7 +49,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER,
 			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED,
-			HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED };
+			HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED,
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT };
 
 	private SharedPreferences preferences;
 
@@ -92,7 +94,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			return;
 		}
 
-		if (FriendsAdapter.EXTRA_ID.equals(contactInfo.getId())) {
+		if (FriendsAdapter.REMOVE_SUGGESTIONS_ID.equals(contactInfo.getId())) {
+			Editor editor = preferences.edit();
+			editor.putBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, true);
+			editor.commit();
+
+			friendsAdapter.makeCompleteList(true);
+		} else if (FriendsAdapter.EXTRA_ID.equals(contactInfo.getId())) {
 			Intent intent;
 			if (FriendsAdapter.INVITE_MSISDN.equals(contactInfo.getMsisdn())) {
 				intent = new Intent(getActivity(), TellAFriend.class);
@@ -318,6 +326,22 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 							.getDefaultSharedPreferences(getActivity())
 							.getBoolean(HikeConstants.FREE_SMS_PREF, true)
 							|| Utils.getSendSmsPref(getActivity()));
+				}
+			});
+		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					friendsAdapter.makeCompleteList(false);
+				}
+			});
+		} else if (HikePubSub.INVITE_SENT.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					friendsAdapter.notifyDataSetChanged();
 				}
 			});
 		}

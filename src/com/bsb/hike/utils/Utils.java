@@ -107,10 +107,14 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
@@ -121,7 +125,7 @@ import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
-import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
@@ -129,21 +133,22 @@ import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.facebook.Session;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -474,18 +479,6 @@ public class Utils {
 			if (!mediaStorageDir.mkdirs()) {
 				Log.d("Hike", "failed to create directory");
 				return null;
-			}
-			/*
-			 * Making sure that audio recordings don't come up in the music
-			 * players.
-			 */
-			if (type == HikeFileType.AUDIO_RECORDING) {
-				File file = new File(mediaStorageDir, ".nomedia");
-				try {
-					file.createNewFile();
-				} catch (IOException e) {
-					Log.d("Hike", "failed to make nomedia file");
-				}
 			}
 		}
 
@@ -1038,7 +1031,7 @@ public class Utils {
 	/**
 	 * Requests the server to send an account info packet
 	 */
-	public static void requestAccountInfo(boolean upgrade) {
+	public static void requestAccountInfo(boolean upgrade, boolean sendbot) {
 		Log.d("Utils", "Requesting account info");
 		JSONObject requestAccountInfo = new JSONObject();
 		try {
@@ -1047,6 +1040,7 @@ public class Utils {
 
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.UPGRADE, upgrade);
+			data.put(HikeConstants.SENDBOT, sendbot);
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
@@ -1451,6 +1445,11 @@ public class Utils {
 	}
 
 	public static void sendInvite(String msisdn, Context context) {
+		sendInvite(msisdn, context, false);
+	}
+
+	public static void sendInvite(String msisdn, Context context,
+			boolean dbUpdated) {
 		SmsManager smsManager = SmsManager.getDefault();
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
@@ -1463,6 +1462,122 @@ public class Utils {
 
 		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
 				messages, null, null);
+
+		if (!dbUpdated) {
+			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
+					System.currentTimeMillis() / 1000);
+		}
+	}
+
+	public static enum WhichScreen {
+		FRIENDS_TAB, UPDATES_TAB, SMS_SECTION, OTHER
+	}
+
+	/*
+	 * msisdn : mobile number to which we need to send the invite context :
+	 * context of calling activity v : View of invite button which need to be
+	 * set invited if not then send this as null checkPref : preference which
+	 * need to set to not show this dialog. header : header text of the dialog
+	 * popup body : body text message of dialog popup
+	 */
+	public static void sendInviteUtil(final ContactInfo contactInfo,
+			final Context context, final String checkPref, String header,
+			String body) {
+		sendInviteUtil(contactInfo, context, checkPref, header, body,
+				WhichScreen.OTHER);
+	}
+
+	public static void sendInviteUtil(final ContactInfo contactInfo,
+			final Context context, final String checkPref, String header,
+			String body, final WhichScreen whichScreen) {
+		final SharedPreferences settings = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		if (!settings.getBoolean(checkPref, false)) {
+			final Dialog dialog = new Dialog(context,
+					R.style.Theme_CustomDialog);
+			dialog.setContentView(R.layout.operator_alert_popup);
+			dialog.setCancelable(true);
+
+			TextView headerView = (TextView) dialog.findViewById(R.id.header);
+			TextView bodyView = (TextView) dialog.findViewById(R.id.body_text);
+			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.ok);
+
+			headerView.setText(header);
+			bodyView.setText(String.format(body, contactInfo.getFirstName()));
+
+			CheckBox checkBox = (CheckBox) dialog
+					.findViewById(R.id.body_checkbox);
+			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					Editor editor = settings.edit();
+					editor.putBoolean(checkPref, isChecked);
+					editor.commit();
+				}
+			});
+			checkBox.setText(context.getResources().getString(
+					R.string.not_show_call_alert_msg));
+
+			btnOk.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+					invite(context, contactInfo, whichScreen);
+				}
+			});
+
+			btnCancel.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
+
+			dialog.show();
+		} else {
+			invite(context, contactInfo, whichScreen);
+		}
+	}
+
+	private static void invite(Context context, ContactInfo contactInfo,
+			WhichScreen whichScreen) {
+		sendInvite(contactInfo.getMsisdn(), context, true);
+		Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
+				.show();
+
+		boolean isReminding = contactInfo.getInviteTime() != 0;
+
+		long inviteTime = System.currentTimeMillis() / 1000;
+		contactInfo.setInviteTime(inviteTime);
+
+		HikeUserDatabase.getInstance().updateInvitedTimestamp(
+				contactInfo.getMsisdn(), inviteTime);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
+
+		switch (whichScreen) {
+		case FRIENDS_TAB:
+			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
+					: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);
+			break;
+		case UPDATES_TAB:
+			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
+					: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+			break;
+		case SMS_SECTION:
+			Utils.sendFTUELogEvent(isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
+					: HikeConstants.LogEvent.REMIND_SMS_CLICK);
+			break;
+		}
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,
@@ -1935,17 +2050,6 @@ public class Utils {
 		return notificationCount;
 	}
 
-	public static boolean showProtip(Protip protip, SharedPreferences prefs) {
-		if (protip == null) {
-			return false;
-		}
-		long lastDismissTime = prefs.getLong(
-				HikeMessengerApp.PROTIP_DISMISS_TIME, 0);
-		long waitTime = prefs.getLong(HikeMessengerApp.PROTIP_WAIT_TIME,
-				HikeConstants.DEFAULT_PROTIP_WAIT_TIME);
-		return System.currentTimeMillis() / 1000 > (lastDismissTime + waitTime);
-	}
-
 	/*
 	 * This method returns whether the device is an mdpi or ldpi device. The
 	 * assumption is that these devices are low end and hence a DB call may
@@ -2081,8 +2185,11 @@ public class Utils {
 
 	private static String getExternalStickerDirectoryForCategoryId(
 			Context context, String catId) {
-		return context.getExternalFilesDir(null).getPath()
-				+ HikeConstants.STICKERS_ROOT + "/" + catId;
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null) {
+			return null;
+		}
+		return dir.getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
 
 	private static String getInternalStickerDirectoryForCategoryId(
@@ -2113,8 +2220,15 @@ public class Utils {
 		boolean externalAvailable = false;
 		if (getExternalStorageState() == ExternalStorageState.WRITEABLE) {
 			externalAvailable = true;
-			File stickerDir = new File(
-					getExternalStickerDirectoryForCategoryId(context, catId));
+			String stickerDirPath = getExternalStickerDirectoryForCategoryId(
+					context, catId);
+
+			if (stickerDirPath == null) {
+				return null;
+			}
+
+			File stickerDir = new File(stickerDirPath);
+
 			if (stickerDir.exists()) {
 				return stickerDir.getPath();
 			}
@@ -2150,6 +2264,9 @@ public class Utils {
 	public static boolean checkIfStickerCategoryExists(Context context,
 			String categoryId) {
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
+		if (path == null) {
+			return false;
+		}
 		File category = new File(path + HikeConstants.LARGE_STICKER_ROOT);
 		if (category.exists() && category.list().length > 0) {
 			return true;
@@ -2486,10 +2603,10 @@ public class Utils {
 			String stickerUrlId = stickerId
 					.substring(0, stickerId.indexOf("_"));
 
-			String message = context.getString(R.string.sent_sticker)
-					+ ". "
-					+ String.format(AccountUtils.stickersUrl,
-							sticker.getCategoryId(), stickerUrlId);
+			String message = context.getString(
+					R.string.sent_sticker_sms,
+					String.format(AccountUtils.stickersUrl,
+							sticker.getCategoryId(), stickerUrlId));
 			return message;
 		}
 		return convMessage.getMessage();
@@ -2720,6 +2837,15 @@ public class Utils {
 		}
 	}
 
+	public static void executeContactInfoListResultTask(
+			AsyncTask<Void, Void, List<ContactInfo>> asyncTask) {
+		if (isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			asyncTask.execute();
+		}
+	}
+
 	public static void executeStringResultTask(
 			AsyncTask<Void, Void, String> asyncTask) {
 		if (isHoneycombOrHigher()) {
@@ -2738,6 +2864,17 @@ public class Utils {
 		}
 	}
 
+	public static void executeConvAsyncTask(
+			AsyncTask<Conversation, Void, Conversation[]> asyncTask,
+			Conversation... conversations) {
+		if (Utils.isHoneycombOrHigher()) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					conversations);
+		} else {
+			asyncTask.execute(conversations);
+		}
+	}
+
 	public static Bitmap returnScaledBitmap(Bitmap src, Context context) {
 		Resources res = context.getResources();
 		if (isHoneycombOrHigher()) {
@@ -2749,24 +2886,6 @@ public class Utils {
 		} else
 			return src;
 
-	}
-
-	public static boolean isProtipNotificationShowable(SharedPreferences prefs) {
-
-		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
-				-1);
-
-		Protip protip = null;
-		boolean showProtipNotification = false;
-		if (currentProtipId == -1) {
-			protip = HikeConversationsDatabase.getInstance().getLastProtip();
-			if (protip != null) {
-				if (Utils.showProtip(protip, prefs)) {
-					showProtipNotification = true;
-				}
-			}
-		}
-		return (showProtipNotification);
 	}
 
 	public static boolean getSendSmsPref(Context context) {
@@ -2795,5 +2914,199 @@ public class Utils {
 		return !convMessage.isSent()
 				&& convMessage.getState() == State.RECEIVED_UNREAD
 				&& convMessage.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE;
+	}
+
+	public static Intent createIntentForConversation(Context context,
+			Conversation conversation) {
+		Intent intent = new Intent(context, ChatThread.class);
+		if (conversation.getContactName() != null) {
+			intent.putExtra(HikeConstants.Extras.NAME,
+					conversation.getContactName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		return intent;
+	}
+
+	public static void createShortcut(Activity activity, Conversation conv) {
+		Intent shortcutIntent = Utils.createIntentForConversation(activity,
+				conv);
+		Intent intent = new Intent();
+		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
+		Drawable d = IconCacheManager.getInstance().getIconForMSISDN(
+				conv.getMsisdn());
+		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+
+		int dimension = (int) (Utils.densityMultiplier * 48);
+
+		Bitmap scaled = Bitmap.createScaledBitmap(bitmap, dimension, dimension,
+				false);
+		bitmap = null;
+		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
+		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+		activity.sendBroadcast(intent);
+	}
+
+	public static void onCallClicked(Activity activity,
+			final String mContactNumber) {
+		final Activity mActivity = activity;
+		final SharedPreferences settings = activity.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false)) {
+			final Dialog dialog = new Dialog(activity,
+					R.style.Theme_CustomDialog);
+			dialog.setContentView(R.layout.operator_alert_popup);
+			dialog.setCancelable(true);
+
+			TextView header = (TextView) dialog.findViewById(R.id.header);
+			TextView body = (TextView) dialog.findViewById(R.id.body_text);
+			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+			header.setText(R.string.call_not_free_head);
+			body.setText(R.string.call_not_free_body);
+
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.call);
+
+			CheckBox checkBox = (CheckBox) dialog
+					.findViewById(R.id.body_checkbox);
+			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.NO_CALL_ALERT_CHECKED,
+							isChecked);
+					editor.commit();
+				}
+			});
+			checkBox.setText(activity.getResources().getString(
+					R.string.not_show_call_alert_msg));
+
+			btnOk.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
+					Intent callIntent = new Intent(Intent.ACTION_CALL);
+					callIntent.setData(Uri.parse("tel:" + mContactNumber));
+					mActivity.startActivity(callIntent);
+					dialog.dismiss();
+				}
+			});
+
+			btnCancel.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
+
+			dialog.show();
+		} else {
+			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
+			Intent callIntent = new Intent(Intent.ACTION_CALL);
+			callIntent.setData(Uri.parse("tel:" + mContactNumber));
+			activity.startActivity(callIntent);
+		}
+	}
+
+	public static String getFormattedDateTimeFromTimestamp(long milliSeconds,
+			Locale current) {
+		String dateFormat = "dd/MM/yyyy hh:mm:ss a";
+		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliSeconds * 1000);
+		return formatter.format(calendar.getTime());
+	}
+
+	public static void sendFTUELogEvent(String key) {
+		sendFTUELogEvent(key, null);
+	}
+
+	public static void sendFTUELogEvent(String key, String msisdn) {
+		try {
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_TYPE, HikeConstants.LogEvent.CLICK);
+			metadata.put(HikeConstants.EVENT_KEY, key);
+
+			if (!TextUtils.isEmpty(msisdn)) {
+				JSONArray msisdns = new JSONArray();
+				msisdns.put(msisdn);
+
+				metadata.put(HikeConstants.TO, msisdns);
+			}
+
+			data.put(HikeConstants.METADATA, metadata);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LE", "Invalid json");
+		}
+	}
+	
+	public static Bitmap returnBigPicture(ConvMessage convMessage,
+			Context context) {
+
+		HikeFile hikeFile = null;
+		Bitmap bigPictureImage = null;
+
+		// Check if this is a file transfer message of image type
+		// construct a bitmap only if the big picture condition matches
+		if (convMessage.isFileTransferMessage()) {
+			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			if (hikeFile != null) {
+				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
+						&& hikeFile.wasFileDownloaded()
+						&& !HikeMessengerApp.fileTransferTaskMap
+								.containsKey(convMessage.getMsgID())
+						&& hikeFile.getThumbnail() != null) {
+					final String filePath = hikeFile.getFilePath(); // check
+					bigPictureImage = BitmapFactory.decodeFile(filePath);
+				}
+			}
+
+		}
+		// check if this is a sticker message and find if its non-downloaded or
+		// non present.
+		if (convMessage.isStickerMessage()) {
+			final Sticker sticker = convMessage.getMetadata().getSticker();
+			/*
+			 * If this is the first category, then the sticker are a part of the
+			 * app bundle itself
+			 */
+			if (sticker.getStickerIndex() != -1) {
+
+				int resourceId = 0;
+
+				if (sticker.getCategoryIndex() == 0) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+							.getStickerIndex()];
+				} else if (sticker.getCategoryIndex() == 1) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+							.getStickerIndex()];
+				}
+
+				if (resourceId > 0) {
+					final Drawable dr = context.getResources().getDrawable(
+							resourceId);
+					bigPictureImage = Utils.drawableToBitmap(dr);
+				}
+
+			} else {
+				final String filePath = sticker.getStickerPath(context);
+				if (!TextUtils.isEmpty(filePath)) {
+					bigPictureImage = BitmapFactory.decodeFile(filePath);
+				}
+			}
+		}
+		return bigPictureImage;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
@@ -19,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +33,9 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class FriendsAdapter extends BaseAdapter implements OnClickListener,
@@ -43,6 +48,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public static final String EXTRA_ID = "-910";
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_ID = "-912";
+	public static final String REMOVE_SUGGESTIONS_ID = "-913";
 
 	public static final String INVITE_MSISDN = "-123";
 	public static final String GROUP_MSISDN = "-124";
@@ -51,7 +57,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public static final String CONTACT_PHONE_NUM = "--126";
 
 	public enum ViewType {
-		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST, EXTRA, EMPTY
+		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS
 	}
 
 	private LayoutInflater layoutInflater;
@@ -134,9 +140,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			hikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
 					myMsisdn, nativeSMSOn);
-			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.REQUEST_RECEIVED, HikeConstants.ON_HIKE_VALUE,
-					myMsisdn, nativeSMSOn, true));
 			hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED_REJECTED,
 					HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn, true));
@@ -287,31 +290,82 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		completeList.clear();
 
-		inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
-				context.getString(R.string.invite_friends_hike), null);
-		completeList.add(inviteExtraItem);
+		if (TextUtils.isEmpty(queryText)) {
+			inviteExtraItem = new ContactInfo(EXTRA_ID, INVITE_MSISDN,
+					context.getString(R.string.invite_friends_hike), null);
+			completeList.add(inviteExtraItem);
 
-		groupExtraItem = new ContactInfo(EXTRA_ID, GROUP_MSISDN,
-				context.getString(R.string.create_group), null);
-		completeList.add(groupExtraItem);
+			groupExtraItem = new ContactInfo(EXTRA_ID, GROUP_MSISDN,
+					context.getString(R.string.create_group), null);
+			completeList.add(groupExtraItem);
+		}
 
 		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredFriendsList.size()),
 				context.getString(R.string.friends), FRIEND_PHONE_NUM);
 		completeList.add(friendsSection);
 
-		if (friendsList.isEmpty()) {
-			completeList.add(new ContactInfo(EMPTY_ID, null, null, null));
-		} else {
-			completeList.addAll(filteredFriendsList);
+		boolean hideSuggestions = true;
+
+		if (!HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText)
+				&& friendsList.size() < HikeConstants.FTUE_LIMIT) {
+			SharedPreferences prefs = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+			hideSuggestions = prefs.getBoolean(
+					HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false);
+
+			if (!hideSuggestions) {
+				long firstTimeViewFtueSuggestionsTs = prefs.getLong(
+						HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, 0);
+
+				long currentTime = System.currentTimeMillis() / 1000;
+
+				if (currentTime - firstTimeViewFtueSuggestionsTs > 60 * 60) {
+					completeList.add(new ContactInfo(REMOVE_SUGGESTIONS_ID,
+							null, null, null));
+				}
+
+				int limit = HikeConstants.FTUE_LIMIT - friendsList.size();
+
+				int counter = 0;
+				for (ContactInfo contactInfo : HomeActivity.ftueList) {
+					FavoriteType favoriteType = contactInfo.getFavoriteType();
+					if (favoriteType == FavoriteType.NOT_FRIEND
+							|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED
+							|| favoriteType == null) {
+						completeList.add(contactInfo);
+						if (++counter == limit) {
+							break;
+						}
+					}
+				}
+				if (!friendsList.isEmpty()) {
+					completeList.addAll(filteredFriendsList);
+				}
+			}
 		}
 
-		hikeContactsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(filteredHikeContactsList.size()),
-				context.getString(R.string.hike_contacts), CONTACT_PHONE_NUM);
-		completeList.add(hikeContactsSection);
+		if (hideSuggestions) {
+			if (friendsList.isEmpty()) {
+				if (TextUtils.isEmpty(queryText)) {
+					completeList
+							.add(new ContactInfo(EMPTY_ID, null, null, null));
+				}
+			} else {
+				completeList.addAll(filteredFriendsList);
+			}
+		}
 
-		completeList.addAll(filteredHikeContactsList);
+		if (!hikeContactsList.isEmpty()) {
+			hikeContactsSection = new ContactInfo(SECTION_ID,
+					Integer.toString(filteredHikeContactsList.size()),
+					context.getString(R.string.hike_contacts),
+					CONTACT_PHONE_NUM);
+			completeList.add(hikeContactsSection);
+
+			completeList.addAll(filteredHikeContactsList);
+		}
 
 		if (showSMSContacts) {
 			smsContactsSection = new ContactInfo(SECTION_ID,
@@ -368,9 +422,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		case HIKE_INDEX:
 			hikeContactsList.add(contactInfo);
 			Collections.sort(hikeContactsList);
+			break;
 		case SMS_INDEX:
 			smsContactsList.add(contactInfo);
 			Collections.sort(smsContactsList);
+			break;
 		}
 
 		makeCompleteList(false);
@@ -440,6 +496,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			return ViewType.SECTION.ordinal();
 		} else if (EXTRA_ID.equals(contactInfo.getId())) {
 			return ViewType.EXTRA.ordinal();
+		} else if (REMOVE_SUGGESTIONS_ID.equals(contactInfo.getId())) {
+			return ViewType.REMOVE_SUGGESTIONS.ordinal();
 		} else {
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			if (favoriteType == FavoriteType.FRIEND
@@ -447,15 +505,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED) {
 				return ViewType.FRIEND.ordinal();
 			} else if (favoriteType == FavoriteType.REQUEST_RECEIVED) {
-				/*
-				 * Accounting for the friends header and the invite/create group
-				 * items
-				 */
-				if (position <= ((filteredFriendsList.size() - 1) + 1 + 2)) {
-					return ViewType.FRIEND_REQUEST.ordinal();
-				}
+				return ViewType.FRIEND_REQUEST.ordinal();
+			} else if (HikeConstants.FTUE_MSISDN_TYPE.equals(contactInfo
+					.getMsisdnType())) {
+				return ViewType.FTUE_CONTACT.ordinal();
+			} else if (contactInfo.isOnhike()) {
+				return ViewType.NOT_FRIEND_HIKE.ordinal();
 			}
-			return ViewType.NOT_FRIEND.ordinal();
+			return ViewType.NOT_FRIEND_SMS.ordinal();
 		}
 	}
 
@@ -468,14 +525,20 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		if (convertView == null) {
 			switch (viewType) {
+			case FTUE_CONTACT:
 			case FRIEND:
 				convertView = layoutInflater.inflate(
 						R.layout.friends_child_view, null);
 				break;
 
-			case NOT_FRIEND:
+			case NOT_FRIEND_HIKE:
 				convertView = layoutInflater.inflate(
-						R.layout.contact_child_view, null);
+						R.layout.hike_contact_child_view, null);
+				break;
+
+			case NOT_FRIEND_SMS:
+				convertView = layoutInflater.inflate(
+						R.layout.sms_contact_child_view, null);
 				break;
 
 			case SECTION:
@@ -494,11 +557,19 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				convertView = layoutInflater.inflate(
 						R.layout.friends_empty_view, parent, false);
 				break;
+			case REMOVE_SUGGESTIONS:
+				convertView = layoutInflater.inflate(
+						R.layout.remove_suggestions, parent, false);
 			}
 		}
 
-		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND
-				|| viewType == ViewType.FRIEND_REQUEST) {
+		switch (viewType) {
+		case FRIEND:
+		case NOT_FRIEND_HIKE:
+		case FRIEND_REQUEST:
+		case NOT_FRIEND_SMS:
+		case FTUE_CONTACT:
+
 			ImageView avatar = (ImageView) convertView
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
@@ -509,7 +580,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					.getMsisdn() : contactInfo.getName());
 
 			if (viewType == ViewType.FRIEND
-					|| viewType == ViewType.FRIEND_REQUEST) {
+					|| viewType == ViewType.FRIEND_REQUEST
+					|| viewType == ViewType.FTUE_CONTACT) {
 				TextView lastSeen = (TextView) convertView
 						.findViewById(R.id.last_seen);
 				ImageView avatarFrame = (ImageView) convertView
@@ -521,6 +593,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 				avatarFrame
 						.setImageResource(R.drawable.frame_avatar_medium_selector);
+
+				TextView inviteBtn = (TextView) convertView
+						.findViewById(R.id.invite_btn);
+				if (inviteBtn != null) {
+					inviteBtn.setVisibility(View.GONE);
+				}
 
 				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
 						&& lastSeenPref) {
@@ -541,6 +619,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.request_pending);
+
+						if (!contactInfo.isOnhike()) {
+							setInviteButton(contactInfo, inviteBtn, null);
+						}
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.sent_friend_request);
@@ -555,21 +637,54 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 						acceptBtn.setOnClickListener(acceptOnClickListener);
 						rejectBtn.setOnClickListener(rejectOnClickListener);
+
+					} else if (viewType == ViewType.FTUE_CONTACT) {
+						lastSeen.setVisibility(View.VISIBLE);
+						lastSeen.setText(R.string.ftue_friends_subtext);
+
+						TextView addBtn = (TextView) convertView
+								.findViewById(R.id.invite_btn);
+
+						addBtn.setVisibility(View.VISIBLE);
+						addBtn.setText(R.string.add);
+						addBtn.setTag(contactInfo);
+						addBtn.setOnClickListener(addOnClickListener);
 					}
 				}
 			} else {
 				TextView info = (TextView) convertView.findViewById(R.id.info);
-				ImageView addFriend = (ImageView) convertView
-						.findViewById(R.id.add_friend);
-
 				info.setText(contactInfo.isOnhike() ? R.string.tap_chat
 						: R.string.tap_sms);
+				if (viewType == ViewType.NOT_FRIEND_HIKE) {
+					ImageView addFriend = (ImageView) convertView
+							.findViewById(R.id.add_friend);
 
-				addFriend.setTag(contactInfo);
-				addFriend.setOnClickListener(this);
+					addFriend.setTag(contactInfo);
+					addFriend.setOnClickListener(this);
+				} else {
+					TextView inviteBtn = (TextView) convertView
+							.findViewById(R.id.invite_btn);
+					ImageView inviteIcon = (ImageView) convertView
+							.findViewById(R.id.invite_icon);
+					ViewGroup infoContainer = (ViewGroup) convertView
+							.findViewById(R.id.info_container);
+
+					setInviteButton(contactInfo, inviteBtn, inviteIcon);
+
+					LayoutParams layoutParams = (LayoutParams) infoContainer
+							.getLayoutParams();
+					if (inviteIcon.getVisibility() == View.VISIBLE) {
+						layoutParams.addRule(RelativeLayout.LEFT_OF,
+								inviteIcon.getId());
+					} else {
+						layoutParams.addRule(RelativeLayout.LEFT_OF,
+								inviteBtn.getId());
+					}
+				}
 			}
+			break;
 
-		} else if (viewType == ViewType.SECTION) {
+		case SECTION:
 			TextView headerName = (TextView) convertView
 					.findViewById(R.id.name);
 			TextView headerCount = (TextView) convertView
@@ -581,21 +696,24 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			icon.setImageResource(FRIEND_PHONE_NUM.equals(contactInfo
 					.getPhoneNum()) ? R.drawable.ic_header_friends
 					: R.drawable.ic_header_contacts);
+			break;
 
-		} else if (viewType == ViewType.EXTRA) {
-			TextView headerName = (TextView) convertView
+		case EXTRA:
+			TextView headerName2 = (TextView) convertView
 					.findViewById(R.id.contact);
 			ImageView headerIcon = (ImageView) convertView
 					.findViewById(R.id.icon);
 
 			if (contactInfo.getMsisdn().equals(INVITE_MSISDN)) {
 				headerIcon.setImageResource(R.drawable.ic_invite_to_hike);
-				headerName.setText(R.string.invite_friends_hike);
+				headerName2.setText(R.string.invite_friends_hike);
 			} else {
 				headerIcon.setImageResource(R.drawable.ic_create_group);
-				headerName.setText(R.string.create_group);
+				headerName2.setText(R.string.create_group);
 			}
-		} else if (viewType == ViewType.EMPTY) {
+			break;
+
+		case EMPTY:
 			TextView emptyText = (TextView) convertView
 					.findViewById(R.id.empty_text);
 
@@ -606,9 +724,57 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			ssb.setSpan(new ImageSpan(context, R.drawable.ic_add_friend),
 					index, index + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			emptyText.setText(ssb);
+			break;
 		}
 
 		return convertView;
+	}
+
+	private void setInviteButton(ContactInfo contactInfo, TextView inviteBtn,
+			ImageView inviteIcon) {
+
+		inviteBtn.setEnabled(true);
+		inviteBtn.setBackgroundResource(R.drawable.bg_green_btn_selector);
+		inviteBtn.setTextColor(context.getResources().getColor(R.color.white));
+
+		inviteBtn.setOnClickListener(inviteOnClickListener);
+		inviteBtn.setTag(contactInfo);
+
+		if (inviteIcon != null) {
+			inviteIcon.setOnClickListener(inviteOnClickListener);
+			inviteIcon.setTag(contactInfo);
+		}
+
+		if (contactInfo.getInviteTime() == 0) {
+			if (inviteIcon != null) {
+				inviteIcon.setVisibility(View.VISIBLE);
+				inviteBtn.setVisibility(View.GONE);
+			} else {
+				inviteBtn.setVisibility(View.VISIBLE);
+				inviteBtn.setText(R.string.invite_1);
+			}
+		} else {
+			if (inviteIcon != null) {
+				inviteIcon.setVisibility(View.GONE);
+			}
+			inviteBtn.setVisibility(View.VISIBLE);
+
+			long inviteTime = contactInfo.getInviteTime();
+
+			/*
+			 * If the contact was invited more than an hour back, we give the
+			 * option to remind this contact
+			 */
+			if ((System.currentTimeMillis() / 1000 - inviteTime) > 60 * 60) {
+				inviteBtn.setText(R.string.remind);
+			} else {
+				inviteBtn.setEnabled(false);
+				inviteBtn.setText(R.string.invited);
+				inviteBtn.setBackgroundResource(0);
+				inviteBtn.setTextColor(context.getResources().getColor(
+						R.color.description_lightgrey));
+			}
+		}
 	}
 
 	@Override
@@ -666,6 +832,59 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		public void onClick(View v) {
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 			respondToFriendRequest(contactInfo, false);
+		}
+	};
+
+	private OnClickListener inviteOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+			Utils.sendInviteUtil(contactInfo, context,
+					HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
+					context.getString(R.string.native_header),
+					context.getString(R.string.native_info),
+					WhichScreen.SMS_SECTION);
+		}
+	};
+
+	private OnClickListener addOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+
+			FavoriteType favoriteType;
+			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+				favoriteType = FavoriteType.FRIEND;
+			} else {
+				favoriteType = FavoriteType.REQUEST_SENT;
+				Toast.makeText(context, R.string.friend_request_sent,
+						Toast.LENGTH_SHORT).show();
+			}
+
+			/*
+			 * Cloning the object since we don't want to send the ftue
+			 * reference.
+			 */
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
+
+			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+					contactInfo2, favoriteType);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteAdded);
+
+			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK);
+
+			if (!contactInfo.isOnhike())
+				Utils.sendInviteUtil(
+						contactInfo2,
+						context,
+						HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED,
+						context.getString(R.string.ftue_add_prompt_invite_title),
+						context.getString(R.string.ftue_add_prompt_invite),
+						WhichScreen.FRIENDS_TAB);
+
 		}
 	};
 

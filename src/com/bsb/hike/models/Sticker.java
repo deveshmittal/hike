@@ -75,8 +75,12 @@ public class Sticker implements Comparable<Sticker> {
 	}
 
 	public String getStickerPath(Context context) {
-		return Utils.getStickerDirectoryForCategoryId(context, categoryId)
-				+ HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
+		String rootPath = Utils.getStickerDirectoryForCategoryId(context,
+				categoryId);
+		if (rootPath == null) {
+			return null;
+		}
+		return rootPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
 	}
 
 	public String getSmallStickerPath(Context context) {

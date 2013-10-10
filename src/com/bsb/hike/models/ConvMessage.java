@@ -56,6 +56,8 @@ public class ConvMessage {
 	private TypingNotification typingNotification;
 
 	private JSONArray readByArray;
+	
+	private boolean shouldShowPush = true;
 
 	public boolean isInvite() {
 		return mInvite;
@@ -228,6 +230,13 @@ public class ConvMessage {
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj
 				.optString(HikeConstants.SUB_TYPE));
+		/**
+		 * This is to specifically handle the hike bot cases for now
+		 * but can be generically used to control which messages have push enabled
+		 */
+		if(data.has(HikeConstants.PUSH)){
+			this.shouldShowPush = data.optBoolean(HikeConstants.PUSH, true);
+		}
 	}
 
 	public ConvMessage(JSONObject obj, Conversation conversation,
@@ -635,5 +644,19 @@ public class ConvMessage {
 
 	public boolean isGroupChat() {
 		return Utils.isGroupConversation(this.mMsisdn);
+	}
+
+	/**
+	 * @return the shouldShowPush
+	 */
+	public boolean isShouldShowPush() {
+		return shouldShowPush;
+	}
+
+	/**
+	 * @param shouldShowPush the shouldShowPush to set
+	 */
+	public void setShouldShowPush(boolean shouldShowPush) {
+		this.shouldShowPush = shouldShowPush;
 	}
 }
