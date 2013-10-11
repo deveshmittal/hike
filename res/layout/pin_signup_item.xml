@@ -45,7 +45,8 @@
                 android:onClick="onClick"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:text="@string/call_me_signup" />
+                android:text="@string/call_me_signup"
+                android:textColor="@color/white" />
 
         </LinearLayout>
 

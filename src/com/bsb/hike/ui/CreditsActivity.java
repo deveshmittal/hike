@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -52,6 +55,20 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 
 		updateCredits();
 		setupActionBar();
+
+		TextView freeSmsTip = (TextView) findViewById(R.id.free_sms_tip);
+
+		String mainString = getString(R.string.free_sms_use_tip);
+		String replaceString = getString(R.string.green_bubble_abbr);
+
+		SpannableStringBuilder ssb = new SpannableStringBuilder(mainString);
+		int index = mainString.indexOf(replaceString);
+		if (index != -1) {
+			ssb.setSpan(new ImageSpan(this, R.drawable.ic_sms_user), index,
+					index + replaceString.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		freeSmsTip.setText(ssb);
 	}
 
 	public void onInviteClick(View v) {
