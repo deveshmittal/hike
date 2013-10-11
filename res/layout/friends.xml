@@ -2,12 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/home_bg"
+    android:background="@color/white"
     android:orientation="vertical" >
 
     <com.bsb.hike.view.PinnedSectionListView
         android:id="@id/android:list"
         style="@style/HomeList"
+        android:background="@color/white"
         android:fastScrollEnabled="true"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp" />

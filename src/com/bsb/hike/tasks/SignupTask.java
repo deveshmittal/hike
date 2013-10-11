@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
@@ -31,6 +32,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
@@ -87,6 +89,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	private HikeHttpRequest profilePicRequest;
 	private Bitmap profilePicSmall;
 	public static boolean isAlreadyFetchingNumber = false;
+	private Birthday birthdate;
+	private boolean isFemale = false;
 
 	private static final String INDIA_ISO = "IN";
 
@@ -124,6 +128,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				RequestType.PROFILE_PIC, null);
 		profilePicRequest.setFilePath(path);
 		this.profilePicSmall = profilePic;
+	}
+
+	public void addBirthdate(Birthday birthdate) {
+		this.birthdate = birthdate;
+	}
+
+	public void addGender(boolean isFemale) {
+		this.isFemale = isFemale;
 	}
 
 	@Override
@@ -343,6 +355,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				List<String> blockList = AccountUtils
 						.getBlockList(jsonForAddressBookAndBlockList);
 
+				if (jsonForAddressBookAndBlockList.has(HikeConstants.PREF)) {
+					JSONObject prefJson = jsonForAddressBookAndBlockList
+							.getJSONObject(HikeConstants.PREF);
+					JSONArray contactsArray = prefJson
+							.optJSONArray(HikeConstants.CONTACTS);
+					if (contactsArray != null) {
+						Editor editor = settings.edit();
+						editor.putString(
+								HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,
+								contactsArray.toString());
+						editor.commit();
+					}
+				}
 				// List<>
 				// TODO this exception should be raised from the postAddressBook
 				// code
@@ -393,7 +418,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					}
 				}
 				name = this.data;
-				AccountUtils.setName(name);
+				AccountUtils.setProfile(name, birthdate, isFemale);
 			} catch (InterruptedException e) {
 				Log.e("SignupTask",
 						"Interrupted exception while waiting for name", e);
@@ -411,6 +436,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, name);
+			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
+			if (birthdate != null) {
+				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
+				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
+				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
+			}
 			editor.commit();
 		}
 

@@ -13,12 +13,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -26,25 +23,26 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -82,6 +80,7 @@ import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -171,6 +170,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	private List<ProfileItem> profileItems;
 
 	private boolean isGroupOwner;
+
+	private Menu mMenu;
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -325,7 +326,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		switch (profileType) {
 		case CONTACT_INFO:
 			getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
-
+			mMenu = menu;
 			MenuItem callItem = menu.findItem(R.id.call);
 			if (callItem != null) {
 				callItem.setVisible(getPackageManager().hasSystemFeature(
@@ -334,11 +335,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			return true;
 		case GROUP_INFO:
 			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			mMenu = menu;
 			return true;
 		case USER_PROFILE:
 			getSupportMenuInflater().inflate(R.menu.my_profile_menu, menu);
+			mMenu = menu;
 			return true;
 		}
+		mMenu = menu;
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -376,7 +380,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.call:
-			onCallClicked(null);
+			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 			break;
 		case R.id.unfriend:
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
@@ -479,8 +483,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				ProfileItem.HEADER_ID));
 
 		showingRequestItem = false;
-		if (!contactInfo.isOnhike()
-				|| contactInfo.getFavoriteType() != FavoriteType.FRIEND) {
+		if ((!contactInfo.isOnhike() || contactInfo.getFavoriteType() != FavoriteType.FRIEND)
+				&& !HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo
+						.getMsisdn())) {
 			profileItems.add(new ProfileItem.ProfileStatusItem(
 					ProfileItem.REQUEST_ID));
 			showingRequestItem = true;
@@ -1297,7 +1302,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteToggle);
 		} else {
-			inviteToHike(contactInfo.getMsisdn());
+			inviteToHike(contactInfo);
 		}
 	}
 
@@ -1424,7 +1429,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 			} else {
-				inviteToHike(contactInfo.getMsisdn());
+				inviteToHike(contactInfo);
 			}
 		}
 	}
@@ -1528,39 +1533,15 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onInviteToHikeClicked(View v) {
-		inviteToHike(contactInfo.getMsisdn());
+		inviteToHike(contactInfo);
 	}
 
-	private void inviteToHike(String msisdn) {
-		Utils.sendInvite(msisdn, this);
+	private void inviteToHike(ContactInfo contactInfo) {
+		Utils.sendInviteUtil(contactInfo, this,
+				HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED,
+				getString(R.string.native_header),
+				getString(R.string.native_info));
 
-		Toast.makeText(getApplicationContext(), R.string.invite_sent,
-				Toast.LENGTH_SHORT).show();
-	}
-
-	public void onCallClicked(View v) {
-		Builder builder = new Builder(this);
-		builder.setTitle(R.string.call_not_free_head);
-		builder.setMessage(R.string.call_not_free_body);
-		builder.setPositiveButton(R.string.call, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				Utils.logEvent(ProfileActivity.this,
-						HikeConstants.LogEvent.MENU_CALL);
-				Intent callIntent = new Intent(Intent.ACTION_CALL);
-				callIntent.setData(Uri.parse("tel:" + mLocalMSISDN));
-				startActivity(callIntent);
-			}
-		});
-		builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		builder.show();
 	}
 
 	public void onBlockUserClicked(View v) {
@@ -1870,7 +1851,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 								openChatThread(contactInfo);
 							} else if (getString(R.string.invite_to_hike)
 									.equals(option)) {
-								inviteToHike(contactInfo.getMsisdn());
+								inviteToHike(contactInfo);
 							} else if (getString(R.string.add_to_contacts)
 									.equals(option)) {
 								addToContacts(contactInfo.getMsisdn());
@@ -1891,51 +1872,44 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void removeFromGroup(final ContactInfo contactInfo) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				ProfileActivity.this);
-
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(ProfileActivity.this);
+		confirmDialog.setHeader(R.string.remove_from_group);
 		String message = getString(R.string.remove_confirm,
 				contactInfo.getFirstName());
+		confirmDialog.setBody(message);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				JSONObject object = new JSONObject();
+				try {
+					object.put(HikeConstants.TO,
+							groupConversation.getMsisdn());
+					object.put(
+							HikeConstants.TYPE,
+							HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
 
-		builder.setMessage(message);
-		builder.setPositiveButton(R.string.yes,
-				new DialogInterface.OnClickListener() {
+					JSONObject data = new JSONObject();
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						JSONObject object = new JSONObject();
-						try {
-							object.put(HikeConstants.TO,
-									groupConversation.getMsisdn());
-							object.put(
-									HikeConstants.TYPE,
-									HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
+					JSONArray msisdns = new JSONArray();
+					msisdns.put(contactInfo.getMsisdn());
 
-							JSONObject data = new JSONObject();
+					data.put(HikeConstants.MSISDNS, msisdns);
 
-							JSONArray msisdns = new JSONArray();
-							msisdns.put(contactInfo.getMsisdn());
-
-							data.put(HikeConstants.MSISDNS, msisdns);
-
-							object.put(HikeConstants.DATA, data);
-						} catch (JSONException e) {
-							Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-						}
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.MQTT_PUBLISH, object);
-					}
-				});
-		builder.setNegativeButton(R.string.no,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-					}
-				});
-		builder.setCancelable(true);
-		AlertDialog alertDialog = builder.create();
-		alertDialog.show();
+					object.put(HikeConstants.DATA, data);
+				} catch (JSONException e) {
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH, object);
+				confirmDialog.dismiss();
+			}
+		}; 
+		
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
+		
 	}
 
 	@Override
@@ -1986,24 +1960,21 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void showDeleteStatusConfirmationDialog(final String statusId) {
-		AlertDialog.Builder builder = new Builder(this);
-		builder.setMessage(R.string.delete_status_confirmation);
-
-		builder.setNegativeButton(R.string.no, new OnClickListener() {
-
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
+		confirmDialog.setHeader(R.string.delete_status);
+		confirmDialog.setBody(R.string.delete_status_confirmation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-
-		builder.setPositiveButton(R.string.yes, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(View v) {
 				deleteStatus(statusId);
+				confirmDialog.dismiss();
 			}
-		});
-		builder.show();
+		}; 
+		
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
+		confirmDialog.show();
 	}
 
 	private void deleteStatus(final String statusId) {
@@ -2072,5 +2043,19 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					contactInfo.isOnhike());
 			startActivity(intent);
 		}
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (Build.VERSION.SDK_INT <= 10
+				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
+						.hasPermanentMenuKey())) {
+			if (event.getAction() == KeyEvent.ACTION_UP
+					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 }

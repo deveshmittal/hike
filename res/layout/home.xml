@@ -7,7 +7,14 @@
     android:background="@color/home_bg"
     android:orientation="vertical" >
 
+    <View
+        android:id="@+id/overflow_anchor"
+        android:layout_width="190dp"
+        android:layout_height="1dp"
+        android:layout_gravity="right" />
+    
     <LinearLayout
+        android:id="@+id/home_screen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >

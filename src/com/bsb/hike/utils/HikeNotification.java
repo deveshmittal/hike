@@ -16,23 +16,20 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.text.Html;
-import android.text.Spanned;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
@@ -116,189 +113,227 @@ public class HikeNotification {
 					mBuilder.getNotification());
 		}
 	}
+	
+	public void notifyHikeUpdate(int updateType, String message) {
+		final SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
 
-	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg,
-			final boolean isRich) {
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		final int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
+				false) ? Notification.DEFAULT_VIBRATE : 0;
+		final boolean led = preferenceManager
+				.getBoolean(HikeConstants.LED_PREF, true);
+		message = (TextUtils.isEmpty(message))? context.getString(R.string.update_app):message;
+		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
+				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
+						: 0;
+
+		final boolean playNativeJingle = preferenceManager.getBoolean(
+				HikeConstants.NATIVE_JINGLE_PREF, true);
+
+		final int notificationId = context.getString(R.string.team_hike).hashCode();
+		final Drawable avatarDrawable = context.getResources().getDrawable(
+				R.drawable.hike_avtar_protip);
+		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
+				(Utils.drawableToBitmap(avatarDrawable)), context);
+		final int smallIconId = returnSmallIcon();
+
+		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setContentTitle(context.getString(R.string.team_hike))
+				.setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
+				.setContentText(message).setAutoCancel(true)  
+				.setTicker(message).setDefaults(vibrate)     
+				.setPriority(Notification.PRIORITY_HIGH);
+
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse("market://details?id=" + context.getPackageName()));
+		intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+				| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+		mBuilder.setContentIntent(PendingIntent.getActivity(context, 0, intent, 0));
+
+		if (playNativeJingle && playSound != 0) {
+			mBuilder.setSound(Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1));
+		} else if (playSound != 0) {
+			mBuilder.setDefaults(mBuilder.getNotification().defaults
+					| playSound);
+		}
+		if (led) {
+			mBuilder.setLights(Color.BLUE, 300, 1000);
+		}
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			notificationManager.notify(notificationId,
+					mBuilder.getNotification());
+		}
+	}
+	
+	public void notifyApplicationsPushUpdate(String packageName, String message) {
+		final SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
+
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		final int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
+				false) ? Notification.DEFAULT_VIBRATE : 0;
+		final boolean led = preferenceManager
+				.getBoolean(HikeConstants.LED_PREF, true);
+		message = (TextUtils.isEmpty(message))? context.getString(R.string.update_app):message;
+		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
+				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
+						: 0;
+
+		final boolean playNativeJingle = preferenceManager.getBoolean(
+				HikeConstants.NATIVE_JINGLE_PREF, true);
+
+		final int notificationId = context.getString(R.string.team_hike).hashCode();
+		final Drawable avatarDrawable = context.getResources().getDrawable(
+				R.drawable.hike_avtar_protip);
+		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
+				(Utils.drawableToBitmap(avatarDrawable)), context);
+		final int smallIconId = returnSmallIcon();
+
+		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setContentTitle(context.getString(R.string.team_hike))
+				.setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
+				.setContentText(message).setAutoCancel(true)  
+				.setTicker(message).setDefaults(vibrate)     
+				.setPriority(Notification.PRIORITY_HIGH);
+
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse("market://details?id=" + packageName));
+		intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+				| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+		mBuilder.setContentIntent(PendingIntent.getActivity(context, 0, intent, 0));
+
+		if (playNativeJingle && playSound != 0) {
+			mBuilder.setSound(Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1));
+		} else if (playSound != 0) {
+			mBuilder.setDefaults(mBuilder.getNotification().defaults
+					| playSound);
+		}
+		if (led) {
+			mBuilder.setLights(Color.BLUE, 300, 1000);
+		}
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			notificationManager.notify(notificationId,
+					mBuilder.getNotification());
+		}
+		//TODO:: we should reset the gaming download message from preferences
+	}
+	
+	public void notifyMessage(final ContactInfo contactInfo,
+			final ConvMessage convMsg, boolean isRich, Bitmap bigPictureImage) {
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
 
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg
 				.getMessage() : HikeFileType.getFileTypeMessage(context,
-						convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType(),
-						convMsg.isSent());
-				// Message will be empty for type 'uj' when the conversation does not
-				// exist
-				if (TextUtils.isEmpty(message)
-						&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-					message = String.format(
-							context.getString(R.string.joined_hike_new),
-							contactInfo.getFirstName());
-				}
-				final long timestamp = convMsg.getTimestamp();
+				convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType(),
+				convMsg.isSent());
+		// Message will be empty for type 'uj' when the conversation does not
+		// exist
+		if (TextUtils.isEmpty(message)
+				&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+			message = String.format(
+					context.getString(R.string.joined_hike_new),
+					contactInfo.getFirstName());
+		}
+		final long timestamp = convMsg.getTimestamp();
 
-				String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
-						.getName())) ? contactInfo.getName() : msisdn;
+		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
+				.getName())) ? contactInfo.getName() : msisdn;
 
-						// we've got to invoke the chat thread from here with the respective
-						// users
-						final Intent notificationIntent = new Intent(context, ChatThread.class);
-						if (contactInfo.getName() != null) {
-							notificationIntent.putExtra(HikeConstants.Extras.NAME,
-									contactInfo.getName());
-						}
-						notificationIntent.putExtra(HikeConstants.Extras.MSISDN,
-								contactInfo.getMsisdn());
+		// we've got to invoke the chat thread from here with the respective
+		// users
+		final Intent notificationIntent = new Intent(context, ChatThread.class);
+		if (contactInfo.getName() != null) {
+			notificationIntent.putExtra(HikeConstants.Extras.NAME,
+					contactInfo.getName());
+		}
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN,
+				contactInfo.getMsisdn());
 
-						/*
-						 * notifications appear to be cached, and their .equals doesn't check
-						 * 'Extra's. In order to prevent the wrong intent being fired, set a
-						 * data field that's unique to the conversation we want to open.
-						 * http://groups
-						 * .google.com/group/android-developers/browse_thread/thread
-						 * /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
-						 */
+		/*
+		 * notifications appear to be cached, and their .equals doesn't check
+		 * 'Extra's. In order to prevent the wrong intent being fired, set a
+		 * data field that's unique to the conversation we want to open.
+		 * http://groups
+		 * .google.com/group/android-developers/browse_thread/thread
+		 * /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
+		 */
 
-						notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
-						notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-						if (contactInfo != null) {
-							if (contactInfo.getName() != null) {
-								notificationIntent.putExtra(HikeConstants.Extras.NAME,
-										contactInfo.getName());
-							}
-						}
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		if (contactInfo != null) {
+			if (contactInfo.getName() != null) {
+				notificationIntent.putExtra(HikeConstants.Extras.NAME,
+						contactInfo.getName());
+			}
+		}
+		final int icon = returnSmallIcon();
 
-						// check if this is a sticker message and find if its non downloaded or
-						// non present.
-						// in that case we just show a normal notification instead of a rich
-						// notification.
+		/*
+		 * Jellybean has added support for emojis so we don't need to add a '*'
+		 * to replace them
+		 */
+		if (Build.VERSION.SDK_INT < 16) {
+			// Replace emojis with a '*'
+			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
+					message, "*");
+		}
 
-						// check if this is a sticker or a file and populate the big picture
-						// accordingly
-						Bitmap bigPictureImage = null;
-						boolean doesStickerExist = false;
-						HikeFile hikeFile = null;
-						if (convMsg.isStickerMessage()) {
+		String partName = "";
+		// For showing the name of the contact that sent the message in a group
+		// chat
+		if (convMsg.isGroupChat()
+				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
+				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
 
-							final Sticker sticker = convMsg.getMetadata().getSticker();
+			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
+			ContactInfo participant = hUDB.getContactInfoFromMSISDN(
+					convMsg.getGroupParticipantMsisdn(), false);
 
-							/*
-							 * If this is the first category, then the sticker are a part of the
-							 * app bundle itself
-							 */
-							if (sticker.getStickerIndex() != -1) {
+			Conversation gConv = convMsg.getConversation();
 
-								int resourceId = 0;
+			key = participant.getName();
 
-								if (sticker.getCategoryIndex() == 0) {
-									resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
-									                                                       .getStickerIndex()];
-								} else if (sticker.getCategoryIndex() == 1) {
-									resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
-									                                                       .getStickerIndex()];
-								}
+			if (TextUtils.isEmpty(key)) {
+				key = gConv.getLabel();
+			}
+			partName = key;
 
-								if (resourceId > 0) {
-									final Drawable dr = context.getResources()
-											.getDrawable(resourceId);
-									bigPictureImage = Utils.drawableToBitmap(dr);
-									doesStickerExist = true;
-								}
+			message = key + HikeConstants.SEPARATOR + message;
+			key = gConv.getLabel();
+		}
 
-							} else {
-								final String filePath = sticker.getStickerPath(context);
-								if (!TextUtils.isEmpty(filePath)) {
-									bigPictureImage = BitmapFactory.decodeFile(filePath);
-									if (bigPictureImage != null)
-										doesStickerExist = true;
-								}
-							}
+		boolean doesBigPictureExist = (bigPictureImage == null) ? false : true;
+		final String text = String.format("%1$s: %2$s", key, message);
+		// For showing the name of the contact that sent the message in a group
+		// chat
 
-						} else {
-							if (convMsg.isFileTransferMessage()) {
-
-								hikeFile = convMsg.getMetadata().getHikeFiles().get(0);
-								if (hikeFile != null) {
-									if (hikeFile.getFileTypeString().toLowerCase()
-											.startsWith("image")) {
-										final String filePath = hikeFile.getFilePath(); // check
-										bigPictureImage = BitmapFactory.decodeFile(filePath);
-										if (bigPictureImage != null)
-											doesStickerExist = true;
-									}
-								}
-							}
-						}
-						String partName = "";
-						// For showing the name of the contact that sent the message in a group
-						// chat
-						if (convMsg.isGroupChat()
-								&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
-								&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
-
-							final GroupConversation gConv = ((GroupConversation) convMsg
-									.getConversation());
-							key = gConv.getGroupParticipantList()
-									.get(convMsg.getGroupParticipantMsisdn()).getContactInfo()
-									.getName();
-
-							if (TextUtils.isEmpty(key)) {
-								key = gConv.getLabel();
-							}
-							partName = key;
-
-							message = key + HikeConstants.SEPARATOR + message;
-							key = gConv.getLabel();
-						}
-
-						final int icon = returnSmallIcon();
-
-						/*
-						 * Jellybean has added support for emojis so we don't need to add a '*'
-						 * to replace them
-						 */
-						if (Build.VERSION.SDK_INT < 16) {
-							// Replace emojis with a '*'
-							message = SmileyParser.getInstance().replaceEmojiWithCharacter(
-									message, "*");
-						}
-
-						final Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
-								key, message));
-
-						if ((convMsg.isStickerMessage() && doesStickerExist)
-								|| (convMsg.isFileTransferMessage() && hikeFile != null && hikeFile
-								.getFileTypeString().toLowerCase().startsWith("image"))
-								&& isRich) {
-
-							final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
-									.getMessage() : HikeFileType.getFileTypeMessage(context,
-											convMsg.getMetadata().getHikeFiles().get(0)
-											.getHikeFileType(), convMsg.isSent());
-
-									if (convMsg.isStickerMessage()) {
-										if (convMsg.isGroupChat()) {
-											message = partName + HikeConstants.SEPARATOR
-													+ messageString;
-										} else
-											message = messageString;
-									} else {
-										if (convMsg.isGroupChat()) {
-											message = partName + HikeConstants.SEPARATOR
-													+ messageString;
-
-										} else {
-											message = messageString;
-										}
-									}
-									// big picture messages ! intercept !
-									pushBigPictureMessageNotifications(notificationIntent, contactInfo,
-											convMsg, bigPictureImage, text, key, message, msisdn);
-						} else
-							showNotification(notificationIntent, icon, timestamp,
-									notificationId, text, key, message, msisdn); // regular text
-						// messages
+		if (doesBigPictureExist && isRich) {
+			final String messageString = (!convMsg.isFileTransferMessage()) ? convMsg
+					.getMessage() : HikeFileType.getFileTypeMessage(context,
+					convMsg.getMetadata().getHikeFiles().get(0)
+							.getHikeFileType(), convMsg.isSent());
+			
+			if (convMsg.isGroupChat()) {
+				message = partName + HikeConstants.SEPARATOR + messageString;
+			}
+			else
+				message = messageString;
+			// big picture messages ! intercept !
+			pushBigPictureMessageNotifications(notificationIntent, contactInfo,
+					convMsg, bigPictureImage, text, key, message, msisdn);
+		} else {
+			// regular message
+			showNotification(notificationIntent, icon, timestamp,
+					notificationId, text, key, message, msisdn);
+		}
 	}
 
 	public void notifyFavorite(final ContactInfo contactInfo) {
@@ -319,8 +354,8 @@ public class HikeNotification {
 				final String message = context
 						.getString(R.string.add_as_friend_notification_line);
 
-				final Spanned text = Html.fromHtml(context.getString(
-						R.string.add_as_friend_notification, key));
+				final String text = context.getString(
+						R.string.add_as_friend_notification, key);
 
 				showNotification(notificationIntent, icon, timeStamp, notificationId,
 						text, key, message, msisdn);
@@ -366,7 +401,12 @@ public class HikeNotification {
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
 			message = context.getString(R.string.confirmed_friend_2, key);
 			text = message;
-		} else {
+		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+			message = context.getString(
+					R.string.status_profile_pic_notification, key);
+			text = key + " " + message;
+		}
+		else {
 			/*
 			 * We don't know how to display this type. Just return.
 			 */
@@ -499,7 +539,7 @@ public class HikeNotification {
 		}
 	}
 
-	public void pushBigPictureStatusNotifications(final String[] profileStruct) {
+	public void pushBigPictureStatusNotifications(final String[] profileStruct) {  //TODO:: replace this with a bundle
 
 		if (PreferenceManager.getDefaultSharedPreferences(this.context).getInt(
 				HikeConstants.STATUS_PREF, 0) != 0) {

@@ -91,14 +91,6 @@
                 android:textSize="14sp"
                 android:textStyle="italic" />
 
-            <ImageView
-                android:id="@+id/status_pic"
-                android:layout_width="@dimen/timeline_pic"
-                android:layout_height="@dimen/timeline_pic"
-                android:layout_marginTop="5dp"
-                android:onClick="onViewImageClicked"
-                android:scaleType="fitCenter"
-                android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
@@ -131,6 +123,43 @@
                 android:onClick="onNoBtnClick"
                 android:text="@string/not_now" />
         </LinearLayout>
+        
+        <ImageView
+            android:id="@+id/status_pic"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_below="@id/btn_container"
+            android:layout_marginTop="10dp"
+            android:onClick="onViewImageClicked"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/moods_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_container"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_ftue_grid"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <LinearLayout
+            android:id="@+id/container1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:id="@+id/container2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal" />
+    </LinearLayout>
+    
     </RelativeLayout>
 
+    
 </RelativeLayout>

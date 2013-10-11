@@ -122,7 +122,14 @@ public class MqttMessagesManager {
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
-			autoDownloadGroupImage(msisdn);
+			/*
+			 * Only auto download if the ic packet is not generated due to
+			 * signup.
+			 */
+			if (!HikeConstants.SIGNUP_IC.equals(jsonObj
+					.optString(HikeConstants.SUB_TYPE))) {
+				autoDownloadGroupImage(msisdn);
+			}
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -565,8 +572,8 @@ public class MqttMessagesManager {
 
 			boolean inviteTokenAdded = false;
 			boolean inviteeNumChanged = false;
-			boolean toggleRewards = false;
-			boolean toggleGames = false;
+			boolean showNewRewards = false;
+			boolean showNewGames = false;
 			boolean talkTimeChanged = false;
 			int newTalkTime = 0;
 
@@ -655,18 +662,22 @@ public class MqttMessagesManager {
 						account.optString(HikeConstants.REWARDS_TOKEN));
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS,
 						account.optBoolean(HikeConstants.SHOW_REWARDS));
+				editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED,
+						!account.optBoolean(HikeConstants.SHOW_REWARDS));
 
 				editor.putString(HikeMessengerApp.GAMES_TOKEN,
 						account.optString(HikeConstants.REWARDS_TOKEN));
 				editor.putBoolean(HikeMessengerApp.SHOW_GAMES,
 						account.optBoolean(HikeConstants.SHOW_GAMES));
+				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED,
+						!account.optBoolean(HikeConstants.SHOW_GAMES));
 
 				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
-					toggleRewards = true;
+					showNewRewards = true;
 				}
 
 				if (account.optBoolean(HikeConstants.SHOW_GAMES)) {
-					toggleGames = true;
+					showNewGames = true;
 				}
 
 				if (account.has(HikeConstants.REWARDS)) {
@@ -697,14 +708,12 @@ public class MqttMessagesManager {
 			if (inviteeNumChanged) {
 				pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
 			}
-			if (toggleRewards) {
-				pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
-			}
-			if (toggleGames) {
-				pubSub.publish(HikePubSub.TOGGLE_GAMES, null);
-			}
 			if (talkTimeChanged) {
 				pubSub.publish(HikePubSub.TALK_TIME_CHANGED, newTalkTime);
+			}
+			if (showNewGames || showNewRewards) {
+				this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
+						null);
 			}
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
@@ -786,10 +795,14 @@ public class MqttMessagesManager {
 				boolean showRewards = data
 						.getBoolean(HikeConstants.SHOW_REWARDS);
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
+				editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED,
+						!showRewards);
 			}
 			if (data.has(HikeConstants.SHOW_GAMES)) {
 				boolean showGames = data.getBoolean(HikeConstants.SHOW_GAMES);
 				editor.putBoolean(HikeMessengerApp.SHOW_GAMES, showGames);
+				editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED,
+						!showGames);
 			}
 			if (data.has(HikeConstants.ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS)) {
 				JSONArray array = data
@@ -800,9 +813,7 @@ public class MqttMessagesManager {
 			}
 
 			editor.commit();
-
-			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
-			this.pubSub.publish(HikePubSub.TOGGLE_GAMES, null);
+			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 
 		} else if (HikeConstants.MqttMessageTypes.REWARDS.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
@@ -905,7 +916,7 @@ public class MqttMessagesManager {
 					 */
 					autoDownloadProfileImage(statusMessage, true);
 				}
-			}
+			} 
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
@@ -954,6 +965,11 @@ public class MqttMessagesManager {
 
 				String categoryDirPath = Utils
 						.getStickerDirectoryForCategoryId(context, categoryId);
+
+				if (categoryDirPath == null) {
+					return;
+				}
+
 				File categoryDir = new File(categoryDirPath);
 
 				/*
@@ -987,11 +1003,8 @@ public class MqttMessagesManager {
 
 					for (int i = 0; i < stickerIds.length(); i++) {
 						String stickerId = stickerIds.getString(i);
-						File sticker = new File(categoryDir
-								+ HikeConstants.LARGE_STICKER_ROOT, stickerId);
 						File stickerSmall = new File(categoryDir
 								+ HikeConstants.SMALL_STICKER_ROOT, stickerId);
-						sticker.delete();
 						stickerSmall.delete();
 					}
 				}
@@ -1077,34 +1090,118 @@ public class MqttMessagesManager {
 			editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
 			editor.commit();
 		} else if (HikeConstants.MqttMessageTypes.PROTIP.equals(type)) {
+			// We should delete the last showing pro tip from the DB, we don't
+			// need it anymore.
+			// As per the last request from growth team, we don't need to show
+			// the older pro tips once the latest pro tips come in.
+			long currentProtipId = settings.getLong(
+					HikeMessengerApp.CURRENT_PROTIP, -1);
+			boolean isValidProtip = false;
+
 			Protip protip = new Protip(jsonObj);
-			/*
-			 * Applying the offset.
-			 */
-			protip.setTimeStamp(Utils.applyServerTimeOffset(context,
-					protip.getTimeStamp()));
-
-			long id = convDb.addProtip(protip);
-			protip.setId(id);
-
-			if (id == -1) {
-				Log.d(getClass().getSimpleName(),
-						"This protip was already added");
-				return;
+			// check upfront if this protip is a valid protip
+			if (protip != null && currentProtipId != protip.getId()) {
+				isValidProtip = true;
 			}
+			// only if its a valid protip, proceed with the display
+			if (isValidProtip) {
 
-			String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
-					.optString(HikeConstants.THUMBNAIL);
-			if (!TextUtils.isEmpty(iconBase64)) {
-				this.userDb.setIcon(protip.getMappedId(),
-						Base64.decode(iconBase64, Base64.DEFAULT), false);
-			}
+				/*
+				 * Applying the offset.
+				 */
+				protip.setTimeStamp(Utils.applyServerTimeOffset(context,
+						protip.getTimeStamp()));
+				long id = convDb.addProtip(protip);
+				if (id == -1) {
+					Log.d(getClass().getSimpleName(),
+							"Error adding this protip");
+					return; // for some reason the insertion failed,
+				}
+				// delete all pro tips before these.
+				// we dont need them anymore.
 
-			if (Utils.isProtipNotificationShowable(settings)) {
+				convDb.deleteAllProtipsBeforeThisId(id);
+				protip.setId(id);
+				Editor editor = settings.edit();
+				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, protip.getId());
+				editor.commit();
+				String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
+						.optString(HikeConstants.THUMBNAIL);
+				if (!TextUtils.isEmpty(iconBase64)) {
+					this.userDb.setIcon(protip.getMappedId(),
+							Base64.decode(iconBase64, Base64.DEFAULT), false);
+				}
+				// increment the unseen status count straight away.
+				// we've got a new pro tip.
 				incrementUnseenStatusCount();
+
+				StatusMessage statusMessage = new StatusMessage(protip);
+				// download the protip only if the URL is non empty
+				// also respect the user's auto photo download setting.
+				if (!TextUtils.isEmpty(protip.getImageURL())
+						&& appPrefs.getBoolean(
+								HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+					autoDownloadProtipImage(statusMessage, true);
+				}
+				pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 			}
 
-			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
+		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
+			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String devType = data.optString(HikeConstants.DEV_TYPE);
+			String id = data.optString(HikeConstants.MESSAGE_ID);
+			String lastPushPacketId = settings.getString(
+					HikeConstants.Extras.LAST_UPDATE_PACKET_ID, "");
+			if (!TextUtils.isEmpty(devType)
+					&& devType.equals(HikeConstants.ANDROID)
+					&& !TextUtils.isEmpty(id) && !lastPushPacketId.equals(id)) {
+				String version = data.optString(HikeConstants.UPDATE_VERSION);
+				String updateURL = data.optString(HikeConstants.Extras.URL);
+				int update = Utils.isUpdateRequired(version, context) ? (data
+						.optBoolean(HikeConstants.CRITICAL_UPDATE_KEY) ? HikeConstants.CRITICAL_UPDATE
+						: HikeConstants.NORMAL_UPDATE)
+						: HikeConstants.NO_UPDATE;
+				if ((update == HikeConstants.CRITICAL_UPDATE || update == HikeConstants.NORMAL_UPDATE)) {
+					if (Utils.isUpdateRequired(version, context)) {
+						Editor editor = settings.edit();
+						editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE,
+								update);
+						editor.putString(HikeConstants.Extras.UPDATE_MESSAGE,
+								data.optString(HikeConstants.MESSAGE));
+						editor.putString(HikeConstants.Extras.LATEST_VERSION,
+								version);
+						editor.putString(HikeConstants.Extras.LAST_UPDATE_PACKET_ID, id);
+						if (!TextUtils.isEmpty(updateURL))
+							editor.putString(HikeConstants.Extras.URL,
+									updateURL);
+						editor.commit();
+						this.pubSub.publish(HikePubSub.UPDATE_PUSH, update);
+					}
+				}
+			}
+		} else if (HikeConstants.MqttMessageTypes.APPLICATIONS_PUSH
+				.equals(type)) {
+			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String id = data.optString(HikeConstants.MESSAGE_ID);
+			String lastPushPacketId = settings.getString(
+					HikeConstants.Extras.LAST_APPLICATION_PUSH_PACKET_ID, "");
+			String devType = data.optString(HikeConstants.DEV_TYPE);
+			String message = data.optString(HikeConstants.MESSAGE);
+			String packageName = data.optString(HikeConstants.PACKAGE);
+			if (!TextUtils.isEmpty(devType)
+					&& devType.equals(HikeConstants.ANDROID)
+					&& !TextUtils.isEmpty(message)
+					&& !TextUtils.isEmpty(packageName)
+					&& !TextUtils.isEmpty(id) && !lastPushPacketId.equals(id)) {
+				Editor editor = settings.edit();
+				editor.putString(HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
+						data.optString(HikeConstants.MESSAGE));
+				editor.putString(
+						HikeConstants.Extras.LAST_APPLICATION_PUSH_PACKET_ID,
+						id);
+				editor.commit();
+				this.pubSub.publish(HikePubSub.APPLICATIONS_PUSH, packageName);
+			}
 		}
 	}
 
@@ -1113,6 +1210,7 @@ public class MqttMessagesManager {
 		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
 			return;
 		}
+		
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
@@ -1131,7 +1229,17 @@ public class MqttMessagesManager {
 				context, id, fileName, true, false, null, null, false);
 		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
-
+	
+	private void autoDownloadProtipImage(StatusMessage statusMessage, boolean statusUpdate) {
+		String fileName = Utils.getProfileImageFileName(statusMessage
+				.getMappedId());
+		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
+				context, statusMessage.getMappedId(), fileName, true,
+				statusUpdate, statusMessage.getMsisdn(),
+				statusMessage.getNotNullName(), false, statusMessage.getProtip().getImageURL());
+		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
+	}
+	
 	private void setDefaultSMSClientTutorialSetting() {
 		/*
 		 * If settings already contains this key, no need to do anything since

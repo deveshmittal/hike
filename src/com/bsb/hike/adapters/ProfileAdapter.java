@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -51,6 +53,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private boolean myProfile;
 	private boolean isContactBlocked;
 	private ImageLoader imageLoader;
+	private boolean lastSeenPref;
 
 	public ProfileAdapter(ProfileActivity profileActivity,
 			List<ProfileItem> itemList, GroupConversation groupConversation,
@@ -71,6 +74,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		this.myProfile = myProfile;
 		this.isContactBlocked = isContactBlocked;
 		this.imageLoader = new ImageLoader(context);
+		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
+				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 	}
 
 	@Override
@@ -254,9 +259,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					viewHolder.subText.setText(R.string.tap_to_save);
 				} else if (mContactInfo.isOnhike()) {
 					String subText = null;
-					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
-							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND
-							|| mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					if (lastSeenPref
+							&& (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
+									|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND || mContactInfo
+									.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)) {
 						subText = Utils.getLastSeenTimeAsString(context,
 								mContactInfo.getLastSeenTime(),
 								mContactInfo.getOffline());
@@ -346,7 +352,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 					String lastSeenString = null;
 					boolean showingLastSeen = false;
-					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+					if (lastSeenPref
+							&& contactInfo.getFavoriteType() == FavoriteType.FRIEND
 							&& !contactInfo.getMsisdn().equals(
 									contactInfo.getId())) {
 						lastSeenString = Utils.getLastSeenTimeAsString(context,
@@ -566,9 +573,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			break;
 		}
 
-		if (viewHolder.parent != null && position == getCount() - 1) {
-			int bottomPadding = context.getResources().getDimensionPixelSize(
-					R.dimen.updates_margin);
+		if (viewHolder.parent != null) {
+			int bottomPadding;
+
+			if (position == getCount() - 1) {
+				bottomPadding = context.getResources().getDimensionPixelSize(
+						R.dimen.updates_margin);
+			} else {
+				bottomPadding = 0;
+			}
+
 			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
 		}
 

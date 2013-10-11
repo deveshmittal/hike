@@ -1,7 +1,6 @@
 package com.bsb.hike.service;
 
 import java.util.Calendar;
-import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,7 +43,6 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
-import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
@@ -182,6 +180,8 @@ public class HikeService extends Service {
 
 	private PostDeviceDetails postDeviceDetails;
 
+	private ScreenOnReceiver screenOnReceiver;
+
 	private HikeMqttManager mMqttManager;
 	private ContactListChangeIntentReceiver contactsReceived;
 	private Handler mHandler;
@@ -268,7 +268,6 @@ public class HikeService extends Service {
 			postDeviceDetails = new PostDeviceDetails();
 			registerReceiver(postDeviceDetails, new IntentFilter(
 					SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
 		}
 		/*
 		 * register with the Contact list to get an update whenever the phone
@@ -304,6 +303,12 @@ public class HikeService extends Service {
 			Log.d(getClass().getSimpleName(), "SYNCING");
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
+		}
+
+		if (screenOnReceiver == null) {
+			screenOnReceiver = new ScreenOnReceiver();
+			registerReceiver(screenOnReceiver, new IntentFilter(
+					Intent.ACTION_SCREEN_ON));
 		}
 	}
 
@@ -445,6 +450,11 @@ public class HikeService extends Service {
 		if (postDeviceDetails != null) {
 			unregisterReceiver(postDeviceDetails);
 			postDeviceDetails = null;
+		}
+
+		if (screenOnReceiver != null) {
+			unregisterReceiver(screenOnReceiver);
+			screenOnReceiver = null;
 		}
 	}
 
@@ -683,6 +693,25 @@ public class HikeService extends Service {
 		}
 	}
 
+	/**
+	 * Added this receiver to as a temporary fix for the issue where app
+	 * disconnects and never connects again. Here everytime the user turn on the
+	 * screen, we will check whether we are connected or not.
+	 */
+	private class ScreenOnReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (!mMqttManager.isConnected()) {
+				Log.d(getClass().getSimpleName(),
+						"App was not connected, trying to reconnect");
+				mMqttManager.connect();
+			} else {
+				Log.d(getClass().getSimpleName(), "App is connected!");
+			}
+		}
+	}
+
 	private class RegisterToGCMTrigger extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -785,8 +814,11 @@ public class HikeService extends Service {
 			} catch (NameNotFoundException e) {
 				Log.e("AccountUtils", "Unable to get app version");
 			}
+
 			TelephonyManager manager = (TelephonyManager) context
 					.getSystemService(Context.TELEPHONY_SERVICE);
+			String deviceKey = manager.getDeviceId();
+
 			JSONObject data = new JSONObject();
 			try {
 				
@@ -795,14 +827,13 @@ public class HikeService extends Service {
 					String deviceId = Utils.getEncryptedDeviceId(context);
 					boolean isMmxPreload = ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true:false;
 					AccountUtils.processMicromaxLogs(isMmxPreload, deviceId, data, context);
-					String deviceKey = manager.getDeviceId();
-					data.put("device_key", deviceKey);
 				}
 				data.put(HikeConstants.DEV_TYPE, devType);
 				data.put(HikeConstants.APP_VERSION, appVersion);
 				data.put(HikeConstants.LogEvent.OS, os);
 				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
+				data.put(HikeConstants.DEVICE_KEY, deviceKey);
 			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
@@ -912,34 +943,6 @@ public class HikeService extends Service {
 						obj);
 			}
 			scheduleNextUserStatsSending();
-		}
-	};
-
-	public void scheduleNextUpdateCheck() {
-		// Randomizing the time when we will poll the server for an update
-		Random random = new Random();
-
-		Calendar wakeUpTime = Calendar.getInstance();
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true)) {
-			int hour = random.nextInt(48) + 1;
-			wakeUpTime.add(Calendar.HOUR, hour);
-		} else {
-			int min = random.nextInt(2) + 1;
-			wakeUpTime.add(Calendar.MINUTE, min);
-		}
-		long scheduleTime = getScheduleTime(wakeUpTime.getTimeInMillis());
-
-		postRunnableWithDelay(checkForUpdates, scheduleTime);
-	}
-
-	private Runnable checkForUpdates = new Runnable() {
-
-		@Override
-		public void run() {
-			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
-					HikeService.this);
-			Utils.executeBoolResultAsyncTask(checkForUpdateTask);
 		}
 	};
 

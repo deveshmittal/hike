@@ -150,6 +150,6 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		Log.d(getClass().getSimpleName(), "Was update successful? " + result);
-		hikeService.scheduleNextUpdateCheck();
+		//hikeService.scheduleNextUpdateCheck();
 	}
 }

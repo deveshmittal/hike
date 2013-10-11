@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -132,6 +133,19 @@ public class IconCacheManager {
 		Drawable b = mIcons.get(stickerPath);
 		if (b == null) {
 			b = new BitmapDrawable(BitmapFactory.decodeFile(stickerPath));
+
+			if (b != null) {
+				mIcons.put(stickerPath, b);
+			}
+		}
+		return b;
+	}
+
+	public synchronized Drawable getSticker(Context context, String stickerPath) {
+		Drawable b = mIcons.get(stickerPath);
+		if (b == null) {
+			b = new BitmapDrawable(context.getResources(),
+					BitmapFactory.decodeFile(stickerPath));
 
 			if (b != null) {
 				mIcons.put(stickerPath, b);

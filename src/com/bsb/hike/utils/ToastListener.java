@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -21,6 +22,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
@@ -46,7 +48,8 @@ public class ToastListener implements Listener {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
-			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED };
+			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED,
+			HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH };
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -69,53 +72,60 @@ public class ToastListener implements Listener {
 			currentActivity = new WeakReference<Activity>(activity);
 		} else if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
+			if (message.isShouldShowPush()) {
+				HikeConversationsDatabase hCDB = HikeConversationsDatabase
+						.getInstance();
+				message.setConversation(hCDB.getConversation(
+						message.getMsisdn(), 0));
 
-			HikeConversationsDatabase hCDB = HikeConversationsDatabase
-					.getInstance();
-			message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
-
-			if (message.getConversation() == null) {
-				Log.w(getClass().getSimpleName(),
-						"The client did not get a GCJ message for us to handle this message.");
-				return;
-			}
-			if ((message.getConversation() instanceof GroupConversation)
-					&& ((GroupConversation) message.getConversation())
-							.isMuted()) {
-				Log.d(getClass().getSimpleName(), "Group has been muted");
-				return;
-			}
-			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO
-					|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-					|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-				Activity activity = (currentActivity != null) ? currentActivity
-						.get() : null;
-				if ((activity instanceof ChatThread)) {
-					String contactNumber = ((ChatThread) activity)
-							.getContactNumber();
-					if (message.getMsisdn().equals(contactNumber)) {
-						return;
+				if (message.getConversation() == null) {
+					Log.w(getClass().getSimpleName(),
+							"The client did not get a GCJ message for us to handle this message.");
+					return;
+				}
+				if ((message.getConversation() instanceof GroupConversation)
+						&& ((GroupConversation) message.getConversation())
+								.isMuted()) {
+					Log.d(getClass().getSimpleName(), "Group has been muted");
+					return;
+				}
+				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO
+						|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+					Activity activity = (currentActivity != null) ? currentActivity
+							.get() : null;
+					if ((activity instanceof ChatThread)) {
+						String contactNumber = ((ChatThread) activity)
+								.getContactNumber();
+						if (message.getMsisdn().equals(contactNumber)) {
+							return;
+						}
 					}
+
+					/*
+					 * the foreground activity isn't going to show this message
+					 * so Toast it
+					 */
+					ContactInfo contactInfo;
+					if (message.isGroupChat()) {
+						Log.d("ToastListener", "GroupName is "
+								+ message.getConversation().getLabel());
+						contactInfo = new ContactInfo(message.getMsisdn(),
+								message.getMsisdn(), message.getConversation()
+										.getLabel(), message.getMsisdn());
+					} else {
+						contactInfo = this.db.getContactInfoFromMSISDN(
+								message.getMsisdn(), false);
+					}
+					/*
+					 * Check if this is a big picture message, else 
+					 * toast a normal push message
+					 */
+					Bitmap bigPicture = Utils.returnBigPicture(message, context);
+					this.toaster.notifyMessage(contactInfo, message, 
+							bigPicture!=null ? true: false, bigPicture);
 				}
 
-				/*
-				 * the foreground activity isn't going to show this message so
-				 * Toast it
-				 */
-				ContactInfo contactInfo;
-				if (message.isGroupChat()) {
-					Log.d("ToastListener", "GroupName is "
-							+ message.getConversation().getLabel());
-					contactInfo = new ContactInfo(message.getMsisdn(),
-							message.getMsisdn(), message.getConversation()
-									.getLabel(), message.getMsisdn());
-				} else {
-					contactInfo = this.db.getContactInfoFromMSISDN(
-							message.getMsisdn(), false);
-				}
-
-				// this.toaster.pushInboxNotifications(contactInfo, message);
-				this.toaster.notifyMessage(contactInfo, message, true);
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
@@ -169,42 +179,67 @@ public class ToastListener implements Listener {
 				return;
 			}
 
+			if (!message.isShouldShowPush()) {
+				return;
+			}
+
 			if ((message.getConversation() instanceof GroupConversation)
 					&& ((GroupConversation) message.getConversation())
-					.isMuted()) {
-					Log.d(getClass().getSimpleName(), "Group has been muted");
-					return;
+							.isMuted()) {
+				Log.d(getClass().getSimpleName(), "Group has been muted");
+				return;
 			}
-			
-			ContactInfo contactInfo;
-			if (message.isGroupChat()) {
-				Log.d("ToastListener", "GroupName is "
-						+ message.getConversation().getLabel());
-				contactInfo = new ContactInfo(message.getMsisdn(),
-						message.getMsisdn(), message.getConversation()
-								.getLabel(), message.getMsisdn());
-			} else {
-				contactInfo = this.db.getContactInfoFromMSISDN(
-						message.getMsisdn(), false);
+			final Bitmap bigPicture = Utils.returnBigPicture(message, context);
+			if (bigPicture!=null) {
+				ContactInfo contactInfo;
+				if (message.isGroupChat()) {
+					Log.d("ToastListener", "GroupName is "
+							+ message.getConversation().getLabel());
+					contactInfo = new ContactInfo(message.getMsisdn(),
+							message.getMsisdn(), message.getConversation()
+									.getLabel(), message.getMsisdn());
+				} else {
+					contactInfo = this.db.getContactInfoFromMSISDN(
+							message.getMsisdn(), false);
+				}
+				toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
-			
-			toaster.notifyMessage(contactInfo, message, true);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
-
 			Protip proTip = (Protip) object;
-			boolean whetherToShow = false;
-			;
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
-			SharedPreferences accountPrefs = context.getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			whetherToShow = Utils.isProtipNotificationShowable(accountPrefs);
-
-			if (proTip.isShowPush() && whetherToShow)
+			// the only check we now need is to check whether the pro tip has to
+			// push flag true or not
+			if (proTip.isShowPush())
 				toaster.notifyMessage(proTip);
+		} else if (HikePubSub.UPDATE_PUSH.equals(type)) {
+			int update = ((Integer) object).intValue();
+			// future todo: possibly handle the case where the alert has been
+			// shown in
+			// the app once for the update and
+			// now the user has got a push update from our server.
+			// if its critical, let it go through, if its normal, check the
+			// preference.
+			toaster.notifyHikeUpdate(
+					update,
+					context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+							HikeConstants.Extras.UPDATE_MESSAGE, ""));
+		} else if (HikePubSub.APPLICATIONS_PUSH.equals(type)) {
+			if (object instanceof String) {
+				String packageName = ((String) object);
+				toaster.notifyApplicationsPushUpdate(
+						packageName,
+						context.getSharedPreferences(
+								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+								.getString(
+										HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
+										""));
+			}
+
 		}
 	}
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        style="@style/UpdatesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <RelativeLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="@dimen/medium_avatar"
+            android:layout_height="@dimen/medium_avatar"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp" >
+
+            <ImageView
+                android:id="@+id/avatar"
+                style="@style/AvatarStyle.Padding"
+                android:background="@drawable/bg_ftue_updates_tip"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_ftue_friends_tip" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/side_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/avatar_container"
+            android:layout_toRightOf="@id/avatar_container"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Rishabh Sharma"
+                android:textColor="@color/updates_text"
+                android:textSize="14sp"
+                android:textStyle="bold|italic" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/details_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/side_content"
+            android:layout_marginRight="5dp"
+            android:layout_toRightOf="@id/avatar_container"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.LinkedTextView
+                android:id="@+id/main_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Added you as a friend"
+                android:textColor="@color/updates_text"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/contacts_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/avatar_container"
+            android:layout_below="@id/details_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_ftue_grid"
+            android:orientation="vertical" />
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -47,6 +47,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	private int offline = 1;
 
+	private long inviteTime;
+
 	public String getName() {
 		return name;
 	}
@@ -158,6 +160,14 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.offline = offline;
 	}
 
+	public long getInviteTime() {
+		return inviteTime;
+	}
+
+	public void setInviteTime(long inviteTime) {
+		this.inviteTime = inviteTime;
+	}
+
 	public String getFormattedHikeJoinTime() {
 		String format = "MMM ''yy";
 		DateFormat df = new SimpleDateFormat(format);
@@ -192,6 +202,17 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.msisdnType = msisdnType;
 		this.lastMessaged = lastMessaged;
 		this.hikeJoinTime = hikeJoinTime;
+	}
+
+	public ContactInfo(ContactInfo contactInfo) {
+		this(contactInfo.getId(), contactInfo.getMsisdn(), contactInfo
+				.getName(), contactInfo.getPhoneNum(), contactInfo.isOnhike(),
+				"", contactInfo.getLastMessaged(),
+				contactInfo.hasCustomPhoto(), contactInfo.getHikeJoinTime());
+		this.favoriteType = contactInfo.getFavoriteType();
+		this.inviteTime = contactInfo.getInviteTime();
+		this.lastSeenTime = contactInfo.getLastSeenTime();
+		this.offline = contactInfo.getOffline();
 	}
 
 	@Override

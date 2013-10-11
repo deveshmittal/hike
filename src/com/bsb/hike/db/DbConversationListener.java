@@ -16,7 +16,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -479,7 +478,8 @@ public class DbConversationListener implements Listener {
 		values.put(HikeConstants.SMSNative.NUMBER, convMessage.getMsisdn());
 		values.put(HikeConstants.SMSNative.DATE,
 				convMessage.getTimestamp() * 1000);
-		values.put(HikeConstants.SMSNative.MESSAGE, convMessage.getMessage());
+		values.put(HikeConstants.SMSNative.MESSAGE,
+				Utils.getMessageDisplayText(convMessage, context));
 
 		context.getContentResolver().insert(
 				HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);

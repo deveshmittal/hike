@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.os.Environment;
 
 public class HikeConstants {
-	public static final String APP_PUSH_ID = "768395314950";
+	public static final String APP_PUSH_ID = "297726274089";
 	public static final String APP_FACEBOOK_ID = "425850510764995";
 	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
 	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
@@ -50,6 +50,7 @@ public class HikeConstants {
 	public static final String GENDER = "gender";
 	public static final String VERSION = "v";
 	public static final String CRITICAL = "c";
+	public static final String CRITICAL_UPDATE_KEY ="critical";
 	public static final String INVITE_TOKEN = "invite_token";
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 	public static final String DND_NUMBERS = "dndnumbers";
@@ -109,6 +110,7 @@ public class HikeConstants {
 	public static final String UPGRADE = "upgrade";
 	public static final String DEV_TYPE = "dev_type";
 	public static final String APP_VERSION = "app_version";
+	public static final String UPDATE_VERSION ="version";
 	public static final String DEVICE_VERSION = "deviceversion";
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
@@ -123,6 +125,7 @@ public class HikeConstants {
 	public static final String ADD_STICKER = "addStk";
 	public static final String REMOVE_STICKER = "remStk";
 	public static final String REMOVE_CATEGORY = "remCat";
+	public static final String DISABLED_ST = "disabled";
 	public static final String STATUS = "stat";
 	public static final String OK = "ok";
 	public static final String REACHED_STICKER_END = "st";
@@ -157,6 +160,14 @@ public class HikeConstants {
 	public static final String LOGEVENT_TAG = "mob";
 	public static final String FREE_SMS_ON = "free_sms_on";
 	public static final String NATIVE_INVITES = "nativeinvites";
+	public static final String PREF = "pref";
+	public static final String CONTACTS = "contacts";
+	public static final String SENDBOT = "sendbot";
+	public static final String EVENT_TYPE = "et";
+	public static final String EVENT_KEY = "ek";
+	public static final String PACKAGE ="pkg";
+	public static final String SIGNUP_IC = "signupIc";
+	public static final String DEVICE_KEY = "device_key";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -171,6 +182,10 @@ public class HikeConstants {
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
 	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String HIKEBOT = "TD-HIKE";
+	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";
+	public static final String FTUE_TEAMHIKE_MSISDN = "+hike+";
+	public static final String FTUE_HIKEBOT_MSISDN = "+hike1+";
+	public static final String FTUE_GAMING_MSISDN ="+hike2+";
 	public static final String UNLINK_PREF = "unlinkAccount";
 	public static final String DELETE_PREF = "deleteAccount";
 	public static final String UNLINK_FB = "unlinkFacebook";
@@ -181,7 +196,15 @@ public class HikeConstants {
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
-	public static final String UPGRADE_AVATAR_CONV_DB ="upgradeAvtarProgressConv";
+	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
+	public static final String NO_CALL_ALERT_CHECKED = "noCallAlertChecked";
+	public static final String CRITICAL_STRING = "critical";
+	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
+	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
+	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
+	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
+	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";
@@ -194,7 +217,7 @@ public class HikeConstants {
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms/android";
 	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
-	
+
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
@@ -261,6 +284,7 @@ public class HikeConstants {
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
 	public static final int PROFILE_IMAGE_DIMENSIONS = 120;
+	public static final int SIGNUP_PROFILE_IMAGE_DIMENSIONS = 200;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
@@ -297,7 +321,7 @@ public class HikeConstants {
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 3 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
@@ -387,7 +411,7 @@ public class HikeConstants {
 
 	public static final String FONT = "font";
 
-	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 40;
+	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 300;
 
 	public static final String FACEBOOK_PROFILEPIC_URL_FORMAT = "https://graph.facebook.com/%1$s/picture?height=%2$d&width=%2$d";
 
@@ -444,6 +468,11 @@ public class HikeConstants {
 	public static final int XHDPI_CACHE = 30;
 	public static final int XXHDPI_CACHE = 30;
 
+	public static final int EMPTY_CONVERSATIONS_PREFILL_LIMIT = 6;
+	public static final int FTUE_LIMIT = 5;
+
+	public static final String FTUE_MSISDN_TYPE = "ftueContact";
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
@@ -490,6 +519,7 @@ public class HikeConstants {
 		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip";
 		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
 		public static final String UPDATE_MESSAGE = "updateMessage";
+		public static final String APPLICATIONSPUSH_MESSAGE = "applicationsPushMessage";
 		public static final String URL_TO_LOAD = "urlToLoad";
 		public static final String TITLE = "title";
 		public static final String FIRST_TIME_USER = "firstTimeUser";
@@ -556,6 +586,9 @@ public class HikeConstants {
 		public static final String CREATE_GROUP = "createGroup";
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
 		public static final String SHOW_KEYBOARD = "ShowKeyboard";
+		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
+		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
+		public static final String LAST_APPLICATION_PUSH_PACKET_ID = "lastApplicationPushPacketId";
 	}
 
 	public static final class LogEvent {
@@ -668,6 +701,25 @@ public class HikeConstants {
 		public static final String HELP_CONTACT = "helpSconT";
 		public static final String HELP_FAQ = "helpSfaQ";
 
+		/*
+		 * FTUE
+		 */
+		public static final String CLICK = "click";
+		public static final String GRID_6 = "grid6";
+		public static final String ADD_FRIENDS_CLICK = "addFriends";
+		public static final String ADD_UPDATES_CLICK = "addUpdates";
+		public static final String INVITE_FTUE_FRIENDS_CLICK = "inviteFTUEFriendsClick";
+		public static final String REMIND_FTUE_FRIENDS_CLICK = "remindFTUEFriendsClick";
+		public static final String INVITE_SMS_CLICK = "inviteSMSClick";
+		public static final String REMIND_SMS_CLICK = "remindSMSClick";
+		public static final String INVITE_FTUE_UPDATES_CLICK = "inviteFTUEUpdatesClick";
+		public static final String REMIND_FTUE_UPDATES_CLICK = "remindFTUEUpdatesClick";
+		public static final String POST_UPDATE_FROM_CARD = "postUpdateFromCard";
+		public static final String POST_UPDATE_FROM_TOP_BAR = "postUpdateFromTopBar";
+		public static final String NEW_CHAT_FROM_GRID = "newChatFromGrid";
+		public static final String NEW_CHAT_FROM_TOP_BAR = "newChatFromTopBar";
+		public static final String INVITE_FROM_GRID = "inviteFromGrid";
+		public static final String FB_CLICK = "fbClick";
 	}
 
 	public static final class MqttMessageTypes {
@@ -715,6 +767,8 @@ public class HikeConstants {
 		public static final String PROTIP = "pt";
 		public static final String BULK_LAST_SEEN = "bls";
 		public static final String FACEBOOK = "fb";
+		public static final String UPDATE_PUSH = "update";
+		public static final String APPLICATIONS_PUSH = "applications";
 	}
 
 	public static final class SMSNative {
@@ -761,5 +815,5 @@ public class HikeConstants {
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
-	
+
 }

@@ -42,7 +42,6 @@
 	<string name="disclaimer_india">Бесплатные SMS можно отправлять только в Индии</string>
 	<string name="shortcut">Добавить ярлык</string>
 	<string name="earn_200_sms">Бесплатные SMS за приглашение друзей!</string>
-	<string name="no_credits">Бесплатные SMS закончились. Пригласите %1$s и получите еще 50!</string>
 	<string name="dnd_message">Не удается отправить сообщение %1$s,он или она находится в списке DND.Чтобы %1$s мог(ла) получать сообщения hike, ему или ей следует позвонить по номеру %2$s.\n\nВы получите еще 10 бесплатных SMS в месяц,если %1$s сделает это!\n\nЧтобы сообщить об этом %1$s через обычную SMS, нажмите здесь.%1$s</string>
 	<string name="dnd_invite_message">Привет! Я использую hike для бесплатной отправки SMS! Чтобы принимать сообщения от hike, позвони по номеру %1$s.</string>
 	<string name="edit_profile">Изменить профиль</string>
@@ -657,13 +656,14 @@
 	<string name="sms_setting_hinttext">Настройки SMS</string>
 	<string name="mute_status_notification_header">Уведомления об обновлении статуса</string>
 	<string name="mute_status_notification_subtext">Показывать уведомления об обновлении статуса ваших друзей</string>
-	<string name="tap_plus_add_friends">Нажмите кнопку +, чтобы добавить некоторые друзья</string>
+	<string name="app_version">Версия %1$s</string>
+	<string name="tap_plus_add_friends">Нажмите +, чтобы добавить друзей</string>
 	<string name="work_in_progress">Обновление hike</string>
-	<string name="upgrading_to_a_new_and_improvd_hike">Пожалуйста, подождите, пока мы сделать несколько изменений.</string>
+	<string name="upgrading_to_a_new_and_improvd_hike">Подождите, пока мы внесем несколько изменений.</string>
 	<string name="protip_games">Игры</string>
-	<string name="unlink_account">выход</string>
-	<string name="delete_account_msg">Окончательно удалить свой аккаунт:(</string>
-	<string name="unlink_confirmation">Вы уверены, что вы хотите выйти из вашего аккаунта hike, на этом устройстве??</string>
+	<string name="unlink_account">Выход</string>
+	<string name="delete_account_msg">Это навсегда удалит ваш аккаунт :(</string>
+	<string name="unlink_confirmation">Вы действительно хотите выйти из аккаунта hike на этом устройстве?</string>
 	<string name="unlinking_account">Выход из аккаунта hike</string>
 	<string name="unlink_facebook_account">Разорвать связь Facebook аккаунт</string>
 	<string name="unlink_twitter_account">Unlink Twitter аккаунт</string>
@@ -671,4 +671,28 @@
 	<string name="unlink_twitter_account_msg">Отключить Вашу учетную запись из Twitter Поход</string>
 	<string name="unlink_facebook_confirmation">Вы уверены, что хотите отменить связь facebook счета от похода?</string>
 	<string name="unlink_twitter_confirmation">Вы уверены, что хотите отменить связь твиттер от похода?</string>
+	<string name="ftue_grid_string">Начните разговор с одним из\nсвоих друзей.</string>
+	<string name="remind">Напомнить</string>
+	<string name="invited">Приглашен(а)</string>
+	<string name="not_show_call_alert_msg">Больше не показывать</string>
+	<string name="view_profile">Показать профиль</string>
+	<string name="normal_update_head">Доступно важное обновление</string>
+  	<string name="critical_update_head">Требуется критическое обновление</string>
+  	<string name="downloading_string">Загрузка...</string>
+  	<string name="friends_ftue_item_label">Добавить друзей</string>
+  	<string name="updates_are_fun_with_friends">Обновления станут интереснее с друзьями. Мы нашли нескольких людей, которых вы можете пригласить в hike.</string>
+  	<string name="no_status">Вы поете от счастья или вам взгрустнулось? У нас можно отметить свое настроение.</string>
+  	<string name="post_a_mood">Опубликовать настроение</string>
+  	<string name="mood_update">Обновление настроения</string>
+  	<string name ="invite_contacts">Пригласить контакты</string>
+  	<string name="no_credits">У вас закончились бесплатные SMS. Пригласите %1$s, чтобы получить еще!</string>
+  	<string name="ftue_add_prompt_invite">По-видимому, %1$s еще не в hike! Пригласите %1$s в hike, коснувшись "Продолжить". Будут действовать тарифы оператора на отправку SMS.</string> 
+  	<string name="ftue_add_prompt_invite_title">Пригласить в hike </string>
+  	<string name="create_group">Новый групповой чат</string>
+  	<string name="create_group_1">Новая группа</string>
+  	<string name="create_group_2">Создать новую группу</string>
+  	<string name="number_confirmation_string">%1$s — это ваш номер?</string>
+  	<string name="ftue_friends_subtext">Добавить в друзья</string>
+  	<string name="ftue_friends_tap_dismiss_friend_suggest">Коснитесь здесь, чтобы отклонить предложения дружбы</string>
+  			
 </resources>

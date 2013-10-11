@@ -17,7 +17,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -481,10 +480,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					ImageView imageView = (ImageView) avatarContainer
 							.findViewById(R.id.avatar);
-					imageView.setImageDrawable(IconCacheManager.getInstance()
-							.getIconForMSISDN(participantList.get(i), true));
+					/*
+					 * Catching OOB here since the participant list can be
+					 * altered by another thread. In that case an OOB will be
+					 * thrown here. The only impact that will have is that the
+					 * image which has been removed will be skipped.
+					 */
+					try {
+						imageView.setImageDrawable(IconCacheManager
+								.getInstance().getIconForMSISDN(
+										participantList.get(i), true));
 
-					holder.typingAvatarContainer.addView(avatarContainer);
+						holder.typingAvatarContainer.addView(avatarContainer);
+					} catch (IndexOutOfBoundsException e) {
+
+					}
 				}
 			}
 			return v;
@@ -833,8 +843,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					TipType tipType = (TipType) chatThread.tipView.getTag();
 					if (tipType == TipType.STATUS
-							&& statusIdForTip.equals(statusMessage
-									.getMappedId())) {
+							&& statusMessage.getMappedId().equals(
+									statusIdForTip)) {
 						showTip = true;
 					}
 				}
@@ -965,6 +975,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
 						.getIntrinsicHeight());
+				/*
+				 * fixed the bug when imagethumbnail is very big. By specifying
+				 * a maximum width for the thumbnail so that download button can
+				 * also fit to the screen.
+				 */
+				int maxWidth = (int) (250 * Utils.densityMultiplier);
+				fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
 			} else {
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileThumbParams.height = LayoutParams.WRAP_CONTENT;
@@ -1015,7 +1032,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								holder.showFileBtn
 										.setImageResource(R.drawable.ic_open_received_file);
 							}
-							holder.showFileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+							holder.showFileBtn
+									.setBackgroundResource(R.drawable.bg_red_btn_selector);
 							holder.messageTextView
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
@@ -1123,16 +1141,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String categoryDirPath = Utils
 						.getStickerDirectoryForCategoryId(context, categoryId)
 						+ HikeConstants.LARGE_STICKER_ROOT;
-				File stickerImage = new File(categoryDirPath, stickerId);
+				File stickerImage = null;
+				if (categoryDirPath != null) {
+					stickerImage = new File(categoryDirPath, stickerId);
+				}
 
 				String key = categoryId + stickerId;
 				boolean downloadingSticker = HikeMessengerApp.stickerTaskMap
 						.containsKey(key);
 
-				if (stickerImage.exists() && !downloadingSticker) {
+				if (stickerImage != null && stickerImage.exists()
+						&& !downloadingSticker) {
 					holder.stickerImage.setVisibility(View.VISIBLE);
-					holder.stickerImage.setImageBitmap(BitmapFactory
-							.decodeFile(stickerImage.getPath()));
+					holder.stickerImage.setImageDrawable(IconCacheManager
+							.getInstance().getSticker(context,
+									stickerImage.getPath()));
 				} else {
 					holder.stickerLoader.setVisibility(View.VISIBLE);
 					holder.stickerPlaceholder
@@ -1248,16 +1271,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private void setFileButtonResource(ImageView button,
 			ConvMessage convMessage, HikeFile hikeFile) {
+		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
 		if (HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
 				.getMsgID())) {
-			button.setImageResource(R.drawable.ic_open_file_disabled);
+			button.setImageResource(R.drawable.ic_download_file);
+			button.setBackgroundResource(R.drawable.bg_red_btn_disabled);
 		} else if (hikeFile.wasFileDownloaded()
 				&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
 			button.setImageResource(R.drawable.ic_open_received_file);
 		} else {
 			button.setImageResource(R.drawable.ic_download_file);
 		}
-		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
 	}
 
 	private void setTextAndIconForSystemMessages(TextView textView,

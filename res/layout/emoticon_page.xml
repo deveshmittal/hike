@@ -12,8 +12,6 @@
         android:drawSelectorOnTop="false"
         android:paddingLeft="10dp"
         android:fadingEdge="none"
-        android:verticalSpacing="14dp"
-        android:horizontalSpacing="10dp"
         android:listSelector="@android:color/transparent"
         android:numColumns="7" />
 
