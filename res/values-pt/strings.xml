@@ -684,7 +684,7 @@
   	<string name="create_group">Nova conversa de grupo</string>
   	<string name="create_group_1">Novo grupo</string>
   	<string name="create_group_2">Criar novo grupo</string>
-  	<string name="number_confirmation_string">%1s é seu número?</string>
+  	<string name="number_confirmation_string">%1$s é seu número?</string>
   	<string name="ftue_friends_subtext">Adicionado como amigo</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Toque aqui para descartar sugestões de amigos</string>
   		

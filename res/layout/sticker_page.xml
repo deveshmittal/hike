@@ -18,14 +18,16 @@
 
     <com.bsb.hike.view.CustomFontButton
         android:id="@+id/sticker_fail_btn"
-        style="@style/ProfileButtonTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="@drawable/invite_chatthread_button"
+        android:background="@drawable/bg_red_btn_selector"
         android:text="@string/sticker_download_failed"
+        android:textColor="@color/actionbar_text"
+        android:textSize="14sp"
+        android:textStyle="bold|italic"
         android:visibility="gone" />
 
     <LinearLayout

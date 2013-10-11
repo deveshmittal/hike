@@ -784,9 +784,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		Calendar calendar = Calendar.getInstance();
 
 		if (mActivityState.birthday == null) {
-			day = calendar.get(Calendar.DAY_OF_MONTH);
-			month = calendar.get(Calendar.MONTH);
-			year = calendar.get(Calendar.YEAR);
+			/*
+			 * Default values for birthday
+			 */
+			day = 1;
+			month = 0;
+			year = 1990;
 		} else {
 			day = mActivityState.birthday.day;
 			month = mActivityState.birthday.month;

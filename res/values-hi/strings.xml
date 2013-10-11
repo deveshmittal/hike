@@ -691,8 +691,9 @@
   	<string name="create_group">नई समूह चैट</string>
   	<string name="create_group_1">नया समूह</string>
   	<string name="create_group_2">नया समूह बनाएँ</string>
-  	<string name="number_confirmation_string">क्या %1s आपका नंबर है?</string>
+  	<string name="number_confirmation_string">क्या %1$s आपका नंबर है?</string>
   	<string name="ftue_friends_subtext">मित्र के भांति जोड़ें |</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">दोस्तों के सुझाव खारिज करने के लिए यहाँ टैप करें</string>
+  	<string name="free_sms_use_tip">निशुल्क समस भेजने के लिए, शुरू करें एक नई चैट उन लोगों के साथ जिनके नाम के आगे हरे रंग का बबल ( gb ) हो। </string>
   			
 </resources>
