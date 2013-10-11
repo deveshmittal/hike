@@ -149,7 +149,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.mqtt.client.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
