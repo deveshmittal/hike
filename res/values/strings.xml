@@ -49,7 +49,7 @@
 	<string name="invalid_email">Invalid email address</string>
 	<string name="joined_conversation">%1$s joined the group chat!</string>
 	<string name="left_conversation">%1$s left the group chat.</string>
-	<string name="leave_group">Leave group</string>
+	<string name="leave_group">Leave Group</string>
 	<string name="group_chat_end">This group chat has ended.</string>
 	<string name="group_info">Group Info</string>
 	<string name="tap_group_info">Tap this button for group info.</string>
@@ -227,7 +227,7 @@
 	<string name="downloading">Downloading file...</string>
 	<string name="hike">hike</string>
 	<string name="emoji">Emoji</string>
-	<string name="group_profile">Group info</string>
+	<string name="group_profile">Group Info</string>
 	<string name="group_name">Group Name</string>
 	<string name="participants">Participants</string>
 	<string name="group_owner">Group Owner</string>
@@ -686,11 +686,13 @@
   	<string name="create_group">New group chat</string>
   	<string name="create_group_1">New group</string>
   	<string name="create_group_2">Create new group</string>
-  	<string name="number_confirmation_string">Is %1s your number?</string>
+  	<string name="number_confirmation_string">Is %1$s your number?</string>
   	<string name="ftue_friends_subtext">Add as a friend</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tap here to dismiss friend suggestions</string>
   	<string name="from_hike_number">from a hike number</string>
   	<string name="sent_sticker_sms">I sent you a sticker. View it here - %1$s</string>
   	<string name="unlink_facebook">Unlink Facebook</string>
 	<string name="unlink_twitter">Unlink Twitter</string>
+	<string name="free_sms_use_tip">To send a free SMS, start a new chat with a contact who has a green bubble ( gb ) next to the name.</string>
+	<string name="green_bubble_abbr">gb</string>
 </resources>

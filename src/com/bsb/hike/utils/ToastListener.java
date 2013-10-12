@@ -179,6 +179,10 @@ public class ToastListener implements Listener {
 				return;
 			}
 
+			if (!message.isShouldShowPush()) {
+				return;
+			}
+
 			if ((message.getConversation() instanceof GroupConversation)
 					&& ((GroupConversation) message.getConversation())
 							.isMuted()) {

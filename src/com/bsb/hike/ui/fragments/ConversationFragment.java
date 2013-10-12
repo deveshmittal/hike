@@ -87,6 +87,9 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		@Override
 		protected void onPostExecute(Conversation[] deleted) {
+			if (!isAdded()) {
+				return;
+			}
 			NotificationManager mgr = (NotificationManager) getActivity()
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			for (Conversation conversation : deleted) {

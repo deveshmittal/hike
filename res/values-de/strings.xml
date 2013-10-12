@@ -674,7 +674,7 @@
    	<string name="create_group">Neuer Gruppenchat</string>
   	<string name="create_group_1">Neue Gruppe</string>
   	<string name="create_group_2">Neue Gruppe erstellen</string>
-  	<string name="number_confirmation_string">Ist %1s deine Nummer?</string>
+  	<string name="number_confirmation_string">Ist %1$s deine Nummer?</string>
   	<string name="ftue_friends_subtext">Als Freund hinzufügen</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tippe hier, um die Freundschaftsvorschläge zu schließen.</string>
   			

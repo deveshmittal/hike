@@ -166,6 +166,8 @@ public class HikeConstants {
 	public static final String EVENT_TYPE = "et";
 	public static final String EVENT_KEY = "ek";
 	public static final String PACKAGE ="pkg";
+	public static final String SIGNUP_IC = "signupIc";
+	public static final String DEVICE_KEY = "device_key";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -319,7 +321,7 @@ public class HikeConstants {
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 3 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;

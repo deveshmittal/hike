@@ -114,7 +114,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.UPDATE_OF_MENU_NOTIFICATION, HikePubSub.SERVICE_STARTED,
-			HikePubSub.UPDATE_PUSH };
+			HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -276,12 +276,30 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			searchView.setOnQueryTextListener(onQueryTextListener);
 			searchView.clearFocus();
 
-			menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
+			MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1,
+					R.string.search_hint);
+
+			searchItem
 					.setIcon(R.drawable.ic_top_bar_search)
 					.setActionView(searchView)
 					.setShowAsAction(
 							MenuItem.SHOW_AS_ACTION_ALWAYS
 									| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
+			searchItem
+					.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+
+						@Override
+						public boolean onMenuItemActionExpand(MenuItem item) {
+							return true;
+						}
+
+						@Override
+						public boolean onMenuItemActionCollapse(MenuItem item) {
+							searchView.setQuery("", true);
+							return true;
+						}
+					});
 			break;
 		default:
 			return false;
@@ -877,6 +895,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					showUpdatePopup(updateType);
+				}
+			});
+		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					GetFTUEContactsTask ftueContactsTask = new GetFTUEContactsTask();
+					Utils.executeContactInfoListResultTask(ftueContactsTask);
 				}
 			});
 		}

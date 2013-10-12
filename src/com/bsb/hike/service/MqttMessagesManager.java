@@ -122,7 +122,14 @@ public class MqttMessagesManager {
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
-			autoDownloadGroupImage(msisdn);
+			/*
+			 * Only auto download if the ic packet is not generated due to
+			 * signup.
+			 */
+			if (!HikeConstants.SIGNUP_IC.equals(jsonObj
+					.optString(HikeConstants.SUB_TYPE))) {
+				autoDownloadGroupImage(msisdn);
+			}
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -1142,7 +1149,7 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String devType = data.optString(HikeConstants.DEV_TYPE);
-			String id = jsonObj.optString(HikeConstants.ID);
+			String id = data.optString(HikeConstants.MESSAGE_ID);
 			String lastPushPacketId = settings.getString(
 					HikeConstants.Extras.LAST_UPDATE_PACKET_ID, "");
 			if (!TextUtils.isEmpty(devType)
@@ -1175,7 +1182,7 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.APPLICATIONS_PUSH
 				.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-			String id = jsonObj.optString(HikeConstants.ID);
+			String id = data.optString(HikeConstants.MESSAGE_ID);
 			String lastPushPacketId = settings.getString(
 					HikeConstants.Extras.LAST_APPLICATION_PUSH_PACKET_ID, "");
 			String devType = data.optString(HikeConstants.DEV_TYPE);
