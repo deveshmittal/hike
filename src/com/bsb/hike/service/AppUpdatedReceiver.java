@@ -1,13 +1,10 @@
 package com.bsb.hike.service;
 
-import org.json.JSONObject;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -28,6 +25,8 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 		if (context.getPackageName().equals(
 				intent.getData().getSchemeSpecificPart())) {
 			Log.d(getClass().getSimpleName(), "App has been updated");
+			
+			Log.d("TestUpdate", "Update receiver triggered");
 			final SharedPreferences prefs = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -37,36 +36,24 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			if (!Utils.isUserAuthenticated(context)) {
 				return;
 			}
+
 			/*
-			 * Have to add the delay since the service is null initially.
+			 * Resetting the boolean preference to post details again
 			 */
-			new Handler().postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					// Send the device details again which includes the new app
-					// version
-					JSONObject obj = Utils.getDeviceDetails(context);
-					if (obj != null) {
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.MQTT_PUBLISH, obj);
-					}
-					Utils.requestAccountInfo(true, false);
+			Editor prefEditor = prefs.edit();
+			prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
+			prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+			prefEditor.commit();
 
-					/*
-					 * Resetting the boolean preference to post details again
-					 */
-					Editor editor = prefs.edit();
-					editor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
-					editor.commit();
-
-					/*
-					 * We send details to the server using the broadcast
-					 * receiver registered in our service.
-					 */
-					context.sendBroadcast(new Intent(
-							HikeService.SEND_DEV_DETAILS_TO_SERVER_ACTION));
-				}
-			}, 5 * 1000);
+			/*
+			 * We send details to the server using the broadcast
+			 * receiver registered in our service.
+			 */
+			context.sendBroadcast(new Intent(
+					HikeService.SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			context.sendBroadcast(new Intent(
+					HikeService.SEND_RAI_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Broadcasting send device details to server event");
 
 			/*
 			 * Checking if the current version is the latest version. If it is

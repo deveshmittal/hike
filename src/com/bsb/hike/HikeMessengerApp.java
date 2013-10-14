@@ -294,6 +294,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String BIRTHDAY_YEAR = "birthdayYear";
 
+	public static final String UPGRADE_RAI_SENT = "upgradeRaiSent";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
