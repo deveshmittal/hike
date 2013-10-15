@@ -618,9 +618,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			});
 			handleDisconnect(true);
 		}
-		catch (MqttException me)
+		catch (MqttException e)
 		{
-			me.printStackTrace();
+			// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
+			e.printStackTrace();
 			handleDisconnect(reconnect);
 		}
 		catch (Exception e)
@@ -999,7 +1000,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				connectOnMqttThread();
 			break;
 		case MqttException.REASON_CODE_CLIENT_TIMEOUT:
-			// TODO : Schedule next conn check
+			// Till this point disconnect has already happened. This could happen in PING or other TIMEOUT happen such as CONNECT, DISCONNECT
+			if(reConnect)
+				connectOnMqttThread();
 			break;
 		case MqttException.REASON_CODE_CONNECT_IN_PROGRESS:
 			Log.e(TAG, "Client already in connecting state");
