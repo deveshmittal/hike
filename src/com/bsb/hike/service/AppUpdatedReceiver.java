@@ -26,7 +26,6 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				intent.getData().getSchemeSpecificPart())) {
 			Log.d(getClass().getSimpleName(), "App has been updated");
 			
-			Log.d("TestUpdate", "Update receiver triggered");
 			final SharedPreferences prefs = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -36,21 +35,6 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			if (!Utils.isUserAuthenticated(context)) {
 				return;
 			}
-
-			/*
-			 * Resetting the boolean preference to post details again
-			 */
-			Utils.resetUpdateParams(prefs);
-
-			/*
-			 * We send details to the server using the broadcast
-			 * receiver registered in our service.
-			 */
-			context.sendBroadcast(new Intent(
-					HikeService.SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			context.sendBroadcast(new Intent(
-					HikeService.SEND_RAI_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Broadcasting send device details to server event");
 
 			/*
 			 * Checking if the current version is the latest version. If it is
