@@ -3115,4 +3115,11 @@ public class Utils {
 		}
 		return bigPictureImage;
 	}
+
+	public static void resetUpdateParams(SharedPreferences prefs) {
+		Editor prefEditor = prefs.edit();
+		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
+		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+		prefEditor.commit();
+	}
 }

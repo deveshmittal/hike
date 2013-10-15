@@ -40,10 +40,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			/*
 			 * Resetting the boolean preference to post details again
 			 */
-			Editor prefEditor = prefs.edit();
-			prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
-			prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
-			prefEditor.commit();
+			Utils.resetUpdateParams(prefs);
 
 			/*
 			 * We send details to the server using the broadcast

@@ -296,6 +296,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String UPGRADE_RAI_SENT = "upgradeRaiSent";
 
+	public static final String CURRENT_APP_VERSION = "currentAppVersion";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -516,6 +518,25 @@ public class HikeMessengerApp extends Application implements Listener {
 			mEditor.commit();
 		}
 
+		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
+		String actualAppVersion = "";
+		try {
+			actualAppVersion = getPackageManager().getPackageInfo(
+					getPackageName(), 0).versionName;
+		} catch (NameNotFoundException e) {
+			Log.e("AccountUtils", "Unable to get app version");
+		}
+
+		if(!currentAppVersion.equals(actualAppVersion)) {
+			Utils.resetUpdateParams(settings);
+
+			/*
+			 * Updating the app version.
+			 */
+			Editor editor = settings.edit();
+			editor.putString(CURRENT_APP_VERSION, actualAppVersion);
+			editor.commit();
+		}
 		// we're basically banking on the fact here that init() would be
 		// succeeded by the
 		// onUpgrade() calls being triggered in the respective databases.
