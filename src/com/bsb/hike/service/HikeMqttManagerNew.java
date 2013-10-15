@@ -282,12 +282,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		setBrokerHostPort(Utils.switchSSLOn(context));
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
+	}
+
+	/*
+	 * This method should be used after creating this object. Note : Functions involving 'this' reference and Threads should not be used or started in constructor as it might
+	 * happen that incomplete 'this' object creation took place till that time.
+	 */
+	public void init()
+	{
 		HandlerThread mqttHandlerThread = new HandlerThread("MQTTThread");
 		mqttHandlerThread.start();
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		mqttThreadHandler = new Handler(mMqttHandlerLooper);
 		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
-
 		// register for Screen ON, Network Connection Change
 		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -749,7 +756,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					{
 						handleMqttException(e, true);
 					}
-					catch(Exception e) // although this might not happen , but still catching it
+					catch (Exception e) // although this might not happen , but still catching it
 					{
 						e.printStackTrace();
 						scheduleNextConnectionCheck();
@@ -825,7 +832,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					{
 						Log.e(TAG, "invalid JSON message", e);
 					}
-					catch(Exception e)
+					catch (Exception e)
 					{
 						Log.e(TAG, "Exception when msg arrived : ", e);
 					}
@@ -860,11 +867,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			}
 			catch (MqttPersistenceException e)
 			{
-				Log.e(TAG, "Unable to persist message",e);
+				Log.e(TAG, "Unable to persist message", e);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
-				Log.e(TAG, "Unable to persist message",e);
+				Log.e(TAG, "Unable to persist message", e);
 			}
 		}
 

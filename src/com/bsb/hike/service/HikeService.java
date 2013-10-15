@@ -145,6 +145,7 @@ public class HikeService extends Service {
 		// reset status variable to initial state
 		//mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
+		mMqttManager.init();
 		networkTypeChangeIntentReceiver = new NetworkTypeChangeIntentReceiver();
 		registerReceiver(networkTypeChangeIntentReceiver, new IntentFilter(
 				ConnectivityManager.CONNECTIVITY_ACTION));
