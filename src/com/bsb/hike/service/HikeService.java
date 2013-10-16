@@ -268,20 +268,6 @@ public class HikeService extends Service {
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
 
-		if (postDeviceDetails == null) {
-			postDeviceDetails = new PostDeviceDetails();
-			registerReceiver(postDeviceDetails, new IntentFilter(
-					SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Update details sender registered");
-		}
-
-		if (sendRai == null) {
-			sendRai = new SendRai();
-			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_RAI_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Update details sender registered");
-		}
 		/*
 		 * register with the Contact list to get an update whenever the phone
 		 * book changes. Use the application thread for the intent receiver, the
@@ -403,6 +389,21 @@ public class HikeService extends Service {
 			pingSender = new PingSender();
 			pingRunnable = new PingRunnable();
 			registerReceiver(pingSender, new IntentFilter(MQTT_PING_ACTION));
+		}
+
+		if (postDeviceDetails == null) {
+			postDeviceDetails = new PostDeviceDetails();
+			registerReceiver(postDeviceDetails, new IntentFilter(
+					SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Update details sender registered");
+		}
+
+		if (sendRai == null) {
+			sendRai = new SendRai();
+			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_RAI_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Update details sender registered");
 		}
 	}
 
