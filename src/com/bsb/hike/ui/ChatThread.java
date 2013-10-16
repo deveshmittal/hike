@@ -3178,7 +3178,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			String filePath = null;
 			if (data == null || data.getData() == null) {
-				filePath = selectedFile.getAbsolutePath();
+				if(selectedFile != null) {
+					filePath = selectedFile.getAbsolutePath();
+				} else {
+					/*
+					 * This else condition was added because of a bug in
+					 * android 4.3 with recording videos.
+					 * https://code.google.com/p/android/issues/detail?id=57996
+					 */
+					Toast.makeText(this, R.string.error_capture_video, Toast.LENGTH_SHORT).show();
+					return;
+				}
 			} else {
 				Uri selectedFileUri = Utils.makePicasaUri(data.getData());
 
