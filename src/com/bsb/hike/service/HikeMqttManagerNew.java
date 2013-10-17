@@ -478,8 +478,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		try
 		{
-			connChkRunnable.setSleepTime(10);
-			mqttThreadHandler.postAtFrontOfQueue(connChkRunnable);
+			connectOnMqttThread(10);
 		}
 		catch (Exception e)
 		{
