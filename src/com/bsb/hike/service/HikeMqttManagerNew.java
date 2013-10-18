@@ -743,7 +743,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
-					Log.d(TAG, "Client Conncted ....");
+					Log.d(TAG, "Client Connected ....");
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
@@ -770,10 +770,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					MqttException ex = arg0.getException();
 					if (ex != null)
 						Log.e(TAG, "Exception : " + ex.getReasonCode());
-					System.out.println("Connection failed : " + value.getMessage());
 					ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
 					if (value != null)
 					{
+						Log.e(TAG,"Connection failed : " + value.getMessage());
 						String msg = value.getMessage();
 						Log.e("(TAG", "Hike Unable to connect", value);
 						connectionStatus = getServerStatusCode(msg);
