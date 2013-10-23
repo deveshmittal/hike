@@ -1504,7 +1504,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (convMessage.isSent()
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))
-					&& isMessageUndelivered(convMessage)) {
+					&& isMessageUndelivered(convMessage)
+					&& convMessage.getState() != State.SENT_UNCONFIRMED) {
 				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage
 						.getTimestamp());
 
@@ -1806,9 +1807,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private void showUndeliveredTextAndSetClick(TextView tv, View container,
 			ImageView iv, boolean fromHandler) {
-		iv.setVisibility(View.GONE);
-		tv.setVisibility(View.VISIBLE);
-		tv.setText(getUndeliveredTextRes());
+		String undeliveredText = getUndeliveredTextRes();
+		if (!TextUtils.isEmpty(undeliveredText)) {
+			iv.setVisibility(View.GONE);
+			tv.setVisibility(View.VISIBLE);
+		}
+		tv.setText(undeliveredText);
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
@@ -1828,9 +1832,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		int res;
 		if (convMessage.getState() == State.SENT_UNCONFIRMED) {
-			res = conversation.isOnhike()
-					&& !(conversation instanceof GroupConversation) ? R.string.msg_unsent
-					: R.string.sms_undelivered;
+			/*
+			 * We don't want to show the user as offline. So we return blank
+			 * here.
+			 */
+			return "";
 		} else {
 			res = conversation.isOnhike()
 					&& !(conversation instanceof GroupConversation) ? R.string.msg_undelivered
