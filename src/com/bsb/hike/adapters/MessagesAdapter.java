@@ -1505,7 +1505,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))
 					&& isMessageUndelivered(convMessage)
-					&& convMessage.getState() != State.SENT_UNCONFIRMED) {
+					&& convMessage.getState() != State.SENT_UNCONFIRMED
+					&& !chatThread.isContactOnline()) {
 				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage
 						.getTimestamp());
 
@@ -1811,8 +1812,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		if (!TextUtils.isEmpty(undeliveredText)) {
 			iv.setVisibility(View.GONE);
 			tv.setVisibility(View.VISIBLE);
+			tv.setText(undeliveredText);
 		}
-		tv.setText(undeliveredText);
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
@@ -1838,6 +1839,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			 */
 			return "";
 		} else {
+			/*
+			 * We don't show the contact as offline if the user is online in the
+			 * last time.
+			 */
+			if (chatThread.isContactOnline()) {
+				return "";
+			}
 			res = conversation.isOnhike()
 					&& !(conversation instanceof GroupConversation) ? R.string.msg_undelivered
 					: R.string.sms_undelivered;
