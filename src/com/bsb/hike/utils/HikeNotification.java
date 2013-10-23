@@ -301,7 +301,7 @@ public class HikeNotification {
 			
 			key = participant.getName();
 			if (TextUtils.isEmpty(key)) {
-				key = participant.getMsisdn(); ;
+				key = participant.getMsisdn(); 
 			}
 			partName = key;
 			message = key + HikeConstants.SEPARATOR + message;
