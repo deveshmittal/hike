@@ -3187,15 +3187,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			String filePath = null;
 			if (data == null || data.getData() == null) {
-				if(selectedFile != null) {
+				if (selectedFile != null) {
 					filePath = selectedFile.getAbsolutePath();
 				} else {
 					/*
-					 * This else condition was added because of a bug in
-					 * android 4.3 with recording videos.
+					 * This else condition was added because of a bug in android
+					 * 4.3 with recording videos.
 					 * https://code.google.com/p/android/issues/detail?id=57996
 					 */
-					Toast.makeText(this, R.string.error_capture_video, Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, R.string.error_capture_video,
+							Toast.LENGTH_SHORT).show();
 					return;
 				}
 			} else {
@@ -3815,8 +3816,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
-				getWindow().setSoftInputMode(
-						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+				getWindow()
+						.setSoftInputMode(
+								WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 				Editor editor = prefs.edit();
 				try {
 					editor.putBoolean(HikeMessengerApp.stickerCategories

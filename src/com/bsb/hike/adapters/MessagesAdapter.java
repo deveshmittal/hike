@@ -981,7 +981,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				 * also fit to the screen.
 				 */
 				int maxWidth = (int) (250 * Utils.densityMultiplier);
-				fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
+				fileThumbParams.width = Math.min(fileThumbParams.width,
+						maxWidth);
 			} else {
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileThumbParams.height = LayoutParams.WRAP_CONTENT;
