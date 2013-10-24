@@ -981,7 +981,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				 * also fit to the screen.
 				 */
 				int maxWidth = (int) (250 * Utils.densityMultiplier);
-				fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
+				fileThumbParams.width = Math.min(fileThumbParams.width,
+						maxWidth);
 			} else {
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileThumbParams.height = LayoutParams.WRAP_CONTENT;
@@ -1504,7 +1505,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (convMessage.isSent()
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))
-					&& isMessageUndelivered(convMessage)) {
+					&& isMessageUndelivered(convMessage)
+					&& convMessage.getState() != State.SENT_UNCONFIRMED
+					&& !chatThread.isContactOnline()) {
 				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage
 						.getTimestamp());
 
@@ -1806,9 +1809,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private void showUndeliveredTextAndSetClick(TextView tv, View container,
 			ImageView iv, boolean fromHandler) {
-		iv.setVisibility(View.GONE);
-		tv.setVisibility(View.VISIBLE);
-		tv.setText(getUndeliveredTextRes());
+		String undeliveredText = getUndeliveredTextRes();
+		if (!TextUtils.isEmpty(undeliveredText)) {
+			iv.setVisibility(View.GONE);
+			tv.setVisibility(View.VISIBLE);
+			tv.setText(undeliveredText);
+		}
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
@@ -1828,10 +1834,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		int res;
 		if (convMessage.getState() == State.SENT_UNCONFIRMED) {
-			res = conversation.isOnhike()
-					&& !(conversation instanceof GroupConversation) ? R.string.msg_unsent
-					: R.string.sms_undelivered;
+			/*
+			 * We don't want to show the user as offline. So we return blank
+			 * here.
+			 */
+			return "";
 		} else {
+			/*
+			 * We don't show the contact as offline if the user is online in the
+			 * last time.
+			 */
+			if (chatThread.isContactOnline()) {
+				return "";
+			}
 			res = conversation.isOnhike()
 					&& !(conversation instanceof GroupConversation) ? R.string.msg_undelivered
 					: R.string.sms_undelivered;

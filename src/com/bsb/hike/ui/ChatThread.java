@@ -267,6 +267,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private boolean showKeyboard = false;
 
+	private boolean isOnline = false;
+
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ,
@@ -2119,6 +2121,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
 					contactInfo.getLastSeenTime(), contactInfo.getOffline());
+
+			isOnline = contactInfo.getOffline() == 0;
+
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -2153,6 +2158,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				}
 			});
 		}
+	}
+
+	public boolean isContactOnline() {
+		return isOnline;
 	}
 
 	private void updateAdapter() {
@@ -3178,15 +3187,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			String filePath = null;
 			if (data == null || data.getData() == null) {
-				if(selectedFile != null) {
+				if (selectedFile != null) {
 					filePath = selectedFile.getAbsolutePath();
 				} else {
 					/*
-					 * This else condition was added because of a bug in
-					 * android 4.3 with recording videos.
+					 * This else condition was added because of a bug in android
+					 * 4.3 with recording videos.
 					 * https://code.google.com/p/android/issues/detail?id=57996
 					 */
-					Toast.makeText(this, R.string.error_capture_video, Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, R.string.error_capture_video,
+							Toast.LENGTH_SHORT).show();
 					return;
 				}
 			} else {
@@ -3806,8 +3816,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
-				getWindow().setSoftInputMode(
-						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+				getWindow()
+						.setSoftInputMode(
+								WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 				Editor editor = prefs.edit();
 				try {
 					editor.putBoolean(HikeMessengerApp.stickerCategories
@@ -4264,6 +4275,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			this.contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN(msisdn, false);
 			if (contactInfo.getOffline() == 0) {
+				isOnline = true;
 				/*
 				 * We reset this to 1 since the user's online state is stale
 				 * here.
