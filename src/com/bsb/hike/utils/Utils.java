@@ -1460,8 +1460,16 @@ public class Utils {
 		ArrayList<String> messages = smsManager.divideMessage(convMessage
 				.getMessage());
 
-		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
-				messages, null, null);
+		/*
+		 * The try-catch block is needed for a bug in certain LG devices where
+		 * it throws an NPE here.
+		 */
+		try {
+			smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+					messages, null, null);
+		} catch (NullPointerException e) {
+			Log.d("Send invite", "NPE while trying to send SMS", e);
+		}
 
 		if (!dbUpdated) {
 			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
