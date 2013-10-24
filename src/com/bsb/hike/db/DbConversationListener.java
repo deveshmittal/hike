@@ -415,8 +415,16 @@ public class DbConversationListener implements Listener {
 					PendingIntent.FLAG_CANCEL_CURRENT));
 		}
 
-		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
-				messages, pendingIntents, null);
+		/*
+		 * The try-catch block is needed for a bug in certain LG devices where
+		 * it throws an NPE here.
+		 */
+		try {
+			smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+					messages, pendingIntents, null);
+		} catch (NullPointerException e) {
+			Log.d(getClass().getSimpleName(), "NPE while trying to send SMS", e);
+		}
 
 		writeToNativeSMSDb(convMessage);
 	}

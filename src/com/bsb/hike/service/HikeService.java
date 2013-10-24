@@ -88,6 +88,8 @@ public class HikeService extends Service {
 	// used to send GCM registeration id to server
 	public static final String SEND_DEV_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_DEV_DETAILS_TO_SERVER";
 
+	public static final String SEND_RAI_TO_SERVER_ACTION = "com.bsb.hike.SEND_RAI";
+
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
 
@@ -111,6 +113,8 @@ public class HikeService extends Service {
 
 	private HikeMqttManagerNew mMqttManager;
 
+	private SendRai sendRai;
+
 	private ContactListChangeIntentReceiver contactsReceived;
 
 	private Handler mContactsChangedHandler;
@@ -128,6 +132,8 @@ public class HikeService extends Service {
 	public void onCreate() {
 		super.onCreate();
 
+		Log.d("TestUpdate", "Service started");
+		
 		if (registerToGCMTrigger == null) {
 			registerToGCMTrigger = new RegisterToGCMTrigger();
 			registerReceiver(registerToGCMTrigger, new IntentFilter(
@@ -176,11 +182,6 @@ public class HikeService extends Service {
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
 
-		if (postDeviceDetails == null) {
-			postDeviceDetails = new PostDeviceDetails();
-			registerReceiver(postDeviceDetails, new IntentFilter(
-					SEND_DEV_DETAILS_TO_SERVER_ACTION));
-		}
 		/*
 		 * register with the Contact list to get an update whenever the phone
 		 * book changes. Use the application thread for the intent receiver, the
@@ -207,6 +208,21 @@ public class HikeService extends Service {
 			 */
 			getContentResolver().notifyChange(
 					ContactsContract.Contacts.CONTENT_URI, null);
+		}
+		
+		if (postDeviceDetails == null) {
+			postDeviceDetails = new PostDeviceDetails();
+			registerReceiver(postDeviceDetails, new IntentFilter(
+					SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Update details sender registered");
+		}
+
+		if (sendRai == null) {
+			sendRai = new SendRai();
+			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_RAI_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Update details sender registered");
 		}
 
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
@@ -243,6 +259,7 @@ public class HikeService extends Service {
 		// be restarted
 		return START_STICKY;
 	}
+
 
 	@Override
 	public void onDestroy() {
@@ -282,6 +299,10 @@ public class HikeService extends Service {
 			postDeviceDetails = null;
 		}
 
+		if (sendRai != null) {
+			unregisterReceiver(sendRai);
+			sendRai = null;
+		}
 	}
 
 	public void unregisterDataChangeReceivers() {
@@ -463,6 +484,7 @@ public class HikeService extends Service {
 				Log.d(getClass().getSimpleName(), "Device details sent");
 				return;
 			}
+			Log.d("TestUpdate", "Sending device details to server");
 			Log.d(getClass().getSimpleName(),
 					"Sending device details to server");
 
@@ -494,10 +516,13 @@ public class HikeService extends Service {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 
+			Log.d("TestUpdate", "Sending data: " + data.toString());
+			
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 					"/account/update", RequestType.OTHER,
 					new HikeHttpCallback() {
 						public void onSuccess(JSONObject response) {
+							Log.d("TestUpdate", "Device details sent successfully");
 							Log.d(getClass().getSimpleName(), "Send successful");
 							Editor editor = getSharedPreferences(
 									HikeMessengerApp.ACCOUNT_SETTINGS,
@@ -508,6 +533,7 @@ public class HikeService extends Service {
 						}
 
 						public void onFailure() {
+							Log.d("TestUpdate", "Device details could not be sent");
 							Log.d(getClass().getSimpleName(),
 									"Send unsuccessful");
 							scheduleNextSendToServerAction(false);
@@ -517,6 +543,39 @@ public class HikeService extends Service {
 
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
+		}
+	}
+
+	private class SendRai extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).getBoolean(
+					HikeMessengerApp.UPGRADE_RAI_SENT, false)) {
+				Log.d(getClass().getSimpleName(), "Rai was already sent");
+				return;
+			}
+			Log.d("TestUpdate", "Sending rai packet to server");
+
+			// Send the device details again which includes the new app
+			// version
+			JSONObject obj = Utils.getDeviceDetails(context);
+			if (obj != null) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH, obj);
+			}
+
+			Utils.requestAccountInfo(true, false);
+
+			Editor editor = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).edit();
+			editor.putBoolean(
+					HikeMessengerApp.UPGRADE_RAI_SENT, true);
+			editor.commit();
+
+			Log.d("TestUpdate", "rai packet sent to server");
 		}
 	}
 

@@ -442,6 +442,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
 				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
 			}
+			/*
+			 * Setting these values as true for now. They will be reset
+			 * on upgrades.
+			 */
+			editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
+			editor.putBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, true);
 			editor.commit();
 		}
 
