@@ -1234,7 +1234,7 @@ public class Utils {
 	}
 
 	public static String getFirstName(String name) {
-		return name.split(" ", 2)[0];
+		return name.trim().split(" ", 2)[0];
 	}
 
 	public static double getFreeSpace() {
