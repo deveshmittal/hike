@@ -99,7 +99,9 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 		}
 
 		long lastChanged = System.currentTimeMillis();
-		if (mTextLastChanged == 0) {
+
+		if (mTextLastChanged == 0
+				|| (lastChanged - mTextLastChanged > HikeConstants.RESEND_TYPING_TIME)) {
 			// we're currently not in 'typing' mode
 			mTextLastChanged = lastChanged;
 
@@ -110,10 +112,9 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 			// create a timer to clear the event
 			mUIThreadHandler.removeCallbacks(this);
 
-			mUIThreadHandler.postDelayed(this, 3 * 1000);
+			mUIThreadHandler.postDelayed(this,
+					HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 		}
-
-		mTextLastChanged = lastChanged;
 	}
 
 	public void onMessageSent() {
@@ -128,12 +129,13 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 	@Override
 	public void run() {
 		long current = System.currentTimeMillis();
-		if (current - mTextLastChanged >= 3 * 1000) {
+		if (current - mTextLastChanged >= HikeConstants.LOCAL_CLEAR_TYPING_TIME) {
 			/* text hasn't changed in 10 seconds, send an event */
 			sendEndTyping();
 		} else {
 			/* text has changed, fire a new event */
-			long delta = 3 * 1000 - (current - mTextLastChanged);
+			long delta = HikeConstants.LOCAL_CLEAR_TYPING_TIME
+					- (current - mTextLastChanged);
 			mUIThreadHandler.postDelayed(this, delta);
 		}
 	}

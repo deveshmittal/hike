@@ -298,14 +298,12 @@ public class HikeNotification {
 					convMsg.getGroupParticipantMsisdn(), false);
 
 			Conversation gConv = convMsg.getConversation();
-
+			
 			key = participant.getName();
-
 			if (TextUtils.isEmpty(key)) {
-				key = gConv.getLabel();
+				key = participant.getMsisdn(); 
 			}
 			partName = key;
-
 			message = key + HikeConstants.SEPARATOR + message;
 			key = gConv.getLabel();
 		}

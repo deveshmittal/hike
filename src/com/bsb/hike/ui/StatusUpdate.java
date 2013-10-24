@@ -227,10 +227,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		backContainer.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(StatusUpdate.this,
-						HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				onBackPressed();
 			}
 		});
 

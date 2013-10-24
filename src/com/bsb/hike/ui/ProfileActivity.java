@@ -1872,21 +1872,20 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void removeFromGroup(final ContactInfo contactInfo) {
-		final CustomAlertDialog confirmDialog = new CustomAlertDialog(ProfileActivity.this);
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(
+				ProfileActivity.this);
 		confirmDialog.setHeader(R.string.remove_from_group);
 		String message = getString(R.string.remove_confirm,
 				contactInfo.getFirstName());
 		confirmDialog.setBody(message);
 		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				JSONObject object = new JSONObject();
 				try {
-					object.put(HikeConstants.TO,
-							groupConversation.getMsisdn());
-					object.put(
-							HikeConstants.TYPE,
+					object.put(HikeConstants.TO, groupConversation.getMsisdn());
+					object.put(HikeConstants.TYPE,
 							HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
 
 					JSONObject data = new JSONObject();
@@ -1900,16 +1899,16 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				} catch (JSONException e) {
 					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH, object);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						object);
 				confirmDialog.dismiss();
 			}
-		}; 
-		
+		};
+
 		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
 		confirmDialog.setCancelButton(R.string.no);
 		confirmDialog.show();
-		
+
 	}
 
 	@Override
@@ -1964,14 +1963,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		confirmDialog.setHeader(R.string.delete_status);
 		confirmDialog.setBody(R.string.delete_status_confirmation);
 		View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				deleteStatus(statusId);
 				confirmDialog.dismiss();
 			}
-		}; 
-		
+		};
+
 		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
 		confirmDialog.setCancelButton(R.string.no);
 		confirmDialog.show();
@@ -2052,6 +2051,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						.hasPermanentMenuKey())) {
 			if (event.getAction() == KeyEvent.ACTION_UP
 					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				/*
+				 * For some reason the activity randomly catches this event in
+				 * the background and we get an NPE when that happens with
+				 * mMenu. Adding an NPE guard for that.
+				 */
+				if (mMenu == null) {
+					return super.onKeyUp(keyCode, event);
+				}
 				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
 				return true;
 			}
