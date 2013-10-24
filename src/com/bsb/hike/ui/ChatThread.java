@@ -4374,6 +4374,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						.hasPermanentMenuKey())) {
 			if (event.getAction() == KeyEvent.ACTION_UP
 					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				/*
+				 * For some reason the activity randomly catches this event in
+				 * the background and we get an NPE when that happens with
+				 * mMenu. Adding an NPE guard for that.
+				 */
+				if (mMenu == null) {
+					return super.onKeyUp(keyCode, event);
+				}
 				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
 				return true;
 			}
