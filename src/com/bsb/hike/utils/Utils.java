@@ -47,6 +47,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -1465,13 +1466,24 @@ public class Utils {
 			ArrayList<String> messages = smsManager.divideMessage(convMessage
 					.getMessage());
 
+			ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
+
+			/*
+			 * Adding blank pending intents as a workaround for where sms don't get sent
+			 * when we pass this as null
+			 */
+			for (int i = 0; i < messages.size(); i++) {
+				Intent intent = new Intent();
+				pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
+						PendingIntent.FLAG_CANCEL_CURRENT));
+			}
 			/*
 			 * The try-catch block is needed for a bug in certain LG devices
 			 * where it throws an NPE here.
 			 */
 			try {
 				smsManager.sendMultipartTextMessage(convMessage.getMsisdn(),
-						null, messages, null, null);
+						null, messages, pendingIntents, null);
 			} catch (NullPointerException e) {
 				Log.d("Send invite", "NPE while trying to send SMS", e);
 			}
