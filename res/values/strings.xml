@@ -696,4 +696,6 @@
 	<string name="free_sms_use_tip">To send a free SMS, start a new chat with a contact who has a green bubble ( gb ) next to the name.</string>
 	<string name="green_bubble_abbr">gb</string>
 	<string name="error_capture_video">Error capturing the video</string>
+	<string name="free_invite_header">Invite via SMS (Placeholder)</string>
+	<string name="free_invite_body">Invites via SMS are now free! Invite away! (Placeholder)</string>
 </resources>

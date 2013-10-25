@@ -298,6 +298,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String CURRENT_APP_VERSION = "currentAppVersion";
 
+	public static final String SEND_NATIVE_INVITE = "sendNativeInvite";
+
+	public static final String SHOW_FREE_INVITE_POPUP = "showFreeInvitePopup";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

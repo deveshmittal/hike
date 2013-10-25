@@ -82,7 +82,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 												// for Production
 
 	private enum DialogShowing {
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -200,6 +200,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			case UPGRADE_POPUP:
 				showUpdatePopup(updateType);
 				break;
+			case FREE_INVITE_POPUP:
+				showFreeInviteDialog();
 			}
 		}
 
@@ -207,6 +209,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			if (!accountPrefs.getBoolean(
 					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
 				showSMSClientDialog();
+			} else if (accountPrefs.getBoolean(
+					HikeMessengerApp.SHOW_FREE_INVITE_POPUP, false)) {
+				showFreeInviteDialog();
 			}
 		}
 
@@ -450,6 +455,31 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		dialog = Utils.showSMSSyncDialog(this,
 				dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
+	}
+
+	private void showFreeInviteDialog() {
+		dialogShowing = DialogShowing.FREE_INVITE_POPUP;
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.free_invite_popup);
+		dialog.setCancelable(false);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, false);
+				editor.commit();
+
+				dialogShowing = null;
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
 	}
 
 	@Override

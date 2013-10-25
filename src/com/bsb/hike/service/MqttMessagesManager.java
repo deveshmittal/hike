@@ -700,6 +700,16 @@ public class MqttMessagesManager {
 									true));
 					settingEditor.commit();
 				}
+
+				if (account.has(HikeConstants.ALLOW_NATIVE_INVITES)) {
+					boolean sendNativeInvite = account
+							.optBoolean(HikeConstants.ALLOW_NATIVE_INVITES);
+					boolean currentNativeInvite = settings.getBoolean(
+							HikeMessengerApp.SEND_NATIVE_INVITE, false);
+					if (currentNativeInvite != sendNativeInvite) {
+						handleSendNativeInviteKey(sendNativeInvite, editor);
+					}
+				}
 			}
 			editor.commit();
 			if (inviteTokenAdded) {
@@ -810,6 +820,16 @@ public class MqttMessagesManager {
 				editor.putString(
 						HikeMessengerApp.BATCH_STATUS_NOTIFICATION_VALUES,
 						array.toString());
+			}
+			if (data.has(HikeConstants.ALLOW_NATIVE_INVITES)) {
+				boolean sendNativeInvite = data
+						.optBoolean(HikeConstants.ALLOW_NATIVE_INVITES);
+				boolean currentNativeInvite = settings.getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false);
+
+				if (sendNativeInvite != currentNativeInvite) {
+					handleSendNativeInviteKey(sendNativeInvite, editor);
+				}
 			}
 
 			editor.commit();
@@ -1203,6 +1223,30 @@ public class MqttMessagesManager {
 				this.pubSub.publish(HikePubSub.APPLICATIONS_PUSH, packageName);
 			}
 		}
+	}
+
+	private void handleSendNativeInviteKey(boolean sendNativeInvite,
+			Editor editor) {
+		editor.putBoolean(HikeMessengerApp.SEND_NATIVE_INVITE, sendNativeInvite);
+		if (sendNativeInvite) {
+			/*
+			 * If native is being turned on, we remove all preferences saved for
+			 * not showing the native SMS invite dialog so that the user is
+			 * shown these dialogs again.
+			 */
+			editor.remove(HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED);
+			editor.remove(HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED);
+			editor.remove(HikeConstants.OPERATOR_SMS_ALERT_CHECKED);
+
+			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, false);
+		} else {
+			/*
+			 * Else we set a preference to show a dialog in the home screen that
+			 * the free Invites are turned on.
+			 */
+			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, true);
+		}
+
 	}
 
 	private void autoDownloadProfileImage(StatusMessage statusMessage,
