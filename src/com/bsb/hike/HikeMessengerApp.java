@@ -302,6 +302,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOW_FREE_INVITE_POPUP = "showFreeInvitePopup";
 
+	public static final String SET_FREE_INVITE_POPUP_PREF_ONCE = "setFreeInvitePopupPrefOnce";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -512,6 +514,17 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
+		/*
+		 * Since we have free invite on by default, we should set the free invite
+		 * popup preference since the popup should be shown.
+		 */
+		if (!settings.getBoolean(SET_FREE_INVITE_POPUP_PREF_ONCE, false)) {
+			Editor editor = settings.edit();
+			editor.putBoolean(SET_FREE_INVITE_POPUP_PREF_ONCE, true);
+			editor.putBoolean(SHOW_FREE_INVITE_POPUP, true);
+			editor.commit();
+		}
+		
 		// first time or failed DB upgrade.
 		if (avtarInt == -1 && convInt == -1) {
 			Editor mEditor = settings.edit();
