@@ -1452,9 +1452,10 @@ public class Utils {
 	public static void sendInvite(String msisdn, Context context,
 			boolean dbUpdated) {
 
-		boolean sendNativeInvite = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
-				HikeMessengerApp.SEND_NATIVE_INVITE, false);
+		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+				|| context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false);
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
 				context);
@@ -1520,8 +1521,8 @@ public class Utils {
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		if (!settings.getBoolean(checkPref, false)
-				&& settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
-						false)) {
+				&& (!HikeMessengerApp.isIndianUser() || settings.getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false))) {
 			final Dialog dialog = new Dialog(context,
 					R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);

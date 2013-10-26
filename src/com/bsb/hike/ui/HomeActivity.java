@@ -458,6 +458,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void showFreeInviteDialog() {
+		/*
+		 * We don't send free invites for non indian users.
+		 */
+		if (!HikeMessengerApp.isIndianUser()) {
+			return;
+		}
+
 		dialogShowing = DialogShowing.FREE_INVITE_POPUP;
 
 		dialog = new Dialog(this, R.style.Theme_CustomDialog);

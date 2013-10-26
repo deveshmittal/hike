@@ -1227,6 +1227,9 @@ public class MqttMessagesManager {
 
 	private void handleSendNativeInviteKey(boolean sendNativeInvite,
 			Editor editor) {
+		if (!HikeMessengerApp.isIndianUser()) {
+			return;
+		}
 		editor.putBoolean(HikeMessengerApp.SEND_NATIVE_INVITE, sendNativeInvite);
 		if (sendNativeInvite) {
 			/*
