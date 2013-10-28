@@ -593,6 +593,7 @@ public class HikeConstants {
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
 		public static final String LAST_APPLICATION_PUSH_PACKET_ID = "lastApplicationPushPacketId";
 		public static final String FREE_SMS_POPUP_BODY = "freeSMSPopupBody";
+		public static final String FREE_SMS_POPUP_HEADER = "freeSMSPopupHeader";
 	}
 
 	public static final class LogEvent {

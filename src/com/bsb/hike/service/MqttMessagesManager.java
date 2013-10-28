@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -870,6 +871,20 @@ public class MqttMessagesManager {
 
 				handleSendNativeInviteKey(sendNativeInvite,
 						showFreeInvitePopup, header, body, editor);
+
+				/*
+				 * Show notification if free SMS is turned on.
+				 */
+				if (!sendNativeInvite) {
+					Bundle bundle = new Bundle();
+					bundle.putString(HikeConstants.Extras.FREE_SMS_POPUP_BODY,
+							body);
+					bundle.putString(
+							HikeConstants.Extras.FREE_SMS_POPUP_HEADER, header);
+
+					this.pubSub
+							.publish(HikePubSub.SHOW_FREE_INVITE_SMS, bundle);
+				}
 			}
 
 			editor.commit();
