@@ -187,7 +187,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		final SharedPreferences settings = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		if (!settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
+		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+				|| settings.getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false);
+
+		if (sendNativeInvite && !settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
 			final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);
 			dialog.setCancelable(true);

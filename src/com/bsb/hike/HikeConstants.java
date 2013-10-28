@@ -169,6 +169,9 @@ public class HikeConstants {
 	public static final String SIGNUP_IC = "signupIc";
 	public static final String DEVICE_KEY = "device_key";
 	public static final String ENABLE_FREE_INVITES = "enable_free_invites";
+	public static final String SHOW_FREE_INVITES = "show_free_invites";
+	public static final String FREE_INVITE_POPUP_TITLE = "free_invite_popup_title";
+	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

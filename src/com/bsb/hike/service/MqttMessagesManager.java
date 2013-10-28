@@ -710,13 +710,25 @@ public class MqttMessagesManager {
 				}
 
 				if (account.has(HikeConstants.ENABLE_FREE_INVITES)) {
-					boolean sendNativeInvite = account
+					boolean sendNativeInvite = !account
 							.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
-					boolean currentNativeInvite = settings.getBoolean(
-							HikeMessengerApp.SEND_NATIVE_INVITE, false);
-					if (currentNativeInvite != sendNativeInvite) {
-						handleSendNativeInviteKey(sendNativeInvite, editor);
+					boolean showFreeInvitePopup = data
+							.optBoolean(HikeConstants.SHOW_FREE_INVITES)
+							&& !settings
+									.getBoolean(
+											HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
+											false);
+					if (showFreeInvitePopup) {
+						editor.putBoolean(
+								HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
+								true);
+						editor.putBoolean(
+								HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE,
+								true);
 					}
+
+					handleSendNativeInviteKey(sendNativeInvite,
+							showFreeInvitePopup, null, null, editor);
 				}
 			}
 			editor.commit();
@@ -830,14 +842,34 @@ public class MqttMessagesManager {
 						array.toString());
 			}
 			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
-				boolean sendNativeInvite = data
-						.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
-				boolean currentNativeInvite = settings.getBoolean(
-						HikeMessengerApp.SEND_NATIVE_INVITE, false);
-
-				if (sendNativeInvite != currentNativeInvite) {
-					handleSendNativeInviteKey(sendNativeInvite, editor);
+				String newId = data.optString(HikeConstants.MESSAGE_ID);
+				String currentId = settings.getString(
+						HikeMessengerApp.FREE_INVITE_PREVIOUS_ID, "");
+				/*
+				 * Duplicate check
+				 */
+				if (currentId.equals(newId)) {
+					Log.d(getClass().getSimpleName(),
+							"Duplicate enable free invite packet");
+					return;
 				}
+
+				editor.putString(HikeMessengerApp.FREE_INVITE_PREVIOUS_ID,
+						newId);
+				editor.putBoolean(
+						HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, false);
+
+				boolean sendNativeInvite = !data
+						.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
+				boolean showFreeInvitePopup = data
+						.optBoolean(HikeConstants.SHOW_FREE_INVITES);
+				String header = data
+						.optString(HikeConstants.FREE_INVITE_POPUP_TITLE);
+				String body = data
+						.optString(HikeConstants.FREE_INVITE_POPUP_TEXT);
+
+				handleSendNativeInviteKey(sendNativeInvite,
+						showFreeInvitePopup, header, body, editor);
 			}
 
 			editor.commit();
@@ -1234,7 +1266,7 @@ public class MqttMessagesManager {
 	}
 
 	private void handleSendNativeInviteKey(boolean sendNativeInvite,
-			Editor editor) {
+			boolean showFreeSmsPopup, String header, String body, Editor editor) {
 		if (!HikeMessengerApp.isIndianUser()) {
 			return;
 		}
@@ -1255,7 +1287,13 @@ public class MqttMessagesManager {
 			 * Else we set a preference to show a dialog in the home screen that
 			 * the free Invites are turned on.
 			 */
-			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, true);
+			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP,
+					showFreeSmsPopup);
+			if (showFreeSmsPopup) {
+				editor.putString(HikeMessengerApp.FREE_INVITE_POPUP_BODY, body);
+				editor.putString(HikeMessengerApp.FREE_INVITE_POPUP_HEADER,
+						header);
+			}
 		}
 
 	}

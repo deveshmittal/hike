@@ -24,20 +24,11 @@
         android:layout_below="@id/header"
         android:background="@color/sms_popup" />
 
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/div1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:src="@drawable/ic_free_sms_default" />
-
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/image"
+        android:layout_below="@id/div1"
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:layout_marginBottom="15dp"

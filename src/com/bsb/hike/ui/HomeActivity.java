@@ -471,18 +471,63 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		dialog.setContentView(R.layout.free_invite_popup);
 		dialog.setCancelable(false);
 
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		ImageView image = (ImageView) dialog.findViewById(R.id.image);
+
+		String headerText = accountPrefs.getString(
+				HikeMessengerApp.FREE_INVITE_POPUP_HEADER, "");
+		String bodyText = accountPrefs.getString(
+				HikeMessengerApp.FREE_INVITE_POPUP_HEADER, "");
+
+		if (TextUtils.isEmpty(headerText)) {
+			headerText = getString(R.string.free_invite_header);
+		}
+
+		if (TextUtils.isEmpty(bodyText)) {
+			bodyText = getString(R.string.free_invite_body);
+		}
+
+		header.setText(headerText);
+		body.setText(bodyText);
+
 		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		image.setImageResource(accountPrefs.getBoolean(
+				HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true) ? R.drawable.ic_free_sms_default
+				: R.drawable.ic_free_sms_rewards);
 
 		okBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				dialog.dismiss();
+
+				Intent intent = new Intent(HomeActivity.this,
+						HikeListActivity.class);
+				startActivity(intent);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
 				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, false);
+				editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP,
+						false);
 				editor.commit();
 
 				dialogShowing = null;
-				dialog.dismiss();
 			}
 		});
 
