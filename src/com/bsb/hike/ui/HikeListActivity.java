@@ -177,7 +177,12 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 	private void setLabel() {
 		if (type != Type.BLOCK) {
-			title.setText(R.string.invite_sms);
+			SharedPreferences preferences = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			boolean sendNativeInvite = preferences.getBoolean(
+					HikeMessengerApp.SEND_NATIVE_INVITE, false);
+			title.setText(sendNativeInvite ? R.string.invite_sms
+					: R.string.invite_free_sms);
 		} else {
 			title.setText(R.string.blocked_list);
 		}
