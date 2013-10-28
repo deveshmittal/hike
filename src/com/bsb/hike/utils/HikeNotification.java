@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -54,6 +55,76 @@ public class HikeNotification {
 				HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
 	}
 
+	public void notifySMSPopup(final String bodyString) {
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			return;
+		}
+
+		final SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
+
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		final int vibrate = preferenceManager.getBoolean(
+				HikeConstants.VIBRATE_PREF, false) ? Notification.DEFAULT_VIBRATE
+				: 0;
+		final boolean led = preferenceManager.getBoolean(
+				HikeConstants.LED_PREF, true);
+
+		final int playSound = preferenceManager.getBoolean(
+				HikeConstants.SOUND_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
+				: 0;
+
+		final boolean playNativeJingle = preferenceManager.getBoolean(
+				HikeConstants.NATIVE_JINGLE_PREF, true);
+
+		final int notificationId = context.getString(R.string.team_hike)
+				.hashCode();
+		/*
+		 * invoke the chat thread here. The free SMS invite switch popup should
+		 * already be showing here ideally by now.
+		 */
+		final Intent notificationIntent = getHomeActivityIntent(HomeActivity.CHATS_TAB_INDEX);
+		notificationIntent.putExtra(HikeConstants.Extras.NAME,
+				context.getString(R.string.team_hike));
+
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(
+				R.drawable.hike_avtar_protip);
+		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
+				(Utils.drawableToBitmap(avatarDrawable)), context);
+		final int smallIconId = returnSmallIcon();
+
+		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setContentTitle(context.getString(R.string.team_hike))
+				.setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
+				.setContentText(bodyString).setAutoCancel(true)
+				.setTicker(bodyString).setDefaults(vibrate)
+				.setPriority(Notification.PRIORITY_HIGH);
+
+		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+		stackBuilder.addNextIntent(notificationIntent);
+
+		final PendingIntent resultPendingIntent = stackBuilder
+				.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+		if (playNativeJingle && playSound != 0) {
+			mBuilder.setSound(Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1));
+		} else if (playSound != 0) {
+			mBuilder.setDefaults(mBuilder.getNotification().defaults
+					| playSound);
+		}
+		if (led) {
+			mBuilder.setLights(Color.BLUE, 300, 1000);
+		}
+
+		notificationManager.notify(notificationId, mBuilder.getNotification());
+
+	}
 	public void notifyMessage(final Protip proTip) {
 		final SharedPreferences preferenceManager = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
