@@ -181,10 +181,18 @@ public class MqttMessagesManager {
 					.equals(type);
 
 			boolean stateChanged = false;
-			stateChanged = ContactUtils.updateHikeStatus(this.context, msisdn,
-					joined) > 0;
 
-			stateChanged = this.convDb.updateOnHikeStatus(msisdn, joined) > 0;
+			int rowsChanged = ContactUtils.updateHikeStatus(this.context,
+					msisdn, joined);
+			rowsChanged += this.convDb.updateOnHikeStatus(msisdn, joined);
+
+			/*
+			 * If at least one row has been updated, that means that the user
+			 * has changed his/her hike state
+			 */
+			if (rowsChanged > 0) {
+				stateChanged = true;
+			}
 
 			if (!stateChanged) {
 				return;
