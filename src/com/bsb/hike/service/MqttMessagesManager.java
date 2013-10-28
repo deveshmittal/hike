@@ -709,9 +709,9 @@ public class MqttMessagesManager {
 					settingEditor.commit();
 				}
 
-				if (account.has(HikeConstants.ALLOW_NATIVE_INVITES)) {
+				if (account.has(HikeConstants.ENABLE_FREE_INVITES)) {
 					boolean sendNativeInvite = account
-							.optBoolean(HikeConstants.ALLOW_NATIVE_INVITES);
+							.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
 					boolean currentNativeInvite = settings.getBoolean(
 							HikeMessengerApp.SEND_NATIVE_INVITE, false);
 					if (currentNativeInvite != sendNativeInvite) {
@@ -829,9 +829,9 @@ public class MqttMessagesManager {
 						HikeMessengerApp.BATCH_STATUS_NOTIFICATION_VALUES,
 						array.toString());
 			}
-			if (data.has(HikeConstants.ALLOW_NATIVE_INVITES)) {
+			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
 				boolean sendNativeInvite = data
-						.optBoolean(HikeConstants.ALLOW_NATIVE_INVITES);
+						.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
 				boolean currentNativeInvite = settings.getBoolean(
 						HikeMessengerApp.SEND_NATIVE_INVITE, false);
 
