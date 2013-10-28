@@ -289,6 +289,8 @@ public class HikePubSub implements Runnable {
 	public static final String SERVICE_STARTED = "serviceStarted";
 
 	public static final String INVITE_SENT = "inviteSent";
+	
+	public static final String SHOW_FREE_INVITE_SMS = "showFreeInviteSMS";
 
 	private final Thread mThread;
 
