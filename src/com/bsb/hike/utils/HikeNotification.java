@@ -38,6 +38,10 @@ import com.bsb.hike.ui.HomeActivity;
 public class HikeNotification {
 	public static final int HIKE_NOTIFICATION = 0;
 	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
+	public static final int PROTIP_NOTIFICATION_ID = -123;
+	public static final int GAMING_PACKET_NOTIFICATION_ID = -124;
+	public static final int FREE_SMS_POPUP_NOTIFICATION_ID = -125;
+	public static final int APP_UPDATE_AVAILABLE_ID = -126;
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 	private static final String SEPERATOR = " ";
 
@@ -81,8 +85,6 @@ public class HikeNotification {
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final int notificationId = context.getString(R.string.team_hike)
-				.hashCode();
 		/*
 		 * invoke the chat thread here. The free SMS invite switch popup should
 		 * already be showing here ideally by now.
@@ -91,7 +93,7 @@ public class HikeNotification {
 		notificationIntent.putExtra(HikeConstants.Extras.NAME,
 				context.getString(R.string.team_hike));
 
-		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		notificationIntent.setData((Uri.parse("custom://" + FREE_SMS_POPUP_NOTIFICATION_ID)));
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -122,7 +124,7 @@ public class HikeNotification {
 			mBuilder.setLights(Color.BLUE, 300, 1000);
 		}
 
-		notificationManager.notify(notificationId, mBuilder.getNotification());
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
 
 	}
 	public void notifyMessage(final Protip proTip) {
@@ -141,14 +143,13 @@ public class HikeNotification {
 
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
-
-		final int notificationId = context.getString(R.string.team_hike).hashCode();
+		
 		// we've got to invoke the timeline here
 		final Intent notificationIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME,
 				context.getString(R.string.team_hike));
 
-		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		notificationIntent.setData((Uri.parse("custom://" + PROTIP_NOTIFICATION_ID)));
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -180,7 +181,7 @@ public class HikeNotification {
 		}
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
 				false)) {
-			notificationManager.notify(notificationId,
+			notificationManager.notify(PROTIP_NOTIFICATION_ID,
 					mBuilder.getNotification());
 		}
 	}
@@ -202,7 +203,6 @@ public class HikeNotification {
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final int notificationId = context.getString(R.string.team_hike).hashCode();
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -234,7 +234,7 @@ public class HikeNotification {
 		}
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
 				false)) {
-			notificationManager.notify(notificationId,
+			notificationManager.notify(APP_UPDATE_AVAILABLE_ID,
 					mBuilder.getNotification());
 		}
 	}
@@ -256,7 +256,6 @@ public class HikeNotification {
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final int notificationId = context.getString(R.string.team_hike).hashCode();
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -288,7 +287,7 @@ public class HikeNotification {
 		}
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
 				false)) {
-			notificationManager.notify(notificationId,
+			notificationManager.notify(GAMING_PACKET_NOTIFICATION_ID,
 					mBuilder.getNotification());
 		}
 		//TODO:: we should reset the gaming download message from preferences
