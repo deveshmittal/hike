@@ -976,7 +976,7 @@ public class MqttMessagesManager {
 					 */
 					autoDownloadProfileImage(statusMessage, true);
 				}
-			} 
+			}
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
@@ -1230,7 +1230,8 @@ public class MqttMessagesManager {
 								data.optString(HikeConstants.MESSAGE));
 						editor.putString(HikeConstants.Extras.LATEST_VERSION,
 								version);
-						editor.putString(HikeConstants.Extras.LAST_UPDATE_PACKET_ID, id);
+						editor.putString(
+								HikeConstants.Extras.LAST_UPDATE_PACKET_ID, id);
 						if (!TextUtils.isEmpty(updateURL))
 							editor.putString(HikeConstants.Extras.URL,
 									updateURL);
@@ -1303,7 +1304,7 @@ public class MqttMessagesManager {
 		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
 			return;
 		}
-		
+
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
@@ -1322,17 +1323,19 @@ public class MqttMessagesManager {
 				context, id, fileName, true, false, null, null, false);
 		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
-	
-	private void autoDownloadProtipImage(StatusMessage statusMessage, boolean statusUpdate) {
+
+	private void autoDownloadProtipImage(StatusMessage statusMessage,
+			boolean statusUpdate) {
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, statusMessage.getMappedId(), fileName, true,
 				statusUpdate, statusMessage.getMsisdn(),
-				statusMessage.getNotNullName(), false, statusMessage.getProtip().getImageURL());
+				statusMessage.getNotNullName(), false, statusMessage
+						.getProtip().getImageURL());
 		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
-	
+
 	private void setDefaultSMSClientTutorialSetting() {
 		/*
 		 * If settings already contains this key, no need to do anything since
