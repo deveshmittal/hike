@@ -448,10 +448,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 			 */
 			editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
 			editor.putBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, true);
-			/*
-			 * Show free SMS invite popup
-			 */
-			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, true);
 			editor.commit();
 		}
 
