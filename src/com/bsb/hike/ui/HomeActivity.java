@@ -494,9 +494,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
 		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
 
-		image.setImageResource(accountPrefs.getBoolean(
-				HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true) ? R.drawable.ic_free_sms_default
-				: R.drawable.ic_free_sms_rewards);
+		if (image != null) {
+			image.setImageResource(accountPrefs.getBoolean(
+					HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true) ? R.drawable.ic_free_sms_default
+					: R.drawable.ic_free_sms_rewards);
+		}
 
 		okBtn.setOnClickListener(new OnClickListener() {
 
