@@ -600,6 +600,27 @@ public class MqttMessagesManager {
 			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
 				setDefaultSMSClientTutorialSetting();
 			}
+			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
+				boolean sendNativeInvite = !data
+						.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
+				boolean showFreeInvitePopup = data
+						.optBoolean(HikeConstants.SHOW_FREE_INVITES)
+						&& !settings
+								.getBoolean(
+										HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
+										false);
+				if (showFreeInvitePopup) {
+					editor.putBoolean(
+							HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
+							true);
+					editor.putBoolean(
+							HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE,
+							true);
+				}
+
+				handleSendNativeInviteKey(sendNativeInvite,
+						showFreeInvitePopup, null, null, editor);
+			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
@@ -708,28 +729,6 @@ public class MqttMessagesManager {
 							account.optBoolean(HikeConstants.LAST_SEEN_SETTING,
 									true));
 					settingEditor.commit();
-				}
-
-				if (account.has(HikeConstants.ENABLE_FREE_INVITES)) {
-					boolean sendNativeInvite = !account
-							.optBoolean(HikeConstants.ENABLE_FREE_INVITES);
-					boolean showFreeInvitePopup = data
-							.optBoolean(HikeConstants.SHOW_FREE_INVITES)
-							&& !settings
-									.getBoolean(
-											HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
-											false);
-					if (showFreeInvitePopup) {
-						editor.putBoolean(
-								HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
-								true);
-						editor.putBoolean(
-								HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE,
-								true);
-					}
-
-					handleSendNativeInviteKey(sendNativeInvite,
-							showFreeInvitePopup, null, null, editor);
 				}
 			}
 			editor.commit();
