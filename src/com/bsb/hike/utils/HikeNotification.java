@@ -308,7 +308,8 @@ public class HikeNotification {
 		if (TextUtils.isEmpty(message)
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
 			message = String.format(
-					context.getString(R.string.joined_hike_new),
+					context.getString(convMsg.getMetadata().isOldUser() ?
+							R.string.user_back_on_hike : R.string.joined_hike_new),
 					contactInfo.getFirstName());
 		}
 		final long timestamp = convMsg.getTimestamp();
