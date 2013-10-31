@@ -484,7 +484,6 @@
 	<string name="tutorial_friends_info">Now share status updates\nwith your circle of friends.</string>
 	<string name="native_sms_invite_1">Hey, I \&#39;m using hike, and it has all these awesome stickers and emoticons which I want to share with you. Get it now http://hike.in/</string>
 	<string name="native_sms_invite_2">Hey, I \&#39;m using hike, which lets us show our \&#34;last seen \&#34; status only to the friends we choose, and not everyone. Get it now http://hike.in/</string>
-	<string name="native_sms_invite_3">Hey, I \&#39;m using hike; it comes with a cool Walkie-Talkie which lets me send you free voice messages. Get it now http://hike.in/</string>
 	<string name="chat">Chat</string>
 	<string name="group">Group</string>
 	<string name="posting_update">Posting...</string>
