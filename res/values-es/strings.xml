@@ -483,9 +483,6 @@
 	<string name="tutorial_sticker_info">Exprésate mejor\ncon las nuevas pegatinas de hike.</string>
 	<string name="tutorial_friends_header">Bienvenido a hike</string>
 	<string name="tutorial_friends_info">Comparte actualizaciones de estado\ncon tu círculo de amigos</string>
-	<string name="native_sms_invite_1">¡Hola! Yo ya uso hike. Incluye pegatinas y emoticonos chulos que quiero compartir contigo. Descártela ya http://hike.in/</string>
-	<string name="native_sms_invite_2">¡Hola! Yo ya uso hike. Te permite mostrar tu última conexión solo a los amigos que elijas, no a todos. Descárgatela ya http://hike.in/</string>
-	<string name="native_sms_invite_3">¡Hola! Yo ya uso hike; incluye un walkie-talkie chulo para enviar mensajes de voz gratis. Descárgatela ya http://hike.in/</string>
 	<string name="chat">Chatear</string>
 	<string name="group">Grupo</string>
 	<string name="posting_update">Publicando...</string>
