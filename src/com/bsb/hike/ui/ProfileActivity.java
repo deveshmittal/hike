@@ -1412,6 +1412,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				HikePubSub.MUTE_CONVERSATION_TOGGLED,
 				new Pair<String, Boolean>(groupConversation.getMsisdn(),
 						groupConversation.isMuted()));
+		invalidateOptionsMenu();
 	}
 
 	public void onProfileBtn1Click(View v) {
