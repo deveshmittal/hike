@@ -483,9 +483,6 @@
 	<string name="tutorial_sticker_info">Exprime-toi mieux\navec les nouveaux stickers hike.</string>
 	<string name="tutorial_friends_header">Bienvenue sur hike</string>
 	<string name="tutorial_friends_info">Partage tes mises à jour de statut\navec ton cercle d\'amis</string>
-	<string name="native_sms_invite_1">Salut ! J\'utilise hike, qui propose de jolis stickers et émoticônes que je veux partager avec toi. Pour l\'obtenir : http://hike.in/</string>
-	<string name="native_sms_invite_2">Salut ! J\'utilise hike, qui permet aux amis choisis de savoir à quand remonte ma \"dernière connexion\". Pour l\'obtenir : http://hike.in/</string>
-	<string name="native_sms_invite_3">Salut ! J\'utilise hike, qui propose un walkie-talkie pour envoyer des messages vocaux gratuits. Pour l\'obtenir : http://hike.in/</string>
 	<string name="chat">Tchat</string>
 	<string name="group">Groupe</string>
 	<string name="posting_update">Publication...</string>
