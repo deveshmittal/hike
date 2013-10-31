@@ -814,6 +814,6 @@ public class HikeConstants {
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
-			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
+			R.string.native_sms_invite_2 };
 
 }
