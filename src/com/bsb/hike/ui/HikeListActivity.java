@@ -179,8 +179,9 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		if (type != Type.BLOCK) {
 			SharedPreferences preferences = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-			boolean sendNativeInvite = preferences.getBoolean(
-					HikeMessengerApp.SEND_NATIVE_INVITE, false);
+			boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+					|| preferences.getBoolean(
+							HikeMessengerApp.SEND_NATIVE_INVITE, false);
 			title.setText(sendNativeInvite ? R.string.invite_sms
 					: R.string.invite_free_sms);
 		} else {

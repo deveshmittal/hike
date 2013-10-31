@@ -65,7 +65,8 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 				MODE_PRIVATE);
 
 		ArrayList<String> items = new ArrayList<String>();
-		items.add(getString(settings.getBoolean(
+		items.add(getString(!HikeMessengerApp.isIndianUser()
+				|| settings.getBoolean(
 				HikeMessengerApp.SEND_NATIVE_INVITE, false) ? R.string.sms
 				: R.string.free_sms_txt));
 		items.add(getString(R.string.facebook));
