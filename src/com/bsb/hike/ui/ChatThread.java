@@ -2016,10 +2016,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				return;
 			}
 			final Boolean isMuted = groupMute.second;
+			((GroupConversation) mConversation).setIsMuted(isMuted);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					toggleConversationMuteViewVisibility(isMuted);
+					invalidateOptionsMenu();
 				}
 			});
 		} else if (HikePubSub.BLOCK_USER.equals(type)
