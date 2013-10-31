@@ -874,7 +874,7 @@ public class MqttMessagesManager {
 				/*
 				 * Show notification if free SMS is turned on.
 				 */
-				if (!sendNativeInvite) {
+				if (!sendNativeInvite && HikeMessengerApp.isIndianUser()) {
 					Bundle bundle = new Bundle();
 					bundle.putString(HikeConstants.Extras.FREE_SMS_POPUP_BODY,
 							body);
