@@ -3772,22 +3772,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Log.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS) {
 				String categoryId = Utils.getCategoryIdForIndex(pageNum);
-				if (!prefs
-						.getBoolean(
-								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
-								false)) {
-					if (pageNum != 0 && pageNum != 1) {
-						if ((!Utils.checkIfStickerCategoryExists(
-								ChatThread.this, categoryId) || !prefs
-								.getBoolean(HikeMessengerApp.stickerCategories
-										.get(pageNum).downloadDialogPref, false))
-								&& !HikeMessengerApp.stickerTaskMap
-										.containsKey(categoryId)) {
-							showStickerPreviewDialog(pageNum);
-						}
-					} else {
+				if (pageNum != 0 && pageNum != 1) {
+					if ((!Utils.checkIfStickerCategoryExists(
+							ChatThread.this, categoryId) || !prefs
+							.getBoolean(HikeMessengerApp.stickerCategories
+									.get(pageNum).downloadDialogPref, false))
+									&& !HikeMessengerApp.stickerTaskMap
+									.containsKey(categoryId)) {
 						showStickerPreviewDialog(pageNum);
 					}
+				} else if (!prefs
+						.getBoolean(
+								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
+								false)){
+					showStickerPreviewDialog(pageNum);
 				}
 			}
 		}
