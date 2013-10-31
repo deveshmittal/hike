@@ -777,6 +777,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikePubSub.MUTE_CONVERSATION_TOGGLED,
 					new Pair<String, Boolean>(groupConversation.getMsisdn(),
 							groupConversation.isMuted()));
+			invalidateOptionsMenu();
 			break;
 		case R.id.call:
 			Utils.onCallClicked(ChatThread.this, mContactNumber);
