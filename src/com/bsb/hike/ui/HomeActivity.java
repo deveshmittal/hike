@@ -478,7 +478,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		String headerText = accountPrefs.getString(
 				HikeMessengerApp.FREE_INVITE_POPUP_HEADER, "");
 		String bodyText = accountPrefs.getString(
-				HikeMessengerApp.FREE_INVITE_POPUP_HEADER, "");
+				HikeMessengerApp.FREE_INVITE_POPUP_BODY, "");
 
 		if (TextUtils.isEmpty(headerText)) {
 			headerText = getString(R.string.free_invite_header);
