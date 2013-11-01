@@ -37,7 +37,7 @@
 	<string name="pin">Pin</string>
 	<string name="name">Name</string>
 	<string name="terms_privacy">Terms and Privacy</string>
-	<string name="invite_now">Invite Now</string>
+	<string name="invite_now">Invite now</string>
 	<string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
 	<string name="shortcut">Add Shortcut</string>
 	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
@@ -695,6 +695,6 @@
 	<string name="free_sms_use_tip">To send a free SMS, start a new chat with a contact who has a green bubble ( gb ) next to the name.</string>
 	<string name="green_bubble_abbr">gb</string>
 	<string name="error_capture_video">Error capturing the video</string>
-	<string name="free_invite_header">Invite via FREE SMS!</string>
-	<string name="free_invite_body">Invite friends to hike via free SMS!</string>
+	<string name="free_invite_header">Free SMS Invites</string>
+	<string name="free_invite_body">Now invite friends via SMS for free. No charges apply :)</string>
 </resources>

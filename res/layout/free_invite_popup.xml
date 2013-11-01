@@ -78,7 +78,7 @@
             style="@style/SmsPopupButton"
             android:textColor="@color/free_sms_btn"
             android:textStyle="bold"
-            android:text="@string/invite_1" />
+            android:text="@string/invite_now" />
     </LinearLayout>
 
 </RelativeLayout>
