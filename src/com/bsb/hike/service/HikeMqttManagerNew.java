@@ -88,12 +88,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private MqttCallback mqttCallBack;
 
-	private IMqttActionListener listernerTopicS;
-
-	private IMqttActionListener listernerTopicU;
-
-	private IMqttActionListener listernerTopicA;
-
 	private IMqttActionListener listernerConnect;
 
 	private MqttMessagesManager mqttMessageManager;
@@ -660,77 +654,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 	}
 
-	/* listeners for subscribe */
-	private IMqttActionListener getSubscribeListener(int val)
-	{
-		/*
-		 * val : topic --> 0 : /s ; 1 : /u ; 2 : /a
-		 */
-		if (val == 0)
-		{
-			if (listernerTopicS == null)
-			{
-				listernerTopicS = new IMqttActionListener()
-				{
-					@Override
-					public void onSuccess(IMqttToken arg0)
-					{
-						Log.d(TAG, "Subscribed to /s");
-					}
-
-					@Override
-					public void onFailure(IMqttToken arg0, Throwable arg1)
-					{
-						Log.e(TAG, "Error subscribing to /s : " + arg1.getMessage());
-					}
-				};
-			}
-			return listernerTopicS;
-		}
-		else if (val == 1)
-		{
-			if (listernerTopicU == null)
-			{
-				listernerTopicU = new IMqttActionListener()
-				{
-					@Override
-					public void onSuccess(IMqttToken arg0)
-					{
-						Log.d(TAG, "Subscribed to /u");
-					}
-
-					@Override
-					public void onFailure(IMqttToken arg0, Throwable arg1)
-					{
-						Log.e(TAG, "Error subscribing to /u : " + arg1.getMessage());
-					}
-				};
-			}
-			return listernerTopicU;
-		}
-		else
-		{
-			if (listernerTopicA == null)
-			{
-				listernerTopicA = new IMqttActionListener()
-				{
-					@Override
-					public void onSuccess(IMqttToken arg0)
-					{
-						Log.d(TAG, "Subscribed to /a");
-					}
-
-					@Override
-					public void onFailure(IMqttToken arg0, Throwable arg1)
-					{
-						Log.e(TAG, "Error subscribing to /a : " + arg1.getMessage());
-					}
-				};
-			}
-			return listernerTopicA;
-		}
-	}
-
 	/* Listeners for conection */
 	private IMqttActionListener getConnectListener()
 	{
@@ -747,9 +670,25 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
-						mqtt.subscribe(uid + "/s", 1).setActionCallback(getSubscribeListener(0));
-						mqtt.subscribe(uid + "/u", 1).setActionCallback(getSubscribeListener(1));
-						mqtt.subscribe(uid + "/a", 1).setActionCallback(getSubscribeListener(2));
+						String[] topics = new String[3];
+						topics[0] = uid + "/s";
+						topics[1] = uid + "/a";
+						topics[2] = uid + "/u";
+						int[] qos = new int[] { 1, 1, 1 };
+						mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener()
+						{
+							@Override
+							public void onSuccess(IMqttToken arg0)
+							{
+								Log.d(TAG, "Successfully subscribed to topics.");
+							}
+
+							@Override
+							public void onFailure(IMqttToken arg0, Throwable arg1)
+							{
+								Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage());
+							}
+						});
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
 					catch (MqttException e)
@@ -773,7 +712,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
 					if (value != null)
 					{
-						Log.e(TAG,"Connection failed : " + value.getMessage());
+						Log.e(TAG, "Connection failed : " + value.getMessage());
 						String msg = value.getMessage();
 						Log.e("(TAG", "Hike Unable to connect", value);
 						connectionStatus = getServerStatusCode(msg);
@@ -1000,7 +939,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			break;
 		case MqttException.REASON_CODE_CLIENT_TIMEOUT:
 			// Till this point disconnect has already happened. This could happen in PING or other TIMEOUT happen such as CONNECT, DISCONNECT
-			if(reConnect)
+			if (reConnect)
 				connectOnMqttThread();
 			break;
 		case MqttException.REASON_CODE_CONNECT_IN_PROGRESS:
