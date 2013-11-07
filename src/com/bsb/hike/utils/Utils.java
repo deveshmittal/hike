@@ -147,6 +147,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -3150,5 +3151,12 @@ public class Utils {
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
 		prefEditor.commit();
+	}
+	
+	public static Intent getHomeActivityIntent(Context context, final int tabIndex) {
+		final Intent intent = new Intent(context, HomeActivity.class);
+		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+
+		return intent;
 	}
 }
