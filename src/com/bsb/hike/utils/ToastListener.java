@@ -174,7 +174,7 @@ public class ToastListener implements Listener {
 				return;
 			}
 			String[] profileStruct = (String[]) object;
-			toaster.pushBigPictureStatusNotifications(profileStruct);
+			toaster.notifyBigPictureStatusNotification(profileStruct[0], profileStruct[1], profileStruct[2]);
 		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
 				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;

@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -396,12 +395,12 @@ public class HikeNotification {
 			else
 				message = messageString;
 			// big picture messages ! intercept !
-			pushBigPictureMessageNotifications(notificationIntent, contactInfo,
-					convMsg, bigPictureImage, text, key, message, msisdn);
+			showNotification(notificationIntent, icon, timestamp,
+					notificationId, text, key, message, msisdn, bigPictureImage);
 		} else {
 			// regular message
 			showNotification(notificationIntent, icon, timestamp,
-					notificationId, text, key, message, msisdn);
+					notificationId, text, key, message, msisdn, null);
 		}
 	}
 
@@ -427,7 +426,7 @@ public class HikeNotification {
 						R.string.add_as_friend_notification, key);
 
 				showNotification(notificationIntent, icon, timeStamp, notificationId,
-						text, key, message, msisdn);
+						text, key, message, msisdn, null);
 				addNotificationId(notificationId);
 	}
 
@@ -483,9 +482,35 @@ public class HikeNotification {
 		}
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
-				text, key, message, statusMessage.getMsisdn());
+				text, key, message, statusMessage.getMsisdn(), null);
 		addNotificationId(notificationId);
 	}
+
+	public void notifyBigPictureStatusNotification(final String imagePath, final String msisdn, final String name) {
+
+		if (PreferenceManager.getDefaultSharedPreferences(this.context).getInt(
+				HikeConstants.STATUS_PREF, 0) != 0) {
+			return;
+		}
+		
+		final int notificationId = msisdn.hashCode();
+		final String key = TextUtils.isEmpty(name) ? msisdn : name;
+		final String message = context
+				.getString(R.string.status_profile_pic_notification);
+		final String text = key + " " + message;
+
+		final int icon = returnSmallIcon();
+		final Bitmap bigPictureImage = BitmapFactory.decodeFile(imagePath);
+		final Intent notificationIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
+		notificationIntent.setData((Uri.parse("custom://"
+				+ notificationId)));
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN,
+				msisdn.toString());
+		
+		showNotification(notificationIntent, icon, System.currentTimeMillis(),
+				notificationId, text, key, message, msisdn, bigPictureImage);
+	}
+
 
 	public void notifyBatchUpdate(final String header, final String message) {
 		final long timeStamp = System.currentTimeMillis() / 1000;
@@ -502,7 +527,7 @@ public class HikeNotification {
 		final String text = message;
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
-				text, key, message, null); // TODO: change this.
+				text, key, message, null, null); // TODO: change this.
 		addNotificationId(notificationId);
 	}
 
@@ -547,7 +572,7 @@ public class HikeNotification {
 
 	private void showNotification(final Intent notificationIntent, final int icon,
 			final long timestamp, final int notificationId, final CharSequence text, final String key,
-			final String message, final String msisdn) {
+			final String message, final String msisdn, final Bitmap bigPictureImage) {
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
@@ -579,6 +604,16 @@ public class HikeNotification {
 				.setLargeIcon(avatarBitmap).setContentText(message)
 				.setAutoCancel(true).setPriority(Notification.PRIORITY_HIGH)
 				.setTicker(text).setDefaults(vibrate);
+		
+		if(bigPictureImage != null){
+			final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
+			bigPicStyle.setBigContentTitle(key);
+			bigPicStyle.setSummaryText(message);
+			mBuilder.setStyle(bigPicStyle);
+	
+			// set the big picture image
+			bigPicStyle.bigPicture(bigPictureImage);
+		}
 
 		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 
@@ -603,165 +638,6 @@ public class HikeNotification {
 				false)) {
 			notificationManager.notify(notificationId,
 					mBuilder.getNotification());
-			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-					: System.currentTimeMillis();
-		}
-	}
-
-	public void pushBigPictureStatusNotifications(final String[] profileStruct) {  //TODO:: replace this with a bundle
-
-		if (PreferenceManager.getDefaultSharedPreferences(this.context).getInt(
-				HikeConstants.STATUS_PREF, 0) != 0) {
-			return;
-		}
-		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-
-		final SharedPreferences preferenceManager = PreferenceManager
-				.getDefaultSharedPreferences(this.context);
-
-		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
-				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
-						: 0;
-
-		final int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
-				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
-						: 0;
-
-		final boolean playNativeJingle = preferenceManager.getBoolean(
-				HikeConstants.NATIVE_JINGLE_PREF, true);
-
-		final boolean led = preferenceManager
-				.getBoolean(HikeConstants.LED_PREF, true);
-
-		final String title = TextUtils.isEmpty(profileStruct[2]) ? profileStruct[1]
-				: profileStruct[2]; // TODO:: replace the struct
-
-		final String message = context
-				.getString(R.string.status_profile_pic_notification);
-		final String text = title + " " + message;
-
-		final int smallIconId = returnSmallIcon();
-		final Bitmap bigPictureImage = BitmapFactory.decodeFile(profileStruct[0]);
-
-		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-				context).setContentTitle(title).setSmallIcon(smallIconId)
-				.setAutoCancel(true).setLargeIcon(bigPictureImage)
-				.setTicker(text).setDefaults(vibrate)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setContentText(message);
-
-		final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
-		bigPicStyle.bigPicture(bigPictureImage);
-		bigPicStyle.setBigContentTitle(title);
-		bigPicStyle.setSummaryText(message);
-		mBuilder.setStyle(bigPicStyle);
-
-		final Intent resultIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
-		resultIntent.setData((Uri.parse("custom://"
-				+ profileStruct[1].toString().hashCode())));
-		resultIntent.putExtra(HikeConstants.Extras.MSISDN,
-				profileStruct[1].toString());
-		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		stackBuilder.addNextIntent(resultIntent);
-
-		if (playNativeJingle && playSound != 0) {
-			mBuilder.setSound(Uri.parse("android.resource://"
-					+ context.getPackageName() + "/" + R.raw.v1));
-		} else if (playSound != 0) {
-			mBuilder.setDefaults(mBuilder.getNotification().defaults
-					| playSound);
-		}
-
-		if (led) {
-			mBuilder.setLights(Color.BLUE, 300, 1000);
-		}
-
-		final PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
-				PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(resultPendingIntent);
-
-		final NotificationManager mNotificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
-				false)) {
-			mNotificationManager.notify(profileStruct[1].hashCode(),
-					mBuilder.build());
-			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
-					: System.currentTimeMillis();
-		}
-	}
-
-	public void pushBigPictureMessageNotifications(final Intent notificationIntent,
-			final ContactInfo contactInfo, final ConvMessage convMessage,
-			final Bitmap bigPictureImage, final CharSequence text, final String key,
-			final String message, final String msisdn) {
-
-		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-
-		final SharedPreferences preferenceManager = PreferenceManager
-				.getDefaultSharedPreferences(this.context);
-
-		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
-				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
-						: 0;
-
-		final int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
-				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
-						: 0;
-
-		final boolean playNativeJingle = preferenceManager.getBoolean(
-				HikeConstants.NATIVE_JINGLE_PREF, true);
-
-		final boolean led = preferenceManager
-				.getBoolean(HikeConstants.LED_PREF, true);
-
-		final int smallIconId = returnSmallIcon();
-
-		final Drawable avatarDrawable = IconCacheManager.getInstance()
-				.getIconForMSISDN(contactInfo.getMsisdn());
-		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
-				(Utils.drawableToBitmap(avatarDrawable)), context);
-		final int notificationId = convMessage.getMsisdn().hashCode(); // group the
-
-		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-				context).setContentTitle(key).setSmallIcon(smallIconId)
-				.setAutoCancel(true).setLargeIcon(avatarBitmap).setTicker(text)
-				.setPriority(Notification.PRIORITY_HIGH).setDefaults(vibrate)
-				.setContentText(message);
-
-		final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
-
-		bigPicStyle.setBigContentTitle(key);
-		bigPicStyle.setSummaryText(message);
-		mBuilder.setStyle(bigPicStyle);
-
-		// set the big picture image
-		bigPicStyle.bigPicture(bigPictureImage);
-
-		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		stackBuilder.addNextIntent(notificationIntent);
-
-		if (playNativeJingle && playSound != 0) {
-			mBuilder.setSound(Uri.parse("android.resource://"
-					+ context.getPackageName() + "/" + R.raw.v1));
-		} else if (playSound != 0) {
-			mBuilder.setDefaults(mBuilder.getNotification().defaults
-					| playSound);
-		}
-
-		if (led) {
-			mBuilder.setLights(Color.BLUE, 300, 1000);
-		}
-
-		final PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
-				PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(resultPendingIntent);
-
-		final NotificationManager mNotificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
-				false)) {
-			mNotificationManager.notify(notificationId, mBuilder.build());
 			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
 					: System.currentTimeMillis();
 		}
