@@ -177,7 +177,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 	private void setLabel() {
 		if (type != Type.BLOCK) {
-			title.setText(R.string.invite_sms);
+			SharedPreferences preferences = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+					|| preferences.getBoolean(
+							HikeMessengerApp.SEND_NATIVE_INVITE, false);
+			title.setText(sendNativeInvite ? R.string.invite_sms
+					: R.string.invite_free_sms);
 		} else {
 			title.setText(R.string.blocked_list);
 		}
@@ -187,7 +193,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		final SharedPreferences settings = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		if (!settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
+		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+				|| settings.getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false);
+
+		if (sendNativeInvite && !settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
 			final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);
 			dialog.setCancelable(true);
