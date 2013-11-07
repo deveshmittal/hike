@@ -630,7 +630,7 @@
 	<string name="x_regular_sms">%1$d x Regular SMS</string>
 	<string name="last_seen_yesterday_group_participant">Yesterday</string>
 	<string name="invite_friends_hike">Invite friends to hike</string>
-	<string name="hike_contacts">PEOPLE WITH HIKE</string>
+	<string name="hike_contacts">PEOPLE ON HIKE</string>
 	<string name="sms_contacts">SMS CONTACTS</string>
 	<string name="invite_subtext">Earn additional free SMS for every friend that joins hike through your SMS invite.</string>
 	<string name="india_only">Free SMS can only be sent to India.</string>
