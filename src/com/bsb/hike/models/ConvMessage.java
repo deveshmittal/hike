@@ -58,6 +58,8 @@ public class ConvMessage {
 	private JSONArray readByArray;
 	
 	private boolean shouldShowPush = true;
+	
+	private boolean showResumeButton = true;
 
 	public boolean isInvite() {
 		return mInvite;
@@ -81,6 +83,16 @@ public class ConvMessage {
 
 	public void setIsStickerMessage(boolean isStickerMessage) {
 		this.isStickerMessage = isStickerMessage;
+	}
+	
+	public void setResumeButtonVisibility(boolean visible)
+	{
+		showResumeButton = visible;
+	}
+	
+	public boolean getResumeButtonVisibility()
+	{
+		return showResumeButton;
 	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */

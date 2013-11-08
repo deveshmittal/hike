@@ -131,8 +131,8 @@ public class HikeFile {
 		this.recordingDuration = fileJSON.optLong(HikeConstants.PLAYTIME, -1);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString,
 				recordingDuration != -1);
-		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
-				.getOutputMediaFile(hikeFileType, fileName, fileKey);
+		//this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
+			//	.getOutputMediaFile(hikeFileType, fileName);
 	}
 
 	public HikeFile(String fileName, String fileTypeString,
@@ -194,6 +194,11 @@ public class HikeFile {
 		return fileName;
 	}
 
+	public void setFile(File f)
+	{
+		this.file = f;
+	}
+	
 	public void setFileTypeString(String fileTypeString) {
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString,
@@ -218,7 +223,8 @@ public class HikeFile {
 
 	public void setFileKey(String fileKey) {
 		this.fileKey = fileKey;
-		this.file = Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
+		if(file == null)
+			this.file = Utils.getOutputMediaFile(hikeFileType, fileName);
 	}
 
 	public String getFileKey() {
@@ -258,8 +264,7 @@ public class HikeFile {
 			return false;
 		}
 		if (file == null) {
-			File file = Utils.getOutputMediaFile(hikeFileType, fileName,
-					fileKey);
+			File file = Utils.getOutputMediaFile(hikeFileType, fileName);
 			return file == null ? false : file.exists();
 		}
 		return file.exists();
@@ -270,15 +275,14 @@ public class HikeFile {
 			return null;
 		}
 		if (file == null) {
-			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey)
-					.getPath();
+			file = Utils.getOutputMediaFile(hikeFileType, fileName);
 		}
 		return file.getPath();
 	}
 
 	public File getFile() {
 		if (file == null) {
-			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
+			file = Utils.getOutputMediaFile(hikeFileType, fileName);
 		}
 		return file;
 	}
@@ -301,6 +305,11 @@ public class HikeFile {
 
 	public JSONArray getEvents() {
 		return events;
+	}
+
+	public void setFileName(String fName)
+	{
+		fileName = fName;
 	}
 
 }

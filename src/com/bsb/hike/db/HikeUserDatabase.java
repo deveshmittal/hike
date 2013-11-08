@@ -1968,12 +1968,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			int i = 0;
 			for (i = 0; i < serverRecommendedArray.length(); i++) {
 				String msisdn = serverRecommendedArray.optString(i);
-				if (myMsisdn.equals(msisdn)) {
-					continue;
+				if (!myMsisdn.equals(msisdn)) {
+					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
-				sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 			}
-			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+			int idx = sb.lastIndexOf(",");
+			if(idx >= 0)
+				sb.replace(idx, sb.length(), ")");
+			else
+				sb.append(")");
 
 			return sb.toString();
 		} catch (JSONException e) {

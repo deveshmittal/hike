@@ -95,6 +95,18 @@
 	            android:layout_marginLeft="7dp"
 	            android:visibility="gone" />
 	        
+	        <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/btn_resume"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:layout_toRightOf="@+id/file_transfer_progress"
+	            android:layout_centerVertical="true"
+	            android:gravity="center"
+	            android:layout_marginLeft="7dp"
+	            android:background="@color/white"
+                android:text="Pause"
+                android:visibility="gone" />
+	        
 	        <LinearLayout
 	            android:id="@+id/receive_message_container"
 	            android:layout_width="wrap_content"

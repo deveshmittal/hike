@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -24,11 +25,14 @@ import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -62,6 +66,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -118,6 +123,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -129,6 +135,9 @@ import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.filetransfer.FileSavedState;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
@@ -155,8 +164,6 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.tasks.UploadContactOrLocationTask;
-import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
@@ -370,7 +377,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	protected void onDestroy() {
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		if (mComposeViewWatcher != null) {
 			// If we didn't send an end typing. We should send one before
 			// exiting
@@ -533,6 +540,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		/* registering localbroadcast manager */
+		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
 	}
 
 	private void clearTempData() {
@@ -671,25 +681,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		case R.id.delete:
 			removeMessage(message);
 			if (message.isFileTransferMessage()) {
-				FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
-						.get(message.getMsgID());
-				if (fileTransferTask != null) {
-					fileTransferTask.cancelTask();
-					HikeMessengerApp.fileTransferTaskMap.remove(message
-							.getMsgID());
-					mAdapter.notifyDataSetChanged();
-				}
-			}
-			return true;
-		case R.id.cancel_file_transfer:
-			FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
-					.get(message.getMsgID());
-			if (fileTransferTask != null) {
-				fileTransferTask.cancelTask();
-				HikeMessengerApp.fileTransferTaskMap.remove(message.getMsgID());
+				//@GM cancelTask has been changed
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				File file = hikeFile.getFile();
+				FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(),file,message.isSent());
 				mAdapter.notifyDataSetChanged();
 			}
 			return true;
+		case R.id.cancel_file_transfer:
+		{
+			//@GM cancelTask has been changed
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(),file,message.isSent());
+			mAdapter.notifyDataSetChanged();
+			return true;
+		}
 		case R.id.share:
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 			Utils.startShareIntent(
@@ -861,11 +868,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					&& hikeFile.wasFileDownloaded()) {
 				optionsList.add(getString(R.string.forward));
 			}
-			if (HikeMessengerApp.fileTransferTaskMap.containsKey(message
-					.getMsgID())) {
-				optionsList
-						.add(message.isSent() ? getString(R.string.cancel_upload)
-								: getString(R.string.cancel_download));
+			//TODO : This should also be handled according to state
+			//@GM Completed the above mentioned TODO
+			File file = hikeFile.getFile();
+			FileSavedState fss;
+			if (message.isSent())
+			{
+				fss = FileTransferManager.getInstance(getApplicationContext()).getUploadFileState(message.getMsgID(), file);
+			}
+			else
+			{
+				fss = FileTransferManager.getInstance(getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
+			}
+			if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED)
+			{
+				optionsList.add(message.isSent() ? getString(R.string.cancel_upload) : getString(R.string.cancel_download));
 			}
 		} else if (message.getMetadata() == null
 				|| !message.getMetadata().isPokeMessage()) {
@@ -2627,8 +2644,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
 					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE,
-							null, null);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE,null);
 
 					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT,
 							Uri.fromFile(selectedFile));
@@ -3002,8 +3018,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 			recorder.setMaxDuration(HikeConstants.MAX_DURATION_RECORDING_SEC * 1000);
 			recorder.setMaxFileSize(HikeConstants.MAX_FILE_SIZE);
-			selectedFile = Utils.getOutputMediaFile(
-					HikeFileType.AUDIO_RECORDING, null, null);
+			selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO_RECORDING, null);
 			recorder.setOutputFile(selectedFile.getPath());
 		}
 		recorder.setOnErrorListener(new OnErrorListener() {
@@ -3207,10 +3222,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					// Picasa image
-					UploadFileTask uploadFileTask = new UploadFileTask(
-							selectedFileUri, hikeFileType, mContactNumber,
-							getApplicationContext(), mConversation);
-					Utils.executeIntProgFtResultAsyncTask(uploadFileTask);
+					FileTransferManager.getInstance(getApplicationContext()).uploadFile(selectedFileUri,hikeFileType,mContactNumber,mConversation.isOnhike());
 					return;
 				} else {
 					String fileUriStart = "file://";
@@ -3504,27 +3516,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikeFileType hikeFileType, String fileType, boolean isRecording,
 			long recordingDuration, boolean isForwardingFile) {
 		clearTempData();
-		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
-				filePath, fileType, hikeFileType, isRecording
-						&& !isForwardingFile, recordingDuration,
-				getApplicationContext(), mConversation);
-		Utils.executeIntProgFtResultAsyncTask(uploadFileTask);
+		if(filePath == null)
+		{
+			Toast.makeText(getApplicationContext(), R.string.upload_failed, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		File file = new File(filePath);
+		Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + file.getName());
+
+		if (HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
+		{
+			Toast.makeText(getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file,fileType ,hikeFileType,isRecording,isForwardingFile,mConversation.isOnhike(),recordingDuration);
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude,
 			int zoomLevel) {
 		clearTempData();
-		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
-				mContactNumber, latitude, longitude, zoomLevel,
-				getApplicationContext(), mConversation);
-		Utils.executeIntProgFtResultAsyncTask(uploadLocationTask);
+		FileTransferManager.getInstance(getApplicationContext()).uploadLocation(mContactNumber, latitude, longitude, zoomLevel, mConversation.isOnhike());
 	}
 
 	private void initialiseContactTransfer(JSONObject contactJson) {
-		UploadContactOrLocationTask contactOrLocationTask = new UploadContactOrLocationTask(
-				mContactNumber, contactJson, getApplicationContext(),
-				mConversation);
-		Utils.executeIntProgFtResultAsyncTask(contactOrLocationTask);
+		FileTransferManager.getInstance(getApplicationContext()).uploadContact(mContactNumber, contactJson, mConversation.isOnhike());
 	}
 
 	private void saveContact(List<ContactInfoData> items,
@@ -4389,4 +4404,53 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 		return super.onKeyUp(keyCode, event);
 	}
+	
+
+
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			if(intent.getAction().equals(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED))
+			{
+				//runOnUiThread(mUpdateAdapter);
+				//@GM
+				mAdapter.notifyDataSetChanged();
+			}
+			else if(intent.getAction().equals(HikePubSub.RESUME_BUTTON_UPDATED))
+			{
+				//Log.d(getClass().getSimpleName(),"making button visible...1");
+				long msgId = intent.getLongExtra("msgId", -1);
+				if(msgId<0)
+					return;
+				//Log.d(getClass().getSimpleName(),"making button visible...2");
+				ConvMessage message = null;
+				for(int i=(messages.size()-1); i>=0; i--)
+				{
+					ConvMessage m = messages.get(i);
+					//Log.d(getClass().getSimpleName(), "comparing  : " +m.getMsgID() +" == " + msgId);
+					if(m != null && m.getMsgID() == msgId)
+					{
+						message = m;
+				    	break;
+					}
+				}
+				if (message == null)
+				return;
+				//Log.d(getClass().getSimpleName(),"making button visible...3");
+				
+				if(!message.getResumeButtonVisibility())
+				{
+					Log.d(getClass().getSimpleName(),"making button visible...DONE");
+					message.setResumeButtonVisibility(true);
+					mAdapter.notifyDataSetChanged();
+				}
+				
+				
+			}
+		}
+	};
+
+
 }
