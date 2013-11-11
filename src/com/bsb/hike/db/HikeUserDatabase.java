@@ -1973,6 +1973,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				}
 				sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 			}
+			/*
+			 * Making sure the string exists.
+			 */
+			if(sb.lastIndexOf(",") == -1) {
+				return null;
+			}
 			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
 
 			return sb.toString();
