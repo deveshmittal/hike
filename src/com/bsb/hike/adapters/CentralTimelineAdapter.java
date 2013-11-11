@@ -55,6 +55,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private String userMsisdn;
 	private ImageLoader imageLoader;
 	private LayoutInflater inflater;
+	private boolean isScrolling;
 
 	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
 			R.drawable.mood_35_partying_hard, R.drawable.mood_14_boozing,
@@ -82,6 +83,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
+	}
+
+	public void setIsScrolling(boolean isScrolling) {
+		if (isScrolling == this.isScrolling) {
+			return;
+		}
+		this.isScrolling = isScrolling;
+		notifyDataSetChanged();
 	}
 
 	@Override
@@ -371,7 +380,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
 					imageLoader.loadImage(protip.getMappedId(),
-							viewHolder.statusImg);
+							viewHolder.statusImg, isScrolling);
 					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
@@ -419,7 +428,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			 * Fetch larger image
 			 */
 			imageLoader.loadImage(statusMessage.getMappedId(),
-					viewHolder.largeProfilePic);
+					viewHolder.largeProfilePic, isScrolling);
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
 					true, context));

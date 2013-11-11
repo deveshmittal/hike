@@ -54,6 +54,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private boolean isContactBlocked;
 	private ImageLoader imageLoader;
 	private boolean lastSeenPref;
+	private boolean isScrolling;
 
 	public ProfileAdapter(ProfileActivity profileActivity,
 			List<ProfileItem> itemList, GroupConversation groupConversation,
@@ -76,6 +77,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		this.imageLoader = new ImageLoader(context);
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
 				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+	}
+
+	public void setIsScrolling(boolean isScrolling) {
+		if (isScrolling == this.isScrolling) {
+			return;
+		}
+		this.isScrolling = isScrolling;
+		notifyDataSetChanged();
 	}
 
 	@Override
@@ -240,7 +249,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null) {
-				imageLoader.loadImage(msisdn, viewHolder.image);
+				imageLoader.loadImage(msisdn, viewHolder.image, isScrolling);
 			} else {
 				viewHolder.image.setImageBitmap(profilePreview);
 			}
@@ -456,7 +465,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			viewHolder.image.setTag(imageViewerInfo2);
 
 			imageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
-					viewHolder.image);
+					viewHolder.image, isScrolling);
 
 			viewHolder.timeStamp.setText(profilePicStatusUpdate
 					.getTimestampFormatted(true, context));
