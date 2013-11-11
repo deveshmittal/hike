@@ -28,8 +28,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends FileTransferBase
