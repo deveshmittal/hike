@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -21,10 +22,11 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -36,6 +38,10 @@ import com.bsb.hike.ui.HomeActivity;
 public class HikeNotification {
 	public static final int HIKE_NOTIFICATION = 0;
 	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
+	public static final int PROTIP_NOTIFICATION_ID = -123;
+	public static final int GAMING_PACKET_NOTIFICATION_ID = -124;
+	public static final int FREE_SMS_POPUP_NOTIFICATION_ID = -125;
+	public static final int APP_UPDATE_AVAILABLE_ID = -126;
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 	private static final String SEPERATOR = " ";
 
@@ -53,6 +59,74 @@ public class HikeNotification {
 				HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
 	}
 
+	public void notifySMSPopup(final String bodyString) {
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
+				false)) {
+			return;
+		}
+
+		final SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
+
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		final int vibrate = preferenceManager.getBoolean(
+				HikeConstants.VIBRATE_PREF, false) ? Notification.DEFAULT_VIBRATE
+				: 0;
+		final boolean led = preferenceManager.getBoolean(
+				HikeConstants.LED_PREF, true);
+
+		final int playSound = preferenceManager.getBoolean(
+				HikeConstants.SOUND_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
+				: 0;
+
+		final boolean playNativeJingle = preferenceManager.getBoolean(
+				HikeConstants.NATIVE_JINGLE_PREF, true);
+
+		/*
+		 * invoke the chat thread here. The free SMS invite switch popup should
+		 * already be showing here ideally by now.
+		 */
+		final Intent notificationIntent = getHomeActivityIntent(HomeActivity.CHATS_TAB_INDEX);
+		notificationIntent.putExtra(HikeConstants.Extras.NAME,
+				context.getString(R.string.team_hike));
+
+		notificationIntent.setData((Uri.parse("custom://" + FREE_SMS_POPUP_NOTIFICATION_ID)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(
+				R.drawable.hike_avtar_protip);
+		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
+				(Utils.drawableToBitmap(avatarDrawable)), context);
+		final int smallIconId = returnSmallIcon();
+
+		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setContentTitle(context.getString(R.string.team_hike))
+				.setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
+				.setContentText(bodyString).setAutoCancel(true)
+				.setTicker(bodyString).setDefaults(vibrate)
+				.setPriority(Notification.PRIORITY_HIGH);
+
+		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+		stackBuilder.addNextIntent(notificationIntent);
+
+		final PendingIntent resultPendingIntent = stackBuilder
+				.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+		if (playNativeJingle && playSound != 0) {
+			mBuilder.setSound(Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1));
+		} else if (playSound != 0) {
+			mBuilder.setDefaults(mBuilder.getNotification().defaults
+					| playSound);
+		}
+		if (led) {
+			mBuilder.setLights(Color.BLUE, 300, 1000);
+		}
+
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
+
+	}
 	public void notifyMessage(final Protip proTip) {
 		final SharedPreferences preferenceManager = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
@@ -69,14 +143,13 @@ public class HikeNotification {
 
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
-
-		final int notificationId = context.getString(R.string.team_hike).hashCode();
+		
 		// we've got to invoke the timeline here
 		final Intent notificationIntent = getHomeActivityIntent(HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME,
 				context.getString(R.string.team_hike));
 
-		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		notificationIntent.setData((Uri.parse("custom://" + PROTIP_NOTIFICATION_ID)));
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -108,7 +181,7 @@ public class HikeNotification {
 		}
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
 				false)) {
-			notificationManager.notify(notificationId,
+			notificationManager.notify(PROTIP_NOTIFICATION_ID,
 					mBuilder.getNotification());
 		}
 	}
@@ -130,7 +203,6 @@ public class HikeNotification {
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final int notificationId = context.getString(R.string.team_hike).hashCode();
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -162,7 +234,7 @@ public class HikeNotification {
 		}
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
 				false)) {
-			notificationManager.notify(notificationId,
+			notificationManager.notify(APP_UPDATE_AVAILABLE_ID,
 					mBuilder.getNotification());
 		}
 	}
@@ -184,7 +256,6 @@ public class HikeNotification {
 		final boolean playNativeJingle = preferenceManager.getBoolean(
 				HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final int notificationId = context.getString(R.string.team_hike).hashCode();
 		final Drawable avatarDrawable = context.getResources().getDrawable(
 				R.drawable.hike_avtar_protip);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
@@ -216,7 +287,7 @@ public class HikeNotification {
 		}
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS,
 				false)) {
-			notificationManager.notify(notificationId,
+			notificationManager.notify(GAMING_PACKET_NOTIFICATION_ID,
 					mBuilder.getNotification());
 		}
 		//TODO:: we should reset the gaming download message from preferences
@@ -237,7 +308,8 @@ public class HikeNotification {
 		if (TextUtils.isEmpty(message)
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
 			message = String.format(
-					context.getString(R.string.joined_hike_new),
+					context.getString(convMsg.getMetadata().isOldUser() ?
+							R.string.user_back_on_hike : R.string.joined_hike_new),
 					contactInfo.getFirstName());
 		}
 		final long timestamp = convMsg.getTimestamp();
@@ -292,17 +364,17 @@ public class HikeNotification {
 				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
 
-			final GroupConversation gConv = ((GroupConversation) convMsg
-					.getConversation());
-			key = gConv.getGroupParticipantList()
-					.get(convMsg.getGroupParticipantMsisdn()).getContactInfo()
-					.getName();
+			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
+			ContactInfo participant = hUDB.getContactInfoFromMSISDN(
+					convMsg.getGroupParticipantMsisdn(), false);
 
+			Conversation gConv = convMsg.getConversation();
+			
+			key = participant.getName();
 			if (TextUtils.isEmpty(key)) {
-				key = gConv.getLabel();
+				key = participant.getMsisdn(); 
 			}
 			partName = key;
-
 			message = key + HikeConstants.SEPARATOR + message;
 			key = gConv.getLabel();
 		}

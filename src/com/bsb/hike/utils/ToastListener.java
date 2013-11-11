@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -49,7 +51,8 @@ public class ToastListener implements Listener {
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
 			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED,
-			HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH };
+			HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
+			HikePubSub.SHOW_FREE_INVITE_SMS};
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -179,6 +182,10 @@ public class ToastListener implements Listener {
 				return;
 			}
 
+			if (!message.isShouldShowPush()) {
+				return;
+			}
+
 			if ((message.getConversation() instanceof GroupConversation)
 					&& ((GroupConversation) message.getConversation())
 							.isMuted()) {
@@ -236,6 +243,15 @@ public class ToastListener implements Listener {
 										""));
 			}
 
+		} else if (HikePubSub.SHOW_FREE_INVITE_SMS.equals(type)){
+			if(object !=null && object instanceof Bundle){
+				Bundle bundle = (Bundle) object;
+				String bodyString = bundle.getString(HikeConstants.Extras.FREE_SMS_POPUP_BODY);
+				//TODO: we may need the title tomorrow, so we can extract that too from the bundle
+				if(!TextUtils.isEmpty(bodyString)){
+					toaster.notifySMSPopup(bodyString);
+				}
+			}
 		}
 	}
 

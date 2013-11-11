@@ -22,6 +22,8 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 
+	private WebView webView;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,7 +33,7 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 				HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
 
-		WebView webView = (WebView) findViewById(R.id.t_and_c_page);
+		webView = (WebView) findViewById(R.id.t_and_c_page);
 
 		WebViewClient client = new WebViewClient() {
 			@Override
@@ -117,5 +119,14 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (webView.canGoBack()) {
+			webView.goBack();
+		} else {
+			super.onBackPressed();
+		}
 	}
 }

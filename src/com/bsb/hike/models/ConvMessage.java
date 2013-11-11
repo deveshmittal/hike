@@ -461,6 +461,10 @@ public class ConvMessage {
 	}
 
 	public JSONObject serialize() {
+		return serialize(false);
+	}
+
+	public JSONObject serialize(boolean sendNativeInvite) {
 		JSONObject object = new JSONObject();
 		JSONObject data = new JSONObject();
 		JSONObject md = null;
@@ -484,7 +488,7 @@ public class ConvMessage {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
 			}
 
-			if (mInvite) {
+			if (sendNativeInvite && mInvite) {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 			}
 

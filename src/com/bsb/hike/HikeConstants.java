@@ -166,6 +166,12 @@ public class HikeConstants {
 	public static final String EVENT_TYPE = "et";
 	public static final String EVENT_KEY = "ek";
 	public static final String PACKAGE ="pkg";
+	public static final String SIGNUP_IC = "signupIc";
+	public static final String DEVICE_KEY = "device_key";
+	public static final String ENABLE_FREE_INVITES = "enable_free_invites";
+	public static final String SHOW_FREE_INVITES = "show_free_invites";
+	public static final String FREE_INVITE_POPUP_TITLE = "free_invite_popup_title";
+	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -319,7 +325,8 @@ public class HikeConstants {
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 3 * 1000;
+	public static final int RESEND_TYPING_TIME = 2 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
@@ -585,6 +592,8 @@ public class HikeConstants {
 		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
 		public static final String LAST_APPLICATION_PUSH_PACKET_ID = "lastApplicationPushPacketId";
+		public static final String FREE_SMS_POPUP_BODY = "freeSMSPopupBody";
+		public static final String FREE_SMS_POPUP_HEADER = "freeSMSPopupHeader";
 	}
 
 	public static final class LogEvent {
@@ -810,6 +819,6 @@ public class HikeConstants {
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
-			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
+			R.string.native_sms_invite_2 };
 
 }

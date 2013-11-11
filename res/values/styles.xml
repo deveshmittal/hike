@@ -251,6 +251,8 @@
         <item name="android:minWidth">90dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">32dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:singleLine">true</item>
         <item name="android:textStyle">bold|italic</item>
@@ -491,22 +493,27 @@
 	    <item name="android:textStyle">bold|italic</item>
 	</style>
 	
-	<style name="FreeSmsInfo">
+	<style name="FreeSmsTip">
 	    <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_alignParentBottom">true</item>
-        <item name="android:layout_centerHorizontal">true</item>
-        <item name="android:layout_marginBottom">30dp</item>
         <item name="android:background">@drawable/bg_info</item>
         <item name="android:drawableLeft">@drawable/ic_india_only</item>
         <item name="android:drawablePadding">12dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingLeft">14dp</item>
-        <item name="android:paddingRight">14dp</item>
-        <item name="android:text">@string/india_only</item>
         <item name="android:textColor">@color/list_item_subtext</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textStyle">bold|italic</item>
+        <item name="android:paddingLeft">14dp</item>
+        <item name="android:paddingRight">14dp</item>
+	</style>
+	
+	<style name="FreeSmsTip.FreeSmsInfo">
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_marginBottom">30dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:text">@string/india_only</item>
 	</style>
 	
 	<style name="SaveContactHeader">

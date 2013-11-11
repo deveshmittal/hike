@@ -82,7 +82,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 												// for Production
 
 	private enum DialogShowing {
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -114,7 +114,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.UPDATE_OF_MENU_NOTIFICATION, HikePubSub.SERVICE_STARTED,
-			HikePubSub.UPDATE_PUSH };
+			HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -200,6 +200,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			case UPGRADE_POPUP:
 				showUpdatePopup(updateType);
 				break;
+			case FREE_INVITE_POPUP:
+				showFreeInviteDialog();
 			}
 		}
 
@@ -207,6 +209,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			if (!accountPrefs.getBoolean(
 					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
 				showSMSClientDialog();
+			} else if (accountPrefs.getBoolean(
+					HikeMessengerApp.SHOW_FREE_INVITE_POPUP, false)) {
+				showFreeInviteDialog();
 			}
 		}
 
@@ -276,12 +281,30 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			searchView.setOnQueryTextListener(onQueryTextListener);
 			searchView.clearFocus();
 
-			menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
+			MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1,
+					R.string.search_hint);
+
+			searchItem
 					.setIcon(R.drawable.ic_top_bar_search)
 					.setActionView(searchView)
 					.setShowAsAction(
 							MenuItem.SHOW_AS_ACTION_ALWAYS
 									| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
+			searchItem
+					.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+
+						@Override
+						public boolean onMenuItemActionExpand(MenuItem item) {
+							return true;
+						}
+
+						@Override
+						public boolean onMenuItemActionCollapse(MenuItem item) {
+							searchView.setQuery("", true);
+							return true;
+						}
+					});
 			break;
 		default:
 			return false;
@@ -432,6 +455,85 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		dialog = Utils.showSMSSyncDialog(this,
 				dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
+	}
+
+	private void showFreeInviteDialog() {
+		/*
+		 * We don't send free invites for non indian users.
+		 */
+		if (!HikeMessengerApp.isIndianUser()) {
+			return;
+		}
+
+		dialogShowing = DialogShowing.FREE_INVITE_POPUP;
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.free_invite_popup);
+		dialog.setCancelable(false);
+
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		ImageView image = (ImageView) dialog.findViewById(R.id.image);
+
+		String headerText = accountPrefs.getString(
+				HikeMessengerApp.FREE_INVITE_POPUP_HEADER, "");
+		String bodyText = accountPrefs.getString(
+				HikeMessengerApp.FREE_INVITE_POPUP_BODY, "");
+
+		if (TextUtils.isEmpty(headerText)) {
+			headerText = getString(R.string.free_invite_header);
+		}
+
+		if (TextUtils.isEmpty(bodyText)) {
+			bodyText = getString(R.string.free_invite_body);
+		}
+
+		header.setText(headerText);
+		body.setText(bodyText);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		if (image != null) {
+			image.setImageResource(accountPrefs.getBoolean(
+					HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true) ? R.drawable.ic_free_sms_default
+					: R.drawable.ic_free_sms_rewards);
+		}
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+
+				Intent intent = new Intent(HomeActivity.this,
+						HikeListActivity.class);
+				startActivity(intent);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP,
+						false);
+				editor.commit();
+
+				dialogShowing = null;
+			}
+		});
+
+		dialog.show();
 	}
 
 	@Override
@@ -877,6 +979,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					showUpdatePopup(updateType);
+				}
+			});
+		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					GetFTUEContactsTask ftueContactsTask = new GetFTUEContactsTask();
+					Utils.executeContactInfoListResultTask(ftueContactsTask);
 				}
 			});
 		}

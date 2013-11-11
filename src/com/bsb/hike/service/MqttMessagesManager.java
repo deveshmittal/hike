@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -122,7 +123,14 @@ public class MqttMessagesManager {
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
-			autoDownloadGroupImage(msisdn);
+			/*
+			 * Only auto download if the ic packet is not generated due to
+			 * signup.
+			 */
+			if (!HikeConstants.SIGNUP_IC.equals(jsonObj
+					.optString(HikeConstants.SUB_TYPE))) {
+				autoDownloadGroupImage(msisdn);
+			}
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -174,10 +182,18 @@ public class MqttMessagesManager {
 					.equals(type);
 
 			boolean stateChanged = false;
-			stateChanged = ContactUtils.updateHikeStatus(this.context, msisdn,
-					joined) > 0;
 
-			stateChanged = this.convDb.updateOnHikeStatus(msisdn, joined) > 0;
+			int rowsChanged = ContactUtils.updateHikeStatus(this.context,
+					msisdn, joined);
+			rowsChanged += this.convDb.updateOnHikeStatus(msisdn, joined);
+
+			/*
+			 * If at least one row has been updated, that means that the user
+			 * has changed his/her hike state
+			 */
+			if (rowsChanged > 0) {
+				stateChanged = true;
+			}
 
 			if (!stateChanged) {
 				return;
@@ -584,6 +600,27 @@ public class MqttMessagesManager {
 			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
 				setDefaultSMSClientTutorialSetting();
 			}
+			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
+				boolean sendNativeInvite = !data
+						.optBoolean(HikeConstants.ENABLE_FREE_INVITES, true);
+				boolean showFreeInvitePopup = data
+						.optBoolean(HikeConstants.SHOW_FREE_INVITES)
+						&& !settings
+								.getBoolean(
+										HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
+										false);
+				if (showFreeInvitePopup) {
+					editor.putBoolean(
+							HikeMessengerApp.SET_FREE_INVITE_POPUP_PREF_FROM_AI,
+							true);
+					editor.putBoolean(
+							HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE,
+							true);
+				}
+
+				handleSendNativeInviteKey(sendNativeInvite,
+						showFreeInvitePopup, null, null, editor);
+			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
@@ -804,6 +841,50 @@ public class MqttMessagesManager {
 						HikeMessengerApp.BATCH_STATUS_NOTIFICATION_VALUES,
 						array.toString());
 			}
+			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
+				String newId = data.optString(HikeConstants.MESSAGE_ID);
+				String currentId = settings.getString(
+						HikeMessengerApp.FREE_INVITE_PREVIOUS_ID, "");
+				/*
+				 * Duplicate check
+				 */
+				if (currentId.equals(newId)) {
+					Log.d(getClass().getSimpleName(),
+							"Duplicate enable free invite packet");
+					return;
+				}
+
+				editor.putString(HikeMessengerApp.FREE_INVITE_PREVIOUS_ID,
+						newId);
+				editor.putBoolean(
+						HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, false);
+
+				boolean sendNativeInvite = !data
+						.optBoolean(HikeConstants.ENABLE_FREE_INVITES, true);
+				boolean showFreeInvitePopup = data
+						.optBoolean(HikeConstants.SHOW_FREE_INVITES);
+				String header = data
+						.optString(HikeConstants.FREE_INVITE_POPUP_TITLE);
+				String body = data
+						.optString(HikeConstants.FREE_INVITE_POPUP_TEXT);
+
+				handleSendNativeInviteKey(sendNativeInvite,
+						showFreeInvitePopup, header, body, editor);
+
+				/*
+				 * Show notification if free SMS is turned on.
+				 */
+				if (!sendNativeInvite && HikeMessengerApp.isIndianUser()) {
+					Bundle bundle = new Bundle();
+					bundle.putString(HikeConstants.Extras.FREE_SMS_POPUP_BODY,
+							body);
+					bundle.putString(
+							HikeConstants.Extras.FREE_SMS_POPUP_HEADER, header);
+
+					this.pubSub
+							.publish(HikePubSub.SHOW_FREE_INVITE_SMS, bundle);
+				}
+			}
 
 			editor.commit();
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -909,7 +990,7 @@ public class MqttMessagesManager {
 					 */
 					autoDownloadProfileImage(statusMessage, true);
 				}
-			} 
+			}
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
@@ -1142,7 +1223,7 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_PUSH.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String devType = data.optString(HikeConstants.DEV_TYPE);
-			String id = jsonObj.optString(HikeConstants.ID);
+			String id = data.optString(HikeConstants.MESSAGE_ID);
 			String lastPushPacketId = settings.getString(
 					HikeConstants.Extras.LAST_UPDATE_PACKET_ID, "");
 			if (!TextUtils.isEmpty(devType)
@@ -1163,7 +1244,8 @@ public class MqttMessagesManager {
 								data.optString(HikeConstants.MESSAGE));
 						editor.putString(HikeConstants.Extras.LATEST_VERSION,
 								version);
-						editor.putString(HikeConstants.Extras.LAST_UPDATE_PACKET_ID, id);
+						editor.putString(
+								HikeConstants.Extras.LAST_UPDATE_PACKET_ID, id);
 						if (!TextUtils.isEmpty(updateURL))
 							editor.putString(HikeConstants.Extras.URL,
 									updateURL);
@@ -1175,7 +1257,7 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.APPLICATIONS_PUSH
 				.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-			String id = jsonObj.optString(HikeConstants.ID);
+			String id = data.optString(HikeConstants.MESSAGE_ID);
 			String lastPushPacketId = settings.getString(
 					HikeConstants.Extras.LAST_APPLICATION_PUSH_PACKET_ID, "");
 			String devType = data.optString(HikeConstants.DEV_TYPE);
@@ -1198,12 +1280,45 @@ public class MqttMessagesManager {
 		}
 	}
 
+	private void handleSendNativeInviteKey(boolean sendNativeInvite,
+			boolean showFreeSmsPopup, String header, String body, Editor editor) {
+		if (!HikeMessengerApp.isIndianUser()) {
+			return;
+		}
+		editor.putBoolean(HikeMessengerApp.SEND_NATIVE_INVITE, sendNativeInvite);
+		if (sendNativeInvite) {
+			/*
+			 * If native is being turned on, we remove all preferences saved for
+			 * not showing the native SMS invite dialog so that the user is
+			 * shown these dialogs again.
+			 */
+			editor.remove(HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED);
+			editor.remove(HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED);
+			editor.remove(HikeConstants.OPERATOR_SMS_ALERT_CHECKED);
+
+			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP, false);
+		} else {
+			/*
+			 * Else we set a preference to show a dialog in the home screen that
+			 * the free Invites are turned on.
+			 */
+			editor.putBoolean(HikeMessengerApp.SHOW_FREE_INVITE_POPUP,
+					showFreeSmsPopup);
+			if (showFreeSmsPopup) {
+				editor.putString(HikeMessengerApp.FREE_INVITE_POPUP_BODY, body);
+				editor.putString(HikeMessengerApp.FREE_INVITE_POPUP_HEADER,
+						header);
+			}
+		}
+
+	}
+
 	private void autoDownloadProfileImage(StatusMessage statusMessage,
 			boolean statusUpdate) {
 		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
 			return;
 		}
-		
+
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
@@ -1222,17 +1337,19 @@ public class MqttMessagesManager {
 				context, id, fileName, true, false, null, null, false);
 		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
-	
-	private void autoDownloadProtipImage(StatusMessage statusMessage, boolean statusUpdate) {
+
+	private void autoDownloadProtipImage(StatusMessage statusMessage,
+			boolean statusUpdate) {
 		String fileName = Utils.getProfileImageFileName(statusMessage
 				.getMappedId());
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, statusMessage.getMappedId(), fileName, true,
 				statusUpdate, statusMessage.getMsisdn(),
-				statusMessage.getNotNullName(), false, statusMessage.getProtip().getImageURL());
+				statusMessage.getNotNullName(), false, statusMessage
+						.getProtip().getImageURL());
 		Utils.executeBoolResultAsyncTask(downloadProfileImageTask);
 	}
-	
+
 	private void setDefaultSMSClientTutorialSetting() {
 		/*
 		 * If settings already contains this key, no need to do anything since

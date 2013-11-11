@@ -19,6 +19,8 @@ public class AppRater {
 	private static boolean showingDialog = false;
 
 	public static void appLaunched(Context mContext) {
+		showingDialog = false;
+
 		SharedPreferences prefs = mContext.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (prefs.getBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER, false)) {
@@ -32,7 +34,6 @@ public class AppRater {
 		editor.putInt(HikeMessengerApp.APP_LAUNCHES, launchCount);
 		editor.commit();
 
-		showingDialog = false;
 		for (int launch : LAUNCHES_UNTIL_PROMPT) {
 			if (launch == launchCount) {
 				showRateDialog(mContext, prefs.edit());

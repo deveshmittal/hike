@@ -364,7 +364,7 @@ public class AccountUtils {
 			data.put("deviceid", deviceId);
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
-			data.put("device_key", deviceKey);
+			data.put(HikeConstants.DEVICE_KEY, deviceKey);
 			data.put("appversion", appVersion);
 			data.put(
 					"invite_token",
