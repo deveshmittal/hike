@@ -168,6 +168,10 @@ public class HikeConstants {
 	public static final String PACKAGE ="pkg";
 	public static final String SIGNUP_IC = "signupIc";
 	public static final String DEVICE_KEY = "device_key";
+	public static final String ENABLE_FREE_INVITES = "enable_free_invites";
+	public static final String SHOW_FREE_INVITES = "show_free_invites";
+	public static final String FREE_INVITE_POPUP_TITLE = "free_invite_popup_title";
+	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -588,6 +592,8 @@ public class HikeConstants {
 		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
 		public static final String LAST_APPLICATION_PUSH_PACKET_ID = "lastApplicationPushPacketId";
+		public static final String FREE_SMS_POPUP_BODY = "freeSMSPopupBody";
+		public static final String FREE_SMS_POPUP_HEADER = "freeSMSPopupHeader";
 	}
 
 	public static final class LogEvent {
@@ -813,6 +819,6 @@ public class HikeConstants {
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
-			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
+			R.string.native_sms_invite_2 };
 
 }

@@ -37,7 +37,7 @@
 	<string name="pin">Pin</string>
 	<string name="name">Name</string>
 	<string name="terms_privacy">Terms and Privacy</string>
-	<string name="invite_now">Invite Now</string>
+	<string name="invite_now">Invite now</string>
 	<string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
 	<string name="shortcut">Add Shortcut</string>
 	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
@@ -482,9 +482,8 @@
 	<string name="tutorial_sticker_info">Express yourself better\nwith new hike stickers.</string>
 	<string name="tutorial_friends_header">Welcome to hike</string>
 	<string name="tutorial_friends_info">Now share status updates\nwith your circle of friends.</string>
-	<string name="native_sms_invite_1">Hey, I\'m using hike, and it has all these awesome stickers and emoticons which I want to share with you. Get it now http://hike.in/</string>
-	<string name="native_sms_invite_2">Hey, I\'m using hike, which lets us show our \"last seen\" status only to the friends we choose, and not everyone. Get it now http://hike.in/</string>
-	<string name="native_sms_invite_3">Hey, I\'m using hike; it comes with a cool Walkie-Talkie which lets me send you free voice messages. Get it now http://hike.in/</string>
+	<string name="native_sms_invite_1">Hey, I just got the new hike messenger! It is faster, simpler and has amazing new stickers! Download it now at http://hike.in/</string>
+	<string name="native_sms_invite_2">Download the new hike messenger, chat with everyone but show your Last Seen only to the friends you choose! Get it now at http://hike.in/</string>
 	<string name="chat">Chat</string>
 	<string name="group">Group</string>
 	<string name="posting_update">Posting...</string>
@@ -631,7 +630,7 @@
 	<string name="x_regular_sms">%1$d x Regular SMS</string>
 	<string name="last_seen_yesterday_group_participant">Yesterday</string>
 	<string name="invite_friends_hike">Invite friends to hike</string>
-	<string name="hike_contacts">HIKE CONTACTS</string>
+	<string name="hike_contacts">PEOPLE WITH HIKE</string>
 	<string name="sms_contacts">SMS CONTACTS</string>
 	<string name="invite_subtext">Earn additional free SMS for every friend that joins hike through your SMS invite.</string>
 	<string name="india_only">Free SMS can only be sent to India.</string>
@@ -675,10 +674,10 @@
   	<string name="downloading_string">Downloading...</string>
   	<string name="friends_ftue_item_label">Add friends</string>
   	<string name="updates_are_fun_with_friends">Updates are more fun with friends. We\'ve found some of them that you can add to hike.</string>
-  	<string name="no_status">Happy and singing or the Monday blues? We\'ve got the right mood just for you.</string>
+  	<string name="no_status">You can now post Status Updates in hike! Try it now.</string>
   	<string name="post">Post</string>
-  	<string name="post_a_mood">Post a mood</string>
-  	<string name="mood_update">Introducing moods</string>
+  	<string name="post_a_mood">Post an Update</string>
+  	<string name="mood_update">Introducing Status Updates</string>
   	<string name="invite_contacts">Invite Contacts</string>
   	<string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
   	<string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet! Invite %1$s to hike. Standard operator SMS rates apply.</string> 
@@ -696,4 +695,6 @@
 	<string name="free_sms_use_tip">To send a free SMS, start a new chat with a contact who has a green bubble ( gb ) next to the name.</string>
 	<string name="green_bubble_abbr">gb</string>
 	<string name="error_capture_video">Error capturing the video</string>
+	<string name="free_invite_header">Free SMS Invites</string>
+	<string name="free_invite_body">Now invite friends via SMS for free. No charges apply :)</string>
 </resources>

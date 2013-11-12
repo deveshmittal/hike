@@ -777,6 +777,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikePubSub.MUTE_CONVERSATION_TOGGLED,
 					new Pair<String, Boolean>(groupConversation.getMsisdn(),
 							groupConversation.isMuted()));
+			invalidateOptionsMenu();
 			break;
 		case R.id.call:
 			Utils.onCallClicked(ChatThread.this, mContactNumber);
@@ -2015,10 +2016,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				return;
 			}
 			final Boolean isMuted = groupMute.second;
+			((GroupConversation) mConversation).setIsMuted(isMuted);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					toggleConversationMuteViewVisibility(isMuted);
+					invalidateOptionsMenu();
 				}
 			});
 		} else if (HikePubSub.BLOCK_USER.equals(type)
@@ -3771,22 +3774,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Log.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS) {
 				String categoryId = Utils.getCategoryIdForIndex(pageNum);
-				if (!prefs
-						.getBoolean(
-								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
-								false)) {
-					if (pageNum != 0 && pageNum != 1) {
-						if ((!Utils.checkIfStickerCategoryExists(
-								ChatThread.this, categoryId) || !prefs
-								.getBoolean(HikeMessengerApp.stickerCategories
-										.get(pageNum).downloadDialogPref, false))
-								&& !HikeMessengerApp.stickerTaskMap
-										.containsKey(categoryId)) {
-							showStickerPreviewDialog(pageNum);
-						}
-					} else {
+				if (pageNum != 0 && pageNum != 1) {
+					if ((!Utils.checkIfStickerCategoryExists(
+							ChatThread.this, categoryId) || !prefs
+							.getBoolean(HikeMessengerApp.stickerCategories
+									.get(pageNum).downloadDialogPref, false))
+									&& !HikeMessengerApp.stickerTaskMap
+									.containsKey(categoryId)) {
 						showStickerPreviewDialog(pageNum);
 					}
+				} else if (!prefs
+						.getBoolean(
+								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
+								false)){
+					showStickerPreviewDialog(pageNum);
 				}
 			}
 		}
