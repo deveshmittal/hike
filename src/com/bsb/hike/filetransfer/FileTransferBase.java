@@ -36,32 +36,32 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	}
 
 	protected static String NETWORK_ERROR_1 = "Connection timed out";
-	
+
 	protected static String NETWORK_ERROR_2 = "Unable to resolve host";
-	
+
 	protected boolean retry = true; // this will be used when network fails and you have to retry
-	
+
 	protected short retryAttempts = 0;
-	
+
 	protected short MAX_RETRY_ATTEMPTS = 5;
-	
+
 	protected int reconnectTime = 0;
-	
+
 	protected int MAX_RECONNECT_TIME = 30; // in seconds
-	
+
 	protected Handler handler;
-	
+
 	protected int progressPercentage;
-	
+
 	protected Object userContext = null;
-	
+
 	protected Context context;
 
 	// this will be used for filename in download and upload both
 	protected File mFile;
-	
+
 	protected String fileKey; // this is used for download from server , and in upload too
-	
+
 	protected File stateFile; // this represents state file in which file state will be saved
 
 	protected volatile FTState _state;
@@ -73,10 +73,10 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected int _totalSize = 0;
 
 	protected int _bytesTransferred = 0;
-	
+
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
-	
-	protected FileTransferBase(Handler handler,ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap,Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
+
+	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
 	{
 		this.handler = handler;
 		this.mFile = destinationFile;
@@ -116,7 +116,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState(String uuid)
 	{
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred,uuid);
+		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
@@ -130,20 +130,20 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			i.printStackTrace();
 		}
 	}
-	
+
 	protected void deleteStateFile()
 	{
-		if(stateFile!= null && stateFile.exists())
+		if (stateFile != null && stateFile.exists())
 			stateFile.delete();
 	}
-	
+
 	protected void setState(FTState mState)
 	{
 		// if state is completed we will not change it '
 		if (!mState.equals(FTState.COMPLETED))
 			_state = mState;
 	}
-	
+
 	protected boolean shouldRetry()
 	{
 		if (retry && retryAttempts < MAX_RETRY_ATTEMPTS)
@@ -169,9 +169,10 @@ public abstract class FileTransferBase implements Callable<FTResult>
 				e.printStackTrace();
 			}
 			retryAttempts++;
+			Log.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
 			return true;
 		}
-		else 
+		else
 			return false;
 	}
 }
