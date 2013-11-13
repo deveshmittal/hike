@@ -51,6 +51,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -1238,7 +1239,7 @@ public class Utils {
 	}
 
 	public static String getFirstName(String name) {
-		return name.split(" ", 2)[0];
+		return name.trim().split(" ", 2)[0];
 	}
 
 	public static double getFreeSpace() {
@@ -1454,18 +1455,44 @@ public class Utils {
 
 	public static void sendInvite(String msisdn, Context context,
 			boolean dbUpdated) {
-		SmsManager smsManager = SmsManager.getDefault();
+
+		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+				|| context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false);
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
 				context);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-				convMessage.serialize());
+				convMessage.serialize(sendNativeInvite));
 
-		ArrayList<String> messages = smsManager.divideMessage(convMessage
-				.getMessage());
+		if (sendNativeInvite) {
+			SmsManager smsManager = SmsManager.getDefault();
+			ArrayList<String> messages = smsManager.divideMessage(convMessage
+					.getMessage());
 
-		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
-				messages, null, null);
+			ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
+
+			/*
+			 * Adding blank pending intents as a workaround for where sms don't get sent
+			 * when we pass this as null
+			 */
+			for (int i = 0; i < messages.size(); i++) {
+				Intent intent = new Intent();
+				pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
+						PendingIntent.FLAG_CANCEL_CURRENT));
+			}
+			/*
+			 * The try-catch block is needed for a bug in certain LG devices
+			 * where it throws an NPE here.
+			 */
+			try {
+				smsManager.sendMultipartTextMessage(convMessage.getMsisdn(),
+						null, messages, pendingIntents, null);
+			} catch (NullPointerException e) {
+				Log.d("Send invite", "NPE while trying to send SMS", e);
+			}
+		}
 
 		if (!dbUpdated) {
 			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn,
@@ -1497,7 +1524,9 @@ public class Utils {
 		final SharedPreferences settings = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		if (!settings.getBoolean(checkPref, false)) {
+		if (!settings.getBoolean(checkPref, false)
+				&& (!HikeMessengerApp.isIndianUser() || settings.getBoolean(
+						HikeMessengerApp.SEND_NATIVE_INVITE, false))) {
 			final Dialog dialog = new Dialog(context,
 					R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);
@@ -3228,5 +3257,12 @@ public class Utils {
 			} 
 		}
 		return isMicromaxDevice;
+	}
+
+	public static void resetUpdateParams(SharedPreferences prefs) {
+		Editor prefEditor = prefs.edit();
+		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
+		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+		prefEditor.commit();
 	}
 }

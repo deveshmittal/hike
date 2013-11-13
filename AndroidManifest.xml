@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
-    android:versionCode="222"
+    android:versionCode="231"
     android:installLocation="auto"
-    android:versionName="2.6.2">
+    android:versionName="2.6.11">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
@@ -120,7 +120,7 @@
         <activity android:name=".ui.CreditsActivity" >
         </activity>
         <activity android:name=".ui.WebViewActivity"
-            android:configChanges="orientation|keyboardHidden" >
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity android:name=".ui.Tutorial"
             android:launchMode="singleTop" >

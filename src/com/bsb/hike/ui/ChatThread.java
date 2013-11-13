@@ -267,6 +267,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private boolean showKeyboard = false;
 
+	private boolean isOnline = false;
+
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ,
@@ -287,7 +289,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.STICKER_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED };
+			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
+			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, };
 
 	private EmoticonType emoticonType;
 
@@ -775,6 +778,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikePubSub.MUTE_CONVERSATION_TOGGLED,
 					new Pair<String, Boolean>(groupConversation.getMsisdn(),
 							groupConversation.isMuted()));
+			invalidateOptionsMenu();
 			break;
 		case R.id.call:
 			Utils.onCallClicked(ChatThread.this, mContactNumber);
@@ -1444,15 +1448,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mLastSeenView.setSelected(true);
 
 		if (mConversation instanceof GroupConversation) {
-			int numActivePeople = ((GroupConversation) mConversation)
-					.getGroupMemberAliveCount();
-			if (numActivePeople > 0) {
-				/*
-				 * Adding 1 to count the user.
-				 */
-				mLastSeenView.setText(getString(R.string.num_people,
-						(numActivePeople + 1)));
-			}
+			updateActivePeopleNumberView(0);
 		} else {
 			mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike
 					: R.string.on_sms);
@@ -1485,6 +1481,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+	
+	private void updateActivePeopleNumberView(int addPeopleCount){
+		int numActivePeople = ((GroupConversation) mConversation)
+				.getGroupMemberAliveCount() + addPeopleCount;
+		((GroupConversation) mConversation).setGroupMemberAliveCount(numActivePeople);
+		
+		if (numActivePeople > 0) {
+			/*
+			 * Adding 1 to count the user.
+			 */
+			mLastSeenView.setText(getString(R.string.num_people,
+					(numActivePeople + 1)));
+		}
 	}
 
 	private void openProfileScreen() {
@@ -2013,10 +2023,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				return;
 			}
 			final Boolean isMuted = groupMute.second;
+			((GroupConversation) mConversation).setIsMuted(isMuted);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					toggleConversationMuteViewVisibility(isMuted);
+					invalidateOptionsMenu();
 				}
 			});
 		} else if (HikePubSub.BLOCK_USER.equals(type)
@@ -2119,6 +2131,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
 					contactInfo.getLastSeenTime(), contactInfo.getOffline());
+
+			isOnline = contactInfo.getOffline() == 0;
+
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -2152,7 +2167,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					updateUIForHikeStatus();
 				}
 			});
+		} else if (HikePubSub.PARTICIPANT_LEFT_GROUP.equals(type)) {
+			if (mConversation == null) {
+				return;
+			}
+			if (mConversation instanceof GroupConversation) {
+				if (mConversation.getMsisdn().equals(((JSONObject) object)
+						.optString(HikeConstants.TO))) {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							// decrementing one user 
+							updateActivePeopleNumberView(-1);
+						}
+					});
+				}
+			}
+		} else if (HikePubSub.PARTICIPANT_JOINED_GROUP.equals(type)) {
+			if (mConversation == null) {
+				return;
+			}
+			if (mConversation.getMsisdn().equals(((JSONObject) object)
+					.optString(HikeConstants.TO))) {
+				JSONObject obj = (JSONObject) object;
+				JSONArray participants = obj
+					.optJSONArray(HikeConstants.DATA);
+				final int addPeopleCount = participants.length();
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						// increment by number of newly added participants
+						updateActivePeopleNumberView(addPeopleCount);
+					}
+				});
+			}
 		}
+	}
+
+	public boolean isContactOnline() {
+		return isOnline;
 	}
 
 	private void updateAdapter() {
@@ -3178,7 +3231,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			String filePath = null;
 			if (data == null || data.getData() == null) {
-				filePath = selectedFile.getAbsolutePath();
+				if (selectedFile != null) {
+					filePath = selectedFile.getAbsolutePath();
+				} else {
+					/*
+					 * This else condition was added because of a bug in android
+					 * 4.3 with recording videos.
+					 * https://code.google.com/p/android/issues/detail?id=57996
+					 */
+					Toast.makeText(this, R.string.error_capture_video,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
 			} else {
 				Uri selectedFileUri = Utils.makePicasaUri(data.getData());
 
@@ -3751,22 +3815,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Log.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS) {
 				String categoryId = Utils.getCategoryIdForIndex(pageNum);
-				if (!prefs
-						.getBoolean(
-								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
-								false)) {
-					if (pageNum != 0 && pageNum != 1) {
-						if ((!Utils.checkIfStickerCategoryExists(
-								ChatThread.this, categoryId) || !prefs
-								.getBoolean(HikeMessengerApp.stickerCategories
-										.get(pageNum).downloadDialogPref, false))
-								&& !HikeMessengerApp.stickerTaskMap
-										.containsKey(categoryId)) {
-							showStickerPreviewDialog(pageNum);
-						}
-					} else {
+				if (pageNum != 0 && pageNum != 1) {
+					if ((!Utils.checkIfStickerCategoryExists(
+							ChatThread.this, categoryId) || !prefs
+							.getBoolean(HikeMessengerApp.stickerCategories
+									.get(pageNum).downloadDialogPref, false))
+									&& !HikeMessengerApp.stickerTaskMap
+									.containsKey(categoryId)) {
 						showStickerPreviewDialog(pageNum);
 					}
+				} else if (!prefs
+						.getBoolean(
+								HikeMessengerApp.stickerCategories.get(pageNum).downloadDialogPref,
+								false)){
+					showStickerPreviewDialog(pageNum);
 				}
 			}
 		}
@@ -3796,8 +3858,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
-				getWindow().setSoftInputMode(
-						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+				getWindow()
+						.setSoftInputMode(
+								WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 				Editor editor = prefs.edit();
 				try {
 					editor.putBoolean(HikeMessengerApp.stickerCategories
@@ -4254,6 +4317,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			this.contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN(msisdn, false);
 			if (contactInfo.getOffline() == 0) {
+				isOnline = true;
 				/*
 				 * We reset this to 1 since the user's online state is stale
 				 * here.
@@ -4352,6 +4416,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						.hasPermanentMenuKey())) {
 			if (event.getAction() == KeyEvent.ACTION_UP
 					&& keyCode == KeyEvent.KEYCODE_MENU) {
+				/*
+				 * For some reason the activity randomly catches this event in
+				 * the background and we get an NPE when that happens with
+				 * mMenu. Adding an NPE guard for that.
+				 */
+				if (mMenu == null) {
+					return super.onKeyUp(keyCode, event);
+				}
 				mMenu.performIdentifierAction(R.id.overflow_menu, 0);
 				return true;
 			}
