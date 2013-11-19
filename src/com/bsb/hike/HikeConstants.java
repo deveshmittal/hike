@@ -726,6 +726,13 @@ public class HikeConstants {
 		public static final String NEW_CHAT_FROM_TOP_BAR = "newChatFromTopBar";
 		public static final String INVITE_FROM_GRID = "inviteFromGrid";
 		public static final String FB_CLICK = "fbClick";
+		/*
+		 * Invite keys 
+		 */
+		public static final String INVITE_FRIENDS_FROM_POPUP = "inviteFriendsFromPopup";
+		public static final String INVITE_SMS_SCREEN_FROM_INVITE = "inviteSMSScreenFromInvite";
+		public static final String INVITE_SMS_SCREEN_FROM_CREDIT = "inviteSMSScreenFromCredit";
+		public static final String SELECT_ALL_INVITE = "selectAllInvite";
 	}
 
 	public static final class MqttMessageTypes {

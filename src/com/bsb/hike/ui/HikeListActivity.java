@@ -425,6 +425,10 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 						mqttPacket);
 
+				CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+				if (selectAllCB.isChecked()) {
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_INVITE);
+				}
 
 				Toast.makeText(
 						getApplicationContext(),

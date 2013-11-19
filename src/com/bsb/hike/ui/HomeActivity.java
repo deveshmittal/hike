@@ -509,6 +509,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				Intent intent = new Intent(HomeActivity.this,
 						HikeListActivity.class);
 				startActivity(intent);
+
+				Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP);
 			}
 		});
 

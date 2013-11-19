@@ -366,6 +366,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		switch (position) {
 		case 0:
 			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
 			startActivity(new Intent(this, HikeListActivity.class));
 			break;
 
