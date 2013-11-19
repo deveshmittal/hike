@@ -66,9 +66,8 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(!HikeMessengerApp.isIndianUser()
-				|| settings.getBoolean(
-				HikeMessengerApp.SEND_NATIVE_INVITE, false) ? R.string.sms
-				: R.string.free_sms_txt));
+				|| settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
+						false) ? R.string.sms : R.string.free_sms_txt));
 		items.add(getString(R.string.facebook));
 		items.add(getString(R.string.twitter));
 		items.add(getString(R.string.email));

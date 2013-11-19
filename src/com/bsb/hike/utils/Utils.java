@@ -1485,13 +1485,13 @@ public class Utils {
 			ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
 
 			/*
-			 * Adding blank pending intents as a workaround for where sms don't get sent
-			 * when we pass this as null
+			 * Adding blank pending intents as a workaround for where sms don't
+			 * get sent when we pass this as null
 			 */
 			for (int i = 0; i < messages.size(); i++) {
 				Intent intent = new Intent();
-				pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
-						PendingIntent.FLAG_CANCEL_CURRENT));
+				pendingIntents.add(PendingIntent.getBroadcast(context, 0,
+						intent, PendingIntent.FLAG_CANCEL_CURRENT));
 			}
 			/*
 			 * The try-catch block is needed for a bug in certain LG devices
