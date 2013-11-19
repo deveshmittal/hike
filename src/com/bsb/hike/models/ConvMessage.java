@@ -480,7 +480,12 @@ public class ConvMessage {
 			data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
 					: HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP, mTimestamp);
-			data.put(HikeConstants.MESSAGE_ID, msgID);
+
+			if (mInvite) {
+				data.put(HikeConstants.MESSAGE_ID, System.currentTimeMillis());
+			} else {
+				data.put(HikeConstants.MESSAGE_ID, msgID);
+			}
 
 			object.put(HikeConstants.TO, mMsisdn);
 			object.put(HikeConstants.DATA, data);
