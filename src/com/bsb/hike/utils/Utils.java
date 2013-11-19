@@ -1018,15 +1018,23 @@ public class Utils {
 	}
 
 	public static boolean isUserOnline(Context context) {
-		if (context == null) {
-			Log.e("HikeService", "Hike service is null!!");
+		try {
+			if (context == null) {
+				Log.e("HikeService", "Hike service is null!!");
+				return false;
+			}
+			ConnectivityManager cm = (ConnectivityManager) context
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+			return (cm != null && cm.getActiveNetworkInfo() != null
+					&& cm.getActiveNetworkInfo().isAvailable() && cm
+					.getActiveNetworkInfo().isConnected());
+		} catch (NullPointerException e) {
+			/*
+			 * We were seeing NPEs on the console in this method. Added this
+			 * since could not find any reason why we would get an NPE here.
+			 */
 			return false;
 		}
-		ConnectivityManager cm = (ConnectivityManager) context
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		return (cm != null && cm.getActiveNetworkInfo() != null
-				&& cm.getActiveNetworkInfo().isAvailable() && cm
-				.getActiveNetworkInfo().isConnected());
 	}
 
 	/**
