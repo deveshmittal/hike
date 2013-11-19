@@ -332,14 +332,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			intent = new Intent(this, ComposeActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
 		case R.id.new_update:
 			intent = new Intent(this, StatusUpdate.class);
 			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
 					true);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
 		}
 
@@ -969,7 +969,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					sendDeviceDetails();
 					if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP,
 							false)) {
-						Utils.sendFTUELogEvent(HikeConstants.LogEvent.FB_CLICK);
+						Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
 					}
 				}
 			}

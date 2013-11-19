@@ -874,7 +874,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK, contactInfo2.getMsisdn());
+			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK, contactInfo2.getMsisdn());
 
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(

@@ -558,7 +558,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				Intent intent = new Intent(context, StatusUpdate.class);
 				context.startActivity(intent);
 
-				Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				Protip protip = statusMessage.getProtip();
 				String url = protip.getGameDownlodURL();
@@ -661,7 +661,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK,
+			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK,
 					contactInfo2.getMsisdn());
 
 			if (!contactInfo.isOnhike())

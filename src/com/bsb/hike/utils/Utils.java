@@ -1603,19 +1603,19 @@ public class Utils {
 
 		switch (whichScreen) {
 		case FRIENDS_TAB:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
 							: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK,
 					contactInfo.getMsisdn());
 			break;
 		case UPDATES_TAB:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
 							: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK,
 					contactInfo.getMsisdn());
 			break;
 		case SMS_SECTION:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
 							: HikeConstants.LogEvent.REMIND_SMS_CLICK,
 					contactInfo.getMsisdn());
@@ -3067,11 +3067,11 @@ public class Utils {
 		return formatter.format(calendar.getTime());
 	}
 
-	public static void sendFTUELogEvent(String key) {
-		sendFTUELogEvent(key, null);
+	public static void sendUILogEvent(String key) {
+		sendUILogEvent(key, null);
 	}
 
-	public static void sendFTUELogEvent(String key, String msisdn) {
+	public static void sendUILogEvent(String key, String msisdn) {
 		try {
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
