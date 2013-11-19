@@ -1986,7 +1986,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			/*
 			 * Making sure the string exists.
 			 */
-			if(sb.lastIndexOf(",") == -1) {
+			if (sb.lastIndexOf(",") == -1) {
 				return null;
 			}
 			sb.replace(sb.lastIndexOf(","), sb.length(), ")");

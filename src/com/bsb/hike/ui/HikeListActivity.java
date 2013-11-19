@@ -24,10 +24,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -202,19 +202,21 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
-				|| settings.getBoolean(
-						HikeMessengerApp.SEND_NATIVE_INVITE, false);
+				|| settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
+						false);
 
-		if (sendNativeInvite && !settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
+		if (sendNativeInvite
+				&& !settings.getBoolean(
+						HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
 			final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);
 			dialog.setCancelable(true);
-	
+
 			TextView header = (TextView) dialog.findViewById(R.id.header);
 			TextView body = (TextView) dialog.findViewById(R.id.body_text);
 			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
 			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-	
+
 			btnCancel.setVisibility(View.GONE);
 			header.setText(R.string.native_header);
 			body.setText(R.string.native_info);
@@ -222,28 +224,29 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 			CheckBox checkBox = (CheckBox) dialog
 					.findViewById(R.id.body_checkbox);
 			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-	
+
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView,
 						boolean isChecked) {
 					Editor editor = settings.edit();
-					editor.putBoolean(
-							HikeConstants.OPERATOR_SMS_ALERT_CHECKED, isChecked);
+					editor.putBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED,
+							isChecked);
 					editor.commit();
 				}
 			});
-			checkBox.setText(getResources().getString(R.string.not_show_call_alert_msg));
-			
+			checkBox.setText(getResources().getString(
+					R.string.not_show_call_alert_msg));
+
 			btnOk.setOnClickListener(new OnClickListener() {
-	
+
 				@Override
 				public void onClick(View v) {
 					onTitleIconClick(null);
 				}
 			});
-	
+
 			dialog.show();
-		}else{
+		} else {
 			onTitleIconClick(null);
 		}
 	}
