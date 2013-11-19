@@ -1459,6 +1459,11 @@ public class Utils {
 
 	public static void sendInvite(String msisdn, Context context,
 			boolean dbUpdated) {
+		sendInvite(msisdn, context, dbUpdated, false);
+	}
+
+	public static void sendInvite(String msisdn, Context context,
+			boolean dbUpdated, boolean sentMqttPacket) {
 
 		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
 				|| context.getSharedPreferences(
@@ -1467,8 +1472,10 @@ public class Utils {
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
 				context);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-				convMessage.serialize(sendNativeInvite));
+		if (!sentMqttPacket) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					convMessage.serialize(sendNativeInvite));
+		}
 
 		if (sendNativeInvite) {
 			SmsManager smsManager = SmsManager.getDefault();

@@ -9,6 +9,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -376,25 +380,60 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 	public void onTitleIconClick(View v) {
 		if (type != Type.BLOCK) {
 
-			Iterator<String> iterator = selectedContacts.iterator();
-
-			while (iterator.hasNext()) {
-				String msisdn = iterator.next();
-				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-				Utils.sendInvite(msisdn, this);
+			if (selectedContacts.isEmpty()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.select_invite_contacts, Toast.LENGTH_SHORT)
+						.show();
+				return;
 			}
 
-			if (!selectedContacts.isEmpty()) {
+			Iterator<String> iterator = selectedContacts.iterator();
+
+			boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+					|| getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+							0).getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
+							false);
+
+			long time = System.currentTimeMillis();
+
+			try {
+				JSONObject mqttPacket = new JSONObject();
+				JSONObject data = new JSONObject();
+
+				mqttPacket.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.MULTI_INVITE);
+				if (sendNativeInvite) {
+					mqttPacket
+							.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
+				}
+				mqttPacket.put(HikeConstants.TIMESTAMP, time / 1000);
+
+				JSONArray inviteArray = new JSONArray();
+
+				while (iterator.hasNext()) {
+					String msisdn = iterator.next();
+					Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+					Utils.sendInvite(msisdn, this, false, true);
+
+					inviteArray.put(msisdn);
+				}
+				data.put(HikeConstants.MESSAGE_ID, time);
+				data.put(HikeConstants.LIST, inviteArray);
+
+				mqttPacket.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						mqttPacket);
+
+
 				Toast.makeText(
 						getApplicationContext(),
 						selectedContacts.size() > 1 ? R.string.invites_sent
 								: R.string.invite_sent, Toast.LENGTH_SHORT)
 						.show();
 				finish();
-			} else {
-				Toast.makeText(getApplicationContext(),
-						R.string.select_invite_contacts, Toast.LENGTH_SHORT)
-						.show();
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
 		} else {
 			for (Entry<String, Boolean> toggleBlockEntry : toggleBlockMap

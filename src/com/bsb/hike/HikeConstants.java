@@ -172,6 +172,7 @@ public class HikeConstants {
 	public static final String SHOW_FREE_INVITES = "show_free_invites";
 	public static final String FREE_INVITE_POPUP_TITLE = "free_invite_popup_title";
 	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
+	public static final String LIST = "list";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -774,6 +775,7 @@ public class HikeConstants {
 		public static final String FACEBOOK = "fb";
 		public static final String UPDATE_PUSH = "update";
 		public static final String APPLICATIONS_PUSH = "applications";
+		public static final String MULTI_INVITE = "mi";
 	}
 
 	public static final class SMSNative {
