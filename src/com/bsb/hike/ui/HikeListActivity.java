@@ -13,6 +13,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -102,8 +103,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 			doneContainer.setVisibility(View.GONE);
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
-		getSupportActionBar().setBackgroundDrawable(
-				getResources().getDrawable(R.drawable.bg_header));
 		setLabel();
 	}
 
@@ -122,7 +121,16 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		if (type != Type.BLOCK) {
 			doneContainer = (ViewGroup) actionBarView
 					.findViewById(R.id.done_container);
+
+			int padding = (int) (7 * Utils.densityMultiplier);
+			doneContainer.setPadding(padding, 0, padding, 0);
+
 			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
+			doneText.setTextSize(14);
+			doneText.setTypeface(doneText.getTypeface(), Typeface.BOLD);
+
+			View tickView = actionBarView.findViewById(R.id.ic_tick);
+			tickView.setVisibility(View.GONE);
 
 			doneContainer.setOnClickListener(new OnClickListener() {
 
@@ -271,10 +279,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
-			/*
-			 * This would be true when we have pre checked items.
-			 */
-			if (type != Type.INVITE) {
+			ViewGroup selectAllContainer = (ViewGroup) findViewById(R.id.select_all_container);
+
+			switch (type) {
+			case BLOCK:
+				/*
+				 * This would be true when we have pre checked items.
+				 */
 				for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList) {
 					boolean checked = contactItem.first.get();
 					if (checked) {
@@ -283,6 +294,38 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 						break;
 					}
 				}
+				selectAllContainer.setVisibility(View.GONE);
+				break;
+			case INVITE:
+				selectAllContainer.setVisibility(View.VISIBLE);
+
+				final TextView selectAllText = (TextView) findViewById(R.id.select_all_text);
+				final CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+
+				final int size = contactList.size();
+
+				selectAllText.setText(getString(R.string.select_all, size));
+				selectAllCB
+						.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+							@Override
+							public void onCheckedChanged(
+									CompoundButton buttonView, boolean isChecked) {
+								selectAllToggled(isChecked);
+								selectAllText.setText(getString(
+										isChecked ? R.string.deselect_all
+												: R.string.select_all, size));
+							}
+						});
+
+				selectAllContainer.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						selectAllCB.setChecked(!selectAllCB.isChecked());
+					}
+				});
+				break;
 			}
 
 			adapter = new HikeInviteAdapter(HikeListActivity.this, -1,
@@ -291,7 +334,23 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			listView.setAdapter(adapter);
 		}
+	}
 
+	public void selectAllToggled(boolean isChecked) {
+		List<Pair<AtomicBoolean, ContactInfo>> contactList = adapter
+				.getCompleteList();
+
+		for (Pair<AtomicBoolean, ContactInfo> pair : contactList) {
+			pair.first.set(isChecked);
+			String msisdn = pair.second.getMsisdn();
+			if (isChecked) {
+				selectedContacts.add(msisdn);
+			} else {
+				selectedContacts.remove(msisdn);
+			}
+		}
+		adapter.selectAllToggled();
+		setupActionBarElements();
 	}
 
 	private List<Pair<AtomicBoolean, ContactInfo>> getContactList() {
@@ -348,6 +407,16 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		}
 	}
 
+	private void setupActionBarElements() {
+		if (!selectedContacts.isEmpty()) {
+			doneContainer.setVisibility(View.VISIBLE);
+			doneText.setText(getString(R.string.send_invite,
+					selectedContacts.size()));
+		} else {
+			init();
+		}
+	}
+
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int arg2, long arg3) {
 		Object tag = view.getTag();
@@ -364,15 +433,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 					selectedContacts.add(msisdn);
 				}
 
-				if (!selectedContacts.isEmpty()) {
-					doneContainer.setVisibility(View.VISIBLE);
-					doneText.setText(Integer.toString(selectedContacts.size()));
-					getSupportActionBar().setBackgroundDrawable(
-							getResources().getDrawable(
-									R.drawable.bg_header_compose));
-				} else {
-					init();
-				}
+				setupActionBarElements();
 
 			} else {
 				doneBtn.setEnabled(true);
