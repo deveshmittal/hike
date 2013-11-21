@@ -73,11 +73,11 @@ public class DownloadStickerTask extends StickerTaskBase {
 		 * If the category is the default one, we should add the default
 		 * stickers as well.
 		 */
-		if (categoryIndex == 0) {
+		if (categoryIndex == 1) {
 			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS_1) {
 				existingStickerIds.put(stickerId);
 			}
-		} else if (categoryIndex == 1) {
+		} else if (categoryIndex == 2) {
 			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS_2) {
 				existingStickerIds.put(stickerId);
 			}

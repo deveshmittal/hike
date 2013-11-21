@@ -2641,12 +2641,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public void insertDoggyStickerCategory() {
-		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[1],
+		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[2],
 				EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length, false);
 	}
 
 	public void insertHumanoidStickerCategory() {
-		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
+		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[1],
 				EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length, false);
 	}
 

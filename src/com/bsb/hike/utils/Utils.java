@@ -3121,10 +3121,10 @@ public class Utils {
 
 				int resourceId = 0;
 
-				if (sticker.getCategoryIndex() == 0) {
+				if (sticker.getCategoryIndex() == 1) {
 					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
 							.getStickerIndex()];
-				} else if (sticker.getCategoryIndex() == 1) {
+				} else if (sticker.getCategoryIndex() == 2) {
 					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
 							.getStickerIndex()];
 				}

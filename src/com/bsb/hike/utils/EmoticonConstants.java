@@ -529,20 +529,22 @@ public class EmoticonConstants {
 			"005_sorry.png", "006_urgh.png", "007_confused.png",
 			"008_dreaming.png", };
 
-	public static final String[] STICKER_CATEGORY_IDS = { "humanoid", "doggy",
+	public static final String[] STICKER_CATEGORY_IDS = { "recent","humanoid", "doggy",
 			"kitty", "expressions", HikeConstants.BOLLYWOOD_CATEGORY,
 			"rageface" };
 
-	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.humanoid,
+	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.humanoid,R.drawable.humanoid,
 			R.drawable.doggy, R.drawable.kitty, R.drawable.expressions,
 			R.drawable.bollywood, R.drawable.rageface };
 
 	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
+			123, // for recents
 			R.drawable.preview_humanoid, R.drawable.preview_doggy,
 			R.drawable.preview_kitty, R.drawable.preview_expressions,
 			R.drawable.preview_bollywood, R.drawable.preview_rageface };
 
 	public static final String[] STICKER_DOWNLOAD_PREF = {
+			"recentStickers", // This is for recents
 			"humanoidDownloadShown", "doggyDownloadShown",
 			"kittyDownloadShown", "expDownloadShown", "bollywoodDownloadShown",
 			"rfDownloadShown" };

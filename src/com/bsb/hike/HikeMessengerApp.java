@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -667,12 +669,20 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 
 		/*
+		 * Recent stickers handling
+		 */
+		recentStickers = new LinkedHashSet<Sticker>(30);
+		// load recent from persistence storage
+		
+		/*
 		 * If we had earlier removed bollywood stickers we need to display them
 		 * again.
 		 */
 		if (settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
 			setupBollywoodCategoryVisibility(settings);
 		}
+		
+		// remove this
 		setupStickerCategoryList(settings);
 
 		/*
@@ -681,7 +691,7 @@ public class HikeMessengerApp extends Application implements Listener {
 		 */
 		if (!preferenceManager.contains(REMOVE_HUMANOID_STICKERS)) {
 			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
-					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
+					this, EmoticonConstants.STICKER_CATEGORY_IDS[1]);
 			if (categoryDirPath != null) {
 				File categoryDir = new File(categoryDirPath);
 				Utils.deleteFile(categoryDir);
@@ -711,10 +721,10 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (!settings.getBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
 			HikeConversationsDatabase.getInstance()
 					.updateReachedEndForCategory(
-							EmoticonConstants.STICKER_CATEGORY_IDS[0], false);
+							EmoticonConstants.STICKER_CATEGORY_IDS[1], false);
 			HikeConversationsDatabase.getInstance()
 					.updateReachedEndForCategory(
-							EmoticonConstants.STICKER_CATEGORY_IDS[1], false);
+							EmoticonConstants.STICKER_CATEGORY_IDS[2], false);
 
 			Editor editor = settings.edit();
 			editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
@@ -784,7 +794,8 @@ public class HikeMessengerApp extends Application implements Listener {
 		editor.remove(REMOVED_CATGORY_IDS);
 		editor.commit();
 
-		setupStickerCategoryList(prefs);
+		// remove this
+		//setupStickerCategoryList(prefs);
 	}
 
 	public static HikePubSub getPubSub() {
@@ -872,6 +883,11 @@ public class HikeMessengerApp extends Application implements Listener {
 		stickerCategories = new ArrayList<StickerCategory>();
 
 		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
+			if("recent".equals(EmoticonConstants.STICKER_CATEGORY_IDS[i]))
+			{
+				stickerCategories.add(new StickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[i]));
+				continue;
+			}
 			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance()
 					.isStickerUpdateAvailable(
 							EmoticonConstants.STICKER_CATEGORY_IDS[i]);
@@ -912,5 +928,31 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 		StickerCategory stickerCategory = stickerCategories.get(index);
 		stickerCategory.updateAvailable = updateAvailable;
+	}
+
+	// recent sticker changes	 
+	private LinkedHashSet<Sticker> recentStickers;
+	
+	public LinkedHashSet<Sticker> getRecentStickerList()
+	{
+		return recentStickers;
+	}
+	
+	public void addRecentSticker(Sticker st)
+	{
+		boolean isRemoved = recentStickers.remove(st);
+		if(isRemoved) // this means list size is less than 30
+			recentStickers.add(st);
+		else if(recentStickers.size() == 30) // if size is already 30 remove first element and then add
+		{
+			Sticker firstSt =  recentStickers.iterator().next();
+			if(firstSt != null)
+				recentStickers.remove(firstSt);
+			recentStickers.add(st);
+		}
+		else
+		{
+			recentStickers.add(st);
+		}
 	}
 }

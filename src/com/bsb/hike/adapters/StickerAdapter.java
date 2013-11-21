@@ -1,8 +1,11 @@
 package com.bsb.hike.adapters;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import android.app.Activity;
@@ -140,10 +143,31 @@ public class StickerAdapter extends PagerAdapter implements
 				protected List<Sticker> doInBackground(Void... params) {
 					List<Sticker> stickerList = new ArrayList<Sticker>();
 
-					if (position == 1) {
+					// this is for recent stickers
+					if(position == 0)
+					{
+						HikeMessengerApp happ = (HikeMessengerApp)activity.getApplicationContext();
+						Object[] lhs = happ.getRecentStickerList().toArray();
+						int size = lhs.length;
+						ArrayList<Sticker> orderedRecentStickers = new ArrayList<Sticker>(size);
+						for(int i = size -1 ; i >= 0; i--)
+						{
+							try
+							{
+								Sticker st = (Sticker)lhs[i];
+								orderedRecentStickers.add(st);
+							}
+							catch (Exception e)
+							{
+								Log.e(getClass().getSimpleName(), "Exception in recent stickers", e);
+							}
+						}
+						return orderedRecentStickers;
+					}
+					else if (position == 2) {
 						addDefaultStickers(stickerList,
 								EmoticonConstants.LOCAL_STICKER_IDS_2);
-					} else if (position == 0) {
+					} else if (position == 1) {
 						addDefaultStickers(stickerList,
 								EmoticonConstants.LOCAL_STICKER_IDS_1);
 					}

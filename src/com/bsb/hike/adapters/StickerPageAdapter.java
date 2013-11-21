@@ -176,11 +176,11 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1) {
-					if (sticker.getCategoryIndex() == 1) {
+					if (sticker.getCategoryIndex() == 2) {
 						imageView
 								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_2[sticker
 										.getStickerIndex()]);
-					} else if (sticker.getCategoryIndex() == 0) {
+					} else if (sticker.getCategoryIndex() == 1) {
 						imageView
 								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_1[sticker
 										.getStickerIndex()]);
@@ -243,5 +243,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	public void onClick(View v) {
 		Sticker sticker = (Sticker) v.getTag();
 		((ChatThread) activity).sendSticker(sticker);
+		((HikeMessengerApp)activity.getApplicationContext()).addRecentSticker(sticker);
 	}
 }

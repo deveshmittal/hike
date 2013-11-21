@@ -1,10 +1,12 @@
 package com.bsb.hike.models;
 
+import com.bsb.hike.R;
+
 
 public class StickerCategory {
 
 	public String categoryId;
-	public int categoryResId;
+	public int categoryResId; // this is for showing small icons in sticker pallete, one those are below actual stickers
 	public String downloadDialogPref;
 	public int categoryPreviewResId;
 	public boolean updateAvailable;
@@ -17,6 +19,15 @@ public class StickerCategory {
 		this.downloadDialogPref = downloadDialogPref;
 		this.categoryPreviewResId = categoryPreviewResId;
 		this.updateAvailable = updateAvailable;
+	}
+
+	// this is mostly used for recents stickers only
+	public StickerCategory(String category)
+	{
+		this.categoryId = category;
+		this.categoryResId = R.drawable.humanoid; // change this once you get icon for recents
+		this.updateAvailable = false;
+		this.downloadDialogPref = "recentDiagPref";
 	}
 
 	@Override

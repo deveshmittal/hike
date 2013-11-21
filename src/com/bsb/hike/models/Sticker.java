@@ -45,12 +45,12 @@ public class Sticker implements Comparable<Sticker> {
 		/*
 		 * Only set sticker index if the category is a local one
 		 */
-		if (categoryIndex == 0 || categoryIndex == 1) {
+		if (categoryIndex == 1 || categoryIndex == 2) {
 			int stickerNumber = Integer.valueOf(stickerId.substring(0,
 					stickerId.indexOf("_")));
 
-			if ((categoryIndex == 1 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length)
-					|| (categoryIndex == 0 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length)) {
+			if ((categoryIndex == 2 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length)
+					|| (categoryIndex == 1 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length)) {
 				this.stickerIndex = stickerNumber - 1;
 			}
 		}
@@ -100,5 +100,34 @@ public class Sticker implements Comparable<Sticker> {
 		}
 		return (this.stickerId.toLowerCase().compareTo(rhs.stickerId
 				.toLowerCase()));
+	}
+	
+	/* Need to override equals and hashcode inorder to use them in recentStickers linkedhashset*/
+	@Override
+	public boolean equals(Object object)
+	{
+		boolean result = false;
+		if (object == null || object.getClass() != getClass())
+		{
+			result = false;
+		}
+		else
+		{
+			Sticker st = (Sticker) object;
+			if (this.categoryId == st.getCategoryId() && this.stickerId == st.getStickerId())
+			{
+				result = true;
+			}
+		}
+		return result;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		int hash = 3;
+		hash = 7 * hash + this.categoryId.hashCode();
+		hash = 7 * hash + this.stickerId.hashCode();
+		return hash;
 	}
 }
