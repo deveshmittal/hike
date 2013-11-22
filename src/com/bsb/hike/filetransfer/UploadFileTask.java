@@ -537,6 +537,8 @@ public class UploadFileTask extends FileTransferBase
 		return res.toString();
 	}
 	
+	//@GM
+	//for updating progress on UI
 	private boolean shouldSendProgress()
 	{
 		int x = progressPercentage / 10;

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -49,7 +47,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -58,14 +55,12 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.R.id;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -130,7 +125,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ViewGroup avatarContainer;
 		ViewGroup typingAvatarContainer;
 		
-		//TextView resumeBtn;
+		//@GM View Items needed for pause/resume overlay
 		View overlayBg;
 		ImageView resumeBtn;
 		TextView dataTransferred;
@@ -316,6 +311,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					Log.d("Upload- button pressed", fss.getFTState().toString());
 					
+					//If the file is complete or has not started yet overlay should not be in action
 					if(fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED)
 						return;
 					
@@ -342,6 +338,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					Log.d("Download- button pressed", fss.getFTState().toString());
 					
+					//If the file is complete or has not started yet overlay should not be in action
 					if(fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED)
 						return;
 					
@@ -369,6 +366,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final ConvMessage convMessage = getItem(position);
+		
+		//HikeFile, file and FileSavedState will be called here once and for all
 		HikeFile hikeFile = null;
 		File file = null;
 		FileSavedState fss = null;
@@ -1334,39 +1333,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 		
 //		@GM		
-//		=============================Implementing the PAUSE/RESUME Button========================
+//		=============================Implementing the PAUSE/RESUME Tap Overlay========================
 		if(convMessage.isFileTransferMessage() )
 		{
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT)
-					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING) && (hikeFile.getHikeFileType() != HikeFileType.AUDIO))
-			{
-				switch (fss.getFTState())
-				{
-				case IN_PROGRESS:
-					holder.overlayBg.setVisibility(View.VISIBLE);
-					break;
-
-				case PAUSED:
-					holder.overlayBg.setVisibility(View.VISIBLE);
-					break;
-
-				case ERROR:
-					holder.overlayBg.setVisibility(View.VISIBLE);
-					break;
-
-				default:
-					holder.overlayBg.setVisibility(View.GONE);
-
-				}
-			}
-			else
-			{
-				holder.overlayBg.setVisibility(View.GONE);
-			}
-		}
-		
-		if(convMessage.isFileTransferMessage() )
-		{
+			//Tap overlay will be there only in case of image and video. 
 			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT)
 					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING) && (hikeFile.getHikeFileType() != HikeFileType.AUDIO))
 			{
@@ -1650,6 +1620,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		return v;
 	}
 	
+	//@GM
+	//The following methods returns the user readable size when passed the bytes in size
 	private String dataDisplay(int bytes)
 	{
 		Log.d(getClass().getSimpleName(),"DataDisplay of bytes : " + bytes);

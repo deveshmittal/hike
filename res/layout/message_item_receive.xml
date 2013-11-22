@@ -135,7 +135,12 @@
 	                android:gravity="center_vertical"
 	                android:orientation="horizontal" >
 	                
-	                <RelativeLayout
+	                <!-- 
+	                @GM
+	                changed the file thumbnail view with the following relative view
+	                that contains thumbnail + the realtion view of the overlay
+	                 -->
+	                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
 
