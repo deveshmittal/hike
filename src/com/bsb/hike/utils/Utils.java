@@ -2544,8 +2544,8 @@ public class Utils {
 
 		switch (tipType) {
 		case EMOTICON:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_left);
-			tipText.setText(R.string.emoticons_stickers_tip);
+			container.setBackgroundResource(R.drawable.bg_sticker_ftue);
+			tipText.setText(R.string.sticker_ftue_body);
 			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);

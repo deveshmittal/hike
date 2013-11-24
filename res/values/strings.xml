@@ -697,4 +697,5 @@
 	<string name="error_capture_video">Error capturing the video</string>
 	<string name="free_invite_header">Free SMS Invites</string>
 	<string name="free_invite_body">Now invite friends via SMS for free. No charges apply :)</string>
+	<string name="sticker_ftue_body">Try out our new Stickers!</string>
 </resources>

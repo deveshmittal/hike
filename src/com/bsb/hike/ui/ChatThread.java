@@ -1404,8 +1404,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					|| ((GroupConversation) mConversation).getIsGroupAlive()) {
 				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP,
 						false)) {
-					tipView = findViewById(R.id.emoticon_tip);
-					Utils.showTip(this, TipType.EMOTICON, tipView);
+					showStickerFtueTip();
 				} else if (!prefs.getBoolean(
 						HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false)) {
 					/*
@@ -1427,7 +1426,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 	}
-
+	
+	private void showStickerFtueTip(){
+		tipView = findViewById(R.id.emoticon_tip);
+		tipView.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1)
+			{
+				//disabling on touch gesture for sticker ftue tip
+				//so that we do not send an unnecessary nudge on a
+				//double tap on tipview. 
+				return true;
+			}
+		});
+		Utils.showTip(this, TipType.EMOTICON, tipView);
+		Animation stickerFtueAnimation = AnimationUtils.loadAnimation(this, R.anim.sticker_ftue_anim);
+		findViewById(R.id.sticker_image_icon).startAnimation(stickerFtueAnimation);
+	}
+	
 	private void setupActionBar() {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -3673,14 +3690,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	public void onEmoticonBtnClicked(View v, int whichSubcategory,
 			boolean backPressed) {
-		if (tipView != null) {
-			TipType viewTipType = (TipType) tipView.getTag();
-			if (viewTipType == TipType.EMOTICON) {
-				Utils.closeTip(TipType.EMOTICON, tipView, prefs);
-				tipView = null;
-			}
-		}
-
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout)
 				: emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
@@ -3692,6 +3701,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			int[] tabDrawables = null;
 
 			if (v.getId() == R.id.sticker_btn) {
+				if (tipView != null) {
+					TipType viewTipType = (TipType) tipView.getTag();
+					if (viewTipType == TipType.EMOTICON ) {
+						Utils.closeTip(TipType.EMOTICON, tipView, prefs);
+						tipView = null;
+					}
+				}
 				if (emoticonType != EmoticonType.STICKERS) {
 					sameType = false;
 					emoticonType = EmoticonType.STICKERS;
