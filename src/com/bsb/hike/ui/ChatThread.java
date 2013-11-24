@@ -1331,7 +1331,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
-
+		if(mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)){
+			//In case of Emma HikeBot we show sticker Ftue tip only on scrolling to
+			//the bottom of the chat thread
+			mConversationsView.setOnScrollListener(getOnScrollListenerForEmmaThread());
+		}
+		
 		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) {
 			Animation alphaIn = AnimationUtils.loadAnimation(
 					getApplicationContext(), R.anim.slide_up_noalpha);
@@ -1427,6 +1432,47 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 	}
 	
+	/*
+	 * In case of Emma hikebot we show sticker ftue tip only
+	 * on scrolling to the bottom of the emma chatthread
+	 */
+	private OnScrollListener getOnScrollListenerForEmmaThread()
+	{
+		return new OnScrollListener()
+		{
+			@Override
+			public void onScrollStateChanged(AbsListView arg0, int arg1)
+			{
+			}
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+			{
+				ChatThread.this.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+				if( view.getChildAt(view.getChildCount() - 1) != null && view.getLastVisiblePosition() == view.getAdapter().getCount() -1 &&
+						view.getChildAt(view.getChildCount() - 1).getBottom() <= view.getHeight()){
+					if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP,
+							false)) {
+						//variable hideTip is for hiding the sticker tip
+						//for the first auto scroll from bottom to top of emma thread.
+						//after that if user manually scroll the emma thread from top
+						//to bottom than we show the tip and keep it showing than on
+						boolean hideTip = false;
+						if(tipView == null){
+							hideTip = true;
+						}
+						
+						showStickerFtueTip();
+						
+						if(hideTip){
+							tipView.setVisibility(View.GONE);
+						}
+					}
+				} 
+			}
+		} ;
+	}
+
 	private void showStickerFtueTip(){
 		tipView = findViewById(R.id.emoticon_tip);
 		tipView.setOnTouchListener(new OnTouchListener()
