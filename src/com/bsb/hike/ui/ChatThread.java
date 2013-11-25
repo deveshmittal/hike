@@ -4084,6 +4084,54 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			dividerBg = getResources().getColor(R.color.rf_div);
 			break;
+		case R.drawable.humanoid2:
+			resParentBg = getResources().getColor(R.color.humanoid2_bg);
+
+			stickerBtnBg = R.drawable.humanoid2_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.humanoid2_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.humanoid2_btn_text_shadow);
+
+			categoryText = R.string.humanoid2_category;
+			categoryTextColor = getResources().getColor(R.color.humanoid2_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.humanoid2_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.humanoid2_div);
+			break;
+		case R.drawable.smileyexpressions:
+			resParentBg = getResources().getColor(R.color.se_bg);
+
+			stickerBtnBg = R.drawable.se_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.se_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.se_btn_text_shadow);
+
+			categoryText = R.string.se_category;
+			categoryTextColor = getResources().getColor(R.color.se_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.se_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.se_div);
+			break;
+		case R.drawable.avtars:
+			resParentBg = getResources().getColor(R.color.avtars_bg);
+
+			stickerBtnBg = R.drawable.avtars_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.avtars_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.avtars_btn_text_shadow);
+
+			categoryText = R.string.avtars_category;
+			categoryTextColor = getResources().getColor(R.color.avtars_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.avtars_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.avtars_div);
+			break;
 		}
 
 		parentDrawable.setColor(resParentBg);

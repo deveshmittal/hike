@@ -700,4 +700,7 @@
 	<string name="sticker_ftue_body">Try out our new Stickers!</string>
 	<string name="select_all">Select all (%1$d)</string>
 	<string name="deselect_all">Deselect all (%1$d)</string>
+	<string name="humanoid2_category">Humanoid 2</string>
+	<string name="se_category">Smiley Expressions</string>
+	<string name="avtars_category">Avatars</string>	
 </resources>
