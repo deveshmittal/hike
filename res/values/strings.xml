@@ -697,6 +697,10 @@
 	<string name="error_capture_video">Error capturing the video</string>
 	<string name="free_invite_header">Free SMS Invites</string>
 	<string name="free_invite_body">Now invite friends via SMS for free. No charges apply :)</string>
+	<string name="sticker_ftue_body">Try out our new Stickers!</string>
 	<string name="select_all">Select all (%1$d)</string>
 	<string name="deselect_all">Deselect all (%1$d)</string>
+	<string name="humanoid2_category">Humanoid 2</string>
+	<string name="se_category">Smiley Expressions</string>
+	<string name="avtars_category">Avatars</string>	
 </resources>

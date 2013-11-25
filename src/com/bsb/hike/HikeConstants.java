@@ -733,6 +733,10 @@ public class HikeConstants {
 		public static final String INVITE_SMS_SCREEN_FROM_INVITE = "inviteSMSScreenFromInvite";
 		public static final String INVITE_SMS_SCREEN_FROM_CREDIT = "inviteSMSScreenFromCredit";
 		public static final String SELECT_ALL_INVITE = "selectAllInvite";
+		/*
+		 * Sticker Ftue
+		 */
+		public static final String STICKER_FTUE_BTN_CLICK = "stickerFtueBtnClick";
 	}
 
 	public static final class MqttMessageTypes {
