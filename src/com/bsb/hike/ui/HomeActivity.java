@@ -494,9 +494,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
 		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
 
+		final boolean showingRewardsPopup = !accountPrefs.getBoolean(
+				HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true);
+
 		if (image != null) {
-			image.setImageResource(accountPrefs.getBoolean(
-					HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true) ? R.drawable.ic_free_sms_default
+			image.setImageResource(!showingRewardsPopup ? R.drawable.ic_free_sms_default
 					: R.drawable.ic_free_sms_rewards);
 		}
 
@@ -510,7 +512,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 						HikeListActivity.class);
 				startActivity(intent);
 
-				Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP);
+				Utils.sendUILogEvent(showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS
+						: HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
 			}
 		});
 

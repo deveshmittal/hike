@@ -729,7 +729,8 @@ public class HikeConstants {
 		/*
 		 * Invite keys 
 		 */
-		public static final String INVITE_FRIENDS_FROM_POPUP = "inviteFriendsFromPopup";
+		public static final String INVITE_FRIENDS_FROM_POPUP_FREE_SMS = "inviteFriendsFromPopupFreeSMS";
+		public static final String INVITE_FRIENDS_FROM_POPUP_REWARDS = "inviteFriendsFromPopupRewards";
 		public static final String INVITE_SMS_SCREEN_FROM_INVITE = "inviteSMSScreenFromInvite";
 		public static final String INVITE_SMS_SCREEN_FROM_CREDIT = "inviteSMSScreenFromCredit";
 		public static final String SELECT_ALL_INVITE = "selectAllInvite";
