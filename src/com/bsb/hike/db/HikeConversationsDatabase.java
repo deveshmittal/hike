@@ -831,12 +831,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 							+ DBConstants.MESSAGES_TABLE + "."
 							+ DBConstants.MESSAGE + "=? AND "
 							+ DBConstants.CONVERSATIONS_TABLE + "."
-							+ DBConstants.MSISDN + "=?",
+							+ DBConstants.MSISDN + "=? AND "
+							+ DBConstants.MESSAGES_TABLE + "."
+							+ DBConstants.TIMESTAMP + "=?",
 					new String[] { Long.toString(conv.getMappedMsgID()),
-							conv.getMessage(), conv.getMsisdn() }, null, null,
+							conv.getMessage(), conv.getMsisdn(),
+							Long.toString(conv.getTimestamp()) }, null, null,
 					null);
 			int count = c.getCount();
-			return (count != 0);
+			return count != 0;
 		} finally {
 			if (c != null) {
 				c.close();

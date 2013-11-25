@@ -30,7 +30,7 @@ public class HikeInviteAdapter extends
 	private List<Pair<AtomicBoolean, ContactInfo>> completeList;
 	private List<Pair<AtomicBoolean, ContactInfo>> filteredList;
 	private ContactFilter filter;
-	private String unknownNumber;
+	private String filterString;
 	private boolean showingBlockedList;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId,
@@ -47,6 +47,14 @@ public class HikeInviteAdapter extends
 		this.showingBlockedList = showingBLockedList;
 	}
 
+	public void selectAllToggled() {
+		filter.filter(filterString);
+	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getCompleteList() {
+		return completeList;
+	}
+
 	@Override
 	protected View getItemView(int position, View convertView, ViewGroup parent) {
 		Pair<AtomicBoolean, ContactInfo> pair = getItem(position);
@@ -57,8 +65,8 @@ public class HikeInviteAdapter extends
 			isChecked = pair.first;
 			contactInfo = pair.second;
 		} else {
-			contactInfo = new ContactInfo(unknownNumber, unknownNumber,
-					unknownNumber, unknownNumber);
+			contactInfo = new ContactInfo(filterString, filterString,
+					filterString, filterString);
 		}
 
 		LayoutInflater inflater = (LayoutInflater) activity
@@ -70,8 +78,8 @@ public class HikeInviteAdapter extends
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		imageView.setImageDrawable(pair != null ? IconCacheManager
 				.getInstance().getIconForMSISDN(contactInfo.getMsisdn(), true)
-				: getContext().getResources()
-						.getDrawable(R.drawable.ic_avatar1_rounded));
+				: getContext().getResources().getDrawable(
+						R.drawable.ic_avatar1_rounded));
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
@@ -111,7 +119,7 @@ public class HikeInviteAdapter extends
 	@Override
 	public void afterTextChanged(Editable s) {
 		filter.filter(s);
-		unknownNumber = s.toString();
+		filterString = s.toString();
 	}
 
 	@Override
@@ -189,7 +197,7 @@ public class HikeInviteAdapter extends
 	@Override
 	public boolean isEnabled(int position) {
 		if (filteredList.get(position) == null) {
-			return unknownNumber.matches(HikeConstants.VALID_MSISDN_REGEX);
+			return filterString.matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
 		return super.isEnabled(position);
 	}

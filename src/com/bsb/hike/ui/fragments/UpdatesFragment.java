@@ -193,6 +193,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		centralTimelineAdapter
+				.setIsScrolling(scrollState != OnScrollListener.SCROLL_STATE_IDLE);
 	}
 
 	@Override
