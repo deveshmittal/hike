@@ -3796,6 +3796,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					TipType viewTipType = (TipType) tipView.getTag();
 					if (viewTipType == TipType.EMOTICON ) {
 						Utils.closeTip(TipType.EMOTICON, tipView, prefs);
+						Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
 						tipView = null;
 					}
 				}
