@@ -1716,7 +1716,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			if (ids != null) {
 				int lastReadIndex = messages.size() - ids.length();
 				// Scroll to the last unread message
-				mConversationsView.setSelection(lastReadIndex - 1);
+				if(lastReadIndex == 0){
+					mConversationsView.setSelection(lastReadIndex);
+				} else{
+					mConversationsView.setSelection(lastReadIndex - 1);
+				}
 
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
