@@ -289,7 +289,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.STICKER_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED };
+			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
+			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, };
 
 	private EmoticonType emoticonType;
 
@@ -1510,15 +1511,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mLastSeenView.setSelected(true);
 
 		if (mConversation instanceof GroupConversation) {
-			int numActivePeople = ((GroupConversation) mConversation)
-					.getGroupMemberAliveCount();
-			if (numActivePeople > 0) {
-				/*
-				 * Adding 1 to count the user.
-				 */
-				mLastSeenView.setText(getString(R.string.num_people,
-						(numActivePeople + 1)));
-			}
+			updateActivePeopleNumberView(0);
 		} else {
 			mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike
 					: R.string.on_sms);
@@ -1551,6 +1544,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+	
+	private void updateActivePeopleNumberView(int addPeopleCount){
+		int numActivePeople = ((GroupConversation) mConversation)
+				.getGroupMemberAliveCount() + addPeopleCount;
+		((GroupConversation) mConversation).setGroupMemberAliveCount(numActivePeople);
+		
+		if (numActivePeople > 0) {
+			/*
+			 * Adding 1 to count the user.
+			 */
+			mLastSeenView.setText(getString(R.string.num_people,
+					(numActivePeople + 1)));
+		}
 	}
 
 	private void openProfileScreen() {
@@ -2227,6 +2234,40 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					updateUIForHikeStatus();
 				}
 			});
+		} else if (HikePubSub.PARTICIPANT_LEFT_GROUP.equals(type)) {
+			if (mConversation == null) {
+				return;
+			}
+			if (mConversation instanceof GroupConversation) {
+				if (mConversation.getMsisdn().equals(((JSONObject) object)
+						.optString(HikeConstants.TO))) {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							// decrementing one user 
+							updateActivePeopleNumberView(-1);
+						}
+					});
+				}
+			}
+		} else if (HikePubSub.PARTICIPANT_JOINED_GROUP.equals(type)) {
+			if (mConversation == null) {
+				return;
+			}
+			if (mConversation.getMsisdn().equals(((JSONObject) object)
+					.optString(HikeConstants.TO))) {
+				JSONObject obj = (JSONObject) object;
+				JSONArray participants = obj
+					.optJSONArray(HikeConstants.DATA);
+				final int addPeopleCount = participants.length();
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						// increment by number of newly added participants
+						updateActivePeopleNumberView(addPeopleCount);
+					}
+				});
+			}
 		}
 	}
 

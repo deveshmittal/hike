@@ -777,6 +777,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		if (profileAdapter == null) {
+			return;
+		}
+		profileAdapter.setIsScrolling(scrollState != SCROLL_STATE_IDLE);
 	}
 
 	private void fetchPersistentData() {
@@ -1599,6 +1603,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						.optString(HikeConstants.DATA);
 				this.participantMap.remove(msisdn);
 
+				groupConversation.setGroupMemberAliveCount(participantMap.size());
 				setupGroupProfileList();
 
 				runOnUiThread(new Runnable() {
@@ -1632,6 +1637,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					participantMap.put(msisdn,
 							new GroupParticipant(participant));
 				}
+				groupConversation.setGroupMemberAliveCount(participantMap.size());
 				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override
