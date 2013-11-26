@@ -530,6 +530,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 								this,
 								dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
 			}
+			if(savedInstanceState
+					.getBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, false)){
+				showStickerFtueTip();
+			}
 		}
 
 		/* register listeners */
@@ -3768,6 +3772,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		outState.putLong(HikeConstants.Extras.RECORDED_TIME, recordedTime);
 		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
 				dialogShowing != null ? dialogShowing.ordinal() : -1);
+		if(mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) 
+				&& findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE){
+			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, true);
+		} 
 		super.onSaveInstanceState(outState);
 	}
 
