@@ -691,5 +691,6 @@
   	<string name="number_confirmation_string">%1$s — это ваш номер?</string>
   	<string name="ftue_friends_subtext">Добавить в друзья</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Коснитесь здесь, чтобы отклонить предложения дружбы</string>
+  	<string name="sticker_ftue_body">Попробуйте наши новые наклейки!</string>
   			
 </resources>
