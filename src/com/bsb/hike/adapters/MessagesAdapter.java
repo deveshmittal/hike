@@ -17,6 +17,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -306,7 +307,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					View overlay = (View) v;
 					overlay.setClickable(false);
 					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
-					resumeButton.setVisibility(View.INVISIBLE);
+					//resumeButton.setImageAlpha(65);
+					//resumeButton.setAlpha(0.3f);
+					//resumeButton.setVisibility(View.INVISIBLE);
 					convMessage.setResumeButtonVisibility(false);
 
 					Log.d("Upload- button pressed", fss.getFTState().toString());
@@ -317,11 +320,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					
 					if (fss.getFTState() == FTState.IN_PROGRESS)
 					{
+						resumeButton.setBackgroundResource(R.drawable.ic_pause_ftr_disabled);
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
 
 					else
 					{
+						resumeButton.setBackgroundResource(R.drawable.ic_resume_ftr_disabled);
 						FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 					}
 					
@@ -333,7 +338,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					View overlay = (View) v;
 					overlay.setClickable(false);
 					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
-					resumeButton.setVisibility(View.INVISIBLE);
+					//resumeButton.setImageAlpha(65);
+					//resumeButton.setAlpha(0.3f);
+					//resumeButton.setVisibility(View.INVISIBLE);
 					convMessage.setResumeButtonVisibility(false);
 
 					Log.d("Download- button pressed", fss.getFTState().toString());
@@ -344,11 +351,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					
 					if (fss.getFTState() == FTState.IN_PROGRESS)
 					{
+						resumeButton.setBackgroundResource(R.drawable.ic_pause_ftr_disabled);
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
 
 					else
 					{
+						resumeButton.setBackgroundResource(R.drawable.ic_resume_ftr_disabled);
 						FileTransferManager.getInstance(context).downloadFile(file, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
 								true);
 					}
@@ -1072,8 +1081,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.setBackgroundResource(R.drawable.ic_default_mov);
 						break;
 					case AUDIO:
-						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_default_audio);
+//						holder.fileThumb
+//								.setBackgroundResource(R.drawable.ic_default_audio);
 						break;
 					case CONTACT:
 						holder.fileThumb
@@ -1332,13 +1341,27 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.image.setVisibility(View.INVISIBLE);
 		}
 		
+		if(convMessage.isFileTransferMessage() && hikeFile.getHikeFileType() == HikeFileType.AUDIO)
+		{
+			holder.fileThumb.getLayoutParams().height=110;
+			holder.fileThumb.getLayoutParams().width=110;
+			holder.fileThumb.setBackgroundColor(Color.rgb(100, 100, 50));
+			holder.resumeBtn.getLayoutParams().height=25;
+			holder.resumeBtn.getLayoutParams().width=25;
+			holder.resumeBtn.setMaxHeight(25);
+			holder.resumeBtn.setMaxWidth(25);
+			//holder.messageTextView.setVisibility(View.GONE);
+			holder.dataTransferred.setTextSize(10);
+			holder.fileThumb.setImageResource(R.drawable.ic_default_audio);
+		}
+		
 //		@GM		
 //		=============================Implementing the PAUSE/RESUME Tap Overlay========================
 		if(convMessage.isFileTransferMessage() )
 		{
 			//Tap overlay will be there only in case of image and video. 
 			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT)
-					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING) && (hikeFile.getHikeFileType() != HikeFileType.AUDIO))
+					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING))
 			{
 				switch (fss.getFTState())
 				{
@@ -1376,26 +1399,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				{
 				case IN_PROGRESS:
 					holder.resumeBtn.setBackgroundResource(R.drawable.ic_pause_ftr);
-					holder.resumeBtn.setVisibility(View.VISIBLE);
 					holder.overlayBg.setClickable(true);
 					break;
 
 				case PAUSED:
-					//holder.resumeBtn.setText("Resume");
 					holder.resumeBtn.setBackgroundResource(R.drawable.ic_resume_ftr);
-					holder.resumeBtn.setVisibility(View.VISIBLE);
 					holder.overlayBg.setClickable(true);
 					break;
 
 				case ERROR:
-					//holder.resumeBtn.setText("Retry");
 					holder.resumeBtn.setBackgroundResource(R.drawable.ic_resume_ftr);
-					holder.resumeBtn.setVisibility(View.VISIBLE);
 					holder.overlayBg.setClickable(true);
 					break;
 
 				default:
-					holder.resumeBtn.setVisibility(View.INVISIBLE);
 					holder.overlayBg.setClickable(false);
 
 				}
@@ -1403,7 +1420,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			else
 			{
-				holder.resumeBtn.setVisibility(View.INVISIBLE);
 				holder.overlayBg.setClickable(false);
 			}
 			
@@ -1634,9 +1650,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			mbPoint/=(1024*102);
 			return (Integer.toString(mb)+ "." + Integer.toString(mbPoint) + " MB");
 		}
-		else if(bytes > 1024)
+		else if(bytes >= 1000)
 		{
-			int kb = bytes/1024;
+			int kb;
+			if(bytes<1024)		//To avoiding showing 1000KB
+				kb = bytes/1000;
+			else
+				kb = bytes/1024;
 			return (Integer.toString(kb) + " KB");
 		}
 		else

@@ -581,7 +581,7 @@ public class UploadFileTask extends FileTransferBase
 
 				hc.addRequestProperty("X-SESSION-ID", X_SESSION_ID);
 				hc.addRequestProperty("X-CONTENT-RANGE", contentRange);
-				Log.d(getClass().getSimpleName(), "TOKEN : " + token);
+				//Log.d(getClass().getSimpleName(), "TOKEN : " + token);
 				hc.addRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
 				hc.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 				hc.setDoInput(true);
