@@ -3,6 +3,8 @@ package com.bsb.hike.tasks;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.json.JSONArray;
@@ -20,9 +22,12 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -33,15 +38,13 @@ public class DownloadStickerTask extends StickerTaskBase {
 	}
 
 	private Context context;
-	private String catId;
-	private int categoryIndex;
+	private StickerCategory category;
 	private DownloadType downloadType;
 
-	public DownloadStickerTask(Context context, int categoryIndex,
+	public DownloadStickerTask(Context context, StickerCategory cat,
 			DownloadType downloadType) {
 		this.context = context;
-		this.categoryIndex = categoryIndex;
-		this.catId = Utils.getCategoryIdForIndex(categoryIndex);
+		this.category = cat;
 		this.downloadType = downloadType;
 	}
 
@@ -52,10 +55,10 @@ public class DownloadStickerTask extends StickerTaskBase {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected FTResult doInBackground(Void... params) {
-		Log.d(getClass().getSimpleName(), "CategoryId: " + catId);
+		Log.d(getClass().getSimpleName(), "CategoryId: " + category.categoryId.name());
 
-		String directoryPath = Utils.getStickerDirectoryForCategoryId(context,
-				catId);
+		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context,
+				category.categoryId.name());
 		if (directoryPath == null) {
 			return FTResult.DOWNLOAD_FAILED;
 		}
@@ -73,12 +76,12 @@ public class DownloadStickerTask extends StickerTaskBase {
 		 * If the category is the default one, we should add the default
 		 * stickers as well.
 		 */
-		if (categoryIndex == 1) {
-			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS_1) {
+		if (category.categoryId.equals(StickerCategoryId.humanoid)) {
+			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID) {
 				existingStickerIds.put(stickerId);
 			}
-		} else if (categoryIndex == 2) {
-			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS_2) {
+		} else if (category.categoryId.equals(StickerCategoryId.doggy)) {
+			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY) {
 				existingStickerIds.put(stickerId);
 			}
 		}
@@ -96,7 +99,8 @@ public class DownloadStickerTask extends StickerTaskBase {
 		smallStickerDir.mkdirs();
 
 		try {
-			JSONObject response = AccountUtils.downloadSticker(catId,
+			
+			JSONObject response = AccountUtils.downloadSticker(category.categoryId.name(),
 					existingStickerIds);
 
 			if (response == null) {
@@ -111,7 +115,7 @@ public class DownloadStickerTask extends StickerTaskBase {
 
 			totalNumber = response.optInt(HikeConstants.NUMBER_OF_STICKERS, -1);
 			reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
-			Log.d(getClass().getSimpleName(), "REached end? " + reachedEnd);
+			Log.d(getClass().getSimpleName(), "Reached end? " + reachedEnd);
 			Log.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 			for (Iterator<String> keys = data.keys(); keys.hasNext();) {
@@ -145,25 +149,26 @@ public class DownloadStickerTask extends StickerTaskBase {
 			return FTResult.DOWNLOAD_FAILED;
 		}
 
+		category.setReachedEnd(reachedEnd);
 		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(
-				catId, totalNumber, reachedEnd);
+				category.categoryId.name(), totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
 	}
 
 	@Override
 	protected void onPostExecute(FTResult result) {
-		HikeMessengerApp.stickerTaskMap.remove(catId);
+		StickerManager.getInstance().removeTask(category.categoryId.name());
 		if (result != FTResult.SUCCESS) {
 			HikeMessengerApp.getPubSub()
 					.publish(
 							HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-							new Pair<Integer, DownloadType>(categoryIndex,
+							new Pair<StickerCategory, DownloadType>(category,
 									downloadType));
 			return;
 		}
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.STICKER_CATEGORY_DOWNLOADED,
-				new Pair<Integer, DownloadType>(categoryIndex, downloadType));
+				new Pair<StickerCategory, DownloadType>(category, downloadType));
 	}
 
 }

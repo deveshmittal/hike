@@ -46,6 +46,8 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper {
@@ -2559,10 +2561,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void addOrUpdateStickerCategory(String categoryId, int totalNum) {
-		addOrUpdateStickerCategory(categoryId, totalNum, false);
-	}
-
 	public void updateReachedEndForCategory(String categoryId,
 			boolean reachedEnd) {
 		ContentValues values = new ContentValues();
@@ -2604,13 +2602,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
-	public boolean isStickerUpdateAvailable(String categoryId) {
+	public boolean isStickerUpdateAvailable(StickerCategoryId categoryId) {
 		Cursor c = null;
 		try {
 			c = mDb.query(DBConstants.STICKERS_TABLE,
 					new String[] { DBConstants.UPDATE_AVAILABLE },
 					DBConstants.CATEGORY_ID + "=?",
-					new String[] { categoryId }, null, null, null);
+					new String[] { categoryId.name() }, null, null, null);
 			if (!c.moveToFirst()) {
 				return false;
 			}
@@ -2641,13 +2639,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public void insertDoggyStickerCategory() {
-		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[2],
-				EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length, false);
+		addOrUpdateStickerCategory(StickerCategoryId.doggy.name(),
+				StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length, false);
 	}
 
 	public void insertHumanoidStickerCategory() {
-		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[1],
-				EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length, false);
+		addOrUpdateStickerCategory(StickerCategoryId.humanoid.name(),
+				StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length, false);
 	}
 
 	public long addProtip(Protip protip) {

@@ -83,6 +83,8 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CircularProgress;
@@ -1126,20 +1128,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			 */
 			if (sticker.getStickerIndex() != -1) {
 				holder.stickerImage.setVisibility(View.VISIBLE);
-				if (sticker.getCategoryIndex() == 2) {
+				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {
 					holder.stickerImage
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+							.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker
 									.getStickerIndex()]);
-				} else if (sticker.getCategoryIndex() == 1) {
+				} else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
 					holder.stickerImage
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+							.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker
 									.getStickerIndex()]);
 				}
 			} else {
-				String categoryId = sticker.getCategoryId();
+				String categoryId = sticker.getCategory().categoryId.name();
 				String stickerId = sticker.getStickerId();
 
-				String categoryDirPath = Utils
+				String categoryDirPath = StickerManager.getInstance()
 						.getStickerDirectoryForCategoryId(context, categoryId)
 						+ HikeConstants.LARGE_STICKER_ROOT;
 				File stickerImage = null;
@@ -1148,8 +1150,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 
 				String key = categoryId + stickerId;
-				boolean downloadingSticker = HikeMessengerApp.stickerTaskMap
-						.containsKey(key);
+				boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key); 
 
 				if (stickerImage != null && stickerImage.exists()
 						&& !downloadingSticker) {
@@ -1163,12 +1164,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.setBackgroundResource(R.drawable.bg_sticker_placeholder);
 
 					/*
-					 * Download the sticker if not already downoading.
+					 * Download the sticker if not already downloading.
 					 */
 					if (!downloadingSticker) {
 						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(
 								context, categoryId, stickerId);
-						HikeMessengerApp.stickerTaskMap.put(key,
+						StickerManager.getInstance().insertTask(key,
 								downloadSingleStickerTask);
 						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
 					}

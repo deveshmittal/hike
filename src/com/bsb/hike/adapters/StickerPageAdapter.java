@@ -19,11 +19,14 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
@@ -45,21 +48,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private List<Sticker> stickerList;
 	private List<ViewType> viewTypeList;
 	private LayoutInflater inflater;
-	private String categoryId;
-	private int categoryIndex;
+	private StickerCategory category;
 	private int numStickerRows;
-	private boolean updateAvailable;
-
-	public StickerPageAdapter(Activity activity, List<Sticker> stickerList,
-			List<ViewType> viewTypeList, int categoryIndex,
-			boolean updateAvailable) {
+	
+	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
+			List<ViewType> viewTypeList) {
 		this.activity = activity;
 		this.stickerList = stickerList;
 		this.numStickers = stickerList.size();
 		this.viewTypeList = viewTypeList;
-		this.categoryIndex = categoryIndex;
-		this.categoryId = Utils.getCategoryIdForIndex(categoryIndex);
-		this.updateAvailable = updateAvailable;
+		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
 
 		calculateNumRowsAndSize();
@@ -91,7 +89,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			}
 
 			for (int i = 0; i < numStickerRows; i++) {
-				viewTypeList.add(updateAvailable ? 1 : 0, ViewType.STICKER);
+				viewTypeList.add(category.updateAvailable ? 1 : 0, ViewType.STICKER);
 			}
 		}
 	}
@@ -154,7 +152,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			 * If this is the last item, its possible that the number of items
 			 * won't fill the complete row
 			 */
-			int startPosition = updateAvailable ? position - 1 : position;
+			int startPosition = category.updateAvailable ? position - 1 : position;
 
 			int maxCount;
 			if ((startPosition == numStickerRows - 1)
@@ -176,13 +174,13 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1) {
-					if (sticker.getCategoryIndex() == 2) {
+					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {
 						imageView
-								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_2[sticker
+								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker
 										.getStickerIndex()]);
-					} else if (sticker.getCategoryIndex() == 1) {
+					} else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
 						imageView
-								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_1[sticker
+								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker
 										.getStickerIndex()]);
 					}
 				} else {
@@ -203,7 +201,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			ProgressBar progressBar = (ProgressBar) convertView
 					.findViewById(R.id.download_progress);
 
-			if (HikeMessengerApp.stickerTaskMap.containsKey(categoryId)) {
+			if (StickerManager.getInstance().isStickerDownloading(category.categoryId.name())) {
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
 				updateText.setTextColor(activity.getResources().getColor(
@@ -221,10 +219,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					@Override
 					public void onClick(View v) {
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-								activity, categoryIndex, DownloadType.UPDATE);
+								activity, category, DownloadType.UPDATE);
 						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-						HikeMessengerApp.stickerTaskMap.put(categoryId,
+						StickerManager.getInstance().insertTask(category.categoryId.name(),
 								downloadStickerTask);
 						notifyDataSetChanged();
 					}
@@ -243,6 +241,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	public void onClick(View v) {
 		Sticker sticker = (Sticker) v.getTag();
 		((ChatThread) activity).sendSticker(sticker);
-		((HikeMessengerApp)activity.getApplicationContext()).addRecentSticker(sticker);
+		StickerManager.getInstance().addRecentSticker(sticker);
 	}
 }

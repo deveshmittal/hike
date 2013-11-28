@@ -34,6 +34,8 @@ import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
@@ -47,7 +49,7 @@ public class StickerAdapter extends PagerAdapter implements
 	public StickerAdapter(Activity activity, boolean isPortrait) {
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
-		stickerCategoryList = HikeMessengerApp.stickerCategories;
+		stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
 	}
 
 	@Override
@@ -69,217 +71,181 @@ public class StickerAdapter extends PagerAdapter implements
 	public Object instantiateItem(ViewGroup container, int position) {
 		View emoticonPage;
 		emoticonPage = inflater.inflate(R.layout.sticker_page, null);
-
-		setupStickerPage(emoticonPage, position, false, null);
+		StickerCategory category = StickerManager.getInstance().getCategoryForIndex(position);
+		setupStickerPage(emoticonPage, category, false, null);
 
 		((ViewPager) container).addView(emoticonPage);
-		emoticonPage.setTag(Utils.getCategoryIdForIndex(position));
+		emoticonPage.setTag(category.categoryId);
 
 		return emoticonPage;
 	}
 
-	public void setupStickerPage(final View parent, final int position,
-			boolean failed, final DownloadType downloadTypeBeforeFail) {
+	public void setupStickerPage(final View parent, final StickerCategory category, boolean failed, final DownloadType downloadTypeBeforeFail)
+	{
 
-		final ListView stickerList = (ListView) parent
-				.findViewById(R.id.emoticon_grid);
+		final ListView stickerList = (ListView) parent.findViewById(R.id.emoticon_grid);
 
-		View downloadingParent = parent
-				.findViewById(R.id.downloading_container);
-		TextView downloadingText = (TextView) parent
-				.findViewById(R.id.downloading_sticker);
+		View downloadingParent = parent.findViewById(R.id.downloading_container);
+		TextView downloadingText = (TextView) parent.findViewById(R.id.downloading_sticker);
 
-		Button downloadingFailed = (Button) parent
-				.findViewById(R.id.sticker_fail_btn);
+		Button downloadingFailed = (Button) parent.findViewById(R.id.sticker_fail_btn);
 
 		stickerList.setVisibility(View.GONE);
 		downloadingParent.setVisibility(View.GONE);
 		downloadingFailed.setVisibility(View.GONE);
 
-		final String categoryId = Utils.getCategoryIdForIndex(position);
+		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.categoryId.name());
 
-		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) HikeMessengerApp.stickerTaskMap
-				.get(categoryId);
+		if (currentStickerTask != null && currentStickerTask.getDownloadType().equals(DownloadType.NEW_CATEGORY))
+		{
 
-		if (currentStickerTask != null
-				&& currentStickerTask.getDownloadType() == DownloadType.NEW_CATEGORY) {
-
-			Log.d(getClass().getSimpleName(), "Downloading new category "
-					+ categoryId);
+			Log.d(getClass().getSimpleName(), "Downloading new category " + category.categoryId.name());
 
 			downloadingParent.setVisibility(View.VISIBLE);
 
-			downloadingText.setText(activity.getString(
-					R.string.downloading_category, categoryId));
-		} else if (failed
-				&& downloadTypeBeforeFail == DownloadType.NEW_CATEGORY) {
+			downloadingText.setText(activity.getString(R.string.downloading_category, category.categoryId.name()));
+		}
+		else if (failed && downloadTypeBeforeFail == DownloadType.NEW_CATEGORY)
+		{
 
-			Log.d(getClass().getSimpleName(),
-					"Download failed for new category " + categoryId);
+			Log.d(getClass().getSimpleName(), "Download failed for new category " + category.categoryId.name());
 
 			downloadingFailed.setVisibility(View.VISIBLE);
 
-			downloadingFailed.setOnClickListener(new OnClickListener() {
-
+			downloadingFailed.setOnClickListener(new OnClickListener()
+			{
 				@Override
-				public void onClick(View v) {
-					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-							activity, position, downloadTypeBeforeFail);
+				public void onClick(View v)
+				{
+					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, downloadTypeBeforeFail);
 					Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-					HikeMessengerApp.stickerTaskMap.put(categoryId,
-							downloadStickerTask);
-					setupStickerPage(parent, position, false, null);
+					StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
+					setupStickerPage(parent, category, false, null);
 				}
 			});
-		} else {
+		}
+		else
+		{
 			stickerList.setVisibility(View.VISIBLE);
-
-			AsyncTask<Void, Void, List<Sticker>> stickerTask = new AsyncTask<Void, Void, List<Sticker>>() {
-
-				boolean updateAvailable;
-
-				@Override
-				protected List<Sticker> doInBackground(Void... params) {
-					List<Sticker> stickerList = new ArrayList<Sticker>();
-
-					// this is for recent stickers
-					if(position == 0)
+			final ArrayList<Sticker> stickersList;
+			if (category.categoryId.equals(StickerCategoryId.recent))
+			{
+				Object[] lhs = StickerManager.getInstance().getRecentStickerList().toArray();
+				int size = lhs.length;
+				stickersList = new ArrayList<Sticker>(size);
+				for (int i = size - 1; i >= 0; i--)
+				{
+					try
 					{
-						HikeMessengerApp happ = (HikeMessengerApp)activity.getApplicationContext();
-						Object[] lhs = happ.getRecentStickerList().toArray();
-						int size = lhs.length;
-						ArrayList<Sticker> orderedRecentStickers = new ArrayList<Sticker>(size);
-						for(int i = size -1 ; i >= 0; i--)
-						{
-							try
-							{
-								Sticker st = (Sticker)lhs[i];
-								orderedRecentStickers.add(st);
-							}
-							catch (Exception e)
-							{
-								Log.e(getClass().getSimpleName(), "Exception in recent stickers", e);
-							}
-						}
-						return orderedRecentStickers;
+						Sticker st = (Sticker) lhs[i];
+						stickersList.add(st);
 					}
-					else if (position == 2) {
-						addDefaultStickers(stickerList,
-								EmoticonConstants.LOCAL_STICKER_IDS_2);
-					} else if (position == 1) {
-						addDefaultStickers(stickerList,
-								EmoticonConstants.LOCAL_STICKER_IDS_1);
+					catch (Exception e)
+					{
+						Log.e(getClass().getSimpleName(), "Exception in recent stickers", e);
 					}
+				}
+			}
+			else
+			{
 
-					String categoryDirPath = Utils
-							.getStickerDirectoryForCategoryId(activity,
-									categoryId);
-
-					if (categoryDirPath != null) {
-						File categoryDir = new File(categoryDirPath
-								+ HikeConstants.SMALL_STICKER_ROOT);
-
-						if (categoryDir.exists()) {
-							String[] stickerIds = categoryDir.list();
-							for (String stickerId : stickerIds) {
-								stickerList
-										.add(new Sticker(position, stickerId));
-							}
-
-						}
-					}
-					updateAvailable = stickerCategoryList.get(position).updateAvailable;
-
-					Collections.sort(stickerList);
-
-					return stickerList;
+				long t1 = System.currentTimeMillis();
+				stickersList = new ArrayList<Sticker>();
+				if (category.categoryId.equals(StickerCategoryId.doggy))
+				{
+					addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY);
+				}
+				else if (category.categoryId.equals(StickerCategoryId.humanoid))
+				{
+					addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID);
 				}
 
-				private void addDefaultStickers(List<Sticker> stickerList,
-						String[] stickerIds) {
-					for (int i = 0; i < stickerIds.length; i++) {
-						stickerList
-								.add(new Sticker(position, stickerIds[i], i));
+				String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(activity, category.categoryId.name());
+
+				if (categoryDirPath != null)
+				{
+					File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+
+					if (categoryDir.exists())
+					{
+						String[] stickerIds = categoryDir.list();
+						for (String stickerId : stickerIds)
+						{
+							stickersList.add(new Sticker(category, stickerId));
+						}
 					}
+				}
+				Collections.sort(stickersList);
+				long t2 = System.currentTimeMillis();
+				Log.d(getClass().getSimpleName(), "Time to sort category : " + category.categoryId + " in ms : " + (t2 - t1));
+
+			}
+	
+			boolean updateAvailable = category.updateAvailable;
+			final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
+			if (updateAvailable || (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.UPDATE))
+			{
+				viewTypeList.add(ViewType.UPDATING_STICKER);
+				updateAvailable = true;
+			}
+			if (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.MORE_STICKERS)
+			{
+				viewTypeList.add(ViewType.DOWNLOADING_MORE);
+			}
+			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList);
+
+			stickerList.setAdapter(stickerPageAdapter);
+			stickerList.setOnScrollListener(new OnScrollListener()
+			{
+
+				@Override
+				public void onScrollStateChanged(AbsListView view, int scrollState)
+				{
 				}
 
 				@Override
-				protected void onPostExecute(final List<Sticker> result) {
-					final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
-					if (updateAvailable
-							|| (currentStickerTask != null && currentStickerTask
-									.getDownloadType() == DownloadType.UPDATE)) {
-						viewTypeList.add(ViewType.UPDATING_STICKER);
-						updateAvailable = true;
+				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+				{
+					int currentIdx = ((ChatThread) activity).getCurrentPage();
+					StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
+					if (stickersList.isEmpty() || !category.categoryId.equals(sc.categoryId)
+							|| !activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(category.categoryId.downloadPref(), false)
+							|| category.hasReachedEnd())
+					{
+						return;
 					}
-					if (currentStickerTask != null
-							&& currentStickerTask.getDownloadType() == DownloadType.MORE_STICKERS) {
-						viewTypeList.add(ViewType.DOWNLOADING_MORE);
+					if (!StickerManager.getInstance().isStickerDownloading(category.categoryId.name()) && !category.hasReachedEnd())
+					{
+						if (firstVisibleItem + visibleItemCount >= totalItemCount - 1)
+						{
+							Log.d(getClass().getSimpleName(), "Downloading more stickers " + category.categoryId.name());
+							viewTypeList.add(ViewType.DOWNLOADING_MORE);
+
+							DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS);
+							Utils.executeFtResultAsyncTask(downloadStickerTask);
+
+							StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
+							stickerPageAdapter.notifyDataSetChanged();
+						}
 					}
-					final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(
-							activity, result, viewTypeList, position,
-							updateAvailable);
-
-					stickerList.setAdapter(stickerPageAdapter);
-					stickerList.setOnScrollListener(new OnScrollListener() {
-
-						@Override
-						public void onScrollStateChanged(AbsListView view,
-								int scrollState) {
-						}
-
-						@Override
-						public void onScroll(AbsListView view,
-								int firstVisibleItem, int visibleItemCount,
-								int totalItemCount) {
-							if (result.isEmpty()
-									|| ((ChatThread) activity).getCurrentPage() != position
-									|| !activity
-											.getSharedPreferences(
-													HikeMessengerApp.ACCOUNT_SETTINGS,
-													0)
-											.getBoolean(
-													EmoticonConstants.STICKER_DOWNLOAD_PREF[position],
-													false)
-									|| HikeConversationsDatabase.getInstance()
-											.hasReachedStickerEnd(categoryId)) {
-								return;
-							}
-							if (!HikeMessengerApp.stickerTaskMap
-									.containsKey(categoryId)) {
-								if (firstVisibleItem + visibleItemCount >= totalItemCount - 1) {
-									Log.d(getClass().getSimpleName(),
-											"Downloading more stickers "
-													+ categoryId);
-									viewTypeList.add(ViewType.DOWNLOADING_MORE);
-
-									DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-											activity, position,
-											DownloadType.MORE_STICKERS);
-									Utils.executeFtResultAsyncTask(downloadStickerTask);
-
-									HikeMessengerApp.stickerTaskMap.put(
-											categoryId, downloadStickerTask);
-									stickerPageAdapter.notifyDataSetChanged();
-								}
-							}
-						}
-					});
 				}
+			});
 
-			};
-			if (Utils.isHoneycombOrHigher()) {
-				stickerTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			} else {
-				stickerTask.execute();
-			}
+		}
+	}
+
+	private void addDefaultStickers(List<Sticker> stickerList, StickerCategory cat, String[] stickerIds)
+	{
+		for (int i = 0; i < stickerIds.length; i++)
+		{
+			stickerList.add(new Sticker(cat, stickerIds[i], i));
 		}
 	}
 
 	@Override
 	public int getIconResId(int index) {
-		return stickerCategoryList.get(index).categoryResId;
+		return stickerCategoryList.get(index).categoryId.resId();
 	}
 
 	@Override

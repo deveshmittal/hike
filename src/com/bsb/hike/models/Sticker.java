@@ -1,14 +1,22 @@
 package com.bsb.hike.models;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
-public class Sticker implements Comparable<Sticker> {
-	private int categoryIndex = -1;
+public class Sticker implements Serializable, Comparable<Sticker> {
 
 	/*
 	 * Used for the local stickers. Will be -1 for non local stickers
@@ -17,48 +25,42 @@ public class Sticker implements Comparable<Sticker> {
 
 	private String stickerId;
 
-	private String categoryId;
+	private StickerCategory category;
 
-	public Sticker(int categoryIndex, String stickerId) {
-		this(categoryIndex, stickerId, -1);
-	}
-
-	public Sticker(int categoryIndex, String stickerId, int stickerIndex) {
-		this.categoryIndex = categoryIndex;
+	public Sticker(StickerCategory category, String stickerId, int stickerIndex) {
 		this.stickerId = stickerId;
 		this.stickerIndex = stickerIndex;
-		this.categoryId = Utils.getCategoryIdForIndex(categoryIndex);
+		this.category = category;
 	}
 
-	public Sticker(String categoryId, String stickerId) {
-		this.categoryId = categoryId;
+	public Sticker(StickerCategory category, String stickerId) {
+		this.category = category;
 		this.stickerId = stickerId;
-
-		// TODO: find a better way to get index.
-		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
-			if (EmoticonConstants.STICKER_CATEGORY_IDS[i].equals(categoryId)) {
-				this.categoryIndex = i;
-				break;
-			}
-		}
 
 		/*
 		 * Only set sticker index if the category is a local one
 		 */
-		if (categoryIndex == 1 || categoryIndex == 2) {
+		if (category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy)) {
 			int stickerNumber = Integer.valueOf(stickerId.substring(0,
 					stickerId.indexOf("_")));
 
-			if ((categoryIndex == 2 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length)
-					|| (categoryIndex == 1 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length)) {
+			if ((category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
+					|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length)) {
 				this.stickerIndex = stickerNumber - 1;
 			}
 		}
 
 	}
 
-	public int getCategoryIndex() {
-		return categoryIndex;
+	public Sticker(String categoryName, String stickerId)
+	{
+		this.stickerId = stickerId;
+		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
+	}
+	
+	public Sticker()
+	{
+		
 	}
 
 	public int getStickerIndex() {
@@ -69,14 +71,13 @@ public class Sticker implements Comparable<Sticker> {
 		return stickerId;
 	}
 
-	public String getCategoryId() {
-		return TextUtils.isEmpty(categoryId) ? Utils
-				.getCategoryIdForIndex(categoryIndex) : categoryId;
+	public StickerCategory getCategory() {
+		return category;
 	}
 
 	public String getStickerPath(Context context) {
-		String rootPath = Utils.getStickerDirectoryForCategoryId(context,
-				categoryId);
+		String rootPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context,
+				category.categoryId.name());
 		if (rootPath == null) {
 			return null;
 		}
@@ -84,7 +85,7 @@ public class Sticker implements Comparable<Sticker> {
 	}
 
 	public String getSmallStickerPath(Context context) {
-		return Utils.getStickerDirectoryForCategoryId(context, categoryId)
+		return StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.categoryId.name())
 				+ HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
 	}
 
@@ -114,7 +115,7 @@ public class Sticker implements Comparable<Sticker> {
 		else
 		{
 			Sticker st = (Sticker) object;
-			if (this.categoryId == st.getCategoryId() && this.stickerId == st.getStickerId())
+			if (this.category.categoryId == st.getCategory().categoryId && this.stickerId == st.getStickerId())
 			{
 				result = true;
 			}
@@ -126,8 +127,38 @@ public class Sticker implements Comparable<Sticker> {
 	public int hashCode()
 	{
 		int hash = 3;
-		hash = 7 * hash + this.categoryId.hashCode();
+		hash = 7 * hash + this.category.categoryId.hashCode();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
+	}
+	
+	public void serializeObj(ObjectOutputStream out)
+	{
+		try
+		{
+			out.writeInt(stickerIndex);
+			out.writeUTF(stickerId);
+			category.serializeObj(out);
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void deSerializeObj(ObjectInputStream in)
+	{
+		try
+		{
+			stickerIndex = in.readInt();
+			stickerId = in.readUTF();
+			category = new StickerCategory();
+			category.deSerializeObj(in);
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

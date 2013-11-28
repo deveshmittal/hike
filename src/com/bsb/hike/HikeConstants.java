@@ -400,7 +400,6 @@ public class HikeConstants {
 
 	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
 
-	public static final String BOLLYWOOD_CATEGORY = "bollywood";
 	/*
 	 * Contact Type
 	 */

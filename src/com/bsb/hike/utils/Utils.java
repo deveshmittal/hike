@@ -150,6 +150,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.maps.GeoPoint;
 
 public class Utils {
@@ -2218,66 +2219,7 @@ public class Utils {
 				: R.string.importing_sms_info);
 	}
 
-	private static String getExternalStickerDirectoryForCategoryId(
-			Context context, String catId) {
-		File dir = context.getExternalFilesDir(null);
-		if (dir == null) {
-			return null;
-		}
-		return dir.getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
-	}
-
-	private static String getInternalStickerDirectoryForCategoryId(
-			Context context, String catId) {
-		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT
-				+ "/" + catId;
-	}
-
-	/**
-	 * Returns the directory for a sticker category.
-	 * 
-	 * @param context
-	 * @param catId
-	 * @return
-	 */
-	public static String getStickerDirectoryForCategoryId(Context context,
-			String catId) {
-		/*
-		 * We give a higher priority to external storage. If we find an
-		 * exisiting directory in the external storage, we will return its path.
-		 * Otherwise if there is an exisiting directory in internal storage, we
-		 * return its path.
-		 * 
-		 * If the directory is not available in both cases, we return the
-		 * external storage's path if external storage is available. Else we
-		 * return the internal storage's path.
-		 */
-		boolean externalAvailable = false;
-		if (getExternalStorageState() == ExternalStorageState.WRITEABLE) {
-			externalAvailable = true;
-			String stickerDirPath = getExternalStickerDirectoryForCategoryId(
-					context, catId);
-
-			if (stickerDirPath == null) {
-				return null;
-			}
-
-			File stickerDir = new File(stickerDirPath);
-
-			if (stickerDir.exists()) {
-				return stickerDir.getPath();
-			}
-		}
-		File stickerDir = new File(getInternalStickerDirectoryForCategoryId(
-				context, catId));
-		if (stickerDir.exists()) {
-			return stickerDir.getPath();
-		}
-		if (externalAvailable) {
-			return getExternalStickerDirectoryForCategoryId(context, catId);
-		}
-		return getInternalStickerDirectoryForCategoryId(context, catId);
-	}
+	
 
 	public static int getResolutionId() {
 		int densityMultiplierX100 = (int) (densityMultiplier * 100);
@@ -2294,19 +2236,6 @@ public class Utils {
 		} else {
 			return HikeConstants.LDPI_ID;
 		}
-	}
-
-	public static boolean checkIfStickerCategoryExists(Context context,
-			String categoryId) {
-		String path = getStickerDirectoryForCategoryId(context, categoryId);
-		if (path == null) {
-			return false;
-		}
-		File category = new File(path + HikeConstants.LARGE_STICKER_ROOT);
-		if (category.exists() && category.list().length > 0) {
-			return true;
-		}
-		return false;
 	}
 
 	public static void saveBase64StringToFile(File file, String base64String)
@@ -2338,13 +2267,6 @@ public class Utils {
 		fos.write(b);
 		fos.flush();
 		fos.close();
-	}
-
-	public static String getCategoryIdForIndex(int index) {
-		if (index == -1 || index >= HikeMessengerApp.stickerCategories.size()) {
-			return "";
-		}
-		return HikeMessengerApp.stickerCategories.get(index).categoryId;
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed) {
@@ -2641,7 +2563,7 @@ public class Utils {
 			String message = context.getString(
 					R.string.sent_sticker_sms,
 					String.format(AccountUtils.stickersUrl,
-							sticker.getCategoryId(), stickerUrlId));
+							sticker.getCategory().categoryId.name(), stickerUrlId));
 			return message;
 		}
 		return convMessage.getMessage();
@@ -3121,11 +3043,11 @@ public class Utils {
 
 				int resourceId = 0;
 
-				if (sticker.getCategoryIndex() == 1) {
-					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
+					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker
 							.getStickerIndex()];
-				} else if (sticker.getCategoryIndex() == 2) {
-					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+				} else if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {
+					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker
 							.getStickerIndex()];
 				}
 

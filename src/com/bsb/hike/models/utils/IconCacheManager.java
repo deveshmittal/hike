@@ -63,7 +63,7 @@ public class IconCacheManager {
 	private static IconCacheManager mCacheManager;
 
 	public IconCacheManager() {
-		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(200));
+		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(getCacheSize()));
 		mDb = HikeUserDatabase.getInstance();
 		hCDb = HikeConversationsDatabase.getInstance();
 	}
@@ -135,7 +135,7 @@ public class IconCacheManager {
 			long t1 = System.currentTimeMillis();
 			b = new BitmapDrawable(BitmapFactory.decodeFile(stickerPath));
 			long t2 = System.currentTimeMillis();
-			Log.w("Sticker loading", "Time to load sticker bitmap : "+(t2-t1)+" ms");
+			//Log.w("Sticker loading", "Time to load sticker bitmap : "+(t2-t1)+" ms");
 			if (b != null) {
 				mIcons.put(stickerPath, b);
 			}
