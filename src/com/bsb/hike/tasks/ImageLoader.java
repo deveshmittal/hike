@@ -40,10 +40,6 @@ public class ImageLoader {
 	// --------------------------------------------------------------------------------------------
 
 	public void loadImage(String id, ImageView imageView) {
-		loadImage(id, imageView, false);
-	}
-
-	public void loadImage(String id, ImageView imageView, boolean isScrolling) {
 		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) imageView.getTag();
 		if (imageViewerInfo.isDefaultImage) {
 			id = Utils.getDefaultAvatarServerName(id);
@@ -52,8 +48,10 @@ public class ImageLoader {
 		if (imageMap.containsKey(id) && imageMap.get(id).get() != null) {
 			imageView.setImageBitmap(imageMap.get(id).get());
 		} else {
-			imageView.setImageResource(0);
-			queueImage(id, imageView, isScrolling);
+			Drawable avatarDrawable = IconCacheManager.getInstance()
+					.getIconForMSISDN(imageViewerInfo.mappedId);
+			imageView.setImageDrawable(avatarDrawable);
+			queueImage(id, imageView);
 		}
 	}
 
@@ -61,9 +59,9 @@ public class ImageLoader {
 		imageLoaderThread.interrupt();
 	}
 
-	private void queueImage(String id, ImageView imageView, boolean isScrolling) {
+	private void queueImage(String id, ImageView imageView) {
 		listItemQueue.clearImageViewInstance(imageView);
-		ListItemRef p = new ListItemRef(id, imageView, isScrolling);
+		ListItemRef p = new ListItemRef(id, imageView);
 
 		synchronized (listItemQueue.listItemRefs) {
 			listItemQueue.listItemRefs.push(p);
@@ -81,12 +79,10 @@ public class ImageLoader {
 	private class ListItemRef {
 		public String id;
 		public ImageView imageView;
-		public boolean isScrolling;
 
-		public ListItemRef(String id, ImageView imageView, boolean isScrolling) {
+		public ListItemRef(String id, ImageView imageView) {
 			this.id = id;
 			this.imageView = imageView;
-			this.isScrolling = isScrolling;
 		}
 	}
 
@@ -127,17 +123,7 @@ public class ImageLoader {
 						ImageViewerInfo tag = (ImageViewerInfo) listItemToLoad.imageView
 								.getTag();
 
-						Drawable drawable = IconCacheManager.getInstance()
-								.getIconForMSISDN(tag.mappedId);
-						ImageDisplayer imgDisplayer = new ImageDisplayer(
-								drawable, listItemToLoad.imageView);
-
-						Activity activity = (Activity) listItemToLoad.imageView
-								.getContext();
-
-						activity.runOnUiThread(imgDisplayer);
-
-						if (!listItemToLoad.isScrolling && tag != null) {
+						if (tag != null) {
 							String id;
 							if (tag.isDefaultImage) {
 								id = Utils
@@ -180,7 +166,7 @@ public class ImageLoader {
 										new SoftReference<Bitmap>(bmp));
 
 								if (id.equals(listItemToLoad.id)) {
-									ImageDisplayer bmpDisplayer = new ImageDisplayer(
+									BitmapDisplayer bmpDisplayer = new BitmapDisplayer(
 											bmp, listItemToLoad.imageView);
 
 									Activity a = (Activity) listItemToLoad.imageView
@@ -202,27 +188,19 @@ public class ImageLoader {
 		}
 	}
 
-	private class ImageDisplayer implements Runnable {
+	private class BitmapDisplayer implements Runnable {
 		Bitmap bitmap;
-		Drawable drawable;
 		ImageView imageView;
 
-		public ImageDisplayer(Bitmap bitmap, ImageView imageView) {
+		public BitmapDisplayer(Bitmap bitmap, ImageView imageView) {
 			this.bitmap = bitmap;
 			this.imageView = imageView;
 		}
 
-		public ImageDisplayer(Drawable drawable, ImageView imageView) {
-			this.drawable = drawable;
-			this.imageView = imageView;
-		}
-
 		public void run() {
-			imageView.setVisibility(View.VISIBLE);
 			if (bitmap != null) {
+				imageView.setVisibility(View.VISIBLE);
 				imageView.setImageBitmap(bitmap);
-			} else if (drawable != null) {
-				imageView.setImageDrawable(drawable);
 			}
 		}
 	}

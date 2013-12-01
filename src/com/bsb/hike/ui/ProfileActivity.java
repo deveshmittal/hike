@@ -777,10 +777,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
-		if (profileAdapter == null) {
-			return;
-		}
-		profileAdapter.setIsScrolling(scrollState != SCROLL_STATE_IDLE);
 	}
 
 	private void fetchPersistentData() {
