@@ -65,7 +65,9 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 				MODE_PRIVATE);
 
 		ArrayList<String> items = new ArrayList<String>();
-		items.add(getString(R.string.sms));
+		items.add(getString(!HikeMessengerApp.isIndianUser()
+				|| settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
+						false) ? R.string.sms : R.string.free_sms_txt));
 		items.add(getString(R.string.facebook));
 		items.add(getString(R.string.twitter));
 		items.add(getString(R.string.email));
@@ -363,6 +365,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements
 		switch (position) {
 		case 0:
 			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
 			startActivity(new Intent(this, HikeListActivity.class));
 			break;
 

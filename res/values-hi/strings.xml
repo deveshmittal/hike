@@ -486,9 +486,6 @@
 	<string name="tutorial_sticker_info">नए hike स्टिकरों से खुद को बेहतर \nअभिव्यक्त करें।</string>
 	<string name="tutorial_friends_header">hike में आपका स्वागत है</string>
 	<string name="tutorial_friends_info">अब अपने मित्र मंडली में स्टेटस अपडेट \nसाझा करें।</string>
-	<string name="native_sms_invite_1">मैं hike  इस्तेमाल कर रहा हूँ जिसमें ऐसे स्टिकर और इमोशिकॉन हैं जिसे तुम्हारे साथ साझा करना चाहता हूँ।इसे अभी http://hike.in/ पर पाएं</string>
-	<string name="native_sms_invite_2">मैं hike  इस्तेमाल कर रहा हूँ जो केवल उन दोस्तों को \'लास्ट सीन\' स्टेटस दिखाता है जिन्हें हम चुनते हैं। इसे अभी http://hike.in/ पर पाएं</string>
-	<string name="native_sms_invite_3">मैं hike इस्तेमाल कर रहा हूँ; यह मजेदार वॉकी-टॉकी के साथ आता है जिससे मुफ्त वॉयस संदेश भेज सकते हैं। इसे अभी http://hike.in/ पर पाएं</string>
 	<string name="chat">चैट करें</string>
 	<string name="group">समूह</string>
 	<string name="posting_update">पोस्ट हो रहा है...</string>
@@ -695,5 +692,6 @@
   	<string name="ftue_friends_subtext">मित्र के भांति जोड़ें |</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">दोस्तों के सुझाव खारिज करने के लिए यहाँ टैप करें</string>
   	<string name="free_sms_use_tip">निशुल्क समस भेजने के लिए, शुरू करें एक नई चैट उन लोगों के साथ जिनके नाम के आगे हरे रंग का बबल ( gb ) हो। </string>
+  	<string name="sticker_ftue_body">हमारे नए स्टिकर्स इस्तेमाल करें </string>
   			
 </resources>

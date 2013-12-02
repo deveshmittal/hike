@@ -483,9 +483,6 @@
 	<string name="tutorial_sticker_info">Expresse-se melhor\ncom novos adesivos do hike.</string>
 	<string name="tutorial_friends_header">Bem-vindo ao hike</string>
 	<string name="tutorial_friends_info">Compartilhe atualizações de status\ncom o círculo de amigos.</string>
-	<string name="native_sms_invite_1">Olá, estou usando o hike, ele tem estes adesivos e emoticons incríveis que quero compartilhar com você. Obtenha-o em http://hike.in/</string>
-	<string name="native_sms_invite_2">Olá, estou usando o hike, que mostra nosso status de \"visto pela última vez\" só para os amigos escolhidos. Obtenha-o agora: http://hike.in/</string>
-	<string name="native_sms_invite_3">Olá, estou usando o hike, que vem com um Walkie-Talkie legal para enviar mensagens de voz grátis. Obtenha-o agora: http://hike.in/</string>
 	<string name="chat">Conv.</string>
 	<string name="group">Grupo</string>
 	<string name="posting_update">Postando...</string>
@@ -687,5 +684,6 @@
   	<string name="number_confirmation_string">%1$s é seu número?</string>
   	<string name="ftue_friends_subtext">Adicionado como amigo</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Toque aqui para descartar sugestões de amigos</string>
+  	<string name="sticker_ftue_body">Experimente nossas novas etiquetas!</string>
   		
 </resources>

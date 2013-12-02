@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="288dp"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:text="@string/free_invite_header"
+        android:textColor="@color/sms_popup"
+        android:layout_marginLeft="20dp"
+        android:textSize="18sp"
+        android:textStyle="bold|italic" />
+
+    <View
+        android:id="@+id/div1"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/header"
+        android:background="@color/sms_popup" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/div1"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="15dp"
+        android:text="@string/free_invite_body"
+        android:textColor="@color/list_item_header"
+        android:textSize="16sp" />
+
+    <View
+        android:id="@+id/sms_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/body"
+        android:background="#f5f5f5" />
+
+    <LinearLayout
+        android:id="@+id/button_container"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@id/sms_divider" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_cancel"
+            style="@style/SmsPopupButton"
+            android:textColor="@color/free_sms_btn"
+            android:text="@string/dismiss" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_below="@id/body"
+            android:background="#f5f5f5" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_ok"
+            style="@style/SmsPopupButton"
+            android:textColor="@color/free_sms_btn"
+            android:textStyle="bold"
+            android:text="@string/invite_now" />
+    </LinearLayout>
+
+</RelativeLayout>

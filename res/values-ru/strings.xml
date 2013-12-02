@@ -485,9 +485,6 @@
 	<string name="tutorial_sticker_info">Обогатите возможности общения\nс новыми стикерами hike.</string>
 	<string name="tutorial_friends_header">Добро пожаловать в hike!</string>
 	<string name="tutorial_friends_info">Теперь можно публиковать обновления статуса\nдля своего круга друзей.</string>
-	<string name="native_sms_invite_1">Привет! Я использую приложение для чата hike с клевыми стикерами и смайликами. Это приложение можно загрузить с: http://hike.in/</string>
-	<string name="native_sms_invite_2">Привет! Я использую приложение для чата hike, которое показывает только друзьям, когда ты был(а) в сети. Загрузи его с: http://hike.in/</string>
-	<string name="native_sms_invite_3">Привет! Я использую приложение-чат hike, в котором можно бесплатно отправлять голосовые сообщения. Загрузи его с: http://hike.in/</string>
 	<string name="chat">Чат</string>
 	<string name="group">Группа</string>
 	<string name="posting_update">Публикация...</string>
@@ -694,5 +691,6 @@
   	<string name="number_confirmation_string">%1$s — это ваш номер?</string>
   	<string name="ftue_friends_subtext">Добавить в друзья</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Коснитесь здесь, чтобы отклонить предложения дружбы</string>
+  	<string name="sticker_ftue_body">Попробуйте наши новые наклейки!</string>
   			
 </resources>

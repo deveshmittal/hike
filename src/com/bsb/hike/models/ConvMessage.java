@@ -56,7 +56,7 @@ public class ConvMessage {
 	private TypingNotification typingNotification;
 
 	private JSONArray readByArray;
-	
+
 	private boolean shouldShowPush = true;
 
 	public boolean isInvite() {
@@ -231,10 +231,10 @@ public class ConvMessage {
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj
 				.optString(HikeConstants.SUB_TYPE));
 		/**
-		 * This is to specifically handle the hike bot cases for now
-		 * but can be generically used to control which messages have push enabled
+		 * This is to specifically handle the hike bot cases for now but can be
+		 * generically used to control which messages have push enabled
 		 */
-		if(data.has(HikeConstants.PUSH)){
+		if (data.has(HikeConstants.PUSH)) {
 			this.shouldShowPush = data.optBoolean(HikeConstants.PUSH, true);
 		}
 	}
@@ -461,6 +461,10 @@ public class ConvMessage {
 	}
 
 	public JSONObject serialize() {
+		return serialize(false);
+	}
+
+	public JSONObject serialize(boolean sendNativeInvite) {
 		JSONObject object = new JSONObject();
 		JSONObject data = new JSONObject();
 		JSONObject md = null;
@@ -476,7 +480,12 @@ public class ConvMessage {
 			data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
 					: HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP, mTimestamp);
-			data.put(HikeConstants.MESSAGE_ID, msgID);
+
+			if (mInvite) {
+				data.put(HikeConstants.MESSAGE_ID, System.currentTimeMillis());
+			} else {
+				data.put(HikeConstants.MESSAGE_ID, msgID);
+			}
 
 			object.put(HikeConstants.TO, mMsisdn);
 			object.put(HikeConstants.DATA, data);
@@ -484,7 +493,7 @@ public class ConvMessage {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
 			}
 
-			if (mInvite) {
+			if (sendNativeInvite && mInvite) {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 			}
 
@@ -654,7 +663,8 @@ public class ConvMessage {
 	}
 
 	/**
-	 * @param shouldShowPush the shouldShowPush to set
+	 * @param shouldShowPush
+	 *            the shouldShowPush to set
 	 */
 	public void setShouldShowPush(boolean shouldShowPush) {
 		this.shouldShowPush = shouldShowPush;
