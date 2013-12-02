@@ -130,7 +130,9 @@ public class EmailConversationsAsyncTask extends
 					.getResources().getString(R.string.chat_backup_)
 					+ "_"
 					+ +System.currentTimeMillis() + ".txt");
-			uris.add(Uri.fromFile(chatFile));
+			if (chatFile != null) {
+				uris.add(Uri.fromFile(chatFile));
+			}
 		}
 		// append the attachments in hike messages in form of URI's. Dodo
 		// android needs uris duh!

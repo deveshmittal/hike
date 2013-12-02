@@ -83,7 +83,7 @@
                 android:layout_marginLeft="7dp"
                 android:visibility="gone" >
 
-                <include layout="@layout/tool_tip" />
+                <include layout="@layout/sticker_tool_tip" />
             </LinearLayout>
 
             <LinearLayout
