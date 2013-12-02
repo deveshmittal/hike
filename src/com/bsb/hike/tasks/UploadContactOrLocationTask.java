@@ -26,6 +26,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ShareLocation;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -98,9 +99,11 @@ public class UploadContactOrLocationTask extends FileTransferTaskBase {
 				}
 
 				if (!uploadingContact) {
-					address = Utils.getAddressFromGeoPoint(new GeoPoint(
-							(int) (latitude * 1E6), (int) (longitude * 1E6)),
-							context);
+					address = Utils.getAddressFromLatLng(latitude, longitude, context);
+							//ShareLocation.getAddressFromPosition(latitude, longitude, context);
+					//(new GeoPoint(
+					//		(int) (latitude * 1E6), (int) (longitude * 1E6)),
+					//		context);
 
 					fetchThumbnailAndUpdateConvMessage(latitude, longitude,
 							zoomLevel, address, convMessage);

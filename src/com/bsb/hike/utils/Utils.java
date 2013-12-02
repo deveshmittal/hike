@@ -1650,6 +1650,25 @@ public class Utils {
 			return "";
 		}
 	}
+	
+	public static String getAddressFromLatLng(double lat, double lng,
+			Context context) {
+		try {
+			Geocoder geoCoder = new Geocoder(context, Locale.getDefault());
+			List<Address> addresses = geoCoder.getFromLocation(lat, lng, 1);
+
+			final StringBuilder address = new StringBuilder();
+			if (!addresses.isEmpty()) {
+				for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
+					address.append(addresses.get(0).getAddressLine(i) + "\n");
+			}
+
+			return address.toString();
+		} catch (IOException e) {
+			Log.e("Utils", "IOException", e);
+			return "";
+		}
+	}
 
 	public static void addFileName(String fileName, String fileKey) {
 		File hikeFileList = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
