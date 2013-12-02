@@ -109,44 +109,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * if isGooglePlayServicesAvailable method returns
-		 * 2=ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED this implies we
-		 * need to update our playservice library if it returns
-		 * 0=ConnectionResult.SUCCESS this implies we have correct version and
-		 * working playservice api
-		 */
-		Log.d(getClass().getSimpleName(),
-				"is play service available = "
-						+ Integer.valueOf(
-								GooglePlayServicesUtil
-										.isGooglePlayServicesAvailable(this))
-								.toString());
-
-		// Getting Google Play availability status
-		int status = GooglePlayServicesUtil
-				.isGooglePlayServicesAvailable(getBaseContext());
-
-		// Showing status
-		if (status != ConnectionResult.SUCCESS) { // Google Play Services// are
-													// not available
-			int requestCode = 10;
-			playServiceErrordialog = GooglePlayServicesUtil.getErrorDialog(
-					status, this, requestCode);
-			playServiceErrordialog.show();
-			playServiceErrordialog
-					.setOnDismissListener(new Dialog.OnDismissListener() {
-
-						@Override
-						public void onDismiss(DialogInterface arg0) {
-							finish();
-						}
-
-					});
-			return;
-
-		} else { // Google Play Services are available
-
+		
 			setContentView(R.layout.share_location);
 			gpsDialogShown = savedInstanceState != null
 					&& savedInstanceState
@@ -203,8 +166,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 						.getString(HikeConstants.Extras.HTTP_SEARCH_STR);
 				executeTask(new GetPlaces(), searchStr);
 			}
-
-		}
 
 		Button fullScreenButton = (Button) findViewById(R.id.full_screen_button);
 		fullScreenButton.setOnClickListener(new View.OnClickListener() {
@@ -855,7 +816,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements
 				userMarker.setSnippet(address);
 				if (list.size() > 0)
 					list.remove(0);
-				addItemToAdapter(userMarker.getTitle(), address, userMarker,
+				addItemToAdapter("My Location", address, userMarker,
 						true);
 				adapter.notifyDataSetChanged();
 			}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="ref_v2_zoom_button_bg_color">#8A1d222a</color>
+    <color name="ref_v2_zoom_button_bg_disabled_color">#2A1d222a</color>
+    <color name="ref_v2_zoom_button_bg_pressed_color">#8A7E8082</color>
+    <color name="ref_v2_venue_button_background">#8A1d222a</color>
+</resources>

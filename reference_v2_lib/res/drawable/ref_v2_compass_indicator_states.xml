@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:nokia="http://schemas.android.com/apk/res/com.nokia.app.maps">
+
+    <!-- <item android:drawable="@drawable/compass_night_pressed" android:state_pressed="true" nokia:night_mode="true"/>-->
+    <!-- <item android:drawable="@drawable/compass_night" android:state_pressed="false" nokia:night_mode="true"/>-->
+    <item android:drawable="@drawable/ref_v2_compass_day_pressed" android:state_pressed="true"/>
+    <item android:drawable="@drawable/ref_v2_compass_day" />
+
+</selector>

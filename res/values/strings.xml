@@ -703,4 +703,6 @@
 	<string name="humanoid2_category">Humanoid 2</string>
 	<string name="se_category">Smiley Expressions</string>
 	<string name="avtars_category">Avatars</string>	
+	<string name="nokia_app_id">Nokia App Id</string>	
+	<string name="here_map_token">token</string>	
 </resources>
