@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -131,6 +132,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ImageView resumeBtn;
 		TextView dataTransferred;
 		ProgressBar barProgress;
+		TextView fileInfo;
 	}
 
 	private Conversation conversation;
@@ -454,6 +456,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
 				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
 				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
+				
+				holder.fileInfo = (TextView) v.findViewById(R.id.file_info);
 
 				showFileTransferElements(holder);
 			case SEND_HIKE:
@@ -508,6 +512,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
 				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
 				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
+				holder.fileInfo = (TextView) v.findViewById(R.id.file_info);
 				showFileTransferElements(holder);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
@@ -1341,18 +1346,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.image.setVisibility(View.INVISIBLE);
 		}
 		
+//		@GM
+//		UI for audio file transfer
 		if(convMessage.isFileTransferMessage() && hikeFile.getHikeFileType() == HikeFileType.AUDIO)
 		{
-			holder.fileThumb.getLayoutParams().height=110;
-			holder.fileThumb.getLayoutParams().width=110;
-			holder.fileThumb.setBackgroundColor(Color.rgb(100, 100, 50));
-			holder.resumeBtn.getLayoutParams().height=25;
-			holder.resumeBtn.getLayoutParams().width=25;
-			holder.resumeBtn.setMaxHeight(25);
-			holder.resumeBtn.setMaxWidth(25);
-			//holder.messageTextView.setVisibility(View.GONE);
-			holder.dataTransferred.setTextSize(10);
-			holder.fileThumb.setImageResource(R.drawable.ic_default_audio);
+			holder.fileThumb.getLayoutParams().height=135;
+			holder.fileThumb.getLayoutParams().width=135;
+			//holder.fileThumb.setBackgroundColor(Color.rgb(100, 100, 50));
+			holder.fileThumb.setBackgroundColor(0xffeae7e0);
+//			holder.resumeBtn.getLayoutParams().height=25;
+//			holder.resumeBtn.getLayoutParams().width=25;
+//			holder.resumeBtn.setMaxHeight(25);
+//			holder.resumeBtn.setMaxWidth(25);
+//			holder.dataTransferred.setTextSize(10);
+			holder.messageTextView.setVisibility(View.GONE);
+			holder.fileThumb.setImageResource(R.drawable.ic_default_audio2 );
+			
+			holder.fileInfo.setText(hikeFile.getFileName());
+			holder.fileInfo.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			if(holder.fileInfo != null)
+				holder.fileInfo.setVisibility(View.GONE);
 		}
 		
 //		@GM		
@@ -1608,11 +1624,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			{
 				if(convMessage.isSent())
 				{
-					Log.d(getClass().getSimpleName(), "error display" + FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()) + convMessage.getMsgID());
-
 					if (TextUtils.isEmpty(hikeFile.getFileKey()) && !FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID())) // Cancelled/Not_Started(Not Completed)
 					{
-						Log.d(getClass().getSimpleName(), "error display" + FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()));
 						holder.image.setVisibility(View.VISIBLE);
 						holder.image.setImageResource(R.drawable.ic_download_failed);
 					}
@@ -1643,7 +1656,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		Log.d(getClass().getSimpleName(),"DataDisplay of bytes : " + bytes);
 		if(bytes<0)
 			return("");
-		if(bytes > (1024*1024))
+		if(bytes > (1024*1000))
 		{
 			int mb = bytes/(1024*1024);
 			int mbPoint = bytes%(1024*1024);

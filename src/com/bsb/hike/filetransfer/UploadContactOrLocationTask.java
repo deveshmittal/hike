@@ -119,8 +119,8 @@ public class UploadContactOrLocationTask extends FileTransferBase
 				}
 
 				userContext = createConvMessage(msisdn, metadata);
-				fileTaskMap.put(((ConvMessage)userContext).getMsgID(), futureTask);
-				Log.d(getClass().getSimpleName(), "error display" + fileTaskMap.contains(((ConvMessage)userContext).getMsgID()) + ((ConvMessage)userContext).getMsgID());
+				long id = ((ConvMessage)userContext).getMsgID();
+				fileTaskMap.put(id, futureTask);
 				if (TextUtils.isEmpty(fileKey))
 				{
 					// Called so that the UI in the Conversation lists screen is

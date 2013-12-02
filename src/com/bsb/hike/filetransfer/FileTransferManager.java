@@ -158,7 +158,8 @@ public class FileTransferManager
 
 	public boolean isFileTaskExist(long msgId)
 	{
-		return fileTaskMap.contains(msgId);
+		//return fileTaskMap.contains(msgId);
+		return fileTaskMap.containsKey(msgId);
 	}
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)

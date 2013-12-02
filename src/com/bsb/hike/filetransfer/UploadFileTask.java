@@ -52,7 +52,7 @@ public class UploadFileTask extends FileTransferBase
 {
 	private String X_SESSION_ID;
 
-	private int chunkSize = 1024 * 10 * 10;
+	private int chunkSize = 1024 * 100;
 
 	private Uri picasaUri = null;
 
@@ -82,7 +82,7 @@ public class UploadFileTask extends FileTransferBase
 	
 	private int num = 0;
 
-	private static final String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
+	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
 			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
@@ -446,20 +446,36 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 		long length = sourceFile.length();
-		int numberOfChunks = length > 0 ? (((int) length % chunkSize == 0) ? ((int) length / chunkSize) : (int) length / chunkSize + 1) : 0;
+		int numberOfChunks = length > 0 ? (((int) length % chunkSize == 0) ? ((int) length / chunkSize) : ((int) length / chunkSize) + 1) : 0;
 		for (int i = (mStart / chunkSize); i < numberOfChunks; i++)
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 
-			boolean last = i == numberOfChunks - 1;
-			byte[] fileBytes = getFileBytesBeginning(raf, (int) length, last);
+			boolean last = i == (numberOfChunks - 1);
+			//byte[] fileBytes = getFileBytesBeginning(raf, (int) length, last);
 			int start = i * chunkSize;
-			int end = (i == numberOfChunks - 1) ? (int) length - 1 : start + chunkSize - 1;
+			//int end = (i == numberOfChunks - 1) ? (int) length - 1 : start + chunkSize - 1;
+			
+			//@GM
+			int end = last ? ((int) length - 1) : (start + chunkSize - 1);
+			if(i == (mStart / chunkSize))
+				start += (mStart%chunkSize);
+			
+			byte[]fileBytes = new byte[end-start+1];
+			if(raf.read(fileBytes) == -1)
+			{
+				raf.close();
+				throw new IOException("Exception in partial read. files ended");
+			}
+			//
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
-			byte[] response = send(contentRange, fileBytes);
+			byte[] response = send(contentRange, fileBytes,last);
 			if (response == null)
+			{
+				raf.close();
 				throw new IOException("Exception in partial upload. response null");
+			}	
 			String responseString = new String(response);
 			Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
 			incrementBytesTransferred(fileBytes.length);
@@ -558,7 +574,7 @@ public class UploadFileTask extends FileTransferBase
 
 	}
 
-	private byte[] send(String contentRange, byte[] fileBytes)
+	private byte[] send(String contentRange, byte[] fileBytes, boolean last)
 	{
 		HttpURLConnection hc = null;
 		InputStream is = null;
@@ -574,7 +590,7 @@ public class UploadFileTask extends FileTransferBase
 				/*
 				 * Setting request headers
 				 */
-
+				hc.setReadTimeout(3000);
 				hc.addRequestProperty("Connection", "Keep-Alive");
 				hc.addRequestProperty("Content-Name", selectedFile.getName());
 				hc.addRequestProperty("X-Thumbnail-Required", "0");
@@ -583,17 +599,20 @@ public class UploadFileTask extends FileTransferBase
 				hc.addRequestProperty("X-CONTENT-RANGE", contentRange);
 				//Log.d(getClass().getSimpleName(), "TOKEN : " + token);
 				hc.addRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
+				BOUNDARY = UUID.randomUUID().toString();
 				hc.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 				hc.setDoInput(true);
 				hc.setDoOutput(true);
 				hc.setRequestMethod("POST");
 
+				//Log.d(getClass().getSimpleName(),"response code: " + hc.getResponseCode());
 				byte[] postBytes = getPostBytes(contentRange, fileBytes);
 				OutputStream dout = hc.getOutputStream();
 				dout.write(postBytes);
 				dout.flush();
 				dout.close();
 
+				//Log.d(getClass().getSimpleName(),"response code: " + hc.getResponseCode());
 				int ch;
 				Log.d(getClass().getSimpleName(), "Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
 				is = hc.getInputStream();
