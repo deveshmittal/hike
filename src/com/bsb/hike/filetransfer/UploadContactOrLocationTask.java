@@ -120,6 +120,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 				userContext = createConvMessage(msisdn, metadata);
 				fileTaskMap.put(((ConvMessage)userContext).getMsgID(), futureTask);
+				Log.d(getClass().getSimpleName(), "error display" + fileTaskMap.contains(((ConvMessage)userContext).getMsgID()) + ((ConvMessage)userContext).getMsgID());
 				if (TextUtils.isEmpty(fileKey))
 				{
 					// Called so that the UI in the Conversation lists screen is
@@ -216,7 +217,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			@Override
 			public void transferred(long num)
 			{
-				setBytesTransferred((int)num);
+				incrementBytesTransferred((int)num);
 				progressPercentage = (int) ((num / (float) maxSize) * 100);
 			}
 		});
@@ -288,6 +289,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	protected void postExecute(FTResult result)
 	{
 		fileTaskMap.remove(((ConvMessage)userContext).getMsgID());
+		Log.d(getClass().getSimpleName(), "error display: removing"  + ((ConvMessage)userContext).getMsgID());
 		if (userContext != null)
 		{
 			//HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
@@ -297,12 +299,17 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 		if (result != FTResult.SUCCESS)
 		{
-			int errorStringId = 0;
 			if (result == FTResult.UPLOAD_FAILED)
 			{
-				errorStringId = R.string.upload_failed;
+				handler.post(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						Toast.makeText(context, R.string.upload_failed, Toast.LENGTH_SHORT).show();
+					}
+				});
 			}
-			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 		}
 	}
 

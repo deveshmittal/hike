@@ -439,7 +439,7 @@ public class FileTransferManager
 		else
 			fss = getDownloadFileState(msgId, mFile);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			if (fss.getTotalSize() > 0)
 				return (int) ((fss.getTransferredSize() * 100) / fss.getTotalSize());

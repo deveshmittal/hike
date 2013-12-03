@@ -185,7 +185,7 @@ public class DownloadFileTask extends FileTransferBase
 						// increase the startByte for resume later
 						mStart += numRead;
 						// increase the downloaded size
-						setBytesTransferred(numRead);
+						incrementBytesTransferred(numRead);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						showButton();
 						if (shouldSendProgress())
