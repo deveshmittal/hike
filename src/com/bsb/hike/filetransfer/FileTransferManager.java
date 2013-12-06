@@ -78,7 +78,7 @@ public class FileTransferManager
 	
 	public enum NetworkType
 	{
-		Wifi
+		WIFI
 		{
 			@Override
 			public int getMaxChunkSize()
@@ -512,7 +512,7 @@ public class FileTransferManager
 		{
 			//If device is connected via WiFi
 			if(info.getType() == ConnectivityManager.TYPE_WIFI)
-				return NetworkType.Wifi;			//return 1024 * 1024;
+				return NetworkType.WIFI;			//return 1024 * 1024;
 			else
 				networkType = info.getSubtype();
 		}	
