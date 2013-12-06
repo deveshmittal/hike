@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +22,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.adapters.StickerPageAdapter;
+import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -40,12 +43,14 @@ public class DownloadStickerTask extends StickerTaskBase {
 	private Context context;
 	private StickerCategory category;
 	private DownloadType downloadType;
+	private StickerPageAdapter stickerPageAdapter;
 
 	public DownloadStickerTask(Context context, StickerCategory cat,
-			DownloadType downloadType) {
+			DownloadType downloadType, StickerPageAdapter st) {
 		this.context = context;
 		this.category = cat;
 		this.downloadType = downloadType;
+		this.stickerPageAdapter = st;
 	}
 
 	public DownloadType getDownloadType() {
@@ -123,6 +128,8 @@ public class DownloadStickerTask extends StickerTaskBase {
 				String stickerData = data.getString(stickerId);
 
 				try {
+					if(stickerPageAdapter != null)
+						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
 					File f = new File(largeStickerDir, stickerId);
 					Utils.saveBase64StringToFile(f, stickerData);
 
@@ -136,6 +143,12 @@ public class DownloadStickerTask extends StickerTaskBase {
 				} catch (IOException e) {
 					Log.w(getClass().getSimpleName(), e);
 				}
+			}
+			if(stickerPageAdapter != null)
+			{
+				List<ViewType>  l = stickerPageAdapter.getViewTypeList();
+				l.remove(ViewType.DOWNLOADING_MORE);
+				stickerPageAdapter.calculateNumRowsAndSize(true);
 			}
 
 		} catch (NetworkErrorException e) {
@@ -156,19 +169,24 @@ public class DownloadStickerTask extends StickerTaskBase {
 	}
 
 	@Override
-	protected void onPostExecute(FTResult result) {
+	protected void onPostExecute(FTResult result) 
+	{
 		StickerManager.getInstance().removeTask(category.categoryId.name());
-		if (result != FTResult.SUCCESS) {
-			HikeMessengerApp.getPubSub()
-					.publish(
-							HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-							new Pair<StickerCategory, DownloadType>(category,
-									downloadType));
+		if (result != FTResult.SUCCESS)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, new Pair<StickerCategory, DownloadType>(category, downloadType));
 			return;
 		}
-		HikeMessengerApp.getPubSub().publish(
-				HikePubSub.STICKER_CATEGORY_DOWNLOADED,
-				new Pair<StickerCategory, DownloadType>(category, downloadType));
+		else
+		{
+			if (downloadType == DownloadType.UPDATE)
+				StickerManager.getInstance().setStickerUpdateAvailable(category.categoryId.name(), false);
+			
+			if (stickerPageAdapter != null)
+			{
+				stickerPageAdapter.notifyDataSetChanged();
+				return;
+			}
+		}
 	}
-
 }

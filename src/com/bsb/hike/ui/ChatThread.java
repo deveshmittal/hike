@@ -3849,7 +3849,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					}
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
 							ChatThread.this, category,
-							DownloadType.NEW_CATEGORY);
+							DownloadType.NEW_CATEGORY,null);
 					Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 					StickerManager.getInstance().insertTask(category.categoryId.name(),
@@ -4031,9 +4031,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		((StickerAdapter) emoticonsAdapter).setupStickerPage(emoticonPage,
 				category, failed, downloadTypeBeforeFail);
 
-		if (downloadTypeBeforeFail == DownloadType.UPDATE && !failed) {
-			StickerManager.getInstance().setStickerUpdateAvailable(category.categoryId.name(), false);
-		}
 	}
 
 	public int getCurrentPage() {

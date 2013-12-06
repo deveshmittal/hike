@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -44,7 +45,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private int numItemsRow;
 	private int sizeEachImage;
 	private Activity activity;
-	private int numStickers;
 	private List<Sticker> stickerList;
 	private List<ViewType> viewTypeList;
 	private LayoutInflater inflater;
@@ -55,15 +55,24 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			List<ViewType> viewTypeList) {
 		this.activity = activity;
 		this.stickerList = stickerList;
-		this.numStickers = stickerList.size();
 		this.viewTypeList = viewTypeList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
 
-		calculateNumRowsAndSize();
+		calculateNumRowsAndSize(false);
 	}
 
-	private void calculateNumRowsAndSize() {
+	public List<Sticker> getStickerList()
+	{
+		return stickerList;
+	}
+	
+	public List<ViewType> getViewTypeList()
+	{
+		return viewTypeList;
+	}
+	
+	public void calculateNumRowsAndSize(boolean recal) {
 		int screenWidth = activity.getResources().getDisplayMetrics().widthPixels;
 
 		this.numItemsRow = (int) (screenWidth / SIZE_IMAGE);
@@ -81,14 +90,29 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 		this.sizeEachImage = SIZE_IMAGE
 				+ ((int) (remainingSpace / this.numItemsRow));
 
-		if (numStickers != 0) {
-			if (numStickers % numItemsRow == 0) {
-				this.numStickerRows = numStickers / numItemsRow;
+		if (stickerList.size() != 0) {
+			if (stickerList.size() % numItemsRow == 0) {
+				this.numStickerRows = stickerList.size() / numItemsRow;
 			} else {
-				this.numStickerRows = numStickers / numItemsRow + 1;
+				this.numStickerRows = stickerList.size() / numItemsRow + 1;
 			}
 
-			for (int i = 0; i < numStickerRows; i++) {
+			int count = 0;
+			
+			/*
+			 * Recal will be used when you download new stickers while scrolling.
+			 * It will add new sticker rows at the end.
+			 * */
+			if (recal)
+			{
+				for (int i = 0; i < viewTypeList.size(); i++)
+				{
+					if (viewTypeList.get(i).equals(ViewType.STICKER))
+						count++;
+				}
+			}
+			for (int i = 0; i < numStickerRows - count; i++)
+			{
 				viewTypeList.add(category.updateAvailable ? 1 : 0, ViewType.STICKER);
 			}
 		}
@@ -156,8 +180,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
 			int maxCount;
 			if ((startPosition == numStickerRows - 1)
-					&& (numStickers % numItemsRow != 0)) {
-				maxCount = numStickers % numItemsRow;
+					&& (stickerList.size() % numItemsRow != 0)) {
+				maxCount = stickerList.size() % numItemsRow;
 			} else {
 				maxCount = numStickerRows != 0 ? numItemsRow : 0;
 			}
@@ -170,7 +194,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				imageView.setPadding(padding, padding, padding, padding);
 
 				int index = (startPosition * numItemsRow) + i;
-
+				if(index > stickerList.size() - 1)
+					return null;
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1) {
@@ -219,7 +244,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					@Override
 					public void onClick(View v) {
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-								activity, category, DownloadType.UPDATE);
+								activity, category, DownloadType.UPDATE,null);
 						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 						StickerManager.getInstance().insertTask(category.categoryId.name(),
@@ -236,7 +261,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
 		return convertView;
 	}
-
+	
 	@Override
 	public void onClick(View v) {
 		Sticker sticker = (Sticker) v.getTag();

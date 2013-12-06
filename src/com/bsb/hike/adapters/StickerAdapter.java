@@ -86,7 +86,7 @@ public class StickerAdapter extends PagerAdapter implements
 		final ListView stickerList = (ListView) parent.findViewById(R.id.emoticon_grid);
 
 		View downloadingParent = parent.findViewById(R.id.downloading_container);
-		TextView downloadingText = (TextView) parent.findViewById(R.id.downloading_sticker);
+		final TextView downloadingText = (TextView) parent.findViewById(R.id.downloading_sticker);
 
 		Button downloadingFailed = (Button) parent.findViewById(R.id.sticker_fail_btn);
 
@@ -117,11 +117,12 @@ public class StickerAdapter extends PagerAdapter implements
 				@Override
 				public void onClick(View v)
 				{
-					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, downloadTypeBeforeFail);
+					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, downloadTypeBeforeFail,null);
 					Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 					StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
-					setupStickerPage(parent, category, false, null);
+					downloadingText.setText(activity.getString(R.string.downloading_category, category.categoryId.name()));
+					//setupStickerPage(parent, category, false, null);
 				}
 			});
 		}
@@ -179,7 +180,6 @@ public class StickerAdapter extends PagerAdapter implements
 				Collections.sort(stickersList);
 				long t2 = System.currentTimeMillis();
 				Log.d(getClass().getSimpleName(), "Time to sort category : " + category.categoryId + " in ms : " + (t2 - t1));
-
 			}
 	
 			boolean updateAvailable = category.updateAvailable;
@@ -194,7 +194,7 @@ public class StickerAdapter extends PagerAdapter implements
 				viewTypeList.add(ViewType.DOWNLOADING_MORE);
 			}
 			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList);
-
+			
 			stickerList.setAdapter(stickerPageAdapter);
 			stickerList.setOnScrollListener(new OnScrollListener()
 			{
@@ -221,12 +221,11 @@ public class StickerAdapter extends PagerAdapter implements
 						{
 							Log.d(getClass().getSimpleName(), "Downloading more stickers " + category.categoryId.name());
 							viewTypeList.add(ViewType.DOWNLOADING_MORE);
-
-							DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS);
-							Utils.executeFtResultAsyncTask(downloadStickerTask);
+							DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS,stickerPageAdapter);
 
 							StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
 							stickerPageAdapter.notifyDataSetChanged();
+							Utils.executeFtResultAsyncTask(downloadStickerTask);
 						}
 					}
 				}
