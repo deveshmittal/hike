@@ -27,6 +27,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected static String NETWORK_ERROR_1 = "Connection timed out";
 
 	protected static String NETWORK_ERROR_2 = "Unable to resolve host";
+	
+	protected static String NETWORK_ERROR_3 = "Network is unreachable";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
 
@@ -167,6 +169,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		}
 		else
 		{
+			retryAttempts++;
 			Log.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
 			return false;
 		}

@@ -41,8 +41,6 @@ public class DownloadFileTask extends FileTransferBase
 	private boolean showToast;
 
 	private int num = 0;
-	
-	private static int BUFFER_SIZE = 4096;
 
 	protected DownloadFileTask(Handler handler,ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType,
 			Object userContext,boolean showToast)
@@ -168,9 +166,10 @@ public class DownloadFileTask extends FileTransferBase
 					// open the output file and seek to the start location
 					raf.seek(mStart);
 
-					byte data[] = new byte[BUFFER_SIZE];
+					int chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+					byte data[] = new byte[chunkSize];
 					int numRead;
-					while ((_state == FTState.IN_PROGRESS) && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1))
+					while ((_state == FTState.IN_PROGRESS) && ((numRead = in.read(data, 0, chunkSize)) != -1))
 					{
 						// write to buffer
 						try
@@ -182,6 +181,14 @@ public class DownloadFileTask extends FileTransferBase
 							Log.e(getClass().getSimpleName(), "Exception", e);
 							return FTResult.CARD_UNMOUNT;
 						}
+						// ChunkSize is increased within the limits
+						chunkSize *= 2;
+						if(chunkSize > FileTransferManager.getInstance(context).getMaxChunkSize())
+							chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
+						else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
+							chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+						// change buffer size
+						data = new byte[chunkSize];
 						// increase the startByte for resume later
 						mStart += numRead;
 						// increase the downloaded size
@@ -255,6 +262,10 @@ public class DownloadFileTask extends FileTransferBase
 				{
 					// here we should retry
 					mStart = _bytesTransferred;
+					// Is case id the task quits after making MAX attempts
+					// the file state is saved
+					if(retryAttempts >= MAX_RETRY_ATTEMPTS)
+						error();
 				}
 				else
 				{
