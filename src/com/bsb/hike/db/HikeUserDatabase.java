@@ -1982,7 +1982,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
 			}
-
 			/*
 			 * Making sure the string exists.
 			 */
