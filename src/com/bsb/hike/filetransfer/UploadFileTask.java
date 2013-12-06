@@ -1,10 +1,14 @@
 package com.bsb.hike.filetransfer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
@@ -15,10 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -46,13 +52,11 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Utils;
-import com.facebook.Response;
+import com.squareup.okhttp.OkHttpClient;
 
 public class UploadFileTask extends FileTransferBase
 {
 	private String X_SESSION_ID;
-
-	private int chunkSize = 1024 * 100;
 
 	private Uri picasaUri = null;
 
@@ -79,7 +83,7 @@ public class UploadFileTask extends FileTransferBase
 	private boolean isForwardMsg;
 
 	private FutureTask<FTResult> futureTask;
-	
+
 	private int num = 0;
 
 	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
@@ -446,49 +450,91 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 		long length = sourceFile.length();
-		int numberOfChunks = length > 0 ? (((int) length % chunkSize == 0) ? ((int) length / chunkSize) : ((int) length / chunkSize) + 1) : 0;
-		for (int i = (mStart / chunkSize); i < numberOfChunks; i++)
+		int chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+		int start = mStart;
+		int end = (int) length;
+		if (end > (start + chunkSize))
+			end = start + chunkSize;
+		end--;
+		//The following loops goes on till the end byte to read reaches the length
+		//or we receive a json response from the server
+		while(end < length && responseJson == null)
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
-
-			boolean last = i == (numberOfChunks - 1);
-			//byte[] fileBytes = getFileBytesBeginning(raf, (int) length, last);
-			int start = i * chunkSize;
-			//int end = (i == numberOfChunks - 1) ? (int) length - 1 : start + chunkSize - 1;
-			
-			//@GM
-			int end = last ? ((int) length - 1) : (start + chunkSize - 1);
-			if(i == (mStart / chunkSize))
-				start += (mStart%chunkSize);
-			
-			byte[]fileBytes = new byte[end-start+1];
-			if(raf.read(fileBytes) == -1)
+			byte[] fileBytes = new byte[end - start + 1]; //Byte Size to read from the file
+			//In case of success following flag is set high to reset retry logic and update UI
+			boolean resetAndUpdate = false;
+			if (raf.read(fileBytes) == -1)
 			{
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
-			//
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
-			byte[] response = send(contentRange, fileBytes,last);
-			if (response == null)
-			{
-				raf.close();
-				throw new IOException("Exception in partial upload. response null");
-			}	
-			String responseString = new String(response);
+			String responseString = send(contentRange, fileBytes);
 			Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
-			incrementBytesTransferred(fileBytes.length);
-			progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
-			// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-			if(shouldSendProgress())
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-			showButton();
-
-			if (i == numberOfChunks - 1) // this is the final chunk
+			// When end byte uploaded is the last byte of the file and server send response
+			// i.e. upload successfully completed
+			if(end == (length-1) && responseString != null)
 			{
 				responseJson = new JSONObject(responseString);
+				resetAndUpdate = true;	//To update UI
 			}
+			// When upload is not complete
+			else
+			{
+				// In case there is error uploading this chunk
+				if(responseString == null)
+				{
+					// If retry attempt is to be made
+					// The chunk size is reduced for next attempt
+					if(shouldRetry())
+					{
+						raf.seek(start);
+						end = (int) length;
+						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+						if (end > (start + chunkSize))
+							end = start + chunkSize;
+						end--;
+					}
+					else
+					{
+						raf.close();
+						throw new IOException("Exception in partial upload. response null");
+					}
+					
+				}
+				// When the chunk uploaded successfully
+				else
+				{
+					start += chunkSize;
+					// ChunkSize is increased within the limits
+					chunkSize *= 2;
+					if(chunkSize > FileTransferManager.getInstance(context).getMaxChunkSize())
+						chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
+					else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
+						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+					end = (int) length;
+					if (end > (start + chunkSize))
+						end = start + chunkSize;
+					end--;
+					resetAndUpdate = true;	// To reset retry logic and update UI
+				}
+			}
+			/* resetting reconnect logic + updating UI*/
+			if(resetAndUpdate)
+			{
+				retry = true;
+				reconnectTime = 0;
+				retryAttempts = 0;
+				incrementBytesTransferred(fileBytes.length);
+				progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
+				// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+				if (shouldSendProgress())
+					LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				showButton();
+			}
+			
 		}
 		switch (_state)
 		{
@@ -520,22 +566,6 @@ public class UploadFileTask extends FileTransferBase
 		return responseJson;
 	}
 
-	private byte[] getFileBytesBeginning(RandomAccessFile raf, int length, boolean last) throws IOException
-	{
-		byte[] arr = null;
-		if (!last)
-		{
-			arr = new byte[chunkSize];
-		}
-		else
-		{
-			arr = new byte[length % chunkSize];
-		}
-
-		raf.read(arr);
-		return arr;
-	}
-
 	String getBoundaryMessage(String contentRange)
 	{
 		StringBuffer res = new StringBuffer("--").append(BOUNDARY).append("\r\n");
@@ -552,9 +582,9 @@ public class UploadFileTask extends FileTransferBase
 				.append(TextUtils.isEmpty(fileType) ? "" : fileType).append("\r\n\r\n");
 		return res.toString();
 	}
-	
-	//@GM
-	//for updating progress on UI
+
+	// @GM
+	// for updating progress on UI
 	private boolean shouldSendProgress()
 	{
 		int x = progressPercentage / 10;
@@ -574,82 +604,80 @@ public class UploadFileTask extends FileTransferBase
 
 	}
 
-	private byte[] send(String contentRange, byte[] fileBytes, boolean last)
+	//private byte[] send(String contentRange, byte[] fileBytes)
+	private String send(String contentRange, byte[] fileBytes)
 	{
 		HttpURLConnection hc = null;
-		InputStream is = null;
+		BufferedInputStream is = null;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-		byte[] res = null;
-
-		while (shouldRetry())
+		OkHttpClient client = new OkHttpClient();
+		String res = null;
+		try
 		{
-			try
+			hc = client.open(mUrl);
+			//hc = (HttpURLConnection) mUrl.openConnection();
+			/*
+			 * Setting request headers
+			 */
+			hc.addRequestProperty("Connection", "Keep-Alive");
+			hc.addRequestProperty("Content-Name", selectedFile.getName());
+			hc.addRequestProperty("X-Thumbnail-Required", "0");
+
+			hc.addRequestProperty("X-SESSION-ID", X_SESSION_ID);
+			hc.addRequestProperty("X-CONTENT-RANGE", contentRange);
+			hc.addRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
+			BOUNDARY = UUID.randomUUID().toString();
+			hc.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+			hc.setDoInput(true);
+			hc.setDoOutput(true);
+			hc.setUseCaches(false);
+			hc.setRequestMethod("POST");
+
+			byte[] postBytes = getPostBytes(contentRange, fileBytes);
+			BufferedOutputStream dout = new BufferedOutputStream(hc.getOutputStream());
+			// OutputStream dout = hc.getOutputStream();
+			dout.write(postBytes);
+			dout.flush();
+			// dout.close();
+			int ch;
+			Log.d(getClass().getSimpleName(), "Before Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
+			is = new BufferedInputStream(hc.getInputStream());
+			// is = hc.getInputStream();
+			Log.d(getClass().getSimpleName(), "After Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
+
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			StringBuilder total = new StringBuilder();
+			String line;
+			while ((line = r.readLine()) != null)
 			{
-				hc = (HttpURLConnection) mUrl.openConnection();
-				/*
-				 * Setting request headers
-				 */
-				hc.setReadTimeout(3000);
-				hc.addRequestProperty("Connection", "Keep-Alive");
-				hc.addRequestProperty("Content-Name", selectedFile.getName());
-				hc.addRequestProperty("X-Thumbnail-Required", "0");
-
-				hc.addRequestProperty("X-SESSION-ID", X_SESSION_ID);
-				hc.addRequestProperty("X-CONTENT-RANGE", contentRange);
-				//Log.d(getClass().getSimpleName(), "TOKEN : " + token);
-				hc.addRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
-				BOUNDARY = UUID.randomUUID().toString();
-				hc.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-				hc.setDoInput(true);
-				hc.setDoOutput(true);
-				hc.setRequestMethod("POST");
-
-				//Log.d(getClass().getSimpleName(),"response code: " + hc.getResponseCode());
-				byte[] postBytes = getPostBytes(contentRange, fileBytes);
-				OutputStream dout = hc.getOutputStream();
-				dout.write(postBytes);
-				dout.flush();
-				dout.close();
-
-				//Log.d(getClass().getSimpleName(),"response code: " + hc.getResponseCode());
-				int ch;
-				Log.d(getClass().getSimpleName(), "Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
-				is = hc.getInputStream();
-				Log.d(getClass().getSimpleName(), "Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
-
-				while ((ch = is.read()) != -1)
-				{
-					bos.write(ch);
-				}
-				res = bos.toByteArray();
-				retry = false; // if success don't retry again till next time
-				Log.d(getClass().getSimpleName(), "Chunk upload response code : " + hc.getResponseCode());
+				total.append(line);
 			}
-			catch (Exception e)
+			res = total.toString();
+			retry = false; // if success don't retry again till next time
+			Log.d(getClass().getSimpleName(), "Chunk upload response code : " + hc.getResponseCode());
+		}
+		catch (Exception e)
+		{
+			Log.d(getClass().getSimpleName(), "Caught Exception: " + e.getMessage());
+			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)
+					|| e.getMessage().contains(NETWORK_ERROR_3)))
 			{
-				Log.d(getClass().getSimpleName(), "Caught Exception");
-				if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)))
-				{
-					Log.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
-					// we should retry if failed due to network
-				}
-				else
-				{
-					error();
-					res = null;
-					retry = false;
-				}
+				Log.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
+				// we should retry if failed due to network
 			}
-			finally
+			else
 			{
-				closeStreams(bos, is, hc);
+				error();
+				res = null;
+				retry = false;
 			}
 		}
-		/* resetting reconnect logic */
-		retry = true;
-		reconnectTime = 0;
-		retryAttempts = 0;
+		finally
+		{
+			closeStreams(bos, is, hc);
+		}
+
 		return res;
 	}
 
@@ -659,10 +687,22 @@ public class UploadFileTask extends FileTransferBase
 		{
 			if (bos != null)
 				bos.close();
-
+		}
+		catch (Exception e2)
+		{
+			e2.printStackTrace();
+		}
+		try
+		{
 			if (is != null)
 				is.close();
-
+		}
+		catch (Exception e2)
+		{
+			e2.printStackTrace();
+		}
+		try
+		{
 			if (hc != null)
 				hc.disconnect();
 		}

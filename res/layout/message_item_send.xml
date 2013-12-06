@@ -58,31 +58,10 @@
             android:layout_height="wrap_content"
             android:gravity="right" >
 
-            <com.bsb.hike.view.CircularProgress
-                android:id="@+id/file_transfer_progress"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="7dp"
-                android:layout_toRightOf="@id/btn_resume"
-                android:visibility="invisible" />
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/btn_resume"
-                android:layout_width="60dp"
-                android:layout_height="30dp"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="7dp"
-                android:background="@color/white"
-                android:gravity="center"
-                android:text="Pause"
-                android:visibility="gone" />
-
             <ImageView
                 android:id="@+id/msg_status_indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignRight="@id/file_transfer_progress"
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_download_failed"
                 android:visibility="invisible" />
@@ -91,7 +70,7 @@
                 android:id="@+id/sent_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/file_transfer_progress"
+                android:layout_toRightOf="@id/msg_status_indicator"
                 android:background="@drawable/ic_bubble_green_selector"
                 android:gravity="center_vertical"
                 android:orientation="horizontal" >

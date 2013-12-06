@@ -309,9 +309,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					View overlay = (View) v;
 					overlay.setClickable(false);
 					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
-					//resumeButton.setImageAlpha(65);
-					//resumeButton.setAlpha(0.3f);
-					//resumeButton.setVisibility(View.INVISIBLE);
 					convMessage.setResumeButtonVisibility(false);
 
 					Log.d("Upload- button pressed", fss.getFTState().toString());
@@ -340,9 +337,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					View overlay = (View) v;
 					overlay.setClickable(false);
 					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
-					//resumeButton.setImageAlpha(65);
-					//resumeButton.setAlpha(0.3f);
-					//resumeButton.setVisibility(View.INVISIBLE);
 					convMessage.setResumeButtonVisibility(false);
 
 					Log.d("Download- button pressed", fss.getFTState().toString());
@@ -442,9 +436,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			case FILE_TRANSFER_SEND:
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
 
-				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
-				//holder.circularProgress = (CircularProgress) v
-				//		.findViewById(R.id.file_transfer_progress);
+				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);         
 				holder.marginView = v.findViewById(R.id.margin_view);
 				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
 				holder.showFileBtn = (ImageView) v
@@ -498,15 +490,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
 				holder.showFileBtn = (ImageView) v
 						.findViewById(R.id.btn_open_file);
-				//holder.circularProgress = (CircularProgress) v
-				//		.findViewById(R.id.file_transfer_progress);
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.message_receive_ft);
 				holder.messageTextView.setVisibility(View.VISIBLE);
-
-				//holder.circularProgress.setVisibility(View.INVISIBLE);
-				
-				//holder.resumeBtn = (]TextView) v.findViewById(R.id.btn_resume);
 				
 				holder.resumeBtn = (ImageView) v.findViewById(R.id.ibtn_resume);
 				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
@@ -1440,6 +1426,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			
 		}
+		else
+		{
+			if(holder.overlayBg != null)
+				holder.overlayBg.setClickable(false);
+		}
 		
 //		@GM
 //		========================Changing the checkProgress criteria===================
@@ -1656,7 +1647,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		Log.d(getClass().getSimpleName(),"DataDisplay of bytes : " + bytes);
 		if(bytes<0)
 			return("");
-		if(bytes > (1024*1000))
+		if(bytes >= (1024*1000))
 		{
 			int mb = bytes/(1024*1024);
 			int mbPoint = bytes%(1024*1024);
