@@ -18,14 +18,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -49,6 +57,10 @@ public class FileTransferManager
 	private final int THREAD_POOL_SIZE = 10;
 
 	private final short KEEP_ALIVE_TIME = 60; // in seconds
+	
+	private static int minChunkSize = 10 * 1024;
+	
+	private static int maxChunkSize = 100 * 1024;
 
 	private ExecutorService pool;
 
@@ -141,6 +153,7 @@ public class FileTransferManager
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
 		handler = new Handler(context.getMainLooper());
+		setChunkSize();
 	}
 
 	public static FileTransferManager getInstance(Context context)
@@ -158,7 +171,8 @@ public class FileTransferManager
 
 	public boolean isFileTaskExist(long msgId)
 	{
-		return fileTaskMap.contains(msgId);
+		//return fileTaskMap.contains(msgId);
+		return fileTaskMap.containsKey(msgId);
 	}
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
@@ -420,6 +434,84 @@ public class FileTransferManager
 		}
 		return fss != null ? fss : new FileSavedState();
 
+	}
+	
+	// Fetches the type of internet connection the device is using
+	// Return the level(1 to 4) of internet connection based on speed
+	public int getNetworkLevel()
+	{
+		int networkType = -1;
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		// Contains all the information about current connection
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (info != null)
+		{
+			//If device is connected via WiFi
+			if(info.getType() == ConnectivityManager.TYPE_WIFI)
+				return 4;							//return 1024 * 1024;
+			else
+				networkType = info.getSubtype();
+		}	
+
+		//There are following types of mobile networks
+		switch (networkType)
+		{
+		case TelephonyManager.NETWORK_TYPE_HSUPA:	// ~ 1-23 Mbps
+		case TelephonyManager.NETWORK_TYPE_LTE:		// ~ 10+ Mbps	// API level 11
+		case TelephonyManager.NETWORK_TYPE_HSPAP:	// ~ 10-20 Mbps	// API level 13
+		case TelephonyManager.NETWORK_TYPE_EVDO_B:	// ~ 5 Mbps		// API level 9
+			return 3;								//return 512 * 1024;
+		case TelephonyManager.NETWORK_TYPE_EVDO_0:	// ~ 400-1000 kbps
+		case TelephonyManager.NETWORK_TYPE_EVDO_A:	// ~ 600-1400 kbps
+		case TelephonyManager.NETWORK_TYPE_HSDPA:	// ~ 2-14 Mbps
+		case TelephonyManager.NETWORK_TYPE_HSPA:	// ~ 700-1700 kbps
+		case TelephonyManager.NETWORK_TYPE_UMTS:	// ~ 400-7000 kbps 
+		case TelephonyManager.NETWORK_TYPE_EHRPD:	// ~ 1-2 Mbps	// API level 11
+			return 2;								//return 256 *1024;
+		case TelephonyManager.NETWORK_TYPE_1xRTT:	// ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_CDMA:	// ~ 14-64 kbps
+		case TelephonyManager.NETWORK_TYPE_EDGE:	// ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_GPRS:	// ~ 100 kbps
+		case TelephonyManager.NETWORK_TYPE_IDEN:	// ~25 kbps		// API level 8
+		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+		default:
+			return 1;								//return 24 * 1024;
+		}
+	}
+	
+	// Set the limits of chunk sizes of files to transfer
+	public void setChunkSize()
+	{
+		int networkLevel = getNetworkLevel();
+		switch (networkLevel)
+		{
+		case 4:
+			maxChunkSize = 1024 * 1024;
+			minChunkSize = 64 * 1024;
+			break;
+		case 3:
+			maxChunkSize = 512 * 1024;
+			minChunkSize = 16 * 1024;
+			break;
+		case 2:
+			maxChunkSize = 256 * 1024;
+			minChunkSize = 16 * 1024;
+			break;
+		case 1:
+			maxChunkSize = 24 * 1024;
+			minChunkSize = 4 * 1024;
+			break;
+		}
+	}
+	
+	public int getMaxChunkSize()
+	{
+		return maxChunkSize;
+	}
+	
+	public int getMinChunkSize()
+	{
+		return minChunkSize;
 	}
 
 	public File getHikeTempDir()
