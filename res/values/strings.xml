@@ -705,4 +705,6 @@
 	<string name="humanoid2_category">Humanoid 2</string>
 	<string name="se_category">Smiley Expressions</string>
 	<string name="avtars_category">Avatars</string>	
+	<string name="One">1</string>
+	<string name="Two">2</string>
 </resources>

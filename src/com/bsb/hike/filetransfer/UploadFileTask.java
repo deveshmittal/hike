@@ -79,6 +79,8 @@ public class UploadFileTask extends FileTransferBase
 	private boolean isForwardMsg;
 
 	private FutureTask<FTResult> futureTask;
+	
+	private int num = 0;
 
 	private static final String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
 
@@ -423,6 +425,7 @@ public class UploadFileTask extends FileTransferBase
 		JSONObject responseJson = null;
 		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(sourceFile, msgId);
 		setFileTotalSize((int) sourceFile.length());
+		setBytesTransferred(fst.getTransferredSize());
 		// represents this file is either not started or unrecovered error has happened
 		Log.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
@@ -459,10 +462,11 @@ public class UploadFileTask extends FileTransferBase
 				throw new IOException("Exception in partial upload. response null");
 			String responseString = new String(response);
 			Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
-			setBytesTransferred(fileBytes.length);
+			incrementBytesTransferred(fileBytes.length);
 			progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 			// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			if(shouldSendProgress())
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			showButton();
 
 			if (i == numberOfChunks - 1) // this is the final chunk
@@ -532,6 +536,19 @@ public class UploadFileTask extends FileTransferBase
 				.append(TextUtils.isEmpty(fileType) ? "" : fileType).append("\r\n\r\n");
 		return res.toString();
 	}
+	
+	//@GM
+	//for updating progress on UI
+	private boolean shouldSendProgress()
+	{
+		int x = progressPercentage / 10;
+		if (x < num)
+			return false;
+		// @GM 'num++' will create a problem in future if with decide to increase "BUFFER_SIZE"(which we will)
+		// num++;
+		num = x + 1;
+		return true;
+	}
 
 	private void showButton()
 	{
@@ -564,7 +581,7 @@ public class UploadFileTask extends FileTransferBase
 
 				hc.addRequestProperty("X-SESSION-ID", X_SESSION_ID);
 				hc.addRequestProperty("X-CONTENT-RANGE", contentRange);
-				Log.d(getClass().getSimpleName(), "TOKEN : " + token);
+				//Log.d(getClass().getSimpleName(), "TOKEN : " + token);
 				hc.addRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
 				hc.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 				hc.setDoInput(true);

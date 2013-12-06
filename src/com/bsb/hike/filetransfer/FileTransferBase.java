@@ -92,9 +92,13 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	}
 
 	// this will be used for both upload and download
-	protected void setBytesTransferred(int value)
+	protected void incrementBytesTransferred(int value)
 	{
 		_bytesTransferred += value;
+	}
+	protected void setBytesTransferred(int value)
+	{
+		_bytesTransferred = value;
 	}
 
 	protected void saveFileState()
@@ -173,6 +177,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			return true;
 		}
 		else
+		{
+			Log.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
 			return false;
+		}
 	}
 }
