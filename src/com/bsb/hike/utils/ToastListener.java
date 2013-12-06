@@ -177,6 +177,8 @@ public class ToastListener implements Listener {
 			toaster.pushBigPictureStatusNotifications(profileStruct);
 		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
 				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
+			if(object == null)
+				return;
 			ConvMessage message = (ConvMessage) object;
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;

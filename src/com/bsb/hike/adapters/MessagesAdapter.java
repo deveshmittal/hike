@@ -17,9 +17,11 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -52,6 +54,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +63,9 @@ import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FileSavedState;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -74,14 +80,10 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
-import com.bsb.hike.tasks.UploadContactOrLocationTask;
-import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
-import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -105,7 +107,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ViewGroup container;
 		ImageView fileThumb;
 		ImageView showFileBtn;
-		CircularProgress circularProgress;
+		//CircularProgress circularProgress;
 		View marginView;
 		TextView participantNameFT;
 		View loadingThumb;
@@ -124,6 +126,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ImageView typing;
 		ViewGroup avatarContainer;
 		ViewGroup typingAvatarContainer;
+		
+		//@GM View Items needed for pause/resume overlay
+		View overlayBg;
+		ImageView resumeBtn;
+		TextView dataTransferred;
+		ProgressBar barProgress;
+		TextView fileInfo;
 	}
 
 	private Conversation conversation;
@@ -277,7 +286,84 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public int getViewTypeCount() {
 		return ViewType.values().length;
 	}
+	
 
+	View.OnClickListener buttonClick = new OnClickListener()
+	{
+		
+		@Override
+		public void onClick(View v)
+		{
+			ConvMessage convMessage = (ConvMessage) v.getTag(R.string.One);
+			switch (v.getId())
+			{
+			case R.id.overlayBg:
+
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+				File file = hikeFile.getFile();
+				
+				if(convMessage.isSent())
+				{
+					FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
+					
+					View overlay = (View) v;
+					overlay.setClickable(false);
+					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
+					convMessage.setResumeButtonVisibility(false);
+
+					Log.d("Upload- button pressed", fss.getFTState().toString());
+					
+					//If the file is complete or has not started yet overlay should not be in action
+					if(fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED)
+						return;
+					
+					if (fss.getFTState() == FTState.IN_PROGRESS)
+					{
+						resumeButton.setBackgroundResource(R.drawable.ic_pause_ftr_disabled);
+						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
+					}
+
+					else
+					{
+						resumeButton.setBackgroundResource(R.drawable.ic_resume_ftr_disabled);
+						FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
+					}
+					
+				}
+				else
+				{
+					FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+
+					View overlay = (View) v;
+					overlay.setClickable(false);
+					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
+					convMessage.setResumeButtonVisibility(false);
+
+					Log.d("Download- button pressed", fss.getFTState().toString());
+					
+					//If the file is complete or has not started yet overlay should not be in action
+					if(fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED)
+						return;
+					
+					if (fss.getFTState() == FTState.IN_PROGRESS)
+					{
+						resumeButton.setBackgroundResource(R.drawable.ic_pause_ftr_disabled);
+						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
+					}
+
+					else
+					{
+						resumeButton.setBackgroundResource(R.drawable.ic_resume_ftr_disabled);
+						FileTransferManager.getInstance(context).downloadFile(file, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
+								true);
+					}
+				}
+				
+				notifyDataSetChanged();	
+			}
+			
+		}
+	}; 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) context
@@ -285,6 +371,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final ConvMessage convMessage = getItem(position);
+		
+		//HikeFile, file and FileSavedState will be called here once and for all
+		HikeFile hikeFile = null;
+		File file = null;
+		FileSavedState fss = null;
+		if(convMessage.isFileTransferMessage())
+		{
+			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			file = hikeFile.getFile();
+			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			{
+				if (convMessage.isSent())
+				{
+					fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
+				}
+				else
+				{
+					fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+				}
+				Log.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
+				Log.d(getClass().getSimpleName(),"FT state: "+fss.getFTState().toString());
+			}
+		}
+		
 		ViewHolder holder = null;
 		View v = convertView;
 		if (v == null) {
@@ -326,15 +436,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			case FILE_TRANSFER_SEND:
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
 
-				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
-				holder.circularProgress = (CircularProgress) v
-						.findViewById(R.id.file_transfer_progress);
+				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);         
 				holder.marginView = v.findViewById(R.id.margin_view);
 				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
 				holder.showFileBtn = (ImageView) v
 						.findViewById(R.id.btn_open_file);
 				holder.image = (ImageView) v
 						.findViewById(R.id.msg_status_indicator);
+				
+				holder.resumeBtn = (ImageView) v.findViewById(R.id.ibtn_resume);
+				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
+				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
+				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
+				
+				holder.fileInfo = (TextView) v.findViewById(R.id.file_info);
 
 				showFileTransferElements(holder);
 			case SEND_HIKE:
@@ -375,13 +490,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
 				holder.showFileBtn = (ImageView) v
 						.findViewById(R.id.btn_open_file);
-				holder.circularProgress = (CircularProgress) v
-						.findViewById(R.id.file_transfer_progress);
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.message_receive_ft);
 				holder.messageTextView.setVisibility(View.VISIBLE);
-
-				holder.circularProgress.setVisibility(View.INVISIBLE);
+				
+				holder.resumeBtn = (ImageView) v.findViewById(R.id.ibtn_resume);
+				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
+				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
+				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
+				holder.fileInfo = (TextView) v.findViewById(R.id.file_info);
 				showFileTransferElements(holder);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
@@ -441,6 +558,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			v.setTag(holder);
 		} else {
 			holder = (ViewHolder) v.getTag();
+		}
+		
+		
+		//@GM Assigning the onClick listener for the resume/pause button in case of file transfer
+		if(viewType == ViewType.FILE_TRANSFER_RECEIVE || viewType == ViewType.FILE_TRANSFER_SEND)
+		{
+			holder.overlayBg.setTag(R.string.One,convMessage);
+			holder.overlayBg.setTag(R.string.Two, holder.resumeBtn);
+			holder.overlayBg.setOnClickListener(buttonClick);
 		}
 
 		if (viewType == ViewType.RECEIVE) {
@@ -886,14 +1012,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		holder.stickerPlaceholder.setVisibility(View.GONE);
 
 		if (convMessage.isFileTransferMessage()) {
-			final HikeFile hikeFile = metadata.getHikeFiles().get(0);
+			//final HikeFile hikeFile = metadata.getHikeFiles().get(0);
 			HikeFileType hikeFileType = hikeFile.getHikeFileType();
 
+			/* logic to show thumbnail :
+			 * 1. isSent() , 2. isGroup() , 3. known contact , 4. unknown contact & downloaded  
+			 */
 			boolean showThumbnail = ((convMessage.isSent())
 					|| (conversation instanceof GroupConversation)
 					|| (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
-					.wasFileDownloaded() && !HikeMessengerApp.fileTransferTaskMap
-					.containsKey(convMessage.getMsgID())))
+					.wasFileDownloaded()))
 					&& (hikeFile.getThumbnail() != null)
 					&& (hikeFileType != HikeFileType.UNKNOWN);
 
@@ -944,8 +1072,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.setBackgroundResource(R.drawable.ic_default_mov);
 						break;
 					case AUDIO:
-						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_default_audio);
+//						holder.fileThumb
+//								.setBackgroundResource(R.drawable.ic_default_audio);
 						break;
 					case CONTACT:
 						holder.fileThumb
@@ -967,7 +1095,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					.setImageResource(((hikeFileType == HikeFileType.VIDEO) && (showThumbnail)) ? R.drawable.ic_video_play
 							: 0);
 
-			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
+			RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) holder.fileThumb
 					.getLayoutParams();
 
 			if (showThumbnail && thumbnail != null) {
@@ -1000,14 +1128,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.messageTextView.setText(context
 						.getString(R.string.unknown_msg));
 			} else {
-				holder.messageTextView.setText(hikeFile.getFileName());
+					holder.messageTextView.setText(hikeFile.getFileName());
 			}
 
 			if (holder.showFileBtn != null) {
 				if (hikeFile.wasFileDownloaded()
-						&& showThumbnail
-						&& !HikeMessengerApp.fileTransferTaskMap
-								.containsKey(convMessage.getMsgID())) {
+						&& showThumbnail) {
 					holder.showFileBtn.setVisibility(View.GONE);
 
 				} else {
@@ -1039,10 +1165,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
 									.setDurationTxt(holder.messageTextView);
-						} else {
-							if (!convMessage.isSent()
-									|| !HikeMessengerApp.fileTransferTaskMap
-											.containsKey(convMessage.getMsgID())) {
+						} else { 
+							//FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(),hikeFile.getFile());
+							if (!convMessage.isSent() && (fss.getFTState() == FTState.CANCELLED || fss.getFTState() == FTState.NOT_STARTED)) {
 								holder.showFileBtn.setVisibility(View.VISIBLE);
 								setFileButtonResource(holder.showFileBtn,
 										convMessage, hikeFile);
@@ -1206,59 +1331,304 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		if (convMessage.isFileTransferMessage() && convMessage.isSent()) {
 			holder.image.setVisibility(View.INVISIBLE);
 		}
+		
+//		@GM
+//		UI for audio file transfer
+		if(convMessage.isFileTransferMessage() && hikeFile.getHikeFileType() == HikeFileType.AUDIO)
+		{
+			holder.fileThumb.getLayoutParams().height=135;
+			holder.fileThumb.getLayoutParams().width=135;
+			//holder.fileThumb.setBackgroundColor(Color.rgb(100, 100, 50));
+			holder.fileThumb.setBackgroundColor(0xffeae7e0);
+//			holder.resumeBtn.getLayoutParams().height=25;
+//			holder.resumeBtn.getLayoutParams().width=25;
+//			holder.resumeBtn.setMaxHeight(25);
+//			holder.resumeBtn.setMaxWidth(25);
+//			holder.dataTransferred.setTextSize(10);
+			holder.messageTextView.setVisibility(View.GONE);
+			holder.fileThumb.setImageResource(R.drawable.ic_default_audio2 );
+			
+			holder.fileInfo.setText(hikeFile.getFileName());
+			holder.fileInfo.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			if(holder.fileInfo != null)
+				holder.fileInfo.setVisibility(View.GONE);
+		}
+		
+//		@GM		
+//		=============================Implementing the PAUSE/RESUME Tap Overlay========================
+		if(convMessage.isFileTransferMessage() )
+		{
+			//Tap overlay will be there only in case of image and video. 
+			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT)
+					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING))
+			{
+				switch (fss.getFTState())
+				{
+				case IN_PROGRESS:
+					holder.overlayBg.setVisibility(View.VISIBLE);
+					break;
 
-		if (convMessage.isFileTransferMessage()
-				&& HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
-						.getMsgID())) {
-			FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
-					.get(convMessage.getMsgID());
-			holder.circularProgress.setVisibility(View.VISIBLE);
-			holder.circularProgress.setProgressAngle(fileTransferTask
-					.getProgress());
+				case PAUSED:
+					holder.overlayBg.setVisibility(View.VISIBLE);
+					break;
 
-			if (holder.messageInfo != null) {
-				holder.messageInfo.setVisibility(View.INVISIBLE);
-			}
-			if (holder.sending != null) {
-				holder.sending.setVisibility(View.INVISIBLE);
-			}
-		} else if (convMessage.isFileTransferMessage()
-				&& convMessage.isSent()
-				&& TextUtils.isEmpty(metadata.getHikeFiles().get(0)
-						.getFileKey())) {
-			if (holder.circularProgress != null) {
-				holder.circularProgress.setVisibility(View.INVISIBLE);
-			}
-			holder.image.setVisibility(View.VISIBLE);
-			holder.image.setImageResource(R.drawable.ic_download_failed);
+				case ERROR:
+					holder.overlayBg.setVisibility(View.VISIBLE);
+					break;
 
-			if (holder.messageInfo != null) {
-				holder.messageInfo.setVisibility(View.INVISIBLE);
-			}
-			if (holder.sending != null) {
-				holder.sending.setVisibility(View.INVISIBLE);
-			}
-		} else {
-			if (holder.circularProgress != null) {
-				holder.circularProgress.setVisibility(View.INVISIBLE);
-			}
-			if (!convMessage.isSent()) {
-				if (firstMessageFromParticipant) {
-					holder.image.setVisibility(View.VISIBLE);
-					holder.image.setImageDrawable(IconCacheManager
-							.getInstance().getIconForMSISDN(
-									convMessage.getGroupParticipantMsisdn(),
-									true));
-					holder.avatarContainer.setVisibility(View.VISIBLE);
-				} else {
-					holder.avatarContainer
-							.setVisibility(isGroupChat ? View.INVISIBLE
-									: View.GONE);
+				default:
+					holder.overlayBg.setVisibility(View.GONE);
+
 				}
 			}
-			setSDRAndTimestamp(position, holder.messageInfo, holder.sending,
-					holder.bubbleContainer);
+			else
+			{
+				holder.overlayBg.setVisibility(View.GONE);
+			}
 		}
+		
+		if(convMessage.isFileTransferMessage() && convMessage.getResumeButtonVisibility())
+		{
+			//HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			if((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			{
+				Log.d(getClass().getSimpleName(),"updating button visibility : " + fss.getFTState().toString());
+				
+				switch (fss.getFTState())
+				{
+				case IN_PROGRESS:
+					holder.resumeBtn.setBackgroundResource(R.drawable.ic_pause_ftr);
+					holder.overlayBg.setClickable(true);
+					break;
+
+				case PAUSED:
+					holder.resumeBtn.setBackgroundResource(R.drawable.ic_resume_ftr);
+					holder.overlayBg.setClickable(true);
+					break;
+
+				case ERROR:
+					holder.resumeBtn.setBackgroundResource(R.drawable.ic_resume_ftr);
+					holder.overlayBg.setClickable(true);
+					break;
+
+				default:
+					holder.overlayBg.setClickable(false);
+
+				}
+				
+			}
+			else
+			{
+				holder.overlayBg.setClickable(false);
+			}
+			
+		}
+		else
+		{
+			if(holder.overlayBg != null)
+				holder.overlayBg.setClickable(false);
+		}
+		
+//		@GM
+//		========================Changing the checkProgress criteria===================
+		
+//		if (convMessage.isFileTransferMessage() && FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
+//		{
+//			int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID());
+//			holder.circularProgress.setVisibility(View.VISIBLE);
+//			holder.circularProgress.setProgressAngle(progress);
+//
+//			if (holder.messageInfo != null)
+//			{
+//				holder.messageInfo.setVisibility(View.INVISIBLE);
+//			}
+//			if (holder.sending != null)
+//			{
+//				holder.sending.setVisibility(View.INVISIBLE);
+//			}
+//		}
+//		else if (convMessage.isFileTransferMessage() && convMessage.isSent() && TextUtils.isEmpty(metadata.getHikeFiles().get(0).getFileKey()))
+//		{
+//			if (holder.circularProgress != null)
+//			{
+//				holder.circularProgress.setVisibility(View.INVISIBLE);
+//			}
+//			holder.image.setVisibility(View.VISIBLE);
+//			holder.image.setImageResource(R.drawable.ic_download_failed);
+//
+//			if (holder.messageInfo != null)
+//			{
+//				holder.messageInfo.setVisibility(View.INVISIBLE);
+//			}
+//			if (holder.sending != null)
+//			{
+//				holder.sending.setVisibility(View.INVISIBLE);
+//			}
+//		}
+//		else
+//		{
+//			if (holder.circularProgress != null)
+//			{
+//				holder.circularProgress.setVisibility(View.INVISIBLE);
+//			}
+//			if (!convMessage.isSent())
+//			{
+//				if (firstMessageFromParticipant)
+//				{
+//					holder.image.setVisibility(View.VISIBLE);
+//					holder.image.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(convMessage.getGroupParticipantMsisdn(), true));
+//					holder.avatarContainer.setVisibility(View.VISIBLE);
+//				}
+//				else
+//				{
+//					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+//				}
+//			}
+//			setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+//		}
+		
+		
+
+		if (convMessage.isFileTransferMessage())
+		{
+			if (convMessage.isSent())
+			{
+				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
+				{
+					setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+				}
+				else
+				{
+					if (holder.messageInfo != null)
+					{
+						holder.messageInfo.setVisibility(View.INVISIBLE);
+					}
+					if (holder.sending != null)
+					{
+						holder.sending.setVisibility(View.INVISIBLE);
+					}
+				}
+
+			}
+			else
+			{
+				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+			}
+		}
+		else
+		{
+			if (!convMessage.isSent())
+			{
+				if (firstMessageFromParticipant)
+				{
+					holder.image.setVisibility(View.VISIBLE);
+					holder.image.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(convMessage.getGroupParticipantMsisdn(), true));
+					holder.avatarContainer.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+				}
+			}
+			setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+		}
+		
+		if (convMessage.isFileTransferMessage())
+		{
+
+			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			{
+				if (convMessage.isSent()) // File is being sent
+				{
+					//FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
+					Log.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
+					switch (fss.getFTState())
+					{
+					case COMPLETED:
+						break;
+					case NOT_STARTED:
+					case CANCELLED:
+					{
+						if (TextUtils.isEmpty(hikeFile.getFileKey())) // Cancelled/Not_Started(Not Completed)
+						{
+							Log.d(getClass().getSimpleName(), "error display");
+							holder.image.setVisibility(View.VISIBLE);
+							holder.image.setImageResource(R.drawable.ic_download_failed);
+						}
+					}
+						break;
+
+					case ERROR:
+						Log.d(getClass().getSimpleName(), "error display");
+						holder.image.setVisibility(View.VISIBLE);
+						holder.image.setImageResource(R.drawable.ic_download_failed);
+						//break;
+					case PAUSED:
+					case IN_PROGRESS:
+						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+						holder.dataTransferred.setText( dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()) );
+						holder.barProgress.setProgress(progress);
+						break;
+
+					default:
+
+					}
+				}
+				else
+				// File is being received
+				{
+					//FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+					Log.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
+					switch (fss.getFTState())
+					{
+					case ERROR:
+					case PAUSED:
+					case IN_PROGRESS:
+						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+						holder.dataTransferred.setText( dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()) );
+						holder.barProgress.setProgress(progress);
+						break;
+					case NOT_STARTED:
+					case CANCELLED:
+					case COMPLETED:
+					default:
+						if (firstMessageFromParticipant)
+						{
+							holder.image.setVisibility(View.VISIBLE);
+							holder.image.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(convMessage.getGroupParticipantMsisdn(), true));
+							holder.avatarContainer.setVisibility(View.VISIBLE);
+						}
+						else
+						{
+							holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+						}
+						break;
+
+					}
+
+				}
+			}
+			else
+			{
+				if(convMessage.isSent())
+				{
+					if (TextUtils.isEmpty(hikeFile.getFileKey()) && !FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID())) // Cancelled/Not_Started(Not Completed)
+					{
+						holder.image.setVisibility(View.VISIBLE);
+						holder.image.setImageResource(R.drawable.ic_download_failed);
+					}
+				}
+			}
+		}
+		else
+		{
+
+		}
+//		-------------------------End of NEW checkProgress criteria-------------------------
+		
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
 			/* label outgoing hike conversations in green */
@@ -1269,11 +1639,39 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		return v;
 	}
+	
+	//@GM
+	//The following methods returns the user readable size when passed the bytes in size
+	private String dataDisplay(int bytes)
+	{
+		Log.d(getClass().getSimpleName(),"DataDisplay of bytes : " + bytes);
+		if(bytes<0)
+			return("");
+		if(bytes >= (1024*1000))
+		{
+			int mb = bytes/(1024*1024);
+			int mbPoint = bytes%(1024*1024);
+			mbPoint/=(1024*102);
+			return (Integer.toString(mb)+ "." + Integer.toString(mbPoint) + " MB");
+		}
+		else if(bytes >= 1000)
+		{
+			int kb;
+			if(bytes<1024)		//To avoiding showing 1000KB
+				kb = bytes/1000;
+			else
+				kb = bytes/1024;
+			return (Integer.toString(kb) + " KB");
+		}
+		else
+			return (Integer.toString(bytes) + " B");
+	}
 
 	private void setFileButtonResource(ImageView button,
 			ConvMessage convMessage, HikeFile hikeFile) {
+		//TODO : handle according to filestate
 		button.setBackgroundResource(R.drawable.bg_red_btn_selector);
-		if (HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
+		if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage
 				.getMsgID())) {
 			button.setImageResource(R.drawable.ic_download_file);
 			button.setBackgroundResource(R.drawable.bg_red_btn_disabled);
@@ -1501,7 +1899,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (convMessage == null) {
 				return;
 			}
-			Log.d(getClass().getSimpleName(), "OnCLICK");
+			Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
 			if (convMessage.isSent()
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))
@@ -1549,8 +1947,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			}
 			if (convMessage.isFileTransferMessage()) {
-				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
-						.get(0);
+				//@GM
+				MessageMetadata messageMetadata = convMessage.getMetadata();
+				HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
+				//HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 				if (Utils.getExternalStorageState() == ExternalStorageState.NONE
 						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT
 						&& hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
@@ -1560,33 +1960,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 				if (convMessage.isSent()) {
 					Log.d(getClass().getSimpleName(),
-							"Hike File name: " + hikeFile.getFileName()
-									+ " File key: " + hikeFile.getFileKey());
-					// If uploading failed then we try again.
-					if (TextUtils.isEmpty(hikeFile.getFileKey())
-							&& !HikeMessengerApp.fileTransferTaskMap
-									.containsKey(convMessage.getMsgID())) {
-
-						FileTransferTaskBase uploadTask;
-						if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION)
-								&& (hikeFile.getHikeFileType() != HikeFileType.CONTACT)) {
-							uploadTask = new UploadFileTask(convMessage,
-									context, conversation);
-						} else {
-							uploadTask = new UploadContactOrLocationTask(
-									convMessage,
-									context,
-									(hikeFile.getHikeFileType() == HikeFileType.CONTACT),
-									conversation);
-						}
-						Utils.executeIntProgFtResultAsyncTask(uploadTask);
-						HikeMessengerApp.fileTransferTaskMap.put(
-								convMessage.getMsgID(), uploadTask);
-						notifyDataSetChanged();
-					}
-					// Else we open it for the use to see
-					else {
+						"Hike File name: " + hikeFile.getFileName()
+							+ " File key: " + hikeFile.getFileKey());
+					
+					if(!TextUtils.isEmpty(hikeFile.getFileKey()))
+					{
 						openFile(hikeFile, convMessage, v);
+					}
+					else
+					{
+						if ((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT))
+						{
+							FileTransferManager.getInstance(context).uploadContactOrLocation(convMessage, (hikeFile.getHikeFileType() == HikeFileType.CONTACT), conversation.isOnhike());
+						}
+						else
+						{
+							File sentFile = hikeFile.getFile();
+							FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), sentFile);
+							if (fss.getFTState() == FTState.CANCELLED || fss.getFTState() == FTState.NOT_STARTED)
+							{
+								FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
+								notifyDataSetChanged();
+							}
+						}
+
 					}
 				} else {
 					File receivedFile = hikeFile.getFile();
@@ -1595,24 +1992,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								Toast.LENGTH_SHORT).show();
 						return;
 					}
-					if (!HikeMessengerApp.fileTransferTaskMap
-							.containsKey(convMessage.getMsgID())
-							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION)
-									|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || receivedFile
-										.exists())) {
+					if (((hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+									|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || hikeFile.wasFileDownloaded()
+										)) {
 						openFile(hikeFile, convMessage, v);
-					} else if (!HikeMessengerApp.fileTransferTaskMap
-							.containsKey(convMessage.getMsgID())) {
-						Log.d(getClass().getSimpleName(),
-								"HIKEFILE: NAME: " + hikeFile.getFileName()
-										+ " KEY: " + hikeFile.getFileKey()
-										+ " TYPE: "
-										+ hikeFile.getFileTypeString());
-						DownloadFileTask downloadFile = new DownloadFileTask(
-								context, receivedFile, hikeFile.getFileKey(),
-								convMessage, hikeFile.getHikeFileType(),
-								convMessage.getMsgID());
-						Utils.executeIntProgFtResultAsyncTask(downloadFile);
+					}
+					else
+					{
+						FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), receivedFile);
+						
+						Log.d(getClass().getSimpleName(), fss.getFTState().toString());
+						if (fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.CANCELLED)
+						{
+							FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,true);
+						}
+
 					}
 				}
 			} else if (convMessage.getMetadata() != null

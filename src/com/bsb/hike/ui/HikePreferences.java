@@ -294,7 +294,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				@Override
 				public void onClick(View v) {
 					DeleteAccountTask task = new DeleteAccountTask(
-							HikePreferences.this, true);
+							HikePreferences.this, true,getApplicationContext());
 					isDeleting = true;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
@@ -315,7 +315,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				@Override
 				public void onClick(View v) {
 					DeleteAccountTask task = new DeleteAccountTask(
-							HikePreferences.this, false);
+							HikePreferences.this, false,getApplicationContext());
 					isDeleting = false;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);

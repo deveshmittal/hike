@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,6 +109,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebStorage.Origin;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -127,6 +130,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
@@ -168,6 +172,8 @@ public class Utils {
 
 	public static float densityMultiplier = 1.0f;
 
+	private static Lock lockObj = new ReentrantLock();
+	
 	static {
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
 		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
@@ -462,7 +468,7 @@ public class Utils {
 
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type,
-			String orgFileName, String fileKey) {
+			String orgFileName) {
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
@@ -483,10 +489,22 @@ public class Utils {
 			}
 		}
 
+		// File name should only be blank in case of profile images or while
+		// capturing new media.
+		if (TextUtils.isEmpty(orgFileName)) {
+			orgFileName = getOriginalFile(type, orgFileName);
+			}
+		
+		//String fileName = getUniqueFileName(orgFileName, fileKey);
+
+		return new File(mediaStorageDir, orgFileName);
+	}
+
+	public static String getOriginalFile(HikeFileType type,String orgFileName)
+	{
 		// Create a media file name
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-				.format(new Date());
-
+						.format(new Date());
 		// File name should only be blank in case of profile images or while
 		// capturing new media.
 		if (TextUtils.isEmpty(orgFileName)) {
@@ -497,17 +515,36 @@ public class Utils {
 				break;
 			case VIDEO:
 				orgFileName = "MOV_" + timeStamp + ".mp4";
+				break;
 			case AUDIO:
 			case AUDIO_RECORDING:
 				orgFileName = "AUD_" + timeStamp + ".m4a";
 			}
 		}
-
-		String fileName = getUniqueFileName(orgFileName, fileKey);
-
-		return new File(mediaStorageDir, fileName);
+		return orgFileName;
 	}
-
+	
+	public static String getFinalFileName(HikeFileType type)
+	{
+		String orgFileName = "";
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+		.format(new Date());
+		switch (type)
+		{
+		case PROFILE:
+		case IMAGE:
+			orgFileName = "IMG_" + timeStamp + ".jpg";
+			break;
+		case VIDEO:
+			orgFileName = "MOV_" + timeStamp + ".mp4";
+			break;
+		case AUDIO:
+		case AUDIO_RECORDING:
+			orgFileName = "AUD_" + timeStamp + ".m4a";
+		}
+		return orgFileName;
+	}
+	
 	public static String getFileParent(HikeFileType type) {
 		StringBuilder path = new StringBuilder(
 				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
@@ -528,7 +565,8 @@ public class Utils {
 			path.append(HikeConstants.AUDIO_RECORDING_ROOT);
 			break;
 		default:
-			return null;
+			path.append(HikeConstants.OTHER_ROOT);
+			break;
 		}
 		return path.toString();
 	}
@@ -3115,8 +3153,6 @@ public class Utils {
 			if (hikeFile != null) {
 				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
 						&& hikeFile.wasFileDownloaded()
-						&& !HikeMessengerApp.fileTransferTaskMap
-								.containsKey(convMessage.getMsgID())
 						&& hikeFile.getThumbnail() != null) {
 					final String filePath = hikeFile.getFilePath(); // check
 					bigPictureImage = BitmapFactory.decodeFile(filePath);
@@ -3165,5 +3201,52 @@ public class Utils {
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
 		prefEditor.commit();
+	}
+	
+	public static String fileToMD5(String filePath)
+	{
+		InputStream inputStream = null;
+		try
+		{
+			inputStream = new FileInputStream(filePath);
+			byte[] buffer = new byte[1024];
+			MessageDigest digest = MessageDigest.getInstance("MD5");
+			int numRead = 0;
+			while (numRead != -1)
+			{
+				numRead = inputStream.read(buffer);
+				if (numRead > 0)
+					digest.update(buffer, 0, numRead);
+			}
+			byte[] md5Bytes = digest.digest();
+			return convertHashToString(md5Bytes);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+		finally
+		{
+			if (inputStream != null)
+			{
+				try
+				{
+					inputStream.close();
+				}
+				catch (Exception e)
+				{
+				}
+			}
+		}
+	}
+
+	private static String convertHashToString(byte[] md5Bytes)
+	{
+		String returnVal = "";
+		for (int i = 0; i < md5Bytes.length; i++)
+		{
+			returnVal += Integer.toString((md5Bytes[i] & 0xff) + 0x100, 16).substring(1);
+		}
+		return returnVal;
 	}
 }

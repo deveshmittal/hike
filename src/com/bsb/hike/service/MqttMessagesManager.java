@@ -30,6 +30,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
@@ -45,7 +46,6 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
@@ -375,27 +375,21 @@ public class MqttMessagesManager {
 				MessageMetadata messageMetadata = convMessage.getMetadata();
 				HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
 
-				if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
-					JSONObject metadataJson = messageMetadata.getJSON();
-					JSONArray fileArray = metadataJson
-							.optJSONArray(HikeConstants.FILES);
-					for (int i = 0; i < fileArray.length(); i++) {
-						JSONObject fileJson = fileArray.getJSONObject(i);
-						Log.d(getClass().getSimpleName(), "Previous json: "
-								+ fileJson);
-						String timeStamp = new SimpleDateFormat(
-								"yyyyMMdd_HHmmss").format(new Date());
-						fileJson.put(HikeConstants.FILE_NAME, "AUD_"
-								+ timeStamp + ".m4a");
-						Log.d(getClass().getSimpleName(), "New json: "
-								+ fileJson);
-					}
-					/*
-					 * Resetting the metadata
-					 */
-					convMessage.setMetadata(metadataJson);
+				JSONObject metadataJson = messageMetadata.getJSON();
+				// this value indicates that file is not downloaded yet
+				JSONArray fileArray = metadataJson.optJSONArray(HikeConstants.FILES);
+				for (int i = 0; i < fileArray.length(); i++)
+				{
+					JSONObject fileJson = fileArray.getJSONObject(i);
+					Log.d(getClass().getSimpleName(), "Previous json: " + fileJson);
+					if(hikeFile.getHikeFileType() != HikeFileType.CONTACT && hikeFile.getHikeFileType() != HikeFileType.LOCATION) // dont change name for contact or location
+						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType()));
+					Log.d(getClass().getSimpleName(), "New json: " + fileJson);
 				}
-
+				/*
+				 * Resetting the metadata
+				 */
+				convMessage.setMetadata(metadataJson);
 			}
 			/*
 			 * Applying the offset.
@@ -468,12 +462,7 @@ public class MqttMessagesManager {
 							.getHikeFiles().get(0);
 
 					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE) {
-						DownloadFileTask downloadFile = new DownloadFileTask(
-								context, hikeFile.getFile(),
-								hikeFile.getFileKey(), convMessage,
-								hikeFile.getHikeFileType(),
-								convMessage.getMsgID(), false);
-						Utils.executeIntProgFtResultAsyncTask(downloadFile);
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
 					}
 				}
 			}

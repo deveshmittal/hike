@@ -392,6 +392,7 @@ public class HikeConstants {
 	public static final String VIDEO_ROOT = "/hike Videos";
 	public static final String AUDIO_ROOT = "/hike Audios";
 	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
+	public static final String OTHER_ROOT = "/hike Others";
 	public static final String STICKERS_ROOT = "/stickers";
 
 	public static final String LARGE_STICKER_ROOT = "/large";
@@ -818,7 +819,7 @@ public class HikeConstants {
 	}
 
 	public static enum FTResult {
-		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
+		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED, PAUSED, SERVER_ERROR, FAILED_UNRECOVERABLE, CARD_UNMOUNT
 	}
 
 	public static enum SMSSyncState {

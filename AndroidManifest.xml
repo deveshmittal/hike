@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:versionCode="243"
     android:installLocation="auto"
-    android:versionName="2.6.16">
+    android:versionName="2.6.72">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
@@ -230,7 +230,13 @@
         		<action android:name="com.android.vending.INSTALL_REFERRER" />
     		</intent-filter>
 		</receiver>
-
+		
+		<receiver android:name="com.bsb.hike.service.ConnectivityChangeReceiver"	>
+		    <intent-filter>
+		        <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+		    </intent-filter>
+		</receiver>
+		
     </application>
 
 </manifest>

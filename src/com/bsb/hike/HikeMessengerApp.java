@@ -342,7 +342,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private ActivityTimeLogger activityTimeLogger;
 
-	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
+	//public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
 
 	public static Map<String, StickerTaskBase> stickerTaskMap;
 
@@ -386,9 +386,9 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	static {
 		mPubSubInstance = new HikePubSub();
-		if (HikeMessengerApp.fileTransferTaskMap == null) {
+		/*if (HikeMessengerApp.fileTransferTaskMap == null) {
 			HikeMessengerApp.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
-		}
+		}*/
 		if (HikeMessengerApp.stickerTaskMap == null) {
 			HikeMessengerApp.stickerTaskMap = new HashMap<String, StickerTaskBase>();
 		}

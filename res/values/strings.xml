@@ -92,6 +92,8 @@
 	<string name="no_external_storage">External storage not found</string>
 	<string name="share_file">Share</string>
 	<string name="download_failed">Could not download file. Check network settings.</string>
+	<string name="download_failed_fatal">Could not download file. Please redownload file.</string>
+	<string name="card_unmount">File Inaccessible. Please mount SD Card and try again.</string>
 	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
 	<string name="dnd_one_to_one">%1$s is on DND. Waiting for %1$s to reply.</string>
 	<string name="optin_one_to_one">%1$s just opted in to hike!</string>
@@ -703,4 +705,6 @@
 	<string name="humanoid2_category">Humanoid 2</string>
 	<string name="se_category">Smiley Expressions</string>
 	<string name="avtars_category">Avatars</string>	
+	<string name="One">1</string>
+	<string name="Two">2</string>
 </resources>
