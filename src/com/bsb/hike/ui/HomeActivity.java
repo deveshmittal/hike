@@ -332,14 +332,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			intent = new Intent(this, ComposeActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
 		case R.id.new_update:
 			intent = new Intent(this, StatusUpdate.class);
 			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
 					true);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
 		}
 
@@ -494,9 +494,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
 		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
 
+		final boolean showingRewardsPopup = !accountPrefs.getBoolean(
+				HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true);
+
 		if (image != null) {
-			image.setImageResource(accountPrefs.getBoolean(
-					HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, true) ? R.drawable.ic_free_sms_default
+			image.setImageResource(!showingRewardsPopup ? R.drawable.ic_free_sms_default
 					: R.drawable.ic_free_sms_rewards);
 		}
 
@@ -509,6 +511,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				Intent intent = new Intent(HomeActivity.this,
 						HikeListActivity.class);
 				startActivity(intent);
+
+				Utils.sendUILogEvent(showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS
+						: HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
 			}
 		});
 
@@ -969,7 +974,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 					sendDeviceDetails();
 					if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP,
 							false)) {
-						Utils.sendFTUELogEvent(HikeConstants.LogEvent.FB_CLICK);
+						Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
 					}
 				}
 			}

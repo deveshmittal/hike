@@ -1597,6 +1597,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						.optString(HikeConstants.DATA);
 				this.participantMap.remove(msisdn);
 
+				groupConversation.setGroupMemberAliveCount(participantMap.size());
 				setupGroupProfileList();
 
 				runOnUiThread(new Runnable() {
@@ -1630,6 +1631,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					participantMap.put(msisdn,
 							new GroupParticipant(participant));
 				}
+				groupConversation.setGroupMemberAliveCount(participantMap.size());
 				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override

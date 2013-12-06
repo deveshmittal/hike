@@ -699,11 +699,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 			int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
 
+			Set<String> msisdnSet = new HashSet<String>();
+
 			while (c.moveToNext()) {
+				String msisdn = c.getString(msisdnIdx);
+
+				if (msisdnSet.contains(msisdn)) {
+					continue;
+				}
+
+				msisdnSet.add(msisdn);
+
 				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
-						c.getString(msisdnIdx), c.getString(nameIdx),
-						c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
-						c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
+						msisdn, c.getString(nameIdx), c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						c.getLong(lastMessagedIdx),
 						c.getInt(hasCustomPhotoIdx) == 1);
 				if (favoriteIdx != -1) {
 					int favoriteTypeOrd = c.getInt(favoriteIdx);
@@ -1972,12 +1982,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
 			}
-			int idx = sb.lastIndexOf(",");
-			if(idx >= 0)
-				sb.replace(idx, sb.length(), ")");
-			else
-				sb.append(")");
 
+			/*
+			 * Making sure the string exists.
+			 */
+			if (sb.lastIndexOf(",") == -1) {
+				return null;
+			}
+			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
 			return sb.toString();
 		} catch (JSONException e) {
 			return null;

@@ -1056,15 +1056,23 @@ public class Utils {
 	}
 
 	public static boolean isUserOnline(Context context) {
-		if (context == null) {
-			Log.e("HikeService", "Hike service is null!!");
+		try {
+			if (context == null) {
+				Log.e("HikeService", "Hike service is null!!");
+				return false;
+			}
+			ConnectivityManager cm = (ConnectivityManager) context
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+			return (cm != null && cm.getActiveNetworkInfo() != null
+					&& cm.getActiveNetworkInfo().isAvailable() && cm
+					.getActiveNetworkInfo().isConnected());
+		} catch (NullPointerException e) {
+			/*
+			 * We were seeing NPEs on the console in this method. Added this
+			 * since could not find any reason why we would get an NPE here.
+			 */
 			return false;
 		}
-		ConnectivityManager cm = (ConnectivityManager) context
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		return (cm != null && cm.getActiveNetworkInfo() != null
-				&& cm.getActiveNetworkInfo().isAvailable() && cm
-				.getActiveNetworkInfo().isConnected());
 	}
 
 	/**
@@ -1489,6 +1497,11 @@ public class Utils {
 
 	public static void sendInvite(String msisdn, Context context,
 			boolean dbUpdated) {
+		sendInvite(msisdn, context, dbUpdated, false);
+	}
+
+	public static void sendInvite(String msisdn, Context context,
+			boolean dbUpdated, boolean sentMqttPacket) {
 
 		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
 				|| context.getSharedPreferences(
@@ -1497,8 +1510,10 @@ public class Utils {
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
 				context);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-				convMessage.serialize(sendNativeInvite));
+		if (!sentMqttPacket) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					convMessage.serialize(sendNativeInvite));
+		}
 
 		if (sendNativeInvite) {
 			SmsManager smsManager = SmsManager.getDefault();
@@ -1508,13 +1523,13 @@ public class Utils {
 			ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
 
 			/*
-			 * Adding blank pending intents as a workaround for where sms don't get sent
-			 * when we pass this as null
+			 * Adding blank pending intents as a workaround for where sms don't
+			 * get sent when we pass this as null
 			 */
 			for (int i = 0; i < messages.size(); i++) {
 				Intent intent = new Intent();
-				pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
-						PendingIntent.FLAG_CANCEL_CURRENT));
+				pendingIntents.add(PendingIntent.getBroadcast(context, 0,
+						intent, PendingIntent.FLAG_CANCEL_CURRENT));
 			}
 			/*
 			 * The try-catch block is needed for a bug in certain LG devices
@@ -1633,19 +1648,19 @@ public class Utils {
 
 		switch (whichScreen) {
 		case FRIENDS_TAB:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
 							: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK,
 					contactInfo.getMsisdn());
 			break;
 		case UPDATES_TAB:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
 							: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK,
 					contactInfo.getMsisdn());
 			break;
 		case SMS_SECTION:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
 							: HikeConstants.LogEvent.REMIND_SMS_CLICK,
 					contactInfo.getMsisdn());
@@ -2582,8 +2597,8 @@ public class Utils {
 
 		switch (tipType) {
 		case EMOTICON:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_left);
-			tipText.setText(R.string.emoticons_stickers_tip);
+			container.setBackgroundResource(R.drawable.bg_sticker_ftue);
+			tipText.setText(R.string.sticker_ftue_body);
 			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
@@ -3097,11 +3112,11 @@ public class Utils {
 		return formatter.format(calendar.getTime());
 	}
 
-	public static void sendFTUELogEvent(String key) {
-		sendFTUELogEvent(key, null);
+	public static void sendUILogEvent(String key) {
+		sendUILogEvent(key, null);
 	}
 
-	public static void sendFTUELogEvent(String key, String msisdn) {
+	public static void sendUILogEvent(String key, String msisdn) {
 		try {
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
