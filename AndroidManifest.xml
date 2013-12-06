@@ -3,11 +3,7 @@
     package="com.bsb.hike"
     android:versionCode="243"
     android:installLocation="auto"
-<<<<<<< HEAD
-    android:versionName="2.6.71">
-=======
     android:versionName="2.6.72">
->>>>>>> 4b357b54d866169381970d5ed6aca2517b35fde2
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
