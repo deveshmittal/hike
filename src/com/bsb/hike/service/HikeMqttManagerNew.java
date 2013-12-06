@@ -269,7 +269,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION;
+		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
@@ -284,7 +284,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	 */
 	public void init()
 	{
-		HandlerThread mqttHandlerThread = new HandlerThread("MQTTThread");
+		HandlerThread mqttHandlerThread = new HandlerThread("MQTT_Thread");
 		mqttHandlerThread.start();
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		mqttThreadHandler = new Handler(mMqttHandlerLooper);
@@ -670,6 +670,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
+						
 						String[] topics = new String[3];
 						topics[0] = uid + "/s";
 						topics[1] = uid + "/a";
@@ -689,12 +690,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 								Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage());
 							}
 						});
+						
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
+					
 					catch (MqttException e)
 					{
 						handleMqttException(e, true);
 					}
+					
 					catch (Exception e) // although this might not happen , but still catching it
 					{
 						e.printStackTrace();
