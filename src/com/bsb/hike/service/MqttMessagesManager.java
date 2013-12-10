@@ -602,8 +602,8 @@ public class MqttMessagesManager {
 				setDefaultSMSClientTutorialSetting();
 			}
 			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
-				boolean sendNativeInvite = !data
-						.optBoolean(HikeConstants.ENABLE_FREE_INVITES, true);
+				boolean sendNativeInvite = !data.optBoolean(
+						HikeConstants.ENABLE_FREE_INVITES, true);
 				boolean showFreeInvitePopup = data
 						.optBoolean(HikeConstants.SHOW_FREE_INVITES)
 						&& !settings
@@ -860,8 +860,8 @@ public class MqttMessagesManager {
 				editor.putBoolean(
 						HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, false);
 
-				boolean sendNativeInvite = !data
-						.optBoolean(HikeConstants.ENABLE_FREE_INVITES, true);
+				boolean sendNativeInvite = !data.optBoolean(
+						HikeConstants.ENABLE_FREE_INVITES, true);
 				boolean showFreeInvitePopup = data
 						.optBoolean(HikeConstants.SHOW_FREE_INVITES);
 				String header = data
