@@ -83,7 +83,7 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 4096 * 1024;
+				return 2048 * 1024;
 			}
 			
 			@Override

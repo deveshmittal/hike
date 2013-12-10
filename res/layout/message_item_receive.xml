@@ -148,7 +148,7 @@
                     <RelativeLayout
                         android:id="@+id/overlayBg"
                         android:layout_width="wrap_content"
-                        android:layout_height="50dp"
+                        android:layout_height="55dp"
                         android:layout_alignLeft="@id/file_thumb"
                         android:layout_alignParentBottom="true"
                         android:layout_alignRight="@id/file_thumb"
@@ -172,6 +172,8 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:layout_alignParentTop="true"
+                            android:layout_toRightOf="@id/ibtn_resume"
+                            android:gravity="right"
                             android:background="#00000000"
                             android:text=""
                             android:textSize="12dp"
