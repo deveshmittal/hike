@@ -14,12 +14,20 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.entity.ByteArrayEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -604,50 +612,33 @@ public class UploadFileTask extends FileTransferBase
 		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
 	}
-
-	//private byte[] send(String contentRange, byte[] fileBytes)
 	private String send(String contentRange, byte[] fileBytes)
 	{
-		HttpURLConnection hc = null;
-		BufferedInputStream is = null;
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//		HttpURLConnection hc = null;
+//		BufferedInputStream is = null;
+//		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-		OkHttpClient client = new OkHttpClient();
+		//OkHttpClient client = new OkHttpClient();
+		HttpClient client = new DefaultHttpClient();
+		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
 		try
-		{
-			hc = client.open(mUrl);
-			//hc = (HttpURLConnection) mUrl.openConnection();
-			/*
-			 * Setting request headers
-			 */
-			hc.addRequestProperty("Connection", "Keep-Alive");
-			hc.addRequestProperty("Content-Name", selectedFile.getName());
-			hc.addRequestProperty("X-Thumbnail-Required", "0");
-
-			hc.addRequestProperty("X-SESSION-ID", X_SESSION_ID);
-			hc.addRequestProperty("X-CONTENT-RANGE", contentRange);
-			hc.addRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
-			BOUNDARY = UUID.randomUUID().toString();
-			hc.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-			hc.setDoInput(true);
-			hc.setDoOutput(true);
-			hc.setUseCaches(false);
-			hc.setRequestMethod("POST");
+		{	
+			post.addHeader("Connection", "Keep-Alive");
+			post.addHeader("Content-Name", selectedFile.getName());
+			post.addHeader("X-Thumbnail-Required", "0");
+			post.addHeader("X-SESSION-ID", X_SESSION_ID);
+			post.addHeader("X-CONTENT-RANGE", contentRange);
+			post.addHeader("Cookie", "user=" + token + ";uid=" + uId);
+			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
 			byte[] postBytes = getPostBytes(contentRange, fileBytes);
-			BufferedOutputStream dout = new BufferedOutputStream(hc.getOutputStream());
-			// OutputStream dout = hc.getOutputStream();
-			dout.write(postBytes);
-			dout.flush();
-			// dout.close();
-			int ch;
+			post.setEntity(new ByteArrayEntity(postBytes));
 			Log.d(getClass().getSimpleName(), "Before Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
-			is = new BufferedInputStream(hc.getInputStream());
-			// is = hc.getInputStream();
+			HttpResponse response = client.execute(post);
 			Log.d(getClass().getSimpleName(), "After Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
-
-			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+		    BufferedReader r = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			//BufferedReader r = new BufferedReader(new InputStreamReader(is));
 			StringBuilder total = new StringBuilder();
 			String line;
 			while ((line = r.readLine()) != null)
@@ -656,7 +647,8 @@ public class UploadFileTask extends FileTransferBase
 			}
 			res = total.toString();
 			retry = false; // if success don't retry again till next time
-			Log.d(getClass().getSimpleName(), "Chunk upload response code : " + hc.getResponseCode());
+			//Log.d(getClass().getSimpleName(), "Chunk upload response code : " + hc.getResponseCode());
+			
 		}
 		catch (Exception e)
 		{
@@ -676,7 +668,7 @@ public class UploadFileTask extends FileTransferBase
 		}
 		finally
 		{
-			closeStreams(bos, is, hc);
+			//closeStreams(bos, is, hc);
 		}
 
 		return res;
