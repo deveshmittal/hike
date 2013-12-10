@@ -94,7 +94,8 @@ public class ToastListener implements Listener {
 				}
 				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO
 						|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
+						|| message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
 					Activity activity = (currentActivity != null) ? currentActivity
 							.get() : null;
 					if ((activity instanceof ChatThread)) {
