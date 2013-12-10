@@ -45,6 +45,7 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
@@ -181,6 +182,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " ("
 				+ DBConstants.FILE_KEY + " )";
 		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CHAT_BG_TABLE + " ("
+				+ DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.BG_ID
+				+ " TEXT)";
+		db.execSQL(sql);
+		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX
+				+ " ON " + DBConstants.CHAT_BG_TABLE + " ("
+				+ DBConstants.MSISDN + ")";
+		db.execSQL(sql);
 	}
 
 	public void deleteAll() {
@@ -194,6 +203,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.PROTIP_TABLE, null, null);
 		mDb.delete(DBConstants.SHARED_MEDIA_TABLE, null, null);
 		mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, null, null);
+		mDb.delete(DBConstants.CHAT_BG_TABLE, null, null);
 	}
 
 	@Override
@@ -427,6 +437,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ " TEXT";
 			db.execSQL(alter);
 		}
+		/*
+		 * Version 22 adds the Chat BG table.
+		 */
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -2895,5 +2908,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public void deleteAllProtipsBeforeThisId(long id) {
 		mDb.delete(DBConstants.PROTIP_TABLE, DBConstants.ID + "< ?",
 				new String[] { Long.toString(id) });
+	}
+
+	public void setChatBackground(String msisdn, String bgId) {
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.MSISDN, msisdn);
+		values.put(DBConstants.BG_ID, bgId);
+
+		mDb.insertWithOnConflict(DBConstants.CHAT_BG_TABLE, null, values,
+				SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public ChatTheme getChatThemeForMsisdn(String msisdn) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.CHAT_BG_TABLE,
+					new String[] { DBConstants.BG_ID }, DBConstants.MSISDN
+							+ "=?", new String[] { msisdn }, null, null, null);
+			if (c.moveToFirst()) {
+				try {
+					return ChatTheme.getThemeFromId(c.getString(c
+							.getColumnIndex(DBConstants.BG_ID)));
+				} catch (IllegalArgumentException e) {
+					/*
+					 * For invalid theme id, we return the default id.
+					 */
+					return ChatTheme.DEFAULT;
+				}
+			}
+			return ChatTheme.DEFAULT;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
 	}
 }
