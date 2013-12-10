@@ -148,6 +148,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private String statusIdForTip;
 	private SharedPreferences preferences;
 	private boolean isGroupChat;
+	private float DpToPixelScale;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -159,6 +160,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.preferences = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
+		DpToPixelScale = context.getResources().getDisplayMetrics().density;
 		setLastSentMessagePosition();
 	}
 
@@ -1336,8 +1338,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 //		UI for audio file transfer
 		if(convMessage.isFileTransferMessage() && hikeFile.getHikeFileType() == HikeFileType.AUDIO)
 		{
-			holder.fileThumb.getLayoutParams().height=135;
-			holder.fileThumb.getLayoutParams().width=135;
+			int pixels = (int) (135 * DpToPixelScale + 0.5f);
+			holder.fileThumb.getLayoutParams().height=pixels;
+			holder.fileThumb.getLayoutParams().width=pixels;
 			//holder.fileThumb.setBackgroundColor(Color.rgb(100, 100, 50));
 			holder.fileThumb.setBackgroundColor(0xffeae7e0);
 //			holder.resumeBtn.getLayoutParams().height=25;

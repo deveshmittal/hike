@@ -181,6 +181,7 @@ public class DownloadFileTask extends FileTransferBase
 							Log.e(getClass().getSimpleName(), "Exception", e);
 							return FTResult.CARD_UNMOUNT;
 						}
+						Log.d(getClass().getSimpleName(),"ChunkSize : " + chunkSize + "Bytes");
 						// ChunkSize is increased within the limits
 						chunkSize *= 2;
 						if(chunkSize > FileTransferManager.getInstance(context).getMaxChunkSize())

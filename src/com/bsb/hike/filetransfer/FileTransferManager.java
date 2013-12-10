@@ -83,13 +83,13 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 1024 * 1024;
+				return 4096 * 1024;
 			}
 			
 			@Override
 			public int getMinChunkSize()
 			{
-				return 64 * 1024;
+				return 512 * 1024;
 			}
 		},
 		FOUR_G
@@ -111,27 +111,27 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 256 * 1024;
+				return 512 * 1024;
 			}
 			
 			@Override
 			public int getMinChunkSize()
 			{
-				return 16 * 1024;
+				return 128 * 1024;
 			}
 		},
-		TWO_2
+		TWO_G
 		{
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 24 * 1024;
+				return 64 * 1024;
 			}
 			
 			@Override
 			public int getMinChunkSize()
 			{
-				return 4 * 1024;
+				return 8 * 1024;
 			}
 		};
 		
@@ -178,7 +178,9 @@ public class FileTransferManager
 		@Override
 		public void run()
 		{
+			Log.d(getClass().getSimpleName(),"TimeCheck: Starting time : " + System.currentTimeMillis());
 			super.run();
+			
 		}
 
 		@Override
@@ -205,6 +207,8 @@ public class FileTransferManager
 				((UploadFileTask) task).postExecute(result);
 			else
 				((UploadContactOrLocationTask) task).postExecute(result);
+			
+			Log.d(getClass().getSimpleName(),"TimeCheck: Exiting  time : " + System.currentTimeMillis());
 		}
 	}
 
@@ -539,7 +543,7 @@ public class FileTransferManager
 		case TelephonyManager.NETWORK_TYPE_IDEN:	// ~25 kbps		// API level 8
 		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
 		default:
-			return NetworkType.TWO_2;					//return 24 * 1024;
+			return NetworkType.TWO_G;					//return 24 * 1024;
 		}
 	}
 	

@@ -456,13 +456,14 @@ public class UploadFileTask extends FileTransferBase
 		if (end > (start + chunkSize))
 			end = start + chunkSize;
 		end--;
+		byte[] fileBytes = null;
 		//The following loops goes on till the end byte to read reaches the length
 		//or we receive a json response from the server
 		while(end < length && responseJson == null)
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
-			byte[] fileBytes = new byte[end - start + 1]; //Byte Size to read from the file
+			fileBytes = new byte[end - start + 1]; //Byte Size to read from the file
 			//In case of success following flag is set high to reset retry logic and update UI
 			boolean resetAndUpdate = false;
 			if (raf.read(fileBytes) == -1)
@@ -470,6 +471,7 @@ public class UploadFileTask extends FileTransferBase
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
+			Log.d(getClass().getSimpleName(),"ChunkSize : " + chunkSize + "Bytes");
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
 			String responseString = send(contentRange, fileBytes);
 			Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
@@ -530,11 +532,10 @@ public class UploadFileTask extends FileTransferBase
 				incrementBytesTransferred(fileBytes.length);
 				progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 				// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-				if (shouldSendProgress())
-					LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 				showButton();
 			}
-			
+			fileBytes = null;
 		}
 		switch (_state)
 		{
