@@ -295,8 +295,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.STICKER_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
-			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, };
+			HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.SEND_SMS_PREF_TOGGLED,
+			HikePubSub.PARTICIPANT_JOINED_GROUP,
+			HikePubSub.PARTICIPANT_LEFT_GROUP,
+			HikePubSub.CHAT_BACKGROUND_CHANGED };
 
 	private EmoticonType emoticonType;
 
@@ -2295,6 +2298,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					}
 				});
 			}
+		} else if (HikePubSub.CHAT_BACKGROUND_CHANGED.equals(type)) {
+			if (mConversation == null) {
+				return;
+			}
+			Pair<String, ChatTheme> pair = (Pair<String, ChatTheme>) object;
+			if (!mConversation.getMsisdn().equals(pair.first)) {
+				return;
+			}
+
+			selectedTheme = pair.second;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setChatTheme(selectedTheme);
+				}
+			});
 		}
 	}
 
