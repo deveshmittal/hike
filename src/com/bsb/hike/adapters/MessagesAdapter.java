@@ -800,6 +800,34 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					((ViewGroup) holder.container).addView(dndMessage);
 				}
+			} else if (infoState == ParticipantInfoState.CHAT_BACKGROUND) {
+				TextView mainMessage = (TextView) inflater.inflate(
+						R.layout.participant_info, null);
+
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = preferences.getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String name;
+				if (isGroupChat) {
+					name = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you)
+							: ((GroupConversation) conversation)
+									.getGroupParticipantFirstName(msisdn);
+				} else {
+					name = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you) : Utils
+							.getFirstName(conversation.getLabel());
+				}
+
+				String message = context.getString(R.string.chat_bg_changed, name);
+
+				setTextAndIconForSystemMessages(mainMessage,
+						Utils.getFormattedParticipantInfo(message, name),
+						conversation.isOnhike() ? R.drawable.ic_hike_user
+								: R.drawable.ic_sms_user);
+
+				((ViewGroup) holder.container).addView(mainMessage);
 			}
 			return v;
 		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
