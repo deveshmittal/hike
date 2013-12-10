@@ -74,6 +74,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 	public void onInviteClick(View v) {
 		Utils.logEvent(CreditsActivity.this,
 				HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+		Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_CREDIT);
 		Intent intent = new Intent(CreditsActivity.this, HikeListActivity.class);
 		intent.putExtra(HikeConstants.Extras.FROM_CREDITS_SCREEN, true);
 		startActivity(intent);

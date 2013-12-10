@@ -26,7 +26,7 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 		screenWidth = context.getResources().getDisplayMetrics().widthPixels;
 
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		minWidth = (int) (40 * metrics.density);
+		minWidth = (int) (48 * metrics.density);
 	}
 
 	@Override
