@@ -487,37 +487,42 @@ public class ConvMessage {
 		JSONObject data = new JSONObject();
 		JSONObject md = null;
 		try {
-			if (metadata != null) {
-				if (isFileTransferMessage || isStickerMessage) {
-					md = metadata.getJSON();
-					data.put(HikeConstants.METADATA, md);
-				} else if (metadata.isPokeMessage()) {
-					data.put(HikeConstants.POKE, true);
-				}
-			}
-			data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
-					: HikeConstants.SMS_MESSAGE, mMessage);
-			data.put(HikeConstants.TIMESTAMP, mTimestamp);
-
-			if (mInvite) {
-				data.put(HikeConstants.MESSAGE_ID, System.currentTimeMillis());
+			if (participantInfoState == ParticipantInfoState.CHAT_BACKGROUND) {
+				object = metadata.getJSON();
 			} else {
-				data.put(HikeConstants.MESSAGE_ID, msgID);
-			}
+				if (metadata != null) {
+					if (isFileTransferMessage || isStickerMessage) {
+						md = metadata.getJSON();
+						data.put(HikeConstants.METADATA, md);
+					} else if (metadata.isPokeMessage()) {
+						data.put(HikeConstants.POKE, true);
+					}
+				}
+				data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
+						: HikeConstants.SMS_MESSAGE, mMessage);
+				data.put(HikeConstants.TIMESTAMP, mTimestamp);
 
-			object.put(HikeConstants.TO, mMsisdn);
-			object.put(HikeConstants.DATA, data);
-			if (isStickerMessage) {
-				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
-			}
+				if (mInvite) {
+					data.put(HikeConstants.MESSAGE_ID,
+							System.currentTimeMillis());
+				} else {
+					data.put(HikeConstants.MESSAGE_ID, msgID);
+				}
 
-			if (sendNativeInvite && mInvite) {
-				object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
-			}
+				object.put(HikeConstants.TO, mMsisdn);
+				object.put(HikeConstants.DATA, data);
+				if (isStickerMessage) {
+					object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
+				}
 
-			object.put(HikeConstants.TYPE,
-					mInvite ? HikeConstants.MqttMessageTypes.INVITE
-							: HikeConstants.MqttMessageTypes.MESSAGE);
+				if (sendNativeInvite && mInvite) {
+					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
+				}
+
+				object.put(HikeConstants.TYPE,
+						mInvite ? HikeConstants.MqttMessageTypes.INVITE
+								: HikeConstants.MqttMessageTypes.MESSAGE);
+			}
 		} catch (JSONException e) {
 			Log.e("ConvMessage", "invalid json message", e);
 		}

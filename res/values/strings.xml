@@ -704,4 +704,6 @@
 	<string name="se_category">Smiley Expressions</string>
 	<string name="avtars_category">Avatars</string>
 	<string name="chat_bg_changed">%1$s changed the background</string>
+	<string name="save_theme">Save theme</string>
+	<string name="change_theme">Change theme</string>	
 </resources>

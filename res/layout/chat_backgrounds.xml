@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/bg_attachments"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <GridView
+            android:id="@+id/attachment_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:numColumns="5"
+            android:horizontalSpacing="4dp"
+            android:verticalSpacing="4dp"
+            android:gravity="center" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/set_theme_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_dark_grey_btn_selector"
+            android:minWidth="70dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:shadowColor="#40000000"
+            android:shadowDy="0.5"
+            android:shadowRadius="0.5"
+            android:src="@drawable/ic_sticker_btn"
+            android:text="@string/save_theme"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="12dp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/chat_bg"
+        android:icon="@drawable/ic_chat_background"
+        android:showAsAction="always"
+        android:title="@string/change_theme"/>
+    <item
         android:id="@+id/attachment"
         android:icon="@drawable/ic_attachment"
         android:showAsAction="always"

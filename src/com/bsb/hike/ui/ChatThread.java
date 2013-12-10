@@ -38,6 +38,9 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.BitmapFactory;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -108,6 +111,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -116,6 +120,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.TipType;
@@ -158,6 +163,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -331,6 +337,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private Menu mMenu;
 
+	private ChatTheme selectedTheme;
+	private ChatTheme temporaryTheme;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -405,6 +414,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		/*
+		 * Making the action bar transparent for custom theming.
+		 */
+		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
@@ -767,6 +781,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		switch (item.getItemId()) {
+		case R.id.chat_bg:
+			showThemePicker();
+			break;
 		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
 			break;
@@ -1336,12 +1353,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
-		if(mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)){
-			//In case of Emma HikeBot we show sticker Ftue tip only on scrolling to
-			//the bottom of the chat thread
-			mConversationsView.setOnScrollListener(getOnScrollListenerForEmmaThread());
+
+		selectedTheme = mConversationDb.getChatThemeForMsisdn(mContactNumber);
+		setChatTheme(selectedTheme);
+
+		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)) {
+			// In case of Emma HikeBot we show sticker Ftue tip only on
+			// scrolling to
+			// the bottom of the chat thread
+			mConversationsView
+					.setOnScrollListener(getOnScrollListenerForEmmaThread());
 		}
-		
+
 		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) {
 			Animation alphaIn = AnimationUtils.loadAnimation(
 					getApplicationContext(), R.anim.slide_up_noalpha);
@@ -2645,6 +2668,155 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private void toggleConversationMuteViewVisibility(boolean isMuted) {
 		findViewById(R.id.conversation_mute).setVisibility(
 				isMuted ? View.VISIBLE : View.GONE);
+	}
+
+	private void showThemePicker() {
+
+		attachmentWindow = new PopupWindow(this);
+
+		View parentView = getLayoutInflater().inflate(
+				R.layout.chat_backgrounds, chatLayout, false);
+
+		attachmentWindow.setContentView(parentView);
+
+		GridView attachmentsGridView = (GridView) parentView
+				.findViewById(R.id.attachment_grid);
+
+		Button setThemeButton = (Button) parentView
+				.findViewById(R.id.set_theme_btn);
+
+		temporaryTheme = selectedTheme;
+
+		attachmentsGridView.setNumColumns(getNumColumnsChatThemes());
+
+		final ArrayAdapter<ChatTheme> gridAdapter = new ArrayAdapter<ChatTheme>(
+				this, -1, ChatTheme.values()) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (convertView == null) {
+					convertView = LayoutInflater.from(ChatThread.this).inflate(
+							R.layout.chat_bg_item, parent, false);
+				}
+				((ImageView) convertView).setBackgroundResource(getItem(
+						position).previewResId());
+				convertView.setEnabled(temporaryTheme == getItem(position));
+
+				return convertView;
+			}
+		};
+
+		attachmentsGridView.setAdapter(gridAdapter);
+
+		attachmentsGridView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				temporaryTheme = ChatTheme.values()[position];
+				gridAdapter.notifyDataSetChanged();
+				setChatTheme(temporaryTheme);
+			}
+		});
+
+		setThemeButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				/*
+				 * If the user has selected the same theme, we shouldn't do
+				 * anything
+				 */
+				if (temporaryTheme != selectedTheme) {
+					selectedTheme = temporaryTheme;
+					sendChatThemeMessage();
+				}
+				attachmentWindow.dismiss();
+			}
+		});
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss() {
+				temporaryTheme = null;
+
+				setChatTheme(selectedTheme);
+			}
+		});
+
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(
+				android.R.color.transparent));
+		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+	}
+
+	private int getNumColumnsChatThemes() {
+		int width = getResources().getDisplayMetrics().widthPixels;
+
+		int chatThemePaletteMargin = 2 * getResources().getDimensionPixelSize(
+				R.dimen.chat_theme_palette_margin);
+
+		int chatThemeGridMargin = 2 * getResources().getDimensionPixelSize(
+				R.dimen.chat_theme_grid_margin);
+
+		int chatThemeGridWidth = width - chatThemeGridMargin
+				- chatThemePaletteMargin;
+
+		int chatThemeItemWidth = getResources().getDimensionPixelSize(
+				R.dimen.chat_bg_item_width);
+
+		return (int) (chatThemeGridWidth / chatThemeItemWidth);
+	}
+
+	private void setChatTheme(ChatTheme chatTheme) {
+		Drawable backgroundDrawable;
+		if (chatTheme.isTiled()) {
+			BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(),
+					BitmapFactory.decodeResource(getResources(),
+							chatTheme.bgResId()));
+			bitmapDrawable.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+			backgroundDrawable = bitmapDrawable;
+		} else {
+			backgroundDrawable = getResources()
+					.getDrawable(chatTheme.bgResId());
+		}
+
+		chatLayout.setBackgroundDrawable(backgroundDrawable);
+		mAdapter.setChatTheme(chatTheme);
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setBackgroundDrawable(getResources().getDrawable(
+				chatTheme.headerBgResId()));
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setDisplayShowTitleEnabled(true);
+	}
+
+	private void sendChatThemeMessage() {
+		mConversationDb.setChatBackground(mContactNumber, selectedTheme.bgId());
+
+		JSONObject jsonObject = new JSONObject();
+		JSONObject data = new JSONObject();
+
+		try {
+			data.put(HikeConstants.BG_ID, selectedTheme.bgId());
+
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.CHAT_BACKGROUD);
+			jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
+			jsonObject.put(HikeConstants.FROM,
+					prefs.getString(HikeMessengerApp.MSISDN_SETTING, ""));
+
+			ConvMessage convMessage = new ConvMessage(jsonObject,
+					mConversation, this, true);
+			sendMessage(convMessage);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState) {

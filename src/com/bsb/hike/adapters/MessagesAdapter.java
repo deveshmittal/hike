@@ -80,6 +80,7 @@ import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
@@ -139,6 +140,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private String statusIdForTip;
 	private SharedPreferences preferences;
 	private boolean isGroupChat;
+	private ChatTheme chatTheme;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -151,6 +153,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
 		setLastSentMessagePosition();
+	}
+
+	public void setChatTheme(ChatTheme theme) {
+		chatTheme = theme;
+		notifyDataSetChanged();
 	}
 
 	public void addMessage(ConvMessage convMessage) {
@@ -1262,9 +1269,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
 			/* label outgoing hike conversations in green */
-			holder.messageContainer
-					.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector
-							: R.drawable.ic_bubble_green_selector);
+			if (chatTheme == ChatTheme.DEFAULT) {
+				holder.messageContainer.setBackgroundResource(!convMessage
+						.isSMS() ? R.drawable.ic_bubble_blue_selector
+						: R.drawable.ic_bubble_green_selector);
+			} else {
+				holder.messageContainer.setBackgroundResource(chatTheme
+						.bubbleResId());
+			}
 		}
 
 		return v;
