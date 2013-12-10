@@ -23,6 +23,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata {
@@ -98,10 +99,11 @@ public class MessageMetadata {
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
 		this.json = metadata;
-		if (metadata.has(HikeConstants.STICKER_ID)) {
+		if (metadata.has(StickerManager.STICKER_ID)) {
 			this.sticker = new Sticker(
-					metadata.optString(HikeConstants.CATEGORY_ID),
-					metadata.optString(HikeConstants.STICKER_ID));
+					metadata.optString(StickerManager.CATEGORY_ID),
+					metadata.optString(StickerManager.STICKER_ID),
+					metadata.optInt(StickerManager.STICKER_INDEX));
 		}
 	}
 

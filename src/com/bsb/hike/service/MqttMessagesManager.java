@@ -1031,7 +1031,7 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.STICKER.equals(type)) {
 			String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			String categoryId = data.getString(HikeConstants.CATEGORY_ID);
+			String categoryId = data.getString(StickerManager.CATEGORY_ID);
 			if (HikeConstants.ADD_STICKER.equals(subType)) {
 				convDb.stickerUpdateAvailable(categoryId);
 				StickerManager.getInstance().setStickerUpdateAvailable(categoryId, true);

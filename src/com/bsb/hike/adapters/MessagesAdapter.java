@@ -1123,7 +1123,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			}
 			/*
-			 * If this is the first category, then the sticker are a part of the
+			 * If this is the default category, then the sticker are part of the
 			 * app bundle itself
 			 */
 			if (sticker.getStickerIndex() != -1) {

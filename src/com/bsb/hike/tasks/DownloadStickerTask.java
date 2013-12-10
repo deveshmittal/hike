@@ -14,7 +14,10 @@ import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -36,7 +39,7 @@ import com.bsb.hike.utils.Utils;
 
 public class DownloadStickerTask extends StickerTaskBase {
 
-	public static enum DownloadType {
+	public enum DownloadType {
 		NEW_CATEGORY, UPDATE, MORE_STICKERS
 	}
 
@@ -128,7 +131,7 @@ public class DownloadStickerTask extends StickerTaskBase {
 				String stickerData = data.getString(stickerId);
 
 				try {
-					if(stickerPageAdapter != null)
+					if(downloadType.equals(DownloadType.MORE_STICKERS) && stickerPageAdapter != null)
 						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
 					File f = new File(largeStickerDir, stickerId);
 					Utils.saveBase64StringToFile(f, stickerData);
@@ -144,7 +147,7 @@ public class DownloadStickerTask extends StickerTaskBase {
 					Log.w(getClass().getSimpleName(), e);
 				}
 			}
-			if(stickerPageAdapter != null)
+			if(downloadType.equals(DownloadType.MORE_STICKERS) && stickerPageAdapter != null)
 			{
 				List<ViewType>  l = stickerPageAdapter.getViewTypeList();
 				l.remove(ViewType.DOWNLOADING_MORE);
@@ -174,18 +177,32 @@ public class DownloadStickerTask extends StickerTaskBase {
 		StickerManager.getInstance().removeTask(category.categoryId.name());
 		if (result != FTResult.SUCCESS)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, new Pair<StickerCategory, DownloadType>(category, downloadType));
-			return;
+			Intent i = new Intent(StickerManager.STICKERS_FAILED);
+			Bundle b = new Bundle();
+			b.putSerializable(StickerManager.STICKER_CATEGORY, category);
+			b.putSerializable("downloadType", downloadType);
+			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
 		else
 		{
 			if (downloadType == DownloadType.UPDATE)
 				StickerManager.getInstance().setStickerUpdateAvailable(category.categoryId.name(), false);
 			
-			if (stickerPageAdapter != null)
+			else if (downloadType.equals(DownloadType.MORE_STICKERS) && stickerPageAdapter != null)
 			{
 				stickerPageAdapter.notifyDataSetChanged();
 				return;
+			}
+			else if(downloadType.equals(DownloadType.NEW_CATEGORY))
+			{
+				Intent i = new Intent(StickerManager.STICKERS_DOWNLOADED);
+				Bundle b = new Bundle();
+				b.putSerializable(StickerManager.STICKER_CATEGORY, category);
+				b.putSerializable("downloadType", downloadType);
+				i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
+				LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+				
 			}
 		}
 	}

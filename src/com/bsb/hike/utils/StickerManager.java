@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
@@ -52,7 +53,31 @@ public class StickerManager
 
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
 
-	private int RECENT_STICKERS_COUNT = 30;
+	public static final String STICKERS_DOWNLOADED = "st_downloaded";
+
+	public static final String STICKERS_FAILED = "st_failed";
+
+	public static final String STICKER_DATA_BUNDLE = "stickerDataBundle";
+
+	public static final String STICKER_CATEGORY = "stickerCategory";
+
+	public static final String RECENT_STICKER_SENT = "recentStickerSent";
+
+	public static final String RECENTS_UPDATED = "recentsUpdated";
+
+	public static final String STICKER_ID = "stId";
+
+	public static final String CATEGORY_ID = "catId";
+
+	public static final String STICKER_INDEX = "stIdx";
+
+	public static final String FWD_STICKER_ID = "fwdStickerId";
+
+	public static final String FWD_CATEGORY_ID = "fwdCategoryId";
+	
+	public static final String FWD_STICKER_INDEX = "fwdStickerIdx";
+
+	public static int RECENT_STICKERS_COUNT = 30;
 
 	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1, R.drawable.sticker_10_love2, R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
 			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry, R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked, R.drawable.sticker_17_hurray,
@@ -72,8 +97,8 @@ public class StickerManager
 			R.drawable.sticker_small_4_devilsmile, R.drawable.sticker_small_5_sorry, R.drawable.sticker_small_6_urgh, R.drawable.sticker_small_7_confused,
 			R.drawable.sticker_small_8_dreaming };
 
-	public final String[] LOCAL_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png", "007_confused.png",
-			"008_dreaming.png", };
+	public final String[] LOCAL_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
+			"007_confused.png", "008_dreaming.png", };
 
 	public enum StickerCategoryId
 	{
@@ -141,24 +166,24 @@ public class StickerManager
 				return "doggyDownloadShown";
 			}
 		},
-		kitty
+		humanoid2
 		{
 			@Override
 			public int resId()
 			{
-				return R.drawable.kitty;
+				return R.drawable.humanoid2;
 			}
 
 			@Override
 			public int previewResId()
 			{
-				return R.drawable.preview_kitty;
+				return R.drawable.preview_humanoid2;
 			}
 
 			@Override
 			public String downloadPref()
 			{
-				return "kittyDownloadShown";
+				return "humanoid2DownloadShown";
 			}
 		},
 		expressions
@@ -179,6 +204,46 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "expDownloadShown";
+			}
+		},
+		avatars
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.avtars;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_avtars;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "avtarsDownloadShown";
+			}
+		},
+		smileyexpressions
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.smileyexpressions;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_smilyexpressions;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "smileyexpressionDownloadShown";
 			}
 		},
 		bollywood
@@ -219,6 +284,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "rfDownloadShown";
+			}
+		},
+		kitty
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.kitty;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_kitty;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "kittyDownloadShown";
 			}
 		};
 
@@ -304,7 +389,7 @@ public class StickerManager
 			// TODO : make it a single DB call
 			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance().isStickerUpdateAvailable(s);
 			boolean hasReachedEnd = HikeConversationsDatabase.getInstance().hasReachedStickerEnd(s.name());
-			stickerCategories.add(new StickerCategory(s, isUpdateAvailable,hasReachedEnd));
+			stickerCategories.add(new StickerCategory(s, isUpdateAvailable, hasReachedEnd));
 		}
 		String removedIds = preferences.getString(REMOVED_CATGORY_IDS, "[]");
 
@@ -411,7 +496,7 @@ public class StickerManager
 		boolean isRemoved = recentStickers.remove(st);
 		if (isRemoved) // this means list size is less than 30
 			recentStickers.add(st);
-		else if (recentStickers.size() == 30) // if size is already 30 remove first element and then add
+		else if (recentStickers.size() == RECENT_STICKERS_COUNT) // if size is already 30 remove first element and then add
 		{
 			Sticker firstSt = recentStickers.iterator().next();
 			if (firstSt != null)

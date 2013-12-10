@@ -1,9 +1,10 @@
 package com.bsb.hike.adapters;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,7 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -25,7 +25,6 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
@@ -262,10 +261,24 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 		return convertView;
 	}
 	
+	/* This should be used only for recent stickers */
+	public void updateRecentsList(Sticker st)
+	{
+		stickerList.remove(st);
+		if (stickerList.size() == StickerManager.RECENT_STICKERS_COUNT) // if size is already 30 remove first element and then add
+		{
+			// remove last sticker
+			stickerList.remove(stickerList.size() - 1);
+		}
+		stickerList.add(0,st);
+		calculateNumRowsAndSize(true);
+	}
+	
 	@Override
 	public void onClick(View v) {
 		Sticker sticker = (Sticker) v.getTag();
 		((ChatThread) activity).sendSticker(sticker);
 		StickerManager.getInstance().addRecentSticker(sticker);
+		LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
 	}
 }

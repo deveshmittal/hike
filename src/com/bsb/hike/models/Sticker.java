@@ -63,6 +63,13 @@ public class Sticker implements Serializable, Comparable<Sticker> {
 		
 	}
 
+	public Sticker(String categoryName, String stickerId,int stickerIdx)
+	{
+		this.stickerId = stickerId;
+		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
+		this.stickerIndex = stickerIdx;
+	}
+
 	public int getStickerIndex() {
 		return stickerIndex;
 	}
@@ -115,7 +122,7 @@ public class Sticker implements Serializable, Comparable<Sticker> {
 		else
 		{
 			Sticker st = (Sticker) object;
-			if (this.category.categoryId == st.getCategory().categoryId && this.stickerId == st.getStickerId())
+			if (this.category.categoryId.equals(st.getCategory().categoryId) && this.stickerId.equals(st.getStickerId()))
 			{
 				result = true;
 			}
