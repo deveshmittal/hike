@@ -100,7 +100,7 @@ public class ConvMessage {
 		PARTICIPANT_LEFT, // The participant has left
 		PARTICIPANT_JOINED, // The participant has joined
 		GROUP_END, // Group chat has ended
-		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE;
+		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE, CHAT_BACKGROUND;
 
 		public static ParticipantInfoState fromJSON(JSONObject obj) {
 			String type = obj.optString(HikeConstants.TYPE);
@@ -131,6 +131,9 @@ public class ConvMessage {
 			} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE
 					.equals(type)) {
 				return STATUS_MESSAGE;
+			} else if (HikeConstants.MqttMessageTypes.CHAT_BACKGROUD
+					.equals(type)) {
+				return CHAT_BACKGROUND;
 			}
 			return NO_INFO;
 		}
@@ -338,6 +341,21 @@ public class ConvMessage {
 			 * We want all status message state to be read by default.
 			 */
 			isSelfGenerated = true;
+			break;
+		case CHAT_BACKGROUND:
+			if (conversation != null) {
+
+				String nameString;
+				if (conversation instanceof GroupConversation) {
+					nameString = ((GroupConversation) conversation)
+							.getGroupParticipantFirstName(metadata.getMsisdn());
+				} else {
+					nameString = Utils.getFirstName(conversation.getLabel());
+				}
+				this.mMessage = context.getString(R.string.chat_bg_changed,
+						nameString);
+				;
+			}
 			break;
 		}
 		this.mConversation = conversation;

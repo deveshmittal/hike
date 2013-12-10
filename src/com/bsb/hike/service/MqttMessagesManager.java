@@ -48,6 +48,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
@@ -1276,6 +1277,33 @@ public class MqttMessagesManager {
 						id);
 				editor.commit();
 				this.pubSub.publish(HikePubSub.APPLICATIONS_PUSH, packageName);
+			}
+		} else if (HikeConstants.MqttMessageTypes.CHAT_BACKGROUD.equals(type)) {
+			String from = jsonObj.optString(HikeConstants.FROM);
+			String to = jsonObj.optString(HikeConstants.TO);
+
+			boolean isGroupConversation = false;
+			if (!TextUtils.isEmpty(to)) {
+				isGroupConversation = Utils.isGroupConversation(to);
+			}
+			String id = isGroupConversation ? to : from;
+
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			String bgId = data.optString(HikeConstants.BG_ID);
+
+			try {
+				ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
+				HikeConversationsDatabase.getInstance().setChatBackground(id,
+						bgId);
+
+				this.pubSub.publish(HikePubSub.CHAT_BACKGROUND_CHANGED,
+						new Pair<String, ChatTheme>(id, chatTheme));
+
+				saveStatusMsg(jsonObj, id);
+			} catch (IllegalArgumentException e) {
+				/*
+				 * This exception is thrown for unknown themes. Do nothing
+				 */
 			}
 		}
 	}
