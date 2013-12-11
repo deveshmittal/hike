@@ -1336,7 +1336,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 //		UI for audio file transfer
 		if(convMessage.isFileTransferMessage() && hikeFile.getHikeFileType() == HikeFileType.AUDIO)
 		{
-			int pixels = (int)(135 * Utils.densityMultiplier);
+			//Bug Fix: 12693,12694
+			int pixels = (int)(140 * Utils.densityMultiplier);
 			holder.fileThumb.getLayoutParams().height = pixels;
 			holder.fileThumb.getLayoutParams().width = pixels;
 			//holder.fileThumb.setBackgroundColor(Color.rgb(100, 100, 50));
@@ -1429,6 +1430,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 		else
 		{
+			//Big Fix: 12695
 			if(holder.overlayBg != null)
 				holder.overlayBg.setClickable(false);
 		}

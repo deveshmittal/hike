@@ -78,6 +78,7 @@ public class DownloadFileTask extends FileTransferBase
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// Restoring the bytes transferred(downloaded) previously.
 				setBytesTransferred((int) raf.length());
+				//Bug Fix: 13029
 				setFileTotalSize(fst.getTotalSize());
 				return downloadFile(raf.length(), raf, AccountUtils.ssl);
 			}
@@ -197,8 +198,8 @@ public class DownloadFileTask extends FileTransferBase
 						incrementBytesTransferred(numRead);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						showButton();
-						if (shouldSendProgress())
-							sendProgress();
+						//if (shouldSendProgress())
+						sendProgress();
 					}
 
 					switch (_state)

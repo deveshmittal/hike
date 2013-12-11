@@ -431,6 +431,7 @@ public class UploadFileTask extends FileTransferBase
 		JSONObject responseJson = null;
 		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(sourceFile, msgId);
 		setFileTotalSize((int) sourceFile.length());
+		//Bug Fix: 13029
 		setBytesTransferred(fst.getTransferredSize());
 		// represents this file is either not started or unrecovered error has happened
 		Log.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
