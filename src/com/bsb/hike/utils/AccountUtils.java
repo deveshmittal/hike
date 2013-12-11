@@ -209,6 +209,9 @@ public class AccountUtils {
 	public static void addUserAgent(URLConnection urlConnection) {
 		urlConnection.addRequestProperty("User-Agent", "android-" + appVersion);
 	}
+	public static void addUserAgent(HttpRequestBase request) {
+		request.addHeader("User-Agent", "android-" + appVersion);
+	}
 
 	public static JSONObject executeRequest(HttpRequestBase request) {
 		HttpClient client = getClient();

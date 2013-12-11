@@ -632,7 +632,6 @@ public class UploadFileTask extends FileTransferBase
 			HttpResponse response = client.execute(post);
 			Log.d(getClass().getSimpleName(), "After Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
 		    BufferedReader r = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			//BufferedReader r = new BufferedReader(new InputStreamReader(is));
 			StringBuilder total = new StringBuilder();
 			String line;
 			while ((line = r.readLine()) != null)

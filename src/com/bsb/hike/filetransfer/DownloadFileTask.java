@@ -78,6 +78,7 @@ public class DownloadFileTask extends FileTransferBase
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// Restoring the bytes transferred(downloaded) previously.
 				setBytesTransferred((int) raf.length());
+				setFileTotalSize(fst.getTotalSize());
 				return downloadFile(raf.length(), raf, AccountUtils.ssl);
 			}
 		}
