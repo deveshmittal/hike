@@ -24,6 +24,7 @@ import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -59,6 +60,10 @@ import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 
 @ReportsCrashes(formKey = "", customReportContent = {
 		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
@@ -687,8 +692,22 @@ public class HikeMessengerApp extends Application implements Listener {
 		hikeBotNamesMap
 				.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
+		initImageLoader(getApplicationContext());
 	}
 
+	public void initImageLoader(Context context) 
+	{
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
+				.threadPriority(Thread.NORM_PRIORITY - 2)
+				.denyCacheImageMultipleSizesInMemory()
+				.tasksProcessingOrder(QueueProcessingType.LIFO)
+				.writeDebugLogs() // TODO : Remove for release app
+				.build();
+		
+		// Initialize ImageLoader with configuration.
+		ImageLoader.getInstance().init(config);
+	}
+	
 	private void makeNoMediaFiles() {
 		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
 

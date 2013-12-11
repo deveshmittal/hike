@@ -15,6 +15,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
@@ -26,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.ImageView.ScaleType;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -43,10 +46,16 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter
 {
 
+	private DisplayImageOptions options;
+	
 	private List<StickerCategory> stickerCategoryList;
 
 	private LayoutInflater inflater;
@@ -114,6 +123,19 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		stickerObjMap = Collections.synchronizedMap(new EnumMap<StickerCategoryId, StickerAdapter.StickerPageObjects>(StickerCategoryId.class));
 		registerListener();
 		Log.d(getClass().getSimpleName(), "Sticker Adapter instantiated ....");
+		initDisplayOptions();
+	}
+
+	private void initDisplayOptions()
+	{
+		options = new DisplayImageOptions.Builder()
+		.cacheInMemory(true)
+		.cacheOnDisc(false)
+		.bitmapConfig(Bitmap.Config.RGB_565)
+		.displayer(new SimpleBitmapDisplayer())
+		.imageScaleType(ImageScaleType.NONE)
+		.resetViewBeforeLoading(false)
+		.build();
 	}
 
 	@Override
@@ -340,7 +362,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			viewTypeList.add(ViewType.DOWNLOADING_MORE);
 		}
-		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList);
+		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList,options);
 		spo.setStickerPageAdapter(stickerPageAdapter);
 		spo.getStickerListView().setAdapter(stickerPageAdapter);
 		spo.getStickerListView().setOnScrollListener(new OnScrollListener()

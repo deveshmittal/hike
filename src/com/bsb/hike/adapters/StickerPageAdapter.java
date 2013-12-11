@@ -28,6 +28,8 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
@@ -49,15 +51,18 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private LayoutInflater inflater;
 	private StickerCategory category;
 	private int numStickerRows;
+	private DisplayImageOptions op;
+	
+	protected ImageLoader imageLoader = ImageLoader.getInstance();
 	
 	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
-			List<ViewType> viewTypeList) {
+			List<ViewType> viewTypeList,DisplayImageOptions options) {
 		this.activity = activity;
 		this.stickerList = stickerList;
 		this.viewTypeList = viewTypeList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
-
+		this.op = options;
 		calculateNumRowsAndSize(false);
 	}
 
@@ -198,7 +203,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1) {
-					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {
+					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {                                              
 						imageView
 								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker
 										.getStickerIndex()]);
@@ -208,9 +213,11 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 										.getStickerIndex()]);
 					}
 				} else {
-					imageView.setImageDrawable(IconCacheManager.getInstance()
+					imageLoader.displayImage("file://"+sticker.getSmallStickerPath(activity),imageView,op);
+						
+					/*imageView.setImageDrawable(IconCacheManager.getInstance()
 							.getStickerThumbnail(
-									sticker.getSmallStickerPath(activity)));
+									sticker.getSmallStickerPath(activity)));*/
 				}
 				imageView.setTag(sticker);
 
