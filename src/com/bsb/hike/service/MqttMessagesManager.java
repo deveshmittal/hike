@@ -1227,7 +1227,7 @@ public class MqttMessagesManager {
 			String lastPushPacketId = settings.getString(
 					HikeConstants.Extras.LAST_UPDATE_PACKET_ID, "");
 			if (!TextUtils.isEmpty(devType)
-					&& devType.equals(HikeConstants.ANDROID)
+					&& devType.equals(HikeConstants.NOKIA)
 					&& !TextUtils.isEmpty(id) && !lastPushPacketId.equals(id)) {
 				String version = data.optString(HikeConstants.UPDATE_VERSION);
 				String updateURL = data.optString(HikeConstants.Extras.URL);

@@ -19,6 +19,7 @@ public class HikeConstants {
 	public static final String MA_SITE_ID = "27576";
 
 	public static final String ANDROID = "android";
+	public static final String NOKIA = "nokia";
 
 	public static final String MESSAGE = "msg";
 	public static final String UI_TOPIC = "/u";

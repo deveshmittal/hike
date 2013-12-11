@@ -797,7 +797,7 @@ public class HikeService extends Service {
 					});
 			JSONObject request = new JSONObject();
 			try {
-				request.put(GCMIntentService.DEV_TYPE, HikeConstants.ANDROID);
+				request.put(GCMIntentService.DEV_TYPE, HikeConstants.NOKIA);
 				request.put(GCMIntentService.DEV_TOKEN, regId);
 			} catch (JSONException e) {
 				Log.d(getClass().getSimpleName(), "Invalid JSON", e);
@@ -824,7 +824,7 @@ public class HikeService extends Service {
 					"Sending device details to server");
 
 			String osVersion = Build.VERSION.RELEASE;
-			String devType = HikeConstants.ANDROID;
+			String devType = HikeConstants.NOKIA;
 			String os = HikeConstants.ANDROID;
 			String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = "";
