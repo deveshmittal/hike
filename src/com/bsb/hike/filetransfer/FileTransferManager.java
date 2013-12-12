@@ -550,9 +550,15 @@ public class FileTransferManager
 	// Set the limits of chunk sizes of files to transfer
 	public void setChunkSize()
 	{
+		int maxMemory = (int) Runtime.getRuntime().maxMemory();
 		NetworkType networkType = getNetworkType();
 		maxChunkSize = networkType.getMaxChunkSize();
 		minChunkSize = networkType.getMinChunkSize();
+		if( maxChunkSize > (maxMemory * 8) )
+			maxChunkSize = maxMemory * 8 ;
+		
+		while(minChunkSize >= maxChunkSize)
+			minChunkSize/=2;
 	}
 	
 	public int getMaxChunkSize()
