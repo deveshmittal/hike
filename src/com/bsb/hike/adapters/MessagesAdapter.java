@@ -1572,7 +1572,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					case PAUSED:
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						holder.dataTransferred.setText( dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()) );
+						holder.dataTransferred.setText( dataDisplay(fss.getTransferredSize()) + " / " + dataDisplay(fss.getTotalSize()) );
 						holder.barProgress.setProgress(progress);
 						break;
 
@@ -1591,7 +1591,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					case PAUSED:
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						holder.dataTransferred.setText( dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()) );
+						holder.dataTransferred.setText( dataDisplay(fss.getTransferredSize()) + "/ " + dataDisplay(fss.getTotalSize()) );
 						holder.barProgress.setProgress(progress);
 						break;
 					case NOT_STARTED:

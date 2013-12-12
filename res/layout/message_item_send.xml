@@ -106,6 +106,8 @@
                             android:text=""
                             android:textSize="12dp"
                             android:textColor="#ff999690"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:visibility="gone" />
 
                     <RelativeLayout
@@ -140,8 +142,10 @@
                             android:background="#00000000"
                             android:text=""
                             android:textSize="12dp"
-                            android:textColor="@color/white" />
-
+                            android:textColor="@color/white"
+                            android:ellipsize="end"
+                            android:maxLines="2"/>
+                        
                         <ProgressBar
                             android:id="@+id/pbTransfer"
                             style="?android:attr/progressBarStyleHorizontal"

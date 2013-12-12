@@ -117,7 +117,7 @@
 	                <!-- 
 	                @GM
 	                changed the file thumbnail view with the following relative view
-	                that contains thumbnail + the realtion view of the overlay
+	                that contains thumbnail + the relation view of the overlay
 	                 -->
 	                 <RelativeLayout
                     android:layout_width="wrap_content"
@@ -143,6 +143,8 @@
                             android:text=""
                             android:textSize="12dp"
                             android:textColor="#ff999690"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:visibility="gone" />
 
                     <RelativeLayout
@@ -177,7 +179,9 @@
                             android:background="#00000000"
                             android:text=""
                             android:textSize="12dp"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:ellipsize="end"
+                            android:maxLines="2" />
 
                         <ProgressBar
                             android:id="@+id/pbTransfer"
