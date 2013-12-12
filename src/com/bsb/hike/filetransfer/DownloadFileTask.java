@@ -190,6 +190,9 @@ public class DownloadFileTask extends FileTransferBase
 							chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
 						else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
 							chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+						int maxMemory = (int) Runtime.getRuntime().maxMemory();
+						if( chunkSize > (maxMemory / 8) )
+							chunkSize = maxMemory / 8 ;
 						// change buffer size
 						data = new byte[chunkSize];
 						// increase the startByte for resume later

@@ -519,6 +519,9 @@ public class UploadFileTask extends FileTransferBase
 						chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
 					else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
 						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+					int maxMemory = (int) Runtime.getRuntime().maxMemory();
+					if( chunkSize > (maxMemory / 8) )
+						chunkSize = maxMemory / 8 ;
 					end = (int) length;
 					if (end > (start + chunkSize))
 						end = start + chunkSize;
