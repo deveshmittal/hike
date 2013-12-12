@@ -543,6 +543,8 @@ public class UploadFileTask extends FileTransferBase
 			}
 			fileBytes = null;
 		}
+		if(responseJson != null)
+			setState(FTState.IN_PROGRESS);
 		switch (_state)
 		{
 		case CANCELLED:
