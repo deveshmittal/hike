@@ -56,6 +56,8 @@ public class StickerManager
 	public static final String STICKERS_DOWNLOADED = "st_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
+	
+	public static final String STICKER_DOWNLOAD_TYPE = "stDownloadType";
 
 	public static final String STICKER_DATA_BUNDLE = "stickerDataBundle";
 
