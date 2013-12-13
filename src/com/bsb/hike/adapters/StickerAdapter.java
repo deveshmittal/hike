@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
@@ -28,7 +27,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.ImageView.ScaleType;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -48,7 +46,6 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter
@@ -133,8 +130,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		.cacheOnDisc(false)
 		.bitmapConfig(Bitmap.Config.RGB_565)
 		.displayer(new SimpleBitmapDisplayer())
-		.imageScaleType(ImageScaleType.NONE)
-		.resetViewBeforeLoading(false)
+		.imageScaleType(ImageScaleType.IN_SAMPLE_POWER_OF_2)
+		.resetViewBeforeLoading(true)
 		.build();
 	}
 
@@ -186,7 +183,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			StickerCategory category = null;
 			if (intent.getAction().equals(StickerManager.RECENTS_UPDATED))
 			{
 				StickerPageObjects spo = stickerObjMap.get(StickerCategoryId.recent);
@@ -215,12 +211,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			{
 				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
 				final StickerCategory cat = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
-				final DownloadType type = (DownloadType) b.getSerializable("downloadType");
+				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 				final StickerPageObjects spo = stickerObjMap.get(cat.categoryId);
 				// if this category is already loaded then only proceed else ignore
 				if (spo != null)
 				{
-					if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && type.equals(DownloadType.NEW_CATEGORY))
+					if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && DownloadType.NEW_CATEGORY.equals(type))
 					{
 						activity.runOnUiThread(new Runnable()
 						{
@@ -248,9 +244,16 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 							}
 						});
 					}
-					else if (intent.getAction().equals(StickerManager.STICKERS_DOWNLOADED) && type.equals(DownloadType.NEW_CATEGORY))
+					else if (intent.getAction().equals(StickerManager.STICKERS_DOWNLOADED) && DownloadType.NEW_CATEGORY.equals(type))
 					{
-						initStickers(spo, cat);
+						activity.runOnUiThread(new Runnable()
+						{						
+							@Override
+							public void run()
+							{
+								initStickers(spo, cat);							
+							}
+						});
 					}
 				}
 			}
@@ -351,6 +354,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 
 		boolean updateAvailable = category.updateAvailable;
+		if(category.categoryId == StickerCategoryId.rageface)
+			category.updateAvailable = updateAvailable = true;
+
 		final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
 		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.categoryId.name());
 		if (updateAvailable || (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.UPDATE))
@@ -382,12 +388,14 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				{
 					return;
 				}
-				if (!StickerManager.getInstance().isStickerDownloading(category.categoryId.name()) && !category.hasReachedEnd())
+				if (!StickerManager.getInstance().isStickerDownloading(category.categoryId.name()) && !category.hasReachedEnd() && !category.updateAvailable)
 				{
 					if (firstVisibleItem + visibleItemCount >= totalItemCount - 1)
 					{
 						Log.d(getClass().getSimpleName(), "Downloading more stickers " + category.categoryId.name());
-						viewTypeList.add(ViewType.DOWNLOADING_MORE);
+						// if downloading more is not already inserted, then only insert that view
+						if(!viewTypeList.get(viewTypeList.size() - 1).equals(ViewType.DOWNLOADING_MORE))
+							viewTypeList.add(ViewType.DOWNLOADING_MORE);
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS, stickerPageAdapter);
 
 						StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);

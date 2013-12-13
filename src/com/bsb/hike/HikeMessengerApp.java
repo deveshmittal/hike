@@ -55,12 +55,9 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
-import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
-import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
@@ -698,10 +695,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	public void initImageLoader(Context context) 
 	{
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
-				.threadPriority(Thread.NORM_PRIORITY - 2)
+				.threadPriority(Thread.NORM_PRIORITY - 1)
 				.denyCacheImageMultipleSizesInMemory()
-				.tasksProcessingOrder(QueueProcessingType.LIFO)
-				.writeDebugLogs() // TODO : Remove for release app
+				.tasksProcessingOrder(QueueProcessingType.FIFO)
+				//.writeDebugLogs() // TODO : Remove for release app
 				.build();
 		
 		// Initialize ImageLoader with configuration.
