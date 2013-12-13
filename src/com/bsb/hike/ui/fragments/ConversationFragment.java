@@ -302,7 +302,7 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		final Conversation conv = (Conversation) mAdapter.getItem(position);
 
-		optionsList.add(getString(R.string.shortcut));
+		//optionsList.add(getString(R.string.shortcut));
 		optionsList.add(getString(R.string.email_conversation));
 		if (conv instanceof GroupConversation) {
 			optionsList.add(getString(R.string.delete_leave));

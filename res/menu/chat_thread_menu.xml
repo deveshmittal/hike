@@ -33,7 +33,8 @@
             <item
                 android:id="@+id/add_shortcut"
                 android:showAsAction="never"
-                android:title="@string/shortcut"/>
+                android:title="@string/shortcut"
+                android:visible="false"/>
         </menu>
     </item>
 
