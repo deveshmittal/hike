@@ -354,8 +354,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 
 		boolean updateAvailable = category.updateAvailable;
-		if(category.categoryId == StickerCategoryId.rageface)
-			category.updateAvailable = updateAvailable = true;
 
 		final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
 		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.categoryId.name());
