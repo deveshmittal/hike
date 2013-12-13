@@ -250,7 +250,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					@Override
 					public void onClick(View v) {
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-								activity, category, DownloadType.UPDATE,null);
+								activity, category, DownloadType.UPDATE,StickerPageAdapter.this);
 						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
 						StickerManager.getInstance().insertTask(category.categoryId.name(),
