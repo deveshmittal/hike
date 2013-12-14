@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -96,6 +97,17 @@ public class ToastListener implements Listener {
 						|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
 						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
 						|| message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+					if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+						boolean showNotification = PreferenceManager
+								.getDefaultSharedPreferences(context)
+								.getBoolean(
+										HikeConstants.CHAT_BG_NOTIFICATION_PREF,
+										true);
+						if (!showNotification) {
+							return;
+						}
+					}
+
 					Activity activity = (currentActivity != null) ? currentActivity
 							.get() : null;
 					if ((activity instanceof ChatThread)) {

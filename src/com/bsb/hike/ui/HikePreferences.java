@@ -199,6 +199,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			mutePreference.setOnPreferenceClickListener(this);
 		}
 
+		Preference muteChatBgPreference = getPreferenceScreen().findPreference(
+				HikeConstants.CHAT_BG_NOTIFICATION_PREF);
+		if (muteChatBgPreference != null) {
+			muteChatBgPreference.setOnPreferenceClickListener(this);
+		}
+
 		if (savedInstanceState != null) {
 			int dialogShowingOrdinal = savedInstanceState.getInt(
 					HikeConstants.Extras.DIALOG_SHOWING, -1);
@@ -488,6 +494,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			} catch (JSONException e) {
 				Log.w(getClass().getSimpleName(), e);
 			}
+		} else if (HikeConstants.CHAT_BG_NOTIFICATION_PREF.equals(preference
+				.getKey())) {
+			/*
+			 * Send to server
+			 */
 		}
 
 		return true;
