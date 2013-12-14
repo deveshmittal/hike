@@ -174,6 +174,7 @@ public class HikeConstants {
 	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
 	public static final String LIST = "list";
 	public static final String BG_ID = "bg_id";
+	public static final String CHAT_BACKGROUNDS = "cbgs";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

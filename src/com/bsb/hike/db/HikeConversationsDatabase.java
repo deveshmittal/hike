@@ -2943,4 +2943,63 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
+
+	public void setChatThemesFromArray(JSONArray chatBackgroundArray) {
+		SQLiteStatement insertStatement = null;
+		InsertHelper ih = null;
+		try {
+			ih = new InsertHelper(mDb, DBConstants.CHAT_BG_TABLE);
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
+					+ DBConstants.CHAT_BG_TABLE + " ( " + DBConstants.MSISDN
+					+ ", " + DBConstants.BG_ID + " ) " + " VALUES (?, ?)");
+			mDb.beginTransaction();
+
+			if (chatBackgroundArray == null
+					|| chatBackgroundArray.length() == 0) {
+				return;
+			}
+			for (int i = 0; i < chatBackgroundArray.length(); i++) {
+				JSONObject chatBgJson = chatBackgroundArray.optJSONObject(i);
+
+				if (chatBgJson == null) {
+					continue;
+				}
+
+				String msisdn = chatBgJson.optString(HikeConstants.MSISDN);
+				String bgId = chatBgJson.optString(HikeConstants.BG_ID);
+
+				if (TextUtils.isEmpty(msisdn)) {
+					continue;
+				}
+
+				ChatTheme chatTheme = null;
+
+				try {
+					chatTheme = ChatTheme.getThemeFromId(bgId);
+				} catch (IllegalArgumentException e) {
+					continue;
+				}
+
+				insertStatement.bindString(
+						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
+				insertStatement.bindString(
+						ih.getColumnIndex(DBConstants.BG_ID), bgId);
+
+				insertStatement.executeInsert();
+
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.CHAT_BACKGROUND_CHANGED,
+						new Pair<String, ChatTheme>(msisdn, chatTheme));
+			}
+		} finally {
+			if (insertStatement != null) {
+				insertStatement.close();
+			}
+			if (ih != null) {
+				ih.close();
+			}
+			mDb.setTransactionSuccessful();
+			mDb.endTransaction();
+		}
+	}
 }

@@ -731,6 +731,11 @@ public class MqttMessagesManager {
 									true));
 					settingEditor.commit();
 				}
+				if (account.has(HikeConstants.CHAT_BACKGROUNDS)) {
+					JSONArray chatBackgroundArray = account
+							.getJSONArray(HikeConstants.CHAT_BACKGROUNDS);
+					convDb.setChatThemesFromArray(chatBackgroundArray);
+				}
 			}
 			editor.commit();
 			if (inviteTokenAdded) {
