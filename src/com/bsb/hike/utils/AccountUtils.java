@@ -358,7 +358,7 @@ public class AccountUtils {
 			String deviceKey = manager.getDeviceId();
 
 			data.put("set_cookie", "0");
-			data.put("devicetype", os);
+			data.put("devicetype", HikeConstants.NOKIA);
 			data.put(HikeConstants.LogEvent.OS, os);
 			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 			data.put("deviceid", deviceId);
