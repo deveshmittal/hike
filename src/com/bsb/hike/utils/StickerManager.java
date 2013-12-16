@@ -57,7 +57,7 @@ public class StickerManager
 	public static final String STICKERS_DOWNLOADED = "st_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
-	
+
 	public static final String STICKER_DOWNLOAD_TYPE = "stDownloadType";
 
 	public static final String STICKER_DATA_BUNDLE = "stickerDataBundle";
@@ -77,7 +77,7 @@ public class StickerManager
 	public static final String FWD_STICKER_ID = "fwdStickerId";
 
 	public static final String FWD_CATEGORY_ID = "fwdCategoryId";
-	
+
 	public static final String FWD_STICKER_INDEX = "fwdStickerIdx";
 
 	public static int RECENT_STICKERS_COUNT = 30;
@@ -383,7 +383,7 @@ public class StickerManager
 		stickerCategories = new ArrayList<StickerCategory>();
 		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = HikeConversationsDatabase.getInstance().stickerDataForCategories();
 		if (stickerDataMap == null)
-				return;
+			return;
 		for (StickerCategoryId s : StickerCategoryId.values())
 		{
 			if (s.equals(StickerCategoryId.recent))
@@ -392,15 +392,10 @@ public class StickerManager
 				continue;
 			}
 			StickerCategory cat = stickerDataMap.get(s);
-			if(cat != null)
+			if (cat != null)
 				stickerCategories.add(cat);
 			else
 				stickerCategories.add(new StickerCategory(s, false, false));
-			/*
-			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance().isStickerUpdateAvailable(s);
-			boolean hasReachedEnd = HikeConversationsDatabase.getInstance().hasReachedStickerEnd(s.name());
-			stickerCategories.add(new StickerCategory(s, isUpdateAvailable, hasReachedEnd));
-			*/
 		}
 		String removedIds = preferences.getString(REMOVED_CATGORY_IDS, "[]");
 
