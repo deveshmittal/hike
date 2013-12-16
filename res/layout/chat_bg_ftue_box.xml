@@ -102,6 +102,65 @@
  
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/box_flip_side_ribbon"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone" >
+
+        <ImageView
+            android:id="@+id/fs_left_knot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/chat_bg_ftue_fs_left_knot" />
+
+        <ImageView
+            android:id="@+id/fs_right_knot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/fs_left_knot"
+            android:src="@drawable/chat_bg_ftue_fs_rightknot" />
+
+        <ImageView
+            android:id="@+id/fs_left_knot2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fs_left_knot"
+            android:src="@drawable/chat_bg_ftue_fs_leftknot2" />
+
+        <ImageView
+            android:id="@+id/fs_left_knot22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fs_left_knot"
+            android:src="@drawable/chat_bg_ftue_fs_leftknot22" />
+
+        <ImageView
+            android:id="@+id/fs_right_knot2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fs_right_knot"
+            android:layout_toRightOf="@id/fs_left_knot2"
+            android:src="@drawable/chat_bg_ftue_fs_rightknot2" />
+
+        <ImageView
+            android:id="@+id/fs_right_knot22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fs_right_knot"
+            android:layout_toRightOf="@id/fs_left_knot2"
+            android:src="@drawable/chat_bg_ftue_fs_rightknot22" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/fs_middle_dot"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:src="@drawable/chat_bg_ftue_fs_middle_dot"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/gift_card"

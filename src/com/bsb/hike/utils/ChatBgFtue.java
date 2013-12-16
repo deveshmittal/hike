@@ -131,5 +131,53 @@ public class ChatBgFtue
 		}, 4800);
 	}
 	
+	public static void onChatBgOpenItUpClick(final Activity activity, View v, final SnowFallView snowFallView){
+		activity.findViewById(R.id.gift_card).clearAnimation();
+		activity.findViewById(R.id.open_it_up_text).setClickable(false);
+		
+		Handler animHandler = new Handler();
+		animHandler.postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				activity.findViewById(R.id.gift_card).setVisibility(View.GONE);
+				activity.findViewById(R.id.box_flip_side_ribbon).setVisibility(View.VISIBLE);
+				activity.findViewById(R.id.box_flip_side_ribbon).setRotation(90);
+				activity.findViewById(R.id.fs_middle_dot).setVisibility(View.VISIBLE);
+			}
+		}, 450);
+		AnimationSet flipBoxAnimSet = new AnimationSet(true);
+		flipBoxAnimSet.setFillAfter(true);
+		int rtype = Animation.RELATIVE_TO_SELF;
+		float rotationAngle = 30;
+		RotateAnimation ra1 = new RotateAnimation(0, -rotationAngle,rtype,0.5f , rtype,0.5f );
+		ra1.setDuration(300);
+		flipBoxAnimSet.addAnimation(ra1);
+
+		View giftBoxLayout = activity.findViewById(R.id.gift_box_layout);
+		View parentLayout = activity.findViewById(R.id.parent_layout);
+		int xCord = (parentLayout.getWidth()/2);
+		int yCord = (parentLayout.getHeight()/2);
+		
+		Rotate3dAnimation rotateBoxAnimY = new Rotate3dAnimation(0, -180, xCord, yCord, 0, false, Rotate3dAnimation.Y_AXIS);
+		rotateBoxAnimY.setStartOffset(250);
+		rotateBoxAnimY.setDuration(500);
+		flipBoxAnimSet.addAnimation(rotateBoxAnimY);
+		
+		Rotate3dAnimation rotateBoxAnimZ = new Rotate3dAnimation(0, -90, xCord, yCord, 0, false, Rotate3dAnimation.Z_AXIS);
+		rotateBoxAnimZ.setStartOffset(200);
+		rotateBoxAnimZ.setDuration(500);
+		flipBoxAnimSet.addAnimation(rotateBoxAnimZ);
+		
+		RotateAnimation ra2 = new RotateAnimation(0, -rotationAngle,rtype,0.5f , rtype,0.5f );
+		ra2.setStartOffset(700);
+		ra2.setDuration(300);
+		flipBoxAnimSet.addAnimation(ra2);
+
+		activity.findViewById(R.id.gift_box_layout).startAnimation(flipBoxAnimSet);
+		
+		
+	}
 
 }

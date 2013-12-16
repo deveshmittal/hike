@@ -231,6 +231,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		return;
 	}
 	
+	public void onChatBgOpenItUpClick(View v){
+		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
 	}
 
 	@Override
