@@ -3544,8 +3544,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			accountContainer.setVisibility(View.VISIBLE);
 			accounts.setAdapter(new AccountAdapter(getApplicationContext(),
 					getAccountList()));
-			accountInfo.setText(((AccountData) accounts.getSelectedItem())
-					.getName());
+			if (accounts.getSelectedItem() != null) {
+				accountInfo.setText(((AccountData) accounts.getSelectedItem())
+						.getName());
+			} else {
+				accountInfo.setText(R.string.device);
+			}
 		} else {
 			accountContainer.setVisibility(View.GONE);
 		}
@@ -3596,7 +3600,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				if (saveContact) {
-					saveContact(items, accounts, name);
+					if (accounts.getSelectedItem() != null) {
+						saveContact(items, accounts, name);
+					} else {
+						Utils.addToContacts(items, name, ChatThread.this);
+					}
 				} else {
 					initialiseContactTransfer(contactInfo);
 				}
