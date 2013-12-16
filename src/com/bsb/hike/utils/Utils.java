@@ -88,6 +88,7 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.SmsManager;
@@ -3314,5 +3315,52 @@ public class Utils {
 
 		// Pre HC-MR1
 		return bitmap.getRowBytes() * bitmap.getHeight();
+	}
+
+	public static void addToContacts(List<ContactInfoData> items, String name,
+			Context context) {
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		int phoneCount = 0;
+		int emailCount = 0;
+		i.putExtra(Insert.NAME, name);
+		for (ContactInfoData contactData : items) {
+			if (contactData.getDataType() == DataType.PHONE_NUMBER) {
+				switch (phoneCount) {
+				case 0:
+					i.putExtra(Insert.PHONE, contactData.getData());
+					break;
+				case 1:
+					i.putExtra(Insert.SECONDARY_PHONE, contactData.getData());
+					break;
+				case 2:
+					i.putExtra(Insert.TERTIARY_PHONE, contactData.getData());
+					break;
+				default:
+					break;
+				}
+				phoneCount++;
+			} else if (contactData.getDataType() == DataType.EMAIL) {
+				switch (emailCount) {
+				case 0:
+					i.putExtra(Insert.EMAIL, contactData.getData());
+					break;
+				case 1:
+					i.putExtra(Insert.SECONDARY_EMAIL, contactData.getData());
+					break;
+				case 2:
+					i.putExtra(Insert.TERTIARY_EMAIL, contactData.getData());
+					break;
+				default:
+					break;
+				}
+				emailCount++;
+			} else if (contactData.getDataType() == DataType.ADDRESS) {
+				i.putExtra(Insert.POSTAL, contactData.getData());
+
+			}
+
+		}
+		context.startActivity(i);
 	}
 }
