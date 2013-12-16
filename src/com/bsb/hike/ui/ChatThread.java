@@ -292,8 +292,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
 			HikePubSub.SHOWN_UNDELIVERED_MESSAGE,
 			HikePubSub.STICKER_DOWNLOADED,
-			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
-			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, };
 
@@ -2185,23 +2183,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			});
 		} else if (HikePubSub.STICKER_DOWNLOADED.equals(type)) {
 			updateAdapter();
-		} else if (HikePubSub.STICKER_CATEGORY_DOWNLOADED.equals(type)
-				|| HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED.equals(type)) {
-			if (emoticonType == EmoticonType.STICKERS) {
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						Pair<StickerCategory, DownloadType> taskData = (Pair<StickerCategory, DownloadType>) object;
-						StickerCategory category = taskData.first;
-						DownloadType downloadType = taskData.second;
-
-						updateStickerCategoryUI(category,
-								HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED
-										.equals(type), downloadType);
-					}
-				});
-			}
 		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
 
@@ -3901,24 +3882,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Log.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
-				/*
-				if(pageNum == 0)
-				{
-					if (!isPaleteOpened)
-					{
-						StickerCategory category = StickerManager.getInstance().getCategoryForIndex(0);
-						View emoticonPage = emoticonViewPager.findViewWithTag(category.categoryId);
-						if (emoticonPage == null)
-						{
-							return;
-						}
-
-						((StickerAdapter) emoticonsAdapter).setupStickerPage(emoticonPage, category, false, null);
-					}
-					isPaleteOpened = false;
-					return;
-				}
-				*/
 				StickerCategory category = StickerManager.getInstance().getCategoryForIndex(pageNum);
 				StickerCategoryId categoryId = category.categoryId;
 				if(StickerCategoryId.recent.equals(categoryId))
@@ -3946,7 +3909,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		public void onPageScrollStateChanged(int arg0) {
 		}
 	};
-	boolean isPaleteOpened = true;
+
 	private void showStickerPreviewDialog(final StickerCategory category) {
 		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.sticker_preview_dialog);
