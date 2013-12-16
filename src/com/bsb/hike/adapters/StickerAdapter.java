@@ -185,11 +185,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			if (intent.getAction().equals(StickerManager.RECENTS_UPDATED))
 			{
-				int currentIdx = ((ChatThread) activity).getCurrentPage();
-				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
-				/* In case sticker is cliked on the recents screen, don't update the UI.*/
-				if(StickerCategoryId.recent.equals(sc.categoryId))
-					return;
 				StickerPageObjects spo = stickerObjMap.get(StickerCategoryId.recent);
 				if(spo != null)
 				{
