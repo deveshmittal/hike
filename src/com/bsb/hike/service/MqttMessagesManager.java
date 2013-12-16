@@ -753,6 +753,15 @@ public class MqttMessagesManager {
 							.getJSONArray(HikeConstants.CHAT_BACKGROUNDS);
 					convDb.setChatThemesFromArray(chatBackgroundArray);
 				}
+				if (account.has(HikeConstants.CHAT_BACKGROUD_NOTIFICATION)) {
+					boolean showNotification = account.optInt(
+							HikeConstants.CHAT_BG_NOTIFICATION_PREF, 0) != -1;
+					Editor settingEditor = settings.edit();
+					settingEditor.putBoolean(
+							HikeConstants.CHAT_BG_NOTIFICATION_PREF,
+							showNotification);
+					settingEditor.commit();
+				}
 			}
 			editor.commit();
 			if (inviteTokenAdded) {
