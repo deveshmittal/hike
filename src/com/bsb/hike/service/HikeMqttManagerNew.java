@@ -670,7 +670,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
-						/*
+						
 						String[] topics = new String[3];
 						topics[0] = uid + "/s";
 						topics[1] = uid + "/a";
@@ -690,15 +690,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 								Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage());
 							}
 						});
-						*/
+						
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
 					
-					/*catch (MqttException e)
+					catch (MqttException e)
 					{
 						handleMqttException(e, true);
 					}
-					*/
+					
 					catch (Exception e) // although this might not happen , but still catching it
 					{
 						e.printStackTrace();
