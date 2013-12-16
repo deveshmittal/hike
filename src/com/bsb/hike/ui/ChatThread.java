@@ -4339,6 +4339,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			dividerBg = getResources().getColor(R.color.avtars_div);
 			break;
+		case R.drawable.indian:
+			resParentBg = getResources().getColor(R.color.indian_bg);
+
+			stickerBtnBg = R.drawable.indian_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.indian_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.indian_btn_text_shadow);
+
+			categoryText = R.string.indian_category;
+			categoryTextColor = getResources().getColor(R.color.indian_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.indian_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.indian_div);
+			break;
 		}
 
 		parentDrawable.setColor(resParentBg);

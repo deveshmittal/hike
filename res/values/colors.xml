@@ -186,4 +186,12 @@
 	<color name="female_selected">#ff5874</color>
 	<color name="signup_disabled">#40ffffff</color>
 	<color name="free_sms_btn">#1891e1</color>
+	<color name="indian_bg">#9ce5bb</color>
+    <color name="indian_btn_normal">#b2f1cd</color>
+    <color name="indian_btn_pressed">#64e099</color>
+    <color name="indian_text">#1c8649</color>
+    <color name="indian_btn_text">#1c8649</color>
+    <color name="indian_text_shadow">#4D000000</color>
+    <color name="indian_btn_text_shadow">#4D000000</color>
+    <color name="indian_div">#00000000</color>
 </resources>
