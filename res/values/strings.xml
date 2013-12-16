@@ -624,7 +624,7 @@
 	<string name="at_sms_rate">At SMS rate</string>
 	<string name="auto_download_image_header">Image auto download</string>
 	<string name="auto_download_image_info">Images received by you will automatically be downloaded</string>
-	<string name="humanoid_category">Humanoid</string>
+	<string name="humanoid_category">Hikins</string>
 	<string name="empty_chat">You have no chats :(\nStart one now!</string>
 	<string name="start_chat">Start a chat</string>
 	<string name="x_regular_sms">%1$d x Regular SMS</string>
@@ -700,9 +700,9 @@
 	<string name="sticker_ftue_body">Try out our new Stickers!</string>
 	<string name="select_all">Select all (%1$d)</string>
 	<string name="deselect_all">Deselect all (%1$d)</string>
-	<string name="humanoid2_category">Humanoid 2</string>
-	<string name="se_category">Smiley Expressions</string>
-	<string name="avtars_category">Avatars</string>
+	<string name="humanoid2_category">You and I</string>
+	<string name="se_category">Goofy Smileys</string>
+	<string name="avtars_category">Hikin Avatars</string>
 	<string name="chat_bg_changed">%1$s changed the background</string>
 	<string name="save_theme">Save theme</string>
 	<string name="change_theme">Change theme</string>
