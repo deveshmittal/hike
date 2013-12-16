@@ -2,6 +2,7 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,9 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -2602,11 +2605,49 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
+	public EnumMap<StickerCategoryId, StickerCategory> stickerDataForCategories()
+	{
+		Cursor c = null;
+		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = null;
+		try
+		{
+			c = mDb.query(DBConstants.STICKERS_TABLE, new String[] { DBConstants.CATEGORY_ID, DBConstants.UPDATE_AVAILABLE, DBConstants.REACHED_END }, null, null, null, null, null);
+			if (c.getCount() > 0)
+			{
+				stickerDataMap = new EnumMap<StickerManager.StickerCategoryId, StickerCategory>(StickerCategoryId.class);
+				while (c.moveToNext())
+				{
+					try
+					{
+						String category = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
+						boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+						boolean reachedEnd = c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
+						StickerCategoryId catId = StickerManager.StickerCategoryId.getCategoryIdFromName(category);
+						StickerCategory s = new StickerCategory(catId, updateAvailable, reachedEnd);
+						stickerDataMap.put(catId, s);
+					}
+					catch (Exception e)
+					{
+
+					}
+				}
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return stickerDataMap;
+	}
+	
 	public boolean isStickerUpdateAvailable(StickerCategoryId categoryId) {
 		Cursor c = null;
 		try {
 			c = mDb.query(DBConstants.STICKERS_TABLE,
-					new String[] { DBConstants.UPDATE_AVAILABLE },
+					new String[] { DBConstants.UPDATE_AVAILABLE},
 					DBConstants.CATEGORY_ID + "=?",
 					new String[] { categoryId.name() }, null, null, null);
 			if (!c.moveToFirst()) {

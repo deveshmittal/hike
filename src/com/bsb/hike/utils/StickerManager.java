@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -380,7 +381,9 @@ public class StickerManager
 	public void setupStickerCategoryList(SharedPreferences preferences)
 	{
 		stickerCategories = new ArrayList<StickerCategory>();
-
+		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = HikeConversationsDatabase.getInstance().stickerDataForCategories();
+		if (stickerDataMap == null)
+				return;
 		for (StickerCategoryId s : StickerCategoryId.values())
 		{
 			if (s.equals(StickerCategoryId.recent))
@@ -388,10 +391,16 @@ public class StickerManager
 				stickerCategories.add(new StickerCategory(StickerCategoryId.recent));
 				continue;
 			}
-			// TODO : make it a single DB call
+			StickerCategory cat = stickerDataMap.get(s);
+			if(cat != null)
+				stickerCategories.add(cat);
+			else
+				stickerCategories.add(new StickerCategory(s, false, false));
+			/*
 			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance().isStickerUpdateAvailable(s);
 			boolean hasReachedEnd = HikeConversationsDatabase.getInstance().hasReachedStickerEnd(s.name());
 			stickerCategories.add(new StickerCategory(s, isUpdateAvailable, hasReachedEnd));
+			*/
 		}
 		String removedIds = preferences.getString(REMOVED_CATGORY_IDS, "[]");
 
