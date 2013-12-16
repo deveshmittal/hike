@@ -979,6 +979,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						DBConstants.GROUP_ID + " =?", new String[] { msisdn });
 				mDb.delete(DBConstants.GROUP_INFO_TABLE, DBConstants.GROUP_ID
 						+ " =?", new String[] { msisdn });
+				removeChatThemeForMsisdn(msisdn);
 			}
 		}
 		mDb.setTransactionSuccessful();
@@ -2942,6 +2943,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				c.close();
 			}
 		}
+	}
+
+	public void removeChatThemeForMsisdn(String msisdn) {
+		mDb.delete(DBConstants.CHAT_BG_TABLE, DBConstants.MSISDN + "=?",
+				new String[] { msisdn });
 	}
 
 	public void setChatThemesFromArray(JSONArray chatBackgroundArray) {
