@@ -28,8 +28,8 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.service.HikeMqttManager;
-import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.service.HikeMqttManagerNew;
+import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
 
 public class ToastListener implements Listener {
@@ -60,7 +60,7 @@ public class ToastListener implements Listener {
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
-		mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
+		mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
 	}
 
 	@Override
@@ -68,9 +68,9 @@ public class ToastListener implements Listener {
 		if (HikePubSub.NEW_ACTIVITY.equals(type)) {
 			Activity activity = (Activity) object;
 			if ((activity != null)
-					&& (mCurrentUnnotifiedStatus != MQTTConnectionStatus.INITIAL)) {
+					&& (mCurrentUnnotifiedStatus != MQTTConnectionStatus.NOT_CONNECTED)) {
 				notifyConnStatus(mCurrentUnnotifiedStatus);
-				mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
+				mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			}
 
 			currentActivity = new WeakReference<Activity>(activity);
@@ -145,7 +145,7 @@ public class ToastListener implements Listener {
 
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
-			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
+			HikeMqttManagerNew.MQTTConnectionStatus status = (HikeMqttManagerNew.MQTTConnectionStatus) object;
 			mCurrentUnnotifiedStatus = status;
 			notifyConnStatus(status);
 		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
@@ -277,7 +277,7 @@ public class ToastListener implements Listener {
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		boolean connectedOnce = settings.getBoolean(
 				HikeMessengerApp.CONNECTED_ONCE, false);
-		if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED) {
+		if (status == HikeMqttManagerNew.MQTTConnectionStatus.CONNECTED) {
 			NotificationManager notificationManager = (NotificationManager) context
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			notificationManager.cancel(HikeConstants.HIKE_SYSTEM_NOTIFICATION);
