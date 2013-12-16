@@ -311,9 +311,189 @@ public class ChatBgFtue
 		
 		activity.findViewById(R.id.fs_moving_ribbon1).startAnimation(translateRibbon1AnimSet);
 		
-
+		(new Handler()).postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				giftBoxUnfolding(activity, snowFallView);
+			}
+		}, animDuration);
 	}
 	
+	private static void giftBoxUnfolding(final Activity activity, SnowFallView snowFallView)
+	{
+		View giftBoxView= activity.findViewById(R.id.gift_box);
+		int animDuration = 1200;
+		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
+		
+		AlphaAnimation giftBoxPinkBottomAnim = new AlphaAnimation(1,0);
+		giftBoxPinkBottomAnim.setInterpolator(accInterpolator);
+		giftBoxPinkBottomAnim.setFillAfter(true);
+		giftBoxPinkBottomAnim.setDuration(animDuration);
+		activity.findViewById(R.id.gift_box_bottom).startAnimation(giftBoxPinkBottomAnim);
+		
+		AnimationSet boxLeftFoldAnimSet = new AnimationSet(true);
+		boxLeftFoldAnimSet.setInterpolator(accInterpolator);
+		boxLeftFoldAnimSet.setFillAfter(true);
+		//Rotate3dAnimation ra1 = new Rotate3dAnimation(0, -90, 0, 0, 15, false);
+		ScaleAnimation ra1 = new ScaleAnimation(1, 0, 1, 1, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
+		ra1.setDuration(animDuration);
+		boxLeftFoldAnimSet.addAnimation(ra1);
+		
+		AlphaAnimation aa5 = new AlphaAnimation(1,0);
+		aa5.setDuration(animDuration);
+		boxLeftFoldAnimSet.addAnimation(aa5);
+		activity.findViewById(R.id.box_left_fold).startAnimation(boxLeftFoldAnimSet);
+		
+		AnimationSet boxRightFoldAnimSet = new AnimationSet(true);
+		boxRightFoldAnimSet.setInterpolator(accInterpolator);
+		boxRightFoldAnimSet.setFillAfter(true);
+		//Rotate3dAnimation ra2 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, 0, 15, false);
+		ScaleAnimation ra2 = new ScaleAnimation(1, 0, 1, 1, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 1f);
+		ra2.setDuration(animDuration);
+		boxRightFoldAnimSet.addAnimation(ra2);
+		
+		AlphaAnimation aa2 = new AlphaAnimation(1,0);
+		aa2.setDuration(animDuration);
+		boxRightFoldAnimSet.addAnimation(aa2);
+		activity.findViewById(R.id.box_right_fold).startAnimation(boxRightFoldAnimSet);
+		
+		
+		AnimationSet boxTopFoldAnimSet = new AnimationSet(true);
+		boxTopFoldAnimSet.setInterpolator(accInterpolator);
+		boxTopFoldAnimSet.setFillAfter(true);
+		//Rotate3dAnimation ra3 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, giftBoxView.getHeight(), 15, false);
+		ScaleAnimation ra3 = new ScaleAnimation(1, 1, 1, 0, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
+		
+		ra3.setDuration(animDuration);
+		boxTopFoldAnimSet.addAnimation(ra3);
+		
+		AlphaAnimation aa3 = new AlphaAnimation(1,0);
+		aa3.setDuration(animDuration);
+		boxTopFoldAnimSet.addAnimation(aa2);
+		activity.findViewById(R.id.box_top_fold).startAnimation(boxTopFoldAnimSet);
+		
+		
+		AnimationSet boxBottomFoldAnimSet = new AnimationSet(true);
+		boxBottomFoldAnimSet.setInterpolator(accInterpolator);
+		boxBottomFoldAnimSet.setFillAfter(true);
+		//Rotate3dAnimation ra3 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, giftBoxView.getHeight(), 15, false);
+		ScaleAnimation ra4 = new ScaleAnimation(1, 1, 1, 0, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 1f);
+		
+		ra4.setDuration(animDuration);
+		boxBottomFoldAnimSet.addAnimation(ra4);
+		
+		AlphaAnimation aa4 = new AlphaAnimation(1,0);
+		aa4.setInterpolator(accInterpolator);
+		aa4.setDuration(animDuration);
+		boxBottomFoldAnimSet.addAnimation(aa4);
+		activity.findViewById(R.id.box_bottom_fold).startAnimation(boxBottomFoldAnimSet);
+		
+		//chat theme popup comes out
+		startChatThemesPopupAnimation(activity, animDuration, snowFallView);
+		
+		
+	}
+	
+	
+	public static void startChatThemesPopupAnimation(final Activity activity, int animDuration, final SnowFallView snowFallView){
+		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.VISIBLE);
+		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
+		
+		AnimationSet chatThemePopupAnimSet = new AnimationSet(true);
+		chatThemePopupAnimSet.setInterpolator(accInterpolator);
+		chatThemePopupAnimSet.setFillAfter(true);
+		//Rotate3dAnimation ra3 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, giftBoxView.getHeight(), 15, false);
+		ScaleAnimation sa1 = new ScaleAnimation(0, 1f, 0, 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		
+		sa1.setDuration(animDuration);
+		chatThemePopupAnimSet.addAnimation(sa1);
+		
+		//AlphaAnimation aa1 = new AlphaAnimation(0.3f,1);
+		//aa1.setDuration(animDuration);
+		//chatThemePopupAnimSet.addAnimation(aa1);
+		
+		ScaleAnimation sa2 = new ScaleAnimation(1, 1.1f, 1f, 1.1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		sa2.setStartOffset(animDuration-100);
+		sa2.setDuration(200);
+		chatThemePopupAnimSet.addAnimation(sa2);
+		ScaleAnimation sa3 = new ScaleAnimation(1, 0.91f, 1f, 0.91f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		sa3.setStartOffset(animDuration+100);
+		sa3.setDuration(200);
+		chatThemePopupAnimSet.addAnimation(sa3);
+		
+		activity.findViewById(R.id.chat_theme_popup).startAnimation(chatThemePopupAnimSet);
+		
+		AnimationSet popupFadeAnimSet = new AnimationSet(true);
+		popupFadeAnimSet.setFillAfter(true);
+		popupFadeAnimSet.setInterpolator(accInterpolator);
+		
+		AlphaAnimation aa2 = new AlphaAnimation(1f,0);
+		aa2.setFillAfter(true);
+		aa2.setDuration(animDuration);
+		
+		popupFadeAnimSet.addAnimation(aa2);
+		activity.findViewById(R.id.chat_theme_popup_white_fade).startAnimation(popupFadeAnimSet);
+		
+		AlphaAnimation aa5 = new AlphaAnimation(1,0);
+		aa5.setFillAfter(true);
+		aa5.setDuration(300);
+		aa5.setStartOffset(animDuration+200);
+		activity.findViewById(R.id.chat_theme_popup_glow).startAnimation(aa5);
+		
+		(new Handler()).postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				activity.findViewById(R.id.give_it_a_spin_text).setVisibility(View.VISIBLE);
+				AlphaAnimation aa6 = new AlphaAnimation(0,1);
+				aa6.setFillAfter(true);
+				aa6.setDuration(500);
+				aa6.setStartOffset(1000);
+				activity.findViewById(R.id.give_it_a_spin_text).startAnimation(aa6);
+				
+				AlphaAnimation aa7 = new AlphaAnimation(1,0);
+				aa7.setDuration(800);
+				if(snowFallView != null){
+					snowFallView.startAnimation(aa7);
+				}
+			}
+		}, animDuration);
+		
+		(new Handler()).postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				if(snowFallView != null){
+					snowFallView.clearAnimation();
+					snowFallView.setVisibility(View.GONE);
+				}
+			}
+		}, animDuration+800);
+		
+	}
+
+
+	public static void onChatBgGiveItASpinClick(final Activity activity, View v, SnowFallView snowFallView){
+		if(snowFallView!= null){
+			snowFallView.clearAnimation();
+			snowFallView.setVisibility(View.GONE);
+		}
+		activity.findViewById(R.id.chat_theme_popup).clearAnimation();
+		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.GONE);
+		activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();
+		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.GONE);
+		//Opening a dummy chat for now
+		Intent intent = new Intent(activity, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.MSISDN, "+918285629162");
+		activity.startActivity(intent);
+		return;
+	}
 
 	public static ScaleAnimation getScaleAnimOnPivot(final Activity activity, int animDuration, float pivotX, float pivotY){
 		int rType = Animation.RELATIVE_TO_SELF;

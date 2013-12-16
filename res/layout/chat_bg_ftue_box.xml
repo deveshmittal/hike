@@ -5,7 +5,86 @@
     android:layout_height="match_parent"
     android:layout_gravity="center" >
 
- 
+    <View
+        android:id="@+id/gift_box_bottom"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_gravity="center"
+        android:background="#ff6788"
+        android:visibility="visible" />
+
+    <FrameLayout
+        android:id="@+id/chat_theme_popup"
+        android:layout_width="314dp"
+        android:layout_height="360dp"
+        android:layout_gravity="center"
+        android:visibility="gone" >
+
+
+        <ImageView
+        	android:id="@+id/chat_theme_popup_glow"
+        	android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+        	android:src="@drawable/chat_bg_ftue_glow"
+        	android:scaleType="fitXY"/>
+        
+                
+        <LinearLayout
+            android:id="@+id/chat_theme_popup_view"
+            android:layout_width="276dp"
+            android:layout_height="325dp"
+            android:background="@drawable/chat_bg_ftue_theme_popup"
+            android:orientation="vertical"
+            android:layout_gravity="center" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/chat_themes_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingTop="180dp"
+                android:text="@string/chat_themes"
+                android:textColor="#49443c"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/chat_themes_msg_text"
+                android:layout_width="match_parent"
+                android:layout_height="66dp"
+                android:gravity="center_horizontal"
+                android:paddingLeft="30dp"
+                android:paddingRight="40dp"
+                android:paddingTop="8dp"
+                android:text="@string/chat_themes_popup_msg"
+                android:textColor="#49443c"
+                android:textSize="16sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/give_it_a_spin_text"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:clickable="true"
+                android:gravity="center"
+                android:onClick="onChatBgGiveItASpinClick"
+                android:paddingTop="10dp"
+                android:text="@string/give_it_a_spin"
+                android:textColor="#49443c"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+        
+        <View
+            android:id="@+id/chat_theme_popup_white_fade"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:scaleType="fitXY"
+            android:visibility="visible" />
+        
+    </FrameLayout>
+
     <RelativeLayout
         android:id="@+id/gift_box"
         android:layout_width="280dp"

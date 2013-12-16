@@ -235,6 +235,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
 	}
 
+	public void onChatBgGiveItASpinClick(View v){
+		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
+		return;
+	}
+	
 	@Override
 	protected void onDestroy() {
 		if (progDialog != null) {
