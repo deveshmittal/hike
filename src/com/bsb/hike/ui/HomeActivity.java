@@ -60,12 +60,14 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
+import com.bsb.hike.utils.ChatBgFtue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -107,6 +109,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private PopupWindow overFlowWindow;
 	private TextView topBarIndicator;
 	private Drawable myProfileImage;
+	private SnowFallView snowFallView;
+	
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
@@ -219,6 +223,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
+		
+		snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+	}
+	
+	public void OnChatBgFtueOverlayClick(View v){
+		return;
+	}
+	
 	}
 
 	@Override
