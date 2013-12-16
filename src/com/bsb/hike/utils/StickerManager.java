@@ -382,8 +382,6 @@ public class StickerManager
 	{
 		stickerCategories = new ArrayList<StickerCategory>();
 		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = HikeConversationsDatabase.getInstance().stickerDataForCategories();
-		if (stickerDataMap == null)
-			return;
 		for (StickerCategoryId s : StickerCategoryId.values())
 		{
 			if (s.equals(StickerCategoryId.recent))
