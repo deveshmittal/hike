@@ -705,4 +705,5 @@
 	<string name="avtars_category">Avatars</string>	
 	<string name="nokia_app_id">Nokia App Id</string>	
 	<string name="here_map_token">token</string>	
+	<string name="device">Device</string>	
 </resources>
