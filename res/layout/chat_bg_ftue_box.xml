@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gift_box_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center" >
+
+ 
+    <RelativeLayout
+        android:id="@+id/gift_box"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_gravity="center"
+        android:visibility="visible" >
+
+        <ImageView
+            android:id="@+id/box_left_fold"
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/chat_bg_ftue_gift_rapper_left" />
+
+        <ImageView
+            android:id="@+id/box_right_fold"
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/box_left_fold"
+            android:src="@drawable/chat_bg_ftue_gift_rapper_right" />
+
+        <ImageView
+            android:id="@+id/box_top_fold"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:src="@drawable/chat_bg_ftue_gift_rapper_top" />
+
+        <ImageView
+            android:id="@+id/box_bottom_fold"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_below="@id/box_top_fold"
+            android:src="@drawable/chat_bg_ftue_gift_rapper_bottom" />
+
+
+
+        <RelativeLayout
+            android:id="@+id/box_front_bars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/box_left_fold"
+            android:layout_alignTop="@id/box_top_fold"
+            android:layout_gravity="center"
+            android:visibility="visible" >
+
+            <RelativeLayout
+                android:id="@+id/box_front_bottom_bar"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/chat_bg_ftue_front_bottombar" >
+
+                <ImageView
+                    android:id="@+id/box_front_bottom_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="1.5dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="5dp"
+                    android:src="@drawable/chat_bg_ftue_bottombar_bottom_line" />
+
+                <ImageView
+                    android:id="@+id/box_front_top_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="1.5dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="5dp"
+                    android:src="@drawable/chat_bg_ftue_bottombar_bottom_line" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/box_front_top_bar"
+                android:layout_width="60dp"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:background="@drawable/chat_bg_ftue_front_topbar" >
+
+                <ImageView
+                    android:id="@+id/box_front_left_line"
+                    android:layout_width="1.5dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/chat_bg_ftue_topbar_left_line" />
+
+                <ImageView
+                    android:id="@+id/box_front_right_line"
+                    android:layout_width="1.5dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="5dp"
+                    android:src="@drawable/chat_bg_ftue_topbar_left_line" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+ 
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/gift_card"
+        android:layout_width="208dp"
+        android:layout_height="220dp"
+        android:layout_gravity="center"
+        android:background="@drawable/chat_bg_ftue_card_bg"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ImageView 
+            android:id="@+id/gift_card_img"
+            android:layout_width="37dp"
+            android:layout_height="54dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/chat_bg_ftue_card_chris_tree"
+            android:layout_marginTop="16dp"/>
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/merry_chris_msg_text"
+            android:layout_width="match_parent"
+            android:layout_height="95dp"
+            android:gravity="center"
+            android:paddingLeft="28dp"
+            android:paddingRight="28dp"
+            android:paddingTop="13dp"
+            android:text="@string/merry_christmas_msg"
+            android:textColor="#f14444"
+            android:textSize="16sp" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/open_it_up_text"
+            android:layout_width="match_parent"
+            android:layout_height="41dp"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onChatBgOpenItUpClick"
+            android:text="@string/open_it_up"
+            android:textColor="#fd9500"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</FrameLayout>
