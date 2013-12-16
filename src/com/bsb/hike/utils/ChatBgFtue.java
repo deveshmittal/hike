@@ -143,7 +143,16 @@ public class ChatBgFtue
 			{
 				activity.findViewById(R.id.gift_card).setVisibility(View.GONE);
 				activity.findViewById(R.id.box_flip_side_ribbon).setVisibility(View.VISIBLE);
-				activity.findViewById(R.id.box_flip_side_ribbon).setRotation(90);
+				
+				View giftBoxLayout = activity.findViewById(R.id.gift_box);
+				int xCord = giftBoxLayout.getWidth()/2;
+				int yCord = giftBoxLayout.getWidth()/2;
+				int rtype = Animation.ABSOLUTE;
+		        RotateAnimation animation = new RotateAnimation(0, 90, rtype, xCord, rtype, yCord);  
+			    animation.setFillAfter(true);  
+			    animation.setDuration(0);  
+			    activity.findViewById(R.id.box_flip_side_ribbon).startAnimation(animation); 
+		        
 				activity.findViewById(R.id.fs_middle_dot).setVisibility(View.VISIBLE);
 			}
 		}, 450);
@@ -155,7 +164,6 @@ public class ChatBgFtue
 		ra1.setDuration(300);
 		flipBoxAnimSet.addAnimation(ra1);
 
-		View giftBoxLayout = activity.findViewById(R.id.gift_box_layout);
 		View parentLayout = activity.findViewById(R.id.parent_layout);
 		int xCord = (parentLayout.getWidth()/2);
 		int yCord = (parentLayout.getHeight()/2);
@@ -193,7 +201,7 @@ public class ChatBgFtue
 	{
 		activity.findViewById(R.id.box_flip_side_ribbon).clearAnimation();
 		activity.findViewById(R.id.gift_box_layout).clearAnimation();
-		activity.findViewById(R.id.box_flip_side_ribbon).setRotation(0);
+		activity.findViewById(R.id.fs_middle_dot).setVisibility(View.VISIBLE);
 		
 		int animDuration = 650;
 		int animDuration2 = 400;
