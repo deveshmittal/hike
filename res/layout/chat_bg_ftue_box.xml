@@ -39,7 +39,37 @@
             android:layout_below="@id/box_top_fold"
             android:src="@drawable/chat_bg_ftue_gift_rapper_bottom" />
 
+        <RelativeLayout
+            android:id="@+id/box_flip_side_moving_ribbons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" >
 
+            <ImageView
+                android:id="@+id/fs_moving_ribbon3"
+                android:layout_width="match_parent"
+                android:layout_height="98dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ribbon3" />
+
+            <ImageView
+                android:id="@+id/fs_moving_ribbon2"
+                android:layout_width="183dp"
+                android:layout_height="141dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ribbon2" />
+
+            <ImageView
+                android:id="@+id/fs_moving_ribbon1"
+                android:layout_width="150dp"
+                android:layout_height="276dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="21dp"
+                android:src="@drawable/ribbon1" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/box_front_bars"

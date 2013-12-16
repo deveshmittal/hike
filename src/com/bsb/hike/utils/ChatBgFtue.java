@@ -177,7 +177,149 @@ public class ChatBgFtue
 
 		activity.findViewById(R.id.gift_box_layout).startAnimation(flipBoxAnimSet);
 		
+		animHandler.postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				giftBoxUnpacking(activity, snowFallView);
+			}
+		}, 1000);
 		
 	}
 
+	
+	private static void giftBoxUnpacking(final Activity activity, SnowFallView snowFallView)
+	{
+		activity.findViewById(R.id.box_flip_side_ribbon).clearAnimation();
+		activity.findViewById(R.id.gift_box_layout).clearAnimation();
+		activity.findViewById(R.id.box_flip_side_ribbon).setRotation(0);
+		
+		int animDuration = 650;
+		int animDuration2 = 400;
+		ScaleAnimation middleDotAnim = getScaleAnimOnPivot(activity, animDuration, 0.5f,0.5f);
+		activity.findViewById(R.id.fs_middle_dot).startAnimation(middleDotAnim);
+
+		ScaleAnimation leftKnotAnim = getScaleAnimOnPivot(activity, animDuration, 1, 1);
+		activity.findViewById(R.id.fs_left_knot).startAnimation(leftKnotAnim);
+		
+		TranslateAnimation rightKnot2Anim = new TranslateAnimation(0, 33*Utils.densityMultiplier, 0, 33*Utils.densityMultiplier);
+		rightKnot2Anim.setFillAfter(true);
+		rightKnot2Anim.setDuration(animDuration);
+		activity.findViewById(R.id.fs_right_knot2).startAnimation(rightKnot2Anim);
+		
+		ScaleAnimation rightKnotAnim = getScaleAnimOnPivot(activity, animDuration2, 0, 1);
+		rightKnotAnim.setInterpolator(new AccelerateInterpolator(2.5f));
+		rightKnotAnim.setStartOffset(animDuration - animDuration2);
+		activity.findViewById(R.id.fs_right_knot).startAnimation(rightKnotAnim);
+		
+		TranslateAnimation leftKnot2Anim = new TranslateAnimation(0, -33*Utils.densityMultiplier, 0, 33*Utils.densityMultiplier);
+		leftKnot2Anim.setInterpolator(new AccelerateInterpolator(2.5f));
+		leftKnot2Anim.setFillAfter(true);
+		leftKnot2Anim.setStartOffset(animDuration - animDuration2);
+		leftKnot2Anim.setDuration(animDuration2);
+		activity.findViewById(R.id.fs_left_knot2).startAnimation(leftKnot2Anim);
+		
+		ribbonMovingAnim(activity, snowFallView);
+		
+		(new Handler()).postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				activity.findViewById(R.id.fs_left_knot2).clearAnimation();
+				activity.findViewById(R.id.fs_left_knot22).clearAnimation();
+				activity.findViewById(R.id.fs_right_knot2).clearAnimation();
+				activity.findViewById(R.id.fs_right_knot22).clearAnimation();
+				
+				activity.findViewById(R.id.fs_left_knot2).setVisibility(View.GONE);
+				activity.findViewById(R.id.fs_left_knot22).setVisibility(View.GONE);
+				activity.findViewById(R.id.fs_right_knot2).setVisibility(View.GONE);
+				activity.findViewById(R.id.fs_right_knot22).setVisibility(View.GONE);
+				activity.findViewById(R.id.box_flip_side_moving_ribbons).setVisibility(View.VISIBLE);
+			}
+		}, animDuration);
+		
+	}
+	
+
+	public static void ribbonMovingAnim(final Activity activity, final SnowFallView snowFallView){
+		int animDuration = 1500;
+		//ribbon moving anim
+		int lineDisapearStartOff = 200;
+		AlphaAnimation lineDisapearAlphaAnim = new AlphaAnimation(1,0);
+		lineDisapearAlphaAnim.setFillAfter(true);
+		lineDisapearAlphaAnim.setDuration(200);
+		lineDisapearAlphaAnim.setStartOffset(lineDisapearStartOff);
+		activity.findViewById(R.id.box_front_bottom_line).startAnimation(lineDisapearAlphaAnim);
+		activity.findViewById(R.id.box_front_top_line).startAnimation(lineDisapearAlphaAnim);
+		activity.findViewById(R.id.box_front_left_line).startAnimation(lineDisapearAlphaAnim);
+		activity.findViewById(R.id.box_front_right_line).startAnimation(lineDisapearAlphaAnim);
+		
+		int startOff = 0;
+		int duration = 500;
+		int rType = Animation.RELATIVE_TO_SELF;
+		ScaleAnimation topBarToRibbonAnim = new ScaleAnimation(1, 0, 1, 1, rType, 0.5f, rType, 0.5f); 
+		topBarToRibbonAnim.setFillAfter(true);
+		topBarToRibbonAnim.setDuration(100);
+		topBarToRibbonAnim.setStartOffset(600);
+		activity.findViewById(R.id.box_front_top_bar).startAnimation(topBarToRibbonAnim);
+		
+		ScaleAnimation bottomBarToRibbonAnim = new ScaleAnimation(1, 1, 1, 0, rType, 0.5f, rType, 0.5f); 
+		bottomBarToRibbonAnim.setFillAfter(true);
+		bottomBarToRibbonAnim.setDuration(100);
+		bottomBarToRibbonAnim.setStartOffset(600);
+		activity.findViewById(R.id.box_front_bottom_bar).startAnimation(bottomBarToRibbonAnim);
+		
+		AnimationSet translateRibbon3AnimSet = new AnimationSet(true);
+		translateRibbon3AnimSet.setFillAfter(true);
+		
+		TranslateAnimation ta1 = new TranslateAnimation(0,0,0,140*Utils.densityMultiplier); 
+		ta1.setDuration(duration);
+		ta1.setStartOffset(startOff);
+		translateRibbon3AnimSet.addAnimation(ta1);
+		
+		AlphaAnimation aa1 = new AlphaAnimation(1,0); 
+		aa1.setDuration(duration);
+		aa1.setStartOffset(startOff);
+		translateRibbon3AnimSet.addAnimation(aa1);
+		
+		activity.findViewById(R.id.fs_moving_ribbon3).startAnimation(translateRibbon3AnimSet);
+		
+		AnimationSet translateRibbon2AnimSet = new AnimationSet(true);
+		translateRibbon2AnimSet.setFillAfter(true);
+		
+		TranslateAnimation ta2 = new TranslateAnimation(0,0,0,140*Utils.densityMultiplier); 
+		ta2.setDuration(duration);
+		ta2.setStartOffset(startOff);
+		translateRibbon2AnimSet.addAnimation(ta2);
+		
+		translateRibbon2AnimSet.addAnimation(aa1);
+		
+		activity.findViewById(R.id.fs_moving_ribbon2).startAnimation(translateRibbon2AnimSet);
+		
+		AnimationSet translateRibbon1AnimSet = new AnimationSet(true);
+		translateRibbon1AnimSet.setFillAfter(true);
+		
+		TranslateAnimation ta3 = new TranslateAnimation(0,0,0,-280*Utils.densityMultiplier); 
+		ta3.setDuration(duration);
+		ta3.setStartOffset(startOff);
+		translateRibbon1AnimSet.addAnimation(ta3);
+		
+		translateRibbon1AnimSet.addAnimation(aa1);
+		
+		activity.findViewById(R.id.fs_moving_ribbon1).startAnimation(translateRibbon1AnimSet);
+		
+
+	}
+	
+
+	public static ScaleAnimation getScaleAnimOnPivot(final Activity activity, int animDuration, float pivotX, float pivotY){
+		int rType = Animation.RELATIVE_TO_SELF;
+		ScaleAnimation animation = new ScaleAnimation(1, 0, 1, 0, rType , pivotX, rType, pivotY);
+		animation.setFillAfter(true);
+		animation.setDuration(animDuration);
+		return animation;
+	}
 }
