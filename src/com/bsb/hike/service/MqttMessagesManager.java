@@ -287,6 +287,8 @@ public class MqttMessagesManager {
 			}
 			Log.d(getClass().getSimpleName(), "GCJ Message is new");
 
+			JSONObject metadata = jsonObj.optJSONObject(HikeConstants.METADATA);
+
 			if (!groupRevived
 					&& !this.convDb.doesConversationExist(groupConversation
 							.getMsisdn())) {
@@ -296,8 +298,6 @@ public class MqttMessagesManager {
 						.addConversation(groupConversation.getMsisdn(), false,
 								"", groupConversation.getGroupOwner());
 
-				JSONObject metadata = jsonObj
-						.optJSONObject(HikeConstants.METADATA);
 				if (metadata != null) {
 					String groupName = metadata.optString(HikeConstants.NAME);
 					if (!TextUtils.isEmpty(groupName)) {
@@ -310,6 +310,23 @@ public class MqttMessagesManager {
 				// received for group creation
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
 			}
+
+			JSONObject chatBgJson = jsonObj
+					.optJSONObject(HikeConstants.CHAT_BACKGROUND);
+			if (chatBgJson != null) {
+				String bgId = chatBgJson.optString(HikeConstants.BG_ID);
+				String groupId = groupConversation.getMsisdn();
+				try {
+					ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
+					HikeConversationsDatabase.getInstance().setChatBackground(
+							groupId, chatTheme.bgId());
+				} catch (IllegalArgumentException e) {
+					/*
+					 * This exception is thrown for unknown themes. Do nothing
+					 */
+				}
+			}
+
 			saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 		} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE.equals(type)) // Group
 		// chat

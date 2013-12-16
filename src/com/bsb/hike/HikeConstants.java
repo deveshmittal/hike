@@ -175,6 +175,7 @@ public class HikeConstants {
 	public static final String LIST = "list";
 	public static final String BG_ID = "bg_id";
 	public static final String CHAT_BACKGROUNDS = "cbgs";
+	public static final String CHAT_BACKGROUND = "cbg";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
