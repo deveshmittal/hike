@@ -2608,28 +2608,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public EnumMap<StickerCategoryId, StickerCategory> stickerDataForCategories()
 	{
 		Cursor c = null;
-		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = null;
+		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = new EnumMap<StickerManager.StickerCategoryId, StickerCategory>(StickerCategoryId.class);
 		try
 		{
 			c = mDb.query(DBConstants.STICKERS_TABLE, new String[] { DBConstants.CATEGORY_ID, DBConstants.UPDATE_AVAILABLE, DBConstants.REACHED_END }, null, null, null, null, null);
-			if (c.getCount() > 0)
+			while (c.moveToNext())
 			{
-				stickerDataMap = new EnumMap<StickerManager.StickerCategoryId, StickerCategory>(StickerCategoryId.class);
-				while (c.moveToNext())
+				try
 				{
-					try
-					{
-						String category = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
-						boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
-						boolean reachedEnd = c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
-						StickerCategoryId catId = StickerManager.StickerCategoryId.getCategoryIdFromName(category);
-						StickerCategory s = new StickerCategory(catId, updateAvailable, reachedEnd);
-						stickerDataMap.put(catId, s);
-					}
-					catch (Exception e)
-					{
+					String category = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
+					boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+					boolean reachedEnd = c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
+					StickerCategoryId catId = StickerManager.StickerCategoryId.getCategoryIdFromName(category);
+					StickerCategory s = new StickerCategory(catId, updateAvailable, reachedEnd);
+					stickerDataMap.put(catId, s);
+				}
+				catch (Exception e)
+				{
 
-					}
 				}
 			}
 		}
@@ -2642,7 +2638,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 		return stickerDataMap;
 	}
-	
+
 	public boolean isStickerUpdateAvailable(StickerCategoryId categoryId) {
 		Cursor c = null;
 		try {
