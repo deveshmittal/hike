@@ -151,7 +151,6 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.google.android.maps.GeoPoint;
 
 public class Utils {
 	public static Pattern shortCodeRegex;
@@ -1631,27 +1630,6 @@ public class Utils {
 		}
 	}
 
-	public static String getAddressFromGeoPoint(GeoPoint geoPoint,
-			Context context) {
-		try {
-			Geocoder geoCoder = new Geocoder(context, Locale.getDefault());
-			List<Address> addresses = geoCoder.getFromLocation(
-					geoPoint.getLatitudeE6() / 1E6,
-					geoPoint.getLongitudeE6() / 1E6, 1);
-
-			final StringBuilder address = new StringBuilder();
-			if (!addresses.isEmpty()) {
-				for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
-					address.append(addresses.get(0).getAddressLine(i) + "\n");
-			}
-
-			return address.toString();
-		} catch (IOException e) {
-			Log.e("Utils", "IOException", e);
-			return "";
-		}
-	}
-	
 	public static String getAddressFromLatLng(double lat, double lng,
 			Context context) {
 		try {
