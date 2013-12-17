@@ -175,7 +175,7 @@
 	<string name="social_unlinking">खाता अनलिंक हो रहा है...</string>
 	<string name="contact_selected_already">यह नम्बर पहले से समूह में है।</string>
 	<string name="share_file_message">हलो! मैंने अभी आपको हाइक से फाइल भेजी है:%1$s</string>
-	<string name="max_file_size">अधिकतम फाइल साइज 15 एमबी</string>
+	<string name="max_file_size">अधिकतम फाइल साइज 25 एमबी</string>
 	<string name="unable_to_read">फाइल पढ़ने में असमर्थ</string>
 	<string name="share_location">लोकेशन साझा करें</string>
 	<string name="group_mute">यह बातचीत म्यूट है।</string>
