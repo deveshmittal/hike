@@ -1438,8 +1438,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 				break;
 			case SENT_CONFIRMED:
-				tv.setText(context.getString(R.string.sent,
-						current.getTimestampFormatted(false, context)));
+				tv.setText(context.getString(
+						conversation.isOnhike() ? R.string.sent
+								: R.string.sent_via_sms, current
+								.getTimestampFormatted(false, context)));
 				if (!current.isSMS()) {
 					scheduleUndeliveredText(tv, container, iv,
 							current.getTimestamp());
