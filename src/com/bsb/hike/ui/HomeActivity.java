@@ -84,7 +84,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 												// for Production
 
 	private enum DialogShowing {
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, CHAT_BG_FTUE
 	}
 
 	private ViewPager viewPager;
@@ -175,10 +175,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 			}
 		}
-		// check the preferences and show update
-		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
-				HikeConstants.NO_UPDATE);
-		showUpdatePopup(updateType);
+		
+		if(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
+			//if chat bg ftue is not shown show this on the highest priority
+			dialogShowing = DialogShowing.CHAT_BG_FTUE;
+			snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+		} else {
+			// check the preferences and show update
+			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
+					HikeConstants.NO_UPDATE);
+			showUpdatePopup(updateType);
+		}
 
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
@@ -224,10 +232,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 		
-		if(!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
-			snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
-		} 
 	}
 	
 	public void OnChatBgFtueOverlayClick(View v){
