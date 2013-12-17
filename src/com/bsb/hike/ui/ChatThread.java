@@ -154,7 +154,6 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -169,6 +168,7 @@ import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -344,6 +344,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private ChatTheme selectedTheme;
 	private ChatTheme temporaryTheme;
+
+	private boolean showingChatThemePicker;
 
 	@Override
 	protected void onPause() {
@@ -730,6 +732,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		if(showingChatThemePicker) {
+			return false;
+		}
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
 		mMenu = menu;
 		MenuItem profileItem = menu.findItem(R.id.profile);
@@ -749,7 +754,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (mConversation == null) {
+		if (mConversation == null || showingChatThemePicker) {
 			return super.onPrepareOptionsMenu(menu);
 		}
 		MenuItem menuItem = menu.findItem(R.id.mute);
@@ -788,6 +793,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.chat_bg:
 			showThemePicker();
+			setupChatThemeActionBar();
+			showingChatThemePicker = true;
+			invalidateOptionsMenu();
 			break;
 		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
@@ -2713,9 +2721,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		GridView attachmentsGridView = (GridView) parentView
 				.findViewById(R.id.attachment_grid);
 
-		Button setThemeButton = (Button) parentView
-				.findViewById(R.id.set_theme_btn);
-
 		temporaryTheme = selectedTheme;
 
 		attachmentsGridView.setNumColumns(getNumColumnsChatThemes());
@@ -2750,22 +2755,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		});
 
-		setThemeButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				/*
-				 * If the user has selected the same theme, we shouldn't do
-				 * anything
-				 */
-				if (temporaryTheme != selectedTheme) {
-					selectedTheme = temporaryTheme;
-					sendChatThemeMessage();
-				}
-				attachmentWindow.dismiss();
-			}
-		});
-
 		attachmentWindow.setOnDismissListener(new OnDismissListener() {
 
 			@Override
@@ -2773,9 +2762,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				temporaryTheme = null;
 
 				setChatTheme(selectedTheme);
+
+				setupActionBar();
+				showingChatThemePicker = false;
+				invalidateOptionsMenu();
 			}
 		});
 
+		attachmentsGridView.requestFocus();
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(
 				android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(true);
@@ -2783,6 +2777,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
 		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+
+		FrameLayout viewParent = (FrameLayout) parentView.getParent();
+		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
+				.getLayoutParams();
+		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+		windowManager.updateViewLayout(viewParent, lp);
+
+		attachmentWindow.setTouchInterceptor(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+					return true;
+				}
+				return false;
+			}
+		});
 	}
 
 	private int getNumColumnsChatThemes() {
@@ -2848,6 +2861,47 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void setupChatThemeActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.chat_theme_action_bar, null);
+
+		Button saveThemeBtn = (Button) actionBarView.findViewById(R.id.save);
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+
+		title.setText(R.string.chat_theme);
+
+		closeBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				attachmentWindow.dismiss();
+			}
+		});
+
+		saveThemeBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				/*
+				 * If the user has selected the same theme, we shouldn't do
+				 * anything
+				 */
+				if (temporaryTheme != selectedTheme) {
+					selectedTheme = temporaryTheme;
+					sendChatThemeMessage();
+				}
+				attachmentWindow.dismiss();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState) {

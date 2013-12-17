@@ -709,4 +709,5 @@
 	<string name="mute_chat_theme_notification_subtext">Show a notification when the chat theme is changed</string>
 	<string name="mute_chat_theme_notification_header">Chat theme notifications</string>
 	<string name="indian_category">Things Indians say</string>	
+	<string name="chat_theme">Chat Theme</string>
 </resources>

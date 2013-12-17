@@ -25,23 +25,6 @@
             android:verticalSpacing="4dp"
             android:gravity="center" />
 
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/set_theme_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:background="@drawable/bg_dark_grey_btn_selector"
-            android:minWidth="70dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:shadowColor="#40000000"
-            android:shadowDy="0.5"
-            android:shadowRadius="0.5"
-            android:src="@drawable/ic_sticker_btn"
-            android:text="@string/save_theme"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
         <View
             android:layout_width="1dp"
             android:layout_height="12dp" />
