@@ -275,6 +275,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private boolean isOnline = false;
 
+	private ContactInfo contactInfo;
+
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ,
@@ -1272,9 +1274,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 
 		if (!(mConversation instanceof GroupConversation)) {
-			favoriteType = HikeUserDatabase.getInstance()
-					.getContactInfoFromMSISDN(mContactNumber, false)
-					.getFavoriteType();
+			contactInfo = HikeUserDatabase.getInstance()
+					.getContactInfoFromMSISDN(mContactNumber, false);
+
+			favoriteType = contactInfo.getFavoriteType();
 
 			if (!mConversation.isOnhike()) {
 				HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
@@ -1928,9 +1931,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 			if (mContactNumber.equals(typingNotification.getId())) {
 
-				ContactInfo contactInfo = HikeUserDatabase.getInstance()
-						.getContactInfoFromMSISDN(mContactNumber, false);
-
 				runOnUiThread(new SetTypingText(true, typingNotification));
 
 				if (shouldShowLastSeen() && contactInfo.getOffline() != -1) {
@@ -2224,13 +2224,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				});
 			}
 		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
-			ContactInfo contactInfo = (ContactInfo) object;
+			ContactInfo newContactInfo = (ContactInfo) object;
 
 			if (!mContactNumber.equals(contactInfo.getMsisdn())
 					|| (mConversation instanceof GroupConversation)
 					|| !shouldShowLastSeen()) {
 				return;
 			}
+
+			/*
+			 * Updating the class's contactinfo object
+			 */
+			contactInfo.setOffline(newContactInfo.getOffline());
+			contactInfo.setLastSeenTime(newContactInfo.getLastSeenTime());
+
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
 					contactInfo.getLastSeenTime(), contactInfo.getOffline());
 
@@ -4647,14 +4654,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private class FetchLastSeenTask extends AsyncTask<Void, Void, Long> {
 
-		ContactInfo contactInfo;
 		boolean retriedOnce;
 		String msisdn;
 
 		public FetchLastSeenTask(String msisdn, boolean retriedOnce) {
 			this.msisdn = msisdn;
-			this.contactInfo = HikeUserDatabase.getInstance()
-					.getContactInfoFromMSISDN(msisdn, false);
 			if (contactInfo.getOffline() == 0) {
 				isOnline = true;
 				/*
