@@ -512,6 +512,7 @@ public class HikeService extends Service {
 				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
 				data.put(HikeConstants.DEVICE_KEY, deviceKey);
+				Utils.addCommonDeviceDetails(data, context);
 			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}

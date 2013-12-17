@@ -177,6 +177,10 @@ public class HikeConstants {
 	public static final String CHAT_BACKGROUNDS = "cbgs";
 	public static final String CHAT_BACKGROUND = "cbg";
 	public static final String CHAT_BACKGROUD_NOTIFICATION = "pushcbg";
+	public static final String RESOLUTION = "res";
+	public static final String OPERATOR = "op";
+	public static final String CIRCLE = "circle";
+	public static final String PIXEL_DENSITY_MULTIPLIER = "pdm";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

@@ -3166,4 +3166,23 @@ public class Utils {
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
 		prefEditor.commit();
 	}
+
+	public static void addCommonDeviceDetails(JSONObject jsonObject,
+			Context context) throws JSONException {
+		int height = context.getResources().getDisplayMetrics().heightPixels;
+		int width = context.getResources().getDisplayMetrics().widthPixels;
+
+		TelephonyManager manager = (TelephonyManager) context
+				.getSystemService(Context.TELEPHONY_SERVICE);
+
+		String res = height + "x" + width;
+		String operator = manager.getSimOperatorName();
+		String circle = manager.getSimOperator();
+		String pdm = Float.toString(Utils.densityMultiplier);
+
+		jsonObject.put(HikeConstants.RESOLUTION, res);
+		jsonObject.put(HikeConstants.OPERATOR, operator);
+		jsonObject.put(HikeConstants.CIRCLE, circle);
+		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
+	}
 }
