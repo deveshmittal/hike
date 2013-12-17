@@ -187,7 +187,7 @@ public class EmailConversationsAsyncTask extends
 			if (fragment.isAdded())
 				dialog.dismiss();
 		} else {
-			if (!activity.isFinishing() || !activity.isDestroyed())
+			if (!activity.isFinishing())
 				dialog.dismiss();
 		}
 		super.onPostExecute(result);
