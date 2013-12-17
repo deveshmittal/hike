@@ -538,17 +538,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder = (ViewHolder) v.getTag();
 		}
 		
+		//int fieldCount = 1;
 		for (Field field : holder.getClass().getDeclaredFields())
 		{
 			View view = null;
 			field.setAccessible(true);
+			//Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName());
+			//fieldCount++;
 			if(field.getName().equals("this$0"))
 			{
-				break;
+				continue;
 			}
 			try
 			{
-				Log.d(getClass().getSimpleName(), field.getName());
+				//Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName());
 				view  = (View) field.get(holder);
 			}
 			catch (IllegalArgumentException e)
@@ -643,7 +646,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		////////////////////////////////////////////////////////////////////////////
 		// Categorical Applications
 		if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
-		{
+		{	
 			if (metadata != null && metadata.isPokeMessage())
 			{
 				//holder.messageTextView.setVisibility(View.GONE);
@@ -950,6 +953,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			else if (hikeFileType == HikeFileType.UNKNOWN)
 			{
 				holder.messageTextView.setText(context.getString(R.string.unknown_msg));
+				holder.messageTextView.setVisibility(View.VISIBLE);
+			}
+			else if (hikeFileType == HikeFileType.CONTACT)
+			{
+				holder.messageTextView.setText(hikeFile.getFileName());
 				holder.messageTextView.setVisibility(View.VISIBLE);
 			}
 			else
