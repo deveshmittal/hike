@@ -178,6 +178,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		
 		if(!accountPrefs.getBoolean(
 				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
+			Utils.blockOrientationChange(HomeActivity.this);
 			//if chat bg ftue is not shown show this on the highest priority
 			dialogShowing = DialogShowing.CHAT_BG_FTUE;
 			snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
@@ -246,6 +247,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
 		editor.commit();
+		Utils.unblockOrientationChange(HomeActivity.this);
 		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
 		return;
 	}
