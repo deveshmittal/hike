@@ -545,7 +545,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			field.setAccessible(true);
 			//Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName());
 			//fieldCount++;
-			if(field.getName().equals("this$0"))
+			if( ("this$0").equals(field.getName()) )
 			{
 				continue;
 			}
