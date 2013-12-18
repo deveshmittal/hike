@@ -3185,4 +3185,15 @@ public class Utils {
 		jsonObject.put(HikeConstants.CIRCLE, circle);
 		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
 	}
+
+	public static ConvMessage makeConvMessage(Conversation mConversation,
+			String msisdn, String message, boolean isOnhike) {
+		long time = (long) System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(message, msisdn, time,
+				ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setConversation(mConversation);
+		convMessage.setSMS(!isOnhike);
+
+		return convMessage;
+	}
 }

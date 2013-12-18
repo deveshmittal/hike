@@ -1000,23 +1000,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		mComposeView.setText("");
 
-		ConvMessage convMessage = makeConvMessage(message);
+		ConvMessage convMessage = Utils.makeConvMessage(mConversation,
+				mContactNumber, message, isConversationOnHike());
 
 		sendMessage(convMessage);
 
 		if (mComposeViewWatcher != null) {
 			mComposeViewWatcher.onMessageSent();
 		}
-	}
-
-	private ConvMessage makeConvMessage(String message) {
-		long time = (long) System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(message, mContactNumber,
-				time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setConversation(mConversation);
-		convMessage.setSMS(mConversation == null || !mConversation.isOnhike());
-
-		return convMessage;
 	}
 
 	/*
@@ -4515,7 +4506,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void sendPoke() {
-		ConvMessage convMessage = makeConvMessage(getString(R.string.poke_msg));
+		ConvMessage convMessage = Utils.makeConvMessage(mConversation,
+				mContactNumber, getString(R.string.poke_msg),
+				isConversationOnHike());
 
 		JSONObject metadata = new JSONObject();
 		try {
@@ -4554,7 +4547,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void sendSticker(Sticker sticker) {
-		ConvMessage convMessage = makeConvMessage("Sticker");
+		ConvMessage convMessage = Utils.makeConvMessage(mConversation,
+				mContactNumber, "Sticker", isConversationOnHike());
 
 		JSONObject metadata = new JSONObject();
 		try {
@@ -4832,5 +4826,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 		return super.onKeyUp(keyCode, event);
+	}
+
+	private boolean isConversationOnHike() {
+		return mConversation != null && mConversation.isOnhike();
 	}
 }
