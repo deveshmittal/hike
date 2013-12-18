@@ -2234,7 +2234,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
 			ContactInfo newContactInfo = (ContactInfo) object;
 
-			if (!mContactNumber.equals(contactInfo.getMsisdn())
+			if (!mContactNumber.equals(newContactInfo.getMsisdn())
 					|| (mConversation instanceof GroupConversation)
 					|| !shouldShowLastSeen()) {
 				return;
