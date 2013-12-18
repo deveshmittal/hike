@@ -2840,12 +2840,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void sendChatThemeMessage() {
-		mConversationDb.setChatBackground(mContactNumber, selectedTheme.bgId());
+		long timestamp = System.currentTimeMillis() / 100;
+		mConversationDb.setChatBackground(mContactNumber, selectedTheme.bgId(),
+				timestamp);
 
 		JSONObject jsonObject = new JSONObject();
 		JSONObject data = new JSONObject();
 
 		try {
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(timestamp));
 			data.put(HikeConstants.BG_ID, selectedTheme.bgId());
 
 			jsonObject.put(HikeConstants.DATA, data);

@@ -318,8 +318,7 @@ public class MqttMessagesManager {
 				String groupId = groupConversation.getMsisdn();
 				try {
 					ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
-					HikeConversationsDatabase.getInstance().setChatBackground(
-							groupId, chatTheme.bgId());
+					convDb.setChatBackground(groupId, chatTheme.bgId(), 0);
 				} catch (IllegalArgumentException e) {
 					/*
 					 * This exception is thrown for unknown themes. Do nothing
@@ -1313,19 +1312,30 @@ public class MqttMessagesManager {
 			String from = jsonObj.optString(HikeConstants.FROM);
 			String to = jsonObj.optString(HikeConstants.TO);
 
+			long timestamp = jsonObj.optLong(HikeConstants.TIMESTAMP);
+			timestamp = Utils.applyServerTimeOffset(context, timestamp);
+
 			boolean isGroupConversation = false;
 			if (!TextUtils.isEmpty(to)) {
 				isGroupConversation = Utils.isGroupConversation(to);
 			}
 			String id = isGroupConversation ? to : from;
 
+			long oldTimestamp = convDb.getChatThemeTimestamp(id);
+			if (oldTimestamp >= timestamp) {
+				/*
+				 * We should ignore this packet since its either old or
+				 * duplicate.
+				 */
+				return;
+			}
+
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 			String bgId = data.optString(HikeConstants.BG_ID);
 
 			try {
 				ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
-				HikeConversationsDatabase.getInstance().setChatBackground(id,
-						bgId);
+				convDb.setChatBackground(id, bgId, timestamp);
 
 				this.pubSub.publish(HikePubSub.CHAT_BACKGROUND_CHANGED,
 						new Pair<String, ChatTheme>(id, chatTheme));

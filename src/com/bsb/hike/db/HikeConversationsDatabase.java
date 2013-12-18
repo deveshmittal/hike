@@ -184,7 +184,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CHAT_BG_TABLE + " ("
 				+ DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.BG_ID
-				+ " TEXT)";
+				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER" + ")";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX
 				+ " ON " + DBConstants.CHAT_BG_TABLE + " ("
@@ -440,6 +440,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 22 adds the Chat BG table.
 		 */
+		boolean chatBgTableAdded = false;
+		if (oldVersion < 22) {
+			chatBgTableAdded = true;
+		}
+		/*
+		 * Version 23 adds the timestamp column to the chat bg table
+		 */
+		if (!chatBgTableAdded && oldVersion < 23) {
+			String alter = "ALTER TABLE " + DBConstants.CHAT_BG_TABLE
+					+ " ADD COLUMN " + DBConstants.TIMESTAMP + " INTEGER";
+			db.execSQL(alter);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -2911,13 +2923,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				new String[] { Long.toString(id) });
 	}
 
-	public void setChatBackground(String msisdn, String bgId) {
+	public void setChatBackground(String msisdn, String bgId, long timeStamp) {
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.MSISDN, msisdn);
 		values.put(DBConstants.BG_ID, bgId);
+		values.put(DBConstants.TIMESTAMP, timeStamp);
 
 		mDb.insertWithOnConflict(DBConstants.CHAT_BG_TABLE, null, values,
 				SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public long getChatThemeTimestamp(String msisdn) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.CHAT_BG_TABLE,
+					new String[] { DBConstants.TIMESTAMP }, DBConstants.MSISDN
+							+ "=?", new String[] { msisdn }, null, null, null);
+			if (c.moveToFirst()) {
+				return c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+			}
+			return 0;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
 	}
 
 	public ChatTheme getChatThemeForMsisdn(String msisdn) {
