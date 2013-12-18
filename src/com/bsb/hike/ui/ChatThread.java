@@ -732,7 +732,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if(showingChatThemePicker) {
+		if (showingChatThemePicker) {
 			return false;
 		}
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
