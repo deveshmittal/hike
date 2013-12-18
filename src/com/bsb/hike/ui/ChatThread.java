@@ -1502,6 +1502,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		tipView.startAnimation(chatBgFtueAnimation);
 	}
 	
+	private void closeChatBgFtueTip(){
+		if (tipView != null) {
+			TipType viewTipType = (TipType) tipView.getTag();
+			if (viewTipType == TipType.CHAT_BG_FTUE ) {
+				tipView.clearAnimation();
+				Utils.closeTip(TipType.CHAT_BG_FTUE, tipView, prefs);
+				tipView = null;
+			}
+		}
+	} 
+	
 	private void showStickerFtueTip(){
 		tipView = findViewById(R.id.emoticon_tip);
 		tipView.setOnTouchListener(new OnTouchListener()

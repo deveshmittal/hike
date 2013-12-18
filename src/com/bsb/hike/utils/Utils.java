@@ -2620,6 +2620,9 @@ public class Utils {
 		case WALKIE_TALKIE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
 			break;
+		case CHAT_BG_FTUE:
+			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
+			break;
 		}
 
 		editor.commit();
