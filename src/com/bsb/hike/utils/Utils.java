@@ -299,7 +299,7 @@ public class Utils {
 				HikeConstants.Extras.MSISDN,
 				Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo
 						.getId() : contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
 
