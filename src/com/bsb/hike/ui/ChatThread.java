@@ -559,6 +559,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
 	}
 
 	private void clearTempData() {
@@ -796,6 +797,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			setupChatThemeActionBar();
 			showingChatThemePicker = true;
 			invalidateOptionsMenu();
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
+					false)) {
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
+				editor.commit();
+
+				closeChatBgFtueTip();
+			}
 			break;
 		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
@@ -1443,8 +1452,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber)) {
 			if (!(mConversation instanceof GroupConversation)
 					|| ((GroupConversation) mConversation).getIsGroupAlive()) {
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP,
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
 						false)) {
+					showChatBgFtueTip();
+				} else if (!prefs.getBoolean(
+						HikeMessengerApp.SHOWN_EMOTICON_TIP, false)) {
 					showStickerFtueTip();
 				} else if (!prefs.getBoolean(
 						HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false)) {
@@ -1511,6 +1523,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				}
 			}
 		};
+	}
+
+	private void showChatBgFtueTip() {
+		tipView = findViewById(R.id.chat_bg_ftue_tip);
+		tipView.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1) {
+				// disabling on touch gesture for sticker ftue tip
+				// so that we do not send an unnecessary nudge on a
+				// double tap on tipview.
+				return true;
+			}
+		});
+		Utils.showTip(this, TipType.CHAT_BG_FTUE, tipView);
+		Animation chatBgFtueAnimation = AnimationUtils.loadAnimation(this,
+				R.anim.chat_bg_ftue_anim);
+		tipView.startAnimation(chatBgFtueAnimation);
+	}
+
+	private void closeChatBgFtueTip() {
+		if (tipView != null) {
+			TipType viewTipType = (TipType) tipView.getTag();
+			if (viewTipType == TipType.CHAT_BG_FTUE) {
+				tipView.clearAnimation();
+				Utils.closeTip(TipType.CHAT_BG_FTUE, tipView, prefs);
+				tipView = null;
+			}
+		}
 	}
 
 	private void showStickerFtueTip() {

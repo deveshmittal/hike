@@ -2085,4 +2085,32 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
 				+ "=?", new String[] { msisdn });
 	}
+	
+	public ContactInfo getMostRecentContact() {
+		Cursor c = null;
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
+					DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
+					DBConstants.ONHIKE, DBConstants.PHONE,
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+					DBConstants.HAS_CUSTOM_PHOTO,
+					DBConstants.FAVORITE_TYPE_SELECTION,
+					DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE,
+					DBConstants.LAST_SEEN }, null, null, null, null,
+					DBConstants.LAST_MESSAGED + " DESC LIMIT 1");
+			if (c.getCount()!=0) {
+				Log.d("Test", "cursor: " + DatabaseUtils.dumpCursorToString(c));
+				ContactInfo ci = extractContactInfo(c).get(0);
+				Log.d("Test", "cursor: " + "inside if"+ci.getMsisdn());
+				return ci;
+			}else{
+				Log.d("Test", "cursor: " + "inside else");
+				return null;
+			}
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
 }

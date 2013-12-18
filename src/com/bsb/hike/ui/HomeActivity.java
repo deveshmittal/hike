@@ -60,12 +60,14 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
+import com.bsb.hike.utils.ChatBgFtue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -82,7 +84,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 												// for Production
 
 	private enum DialogShowing {
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, CHAT_BG_FTUE
 	}
 
 	private ViewPager viewPager;
@@ -107,6 +109,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private PopupWindow overFlowWindow;
 	private TextView topBarIndicator;
 	private Drawable myProfileImage;
+	private SnowFallView snowFallView;
+	
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
@@ -171,10 +175,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 			}
 		}
-		// check the preferences and show update
-		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
-				HikeConstants.NO_UPDATE);
-		showUpdatePopup(updateType);
+		
+		if(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
+			Utils.blockOrientationChange(HomeActivity.this);
+			//if chat bg ftue is not shown show this on the highest priority
+			dialogShowing = DialogShowing.CHAT_BG_FTUE;
+			snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+		} else {
+			// check the preferences and show update
+			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
+					HikeConstants.NO_UPDATE);
+			showUpdatePopup(updateType);
+		}
 
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
@@ -219,8 +232,26 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
+		
+	}
+	
+	public void OnChatBgFtueOverlayClick(View v){
+		return;
+	}
+	
+	public void onChatBgOpenItUpClick(View v){
+		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
 	}
 
+	public void onChatBgGiveItASpinClick(View v){
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
+		editor.commit();
+		Utils.unblockOrientationChange(HomeActivity.this);
+		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
+		return;
+	}
+	
 	@Override
 	protected void onDestroy() {
 		if (progDialog != null) {
