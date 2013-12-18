@@ -2578,6 +2578,10 @@ public class Utils {
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
 			tipText.setText(R.string.walkie_talkie_tip);
 			break;
+		case CHAT_BG_FTUE:
+			container.setBackgroundResource(R.drawable.bg_tip_top_right);
+			tipText.setText(R.string.chat_bg_ftue_tip);
+			break;	
 		}
 		if (closeTip != null) {
 			closeTip.setOnClickListener(new OnClickListener() {

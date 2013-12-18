@@ -314,6 +314,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	
 	public static final String SHOWN_CHAT_BG_FTUE = "shownChatBgFtue";
 
+	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

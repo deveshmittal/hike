@@ -66,6 +66,17 @@
                 android:visibility="gone" />
             
             <LinearLayout
+                android:id="@+id/chat_bg_ftue_tip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="82dp"
+                android:visibility="gone" >
+
+                <include layout="@layout/chat_bg_tool_tip" />
+            </LinearLayout>
+            
+            <LinearLayout
                 android:id="@+id/last_seen_tip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
