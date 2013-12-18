@@ -20,10 +20,11 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
-            android:numColumns="5"
+            android:fadingEdge="none"
+            android:gravity="center"
             android:horizontalSpacing="4dp"
-            android:verticalSpacing="4dp"
-            android:gravity="center" />
+            android:numColumns="5"
+            android:verticalSpacing="4dp" />
 
         <View
             android:layout_width="1dp"
