@@ -18,6 +18,8 @@ import android.widget.LinearLayout.LayoutParams;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
@@ -496,10 +498,14 @@ public class ChatBgFtue
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.GONE);
 		activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.GONE);
-		//Opening a dummy chat for now
-		Intent intent = new Intent(activity, ChatThread.class);
-		intent.putExtra(HikeConstants.Extras.MSISDN, "+918285629162");
-		activity.startActivity(intent);
+		ContactInfo contactInfo = HikeUserDatabase.getInstance().getMostRecentContact();
+		if(contactInfo != null){
+			Intent intent = Utils.createIntentFromContactInfo(contactInfo, false);
+			intent.setClass(activity, ChatThread.class);
+			activity.startActivity(intent);
+		} else{
+			//We need to handle this case; this case will occur if user doesn't have any sms contact
+		}
 		return;
 	}
 
