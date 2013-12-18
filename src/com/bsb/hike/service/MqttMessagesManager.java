@@ -691,9 +691,7 @@ public class MqttMessagesManager {
 					JSONArray groupIds = mutedGroups.names();
 					if (groupIds != null && groupIds.length() > 0) {
 						for (int i = 0; i < groupIds.length(); i++) {
-							HikeConversationsDatabase.getInstance()
-									.toggleGroupMute(groupIds.optString(i),
-											true);
+							convDb.toggleGroupMute(groupIds.optString(i), true);
 						}
 					}
 				}
