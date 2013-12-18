@@ -826,6 +826,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
 			Utils.createShortcut(ChatThread.this, mConversation);
 			break;
+		case R.id.overflow_menu:
+			mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+			break;
 		}
 
 		return true;
