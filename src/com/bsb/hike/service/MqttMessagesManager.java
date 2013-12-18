@@ -1341,8 +1341,22 @@ public class MqttMessagesManager {
 				saveStatusMsg(jsonObj, id);
 			} catch (IllegalArgumentException e) {
 				/*
-				 * This exception is thrown for unknown themes. Do nothing
+				 * This exception is thrown for unknown themes. Show an
+				 * unsupported message
 				 */
+				String message = context.getString(R.string.unknown_chat_theme);
+				ConvMessage convMessage = Utils.makeConvMessage(null, id,
+						message, true);
+				convDb.addConversationMessages(convMessage);
+
+				/*
+				 * Return if there is no conversation mapped to this message
+				 */
+				if (convMessage.getConversation() == null) {
+					return;
+				}
+
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 			}
 		}
 	}
