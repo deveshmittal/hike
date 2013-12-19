@@ -2415,6 +2415,13 @@ public class Utils {
 
 	public static String getLastSeenTimeAsString(Context context,
 			long lastSeenTime, int offline, boolean groupParticipant) {
+		return getLastSeenTimeAsString(context, lastSeenTime, offline,
+				groupParticipant, false);
+	}
+
+	public static String getLastSeenTimeAsString(Context context,
+			long lastSeenTime, int offline, boolean groupParticipant,
+			boolean fromChatThread) {
 		/*
 		 * This refers to the setting being turned off
 		 */
@@ -2448,7 +2455,9 @@ public class Utils {
 		 * More than 7 days old.
 		 */
 		if ((lastSeenYear < nowYear) || ((nowDay - lastSeenDay) > 7)) {
-			return context.getString(R.string.last_seen_while_ago);
+			return context
+					.getString(fromChatThread ? R.string.last_seen_while_ago_ct
+							: R.string.last_seen_while_ago);
 		}
 
 		boolean is24Hour = android.text.format.DateFormat
@@ -2473,8 +2482,10 @@ public class Utils {
 							+ "' MMM, h:mmaaa";
 				}
 				DateFormat df = new SimpleDateFormat(format);
-				lastSeen = context.getString(R.string.last_seen_more,
-						df.format(lastSeenDate));
+				lastSeen = context.getString(
+						fromChatThread ? R.string.last_seen_more_ct
+								: R.string.last_seen_more, df
+								.format(lastSeenDate));
 			}
 		} else {
 			String format;
@@ -2490,10 +2501,16 @@ public class Utils {
 						.getString(R.string.last_seen_yesterday_group_participant)
 						: df.format(lastSeenDate);
 			} else {
-				lastSeen = context.getString(
-						(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
-								: R.string.last_seen_today, df
-								.format(lastSeenDate));
+				int stringRes;
+				if (fromChatThread) {
+					stringRes = (nowDay > lastSeenDay) ? R.string.last_seen_yesterday_ct
+							: R.string.last_seen_today_ct;
+				} else {
+					stringRes = (nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+							: R.string.last_seen_today;
+				}
+				lastSeen = context
+						.getString(stringRes, df.format(lastSeenDate));
 			}
 		}
 

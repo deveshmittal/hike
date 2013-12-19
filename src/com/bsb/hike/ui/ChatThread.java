@@ -1336,6 +1336,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			if (shouldShowLastSeen()) {
 				mLastSeenView.setText("");
+				mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0,
+						0);
 				/*
 				 * Fetching last seen value.
 				 */
@@ -1594,6 +1596,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		} else {
 			mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike
 					: R.string.on_sms);
+			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
 
 		avatar.setImageDrawable(IconCacheManager.getInstance()
@@ -1637,6 +1640,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			 */
 			mLastSeenView.setText(getString(R.string.num_people,
 					(numActivePeople + 1)));
+			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
 	}
 
@@ -2088,6 +2092,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					mLastSeenView
 							.setText(mConversation.isOnhike() ? R.string.on_hike
 									: R.string.on_sms);
+					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(
+							0, 0, 0, 0);
 
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
@@ -2281,7 +2287,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			contactInfo.setLastSeenTime(newContactInfo.getLastSeenTime());
 
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
-					contactInfo.getLastSeenTime(), contactInfo.getOffline());
+					contactInfo.getLastSeenTime(), contactInfo.getOffline(),
+					false, true);
 
 			isOnline = contactInfo.getOffline() == 0;
 
@@ -2293,8 +2300,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						mLastSeenView
 								.setText(mConversation.isOnhike() ? R.string.on_hike
 										: R.string.on_sms);
+						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(
+								0, 0, 0, 0);
 					} else {
 						mLastSeenView.setText(lastSeenString);
+						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(
+								R.drawable.ic_last_seen_clock, 0, 0, 0);
 
 						if (tipView == null
 								&& !prefs.getBoolean(
