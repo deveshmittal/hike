@@ -141,6 +141,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private SharedPreferences preferences;
 	private boolean isGroupChat;
 	private ChatTheme chatTheme;
+	private boolean isDefaultTheme;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -157,6 +158,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	public void setChatTheme(ChatTheme theme) {
 		chatTheme = theme;
+		isDefaultTheme = chatTheme == ChatTheme.DEFAULT;
 		notifyDataSetChanged();
 	}
 
@@ -1297,7 +1299,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
 			/* label outgoing hike conversations in green */
-			if (chatTheme == ChatTheme.DEFAULT) {
+			if (isDefaultTheme) {
 				holder.messageContainer.setBackgroundResource(!convMessage
 						.isSMS() ? R.drawable.ic_bubble_blue_selector
 						: R.drawable.ic_bubble_green_selector);
