@@ -598,7 +598,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				setTextAndIconForSystemMessages(participantInfo,
 						Utils.getFormattedParticipantInfo(message, highlight),
-						R.drawable.ic_joined_chat);
+						isDefaultTheme ? R.drawable.ic_joined_chat
+								: R.drawable.ic_joined_chat_custom);
 
 				((ViewGroup) holder.container).addView(participantInfo);
 			} else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT
@@ -642,7 +643,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					message = context.getString(R.string.group_chat_end);
 				}
 				setTextAndIconForSystemMessages(participantInfo, message,
-						R.drawable.ic_left_chat);
+						isDefaultTheme ? R.drawable.ic_left_chat
+								: R.drawable.ic_left_chat_custom);
 
 				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
 						LayoutParams.WRAP_CONTENT);
@@ -675,13 +677,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 											: R.string.optin_one_to_one, name);
 				}
 
+				int icRes;
+				if (infoState == ParticipantInfoState.USER_JOIN) {
+					icRes = isDefaultTheme ? R.drawable.ic_user_join
+							: R.drawable.ic_user_join_custom;
+				} else {
+					icRes = isDefaultTheme ? R.drawable.ic_opt_in
+							: R.drawable.ic_opt_in_custom;
+				}
+
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
 						null);
-				setTextAndIconForSystemMessages(
-						mainMessage,
-						Utils.getFormattedParticipantInfo(message, name),
-						infoState == ParticipantInfoState.USER_JOIN ? R.drawable.ic_hike_user
-								: R.drawable.ic_opt_in);
+				setTextAndIconForSystemMessages(mainMessage,
+						Utils.getFormattedParticipantInfo(message, name), icRes);
 
 				TextView creditsMessageView = null;
 				if (metadata.getCredits() != -1) {
@@ -730,12 +738,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
 						null);
-				setTextAndIconForSystemMessages(
-						mainMessage,
+				int icRes;
+				if (infoState == ParticipantInfoState.CHANGED_GROUP_NAME) {
+					icRes = isDefaultTheme ? R.drawable.ic_group_info
+							: R.drawable.ic_group_info_custom;
+				} else {
+					icRes = isDefaultTheme ? R.drawable.ic_group_image
+							: R.drawable.ic_group_image_custom;
+				}
+				setTextAndIconForSystemMessages(mainMessage,
 						Utils.getFormattedParticipantInfo(message,
-								participantName),
-						infoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.drawable.ic_group_info
-								: R.drawable.ic_group_image);
+								participantName), icRes);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
@@ -748,7 +761,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				setTextAndIconForSystemMessages(
 						mainMessage,
 						Utils.getFormattedParticipantInfo(info, textToHighlight),
-						R.drawable.ic_no_int_sms);
+						isDefaultTheme ? R.drawable.ic_no_int_sms
+								: R.drawable.ic_no_int_sms_custom);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.INTRO_MESSAGE) {
@@ -764,12 +778,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							context.getString(R.string.intro_sms_thread), name);
 				}
 
+				int icRes;
+				if (conversation.isOnhike()) {
+					icRes = isDefaultTheme ? R.drawable.ic_user_join
+							: R.drawable.ic_user_join_custom;
+				} else {
+					icRes = isDefaultTheme ? R.drawable.ic_sms_user_ct
+							: R.drawable.ic_sms_user_ct_custom;
+				}
+
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
 						null);
 				setTextAndIconForSystemMessages(mainMessage,
-						Utils.getFormattedParticipantInfo(message, name),
-						conversation.isOnhike() ? R.drawable.ic_hike_user
-								: R.drawable.ic_sms_user);
+						Utils.getFormattedParticipantInfo(message, name), icRes);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.DND_USER) {
@@ -825,7 +846,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					}
 
 					setTextAndIconForSystemMessages(dndMessage, ssb,
-							R.drawable.ic_waiting_dnd);
+							isDefaultTheme ? R.drawable.ic_waiting_dnd
+									: R.drawable.ic_waiting_dnd_custom);
 					LayoutParams lp = new LayoutParams(
 							LayoutParams.MATCH_PARENT,
 							LayoutParams.WRAP_CONTENT);
@@ -854,12 +876,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.getFirstName(conversation.getLabel());
 				}
 
-				String message = context.getString(R.string.chat_bg_changed, name);
+				String message = context.getString(R.string.chat_bg_changed,
+						name);
 
 				setTextAndIconForSystemMessages(mainMessage,
 						Utils.getFormattedParticipantInfo(message, name),
-						conversation.isOnhike() ? R.drawable.ic_hike_user
-								: R.drawable.ic_sms_user);
+						isDefaultTheme ? R.drawable.ic_change_theme
+								: R.drawable.ic_change_theme_custom);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			}
