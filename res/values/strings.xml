@@ -721,5 +721,6 @@
 	<string name="last_seen_today_ct">%1$s</string>
 	<string name="last_seen_yesterday_ct">yesterday, %1$s</string>
 	<string name="last_seen_more_ct">%1$s</string>
-	<string name="last_seen_while_ago_ct">a while ago</string>		
+	<string name="last_seen_while_ago_ct">a while ago</string>
+	<string name="apply">Apply</string>		
 </resources>
