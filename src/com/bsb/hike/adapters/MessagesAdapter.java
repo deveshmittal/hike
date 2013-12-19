@@ -859,6 +859,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			return v;
 		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
+			if (isDefaultTheme) {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_subtext));
+				holder.messageInfo.setTextColor(context.getResources()
+						.getColor(R.color.timestampcolor));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_header));
+			} else {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageInfo.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+			}
+
 			holder.container
 					.setBackgroundResource(R.drawable.bg_status_chat_thread);
 
