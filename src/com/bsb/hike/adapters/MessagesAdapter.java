@@ -566,13 +566,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			int right = 0;
 			int bottom = positiveMargin;
 
+			int layoutRes = isDefaultTheme ? R.layout.participant_info
+					: R.layout.participant_info_custom;
 			MessageMetadata metadata = convMessage.getMetadata();
 			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED) {
 				JSONArray participantInfoArray = metadata
 						.getGcjParticipantInfo();
 
 				TextView participantInfo = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+						layoutRes, null);
 
 				String message;
 				String highlight = Utils.getGroupJoinHighlightText(
@@ -596,7 +598,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT
 					|| infoState == ParticipantInfoState.GROUP_END) {
 				TextView participantInfo = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+						layoutRes, null);
 
 				CharSequence message;
 				if (infoState == ParticipantInfoState.PARTICIPANT_LEFT) {
@@ -609,7 +611,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.getString(R.string.block_internation_sms_bold_text);
 
 						TextView mainMessage = (TextView) inflater.inflate(
-								R.layout.participant_info, null);
+								layoutRes, null);
 						setTextAndIconForSystemMessages(mainMessage,
 								Utils.getFormattedParticipantInfo(info,
 										textToHighlight),
@@ -667,8 +669,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 											: R.string.optin_one_to_one, name);
 				}
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 				setTextAndIconForSystemMessages(
 						mainMessage,
 						Utils.getFormattedParticipantInfo(message, name),
@@ -683,8 +685,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					String highlight = String.format(context.getString(
 							R.string.earned_credits_highlight, credits));
 
-					creditsMessageView = (TextView) inflater.inflate(
-							R.layout.participant_info, null);
+					creditsMessageView = (TextView) inflater.inflate(layoutRes,
+							null);
 					setTextAndIconForSystemMessages(creditsMessageView,
 							Utils.getFormattedParticipantInfo(creditsMessage,
 									highlight), R.drawable.ic_got_credits);
@@ -720,8 +722,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
 								: R.string.change_group_image), participantName);
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 				setTextAndIconForSystemMessages(
 						mainMessage,
 						Utils.getFormattedParticipantInfo(message,
@@ -735,8 +737,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String textToHighlight = context
 						.getString(R.string.block_internation_sms_bold_text);
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 				setTextAndIconForSystemMessages(
 						mainMessage,
 						Utils.getFormattedParticipantInfo(info, textToHighlight),
@@ -756,8 +758,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							context.getString(R.string.intro_sms_thread), name);
 				}
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 				setTextAndIconForSystemMessages(mainMessage,
 						Utils.getFormattedParticipantInfo(message, name),
 						conversation.isOnhike() ? R.drawable.ic_hike_user
@@ -767,8 +769,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else if (infoState == ParticipantInfoState.DND_USER) {
 				JSONArray dndNumbers = metadata.getDndNumbers();
 
-				TextView dndMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView dndMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 
 				if (dndNumbers != null && dndNumbers.length() > 0) {
 					StringBuilder dndNamesSB = new StringBuilder();
@@ -827,8 +829,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					((ViewGroup) holder.container).addView(dndMessage);
 				}
 			} else if (infoState == ParticipantInfoState.CHAT_BACKGROUND) {
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 
 				String msisdn = metadata.getMsisdn();
 				String userMsisdn = preferences.getString(
