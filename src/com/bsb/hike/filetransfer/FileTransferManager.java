@@ -244,6 +244,8 @@ public class FileTransferManager
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
+		if(isFileTaskExist(msgId))
+			return;
 		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast);
 		task.setState(FTState.IN_PROGRESS);
 		try
@@ -274,6 +276,8 @@ public class FileTransferManager
 
 	public void uploadFile(ConvMessage convMessage, boolean isRecipientOnHike)
 	{
+		if(isFileTaskExist(convMessage.getMsgID()))
+			return;
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -405,7 +409,7 @@ public class FileTransferManager
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
-				return new FileSavedState(FTState.IN_PROGRESS, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
+				return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
 			}
 			else
 			{
@@ -464,7 +468,7 @@ public class FileTransferManager
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
-				return new FileSavedState(FTState.IN_PROGRESS, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
+				return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
 			}
 			else
 			{
@@ -587,10 +591,19 @@ public class FileTransferManager
 	public int getFTProgress(long msgId, File mFile, boolean sent)
 	{
 		FileSavedState fss;
+		if(isFileTaskExist(msgId))
+		{
+			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+			if (obj != null)
+			{
+				return ((MyFutureTask) obj).getTask().progressPercentage ;
+			}
+		}
+		
 		if (sent)
-			fss = getUploadFileState(msgId, mFile);
+			fss = getUploadFileState(mFile, msgId);
 		else
-			fss = getDownloadFileState(msgId, mFile);
+			fss = getDownloadFileState(mFile, msgId);
 
 		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{

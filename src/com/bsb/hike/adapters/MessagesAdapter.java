@@ -649,7 +649,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		{	
 			if (metadata != null && metadata.isPokeMessage())
 			{
-				//holder.messageTextView.setVisibility(View.GONE);
 				holder.messageContainer.setVisibility(View.VISIBLE);
 				if (!convMessage.isSent())
 				{
@@ -658,24 +657,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						holder.participantNameFT.setVisibility(View.VISIBLE);
 						holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
 					}
-					else
-					{
-						//holder.participantNameFT.setVisibility(View.GONE);
-					}
 				}
 				holder.poke.setVisibility(View.VISIBLE);
 				holder.poke.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent : R.drawable.ic_nudge_hike_receive);
 			}
 			else if (convMessage.isStickerMessage())
 			{
-				//holder.messageContainer.setVisibility(View.GONE);
-				//holder.poke.setVisibility(View.GONE);
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
-
-				//holder.stickerImage.setVisibility(View.GONE);
-				//holder.stickerLoader.setVisibility(View.GONE);
-				//holder.stickerParticipantName.setVisibility(View.GONE);
 
 				Sticker sticker = metadata.getSticker();
 
@@ -746,9 +735,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			else
 			{
 				holder.messageTextView.setVisibility(View.VISIBLE);
-				//holder.stickerPlaceholder.setVisibility(View.GONE);
 				holder.messageContainer.setVisibility(View.VISIBLE);
-				//holder.poke.setVisibility(View.GONE);
 
 				CharSequence markedUp = convMessage.getMessage();
 				// Fix for bug where if a participant leaves the group chat, the
@@ -759,10 +746,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					{
 						holder.participantNameFT.setVisibility(View.VISIBLE);
 						holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-					}
-					else
-					{
-						//holder.participantNameFT.setVisibility(View.GONE);
 					}
 				}
 				SmileyParser smileyParser = SmileyParser.getInstance();
@@ -854,7 +837,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				{
 					holder.fileThumb.setBackgroundDrawable(thumbnail);
 					holder.fileThumb.setImageResource(R.drawable.ic_video_play);
-					// holder.fileThumb.setBackgroundDrawable(thumbnail);
 				}
 				else
 				{
@@ -888,7 +870,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					 * In that case we won't have a thumbnail initially while the image is being downloaded.
 					 */
 					holder.loadingThumb.setVisibility(View.VISIBLE);
-					// holder.fileThumb.setVisibility(View.GONE);
 					showThumbnail = true;
 				}
 				else
@@ -896,7 +877,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (showThumbnail)
 					{
 						holder.fileThumb.setBackgroundDrawable(thumbnail);
-						// holder.fileThumb.setBackgroundDrawable(thumbnail);
 					}
 					//else if(hikeFileType != HikeFileType.LOCATION)
 					else
@@ -944,7 +924,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			
 			
 			//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>	 Setting and Showing MessageTextView
-			//holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE : View.GONE);
 			if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			{
 				Utils.setupFormattedTime(holder.messageTextView, hikeFile.getRecordingDuration());
@@ -992,7 +971,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 				else
 				{
-					// FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(),hikeFile.getFile());
 					if ( (!convMessage.isSent()) || (!TextUtils.isEmpty(hikeFile.getFileKey())) ) 
 					{
 						holder.showFileBtn.setVisibility(View.VISIBLE);
@@ -1104,7 +1082,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			{
 				if (convMessage.isSent()) // File is being sent
 				{
-					//FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
 					Log.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
 					switch (fss.getFTState())
 					{
@@ -1141,7 +1118,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				else
 				// File is being received
 				{
-					//FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
 					Log.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
 					switch (fss.getFTState())
 					{
@@ -1244,7 +1220,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (statusMessage.hasMood())
 			{
 				holder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
-				//holder.avatarFrame.setVisibility(View.GONE);
 			}
 			else
 			{
