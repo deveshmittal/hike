@@ -127,6 +127,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ViewGroup typingAvatarContainer;
 		View dayLeft;
 		View dayRight;
+		ImageView pokeCustom;
 	}
 
 	private Conversation conversation;
@@ -363,6 +364,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.dayRight = v.findViewById(R.id.day_right);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
+				holder.pokeCustom = (ImageView) v
+						.findViewById(R.id.poke_sent_custom);
 				holder.messageContainer = v
 						.findViewById(R.id.sent_message_container);
 
@@ -416,6 +419,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.findViewById(R.id.message_receive);
 				}
 				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
+				holder.pokeCustom = (ImageView) v
+						.findViewById(R.id.poke_receive_custom);
 				holder.messageContainer = v
 						.findViewById(R.id.receive_message_container);
 				holder.dayContainer = (LinearLayout) v
@@ -472,6 +477,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.dayContainer.setVisibility(View.GONE);
 			holder.stickerPlaceholder.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.GONE);
+			holder.pokeCustom.setVisibility(View.GONE);
 
 			holder.messageInfo.setVisibility(View.INVISIBLE);
 
@@ -943,6 +949,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (holder.poke != null) {
 			holder.poke.setVisibility(View.GONE);
+			holder.pokeCustom.setVisibility(View.GONE);
 		}
 
 		boolean firstMessageFromParticipant = false;
@@ -1172,10 +1179,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.participantNameFT.setVisibility(View.GONE);
 				}
 			}
-			holder.poke.setVisibility(View.VISIBLE);
-			holder.poke
-					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
-							: R.drawable.ic_nudge_hike_receive);
+			if (isDefaultTheme) {
+				holder.poke.setVisibility(View.VISIBLE);
+				holder.poke
+						.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
+								: R.drawable.ic_nudge_hike_receive);
+				holder.messageContainer.setVisibility(View.VISIBLE);
+			} else {
+				holder.pokeCustom.setVisibility(View.VISIBLE);
+				holder.pokeCustom
+						.setImageResource(convMessage.isSent() ? chatTheme
+								.sentNudgeResId()
+								: R.drawable.ic_nudge_receive_custom);
+				holder.messageContainer.setVisibility(View.GONE);
+			}
 		} else if (convMessage.isStickerMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.GONE);

@@ -34,6 +34,11 @@ public enum ChatTheme {
 		public boolean isTiled() {
 			return false;
 		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_hike_sent;
+		}
 	},
 	AQUA {
 		@Override
@@ -64,6 +69,12 @@ public enum ChatTheme {
 		@Override
 		public boolean isTiled() {
 			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	},
 	BLUE {
@@ -96,6 +107,12 @@ public enum ChatTheme {
 		public boolean isTiled() {
 			return true;
 		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	},
 	BLUE_GREEN {
 		@Override
@@ -126,6 +143,12 @@ public enum ChatTheme {
 		@Override
 		public boolean isTiled() {
 			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	},
 	CYAN {
@@ -158,6 +181,12 @@ public enum ChatTheme {
 		public boolean isTiled() {
 			return true;
 		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	},
 	GREEN {
 		@Override
@@ -188,6 +217,12 @@ public enum ChatTheme {
 		@Override
 		public boolean isTiled() {
 			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	},
 	ORANGE {
@@ -220,6 +255,12 @@ public enum ChatTheme {
 		public boolean isTiled() {
 			return true;
 		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	},
 	PURPLE {
 		@Override
@@ -250,6 +291,12 @@ public enum ChatTheme {
 		@Override
 		public boolean isTiled() {
 			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	},
 	RED_CHRISTMAS {
@@ -282,6 +329,12 @@ public enum ChatTheme {
 		public boolean isTiled() {
 			return true;
 		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	},
 	RED_HEARTS {
 		@Override
@@ -313,6 +366,12 @@ public enum ChatTheme {
 		public boolean isTiled() {
 			return true;
 		}
+
+		@Override
+		public int sentNudgeResId() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	};
 
 	public abstract String bgId();
@@ -326,6 +385,8 @@ public enum ChatTheme {
 	public abstract int bubbleResId();
 
 	public abstract boolean isTiled();
+
+	public abstract int sentNudgeResId();
 
 	public static ChatTheme getThemeFromId(String bgId) {
 		if (bgId == null) {

@@ -141,13 +141,22 @@
                     android:layout_toRightOf="@id/msg_status_indicator"
                     android:gravity="center_vertical"
                     android:src="@drawable/ic_nudge_hike_sent"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1.5dp"
+                    android:layout_marginLeft="6dp"
                     android:layout_marginRight="10dp"
                     android:visibility="gone" />
-
+                
             </LinearLayout>
+
+            <ImageView
+                android:id="@+id/poke_sent_custom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                android:src="@drawable/ic_nudge_sent_custom_forest_sporty"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/sticker_placeholder"
