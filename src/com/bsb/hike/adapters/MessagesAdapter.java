@@ -1293,7 +1293,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.circularProgress.setVisibility(View.INVISIBLE);
 			}
 			holder.image.setVisibility(View.VISIBLE);
-			holder.image.setImageResource(R.drawable.ic_download_failed);
+			holder.image
+					.setImageResource(isDefaultTheme ? R.drawable.ic_download_failed
+							: R.drawable.ic_download_failed_custom);
 
 			if (holder.messageInfo != null) {
 				holder.messageInfo.setVisibility(View.INVISIBLE);
