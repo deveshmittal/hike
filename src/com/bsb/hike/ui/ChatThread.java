@@ -2885,7 +2885,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void sendChatThemeMessage() {
-		long timestamp = System.currentTimeMillis() / 100;
+		long timestamp = System.currentTimeMillis() / 1000;
 		mConversationDb.setChatBackground(mContactNumber, selectedTheme.bgId(),
 				timestamp);
 
