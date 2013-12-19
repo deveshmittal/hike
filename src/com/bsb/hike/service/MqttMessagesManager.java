@@ -311,7 +311,7 @@ public class MqttMessagesManager {
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
 			}
 
-			JSONObject chatBgJson = jsonObj
+			JSONObject chatBgJson = metadata
 					.optJSONObject(HikeConstants.CHAT_BACKGROUND);
 			if (chatBgJson != null) {
 				String bgId = chatBgJson.optString(HikeConstants.BG_ID);
