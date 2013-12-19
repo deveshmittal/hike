@@ -2921,10 +2921,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		Button saveThemeBtn = (Button) actionBarView.findViewById(R.id.save);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		ViewGroup closeContainer = (ViewGroup) actionBarView
+				.findViewById(R.id.close_container);
 
 		title.setText(R.string.chat_theme);
 
-		closeBtn.setOnClickListener(new OnClickListener() {
+		closeContainer.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
