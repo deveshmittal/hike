@@ -239,17 +239,7 @@ public class FileTransferManager
 
 	public boolean isFileTaskExist(long msgId)
 	{
-		//return fileTaskMap.containsKey(msgId);
-		if(fileTaskMap.containsKey(msgId))
-		{
-			Log.d(getClass().getSimpleName(), "Contains Key");
-			return true;
-		}
-		else
-		{
-			Log.d(getClass().getSimpleName(), "Doesn't contain Key");
-			return false;
-		}
+		return fileTaskMap.containsKey(msgId);
 	}
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
@@ -526,7 +516,6 @@ public class FileTransferManager
 	}
 	
 	// Fetches the type of internet connection the device is using
-	// Return the level(1 to 4) of internet connection based on speed
 	public NetworkType getNetworkType()
 	{
 		int networkType = -1;
@@ -549,14 +538,14 @@ public class FileTransferManager
 		case TelephonyManager.NETWORK_TYPE_LTE:		// ~ 10+ Mbps	// API level 11
 		case TelephonyManager.NETWORK_TYPE_HSPAP:	// ~ 10-20 Mbps	// API level 13
 		case TelephonyManager.NETWORK_TYPE_EVDO_B:	// ~ 5 Mbps		// API level 9
-			return NetworkType.FOUR_G;					//return 512 * 1024;
+			return NetworkType.FOUR_G;
 		case TelephonyManager.NETWORK_TYPE_EVDO_0:	// ~ 400-1000 kbps
 		case TelephonyManager.NETWORK_TYPE_EVDO_A:	// ~ 600-1400 kbps
 		case TelephonyManager.NETWORK_TYPE_HSDPA:	// ~ 2-14 Mbps
 		case TelephonyManager.NETWORK_TYPE_HSPA:	// ~ 700-1700 kbps
 		case TelephonyManager.NETWORK_TYPE_UMTS:	// ~ 400-7000 kbps 
 		case TelephonyManager.NETWORK_TYPE_EHRPD:	// ~ 1-2 Mbps	// API level 11
-			return NetworkType.THREE_G;					//return 256 *1024;
+			return NetworkType.THREE_G;
 		case TelephonyManager.NETWORK_TYPE_1xRTT:	// ~ 50-100 kbps
 		case TelephonyManager.NETWORK_TYPE_CDMA:	// ~ 14-64 kbps
 		case TelephonyManager.NETWORK_TYPE_EDGE:	// ~ 50-100 kbps
@@ -564,7 +553,7 @@ public class FileTransferManager
 		case TelephonyManager.NETWORK_TYPE_IDEN:	// ~25 kbps		// API level 8
 		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
 		default:
-			return NetworkType.TWO_G;					//return 24 * 1024;
+			return NetworkType.TWO_G;
 		}
 	}
 	

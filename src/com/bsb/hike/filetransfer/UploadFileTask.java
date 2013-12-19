@@ -247,7 +247,6 @@ public class UploadFileTask extends FileTransferBase
 				 */
 				((ConvMessage) userContext).setMetadata(metadata);
 				HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
-				// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
@@ -266,7 +265,6 @@ public class UploadFileTask extends FileTransferBase
 		}
 		msgId = ((ConvMessage) userContext).getMsgID();
 		fileTaskMap.put(msgId, futureTask);
-		Log.d(getClass().getSimpleName(), "Key Added");
 		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 		Log.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
@@ -444,6 +442,12 @@ public class UploadFileTask extends FileTransferBase
 		}
 		else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 		{
+			/* 
+			 * In case user paused the transfer during the last chunk.
+			 * The Upload was completed and the response from server was stored with the state file.
+			 * So when resumed, the response is read from state file.
+			 * If this is not null the response is returned.
+			 */
 			if(fst.getResponseJson() != null)
 			{
 				_state = FTState.COMPLETED;
@@ -469,22 +473,16 @@ public class UploadFileTask extends FileTransferBase
 			end = start + chunkSize;
 		end--;
 		byte[] fileBytes = null;
-		//The following loops goes on till the end byte to read reaches the length
-		//or we receive a json response from the server
+		/*
+		 * The following loops goes on till the end byte to read reaches the length
+		 * or we receive a json response from the server
+		 */
+		//
 		while(end < length && responseJson == null)
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 			
-			if(fileTaskMap.containsKey(msgId))
-			{
-				Log.d(getClass().getSimpleName(), "Contains Key");
-			}
-			else
-			{
-				Log.d(getClass().getSimpleName(), "Doesn't contain Key");
-			}
-		
 			fileBytes = new byte[end - start + 1]; //Byte Size to read from the file
 			//In case of success following flag is set high to reset retry logic and update UI
 			boolean resetAndUpdate = false;
@@ -493,12 +491,14 @@ public class UploadFileTask extends FileTransferBase
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
-			Log.d(getClass().getSimpleName(),"ChunkSize : " + chunkSize + "Bytes");
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
 			String responseString = send(contentRange, fileBytes);
 			Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
-			// When end byte uploaded is the last byte of the file and server send response
-			// i.e. upload successfully completed
+			/*
+			 * When end byte uploaded is the last byte of the file and server send response
+			 * i.e. upload successfully completed
+			 */
+			 
 			if(end == (length-1) && responseString != null)
 			{
 				responseJson = new JSONObject(responseString);
@@ -510,13 +510,29 @@ public class UploadFileTask extends FileTransferBase
 				// In case there is error uploading this chunk
 				if(responseString == null)
 				{
-					// If retry attempt is to be made
-					// The chunk size is reduced for next attempt
+					/*
+					 * If retry attempt is to be made.
+					 * The chunk size is reduced for next attempt
+					 */
+					 
 					if(shouldRetry())
 					{
 						raf.seek(start);
 						end = (int) length;
 						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+						/*
+						 * This chunk size should ideally be no more than 1/8 of the total memory available.
+						 */
+						try
+						{
+							int maxMemory = (int) Runtime.getRuntime().maxMemory();
+							if( chunkSize > (maxMemory / 8) )
+							chunkSize = maxMemory / 8 ;
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+						}
 						if (end > (start + chunkSize))
 							end = start + chunkSize;
 						end--;
@@ -538,9 +554,20 @@ public class UploadFileTask extends FileTransferBase
 						chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
 					else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
 						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
-					int maxMemory = (int) Runtime.getRuntime().maxMemory();
-					if( chunkSize > (maxMemory / 8) )
+					/*
+					 * This chunk size should ideally be no more than 1/8 of the total memory available.
+					 */
+					try
+					{
+						int maxMemory = (int) Runtime.getRuntime().maxMemory();
+						if( chunkSize > (maxMemory / 8) )
 						chunkSize = maxMemory / 8 ;
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					
 					end = (int) length;
 					if (end > (start + chunkSize))
 						end = start + chunkSize;
@@ -548,15 +575,20 @@ public class UploadFileTask extends FileTransferBase
 					resetAndUpdate = true;	// To reset retry logic and update UI
 				}
 			}
-			/* resetting reconnect logic + updating UI*/
+			/*
+			 * Resetting reconnect logic
+			 * Updating UI
+			 */
 			if(resetAndUpdate)
 			{
 				retry = true;
 				reconnectTime = 0;
 				retryAttempts = 0;
 				incrementBytesTransferred(fileBytes.length);
-				progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
-				// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+				long temp = _bytesTransferred;
+				temp *= 100;
+				temp /= _totalSize;
+				progressPercentage = (int) temp;
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 				showButton();
 			}
@@ -575,6 +607,7 @@ public class UploadFileTask extends FileTransferBase
 			break;
 		case PAUSED:
 			Log.d(getClass().getSimpleName(), "FT PAUSED");
+			// In case upload was complete response JSON is to be saved not the Session_ID
 			if(responseJson != null)
 				saveFileState(responseJson);
 			else
@@ -612,8 +645,10 @@ public class UploadFileTask extends FileTransferBase
 		return res.toString();
 	}
 
-	// @GM
-	// for updating progress on UI
+	/*
+	 * this function was created to notify the UI
+	 * but is not required for now. Not deleted if required again
+	 */
 	private boolean shouldSendProgress()
 	{
 		int x = progressPercentage / 10;
@@ -634,11 +669,6 @@ public class UploadFileTask extends FileTransferBase
 	}
 	private String send(String contentRange, byte[] fileBytes)
 	{
-//		HttpURLConnection hc = null;
-//		BufferedInputStream is = null;
-//		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-		//OkHttpClient client = new OkHttpClient();
 		HttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
@@ -666,8 +696,6 @@ public class UploadFileTask extends FileTransferBase
 			}
 			res = total.toString();
 			retry = false; // if success don't retry again till next time
-			//Log.d(getClass().getSimpleName(), "Chunk upload response code : " + hc.getResponseCode());
-			
 		}
 		catch (Exception e)
 		{
@@ -684,10 +712,6 @@ public class UploadFileTask extends FileTransferBase
 				res = null;
 				retry = false;
 			}
-		}
-		finally
-		{
-			//closeStreams(bos, is, hc);
 		}
 
 		return res;
@@ -769,12 +793,10 @@ public class UploadFileTask extends FileTransferBase
 		if (userContext != null)
 		{
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
-			Log.d(getClass().getSimpleName(), "Key Removed");
 			if (result == FTResult.SUCCESS)
 			{
 				((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 			}
-			// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
 

@@ -80,7 +80,11 @@ public class FileSavedState implements Serializable
 	{
 		try
 		{
-			return (new JSONObject(_responseJson));
+			if(_responseJson != null)
+			{
+				return (new JSONObject(_responseJson));
+			}
+			return null;
 		}
 		catch (JSONException e)
 		{

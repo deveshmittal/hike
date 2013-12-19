@@ -78,7 +78,7 @@ public class DownloadFileTask extends FileTransferBase
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// Restoring the bytes transferred(downloaded) previously.
 				setBytesTransferred((int) raf.length());
-				//Bug Fix: 13029
+				// Bug Fix: 13029
 				setFileTotalSize(fst.getTotalSize());
 				return downloadFile(raf.length(), raf, AccountUtils.ssl);
 			}
@@ -159,9 +159,12 @@ public class DownloadFileTask extends FileTransferBase
 					}
 					Log.d(getClass().getSimpleName(), "bytes=" + byteRange);
 					setFileTotalSize(contentLength + (int) mStart);
-
-					progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
-					num = (int) (progressPercentage / 10);
+					
+					long temp = _bytesTransferred;
+					temp *= 100;
+					temp /= _totalSize;
+					progressPercentage = (int) temp;
+					
 					// get the input stream
 					in = new BufferedInputStream(conn.getInputStream());
 
@@ -190,9 +193,20 @@ public class DownloadFileTask extends FileTransferBase
 							chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
 						else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
 							chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
-						int maxMemory = (int) Runtime.getRuntime().maxMemory();
-						if( chunkSize > (maxMemory / 8) )
+						
+						/*
+						 * This chunk size should ideally be no more than 1/8 of the total memory available.
+						 */
+						try
+						{
+							int maxMemory = (int) Runtime.getRuntime().maxMemory();
+							if( chunkSize > (maxMemory / 8) )
 							chunkSize = maxMemory / 8 ;
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+						}
 						// change buffer size
 						data = new byte[chunkSize];
 						// increase the startByte for resume later
@@ -201,7 +215,6 @@ public class DownloadFileTask extends FileTransferBase
 						incrementBytesTransferred(numRead);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						showButton();
-						//if (shouldSendProgress())
 						sendProgress();
 					}
 

@@ -815,7 +815,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			
 			//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail
-			holder.fileThumb.setBackground(null);
+			holder.fileThumb.setBackgroundResource(0);
 			holder.fileThumb.setImageResource(0);
 			boolean showThumbnail = false;
 			Drawable thumbnail = null;
@@ -852,7 +852,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				
 				if (showThumbnail)
 				{
-					holder.fileThumb.setBackground(thumbnail);
+					holder.fileThumb.setBackgroundDrawable(thumbnail);
 					holder.fileThumb.setImageResource(R.drawable.ic_video_play);
 					// holder.fileThumb.setBackgroundDrawable(thumbnail);
 				}
@@ -895,7 +895,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				{
 					if (showThumbnail)
 					{
-						holder.fileThumb.setBackground(thumbnail);
+						holder.fileThumb.setBackgroundDrawable(thumbnail);
 						// holder.fileThumb.setBackgroundDrawable(thumbnail);
 					}
 					//else if(hikeFileType != HikeFileType.LOCATION)
