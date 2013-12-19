@@ -17,6 +17,7 @@
 		android:layout_marginTop="10dp">
 
 		<View 
+		    android:id="@+id/day_left"
 		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
@@ -37,6 +38,7 @@
         	android:textStyle="bold|italic" />
 
 	    <View 
+	        android:id="@+id/day_right"
 		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"

@@ -125,6 +125,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ImageView typing;
 		ViewGroup avatarContainer;
 		ViewGroup typingAvatarContainer;
+		View dayLeft;
+		View dayRight;
 	}
 
 	private Conversation conversation;
@@ -326,6 +328,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
 
 				holder.image.setVisibility(View.GONE);
 				v.findViewById(R.id.receive_message_container).setVisibility(
@@ -355,6 +359,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.dayContainer = (LinearLayout) v
 						.findViewById(R.id.day_container);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
 				holder.messageContainer = v
@@ -415,6 +421,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.dayContainer = (LinearLayout) v
 						.findViewById(R.id.day_container);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
 				holder.stickerPlaceholder = v
@@ -526,6 +534,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			String dateFormatted = convMessage.getMessageDate(context);
 			holder.dayTextView.setText(dateFormatted.toUpperCase());
 			holder.dayContainer.setVisibility(View.VISIBLE);
+
+			if (isDefaultTheme) {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_header));
+				holder.dayLeft.setBackgroundColor(context.getResources()
+						.getColor(R.color.day_line));
+				holder.dayRight.setBackgroundColor(context.getResources()
+						.getColor(R.color.day_line));
+			} else {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.dayLeft.setBackgroundColor(context.getResources()
+						.getColor(R.color.white));
+				holder.dayRight.setBackgroundColor(context.getResources()
+						.getColor(R.color.white));
+			}
 		} else {
 			if (holder.dayContainer != null) {
 				holder.dayContainer.setVisibility(View.GONE);
