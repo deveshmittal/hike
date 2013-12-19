@@ -1466,6 +1466,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			iv.setVisibility(View.GONE);
 		}
 
+		tv.setTextColor(context.getResources().getColor(
+				isDefaultTheme ? R.color.list_item_subtext : R.color.white));
+
 		ConvMessage current = getItem(position);
 		if (current.isSent() && (position == lastSentMessagePosition)) {
 			switch (current.getState()) {
