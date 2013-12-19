@@ -9,6 +9,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
@@ -112,6 +114,23 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected void saveFileState(String uuid)
 	{
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
+	
+	protected void saveFileState(JSONObject response)
+	{
+		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, response);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);

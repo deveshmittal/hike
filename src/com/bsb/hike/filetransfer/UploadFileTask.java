@@ -266,6 +266,7 @@ public class UploadFileTask extends FileTransferBase
 		}
 		msgId = ((ConvMessage) userContext).getMsgID();
 		fileTaskMap.put(msgId, futureTask);
+		Log.d(getClass().getSimpleName(), "Key Added");
 		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 		Log.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
@@ -443,6 +444,14 @@ public class UploadFileTask extends FileTransferBase
 		}
 		else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 		{
+			if(fst.getResponseJson() != null)
+			{
+				_state = FTState.COMPLETED;
+				deleteStateFile();
+				
+				responseJson = fst.getResponseJson();
+				return responseJson;
+			}
 			X_SESSION_ID = fst.getSessionId();
 			Log.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
@@ -466,6 +475,16 @@ public class UploadFileTask extends FileTransferBase
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
+			
+			if(fileTaskMap.containsKey(msgId))
+			{
+				Log.d(getClass().getSimpleName(), "Contains Key");
+			}
+			else
+			{
+				Log.d(getClass().getSimpleName(), "Doesn't contain Key");
+			}
+		
 			fileBytes = new byte[end - start + 1]; //Byte Size to read from the file
 			//In case of success following flag is set high to reset retry logic and update UI
 			boolean resetAndUpdate = false;
@@ -543,8 +562,6 @@ public class UploadFileTask extends FileTransferBase
 			}
 			fileBytes = null;
 		}
-		if(responseJson != null)
-			setState(FTState.IN_PROGRESS);
 		switch (_state)
 		{
 		case CANCELLED:
@@ -558,7 +575,10 @@ public class UploadFileTask extends FileTransferBase
 			break;
 		case PAUSED:
 			Log.d(getClass().getSimpleName(), "FT PAUSED");
-			saveFileState(X_SESSION_ID);
+			if(responseJson != null)
+				saveFileState(responseJson);
+			else
+				saveFileState(X_SESSION_ID);
 			break;
 		default:
 			break;
@@ -749,6 +769,7 @@ public class UploadFileTask extends FileTransferBase
 		if (userContext != null)
 		{
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
+			Log.d(getClass().getSimpleName(), "Key Removed");
 			if (result == FTResult.SUCCESS)
 			{
 				((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);

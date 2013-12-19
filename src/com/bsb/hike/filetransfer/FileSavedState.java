@@ -2,6 +2,9 @@ package com.bsb.hike.filetransfer;
 
 import java.io.Serializable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 
 public class FileSavedState implements Serializable
@@ -18,6 +21,8 @@ public class FileSavedState implements Serializable
 	private int _transferredSize;
 	
 	private String _sessionId;
+	
+	private String _responseJson;
 
 	public FileSavedState(FTState state, int totalSize, int transferredSize)
 	{
@@ -25,6 +30,7 @@ public class FileSavedState implements Serializable
 		_totalSize = totalSize;
 		_transferredSize = transferredSize;
 		_sessionId = null;
+		_responseJson = null;
 	}
 	
 	public FileSavedState(FTState state, int totalSize, int transferredSize,String sId)
@@ -33,6 +39,16 @@ public class FileSavedState implements Serializable
 		_totalSize = totalSize;
 		_transferredSize = transferredSize;
 		_sessionId = sId;
+		_responseJson = null;
+	}
+	
+	public FileSavedState(FTState state, int totalSize, int transferredSize,JSONObject response)
+	{
+		_currentState = state;
+		_totalSize = totalSize;
+		_transferredSize = transferredSize;
+		_sessionId = null;
+		_responseJson = response.toString();
 	}
 	
 	public FileSavedState()
@@ -58,5 +74,19 @@ public class FileSavedState implements Serializable
 	public String getSessionId()
 	{
 		return _sessionId;
+	}
+	
+	public JSONObject getResponseJson()
+	{
+		try
+		{
+			return (new JSONObject(_responseJson));
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

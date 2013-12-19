@@ -239,8 +239,17 @@ public class FileTransferManager
 
 	public boolean isFileTaskExist(long msgId)
 	{
-		//return fileTaskMap.contains(msgId);
-		return fileTaskMap.containsKey(msgId);
+		//return fileTaskMap.containsKey(msgId);
+		if(fileTaskMap.containsKey(msgId))
+		{
+			Log.d(getClass().getSimpleName(), "Contains Key");
+			return true;
+		}
+		else
+		{
+			Log.d(getClass().getSimpleName(), "Doesn't contain Key");
+			return false;
+		}
 	}
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
@@ -401,11 +410,17 @@ public class FileTransferManager
 	// this function gives the state of downloading for a file
 	public FileSavedState getDownloadFileState(long msgId, File mFile)
 	{
-		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
-		if (obj != null)
+		if(isFileTaskExist(msgId))
 		{
-			return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
-			// return new FileSavedState(FTState.IN_PROGRESS, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
+			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+			if (obj != null)
+			{
+				return new FileSavedState(FTState.IN_PROGRESS, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
+			}
+			else
+			{
+				return new FileSavedState(FTState.IN_PROGRESS, 0, 0);
+			}
 		}
 		else
 			return getDownloadFileState(mFile, msgId);
@@ -454,11 +469,17 @@ public class FileTransferManager
 	// this function gives the state of uploading for a file
 	public FileSavedState getUploadFileState(long msgId, File mFile)
 	{
-		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
-		if (obj != null)
+		if(isFileTaskExist(msgId))
 		{
-			return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
-			// return new FileSavedState(FTState.IN_PROGRESS, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
+			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+			if (obj != null)
+			{
+				return new FileSavedState(FTState.IN_PROGRESS, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
+			}
+			else
+			{
+				return new FileSavedState(FTState.IN_PROGRESS, 0, 0);
+			}
 		}
 		else
 			return getUploadFileState(mFile, msgId);
@@ -585,7 +606,13 @@ public class FileTransferManager
 		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			if (fss.getTotalSize() > 0)
-				return (int) ((fss.getTransferredSize() * 100) / fss.getTotalSize());
+			{
+				long temp = fss.getTransferredSize();
+				temp *= 100;
+				temp /= fss.getTotalSize();
+				return (int) temp;
+			}
+				
 			else
 				return 0;
 		}
