@@ -501,6 +501,7 @@ public class ChatBgFtue
 		ContactInfo contactInfo = HikeUserDatabase.getInstance().getMostRecentContact();
 		if(contactInfo != null){
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo, false);
+			intent.putExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, true);
 			intent.setClass(activity, ChatThread.class);
 			activity.startActivity(intent);
 		} else{

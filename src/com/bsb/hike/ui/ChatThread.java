@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -1467,7 +1468,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
 
-		selectedTheme = mConversationDb.getChatThemeForMsisdn(mContactNumber);
+		if (getIntent().getBooleanExtra(
+				HikeConstants.Extras.FROM_CHAT_THEME_FTUE, false)) {
+			getIntent().removeExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE);
+			Random random = new Random();
+			selectedTheme = ChatTheme.FTUE_THEMES[random
+					.nextInt(ChatTheme.FTUE_THEMES.length)];
+			sendChatThemeMessage();
+		} else {
+			selectedTheme = mConversationDb
+					.getChatThemeForMsisdn(mContactNumber);
+		}
 		setChatTheme(selectedTheme);
 
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)) {
