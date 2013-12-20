@@ -2860,6 +2860,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		GridView attachmentsGridView = (GridView) parentView
 				.findViewById(R.id.attachment_grid);
 
+		TextView chatThemeTip = (TextView) parentView
+				.findViewById(R.id.chat_theme_tip);
+
+		chatThemeTip
+				.setText(mConversation instanceof GroupConversation ? R.string.chat_theme_tip_group
+						: R.string.chat_theme_tip);
+		chatThemeTip.setVisibility(mConversation.isOnhike() ? View.VISIBLE
+				: View.GONE);
+
 		temporaryTheme = selectedTheme;
 
 		attachmentsGridView.setNumColumns(getNumColumnsChatThemes());

@@ -26,6 +26,19 @@
             android:numColumns="5"
             android:verticalSpacing="4dp" />
 
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/chat_theme_tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:drawableLeft="@drawable/ic_chat_theme_info"
+            android:drawablePadding="8dp"
+            android:gravity="left"
+            android:text="@string/chat_theme_tip"
+            android:textColor="#bdbebe"
+            android:textSize="12sp" />
+
         <View
             android:layout_width="1dp"
             android:layout_height="12dp" />
