@@ -11,7 +11,7 @@
         android:layout_height="@dimen/gift_box_bottom_height"
         android:layout_gravity="center"
         android:background="#ff6788"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/chat_theme_popup"
