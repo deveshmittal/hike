@@ -788,5 +788,5 @@ public enum ChatTheme {
 		throw new IllegalArgumentException();
 	}
 
-	public static ChatTheme[] FTUE_THEMES = { LOVE, BEACH, FOREST };
+	public static ChatTheme[] FTUE_THEMES = { STARRY, BEACH, FOREST };
 };
