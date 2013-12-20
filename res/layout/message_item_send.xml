@@ -155,7 +155,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:gravity="center_vertical"
-                android:src="@drawable/ic_nudge_sent_custom_forest_sporty"
                 android:visibility="gone" />
 
             <LinearLayout
