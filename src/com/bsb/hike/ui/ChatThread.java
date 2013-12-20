@@ -90,6 +90,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -3045,6 +3046,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		});
 
 		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this,
+				R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+		saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(this,
+				R.anim.scale_in));
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState) {
