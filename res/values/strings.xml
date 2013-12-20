@@ -719,7 +719,7 @@
 	<string name="give_it_a_spin">Give it a spin</string>		
 	<string name="chat_bg_ftue_tip">More gorgeous themes here...</string>
 	<string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
-	<string name="last_seen_today_ct">%1$s</string>
+	<string name="last_seen_today_ct">today, %1$s</string>
 	<string name="last_seen_yesterday_ct">yesterday, %1$s</string>
 	<string name="last_seen_more_ct">%1$s</string>
 	<string name="last_seen_while_ago_ct">a while ago</string>
