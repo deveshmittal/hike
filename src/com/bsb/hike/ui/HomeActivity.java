@@ -182,6 +182,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			//if chat bg ftue is not shown show this on the highest priority
 			dialogShowing = DialogShowing.CHAT_BG_FTUE;
 			snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+			findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
+			getSupportActionBar().hide();
 		} else {
 			// check the preferences and show update
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
@@ -244,6 +246,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onChatBgGiveItASpinClick(View v){
+		findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+		getSupportActionBar().show();
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
 		editor.commit();
