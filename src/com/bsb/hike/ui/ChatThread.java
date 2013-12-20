@@ -1254,6 +1254,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						.getStringExtra(HikeConstants.Extras.FWD_STICKER_ID);
 				Sticker sticker = new Sticker(categoryId, stickerId);
 				sendSticker(sticker);
+
+				/*
+				 * Making sure the sticker is not forwarded again on orientation
+				 * change
+				 */
+				intent.removeExtra(HikeConstants.Extras.FWD_CATEGORY_ID);
 			}
 			/*
 			 * Since the message was not forwarded, we check if we have any
