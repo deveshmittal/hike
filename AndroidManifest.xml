@@ -89,6 +89,7 @@
         </activity>
         <activity
             android:name=".ui.ChatThread"
+            android:theme="@style/ChatThreadTheme"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden" >
