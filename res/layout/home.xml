@@ -35,8 +35,8 @@
         android:id="@+id/chat_bg_ftue_fade"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
+        android:background="#cd000000"
         android:onClick="OnChatBgFtueOverlayClick"
         android:visibility="gone" />
-        
+    
 </FrameLayout>
