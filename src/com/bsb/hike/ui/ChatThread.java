@@ -2908,6 +2908,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		};
 
 		attachmentsGridView.setAdapter(gridAdapter);
+		attachmentsGridView.setSelection(temporaryTheme.ordinal());
 
 		attachmentsGridView.setOnItemClickListener(new OnItemClickListener() {
 
