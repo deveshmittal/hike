@@ -34,6 +34,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
@@ -1347,6 +1348,7 @@ public class MqttMessagesManager {
 				String message = context.getString(R.string.unknown_chat_theme);
 				ConvMessage convMessage = Utils.makeConvMessage(null, id,
 						message, true);
+				convMessage.setState(State.RECEIVED_UNREAD);
 				convDb.addConversationMessages(convMessage);
 
 				/*
