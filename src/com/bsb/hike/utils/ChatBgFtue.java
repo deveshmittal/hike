@@ -29,32 +29,63 @@ public class ChatBgFtue
 	public static SnowFallView startAndSetSnowFallView(final Activity activity){
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.VISIBLE);
 		Handler animHandler = new Handler();
-		AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 0.6f);
-		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
-		alphaAnim.setInterpolator(accInterpolator);
-		alphaAnim.setStartOffset(400);
-		alphaAnim.setDuration(800);
+		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
 		alphaAnim.setFillAfter(true);
-		activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
-
-		FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
-		final SnowFallView snowFallView = new SnowFallView(activity);
-		snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		snowFallView.setVisibility(View.GONE);
-		layout.addView(snowFallView);
-		
-		setGiftFallAnim(activity);
-		animHandler.postDelayed(new Runnable()
-		{
 			
-			@Override
-			public void run()
+		if(((int)Utils.densityMultiplier *100) >= 100){
+			alphaAnim.setDuration(1400);
+			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
+			FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
+			final SnowFallView snowFallView = new SnowFallView(activity);
+			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			snowFallView.setVisibility(View.GONE);
+			layout.addView(snowFallView);
+
+			animHandler.postDelayed(new Runnable()
 			{
-				snowFallView.setVisibility(View.VISIBLE);
-			}
-		}, 1300);
+
+				@Override
+				public void run()
+				{
+					setGiftFallAnim(activity);
+
+				}
+			}, 2200);
+
+			animHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView.setVisibility(View.VISIBLE);
+					AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 1f);
+					AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
+					alphaAnim.setInterpolator(accInterpolator);
+					//alphaAnim.setStartOffset(600);
+					alphaAnim.setDuration(600);
+					alphaAnim.setFillAfter(true);
+					snowFallView.startAnimation(alphaAnim);
+				}
+			}, 1200);
+			return snowFallView;
+		} else{
+			alphaAnim.setDuration(1800);
+			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
+			animHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					setGiftFallAnim(activity);
+
+				}
+			}, 2000);
+			return null;
+		}
+		
 	
-		return snowFallView;
 	}
 
 	public static void setGiftFallAnim(final Activity activity)
