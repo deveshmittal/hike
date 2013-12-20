@@ -89,6 +89,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.BadTokenException;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -151,6 +152,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -738,18 +740,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
 		mMenu = menu;
-		MenuItem profileItem = menu.findItem(R.id.profile);
-		MenuItem callItem = menu.findItem(R.id.call);
-		if (mConversation instanceof GroupConversation) {
-			profileItem.setTitle(R.string.group_profile);
-			callItem.setVisible(false);
-		} else {
-			profileItem.setTitle(R.string.view_profile);
-			callItem.setVisible(true);
-		}
-
-		MenuItem muteItem = menu.findItem(R.id.mute);
-		muteItem.setVisible(mConversation instanceof GroupConversation);
 		return true;
 	}
 
@@ -757,13 +747,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		if (mConversation == null || showingChatThemePicker) {
 			return super.onPrepareOptionsMenu(menu);
-		}
-		MenuItem menuItem = menu.findItem(R.id.mute);
-		if (mConversation instanceof GroupConversation) {
-			boolean isMuted = ((GroupConversation) mConversation).isMuted();
-			menuItem.setTitle(isMuted ? R.string.unmute_group
-					: R.string.mute_group);
-			return true;
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -809,38 +792,148 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
 			break;
-		case R.id.profile:
-			openProfileScreen();
-			break;
-		case R.id.mute:
-			GroupConversation groupConversation = (GroupConversation) mConversation;
-
-			groupConversation.setIsMuted(!groupConversation.isMuted());
-
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.MUTE_CONVERSATION_TOGGLED,
-					new Pair<String, Boolean>(groupConversation.getMsisdn(),
-							groupConversation.isMuted()));
-			invalidateOptionsMenu();
-			break;
-		case R.id.call:
-			Utils.onCallClicked(ChatThread.this, mContactNumber);
-			break;
-		case R.id.email_conv:
-			EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(
-					ChatThread.this, null);
-			Utils.executeConvAsyncTask(emailTask, mConversation);
-			break;
-		case R.id.add_shortcut:
-			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
-			Utils.createShortcut(ChatThread.this, mConversation);
-			break;
 		case R.id.overflow_menu:
-			mMenu.performIdentifierAction(R.id.overflow_menu, 0);
+			showOverFlowMenu();
 			break;
 		}
 
 		return true;
+	}
+
+	private void showOverFlowMenu() {
+
+		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
+
+		optionsList
+				.add(new OverFlowMenuItem(
+						getString((mConversation instanceof GroupConversation) ? R.string.group_profile
+								: R.string.view_profile), 0));
+
+		if (!(mConversation instanceof GroupConversation)) {
+			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+		}
+
+		if (mConversation instanceof GroupConversation) {
+			boolean isMuted = ((GroupConversation) mConversation).isMuted();
+
+			optionsList.add(new OverFlowMenuItem(
+					getString(isMuted ? R.string.unmute_group
+							: R.string.mute_group), 2));
+		}
+
+		optionsList.add(new OverFlowMenuItem(
+				getString(R.string.email_conversation), 3));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
+
+		final PopupWindow overFlowWindow = new PopupWindow(this);
+
+		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu,
+				chatLayout, false);
+
+		overFlowWindow.setContentView(parentView);
+
+		ListView overFlowListView = (ListView) parentView
+				.findViewById(R.id.overflow_menu_list);
+		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this,
+				R.layout.over_flow_menu_item, R.id.item_title, optionsList) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (convertView == null) {
+					convertView = getLayoutInflater().inflate(
+							R.layout.over_flow_menu_item, parent, false);
+				}
+
+				OverFlowMenuItem item = getItem(position);
+
+				TextView itemTextView = (TextView) convertView
+						.findViewById(R.id.item_title);
+				itemTextView.setText(item.getName());
+
+				convertView.findViewById(R.id.profile_image_view)
+						.setVisibility(View.GONE);
+
+				TextView freeSmsCount = (TextView) convertView
+						.findViewById(R.id.free_sms_count);
+				freeSmsCount.setVisibility(View.GONE);
+
+				TextView newGamesIndicator = (TextView) convertView
+						.findViewById(R.id.new_games_indicator);
+				newGamesIndicator.setVisibility(View.GONE);
+
+				return convertView;
+			}
+		});
+
+		overFlowListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				Log.d(getClass().getSimpleName(), "Onclick: " + position);
+
+				overFlowWindow.dismiss();
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView
+						.getItemAtPosition(position);
+
+				switch (item.getKey()) {
+				case 0:
+					openProfileScreen();
+					break;
+				case 1:
+					Utils.onCallClicked(ChatThread.this, mContactNumber);
+					break;
+				case 2:
+					GroupConversation groupConversation = (GroupConversation) mConversation;
+
+					groupConversation.setIsMuted(!groupConversation.isMuted());
+
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.MUTE_CONVERSATION_TOGGLED,
+							new Pair<String, Boolean>(groupConversation
+									.getMsisdn(), groupConversation.isMuted()));
+					break;
+				case 3:
+					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(
+							ChatThread.this, null);
+					Utils.executeConvAsyncTask(emailTask, mConversation);
+					break;
+				case 4:
+					Utils.logEvent(ChatThread.this,
+							HikeConstants.LogEvent.ADD_SHORTCUT);
+					Utils.createShortcut(ChatThread.this, mConversation);
+					break;
+				}
+
+			}
+		});
+
+		overFlowWindow.setBackgroundDrawable(getResources().getDrawable(
+				android.R.color.transparent));
+		overFlowWindow.setOutsideTouchable(true);
+		overFlowWindow.setFocusable(true);
+		overFlowWindow.setWidth(getResources().getDimensionPixelSize(
+				R.dimen.overflow_menu_width));
+		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		/*
+		 * In some devices Activity crashes and a BadTokenException is thrown by
+		 * showAsDropDown method. Still need to find out exact repro of the bug.
+		 */
+		try {
+			overFlowWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
+		} catch (BadTokenException e) {
+			Log.e(getClass().getSimpleName(),
+					"Excepetion in HomeActivity Overflow popup", e);
+		}
+		overFlowWindow.getContentView().setFocusableInTouchMode(true);
+		overFlowWindow.getContentView().setOnKeyListener(
+				new View.OnKeyListener() {
+					@Override
+					public boolean onKey(View v, int keyCode, KeyEvent event) {
+						return onKeyUp(keyCode, event);
+					}
+				});
 	}
 
 	private void blockUser() {

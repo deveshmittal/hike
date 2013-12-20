@@ -59,6 +59,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
@@ -1079,24 +1080,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 		return super.onKeyUp(keyCode, event);
-	}
-
-	private class OverFlowMenuItem {
-		private String name;
-		private int key;
-
-		OverFlowMenuItem(String name, int key) {
-			this.name = name;
-			this.key = key;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public int getKey() {
-			return key;
-		}
 	}
 
 	private void showOverFlowMenu() {
