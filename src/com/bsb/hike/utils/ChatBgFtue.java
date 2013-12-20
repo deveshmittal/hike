@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -29,79 +30,120 @@ public class ChatBgFtue
 	public static SnowFallView startAndSetSnowFallView(final Activity activity){
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.VISIBLE);
 		Handler animHandler = new Handler();
-		AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 0.6f);
-		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
-		alphaAnim.setInterpolator(accInterpolator);
-		alphaAnim.setStartOffset(400);
-		alphaAnim.setDuration(800);
+		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
 		alphaAnim.setFillAfter(true);
-		activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
-
-		FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
-		final SnowFallView snowFallView = new SnowFallView(activity);
-		snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		snowFallView.setVisibility(View.GONE);
-		layout.addView(snowFallView);
-		
-		setGiftFallAnim(activity);
-		animHandler.postDelayed(new Runnable()
-		{
 			
-			@Override
-			public void run()
+		if(((int)Utils.densityMultiplier *100) >= 100){
+			alphaAnim.setDuration(1400);
+			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
+			FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
+			final SnowFallView snowFallView = new SnowFallView(activity);
+			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			snowFallView.setVisibility(View.GONE);
+			layout.addView(snowFallView);
+
+			animHandler.postDelayed(new Runnable()
 			{
-				snowFallView.setVisibility(View.VISIBLE);
-			}
-		}, 1300);
+
+				@Override
+				public void run()
+				{
+					setGiftFallAnim(activity);
+
+				}
+			}, 2200);
+
+			animHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView.setVisibility(View.VISIBLE);
+					AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 1f);
+					AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
+					alphaAnim.setInterpolator(accInterpolator);
+					//alphaAnim.setStartOffset(600);
+					alphaAnim.setDuration(600);
+					alphaAnim.setFillAfter(true);
+					snowFallView.startAnimation(alphaAnim);
+				}
+			}, 1200);
+			return snowFallView;
+		} else{
+			alphaAnim.setDuration(1800);
+			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
+			animHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					setGiftFallAnim(activity);
+
+				}
+			}, 2000);
+			return null;
+		}
+		
 	
-		return snowFallView;
 	}
 
 	public static void setGiftFallAnim(final Activity activity)
 	{
+		
 		Handler animHandler = new Handler();
 		FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
 		View.inflate(activity, R.layout.chat_bg_ftue_box, layout);
-		activity.findViewById(R.id.gift_box_layout).setVisibility(View.GONE);
 		
-		animHandler.postDelayed(new Runnable()
-		{
-			
-			@Override
-			public void run()
-			{
-				AnimationSet boxFallAnimSet = new AnimationSet(true);
-				boxFallAnimSet.setFillAfter(true);
-				int rtype = Animation.RELATIVE_TO_SELF;
-				float rotationAngle = 15;
-				RotateAnimation ra1 = new RotateAnimation(0, rotationAngle,rtype,0.5f , rtype,0.5f );
-				ra1.setDuration(500);
-				
-				boxFallAnimSet.addAnimation(ra1);
-				
-				activity.findViewById(R.id.gift_box_layout).setVisibility(View.VISIBLE);
-				Animation boxFallAnim = AnimationUtils.loadAnimation(activity,
-					R.anim.boxfall);
-				boxFallAnimSet.addAnimation(boxFallAnim);
-				
-				RotateAnimation ra2 = new RotateAnimation(0, -rotationAngle,rtype, 0.5f , rtype, 0.5f );
-				ra2.setStartOffset(500);
-				ra2.setDuration(200);
-				boxFallAnimSet.addAnimation(ra2);
-				
-				RotateAnimation ra3 = new RotateAnimation(0, rotationAngle/3,rtype, 0.5f , rtype, 0.5f );
-				ra3.setStartOffset(700);
-				ra3.setDuration(100);
-				boxFallAnimSet.addAnimation(ra3);
-				
-				RotateAnimation ra4 = new RotateAnimation(0, -rotationAngle/3,rtype, 0.5f , rtype, 0.5f );
-				ra4.setStartOffset(800);
-				ra4.setDuration(100);
-				boxFallAnimSet.addAnimation(ra4);
-				
-				activity.findViewById(R.id.gift_box_layout).startAnimation(boxFallAnimSet);
-			}
-		}, 3000);
+		AnimationSet boxFallAnimSet = new AnimationSet(true);
+		boxFallAnimSet.setInterpolator(new AccelerateInterpolator(1.5f));
+		int animDuration = 600;
+		AlphaAnimation aa1 = new AlphaAnimation(0f, 1f);
+		aa1.setDuration(350);
+		boxFallAnimSet.addAnimation(aa1);
+		
+		int rtype = Animation.RELATIVE_TO_SELF;
+		float rotationAngle = 7.5f;
+		RotateAnimation ra1 = new RotateAnimation(20, rotationAngle, rtype, 0.5f , rtype,0.5f );
+		ra1.setDuration(animDuration);
+		
+		boxFallAnimSet.addAnimation(ra1);
+		
+		Animation boxFallAnim = new TranslateAnimation(0, 6*Utils.densityMultiplier, -400*Utils.densityMultiplier,-13*Utils.densityMultiplier);
+		
+		boxFallAnim.setDuration(animDuration);
+		boxFallAnimSet.addAnimation(boxFallAnim);
+		
+		TranslateAnimation ta1 = new TranslateAnimation(0, 0, 0, -11*Utils.densityMultiplier);
+		ta1.setStartOffset(animDuration-6);
+		ta1.setDuration(150);
+		boxFallAnimSet.addAnimation(ta1);
+		
+		RotateAnimation ra2 = new RotateAnimation(0, -(rotationAngle+ 5.8f),rtype, 0.5f , rtype, 0.5f );
+		ra2.setStartOffset(animDuration-6);
+		ra2.setDuration(182);
+		boxFallAnimSet.addAnimation(ra2);
+		
+		TranslateAnimation ta2 = new TranslateAnimation(0, 0, 0, 24*Utils.densityMultiplier);
+		ta2.setInterpolator(new AccelerateInterpolator(3f));
+		ta2.setStartOffset(animDuration+95+44);
+		ta2.setDuration(150);
+		boxFallAnimSet.addAnimation(ta2);
+		
+		RotateAnimation ra3 = new RotateAnimation(0, 8f, rtype, 0.5f , rtype, 0.5f );
+		ra3.setStartOffset(animDuration+127+44);
+		ra3.setDuration(216);
+		
+		boxFallAnimSet.addAnimation(ra3);
+		
+		RotateAnimation ra4 = new RotateAnimation(0, -2.2f,rtype, 0.5f , rtype, 0.5f );
+		ra4.setStartOffset(animDuration+295+44);
+		ra4.setDuration(114);
+		
+		boxFallAnimSet.addAnimation(ra4);
+		
+		activity.findViewById(R.id.gift_box).startAnimation(boxFallAnimSet);
 		
 		animHandler.postDelayed(new Runnable()
 		{
@@ -110,27 +152,26 @@ public class ChatBgFtue
 			public void run()
 			{
 				AnimationSet giftCardApearAnimSet = new AnimationSet(true);
-				giftCardApearAnimSet.setFillAfter(true);
 				int rtype = Animation.RELATIVE_TO_SELF;
 				float rotationAngle = 15;
 				RotateAnimation ra1 = new RotateAnimation(rotationAngle, 0,rtype,0.5f , rtype,0.5f );
-				ra1.setDuration(600);
+				ra1.setDuration(400);
 				
 				giftCardApearAnimSet.addAnimation(ra1);
 				
 				activity.findViewById(R.id.gift_card).setVisibility(View.VISIBLE);
 				AlphaAnimation cardFadeInAnim = new AlphaAnimation(0.1f, 1);
-				cardFadeInAnim.setDuration(600);
+				cardFadeInAnim.setDuration(400);
 				giftCardApearAnimSet.addAnimation(cardFadeInAnim);
 				
 				ScaleAnimation cardScaleInAnim = new ScaleAnimation(1.2f, 1, 1.2f, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-				cardScaleInAnim.setDuration(600);
+				cardScaleInAnim.setDuration(400);
 				giftCardApearAnimSet.addAnimation(cardScaleInAnim);
 				
 				activity.findViewById(R.id.gift_card).startAnimation(giftCardApearAnimSet);
 				
 			}
-		}, 4800);
+		}, 1400);
 	}
 	
 	public static void onChatBgOpenItUpClick(final Activity activity, View v, final SnowFallView snowFallView){
@@ -157,13 +198,13 @@ public class ChatBgFtue
 		        
 				activity.findViewById(R.id.fs_middle_dot).setVisibility(View.VISIBLE);
 			}
-		}, 450);
+		}, 400);
 		AnimationSet flipBoxAnimSet = new AnimationSet(true);
 		flipBoxAnimSet.setFillAfter(true);
 		int rtype = Animation.RELATIVE_TO_SELF;
-		float rotationAngle = 30;
+		float rotationAngle = 90;
 		RotateAnimation ra1 = new RotateAnimation(0, -rotationAngle,rtype,0.5f , rtype,0.5f );
-		ra1.setDuration(300);
+		ra1.setDuration(800);
 		flipBoxAnimSet.addAnimation(ra1);
 
 		View parentLayout = activity.findViewById(R.id.parent_layout);
@@ -171,18 +212,15 @@ public class ChatBgFtue
 		int yCord = (parentLayout.getHeight()/2);
 		
 		Rotate3dAnimation rotateBoxAnimY = new Rotate3dAnimation(0, -180, xCord, yCord, 0, false, Rotate3dAnimation.Y_AXIS);
-		rotateBoxAnimY.setStartOffset(250);
-		rotateBoxAnimY.setDuration(500);
+		rotateBoxAnimY.setDuration(800);
 		flipBoxAnimSet.addAnimation(rotateBoxAnimY);
 		
 		Rotate3dAnimation rotateBoxAnimZ = new Rotate3dAnimation(0, -90, xCord, yCord, 0, false, Rotate3dAnimation.Z_AXIS);
-		rotateBoxAnimZ.setStartOffset(200);
-		rotateBoxAnimZ.setDuration(500);
+		rotateBoxAnimZ.setDuration(800);
 		flipBoxAnimSet.addAnimation(rotateBoxAnimZ);
 		
 		RotateAnimation ra2 = new RotateAnimation(0, -rotationAngle,rtype,0.5f , rtype,0.5f );
-		ra2.setStartOffset(700);
-		ra2.setDuration(300);
+		ra2.setDuration(800);
 		flipBoxAnimSet.addAnimation(ra2);
 
 		activity.findViewById(R.id.gift_box_layout).startAnimation(flipBoxAnimSet);
@@ -194,7 +232,7 @@ public class ChatBgFtue
 			{
 				giftBoxUnpacking(activity, snowFallView);
 			}
-		}, 1000);
+		}, 1066);
 		
 	}
 
@@ -207,27 +245,27 @@ public class ChatBgFtue
 		
 		int animDuration = 650;
 		int animDuration2 = 400;
-		ScaleAnimation middleDotAnim = getScaleAnimOnPivot(activity, animDuration, 0.5f,0.5f);
+		ScaleAnimation middleDotAnim = getScaleAnimOnPivot(activity, 466, 0.5f,0.5f);
 		activity.findViewById(R.id.fs_middle_dot).startAnimation(middleDotAnim);
 
-		ScaleAnimation leftKnotAnim = getScaleAnimOnPivot(activity, animDuration, 1, 1);
+		ScaleAnimation leftKnotAnim = getScaleAnimOnPivot(activity, 333, 1, 1);
 		activity.findViewById(R.id.fs_left_knot).startAnimation(leftKnotAnim);
 		
 		TranslateAnimation rightKnot2Anim = new TranslateAnimation(0, 33*Utils.densityMultiplier, 0, 33*Utils.densityMultiplier);
 		rightKnot2Anim.setFillAfter(true);
-		rightKnot2Anim.setDuration(animDuration);
+		rightKnot2Anim.setDuration(333);
 		activity.findViewById(R.id.fs_right_knot2).startAnimation(rightKnot2Anim);
 		
-		ScaleAnimation rightKnotAnim = getScaleAnimOnPivot(activity, animDuration2, 0, 1);
-		rightKnotAnim.setInterpolator(new AccelerateInterpolator(2.5f));
-		rightKnotAnim.setStartOffset(animDuration - animDuration2);
+		ScaleAnimation rightKnotAnim = getScaleAnimOnPivot(activity, 400, 0, 1);
+		//rightKnotAnim.setInterpolator(new AccelerateInterpolator(2.5f));
+		//rightKnotAnim.setStartOffset(animDuration - animDuration2);
 		activity.findViewById(R.id.fs_right_knot).startAnimation(rightKnotAnim);
 		
 		TranslateAnimation leftKnot2Anim = new TranslateAnimation(0, -33*Utils.densityMultiplier, 0, 33*Utils.densityMultiplier);
-		leftKnot2Anim.setInterpolator(new AccelerateInterpolator(2.5f));
+		//leftKnot2Anim.setInterpolator(new AccelerateInterpolator(2.5f));
 		leftKnot2Anim.setFillAfter(true);
-		leftKnot2Anim.setStartOffset(animDuration - animDuration2);
-		leftKnot2Anim.setDuration(animDuration2);
+		//leftKnot2Anim.setStartOffset(animDuration - animDuration2);
+		leftKnot2Anim.setDuration(400);
 		activity.findViewById(R.id.fs_left_knot2).startAnimation(leftKnot2Anim);
 		
 		ribbonMovingAnim(activity, snowFallView);
@@ -249,18 +287,19 @@ public class ChatBgFtue
 				activity.findViewById(R.id.fs_right_knot22).setVisibility(View.GONE);
 				activity.findViewById(R.id.box_flip_side_moving_ribbons).setVisibility(View.VISIBLE);
 			}
-		}, animDuration);
+		}, 400);
+		
+		
 		
 	}
 	
 
 	public static void ribbonMovingAnim(final Activity activity, final SnowFallView snowFallView){
 		int animDuration = 1500;
-		//ribbon moving anim
-		int lineDisapearStartOff = 200;
+		int lineDisapearStartOff = 66;
 		AlphaAnimation lineDisapearAlphaAnim = new AlphaAnimation(1,0);
 		lineDisapearAlphaAnim.setFillAfter(true);
-		lineDisapearAlphaAnim.setDuration(200);
+		lineDisapearAlphaAnim.setDuration(167);
 		lineDisapearAlphaAnim.setStartOffset(lineDisapearStartOff);
 		activity.findViewById(R.id.box_front_bottom_line).startAnimation(lineDisapearAlphaAnim);
 		activity.findViewById(R.id.box_front_top_line).startAnimation(lineDisapearAlphaAnim);
@@ -272,27 +311,27 @@ public class ChatBgFtue
 		int rType = Animation.RELATIVE_TO_SELF;
 		ScaleAnimation topBarToRibbonAnim = new ScaleAnimation(1, 0, 1, 1, rType, 0.5f, rType, 0.5f); 
 		topBarToRibbonAnim.setFillAfter(true);
-		topBarToRibbonAnim.setDuration(100);
-		topBarToRibbonAnim.setStartOffset(600);
+		topBarToRibbonAnim.setDuration(33);
+		topBarToRibbonAnim.setStartOffset(380);
 		activity.findViewById(R.id.box_front_top_bar).startAnimation(topBarToRibbonAnim);
 		
 		ScaleAnimation bottomBarToRibbonAnim = new ScaleAnimation(1, 1, 1, 0, rType, 0.5f, rType, 0.5f); 
 		bottomBarToRibbonAnim.setFillAfter(true);
-		bottomBarToRibbonAnim.setDuration(100);
-		bottomBarToRibbonAnim.setStartOffset(600);
+		bottomBarToRibbonAnim.setDuration(33);
+		bottomBarToRibbonAnim.setStartOffset(380);
 		activity.findViewById(R.id.box_front_bottom_bar).startAnimation(bottomBarToRibbonAnim);
 		
 		AnimationSet translateRibbon3AnimSet = new AnimationSet(true);
 		translateRibbon3AnimSet.setFillAfter(true);
 		
 		TranslateAnimation ta1 = new TranslateAnimation(0,0,0,140*Utils.densityMultiplier); 
-		ta1.setDuration(duration);
+		ta1.setDuration(467);
 		ta1.setStartOffset(startOff);
 		translateRibbon3AnimSet.addAnimation(ta1);
 		
 		AlphaAnimation aa1 = new AlphaAnimation(1,0); 
-		aa1.setDuration(duration);
-		aa1.setStartOffset(startOff);
+		aa1.setDuration(267);
+		aa1.setStartOffset(200);
 		translateRibbon3AnimSet.addAnimation(aa1);
 		
 		activity.findViewById(R.id.fs_moving_ribbon3).startAnimation(translateRibbon3AnimSet);
@@ -301,11 +340,14 @@ public class ChatBgFtue
 		translateRibbon2AnimSet.setFillAfter(true);
 		
 		TranslateAnimation ta2 = new TranslateAnimation(0,0,0,140*Utils.densityMultiplier); 
-		ta2.setDuration(duration);
+		ta2.setDuration(500);
 		ta2.setStartOffset(startOff);
 		translateRibbon2AnimSet.addAnimation(ta2);
 		
-		translateRibbon2AnimSet.addAnimation(aa1);
+		AlphaAnimation aa2 = new AlphaAnimation(1,0); 
+		aa2.setDuration(200);
+		aa2.setStartOffset(300);
+		translateRibbon2AnimSet.addAnimation(aa2);
 		
 		activity.findViewById(R.id.fs_moving_ribbon2).startAnimation(translateRibbon2AnimSet);
 		
@@ -313,11 +355,14 @@ public class ChatBgFtue
 		translateRibbon1AnimSet.setFillAfter(true);
 		
 		TranslateAnimation ta3 = new TranslateAnimation(0,0,0,-280*Utils.densityMultiplier); 
-		ta3.setDuration(duration);
+		ta3.setDuration(367);
 		ta3.setStartOffset(startOff);
 		translateRibbon1AnimSet.addAnimation(ta3);
 		
-		translateRibbon1AnimSet.addAnimation(aa1);
+		AlphaAnimation aa3 = new AlphaAnimation(1,0); 
+		aa3.setDuration(167);
+		aa3.setStartOffset(200);
+		translateRibbon1AnimSet.addAnimation(aa3);
 		
 		activity.findViewById(R.id.fs_moving_ribbon1).startAnimation(translateRibbon1AnimSet);
 		
@@ -328,25 +373,23 @@ public class ChatBgFtue
 			{
 				giftBoxUnfolding(activity, snowFallView);
 			}
-		}, animDuration);
+		}, 480);
 	}
 	
 	private static void giftBoxUnfolding(final Activity activity, SnowFallView snowFallView)
 	{
+		//activity.findViewById(R.id.gift_box_bottom).setVisibility(View.VISIBLE);
 		View giftBoxView= activity.findViewById(R.id.gift_box);
-		int animDuration = 1200;
+		int animDuration = 467;
 		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
 		
 		AlphaAnimation giftBoxPinkBottomAnim = new AlphaAnimation(1,0);
-		giftBoxPinkBottomAnim.setInterpolator(accInterpolator);
 		giftBoxPinkBottomAnim.setFillAfter(true);
 		giftBoxPinkBottomAnim.setDuration(animDuration);
 		activity.findViewById(R.id.gift_box_bottom).startAnimation(giftBoxPinkBottomAnim);
 		
 		AnimationSet boxLeftFoldAnimSet = new AnimationSet(true);
-		boxLeftFoldAnimSet.setInterpolator(accInterpolator);
 		boxLeftFoldAnimSet.setFillAfter(true);
-		//Rotate3dAnimation ra1 = new Rotate3dAnimation(0, -90, 0, 0, 15, false);
 		ScaleAnimation ra1 = new ScaleAnimation(1, 0, 1, 1, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
 		ra1.setDuration(animDuration);
 		boxLeftFoldAnimSet.addAnimation(ra1);
@@ -357,9 +400,7 @@ public class ChatBgFtue
 		activity.findViewById(R.id.box_left_fold).startAnimation(boxLeftFoldAnimSet);
 		
 		AnimationSet boxRightFoldAnimSet = new AnimationSet(true);
-		boxRightFoldAnimSet.setInterpolator(accInterpolator);
 		boxRightFoldAnimSet.setFillAfter(true);
-		//Rotate3dAnimation ra2 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, 0, 15, false);
 		ScaleAnimation ra2 = new ScaleAnimation(1, 0, 1, 1, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 1f);
 		ra2.setDuration(animDuration);
 		boxRightFoldAnimSet.addAnimation(ra2);
@@ -371,9 +412,7 @@ public class ChatBgFtue
 		
 		
 		AnimationSet boxTopFoldAnimSet = new AnimationSet(true);
-		boxTopFoldAnimSet.setInterpolator(accInterpolator);
 		boxTopFoldAnimSet.setFillAfter(true);
-		//Rotate3dAnimation ra3 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, giftBoxView.getHeight(), 15, false);
 		ScaleAnimation ra3 = new ScaleAnimation(1, 1, 1, 0, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
 		
 		ra3.setDuration(animDuration);
@@ -386,16 +425,13 @@ public class ChatBgFtue
 		
 		
 		AnimationSet boxBottomFoldAnimSet = new AnimationSet(true);
-		boxBottomFoldAnimSet.setInterpolator(accInterpolator);
 		boxBottomFoldAnimSet.setFillAfter(true);
-		//Rotate3dAnimation ra3 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, giftBoxView.getHeight(), 15, false);
 		ScaleAnimation ra4 = new ScaleAnimation(1, 1, 1, 0, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 1f);
 		
 		ra4.setDuration(animDuration);
 		boxBottomFoldAnimSet.addAnimation(ra4);
 		
 		AlphaAnimation aa4 = new AlphaAnimation(1,0);
-		aa4.setInterpolator(accInterpolator);
 		aa4.setDuration(animDuration);
 		boxBottomFoldAnimSet.addAnimation(aa4);
 		activity.findViewById(R.id.box_bottom_fold).startAnimation(boxBottomFoldAnimSet);
@@ -414,19 +450,14 @@ public class ChatBgFtue
 		AnimationSet chatThemePopupAnimSet = new AnimationSet(true);
 		chatThemePopupAnimSet.setInterpolator(accInterpolator);
 		chatThemePopupAnimSet.setFillAfter(true);
-		//Rotate3dAnimation ra3 = new Rotate3dAnimation(0, 90, giftBoxView.getWidth()/2, giftBoxView.getHeight(), 15, false);
-		ScaleAnimation sa1 = new ScaleAnimation(0, 1f, 0, 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		ScaleAnimation sa1 = new ScaleAnimation(0.4f, 1f, 0.4f, 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		
 		sa1.setDuration(animDuration);
 		chatThemePopupAnimSet.addAnimation(sa1);
 		
-		//AlphaAnimation aa1 = new AlphaAnimation(0.3f,1);
-		//aa1.setDuration(animDuration);
-		//chatThemePopupAnimSet.addAnimation(aa1);
-		
 		ScaleAnimation sa2 = new ScaleAnimation(1, 1.1f, 1f, 1.1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-		sa2.setStartOffset(animDuration-100);
-		sa2.setDuration(200);
+		sa2.setStartOffset(animDuration);
+		sa2.setDuration(100);
 		chatThemePopupAnimSet.addAnimation(sa2);
 		ScaleAnimation sa3 = new ScaleAnimation(1, 0.91f, 1f, 0.91f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		sa3.setStartOffset(animDuration+100);
