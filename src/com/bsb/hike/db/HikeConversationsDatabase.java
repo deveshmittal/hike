@@ -3011,6 +3011,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				ChatTheme chatTheme = null;
 
 				try {
+					/*
+					 * We don't support custom themes yet.
+					 */
+					if (chatBgJson.optBoolean(HikeConstants.CUSTOM)) {
+						throw new IllegalArgumentException();
+					}
+
 					chatTheme = ChatTheme.getThemeFromId(bgId);
 				} catch (IllegalArgumentException e) {
 					continue;

@@ -318,6 +318,13 @@ public class MqttMessagesManager {
 				String bgId = chatBgJson.optString(HikeConstants.BG_ID);
 				String groupId = groupConversation.getMsisdn();
 				try {
+					/*
+					 * We don't support custom themes yet.
+					 */
+					if (chatBgJson.optBoolean(HikeConstants.CUSTOM)) {
+						throw new IllegalArgumentException();
+					}
+
 					ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
 					convDb.setChatBackground(groupId, chatTheme.bgId(), 0);
 				} catch (IllegalArgumentException e) {
@@ -1333,6 +1340,14 @@ public class MqttMessagesManager {
 			String bgId = data.optString(HikeConstants.BG_ID);
 
 			try {
+				/*
+				 * If this is a custom theme, we should show it as not
+				 * supported.
+				 */
+				if (data.optBoolean(HikeConstants.CUSTOM)) {
+					throw new IllegalArgumentException();
+				}
+
 				ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
 				convDb.setChatBackground(id, bgId, timestamp);
 

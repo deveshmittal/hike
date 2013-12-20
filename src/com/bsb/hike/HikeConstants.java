@@ -181,6 +181,7 @@ public class HikeConstants {
 	public static final String OPERATOR = "op";
 	public static final String CIRCLE = "circle";
 	public static final String PIXEL_DENSITY_MULTIPLIER = "pdm";
+	public static final String CUSTOM = "custom";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
