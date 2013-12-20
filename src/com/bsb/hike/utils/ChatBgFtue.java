@@ -16,6 +16,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -174,7 +175,7 @@ public class ChatBgFtue
 		}, 1400);
 	}
 	
-	public static void onChatBgOpenItUpClick(final Activity activity, View v, final SnowFallView snowFallView){
+	public static void onChatBgOpenItUpClick(final HomeActivity activity, View v, final SnowFallView snowFallView){
 		activity.findViewById(R.id.gift_card).clearAnimation();
 		activity.findViewById(R.id.open_it_up_text).setClickable(false);
 		
@@ -237,7 +238,7 @@ public class ChatBgFtue
 	}
 
 	
-	private static void giftBoxUnpacking(final Activity activity, SnowFallView snowFallView)
+	private static void giftBoxUnpacking(final HomeActivity activity, SnowFallView snowFallView)
 	{
 		activity.findViewById(R.id.box_flip_side_ribbon).clearAnimation();
 		activity.findViewById(R.id.gift_box_layout).clearAnimation();
@@ -294,7 +295,7 @@ public class ChatBgFtue
 	}
 	
 
-	public static void ribbonMovingAnim(final Activity activity, final SnowFallView snowFallView){
+	public static void ribbonMovingAnim(final HomeActivity activity, final SnowFallView snowFallView){
 		int animDuration = 1500;
 		int lineDisapearStartOff = 66;
 		AlphaAnimation lineDisapearAlphaAnim = new AlphaAnimation(1,0);
@@ -376,7 +377,7 @@ public class ChatBgFtue
 		}, 480);
 	}
 	
-	private static void giftBoxUnfolding(final Activity activity, SnowFallView snowFallView)
+	private static void giftBoxUnfolding(final HomeActivity activity, SnowFallView snowFallView)
 	{
 		//activity.findViewById(R.id.gift_box_bottom).setVisibility(View.VISIBLE);
 		View giftBoxView= activity.findViewById(R.id.gift_box);
@@ -443,7 +444,7 @@ public class ChatBgFtue
 	}
 	
 	
-	public static void startChatThemesPopupAnimation(final Activity activity, int animDuration, final SnowFallView snowFallView){
+	public static void startChatThemesPopupAnimation(final HomeActivity activity, int animDuration, final SnowFallView snowFallView){
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.VISIBLE);
 		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
 		
@@ -482,6 +483,15 @@ public class ChatBgFtue
 		aa5.setDuration(300);
 		aa5.setStartOffset(animDuration+200);
 		activity.findViewById(R.id.chat_theme_popup_glow).startAnimation(aa5);
+
+		boolean newUser = activity.getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
+		ContactInfo contactInfo = HikeUserDatabase.getInstance().getChatThemeFTUEContact(activity, newUser);
+		if(contactInfo == null) {
+			TextView textView = (TextView) activity.findViewById(R.id.give_it_a_spin_text);
+			textView.setText(R.string.ok);
+		} else {
+			activity.setChatThemeFTUEContact(contactInfo);
+		}
 		
 		(new Handler()).postDelayed(new Runnable()
 		{
@@ -520,7 +530,7 @@ public class ChatBgFtue
 	}
 
 
-	public static void onChatBgGiveItASpinClick(final Activity activity, View v, SnowFallView snowFallView){
+	public static void onChatBgGiveItASpinClick(final HomeActivity activity, View v, SnowFallView snowFallView){
 		if(snowFallView!= null){
 			snowFallView.clearAnimation();
 			snowFallView.setVisibility(View.GONE);
@@ -529,14 +539,14 @@ public class ChatBgFtue
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.GONE);
 		activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.GONE);
-		ContactInfo contactInfo = HikeUserDatabase.getInstance().getMostRecentContact();
+		ContactInfo contactInfo = activity.getChatThemeFTUEContact();
 		if(contactInfo != null){
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo, false);
 			intent.putExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, true);
 			intent.setClass(activity, ChatThread.class);
 			activity.startActivity(intent);
 		} else{
-			//We need to handle this case; this case will occur if user doesn't have any sms contact
+			//Do nothing
 		}
 		return;
 	}

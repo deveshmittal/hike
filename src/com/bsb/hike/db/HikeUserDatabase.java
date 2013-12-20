@@ -2085,8 +2085,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
 				+ "=?", new String[] { msisdn });
 	}
-	
-	public ContactInfo getMostRecentContact() {
+
+	public ContactInfo getMostRecentContact(int hikeState) {
+		String selection;
+		switch (hikeState) {
+		case HikeConstants.ON_HIKE_VALUE:
+			selection = DBConstants.ONHIKE + "=1";
+			break;
+		case HikeConstants.NOT_ON_HIKE_VALUE:
+			selection = DBConstants.ONHIKE + "=0 AND " + DBConstants.MSISDN
+					+ " LIKE '+91%'";
+			break;
+		default:
+			selection = null;
+			break;
+		}
 		Cursor c = null;
 		try {
 			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
@@ -2096,21 +2109,76 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					DBConstants.HAS_CUSTOM_PHOTO,
 					DBConstants.FAVORITE_TYPE_SELECTION,
 					DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE,
-					DBConstants.LAST_SEEN }, null, null, null, null,
+					DBConstants.LAST_SEEN }, selection, null, null, null,
 					DBConstants.LAST_MESSAGED + " DESC LIMIT 1");
-			if (c.getCount()!=0) {
-				Log.d("Test", "cursor: " + DatabaseUtils.dumpCursorToString(c));
+			if (c.getCount() != 0) {
 				ContactInfo ci = extractContactInfo(c).get(0);
-				Log.d("Test", "cursor: " + "inside if"+ci.getMsisdn());
 				return ci;
-			}else{
-				Log.d("Test", "cursor: " + "inside else");
-				return null;
 			}
+			return null;
 		} finally {
 			if (c != null) {
 				c.close();
 			}
 		}
+	}
+
+	public ContactInfo getChatThemeFTUEContact(Context context, boolean newUser) {
+		ContactInfo contactInfo;
+		if (newUser) {
+			/*
+			 * For new users, we first try to get a recommended hike contact.
+			 */
+			String recommendedContactsString = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null);
+			try {
+				JSONArray recommendedContactsArray = new JSONArray(
+						recommendedContactsString);
+				if (recommendedContactsArray.length() != 0) {
+					contactInfo = getContactInfoFromMSISDN(
+							recommendedContactsArray.getString(0), false);
+
+					if (contactInfo != null) {
+						return contactInfo;
+					}
+				}
+			} catch (JSONException e) {
+			}
+
+			/*
+			 * If we didn't find any, we pick a hike contact
+			 */
+			contactInfo = getMostRecentContact(HikeConstants.ON_HIKE_VALUE);
+			if (contactInfo != null) {
+				return contactInfo;
+			}
+
+			/*
+			 * If we didn't find any there as well, we pick an SMS contact that
+			 * is most contacted by the user.
+			 */
+			List<ContactInfo> contactList = getNonHikeMostContactedContacts(1);
+			if (contactList.isEmpty()) {
+				contactInfo = null;
+			} else {
+				contactInfo = contactList.get(0);
+			}
+		} else {
+			/*
+			 * For an existing user, we first try to pick his last contacted
+			 * hike contact.
+			 */
+			contactInfo = getMostRecentContact(HikeConstants.ON_HIKE_VALUE);
+			if (contactInfo != null) {
+				return contactInfo;
+			}
+
+			/*
+			 * Else we fetch his last contacted SMS contact.
+			 */
+			contactInfo = getMostRecentContact(HikeConstants.NOT_ON_HIKE_VALUE);
+		}
+		return contactInfo;
 	}
 }

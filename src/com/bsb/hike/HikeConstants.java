@@ -608,6 +608,7 @@ public class HikeConstants {
 		public static final String FREE_SMS_POPUP_HEADER = "freeSMSPopupHeader";
 		public static final String SHOW_STICKER_TIP_FOR_EMMA = "showStickerTipForEmma";
 		public static final String FROM_CHAT_THEME_FTUE = "fromChatThemeFtue";
+		public static final String NEW_USER = "newUser";
 	}
 
 	public static final class LogEvent {

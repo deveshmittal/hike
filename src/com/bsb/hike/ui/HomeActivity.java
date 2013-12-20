@@ -111,6 +111,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private TextView topBarIndicator;
 	private Drawable myProfileImage;
 	private SnowFallView snowFallView;
+	private ContactInfo chatThemeFTUEContact;
 	
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
@@ -237,7 +238,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 		
 	}
-	
+
+	public void setChatThemeFTUEContact(ContactInfo contactInfo) {
+		this.chatThemeFTUEContact = contactInfo;
+	}
+
+	public ContactInfo getChatThemeFTUEContact() {
+		return this.chatThemeFTUEContact;
+	}
+
 	public void OnChatBgFtueOverlayClick(View v){
 		return;
 	}
