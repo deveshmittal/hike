@@ -2203,8 +2203,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					mLastSeenView
 							.setText(mConversation.isOnhike() ? R.string.on_hike
 									: R.string.on_sms);
-					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(
-							0, 0, 0, 0);
+					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+							0, 0);
 
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
