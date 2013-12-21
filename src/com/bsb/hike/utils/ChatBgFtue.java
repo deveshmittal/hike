@@ -379,14 +379,14 @@ public class ChatBgFtue
 	
 	private static void giftBoxUnfolding(final HomeActivity activity, SnowFallView snowFallView)
 	{
-		//activity.findViewById(R.id.gift_box_bottom).setVisibility(View.VISIBLE);
+		activity.findViewById(R.id.gift_box_bottom).setVisibility(View.VISIBLE);
 		View giftBoxView= activity.findViewById(R.id.gift_box);
 		int animDuration = 467;
 		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
 		
 		AlphaAnimation giftBoxPinkBottomAnim = new AlphaAnimation(1,0);
 		giftBoxPinkBottomAnim.setFillAfter(true);
-		giftBoxPinkBottomAnim.setDuration(animDuration);
+		giftBoxPinkBottomAnim.setDuration(animDuration+100);
 		activity.findViewById(R.id.gift_box_bottom).startAnimation(giftBoxPinkBottomAnim);
 		
 		AnimationSet boxLeftFoldAnimSet = new AnimationSet(true);
