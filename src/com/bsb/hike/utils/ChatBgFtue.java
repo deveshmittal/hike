@@ -238,7 +238,7 @@ public class ChatBgFtue
 	}
 
 	
-	private static void giftBoxUnpacking(final HomeActivity activity, SnowFallView snowFallView)
+	private static void giftBoxUnpacking(final HomeActivity activity, final SnowFallView snowFallView)
 	{
 		activity.findViewById(R.id.box_flip_side_ribbon).clearAnimation();
 		activity.findViewById(R.id.gift_box_layout).clearAnimation();
@@ -246,10 +246,10 @@ public class ChatBgFtue
 		
 		int animDuration = 650;
 		int animDuration2 = 400;
-		ScaleAnimation middleDotAnim = getScaleAnimOnPivot(activity, 466, 0.5f,0.5f);
+		ScaleAnimation middleDotAnim = getScaleAnimOnPivot(0.3f,0.5f,activity, 400, 0.5f,0.5f);
 		activity.findViewById(R.id.fs_middle_dot).startAnimation(middleDotAnim);
 
-		ScaleAnimation leftKnotAnim = getScaleAnimOnPivot(activity, 333, 1, 1);
+		ScaleAnimation leftKnotAnim = getScaleAnimOnPivot(0,0,activity, 333, 1, 1);
 		activity.findViewById(R.id.fs_left_knot).startAnimation(leftKnotAnim);
 		
 		TranslateAnimation rightKnot2Anim = new TranslateAnimation(0, 33*Utils.densityMultiplier, 0, 33*Utils.densityMultiplier);
@@ -257,7 +257,7 @@ public class ChatBgFtue
 		rightKnot2Anim.setDuration(333);
 		activity.findViewById(R.id.fs_right_knot2).startAnimation(rightKnot2Anim);
 		
-		ScaleAnimation rightKnotAnim = getScaleAnimOnPivot(activity, 400, 0, 1);
+		ScaleAnimation rightKnotAnim = getScaleAnimOnPivot(0,0,activity, 400, 0, 1);
 		//rightKnotAnim.setInterpolator(new AccelerateInterpolator(2.5f));
 		//rightKnotAnim.setStartOffset(animDuration - animDuration2);
 		activity.findViewById(R.id.fs_right_knot).startAnimation(rightKnotAnim);
@@ -269,7 +269,16 @@ public class ChatBgFtue
 		leftKnot2Anim.setDuration(400);
 		activity.findViewById(R.id.fs_left_knot2).startAnimation(leftKnot2Anim);
 		
-		ribbonMovingAnim(activity, snowFallView);
+		int lineDisapearStartOff = 66;
+		AlphaAnimation lineDisapearAlphaAnim = new AlphaAnimation(1,0);
+		lineDisapearAlphaAnim.setFillAfter(true);
+		lineDisapearAlphaAnim.setDuration(167);
+		lineDisapearAlphaAnim.setStartOffset(lineDisapearStartOff);
+		activity.findViewById(R.id.box_front_bottom_line).startAnimation(lineDisapearAlphaAnim);
+		activity.findViewById(R.id.box_front_top_line).startAnimation(lineDisapearAlphaAnim);
+		activity.findViewById(R.id.box_front_left_line).startAnimation(lineDisapearAlphaAnim);
+		activity.findViewById(R.id.box_front_right_line).startAnimation(lineDisapearAlphaAnim);
+		
 		
 		(new Handler()).postDelayed(new Runnable()
 		{
@@ -287,6 +296,9 @@ public class ChatBgFtue
 				activity.findViewById(R.id.fs_right_knot2).setVisibility(View.GONE);
 				activity.findViewById(R.id.fs_right_knot22).setVisibility(View.GONE);
 				activity.findViewById(R.id.box_flip_side_moving_ribbons).setVisibility(View.VISIBLE);
+				ribbonMovingAnim(activity, snowFallView);
+				activity.findViewById(R.id.fs_middle_dot).clearAnimation();
+				activity.findViewById(R.id.fs_middle_dot).setVisibility(View.GONE);
 			}
 		}, 400);
 		
@@ -297,15 +309,6 @@ public class ChatBgFtue
 
 	public static void ribbonMovingAnim(final HomeActivity activity, final SnowFallView snowFallView){
 		int animDuration = 1500;
-		int lineDisapearStartOff = 66;
-		AlphaAnimation lineDisapearAlphaAnim = new AlphaAnimation(1,0);
-		lineDisapearAlphaAnim.setFillAfter(true);
-		lineDisapearAlphaAnim.setDuration(167);
-		lineDisapearAlphaAnim.setStartOffset(lineDisapearStartOff);
-		activity.findViewById(R.id.box_front_bottom_line).startAnimation(lineDisapearAlphaAnim);
-		activity.findViewById(R.id.box_front_top_line).startAnimation(lineDisapearAlphaAnim);
-		activity.findViewById(R.id.box_front_left_line).startAnimation(lineDisapearAlphaAnim);
-		activity.findViewById(R.id.box_front_right_line).startAnimation(lineDisapearAlphaAnim);
 		
 		int startOff = 0;
 		int duration = 500;
@@ -313,13 +316,13 @@ public class ChatBgFtue
 		ScaleAnimation topBarToRibbonAnim = new ScaleAnimation(1, 0, 1, 1, rType, 0.5f, rType, 0.5f); 
 		topBarToRibbonAnim.setFillAfter(true);
 		topBarToRibbonAnim.setDuration(33);
-		topBarToRibbonAnim.setStartOffset(380);
+		//topBarToRibbonAnim.setStartOffset(380);
 		activity.findViewById(R.id.box_front_top_bar).startAnimation(topBarToRibbonAnim);
 		
 		ScaleAnimation bottomBarToRibbonAnim = new ScaleAnimation(1, 1, 1, 0, rType, 0.5f, rType, 0.5f); 
 		bottomBarToRibbonAnim.setFillAfter(true);
 		bottomBarToRibbonAnim.setDuration(33);
-		bottomBarToRibbonAnim.setStartOffset(380);
+		//bottomBarToRibbonAnim.setStartOffset(380);
 		activity.findViewById(R.id.box_front_bottom_bar).startAnimation(bottomBarToRibbonAnim);
 		
 		AnimationSet translateRibbon3AnimSet = new AnimationSet(true);
@@ -374,15 +377,13 @@ public class ChatBgFtue
 			{
 				giftBoxUnfolding(activity, snowFallView);
 			}
-		}, 480);
+		}, 400);
 	}
 	
 	private static void giftBoxUnfolding(final HomeActivity activity, SnowFallView snowFallView)
 	{
 		activity.findViewById(R.id.gift_box_bottom).setVisibility(View.VISIBLE);
-		View giftBoxView= activity.findViewById(R.id.gift_box);
 		int animDuration = 467;
-		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
 		
 		AlphaAnimation giftBoxPinkBottomAnim = new AlphaAnimation(1,0);
 		giftBoxPinkBottomAnim.setFillAfter(true);
@@ -551,9 +552,9 @@ public class ChatBgFtue
 		return;
 	}
 
-	public static ScaleAnimation getScaleAnimOnPivot(final Activity activity, int animDuration, float pivotX, float pivotY){
+	public static ScaleAnimation getScaleAnimOnPivot(float toX, float toY, final Activity activity, int animDuration, float pivotX, float pivotY){
 		int rType = Animation.RELATIVE_TO_SELF;
-		ScaleAnimation animation = new ScaleAnimation(1, 0, 1, 0, rType , pivotX, rType, pivotY);
+		ScaleAnimation animation = new ScaleAnimation(1, toX, 1, toY, rType , pivotX, rType, pivotY);
 		animation.setFillAfter(true);
 		animation.setDuration(animDuration);
 		return animation;
