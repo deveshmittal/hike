@@ -440,12 +440,11 @@ public class ChatBgFtue
 		
 		//chat theme popup comes out
 		startChatThemesPopupAnimation(activity, animDuration, snowFallView);
-		
-		
 	}
 	
 	
 	public static void startChatThemesPopupAnimation(final HomeActivity activity, int animDuration, final SnowFallView snowFallView){
+		Handler animHandler = new Handler();
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.VISIBLE);
 		AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1.5f);
 		
@@ -494,7 +493,34 @@ public class ChatBgFtue
 			activity.setChatThemeFTUEContact(contactInfo);
 		}
 		
-		(new Handler()).postDelayed(new Runnable()
+		animHandler.postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				AlphaAnimation aa7 = new AlphaAnimation(1,0);
+				aa7.setDuration(400);
+				if(snowFallView != null){
+					snowFallView.startAnimation(aa7);
+				}
+			}
+		}, animDuration);
+		
+		animHandler.postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				if(snowFallView != null){
+					snowFallView.clearAnimation();
+					snowFallView.setVisibility(View.GONE);
+				}
+			}
+		}, animDuration+400);
+		
+		animHandler.postDelayed(new Runnable()
 		{
 			
 			@Override
@@ -506,27 +532,12 @@ public class ChatBgFtue
 				aa6.setDuration(500);
 				aa6.setStartOffset(1000);
 				activity.findViewById(R.id.give_it_a_spin_text).startAnimation(aa6);
-				
-				AlphaAnimation aa7 = new AlphaAnimation(1,0);
-				aa7.setDuration(800);
-				if(snowFallView != null){
-					snowFallView.startAnimation(aa7);
-				}
-			}
-		}, animDuration);
-		
-		(new Handler()).postDelayed(new Runnable()
-		{
-			
-			@Override
-			public void run()
-			{
 				if(snowFallView != null){
 					snowFallView.clearAnimation();
 					snowFallView.setVisibility(View.GONE);
 				}
 			}
-		}, animDuration+800);
+		}, animDuration+1500);
 		
 	}
 
