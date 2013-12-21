@@ -172,7 +172,7 @@ public class ChatBgFtue
 				activity.findViewById(R.id.gift_card).startAnimation(giftCardApearAnimSet);
 				
 			}
-		}, 1400);
+		}, 2000);
 	}
 	
 	public static void onChatBgOpenItUpClick(final HomeActivity activity, View v, final SnowFallView snowFallView){
