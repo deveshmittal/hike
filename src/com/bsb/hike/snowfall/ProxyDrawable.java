@@ -16,11 +16,11 @@ public class ProxyDrawable extends Drawable {
     public int size;
     
     public ProxyDrawable(Drawable target) {
-    	size = random.nextInt(100);
-    	if(size>9 && size<97)
+    	size = random.nextInt(21);
+    	if(size>9 && size<18)
     		size = 9;
-    	if(size > 96 )
-    		size = 20;
+    	if(size > 18 && random.nextInt(2)==0)
+    		size = 9;
     	size = (int)(size*Utils.densityMultiplier)+1;
     	mProxy = target;
     }
