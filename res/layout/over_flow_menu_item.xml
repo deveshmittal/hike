@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:gravity="center"
-    android:paddingLeft="13dp"
-    android:paddingRight="13dp" >
+    android:paddingLeft="11dp"
+    android:paddingRight="11dp" >
 
     <RelativeLayout
         android:layout_width="match_parent"
