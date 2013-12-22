@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -183,7 +184,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			Utils.blockOrientationChange(HomeActivity.this);
 			//if chat bg ftue is not shown show this on the highest priority
 			dialogShowing = DialogShowing.CHAT_BG_FTUE;
-			snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
 			findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
 			getSupportActionBar().hide();
 		} else {
@@ -597,6 +597,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
+		if((!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))&&snowFallView==null){
+			(new Handler()).postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+				}
+			}, 300);
+		}
+		
 	}
 
 	@Override
