@@ -38,22 +38,40 @@ public class SnowFallView extends View {
 		Random random = new Random();
 		Interpolator interpolator = new LinearInterpolator();
 
-		snow_flake_count = Math.max(width, height) / 5;
+		snow_flake_count = Math.max(width, height) / 12;
 		coords = new int[snow_flake_count][];
 		drawables.clear();
 		int durationMultiplier = (int)(6/Utils.densityMultiplier);
+		
 		for (int i = 0; i < snow_flake_count; i++) {
-			Animation animation = new TranslateAnimation(0, height / 10
-			        - random.nextInt(height / 5), 0, height + 50);
-			animation.setDuration(durationMultiplier* height + random.nextInt((int)(durationMultiplier * height)));
+			//coordinates where snow will be generated
+			coords[i] = new int[] { random.nextInt(width), random.nextInt(height-300) };
+			/* 
+			 * x and y displacement of particles
+			 * negative x => particle will go in left and vice versa
+			 * negative y => particle will up and vice versa
+			 */
+			int toXDelta = 0;
+			int toYDelta = 0;
+			if(coords[i][0]>width/2){
+				toXDelta = 200-random.nextInt(width/2);
+			} else{
+				toXDelta = -200+random.nextInt(width/2);
+			}
+			
+			toYDelta = -400+random.nextInt(height);
+			Animation animation = new TranslateAnimation(0,toXDelta , 0, toYDelta);
+			/* 
+			 * duration of the particle animation ==> this will decide the speed
+			 * ideally it should be based on actual displacement otherwise some 
+			 * particle would be very slow
+			 */
+			animation.setDuration(height+ random.nextInt((int)(height)));
 			animation.setRepeatCount(Animation.INFINITE);
 			animation.initialize(10, 10, 10, 10);
 			animation.setInterpolator(interpolator);
 
-			int startYDisp = (int)(19*Utils.densityMultiplier);
-			coords[i] = new int[] { random.nextInt(width-startYDisp), -startYDisp };
 			drawables.add(new AnimateDrawable(snow_flake, animation));
-			animation.setStartOffset(random.nextInt(10 * height));
 			animation.setFillBefore(false);
 			
 			animation.startNow();
