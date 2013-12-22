@@ -724,6 +724,6 @@
 	<string name="last_seen_more_ct">%1$s</string>
 	<string name="last_seen_while_ago_ct">a while ago</string>
 	<string name="apply">Apply</string>
-	<string name="chat_theme_tip">Once you tap done, the chat theme will change for both you and your friend.</string>
-	<string name="chat_theme_tip_group">Once you tap done, the chat theme will change for the group.</string>		
+	<string name="chat_theme_tip">The chat theme will change for both you and your friend</string>
+	<string name="chat_theme_tip_group">The chat theme will change for the whole group</string>		
 </resources>
