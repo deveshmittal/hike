@@ -52,7 +52,7 @@ public class ChatBgFtue
 					setGiftFallAnim(activity);
 
 				}
-			}, 2200);
+			}, 2800);
 
 			animHandler.postDelayed(new Runnable()
 			{
