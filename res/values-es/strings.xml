@@ -684,5 +684,34 @@
   	<string name="ftue_friends_subtext">Añadir como amigo</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Toca aquí para descartar las sugerencias de amigos</string>
   	<string name="sticker_ftue_body">¡ Prueba nuestras nuevas etiquetas engomadas!</string>
-  		
+
+  	<string name="select_all">Seleccionar todos (%1$d)</string>
+	<string name="deselect_all">Eliminar selección (%1$d)</string>
+	<string name="humanoid2_category">You and I</string>
+	<string name="se_category">Goofy Smileys</string>
+	<string name="avtars_category">Hikin Avatars</string>
+	<string name="chat_bg_changed">%1$s ha cambiado el fondo</string>
+	<string name="save_theme">Guardar tema</string>
+	<string name="change_theme">Cambiar tema</string>
+	<string name="mute_chat_theme_notification_subtext">Mostrar una notificación cuando el tema del chat cambia.</string>
+	<string name="mute_chat_theme_notification_header">Notificaciones de tema del chat</string>
+	<string name="indian_category">Things Indians say</string>
+	<string name="sent_via_sms">Enviado como SMS - %1$s</string>
+	<string name="chat_theme">Tema del chat</string>
+	<string name="unknown_chat_theme">¡Ey! Hay un nuevo tema increíble esperándote. Sin embargo, sigues teniendo una versión antigua de hike :(. Actualízate ya en http://hike.in</string>
+	<string name="merry_christmas_msg">What are holidays without any gifts? Happy Hiking!</string>	
+	<string name="open_it_up">Open gift...</string>	
+	<string name="chat_themes">¡Temas del chat!</string>
+	<string name="chat_themes_popup_msg">Personaliza tus chats con temas fantásticos.</string>
+	<string name="give_it_a_spin">Pruébalo</string>		
+	<string name="chat_bg_ftue_tip">More gorgeous themes here...</string>
+	<string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
+	<string name="last_seen_today_ct">hoy, %1$s</string>
+	<string name="last_seen_yesterday_ct">ayer, %1$s</string>
+	<string name="last_seen_more_ct">%1$s</string>
+	<string name="last_seen_while_ago_ct">hace un rato</string>
+	<string name="apply">Aplique</string>
+	<string name="chat_theme_tip">El tema de charla va a cambiar para ti y tu amigo</string>
+	<string name="chat_theme_tip_group">El tema de charla va a cambiar para todo el grupo</string>		
+  			
 </resources>

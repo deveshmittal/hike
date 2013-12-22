@@ -693,5 +693,33 @@
   	<string name="ftue_friends_tap_dismiss_friend_suggest">दोस्तों के सुझाव खारिज करने के लिए यहाँ टैप करें</string>
   	<string name="free_sms_use_tip">निशुल्क समस भेजने के लिए, शुरू करें एक नई चैट उन लोगों के साथ जिनके नाम के आगे हरे रंग का बबल ( gb ) हो। </string>
   	<string name="sticker_ftue_body">हमारे नए स्टिकर्स इस्तेमाल करें </string>
-  			
+
+  	<string name="select_all">सभी चुनें (%1$d)</string>
+	<string name="deselect_all">सभी अचयनित करें (%1$d)</string>
+	<string name="humanoid2_category">You and I</string>
+	<string name="se_category">Goofy Smileys</string>
+	<string name="avtars_category">Hikin Avatars</string>
+	<string name="chat_bg_changed">%1$s पृष्ठभूमि परिवर्तित की गई</string>
+	<string name="save_theme">थीम सहेजें</string>
+	<string name="change_theme">थीम बदलें</string>
+	<string name="mute_chat_theme_notification_subtext">चैट थीम परिवर्तित होने पर अधिसूचना दिखाएँ</string>
+	<string name="mute_chat_theme_notification_header">चैट थीम अधिसूचनाएँ</string>
+	<string name="indian_category">Things Indians sayं</string>
+	<string name="sent_via_sms">एसएमएस के रूप में भेजा गया - %1$s</string>
+	<string name="chat_theme">चैट थीम</string>
+	<string name="unknown_chat_theme">ओफ़ ओह! एक अद्भुत नया चैट थीम आपका इंतज़ार कर रहा है। परंतु आप अभी तक hike के पुराने संस्करण पर हैं :(.अभी अपडेट करें http://hike.in</string>
+	<string name="merry_christmas_msg">क्रिसमस जादुई है! और प्यारे क्या हमारे पास तुम्हारे लिए कोई सरप्राइज़ है ...</string>	
+	<string name="open_it_up">इसे खोलें</string>	
+	<string name="chat_themes">चैट थीम!</string>
+	<string name="chat_themes_popup_msg">शानदार थीम से अपनी चैट निजीकृत करें।</string>
+	<string name="give_it_a_spin">इसे आज़माएँ</string>		
+	<string name="chat_bg_ftue_tip">और यहाँ और बहुत सारे थीम हैं....</string>
+	<string name="last_seen_today_ct">आज, %1$s</string>
+	<string name="last_seen_yesterday_ct">कल, %1$s</string>
+	<string name="last_seen_more_ct">%1$s</string>
+	<string name="last_seen_while_ago_ct">कुछ समय पहले</string>		
+	<string name="apply">लागू करें</string>
+	<string name="chat_theme_tip">चैट थीम, आपके और आपके दोस्त के लिए बदल जाएगा</string>
+	<string name="chat_theme_tip_group">चैट थीम पूरे समूह के लिए बदल जाएगा</string>		
+	
 </resources>
