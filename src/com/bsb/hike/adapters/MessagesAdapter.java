@@ -144,7 +144,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private SharedPreferences preferences;
 	private boolean isGroupChat;
 	private ChatTheme chatTheme;
-	private boolean isDefaultTheme;
+	private boolean isDefaultTheme = true;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -156,6 +156,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.preferences = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
+		this.chatTheme = ChatTheme.DEFAULT;
 		setLastSentMessagePosition();
 	}
 
