@@ -41,7 +41,7 @@ public class ChatBgFtue
 			final SnowFallView snowFallView = new SnowFallView(activity);
 			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			snowFallView.setVisibility(View.GONE);
-			layout.addView(snowFallView);
+			layout.addView(snowFallView,3);
 
 			animHandler.postDelayed(new Runnable()
 			{
@@ -92,10 +92,8 @@ public class ChatBgFtue
 
 	public static void setGiftFallAnim(final Activity activity)
 	{
-		
+		activity.findViewById(R.id.gift_box_layout_view).setVisibility(View.VISIBLE);
 		Handler animHandler = new Handler();
-		FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
-		View.inflate(activity, R.layout.chat_bg_ftue_box, layout);
 		
 		AnimationSet boxFallAnimSet = new AnimationSet(true);
 		boxFallAnimSet.setInterpolator(new AccelerateInterpolator(1.5f));
