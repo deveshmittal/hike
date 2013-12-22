@@ -263,4 +263,10 @@
 
     <include layout="@layout/dark_overlay" />
 
+    <View 
+        android:id="@+id/white_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:visibility="invisible"/>
 </RelativeLayout>
