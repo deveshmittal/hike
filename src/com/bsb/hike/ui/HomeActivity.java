@@ -1092,6 +1092,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		Log.d(getClass().getSimpleName(), "Key Event is triggered");
+		if(dialogShowing == DialogShowing.CHAT_BG_FTUE){
+			return super.onKeyUp(keyCode, event);
+		}
 		if (Build.VERSION.SDK_INT <= 10
 				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
 						.hasPermanentMenuKey())) {
