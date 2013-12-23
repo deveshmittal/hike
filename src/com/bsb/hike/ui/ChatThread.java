@@ -4218,6 +4218,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	public void onStickerBtnClicked(View v) {
 		onEmoticonBtnClicked(v, 0, false);
+		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false)) {
+			/*
+			 * Added this code to prevent the sticker ftue tip from showing up
+			 * if the user has already used stickers.
+			 */
+			Editor editor = prefs.edit();
+			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
+			editor.commit();
+		}
 	}
 
 	public void onEmoticonBtnClicked(View v) {
