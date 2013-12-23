@@ -1365,8 +1365,7 @@ public class MqttMessagesManager {
 				 */
 				String message = context.getString(R.string.unknown_chat_theme);
 				ConvMessage convMessage = Utils.makeConvMessage(null, id,
-						message, true);
-				convMessage.setState(State.RECEIVED_UNREAD);
+						message, true, State.RECEIVED_UNREAD);
 				convDb.addConversationMessages(convMessage);
 
 				/*

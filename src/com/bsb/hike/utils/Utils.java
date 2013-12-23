@@ -3212,9 +3212,14 @@ public class Utils {
 
 	public static ConvMessage makeConvMessage(Conversation mConversation,
 			String msisdn, String message, boolean isOnhike) {
+		return makeConvMessage(mConversation, msisdn, message, isOnhike,
+				State.SENT_UNCONFIRMED);
+	}
+
+	public static ConvMessage makeConvMessage(Conversation mConversation,
+			String msisdn, String message, boolean isOnhike, State state) {
 		long time = (long) System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(message, msisdn, time,
-				ConvMessage.State.SENT_UNCONFIRMED);
+		ConvMessage convMessage = new ConvMessage(message, msisdn, time, state);
 		convMessage.setConversation(mConversation);
 		convMessage.setSMS(!isOnhike);
 
