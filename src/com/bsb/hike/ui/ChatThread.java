@@ -92,7 +92,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
@@ -1476,16 +1478,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		if (getIntent().getBooleanExtra(
 				HikeConstants.Extras.FROM_CHAT_THEME_FTUE, false)) {
-			getIntent().removeExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE);
-			Random random = new Random();
-			selectedTheme = ChatTheme.FTUE_THEMES[random
-					.nextInt(ChatTheme.FTUE_THEMES.length)];
-			sendChatThemeMessage();
+			setupChatThemeFTUE();
 		} else {
 			selectedTheme = mConversationDb
 					.getChatThemeForMsisdn(mContactNumber);
+			setChatTheme(selectedTheme);
 		}
-		setChatTheme(selectedTheme);
 
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)) {
 			// In case of Emma HikeBot we show sticker Ftue tip only on
@@ -1591,6 +1589,59 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				}
 			}
 		}
+	}
+
+	private void setupChatThemeFTUE() {
+		Random random = new Random();
+		selectedTheme = ChatTheme.FTUE_THEMES[random
+				.nextInt(ChatTheme.FTUE_THEMES.length)];
+
+		final View whiteOverlay = findViewById(R.id.white_overlay);
+		AnimationSet animationSet = new AnimationSet(false);
+
+		AlphaAnimation alphaIn = new AlphaAnimation(0, 1);
+		alphaIn.setStartOffset(500);
+		alphaIn.setDuration(500);
+
+		AlphaAnimation alphaOut = new AlphaAnimation(1, 0);
+		alphaOut.setStartOffset(1000);
+		alphaOut.setDuration(500);
+
+		animationSet.addAnimation(alphaIn);
+		animationSet.addAnimation(alphaOut);
+
+		whiteOverlay.setVisibility(View.VISIBLE);
+		whiteOverlay.startAnimation(animationSet);
+
+		animationSet.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				whiteOverlay.setVisibility(View.GONE);
+			}
+		});
+
+		mHandler.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				setChatTheme(selectedTheme);
+				sendChatThemeMessage();
+				/*
+				 * Only remove the extra once we've actually set the theme
+				 */
+				getIntent().removeExtra(
+						HikeConstants.Extras.FROM_CHAT_THEME_FTUE);
+			}
+		}, 1200);
 	}
 
 	/*

@@ -535,7 +535,7 @@ public class ChatBgFtue
 					snowFallView.setVisibility(View.GONE);
 				}
 			}
-		}, animDuration+1500);
+		}, animDuration);
 		
 	}
 
