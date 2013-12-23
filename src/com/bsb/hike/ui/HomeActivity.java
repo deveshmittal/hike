@@ -256,8 +256,25 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onChatBgGiveItASpinClick(View v){
-		findViewById(R.id.action_bar_img).setVisibility(View.GONE);
-		getSupportActionBar().show();
+		(new Handler()).postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				/*
+				 * This handler is to fix the issue
+				 * When user taps on give it spin button there is a
+				 * delay in opening chatthread. And There is also a
+				 * delay in showing actionbar when we call actionbar
+				 * show() method. 
+				 */
+
+				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+				getSupportActionBar().show();
+			}
+		}, 2000);
+		
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
 		editor.commit();
@@ -1092,6 +1109,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		Log.d(getClass().getSimpleName(), "Key Event is triggered");
+		if(dialogShowing == DialogShowing.CHAT_BG_FTUE){
+			return super.onKeyUp(keyCode, event);
+		}
 		if (Build.VERSION.SDK_INT <= 10
 				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
 						.hasPermanentMenuKey())) {
