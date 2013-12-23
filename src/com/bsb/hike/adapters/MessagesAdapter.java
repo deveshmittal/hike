@@ -1531,7 +1531,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				break;
 			case SENT_CONFIRMED:
 				tv.setText(context.getString(
-						conversation.isOnhike() ? R.string.sent
+						!current.isSMS() ? R.string.sent
 								: R.string.sent_via_sms, current
 								.getTimestampFormatted(false, context)));
 				if (!current.isSMS()) {

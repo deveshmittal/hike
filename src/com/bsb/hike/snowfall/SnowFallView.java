@@ -21,6 +21,7 @@ public class SnowFallView extends View {
 	private final List<Drawable> drawables = new ArrayList<Drawable>();
 	private int[][] coords;
 	private final Drawable snow_flake;
+	private final Drawable snow_flake_large;
 	
 	public SnowFallView(Context context) {
 		super(context);
@@ -29,6 +30,10 @@ public class SnowFallView extends View {
 
 		snow_flake = context.getResources().getDrawable(R.drawable.snow_flake);
 		snow_flake.setBounds(0, 0, snow_flake.getIntrinsicWidth(), snow_flake
+		        .getIntrinsicHeight());
+
+		snow_flake_large = context.getResources().getDrawable(R.drawable.snow_flake_large);
+		snow_flake_large.setBounds(0, 0, snow_flake_large.getIntrinsicWidth(), snow_flake_large
 		        .getIntrinsicHeight());
 	}
 
@@ -50,9 +55,9 @@ public class SnowFallView extends View {
 			animation.initialize(10, 10, 10, 10);
 			animation.setInterpolator(interpolator);
 
-			int startYDisp = (int)(19*Utils.densityMultiplier);
+			int startYDisp = (int)(25*Utils.densityMultiplier);
 			coords[i] = new int[] { random.nextInt(width-startYDisp), -startYDisp };
-			drawables.add(new AnimateDrawable(snow_flake, animation));
+			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, animation));
 			animation.setStartOffset(random.nextInt(10 * height));
 			animation.setFillBefore(false);
 			

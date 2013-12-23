@@ -15,14 +15,14 @@ public class ProxyDrawable extends Drawable {
     private Drawable mProxy;
     public int size;
     
-    public ProxyDrawable(Drawable target) {
+    public ProxyDrawable(Drawable targetSmall, Drawable targetLarge) {
     	size = random.nextInt(100);
-    	if(size>9 && size<97)
-    		size = 9;
+    	if(size>13 && size<97)
+    		size = 13;
     	if(size > 96 )
-    		size = 20;
+    		size = 30;
     	size = (int)(size*Utils.densityMultiplier)+1;
-    	mProxy = target;
+    	mProxy = size == 30 ? targetLarge : targetSmall;
     }
     
     public Drawable getProxy() {
