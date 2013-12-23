@@ -142,7 +142,7 @@ public class ChatBgFtue
 		
 		boxFallAnimSet.addAnimation(ra4);
 		
-		activity.findViewById(R.id.gift_box).startAnimation(boxFallAnimSet);
+		activity.findViewById(R.id.gift_box_layout).startAnimation(boxFallAnimSet);
 		
 		animHandler.postDelayed(new Runnable()
 		{
@@ -380,7 +380,6 @@ public class ChatBgFtue
 	
 	private static void giftBoxUnfolding(final HomeActivity activity, SnowFallView snowFallView)
 	{
-		activity.findViewById(R.id.gift_box_bottom).setVisibility(View.VISIBLE);
 		int animDuration = 467;
 		
 		AlphaAnimation giftBoxPinkBottomAnim = new AlphaAnimation(1,0);
