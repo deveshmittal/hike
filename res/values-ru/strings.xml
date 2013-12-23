@@ -707,13 +707,13 @@
 	<string name="sent_via_sms">Отправлено как SMS - %1$s</string>
 	<string name="chat_theme">Тема чата</string>
 	<string name="unknown_chat_theme">Ой! Уже появилась новая клевая тема для чата, а ты всё еще пользуешься старой :(. Обнови с http://hike.in</string>
-	<string name="merry_christmas_msg">What are holidays without any gifts? Happy Hiking!</string>	
-	<string name="open_it_up">Open gift...</string>	
+	<string name="merry_christmas_msg">Что такое праздник без каких-либо подарков? Счастливый hiking!</string>	
+	<string name="open_it_up">Откройте подарок...</string>	
 	<string name="chat_themes">Темы чата!</string>
 	<string name="chat_themes_popup_msg">Персонифицируйте свой чат с помощью великолепных тем.</string>
 	<string name="give_it_a_spin">Попробуйте</string>		
-	<string name="chat_bg_ftue_tip">More gorgeous themes here...</string>
-	<string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
+	<string name="chat_bg_ftue_tip">Более великолепные темы здесь...</string>
+	<string name="chat_bg_ftue_tip_1">И кучу темы здесь...</string>
 	<string name="last_seen_today_ct">сегод, %1$s</string>
 	<string name="last_seen_yesterday_ct">вчера, %1$s</string>
 	<string name="last_seen_more_ct">%1$s</string>
