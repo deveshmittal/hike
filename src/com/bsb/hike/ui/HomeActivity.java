@@ -256,8 +256,25 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	public void onChatBgGiveItASpinClick(View v){
-		findViewById(R.id.action_bar_img).setVisibility(View.GONE);
-		getSupportActionBar().show();
+		(new Handler()).postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				/*
+				 * This handler is to fix the issue
+				 * When user taps on give it spin button there is a
+				 * delay in opening chatthread. And There is also a
+				 * delay in showing actionbar when we call actionbar
+				 * show() method. 
+				 */
+
+				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+				getSupportActionBar().show();
+			}
+		}, 2000);
+		
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
 		editor.commit();
