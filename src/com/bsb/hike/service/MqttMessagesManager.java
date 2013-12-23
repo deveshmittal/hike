@@ -312,25 +312,28 @@ public class MqttMessagesManager {
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
 			}
 
-			JSONObject chatBgJson = metadata
-					.optJSONObject(HikeConstants.CHAT_BACKGROUND);
-			if (chatBgJson != null) {
-				String bgId = chatBgJson.optString(HikeConstants.BG_ID);
-				String groupId = groupConversation.getMsisdn();
-				try {
-					/*
-					 * We don't support custom themes yet.
-					 */
-					if (chatBgJson.optBoolean(HikeConstants.CUSTOM)) {
-						throw new IllegalArgumentException();
-					}
+			if (metadata != null) {
+				JSONObject chatBgJson = metadata
+						.optJSONObject(HikeConstants.CHAT_BACKGROUND);
+				if (chatBgJson != null) {
+					String bgId = chatBgJson.optString(HikeConstants.BG_ID);
+					String groupId = groupConversation.getMsisdn();
+					try {
+						/*
+						 * We don't support custom themes yet.
+						 */
+						if (chatBgJson.optBoolean(HikeConstants.CUSTOM)) {
+							throw new IllegalArgumentException();
+						}
 
-					ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
-					convDb.setChatBackground(groupId, chatTheme.bgId(), 0);
-				} catch (IllegalArgumentException e) {
-					/*
-					 * This exception is thrown for unknown themes. Do nothing
-					 */
+						ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
+						convDb.setChatBackground(groupId, chatTheme.bgId(), 0);
+					} catch (IllegalArgumentException e) {
+						/*
+						 * This exception is thrown for unknown themes. Do
+						 * nothing
+						 */
+					}
 				}
 			}
 
