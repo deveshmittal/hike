@@ -1507,6 +1507,8 @@ public class MqttMessagesManager {
 		Conversation conversation = convDb
 				.getConversationWithLastMessage(msisdn);
 
+		boolean isChatBgMsg = HikeConstants.MqttMessageTypes.CHAT_BACKGROUD
+				.equals(jsonObj.getString(HikeConstants.TYPE));
 		boolean isUJMsg = HikeConstants.MqttMessageTypes.USER_JOINED
 				.equals(jsonObj.getString(HikeConstants.TYPE));
 		boolean isGettingCredits = false;
@@ -1521,12 +1523,14 @@ public class MqttMessagesManager {
 		 * chats with that participant. Otherwise for other types, we only show
 		 * the message if the user already has an existing conversation.
 		 */
-		if ((conversation == null && (!isUJMsg || !userDb
-				.doesContactExist(msisdn)))
-				|| (conversation != null
-						&& TextUtils.isEmpty(conversation.getContactName())
-						&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
-			return null;
+		if (!isChatBgMsg) {
+			if ((conversation == null && (!isUJMsg || !userDb
+					.doesContactExist(msisdn)))
+					|| (conversation != null
+							&& TextUtils.isEmpty(conversation.getContactName())
+							&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
+				return null;
+			}
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation,
 				context, false);
