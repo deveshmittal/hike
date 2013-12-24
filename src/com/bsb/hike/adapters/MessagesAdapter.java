@@ -528,6 +528,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			hikeSmsText = holder.hikeSmsText;
 			regularSmsText = holder.regularSmsText;
 
+			if (isDefaultTheme) {
+				holder.hikeSmsText.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.regularSmsText.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+			} else {
+				holder.hikeSmsText.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.regularSmsText.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+			}
+
 			boolean smsToggleOn = Utils.getSendSmsPref(context);
 			holder.smsToggle.setChecked(smsToggleOn);
 			setSmsToggleSubtext(smsToggleOn);
@@ -1886,9 +1902,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 			hikeSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_unselected));
+					isDefaultTheme ? R.color.sms_choice_unselected
+							: R.color.white));
 			regularSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_selected));
+					isDefaultTheme ? R.color.sms_choice_selected
+							: R.color.white));
 
 			hikeSmsText.setTextSize(
 					TypedValue.COMPLEX_UNIT_PX,
@@ -1900,9 +1918,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							R.dimen.sms_toggle_checked));
 		} else {
 			hikeSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_selected));
+					isDefaultTheme ? R.color.sms_choice_selected
+							: R.color.white));
 			regularSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_unselected));
+					isDefaultTheme ? R.color.sms_choice_unselected
+							: R.color.white));
 
 			hikeSmsText.setTextSize(
 					TypedValue.COMPLEX_UNIT_PX,
