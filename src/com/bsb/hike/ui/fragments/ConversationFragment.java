@@ -855,8 +855,9 @@ public class ConversationFragment extends SherlockListFragment implements
 	public void onResume() {
 		SharedPreferences prefs = getActivity().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
-				.ordinal()) {
+		if (getActivity() == null
+				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
+						.ordinal()) {
 			/*
 			 * if there is a HikeBotConversation in Conversation list also it is
 			 * Viewed by user then delete this.
