@@ -711,7 +711,7 @@
 	<string name="indian_category">Things Indians say</string>
 	<string name="sent_via_sms">Sent as SMS - %1$s</string>
 	<string name="chat_theme">Chat Theme</string>
-	<string name="unknown_chat_theme">Uh oh! There is a stunning new chat theme waiting for you. But you\'re still on an old version of hike :(. Update now http://hike.in</string>
+	<string name="unknown_chat_theme">This chat\'s theme was just changed. To use the new chat themes, update hike. http://get.hike.in</string>
 	<string name="merry_christmas_msg">What are holidays without any gifts? Happy Hiking!</string>	
 	<string name="open_it_up">Open gift...</string>	
 	<string name="chat_themes">Chat Themes!</string>
