@@ -29,7 +29,6 @@ import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -826,21 +825,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (conversation instanceof GroupConversation) {
 						ssb = new SpannableStringBuilder(
 								convMessage.getMessage());
-						ssb.setSpan(new ForegroundColorSpan(0xff666666),
-								convMessage.getMessage().indexOf(dndNames),
+						ssb.setSpan(new StyleSpan(Typeface.BOLD), convMessage
+								.getMessage().indexOf(dndNames),
 								convMessage.getMessage().indexOf(dndNames)
 										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
 					} else {
+
 						ssb = new SpannableStringBuilder(
 								convMessage.getMessage());
-						ssb.setSpan(new ForegroundColorSpan(0xff666666),
-								convMessage.getMessage().indexOf(dndNames),
+						ssb.setSpan(new StyleSpan(Typeface.BOLD), convMessage
+								.getMessage().indexOf(dndNames),
 								convMessage.getMessage().indexOf(dndNames)
 										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						ssb.setSpan(new ForegroundColorSpan(0xff666666),
-								convMessage.getMessage().lastIndexOf(dndNames),
+						ssb.setSpan(new StyleSpan(Typeface.BOLD), convMessage
+								.getMessage().lastIndexOf(dndNames),
 								convMessage.getMessage().lastIndexOf(dndNames)
 										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
