@@ -1383,7 +1383,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			getWindow().setSoftInputMode(
 					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
-		setupActionBar();
+		setupActionBar(true);
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 
@@ -1735,7 +1735,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				stickerFtueAnimation);
 	}
 
-	private void setupActionBar() {
+	private void setupActionBar(boolean initialising) {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
@@ -1745,6 +1745,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		View backContainer = actionBarView.findViewById(R.id.back);
 		View contactInfoContainer = actionBarView
 				.findViewById(R.id.contact_info);
+
+		CharSequence lastSeenString = null;
+		if (!initialising) {
+			lastSeenString = mLastSeenView.getText();
+		}
+
 		avatar = (ImageView) actionBarView.findViewById(R.id.avatar);
 		mLabelView = (TextView) actionBarView.findViewById(R.id.contact_name);
 		mLastSeenView = (TextView) actionBarView
@@ -1753,12 +1759,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mLastSeenView.setVisibility(View.VISIBLE);
 		mLastSeenView.setSelected(true);
 
-		if (mConversation instanceof GroupConversation) {
-			updateActivePeopleNumberView(0);
+		if (initialising) {
+			if (mConversation instanceof GroupConversation) {
+				updateActivePeopleNumberView(0);
+			} else {
+				mLastSeenView
+						.setText(mConversation.isOnhike() ? R.string.on_hike
+								: R.string.on_sms);
+				mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0,
+						0);
+			}
 		} else {
-			mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike
-					: R.string.on_sms);
-			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			mLastSeenView.setText(lastSeenString);
+			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(
+					shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0,
+					0, 0, 0);
 		}
 
 		avatar.setImageDrawable(IconCacheManager.getInstance()
@@ -2980,7 +2995,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				setChatTheme(selectedTheme);
 
-				setupActionBar();
+				setupActionBar(false);
 				showingChatThemePicker = false;
 				invalidateOptionsMenu();
 			}
