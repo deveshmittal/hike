@@ -221,7 +221,6 @@ public class HikeService extends Service {
 		if (sendRai == null) {
 			sendRai = new SendRai();
 			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_RAI_TO_SERVER_ACTION));
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
