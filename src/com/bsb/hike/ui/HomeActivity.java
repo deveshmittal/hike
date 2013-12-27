@@ -113,7 +113,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private Drawable myProfileImage;
 	private SnowFallView snowFallView;
 	private ContactInfo chatThemeFTUEContact;
-	
+
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
@@ -165,7 +165,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void initialiseHomeScreen(Bundle savedInstanceState) {
 
-		setContentView(R.layout.home);
+		setContentView(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue
+				: R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
 
