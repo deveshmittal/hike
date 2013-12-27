@@ -199,6 +199,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			mutePreference.setOnPreferenceClickListener(this);
 		}
 
+		Preference muteChatBgPreference = getPreferenceScreen().findPreference(
+				HikeConstants.CHAT_BG_NOTIFICATION_PREF);
+		if (muteChatBgPreference != null) {
+			muteChatBgPreference.setOnPreferenceClickListener(this);
+		}
+
 		if (savedInstanceState != null) {
 			int dialogShowingOrdinal = savedInstanceState.getInt(
 					HikeConstants.Extras.DIALOG_SHOWING, -1);
@@ -479,6 +485,28 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				JSONObject jsonObject = new JSONObject();
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.PUSH_SU, newValue);
+				jsonObject.put(HikeConstants.DATA, data);
+				jsonObject.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						jsonObject);
+
+			} catch (JSONException e) {
+				Log.w(getClass().getSimpleName(), e);
+			}
+		} else if (HikeConstants.CHAT_BG_NOTIFICATION_PREF.equals(preference
+				.getKey())) {
+			/*
+			 * Send to server
+			 */
+			SharedPreferences settingPref = PreferenceManager
+					.getDefaultSharedPreferences(this);
+			try {
+				JSONObject jsonObject = new JSONObject();
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.CHAT_BACKGROUD_NOTIFICATION, settingPref
+						.getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF,
+								true) ? 0 : -1);
 				jsonObject.put(HikeConstants.DATA, data);
 				jsonObject.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);

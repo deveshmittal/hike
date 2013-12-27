@@ -306,11 +306,18 @@ public class HikeNotification {
 		// Message will be empty for type 'uj' when the conversation does not
 		// exist
 		if (TextUtils.isEmpty(message)
-				&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-			message = String.format(
-					context.getString(convMsg.getMetadata().isOldUser() ?
-							R.string.user_back_on_hike : R.string.joined_hike_new),
-					contactInfo.getFirstName());
+				&& (convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMsg
+						.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)) {
+			if (convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+				message = String
+						.format(context.getString(convMsg.getMetadata()
+								.isOldUser() ? R.string.user_back_on_hike
+								: R.string.joined_hike_new), contactInfo
+								.getFirstName());
+			} else {
+				message = context.getString(R.string.chat_bg_changed,
+						contactInfo.getFirstName());
+			}
 		}
 		final long timestamp = convMsg.getTimestamp();
 

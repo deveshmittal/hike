@@ -299,7 +299,7 @@ public class Utils {
 				HikeConstants.Extras.MSISDN,
 				Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo
 						.getId() : contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
 
@@ -2413,6 +2413,13 @@ public class Utils {
 
 	public static String getLastSeenTimeAsString(Context context,
 			long lastSeenTime, int offline, boolean groupParticipant) {
+		return getLastSeenTimeAsString(context, lastSeenTime, offline,
+				groupParticipant, false);
+	}
+
+	public static String getLastSeenTimeAsString(Context context,
+			long lastSeenTime, int offline, boolean groupParticipant,
+			boolean fromChatThread) {
 		/*
 		 * This refers to the setting being turned off
 		 */
@@ -2446,7 +2453,9 @@ public class Utils {
 		 * More than 7 days old.
 		 */
 		if ((lastSeenYear < nowYear) || ((nowDay - lastSeenDay) > 7)) {
-			return context.getString(R.string.last_seen_while_ago);
+			return context
+					.getString(fromChatThread ? R.string.last_seen_while_ago_ct
+							: R.string.last_seen_while_ago);
 		}
 
 		boolean is24Hour = android.text.format.DateFormat
@@ -2471,8 +2480,10 @@ public class Utils {
 							+ "' MMM, h:mmaaa";
 				}
 				DateFormat df = new SimpleDateFormat(format);
-				lastSeen = context.getString(R.string.last_seen_more,
-						df.format(lastSeenDate));
+				lastSeen = context.getString(
+						fromChatThread ? R.string.last_seen_more_ct
+								: R.string.last_seen_more, df
+								.format(lastSeenDate));
 			}
 		} else {
 			String format;
@@ -2488,10 +2499,16 @@ public class Utils {
 						.getString(R.string.last_seen_yesterday_group_participant)
 						: df.format(lastSeenDate);
 			} else {
-				lastSeen = context.getString(
-						(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
-								: R.string.last_seen_today, df
-								.format(lastSeenDate));
+				int stringRes;
+				if (fromChatThread) {
+					stringRes = (nowDay > lastSeenDay) ? R.string.last_seen_yesterday_ct
+							: R.string.last_seen_today_ct;
+				} else {
+					stringRes = (nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+							: R.string.last_seen_today;
+				}
+				lastSeen = context
+						.getString(stringRes, df.format(lastSeenDate));
 			}
 		}
 
@@ -2576,6 +2593,10 @@ public class Utils {
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
 			tipText.setText(R.string.walkie_talkie_tip);
 			break;
+		case CHAT_BG_FTUE:
+			container.setBackgroundResource(R.drawable.bg_tip_top_right);
+			tipText.setText(R.string.chat_bg_ftue_tip);
+			break;	
 		}
 		if (closeTip != null) {
 			closeTip.setOnClickListener(new OnClickListener() {
@@ -2613,6 +2634,9 @@ public class Utils {
 			break;
 		case WALKIE_TALKIE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
+			break;
+		case CHAT_BG_FTUE:
+			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
 			break;
 		}
 
@@ -3209,5 +3233,40 @@ public class Utils {
 			
 		}
 		context.startActivity(i);
+	}
+
+	public static void addCommonDeviceDetails(JSONObject jsonObject,
+			Context context) throws JSONException {
+		int height = context.getResources().getDisplayMetrics().heightPixels;
+		int width = context.getResources().getDisplayMetrics().widthPixels;
+
+		TelephonyManager manager = (TelephonyManager) context
+				.getSystemService(Context.TELEPHONY_SERVICE);
+
+		String res = height + "x" + width;
+		String operator = manager.getSimOperatorName();
+		String circle = manager.getSimOperator();
+		String pdm = Float.toString(Utils.densityMultiplier);
+
+		jsonObject.put(HikeConstants.RESOLUTION, res);
+		jsonObject.put(HikeConstants.OPERATOR, operator);
+		jsonObject.put(HikeConstants.CIRCLE, circle);
+		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
+	}
+
+	public static ConvMessage makeConvMessage(Conversation mConversation,
+			String msisdn, String message, boolean isOnhike) {
+		return makeConvMessage(mConversation, msisdn, message, isOnhike,
+				State.SENT_UNCONFIRMED);
+	}
+
+	public static ConvMessage makeConvMessage(Conversation mConversation,
+			String msisdn, String message, boolean isOnhike, State state) {
+		long time = (long) System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(message, msisdn, time, state);
+		convMessage.setConversation(mConversation);
+		convMessage.setSMS(!isOnhike);
+
+		return convMessage;
 	}
 }
