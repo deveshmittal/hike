@@ -24,7 +24,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -219,6 +218,26 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						participantName);
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
 				markedUp = context.getString(R.string.block_internation_sms);
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String nameString;
+				if (conversation instanceof GroupConversation) {
+					nameString = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you)
+							: ((GroupConversation) conversation)
+									.getGroupParticipantFirstName(msisdn);
+				} else {
+					nameString = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you) : Utils
+							.getFirstName(conversation.getLabel());
+				}
+
+				markedUp = context.getString(R.string.chat_bg_changed,
+						nameString);
 			} else {
 				String msg = message.getMessage();
 				markedUp = msg.substring(0, Math.min(msg.length(),

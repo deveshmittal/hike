@@ -61,6 +61,12 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 			// disconnected (and then reconnected if it can be restarted)
 			// so there is no need to do anything here.
 		}
+
+		/*
+		 * Broadcasting this event to force an rai send check. This is
+		 * so that we send the rai packet after the app updates.
+		 */
+		mApp.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
 	}
 
 	public void onServiceDisconnected(ComponentName className) {

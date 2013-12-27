@@ -11,7 +11,8 @@ import java.security.UnrecoverableKeyException;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 
-import com.bsb.hike.mqtt.client.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSSLUtil;
+
 
 public class CustomSSLSocketFactory extends SSLSocketFactory {
 

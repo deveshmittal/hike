@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp" >
+
+    <LinearLayout
+        android:id="@+id/close_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_overflow_menu_selector"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingRight="5dp" >
+
+        <ImageView
+            android:id="@+id/close_action_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginLeft="9dp"
+            android:src="@drawable/ic_close_chat_bg_palette" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/title"
+            style="@style/ActionBarText.Shadow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/close_action_mode"
+            android:text="@string/chat_theme" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/margin_view"
+        android:layout_width="9dp"
+        android:layout_height="1dp"
+        android:layout_alignParentRight="true" />
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/save"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/margin_view"
+        android:background="@drawable/bg_save_theme_btn"
+        android:gravity="center"
+        android:minWidth="56dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:text="@string/done"
+        android:textColor="@drawable/action_bar_btn_text"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

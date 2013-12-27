@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+
+import com.bsb.hike.service.HikeMqttManagerNew;
+//import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMBaseIntentService;
@@ -37,7 +40,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		HikeMessengerApp app = (HikeMessengerApp) context
 				.getApplicationContext();
 		app.connectToService();
-		context.sendBroadcast(new Intent(HikeService.MQTT_PING_ACTION));
+		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION));
 	}
 
 	@Override

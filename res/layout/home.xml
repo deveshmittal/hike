@@ -18,6 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >
+        <ImageView 
+            android:id="@+id/action_bar_img"
+            android:layout_width= "match_parent"
+            android:layout_height="48dp"
+            android:visibility="gone"
+            android:scaleType="fitXY"
+            android:src="@drawable/action_bar_img" />
 
         <com.viewpagerindicator.TabPageIndicator
             android:id="@+id/titles"
@@ -30,5 +37,23 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
-
+    
+    <View
+        android:id="@+id/chat_bg_ftue_fade"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#cd000000"
+        android:onClick="OnChatBgFtueOverlayClick"
+        android:visibility="gone" />
+    
+    <FrameLayout 
+        android:id="@+id/gift_box_layout_view"
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:layout_gravity="center"
+    	android:visibility="gone"  >
+        
+        <include layout="@layout/chat_bg_ftue_box" />
+    </FrameLayout>
+    
 </FrameLayout>
