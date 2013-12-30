@@ -108,12 +108,15 @@ public class DbConversationListener implements Listener {
 						convMessage.getMsisdn());
 			}
 
-			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO
+			if ((convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage
+					.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 					&& (!convMessage.isFileTransferMessage() || shouldSendMessage)) {
 				Log.d("DBCONVERSATION LISTENER",
 						"Sending Message : " + convMessage.getMessage()
 								+ "	;	to : " + convMessage.getMsisdn());
-				if (!convMessage.isSMS() || !Utils.getSendSmsPref(context)) {
+				if (!convMessage.isSMS()
+						|| !Utils.getSendSmsPref(context)
+						|| convMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH,
 							convMessage.serialize());
 				} else {

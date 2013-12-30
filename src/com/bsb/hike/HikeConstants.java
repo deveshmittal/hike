@@ -50,7 +50,7 @@ public class HikeConstants {
 	public static final String GENDER = "gender";
 	public static final String VERSION = "v";
 	public static final String CRITICAL = "c";
-	public static final String CRITICAL_UPDATE_KEY ="critical";
+	public static final String CRITICAL_UPDATE_KEY = "critical";
 	public static final String INVITE_TOKEN = "invite_token";
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 	public static final String DND_NUMBERS = "dndnumbers";
@@ -110,7 +110,7 @@ public class HikeConstants {
 	public static final String UPGRADE = "upgrade";
 	public static final String DEV_TYPE = "dev_type";
 	public static final String APP_VERSION = "app_version";
-	public static final String UPDATE_VERSION ="version";
+	public static final String UPDATE_VERSION = "version";
 	public static final String DEVICE_VERSION = "deviceversion";
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
@@ -165,7 +165,7 @@ public class HikeConstants {
 	public static final String SENDBOT = "sendbot";
 	public static final String EVENT_TYPE = "et";
 	public static final String EVENT_KEY = "ek";
-	public static final String PACKAGE ="pkg";
+	public static final String PACKAGE = "pkg";
 	public static final String SIGNUP_IC = "signupIc";
 	public static final String DEVICE_KEY = "device_key";
 	public static final String ENABLE_FREE_INVITES = "enable_free_invites";
@@ -173,6 +173,15 @@ public class HikeConstants {
 	public static final String FREE_INVITE_POPUP_TITLE = "free_invite_popup_title";
 	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
 	public static final String LIST = "list";
+	public static final String BG_ID = "bg_id";
+	public static final String CHAT_BACKGROUNDS = "cbgs";
+	public static final String CHAT_BACKGROUND = "cbg";
+	public static final String CHAT_BACKGROUD_NOTIFICATION = "pushcbg";
+	public static final String RESOLUTION = "res";
+	public static final String OPERATOR = "op";
+	public static final String CIRCLE = "circle";
+	public static final String PIXEL_DENSITY_MULTIPLIER = "pdm";
+	public static final String CUSTOM = "custom";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -186,11 +195,13 @@ public class HikeConstants {
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
 	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
+	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
+
 	public static final String HIKEBOT = "TD-HIKE";
 	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";
 	public static final String FTUE_TEAMHIKE_MSISDN = "+hike+";
 	public static final String FTUE_HIKEBOT_MSISDN = "+hike1+";
-	public static final String FTUE_GAMING_MSISDN ="+hike2+";
+	public static final String FTUE_GAMING_MSISDN = "+hike2+";
 	public static final String UNLINK_PREF = "unlinkAccount";
 	public static final String DELETE_PREF = "deleteAccount";
 	public static final String UNLINK_FB = "unlinkFacebook";
@@ -597,7 +608,9 @@ public class HikeConstants {
 		public static final String LAST_APPLICATION_PUSH_PACKET_ID = "lastApplicationPushPacketId";
 		public static final String FREE_SMS_POPUP_BODY = "freeSMSPopupBody";
 		public static final String FREE_SMS_POPUP_HEADER = "freeSMSPopupHeader";
-		public static final String SHOW_STICKER_TIP_FOR_EMMA = "showStickerTipForEmma";		
+		public static final String SHOW_STICKER_TIP_FOR_EMMA = "showStickerTipForEmma";
+		public static final String FROM_CHAT_THEME_FTUE = "fromChatThemeFtue";
+		public static final String NEW_USER = "newUser";
 	}
 
 	public static final class LogEvent {
@@ -730,7 +743,7 @@ public class HikeConstants {
 		public static final String INVITE_FROM_GRID = "inviteFromGrid";
 		public static final String FB_CLICK = "fbClick";
 		/*
-		 * Invite keys 
+		 * Invite keys
 		 */
 		public static final String INVITE_FRIENDS_FROM_POPUP_FREE_SMS = "inviteFriendsFromPopupFreeSMS";
 		public static final String INVITE_FRIENDS_FROM_POPUP_REWARDS = "inviteFriendsFromPopupRewards";
@@ -791,6 +804,7 @@ public class HikeConstants {
 		public static final String UPDATE_PUSH = "update";
 		public static final String APPLICATIONS_PUSH = "applications";
 		public static final String MULTI_INVITE = "mi";
+		public static final String CHAT_BACKGROUD = "cbg";
 	}
 
 	public static final class SMSNative {
@@ -828,7 +842,7 @@ public class HikeConstants {
 	}
 
 	public static enum TipType {
-		EMOTICON, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
+		EMOTICON, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
 	}
 
 	public static enum EmoticonType {

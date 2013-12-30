@@ -34,6 +34,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
@@ -48,6 +49,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
@@ -286,6 +288,8 @@ public class MqttMessagesManager {
 			}
 			Log.d(getClass().getSimpleName(), "GCJ Message is new");
 
+			JSONObject metadata = jsonObj.optJSONObject(HikeConstants.METADATA);
+
 			if (!groupRevived
 					&& !this.convDb.doesConversationExist(groupConversation
 							.getMsisdn())) {
@@ -295,8 +299,6 @@ public class MqttMessagesManager {
 						.addConversation(groupConversation.getMsisdn(), false,
 								"", groupConversation.getGroupOwner());
 
-				JSONObject metadata = jsonObj
-						.optJSONObject(HikeConstants.METADATA);
 				if (metadata != null) {
 					String groupName = metadata.optString(HikeConstants.NAME);
 					if (!TextUtils.isEmpty(groupName)) {
@@ -309,6 +311,32 @@ public class MqttMessagesManager {
 				// received for group creation
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
 			}
+
+			if (metadata != null) {
+				JSONObject chatBgJson = metadata
+						.optJSONObject(HikeConstants.CHAT_BACKGROUND);
+				if (chatBgJson != null) {
+					String bgId = chatBgJson.optString(HikeConstants.BG_ID);
+					String groupId = groupConversation.getMsisdn();
+					try {
+						/*
+						 * We don't support custom themes yet.
+						 */
+						if (chatBgJson.optBoolean(HikeConstants.CUSTOM)) {
+							throw new IllegalArgumentException();
+						}
+
+						ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
+						convDb.setChatBackground(groupId, chatTheme.bgId(), 0);
+					} catch (IllegalArgumentException e) {
+						/*
+						 * This exception is thrown for unknown themes. Do
+						 * nothing
+						 */
+					}
+				}
+			}
+
 			saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 		} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE.equals(type)) // Group
 		// chat
@@ -601,8 +629,8 @@ public class MqttMessagesManager {
 				setDefaultSMSClientTutorialSetting();
 			}
 			if (data.has(HikeConstants.ENABLE_FREE_INVITES)) {
-				boolean sendNativeInvite = !data
-						.optBoolean(HikeConstants.ENABLE_FREE_INVITES, true);
+				boolean sendNativeInvite = !data.optBoolean(
+						HikeConstants.ENABLE_FREE_INVITES, true);
 				boolean showFreeInvitePopup = data
 						.optBoolean(HikeConstants.SHOW_FREE_INVITES)
 						&& !settings
@@ -674,9 +702,7 @@ public class MqttMessagesManager {
 					JSONArray groupIds = mutedGroups.names();
 					if (groupIds != null && groupIds.length() > 0) {
 						for (int i = 0; i < groupIds.length(); i++) {
-							HikeConversationsDatabase.getInstance()
-									.toggleGroupMute(groupIds.optString(i),
-											true);
+							convDb.toggleGroupMute(groupIds.optString(i), true);
 						}
 					}
 				}
@@ -728,6 +754,20 @@ public class MqttMessagesManager {
 					settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF,
 							account.optBoolean(HikeConstants.LAST_SEEN_SETTING,
 									true));
+					settingEditor.commit();
+				}
+				if (account.has(HikeConstants.CHAT_BACKGROUNDS)) {
+					JSONArray chatBackgroundArray = account
+							.getJSONArray(HikeConstants.CHAT_BACKGROUNDS);
+					convDb.setChatThemesFromArray(chatBackgroundArray);
+				}
+				if (account.has(HikeConstants.CHAT_BACKGROUD_NOTIFICATION)) {
+					boolean showNotification = account.optInt(
+							HikeConstants.CHAT_BG_NOTIFICATION_PREF, 0) != -1;
+					Editor settingEditor = settings.edit();
+					settingEditor.putBoolean(
+							HikeConstants.CHAT_BG_NOTIFICATION_PREF,
+							showNotification);
 					settingEditor.commit();
 				}
 			}
@@ -859,8 +899,8 @@ public class MqttMessagesManager {
 				editor.putBoolean(
 						HikeMessengerApp.FREE_INVITE_POPUP_DEFAULT_IMAGE, false);
 
-				boolean sendNativeInvite = !data
-						.optBoolean(HikeConstants.ENABLE_FREE_INVITES, true);
+				boolean sendNativeInvite = !data.optBoolean(
+						HikeConstants.ENABLE_FREE_INVITES, true);
 				boolean showFreeInvitePopup = data
 						.optBoolean(HikeConstants.SHOW_FREE_INVITES);
 				String header = data
@@ -1277,6 +1317,66 @@ public class MqttMessagesManager {
 				editor.commit();
 				this.pubSub.publish(HikePubSub.APPLICATIONS_PUSH, packageName);
 			}
+		} else if (HikeConstants.MqttMessageTypes.CHAT_BACKGROUD.equals(type)) {
+			String from = jsonObj.optString(HikeConstants.FROM);
+			String to = jsonObj.optString(HikeConstants.TO);
+
+			long timestamp = jsonObj.optLong(HikeConstants.TIMESTAMP);
+			timestamp = Utils.applyServerTimeOffset(context, timestamp);
+
+			boolean isGroupConversation = false;
+			if (!TextUtils.isEmpty(to)) {
+				isGroupConversation = Utils.isGroupConversation(to);
+			}
+			String id = isGroupConversation ? to : from;
+
+			long oldTimestamp = convDb.getChatThemeTimestamp(id);
+			if (oldTimestamp >= timestamp) {
+				/*
+				 * We should ignore this packet since its either old or
+				 * duplicate.
+				 */
+				return;
+			}
+
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			String bgId = data.optString(HikeConstants.BG_ID);
+
+			try {
+				/*
+				 * If this is a custom theme, we should show it as not
+				 * supported.
+				 */
+				if (data.optBoolean(HikeConstants.CUSTOM)) {
+					throw new IllegalArgumentException();
+				}
+
+				ChatTheme chatTheme = ChatTheme.getThemeFromId(bgId);
+				convDb.setChatBackground(id, bgId, timestamp);
+
+				this.pubSub.publish(HikePubSub.CHAT_BACKGROUND_CHANGED,
+						new Pair<String, ChatTheme>(id, chatTheme));
+
+				saveStatusMsg(jsonObj, id);
+			} catch (IllegalArgumentException e) {
+				/*
+				 * This exception is thrown for unknown themes. Show an
+				 * unsupported message
+				 */
+				String message = context.getString(R.string.unknown_chat_theme);
+				ConvMessage convMessage = Utils.makeConvMessage(null, id,
+						message, true, State.RECEIVED_UNREAD);
+				convDb.addConversationMessages(convMessage);
+
+				/*
+				 * Return if there is no conversation mapped to this message
+				 */
+				if (convMessage.getConversation() == null) {
+					return;
+				}
+
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+			}
 		}
 	}
 
@@ -1407,6 +1507,8 @@ public class MqttMessagesManager {
 		Conversation conversation = convDb
 				.getConversationWithLastMessage(msisdn);
 
+		boolean isChatBgMsg = HikeConstants.MqttMessageTypes.CHAT_BACKGROUD
+				.equals(jsonObj.getString(HikeConstants.TYPE));
 		boolean isUJMsg = HikeConstants.MqttMessageTypes.USER_JOINED
 				.equals(jsonObj.getString(HikeConstants.TYPE));
 		boolean isGettingCredits = false;
@@ -1421,12 +1523,14 @@ public class MqttMessagesManager {
 		 * chats with that participant. Otherwise for other types, we only show
 		 * the message if the user already has an existing conversation.
 		 */
-		if ((conversation == null && (!isUJMsg || !userDb
-				.doesContactExist(msisdn)))
-				|| (conversation != null
-						&& TextUtils.isEmpty(conversation.getContactName())
-						&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
-			return null;
+		if (!isChatBgMsg) {
+			if ((conversation == null && (!isUJMsg || !userDb
+					.doesContactExist(msisdn)))
+					|| (conversation != null
+							&& TextUtils.isEmpty(conversation.getContactName())
+							&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
+				return null;
+			}
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation,
 				context, false);

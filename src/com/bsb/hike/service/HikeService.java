@@ -5,7 +5,6 @@ import java.util.Calendar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,19 +18,13 @@ import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Messenger;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
-import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.GCMIntentService;
@@ -41,8 +34,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.HikePacket;
-import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
@@ -67,13 +59,6 @@ public class HikeService extends Service {
 		}
 	}
 
-	private class PingRunnable implements Runnable {
-		@Override
-		public void run() {
-			HikeService.this.mMqttManager.ping();
-		}
-	}
-
 	public static final int MSG_APP_CONNECTED = 1;
 
 	public static final int MSG_APP_DISCONNECTED = 2;
@@ -90,53 +75,9 @@ public class HikeService extends Service {
 
 	protected Messenger mApp;
 
-	class IncomingHandler extends Handler {
-		public IncomingHandler(Looper looper) {
-			super(looper);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			try {
-				switch (msg.what) {
-				case MSG_APP_CONNECTED:
-					if (mMqttManager.isConnected()) {
-						mMqttManager.subscribeToUIEvents();
-					}
-					handleStart();
-
-					mApp = msg.replyTo;
-					broadcastServiceStatus(mMqttManager.getConnectionStatus());
-					break;
-				case MSG_APP_DISCONNECTED:
-					mMqttManager.unsubscribeFromUIEvents();
-					mApp = null;
-					break;
-				case MSG_APP_TOKEN_CREATED:
-					Log.d("HikeService", "received MSG_APP_TOKEN_CREATED");
-					handleStart();
-					break;
-				case MSG_APP_PUBLISH:
-					Bundle bundle = msg.getData();
-					String message = bundle.getString(HikeConstants.MESSAGE);
-					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					mMqttManager.send(new HikePacket(message.getBytes(), msgId,
-							System.currentTimeMillis()), msg.arg1);
-				}
-			} catch (Exception e) {
-				Log.e(getClass().getSimpleName(), "Exception", e);
-			}
-		}
-	}
-
-	private Messenger mMessenger;
-
 	/************************************************************************/
 	/* CONSTANTS */
 	/************************************************************************/
-
-	// constant used internally to schedule the next ping event
-	public static final String MQTT_PING_ACTION = "com.bsb.hike.PING";
 
 	public static final String MQTT_CONTACT_SYNC_ACTION = "com.bsb.hike.CONTACT_SYNC";
 
@@ -163,16 +104,6 @@ public class HikeService extends Service {
 	// receiver that notifies change in network type.
 	private NetworkTypeChangeIntentReceiver networkTypeChangeIntentReceiver;
 
-	// receiver that notifies the Service when the phone gets data connection
-	private NetworkConnectionIntentReceiver netConnReceiver;
-
-	// receiver that notifies the Service when the user changes data use
-	// preferences
-	private BackgroundDataChangeIntentReceiver dataEnabledReceiver;
-
-	// receiver that wakes the Service up when it's time to ping the server
-	private PingSender pingSender;
-
 	// receiver that triggers a contact sync
 	private ManualContactSyncTrigger manualContactSyncTrigger;
 
@@ -182,22 +113,16 @@ public class HikeService extends Service {
 
 	private PostDeviceDetails postDeviceDetails;
 
-	private ScreenOnReceiver screenOnReceiver;
+	private HikeMqttManagerNew mMqttManager;
 
 	private SendRai sendRai;
 
-	private HikeMqttManager mMqttManager;
 	private ContactListChangeIntentReceiver contactsReceived;
-	private Handler mHandler;
 
 	private Handler mContactsChangedHandler;
 	private Runnable mContactsChanged;
 
-	private PingRunnable pingRunnable;
-
 	private Looper mContactHandlerLooper;
-
-	private Looper mMqttHandlerLooper;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -224,22 +149,11 @@ public class HikeService extends Service {
 		}
 
 		Log.d("HikeService", "onCreate called");
-		HandlerThread mqttHandlerThread = new HandlerThread("MQTTThread");
-		mqttHandlerThread.start();
-		mMqttHandlerLooper = mqttHandlerThread.getLooper();
-		this.mHandler = new Handler(mMqttHandlerLooper);
-		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
 
 		// reset status variable to initial state
-		mMqttManager = new HikeMqttManager(this, this.mHandler);
-
-		// register to be notified whenever the user changes their preferences
-		// relating to background data use - so that we can respect the current
-		// preference
-		dataEnabledReceiver = new BackgroundDataChangeIntentReceiver();
-		registerReceiver(dataEnabledReceiver, new IntentFilter(
-				ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED));
-
+		//mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
+		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
+		mMqttManager.init();
 		networkTypeChangeIntentReceiver = new NetworkTypeChangeIntentReceiver();
 		registerReceiver(networkTypeChangeIntentReceiver, new IntentFilter(
 				ConnectivityManager.CONNECTIVITY_ACTION));
@@ -297,6 +211,20 @@ public class HikeService extends Service {
 			getContentResolver().notifyChange(
 					ContactsContract.Contacts.CONTENT_URI, null);
 		}
+		
+		if (postDeviceDetails == null) {
+			postDeviceDetails = new PostDeviceDetails();
+			registerReceiver(postDeviceDetails, new IntentFilter(
+					SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Update details sender registered");
+		}
+
+		if (sendRai == null) {
+			sendRai = new SendRai();
+			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
+			Log.d("TestUpdate", "Update details sender registered");
+		}
 
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE).getBoolean(
@@ -306,16 +234,12 @@ public class HikeService extends Service {
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 
-		if (screenOnReceiver == null) {
-			screenOnReceiver = new ScreenOnReceiver();
-			registerReceiver(screenOnReceiver, new IntentFilter(
-					Intent.ACTION_SCREEN_ON));
-		}
 	}
 
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId) {
-		asyncStart();
+		Log.d("HikeService","Start MQTT Thread.");
+		mMqttManager.connectOnMqttThread();
 		Log.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE)) {
 			String s = intent.getExtras().getString(
@@ -337,111 +261,19 @@ public class HikeService extends Service {
 		return START_STICKY;
 	}
 
-	private void asyncStart() {
-		/* ensure that all mqtt activity is done on the mqtt thread */
-		this.mHandler.postAtFrontOfQueue(new Runnable() {
-			@Override
-			public void run() {
-				handleStart();
-			}
-		});
-	}
-
-	synchronized void handleStart() {
-		// before we start - check for a couple of reasons why we should stop
-
-		Log.d("HikeService", "handlestart called");
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		if (cm.getBackgroundDataSetting() == false) // respect the user's
-		// request not to use data!
-		{
-			// user has disabled background data
-			mMqttManager
-					.setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_DATADISABLED);
-
-			// we have a listener running that will notify us when this
-			// preference changes, and will call handleStart again when it
-			// is - letting us pick up where we leave off now
-			return;
-		}
-
-		// if the Service was already running and we're already connected - we
-		// don't need to do anything
-		if (this.haveCredentials() && !this.mMqttManager.isConnected()) {
-			this.mMqttManager.connect();
-
-		}
-
-		// changes to the phone's network - such as bouncing between WiFi
-		// and mobile data networks - can break the MQTT connection
-		// the MQTT connectionLost can be a bit slow to notice, so we use
-		// Android's inbuilt notification system to be informed of
-		// network changes - so we can reconnect immediately, without
-		// haing to wait for the MQTT timeout
-		if (netConnReceiver == null) {
-			netConnReceiver = new NetworkConnectionIntentReceiver();
-			registerReceiver(netConnReceiver, new IntentFilter(
-					ConnectivityManager.CONNECTIVITY_ACTION));
-
-		}
-
-		// creates the intents that are used to wake up the phone when it is
-		// time to ping the server
-		if (pingSender == null) {
-			pingSender = new PingSender();
-			pingRunnable = new PingRunnable();
-			registerReceiver(pingSender, new IntentFilter(MQTT_PING_ACTION));
-		}
-
-		if (postDeviceDetails == null) {
-			postDeviceDetails = new PostDeviceDetails();
-			registerReceiver(postDeviceDetails, new IntentFilter(
-					SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Update details sender registered");
-		}
-
-		if (sendRai == null) {
-			sendRai = new SendRai();
-			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_RAI_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Update details sender registered");
-		}
-	}
-
-	private boolean haveCredentials() {
-		SharedPreferences settings = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		return !TextUtils.isEmpty(settings.getString(
-				HikeMessengerApp.TOKEN_SETTING, null));
-	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 
-		// disconnect immediately
-		this.mMqttManager.disconnectFromBroker(false);
-		this.mMqttManager.finish();
-		this.mMqttManager = null;
-
-		// inform the app that the app has successfully disconnected
 		Log.i("HikeService", "onDestroy.  Shutting down service");
-
+		mMqttManager.destroyMqtt();
+		this.mMqttManager = null;
+		// inform the app that the app has successfully disconnected
 		unregisterDataChangeReceivers();
-
-		if (pingSender != null) {
-			unregisterReceiver(pingSender);
-			pingSender = null;
-		}
-
 		if (contactsReceived != null) {
 			getContentResolver().unregisterContentObserver(contactsReceived);
 			contactsReceived = null;
-		}
-
-		if (mMqttHandlerLooper != null) {
-			mMqttHandlerLooper.quit();
 		}
 
 		if (mContactHandlerLooper != null) {
@@ -468,11 +300,6 @@ public class HikeService extends Service {
 			postDeviceDetails = null;
 		}
 
-		if (screenOnReceiver != null) {
-			unregisterReceiver(screenOnReceiver);
-			screenOnReceiver = null;
-		}
-
 		if (sendRai != null) {
 			unregisterReceiver(sendRai);
 			sendRai = null;
@@ -480,14 +307,7 @@ public class HikeService extends Service {
 	}
 
 	public void unregisterDataChangeReceivers() {
-		if (netConnReceiver != null) {
-			unregisterReceiver(netConnReceiver);
-			netConnReceiver = null;
-		}
-		if (dataEnabledReceiver != null) {
-			unregisterReceiver(dataEnabledReceiver);
-			dataEnabledReceiver = null;
-		}
+		
 		if (networkTypeChangeIntentReceiver != null) {
 			unregisterReceiver(networkTypeChangeIntentReceiver);
 			networkTypeChangeIntentReceiver = null;
@@ -502,34 +322,6 @@ public class HikeService extends Service {
 	// so that it can be updated to reflect status and the data received
 	// from the server
 
-	public void broadcastServiceStatus(
-			HikeMqttManager.MQTTConnectionStatus status) {
-		Log.d("HikeService", "broadcastServiceStatus " + status);
-
-		if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED) {
-			NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			notificationManager.cancel(HikeConstants.HIKE_SYSTEM_NOTIFICATION);
-		}
-
-		if (mApp == null) {
-			return;
-		}
-
-		try {
-			Message msg = Message.obtain();
-			msg.what = MSG_APP_CONN_STATUS;
-			msg.arg1 = status.ordinal();
-			mApp.send(msg);
-		} catch (RemoteException e) {
-			// client is dead :(
-			mApp = null;
-			mMqttManager.unsubscribeFromUIEvents();
-			Log.e("HikeService",
-					"Can't send connection status to the application");
-		}
-
-	}
-
 	// methods used to notify the user of what has happened for times when
 	// the app Activity UI isn't running
 
@@ -543,7 +335,7 @@ public class HikeService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return mMessenger.getBinder();
+		return mMqttManager.getMessenger().getBinder();
 	}
 
 	/************************************************************************/
@@ -569,76 +361,6 @@ public class HikeService extends Service {
 		}
 	}
 
-	private class BackgroundDataChangeIntentReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context ctx, Intent intent) {
-			// we protect against the phone switching off while we're doing this
-			// by requesting a wake lock - we request the minimum possible wake
-			// lock - just enough to keep the CPU running until we've finished
-			PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-			WakeLock wl = pm
-					.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
-			try {
-				wl.acquire();
-
-				ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-				if (cm.getBackgroundDataSetting()) {
-					Log.d("HikeService", "User has enabled data");
-					// user has allowed background data - we start again -
-					// picking
-					// up where we left off in handleStart before
-					asyncStart();
-				} else {
-					Log.w("HikeService", "User has disabled data");
-					// user has disabled background data
-					mMqttManager
-							.setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_DATADISABLED);
-
-					// disconnect from the broker
-					mMqttManager.disconnectFromBroker(false);
-				}
-
-				// we're finished - if the phone is switched off, it's okay for
-				// the CPU
-				// to sleep now
-			} finally {
-				wl.release();
-			}
-		}
-	}
-
-	/*
-	 * Called in response to a change in network connection - after losing a
-	 * connection to the server, this allows us to wait until we have a usable
-	 * data connection again
-	 */
-	private class NetworkConnectionIntentReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context ctx, Intent intent) {
-			// we protect against the phone switching off while we're doing this
-			// by requesting a wake lock - we request the minimum possible wake
-			// lock - just enough to keep the CPU running until we've finished
-			PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-			WakeLock wl = pm
-					.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
-			wl.acquire();
-
-			if (Utils.isUserOnline(HikeService.this)) {
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						HikeService.this.mMqttManager.ping();
-					}
-				});
-			}
-
-			// we're finished - if the phone is switched off, it's okay for the
-			// CPU
-			// to sleep now
-			wl.release();
-		}
-	}
-
 	private class NetworkTypeChangeIntentReceiver extends BroadcastReceiver {
 
 		boolean wasWifiOnLastTime = false;
@@ -658,78 +380,20 @@ public class HikeService extends Service {
 		}
 	}
 
-	public void scheduleNextPing() {
-		scheduleNextPing((int) (HikeConstants.KEEP_ALIVE * 0.9));
-	}
-
 	private void postRunnableWithDelay(Runnable runnable, long delay) {
-		mHandler.removeCallbacks(runnable);
-		mHandler.postDelayed(runnable, delay);
+		mContactsChangedHandler.removeCallbacks(runnable);
+		mContactsChangedHandler.postDelayed(runnable, delay);
 	}
 
 	private long getScheduleTime(long wakeUpTime) {
 		return (wakeUpTime - System.currentTimeMillis());
 	}
 
-	/*
-	 * Schedule the next time that you want the phone to wake up and ping the
-	 * message broker server
-	 */
-	public void scheduleNextPing(int timeout) {
-		Log.d(getClass().getSimpleName(), "Scheduling ping in " + timeout
-				+ " seconds");
-
-		postRunnableWithDelay(pingSenderRunnable, timeout * 1000);
-	}
-
-	private Runnable pingSenderRunnable = new Runnable() {
-
-		@Override
-		public void run() {
-			sendBroadcast(new Intent(MQTT_PING_ACTION));
-		}
-	};
-
-	/*
-	 * Used to implement a keep-alive protocol at this Service level - it sends
-	 * a PING message to the server, then schedules another ping after an
-	 * interval defined by keepAliveSeconds
-	 */
-	public class PingSender extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			mHandler.post(pingRunnable);
-
-			// start the next keep alive period
-			scheduleNextPing();
-
-		}
-	};
-
 	private class ManualContactSyncTrigger extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			getContentResolver().notifyChange(
 					ContactsContract.Contacts.CONTENT_URI, null);
-		}
-	}
-
-	/**
-	 * Added this receiver to as a temporary fix for the issue where app
-	 * disconnects and never connects again. Here everytime the user turn on the
-	 * screen, we will check whether we are connected or not.
-	 */
-	private class ScreenOnReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (!mMqttManager.isConnected()) {
-				Log.d(getClass().getSimpleName(),
-						"App was not connected, trying to reconnect");
-				mMqttManager.connect();
-			} else {
-				Log.d(getClass().getSimpleName(), "App is connected!");
-			}
 		}
 	}
 
@@ -856,6 +520,7 @@ public class HikeService extends Service {
 				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
 				data.put(HikeConstants.DEVICE_KEY, deviceKey);
+				Utils.addCommonDeviceDetails(data, context);
 			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
@@ -1005,47 +670,17 @@ public class HikeService extends Service {
 		}
 	};
 
+	private Runnable checkForUpdates = new Runnable() {
+
+		@Override
+		public void run() {
+			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
+					HikeService.this);
+			Utils.executeBoolResultAsyncTask(checkForUpdateTask);
+		}
+	};
+
 	public boolean appIsConnected() {
 		return mApp != null;
-	}
-
-	public boolean sendInvalidToken() {
-		if (mApp == null) {
-			Log.d("HikeService", "no app");
-			return false;
-		}
-
-		try {
-			Message msg = Message.obtain(null, MSG_APP_INVALID_TOKEN);
-			mApp.send(msg);
-		} catch (RemoteException e) {
-			// client is dead :(
-			mApp = null;
-			mMqttManager.unsubscribeFromUIEvents();
-			Log.e("HikeService", "Can't send message to the application");
-			return false;
-		}
-		return true;
-	}
-
-	public boolean sendMessageStatus(Long msgId, boolean sent) {
-		if (mApp == null) {
-			Log.d("HikeService", "no app");
-			return false;
-		}
-
-		try {
-			Message msg = Message.obtain(null, MSG_APP_MESSAGE_STATUS);
-			msg.obj = msgId;
-			msg.arg1 = sent ? 1 : 0;
-			mApp.send(msg);
-		} catch (RemoteException e) {
-			// client is dead :(
-			mApp = null;
-			mMqttManager.unsubscribeFromUIEvents();
-			Log.e("HikeService", "Can't send message to the application");
-			return false;
-		}
-		return true;
 	}
 }
