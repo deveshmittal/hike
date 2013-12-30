@@ -306,6 +306,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		@Override
 		public void run() {
 			Intent i = new Intent(SignupActivity.this, HomeActivity.class);
+			i.putExtra(HikeConstants.Extras.NEW_USER, true);
 			startActivity(i);
 			finish();
 		}

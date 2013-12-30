@@ -45,7 +45,7 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
@@ -287,6 +287,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String FREE_INVITE_POPUP_BODY = "freeInvitePopupBody";
 
 	public static final String FREE_INVITE_POPUP_DEFAULT_IMAGE = "freeInviteDefaultImage";
+	
+	public static final String SHOWN_CHAT_BG_FTUE = "shownChatBgFtue";
+
+	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

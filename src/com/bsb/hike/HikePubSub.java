@@ -292,6 +292,8 @@ public class HikePubSub implements Runnable {
 	
 	public static final String SHOW_FREE_INVITE_SMS = "showFreeInviteSMS";
 
+	public static final String CHAT_BACKGROUND_CHANGED = "chatBackgroundChanged";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

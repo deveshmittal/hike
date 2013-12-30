@@ -85,6 +85,9 @@ public class MessageMetadata {
 		case STATUS_MESSAGE:
 			this.statusMessage = new StatusMessage(metadata);
 			break;
+		case CHAT_BACKGROUND:
+			this.msisdn = metadata.optString(HikeConstants.FROM);
+			break;
 		}
 		this.newUser = metadata.optString(HikeConstants.NEW_USER)
 				.equals("true");

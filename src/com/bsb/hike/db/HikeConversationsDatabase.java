@@ -45,10 +45,9 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
@@ -186,6 +185,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " ("
 				+ DBConstants.FILE_KEY + " )";
 		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CHAT_BG_TABLE + " ("
+				+ DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.BG_ID
+				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER" + ")";
+		db.execSQL(sql);
+		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX
+				+ " ON " + DBConstants.CHAT_BG_TABLE + " ("
+				+ DBConstants.MSISDN + ")";
+		db.execSQL(sql);
 	}
 
 	public void deleteAll() {
@@ -199,6 +206,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.PROTIP_TABLE, null, null);
 		mDb.delete(DBConstants.SHARED_MEDIA_TABLE, null, null);
 		mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, null, null);
+		mDb.delete(DBConstants.CHAT_BG_TABLE, null, null);
 	}
 
 	@Override
@@ -430,6 +438,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			String alter = "ALTER TABLE " + DBConstants.PROTIP_TABLE
 					+ " ADD COLUMN " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL
 					+ " TEXT";
+			db.execSQL(alter);
+		}
+		/*
+		 * Version 22 adds the Chat BG table.
+		 */
+		boolean chatBgTableAdded = false;
+		if (oldVersion < 22) {
+			chatBgTableAdded = true;
+		}
+		/*
+		 * Version 23 adds the timestamp column to the chat bg table
+		 */
+		if (!chatBgTableAdded && oldVersion < 23) {
+			String alter = "ALTER TABLE " + DBConstants.CHAT_BG_TABLE
+					+ " ADD COLUMN " + DBConstants.TIMESTAMP + " INTEGER";
 			db.execSQL(alter);
 		}
 	}
@@ -971,6 +994,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						DBConstants.GROUP_ID + " =?", new String[] { msisdn });
 				mDb.delete(DBConstants.GROUP_INFO_TABLE, DBConstants.GROUP_ID
 						+ " =?", new String[] { msisdn });
+				removeChatThemeForMsisdn(msisdn);
 			}
 		}
 		mDb.setTransactionSuccessful();
@@ -2930,5 +2954,128 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public void deleteAllProtipsBeforeThisId(long id) {
 		mDb.delete(DBConstants.PROTIP_TABLE, DBConstants.ID + "< ?",
 				new String[] { Long.toString(id) });
+	}
+
+	public void setChatBackground(String msisdn, String bgId, long timeStamp) {
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.MSISDN, msisdn);
+		values.put(DBConstants.BG_ID, bgId);
+		values.put(DBConstants.TIMESTAMP, timeStamp);
+
+		mDb.insertWithOnConflict(DBConstants.CHAT_BG_TABLE, null, values,
+				SQLiteDatabase.CONFLICT_REPLACE);
+	}
+
+	public long getChatThemeTimestamp(String msisdn) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.CHAT_BG_TABLE,
+					new String[] { DBConstants.TIMESTAMP }, DBConstants.MSISDN
+							+ "=?", new String[] { msisdn }, null, null, null);
+			if (c.moveToFirst()) {
+				return c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+			}
+			return 0;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public ChatTheme getChatThemeForMsisdn(String msisdn) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.CHAT_BG_TABLE,
+					new String[] { DBConstants.BG_ID }, DBConstants.MSISDN
+							+ "=?", new String[] { msisdn }, null, null, null);
+			if (c.moveToFirst()) {
+				try {
+					return ChatTheme.getThemeFromId(c.getString(c
+							.getColumnIndex(DBConstants.BG_ID)));
+				} catch (IllegalArgumentException e) {
+					/*
+					 * For invalid theme id, we return the default id.
+					 */
+					return ChatTheme.DEFAULT;
+				}
+			}
+			return ChatTheme.DEFAULT;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public void removeChatThemeForMsisdn(String msisdn) {
+		mDb.delete(DBConstants.CHAT_BG_TABLE, DBConstants.MSISDN + "=?",
+				new String[] { msisdn });
+	}
+
+	public void setChatThemesFromArray(JSONArray chatBackgroundArray) {
+		SQLiteStatement insertStatement = null;
+		InsertHelper ih = null;
+		try {
+			ih = new InsertHelper(mDb, DBConstants.CHAT_BG_TABLE);
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
+					+ DBConstants.CHAT_BG_TABLE + " ( " + DBConstants.MSISDN
+					+ ", " + DBConstants.BG_ID + " ) " + " VALUES (?, ?)");
+			mDb.beginTransaction();
+
+			if (chatBackgroundArray == null
+					|| chatBackgroundArray.length() == 0) {
+				return;
+			}
+			for (int i = 0; i < chatBackgroundArray.length(); i++) {
+				JSONObject chatBgJson = chatBackgroundArray.optJSONObject(i);
+
+				if (chatBgJson == null) {
+					continue;
+				}
+
+				String msisdn = chatBgJson.optString(HikeConstants.MSISDN);
+				String bgId = chatBgJson.optString(HikeConstants.BG_ID);
+
+				if (TextUtils.isEmpty(msisdn)) {
+					continue;
+				}
+
+				ChatTheme chatTheme = null;
+
+				try {
+					/*
+					 * We don't support custom themes yet.
+					 */
+					if (chatBgJson.optBoolean(HikeConstants.CUSTOM)) {
+						throw new IllegalArgumentException();
+					}
+
+					chatTheme = ChatTheme.getThemeFromId(bgId);
+				} catch (IllegalArgumentException e) {
+					continue;
+				}
+
+				insertStatement.bindString(
+						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
+				insertStatement.bindString(
+						ih.getColumnIndex(DBConstants.BG_ID), bgId);
+
+				insertStatement.executeInsert();
+
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.CHAT_BACKGROUND_CHANGED,
+						new Pair<String, ChatTheme>(msisdn, chatTheme));
+			}
+		} finally {
+			if (insertStatement != null) {
+				insertStatement.close();
+			}
+			if (ih != null) {
+				ih.close();
+			}
+			mDb.setTransactionSuccessful();
+			mDb.endTransaction();
+		}
 	}
 }
