@@ -188,9 +188,9 @@ public class HikeConstants {
 	//	@GM
 	//public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String MEDIA_AUTO_DOWNLOAD_PREF = "mediaAutoDownloadPref";
-	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mbAutoDownloadImagePref";
-	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mbAutoDownloadAudioPref";
-	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mbAutoDownloadVideoPref";
+	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mdAutoDownloadImagePref";
+	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mdAutoDownloadAudioPref";
+	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mdAutoDownloadVideoPref";
 	public static final String WF_AUTO_DOWNLOAD_IMAGE_PREF = "wfAutoDownloadImagePref";
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,7 +33,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
 
-		Log.d("Auto-d", "Step 1.1");
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.notifications));
@@ -131,7 +129,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		settingsList.setAdapter(listAdapter);
 		settingsList.setOnItemClickListener(this);
 		setupActionBar();
-		
 	}
 
 	private void setupActionBar() {
