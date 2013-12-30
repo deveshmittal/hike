@@ -211,6 +211,7 @@
 	<string name="sound_msg">Play a sound on new message</string>
 	<string name="free_sms">Free SMS to India</string>
 	<string name="free_sms_msg">Turn on to send free SMS to India</string>
+	<string name="media_auto_download">Media Auto-Download</string>
 	<string name="delete_account">Delete Account</string>
 	<string name="unlink_facebook_account">Unlink Facebook Account</string>
 	<string name="unlink_twitter_account">Unlink Twitter Account</string>
