@@ -214,6 +214,8 @@ public class DownloadStickerTask extends StickerTaskBase
 				l.remove(ViewType.UPDATING_STICKER);
 				stickerPageAdapter.calculateNumRowsAndSize(true);
 				stickerPageAdapter.notifyDataSetChanged();
+				Intent i = new Intent(StickerManager.STICKERS_UPDATED);
+				LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 			}
 
 			else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)

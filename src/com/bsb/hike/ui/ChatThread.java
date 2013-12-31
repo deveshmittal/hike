@@ -25,9 +25,12 @@ import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.OperationApplicationException;
@@ -67,6 +70,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -287,6 +291,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private boolean isOnline = false;
 
 	private ContactInfo contactInfo;
+	
+	private StickerEmoticonIconPageIndicator iconPageIndicator;
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
@@ -400,7 +406,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	protected void onDestroy() {
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
 		if (mComposeViewWatcher != null) {
 			// If we didn't send an end typing. We should send one before
 			// exiting
@@ -573,6 +579,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
 
 	}
 
@@ -4730,7 +4737,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		emoticonViewPager.setCurrentItem(actualPageNum, false);
 		emoticonViewPager.invalidate();
 
-		StickerEmoticonIconPageIndicator iconPageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
+		iconPageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
 		iconPageIndicator.setViewPager(emoticonViewPager);
 		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
 		iconPageIndicator.notifyDataSetChanged();
@@ -5088,4 +5095,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private boolean isConversationOnHike() {
 		return mConversation != null && mConversation.isOnhike();
 	}
+	
+	private BroadcastReceiver chatThreadReceiver = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
+			{
+				if(iconPageIndicator != null)
+				{
+					runOnUiThread(new Runnable()
+					{
+						public void run()
+						{
+							iconPageIndicator.notifyDataSetChanged();
+						}
+					});
+				}
+			}
+		}
+	};
 }

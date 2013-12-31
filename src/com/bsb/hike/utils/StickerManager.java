@@ -80,6 +80,8 @@ public class StickerManager
 
 	public static final String FWD_STICKER_INDEX = "fwdStickerIdx";
 
+	public static final String STICKERS_UPDATED = "stickersUpdated";
+
 	public static int RECENT_STICKERS_COUNT = 30;
 
 	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1, R.drawable.sticker_10_love2, R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
