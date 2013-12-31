@@ -12,12 +12,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
@@ -29,7 +29,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -402,6 +401,9 @@ public class StickerManager
 
 	public void setupStickerCategoryList(SharedPreferences preferences)
 	{
+		/*TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and 
+				 stickerCategories will be called from UI thread also. 
+		*/
 		stickerCategories = new ArrayList<StickerCategory>();
 		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = HikeConversationsDatabase.getInstance().stickerDataForCategories();
 		for (StickerCategoryId s : StickerCategoryId.values())
