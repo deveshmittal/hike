@@ -311,6 +311,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String FREE_INVITE_POPUP_BODY = "freeInvitePopupBody";
 
 	public static final String FREE_INVITE_POPUP_DEFAULT_IMAGE = "freeInviteDefaultImage";
+	
+	public static final String SHOWN_CHAT_BG_FTUE = "shownChatBgFtue";
+
+	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
 
 	public static List<StickerCategory> stickerCategories;
 

@@ -21,41 +21,6 @@
             android:orientation="vertical" >
 
             <LinearLayout
-                android:id="@+id/ftue_empty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical" >
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_empty_chat" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:layout_width="155dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:gravity="center"
-                    android:text="@string/empty_chat"
-                    android:textColor="#73726f"
-                    android:textSize="16dp" />
-
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/start_chat_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/bg_blue_btn_selector"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:text="@string/start_chat"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/ftue_not_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

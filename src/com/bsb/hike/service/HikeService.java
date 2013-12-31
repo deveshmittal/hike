@@ -221,7 +221,6 @@ public class HikeService extends Service {
 		if (sendRai == null) {
 			sendRai = new SendRai();
 			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_RAI_TO_SERVER_ACTION));
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
@@ -512,6 +511,7 @@ public class HikeService extends Service {
 				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
 				data.put(HikeConstants.DEVICE_KEY, deviceKey);
+				Utils.addCommonDeviceDetails(data, context);
 			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}

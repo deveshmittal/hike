@@ -8,41 +8,43 @@
     android:paddingRight="@dimen/chat_bubble_edge_spacing" >
 
     <LinearLayout
-        android:id="@+id/day_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="10dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
+		android:layout_marginBottom="5dp"
+	    android:orientation="horizontal"
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/day_container"
+		android:gravity="center_vertical"
+		android:layout_marginTop="10dp">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:layout_gravity="center"
-            android:layout_weight="10"
-            android:background="@drawable/ic_chatthread_divider" />
+		<View 
+		    android:id="@+id/day_left"
+		    android:layout_height="2dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@color/day_line"/>
+		    
+	    <com.bsb.hike.view.CustomFontTextView
+	        android:id="@+id/day"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_marginLeft="7dp"
+        	android:layout_marginRight="7dp"
+        	android:layout_alignParentTop="true"
+        	android:layout_centerHorizontal="true"
+        	android:text="This is the timestamp"
+        	android:textSize="12sp"
+        	android:textColor="@color/list_item_header"
+        	android:textStyle="bold|italic" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/day"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="7dp"
-            android:layout_marginRight="7dp"
-            android:text="This is the timestamp"
-            android:textColor="@color/list_item_header"
-            android:textSize="12sp"
-            android:textStyle="bold|italic" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:layout_gravity="center"
-            android:layout_weight="10"
-            android:background="@drawable/ic_chatthread_divider" />
-    </LinearLayout>
+	    <View 
+	        android:id="@+id/day_right"
+		    android:layout_height="2dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@color/day_line"/>
+	</LinearLayout>
 
     <RelativeLayout
         android:id="@+id/relativeLayout1"
@@ -202,15 +204,23 @@
                     android:id="@+id/poke_sent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="2dp"
                     android:layout_toRightOf="@id/msg_status_indicator"
                     android:gravity="center_vertical"
                     android:src="@drawable/ic_nudge_hike_sent"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1.5dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="10dp"
                     android:visibility="gone" />
             </LinearLayout>
+
+            <ImageView
+                android:id="@+id/poke_sent_custom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/sticker_placeholder"

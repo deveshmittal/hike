@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -52,7 +53,7 @@ public class ToastListener implements Listener {
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
 			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED,
 			HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
-			HikePubSub.SHOW_FREE_INVITE_SMS};
+			HikePubSub.SHOW_FREE_INVITE_SMS };
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -94,7 +95,19 @@ public class ToastListener implements Listener {
 				}
 				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO
 						|| message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
+						|| message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+					if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+						boolean showNotification = PreferenceManager
+								.getDefaultSharedPreferences(context)
+								.getBoolean(
+										HikeConstants.CHAT_BG_NOTIFICATION_PREF,
+										true);
+						if (!showNotification) {
+							return;
+						}
+					}
+
 					Activity activity = (currentActivity != null) ? currentActivity
 							.get() : null;
 					if ((activity instanceof ChatThread)) {
@@ -121,12 +134,13 @@ public class ToastListener implements Listener {
 								message.getMsisdn(), false);
 					}
 					/*
-					 * Check if this is a big picture message, else 
-					 * toast a normal push message
+					 * Check if this is a big picture message, else toast a
+					 * normal push message
 					 */
-					Bitmap bigPicture = Utils.returnBigPicture(message, context);
-					this.toaster.notifyMessage(contactInfo, message, 
-							bigPicture!=null ? true: false, bigPicture);
+					Bitmap bigPicture = Utils
+							.returnBigPicture(message, context);
+					this.toaster.notifyMessage(contactInfo, message,
+							bigPicture != null ? true : false, bigPicture);
 				}
 
 			}
@@ -195,7 +209,7 @@ public class ToastListener implements Listener {
 				return;
 			}
 			final Bitmap bigPicture = Utils.returnBigPicture(message, context);
-			if (bigPicture!=null) {
+			if (bigPicture != null) {
 				ContactInfo contactInfo;
 				if (message.isGroupChat()) {
 					Log.d("ToastListener", "GroupName is "
@@ -245,12 +259,14 @@ public class ToastListener implements Listener {
 										""));
 			}
 
-		} else if (HikePubSub.SHOW_FREE_INVITE_SMS.equals(type)){
-			if(object !=null && object instanceof Bundle){
+		} else if (HikePubSub.SHOW_FREE_INVITE_SMS.equals(type)) {
+			if (object != null && object instanceof Bundle) {
 				Bundle bundle = (Bundle) object;
-				String bodyString = bundle.getString(HikeConstants.Extras.FREE_SMS_POPUP_BODY);
-				//TODO: we may need the title tomorrow, so we can extract that too from the bundle
-				if(!TextUtils.isEmpty(bodyString)){
+				String bodyString = bundle
+						.getString(HikeConstants.Extras.FREE_SMS_POPUP_BODY);
+				// TODO: we may need the title tomorrow, so we can extract that
+				// too from the bundle
+				if (!TextUtils.isEmpty(bodyString)) {
 					toaster.notifySMSPopup(bodyString);
 				}
 			}

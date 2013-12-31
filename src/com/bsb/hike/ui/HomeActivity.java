@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -59,13 +60,16 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
+import com.bsb.hike.utils.ChatBgFtue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -82,7 +86,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 												// for Production
 
 	private enum DialogShowing {
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, CHAT_BG_FTUE
 	}
 
 	private ViewPager viewPager;
@@ -107,6 +111,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private PopupWindow overFlowWindow;
 	private TextView topBarIndicator;
 	private Drawable myProfileImage;
+	private SnowFallView snowFallView;
+	private ContactInfo chatThemeFTUEContact;
+
 	private String[] homePubSubListeners = {
 			HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT,
 			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
@@ -158,7 +165,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void initialiseHomeScreen(Bundle savedInstanceState) {
 
-		setContentView(R.layout.home);
+		setContentView(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue
+				: R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
 
@@ -171,10 +180,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 			}
 		}
-		// check the preferences and show update
-		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
-				HikeConstants.NO_UPDATE);
-		showUpdatePopup(updateType);
+		
+		if(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
+			Utils.blockOrientationChange(HomeActivity.this);
+			//if chat bg ftue is not shown show this on the highest priority
+			dialogShowing = DialogShowing.CHAT_BG_FTUE;
+			findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
+			getSupportActionBar().hide();
+		} else {
+			// check the preferences and show update
+			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
+					HikeConstants.NO_UPDATE);
+			showUpdatePopup(updateType);
+		}
 
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
@@ -219,8 +238,53 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
+		
 	}
 
+	public void setChatThemeFTUEContact(ContactInfo contactInfo) {
+		this.chatThemeFTUEContact = contactInfo;
+	}
+
+	public ContactInfo getChatThemeFTUEContact() {
+		return this.chatThemeFTUEContact;
+	}
+
+	public void OnChatBgFtueOverlayClick(View v){
+		return;
+	}
+	
+	public void onChatBgOpenItUpClick(View v){
+		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
+	}
+
+	public void onChatBgGiveItASpinClick(View v){
+		(new Handler()).postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				/*
+				 * This handler is to fix the issue
+				 * When user taps on give it spin button there is a
+				 * delay in opening chatthread. And There is also a
+				 * delay in showing actionbar when we call actionbar
+				 * show() method. 
+				 */
+
+				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+				getSupportActionBar().show();
+			}
+		}, 2000);
+		
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
+		editor.commit();
+		Utils.unblockOrientationChange(HomeActivity.this);
+		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
+		return;
+	}
+	
 	@Override
 	protected void onDestroy() {
 		if (progDialog != null) {
@@ -552,6 +616,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
+		if((!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))&&snowFallView==null){
+			(new Handler()).postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+				}
+			}, 300);
+		}
+		
 	}
 
 	@Override
@@ -1034,6 +1111,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		Log.d(getClass().getSimpleName(), "Key Event is triggered");
+		if(dialogShowing == DialogShowing.CHAT_BG_FTUE){
+			return super.onKeyUp(keyCode, event);
+		}
 		if (Build.VERSION.SDK_INT <= 10
 				|| (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this)
 						.hasPermanentMenuKey())) {
@@ -1048,24 +1128,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 		return super.onKeyUp(keyCode, event);
-	}
-
-	private class OverFlowMenuItem {
-		private String name;
-		private int key;
-
-		OverFlowMenuItem(String name, int key) {
-			this.name = name;
-			this.key = key;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public int getKey() {
-			return key;
-		}
 	}
 
 	private void showOverFlowMenu() {
@@ -1223,7 +1285,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 				android.R.color.transparent));
 		overFlowWindow.setOutsideTouchable(true);
 		overFlowWindow.setFocusable(true);
-		overFlowWindow.setWidth((int) (Utils.densityMultiplier * 196));
+		overFlowWindow.setWidth(getResources().getDimensionPixelSize(
+				R.dimen.overflow_menu_width));
 		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
 		/*
 		 * In some devices Activity crashes and a BadTokenException is thrown by
