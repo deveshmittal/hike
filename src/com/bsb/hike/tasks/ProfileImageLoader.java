@@ -12,7 +12,7 @@ import java.net.URLConnection;
 import javax.net.ssl.HttpsURLConnection;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.mqtt.client.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
 

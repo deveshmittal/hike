@@ -376,6 +376,8 @@ public class AccountUtils {
 				data.put("msisdn", unAuthMSISDN);
 				data.put("pin", pin);
 			}
+			Utils.addCommonDeviceDetails(data, context);
+
 			Log.d("AccountUtils", "Creating Account " + data.toString());
 			entity = new GzipByteArrayEntity(data.toString().getBytes(),
 					HTTP.DEFAULT_CONTENT_CHARSET);

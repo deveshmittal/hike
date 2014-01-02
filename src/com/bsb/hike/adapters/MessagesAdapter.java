@@ -29,7 +29,6 @@ import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -80,6 +79,7 @@ import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
@@ -124,6 +124,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ImageView typing;
 		ViewGroup avatarContainer;
 		ViewGroup typingAvatarContainer;
+		View dayLeft;
+		View dayRight;
+		ImageView pokeCustom;
 	}
 
 	private Conversation conversation;
@@ -139,6 +142,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private String statusIdForTip;
 	private SharedPreferences preferences;
 	private boolean isGroupChat;
+	private ChatTheme chatTheme;
+	private boolean isDefaultTheme = true;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -150,7 +155,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.preferences = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
+		this.chatTheme = ChatTheme.DEFAULT;
 		setLastSentMessagePosition();
+	}
+
+	public void setChatTheme(ChatTheme theme) {
+		chatTheme = theme;
+		isDefaultTheme = chatTheme == ChatTheme.DEFAULT;
+		notifyDataSetChanged();
 	}
 
 	public void addMessage(ConvMessage convMessage) {
@@ -317,6 +329,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
 
 				holder.image.setVisibility(View.GONE);
 				v.findViewById(R.id.receive_message_container).setVisibility(
@@ -346,8 +360,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.dayContainer = (LinearLayout) v
 						.findViewById(R.id.day_container);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
+				holder.pokeCustom = (ImageView) v
+						.findViewById(R.id.poke_sent_custom);
 				holder.messageContainer = v
 						.findViewById(R.id.sent_message_container);
 
@@ -401,11 +419,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.findViewById(R.id.message_receive);
 				}
 				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
+				holder.pokeCustom = (ImageView) v
+						.findViewById(R.id.poke_receive_custom);
 				holder.messageContainer = v
 						.findViewById(R.id.receive_message_container);
 				holder.dayContainer = (LinearLayout) v
 						.findViewById(R.id.day_container);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
 				holder.stickerPlaceholder = v
@@ -455,6 +477,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.dayContainer.setVisibility(View.GONE);
 			holder.stickerPlaceholder.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.GONE);
+			holder.pokeCustom.setVisibility(View.GONE);
 
 			holder.messageInfo.setVisibility(View.INVISIBLE);
 
@@ -505,6 +528,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			hikeSmsText = holder.hikeSmsText;
 			regularSmsText = holder.regularSmsText;
 
+			if (isDefaultTheme) {
+				holder.hikeSmsText.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.regularSmsText.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+			} else {
+				holder.hikeSmsText.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.regularSmsText.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+			}
+
 			boolean smsToggleOn = Utils.getSendSmsPref(context);
 			holder.smsToggle.setChecked(smsToggleOn);
 			setSmsToggleSubtext(smsToggleOn);
@@ -517,6 +556,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			String dateFormatted = convMessage.getMessageDate(context);
 			holder.dayTextView.setText(dateFormatted.toUpperCase());
 			holder.dayContainer.setVisibility(View.VISIBLE);
+
+			if (isDefaultTheme) {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_header));
+				holder.dayLeft.setBackgroundColor(context.getResources()
+						.getColor(R.color.day_line));
+				holder.dayRight.setBackgroundColor(context.getResources()
+						.getColor(R.color.day_line));
+			} else {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.dayLeft.setBackgroundColor(context.getResources()
+						.getColor(R.color.white));
+				holder.dayRight.setBackgroundColor(context.getResources()
+						.getColor(R.color.white));
+			}
 		} else {
 			if (holder.dayContainer != null) {
 				holder.dayContainer.setVisibility(View.GONE);
@@ -533,13 +588,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			int right = 0;
 			int bottom = positiveMargin;
 
+			int layoutRes = isDefaultTheme ? R.layout.participant_info
+					: R.layout.participant_info_custom;
 			MessageMetadata metadata = convMessage.getMetadata();
 			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED) {
 				JSONArray participantInfoArray = metadata
 						.getGcjParticipantInfo();
 
 				TextView participantInfo = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+						layoutRes, null);
 
 				String message;
 				String highlight = Utils.getGroupJoinHighlightText(
@@ -557,13 +614,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				setTextAndIconForSystemMessages(participantInfo,
 						Utils.getFormattedParticipantInfo(message, highlight),
-						R.drawable.ic_joined_chat);
+						isDefaultTheme ? R.drawable.ic_joined_chat
+								: R.drawable.ic_joined_chat_custom);
 
 				((ViewGroup) holder.container).addView(participantInfo);
 			} else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT
 					|| infoState == ParticipantInfoState.GROUP_END) {
 				TextView participantInfo = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+						layoutRes, null);
 
 				CharSequence message;
 				if (infoState == ParticipantInfoState.PARTICIPANT_LEFT) {
@@ -576,7 +634,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.getString(R.string.block_internation_sms_bold_text);
 
 						TextView mainMessage = (TextView) inflater.inflate(
-								R.layout.participant_info, null);
+								layoutRes, null);
 						setTextAndIconForSystemMessages(mainMessage,
 								Utils.getFormattedParticipantInfo(info,
 										textToHighlight),
@@ -601,7 +659,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					message = context.getString(R.string.group_chat_end);
 				}
 				setTextAndIconForSystemMessages(participantInfo, message,
-						R.drawable.ic_left_chat);
+						isDefaultTheme ? R.drawable.ic_left_chat
+								: R.drawable.ic_left_chat_custom);
 
 				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
 						LayoutParams.WRAP_CONTENT);
@@ -634,13 +693,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 											: R.string.optin_one_to_one, name);
 				}
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
-				setTextAndIconForSystemMessages(
-						mainMessage,
-						Utils.getFormattedParticipantInfo(message, name),
-						infoState == ParticipantInfoState.USER_JOIN ? R.drawable.ic_hike_user
-								: R.drawable.ic_opt_in);
+				int icRes;
+				if (infoState == ParticipantInfoState.USER_JOIN) {
+					icRes = isDefaultTheme ? R.drawable.ic_user_join
+							: R.drawable.ic_user_join_custom;
+				} else {
+					icRes = isDefaultTheme ? R.drawable.ic_opt_in
+							: R.drawable.ic_opt_in_custom;
+				}
+
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
+				setTextAndIconForSystemMessages(mainMessage,
+						Utils.getFormattedParticipantInfo(message, name), icRes);
 
 				TextView creditsMessageView = null;
 				if (metadata.getCredits() != -1) {
@@ -650,8 +715,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					String highlight = String.format(context.getString(
 							R.string.earned_credits_highlight, credits));
 
-					creditsMessageView = (TextView) inflater.inflate(
-							R.layout.participant_info, null);
+					creditsMessageView = (TextView) inflater.inflate(layoutRes,
+							null);
 					setTextAndIconForSystemMessages(creditsMessageView,
 							Utils.getFormattedParticipantInfo(creditsMessage,
 									highlight), R.drawable.ic_got_credits);
@@ -687,14 +752,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
 								: R.string.change_group_image), participantName);
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
-				setTextAndIconForSystemMessages(
-						mainMessage,
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
+				int icRes;
+				if (infoState == ParticipantInfoState.CHANGED_GROUP_NAME) {
+					icRes = isDefaultTheme ? R.drawable.ic_group_info
+							: R.drawable.ic_group_info_custom;
+				} else {
+					icRes = isDefaultTheme ? R.drawable.ic_group_image
+							: R.drawable.ic_group_image_custom;
+				}
+				setTextAndIconForSystemMessages(mainMessage,
 						Utils.getFormattedParticipantInfo(message,
-								participantName),
-						infoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.drawable.ic_group_info
-								: R.drawable.ic_group_image);
+								participantName), icRes);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
@@ -702,12 +772,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String textToHighlight = context
 						.getString(R.string.block_internation_sms_bold_text);
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 				setTextAndIconForSystemMessages(
 						mainMessage,
 						Utils.getFormattedParticipantInfo(info, textToHighlight),
-						R.drawable.ic_no_int_sms);
+						isDefaultTheme ? R.drawable.ic_no_int_sms
+								: R.drawable.ic_no_int_sms_custom);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.INTRO_MESSAGE) {
@@ -723,19 +794,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							context.getString(R.string.intro_sms_thread), name);
 				}
 
-				TextView mainMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				int icRes;
+				if (conversation.isOnhike()) {
+					icRes = isDefaultTheme ? R.drawable.ic_user_join
+							: R.drawable.ic_user_join_custom;
+				} else {
+					icRes = isDefaultTheme ? R.drawable.ic_sms_user_ct
+							: R.drawable.ic_sms_user_ct_custom;
+				}
+
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 				setTextAndIconForSystemMessages(mainMessage,
-						Utils.getFormattedParticipantInfo(message, name),
-						conversation.isOnhike() ? R.drawable.ic_hike_user
-								: R.drawable.ic_sms_user);
+						Utils.getFormattedParticipantInfo(message, name), icRes);
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.DND_USER) {
 				JSONArray dndNumbers = metadata.getDndNumbers();
 
-				TextView dndMessage = (TextView) inflater.inflate(
-						R.layout.participant_info, null);
+				TextView dndMessage = (TextView) inflater.inflate(layoutRes,
+						null);
 
 				if (dndNumbers != null && dndNumbers.length() > 0) {
 					StringBuilder dndNamesSB = new StringBuilder();
@@ -763,28 +841,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (conversation instanceof GroupConversation) {
 						ssb = new SpannableStringBuilder(
 								convMessage.getMessage());
-						ssb.setSpan(new ForegroundColorSpan(0xff666666),
-								convMessage.getMessage().indexOf(dndNames),
+						ssb.setSpan(new StyleSpan(Typeface.BOLD), convMessage
+								.getMessage().indexOf(dndNames),
 								convMessage.getMessage().indexOf(dndNames)
 										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
 					} else {
+
 						ssb = new SpannableStringBuilder(
 								convMessage.getMessage());
-						ssb.setSpan(new ForegroundColorSpan(0xff666666),
-								convMessage.getMessage().indexOf(dndNames),
+						ssb.setSpan(new StyleSpan(Typeface.BOLD), convMessage
+								.getMessage().indexOf(dndNames),
 								convMessage.getMessage().indexOf(dndNames)
 										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						ssb.setSpan(new ForegroundColorSpan(0xff666666),
-								convMessage.getMessage().lastIndexOf(dndNames),
+						ssb.setSpan(new StyleSpan(Typeface.BOLD), convMessage
+								.getMessage().lastIndexOf(dndNames),
 								convMessage.getMessage().lastIndexOf(dndNames)
 										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
 
 					setTextAndIconForSystemMessages(dndMessage, ssb,
-							R.drawable.ic_waiting_dnd);
+							isDefaultTheme ? R.drawable.ic_waiting_dnd
+									: R.drawable.ic_waiting_dnd_custom);
 					LayoutParams lp = new LayoutParams(
 							LayoutParams.MATCH_PARENT,
 							LayoutParams.WRAP_CONTENT);
@@ -793,9 +874,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					((ViewGroup) holder.container).addView(dndMessage);
 				}
+			} else if (infoState == ParticipantInfoState.CHAT_BACKGROUND) {
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes,
+						null);
+
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = preferences.getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String name;
+				if (isGroupChat) {
+					name = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you)
+							: ((GroupConversation) conversation)
+									.getGroupParticipantFirstName(msisdn);
+				} else {
+					name = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you) : Utils
+							.getFirstName(conversation.getLabel());
+				}
+
+				String message = context.getString(R.string.chat_bg_changed,
+						name);
+
+				setTextAndIconForSystemMessages(mainMessage,
+						Utils.getFormattedParticipantInfo(message, name),
+						isDefaultTheme ? R.drawable.ic_change_theme
+								: R.drawable.ic_change_theme_custom);
+
+				((ViewGroup) holder.container).addView(mainMessage);
 			}
 			return v;
 		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
+			if (isDefaultTheme) {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_subtext));
+				holder.messageInfo.setTextColor(context.getResources()
+						.getColor(R.color.timestampcolor));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_header));
+			} else {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageInfo.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+			}
+
 			holder.container
 					.setBackgroundResource(R.drawable.bg_status_chat_thread);
 
@@ -864,6 +990,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (holder.poke != null) {
 			holder.poke.setVisibility(View.GONE);
+			holder.pokeCustom.setVisibility(View.GONE);
 		}
 
 		boolean firstMessageFromParticipant = false;
@@ -1093,10 +1220,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.participantNameFT.setVisibility(View.GONE);
 				}
 			}
-			holder.poke.setVisibility(View.VISIBLE);
-			holder.poke
-					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
-							: R.drawable.ic_nudge_hike_receive);
+			if (isDefaultTheme) {
+				holder.poke.setVisibility(View.VISIBLE);
+				holder.poke
+						.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
+								: R.drawable.ic_nudge_hike_receive);
+				holder.messageContainer.setVisibility(View.VISIBLE);
+			} else {
+				holder.pokeCustom.setVisibility(View.VISIBLE);
+				holder.pokeCustom
+						.setImageResource(convMessage.isSent() ? chatTheme
+								.sentNudgeResId()
+								: R.drawable.ic_nudge_receive_custom);
+				holder.messageContainer.setVisibility(View.GONE);
+			}
 		} else if (convMessage.isStickerMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.GONE);
@@ -1230,7 +1367,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.circularProgress.setVisibility(View.INVISIBLE);
 			}
 			holder.image.setVisibility(View.VISIBLE);
-			holder.image.setImageResource(R.drawable.ic_download_failed);
+			holder.image
+					.setImageResource(isDefaultTheme ? R.drawable.ic_download_failed
+							: R.drawable.ic_download_failed_custom);
 
 			if (holder.messageInfo != null) {
 				holder.messageInfo.setVisibility(View.INVISIBLE);
@@ -1262,9 +1401,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
 			/* label outgoing hike conversations in green */
-			holder.messageContainer
-					.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector
-							: R.drawable.ic_bubble_green_selector);
+			if (isDefaultTheme) {
+				holder.messageContainer.setBackgroundResource(!convMessage
+						.isSMS() ? R.drawable.ic_bubble_blue_selector
+						: R.drawable.ic_bubble_green_selector);
+			} else {
+				holder.messageContainer.setBackgroundResource(chatTheme
+						.bubbleResId());
+			}
 		}
 
 		return v;
@@ -1380,6 +1524,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			iv.setVisibility(View.GONE);
 		}
 
+		tv.setTextColor(context.getResources().getColor(
+				isDefaultTheme ? R.color.list_item_subtext : R.color.white));
+
 		ConvMessage current = getItem(position);
 		if (current.isSent() && (position == lastSentMessagePosition)) {
 			switch (current.getState()) {
@@ -1387,6 +1534,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				tv.setVisibility(View.GONE);
 				iv.setVisibility(View.VISIBLE);
 
+				iv.setImageResource(isDefaultTheme ? R.drawable.sending
+						: R.drawable.sending_custom);
 				AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
 				ad.setCallback(iv);
 				ad.setVisible(true, true);
@@ -1398,8 +1547,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 				break;
 			case SENT_CONFIRMED:
-				tv.setText(context.getString(R.string.sent,
-						current.getTimestampFormatted(false, context)));
+				tv.setText(context.getString(
+						!current.isSMS() ? R.string.sent
+								: R.string.sent_via_sms, current
+								.getTimestampFormatted(false, context)));
 				if (!current.isSMS()) {
 					scheduleUndeliveredText(tv, container, iv,
 							current.getTimestamp());
@@ -1751,9 +1902,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 			hikeSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_unselected));
+					isDefaultTheme ? R.color.sms_choice_unselected
+							: R.color.white));
 			regularSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_selected));
+					isDefaultTheme ? R.color.sms_choice_selected
+							: R.color.white));
 
 			hikeSmsText.setTextSize(
 					TypedValue.COMPLEX_UNIT_PX,
@@ -1765,9 +1918,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							R.dimen.sms_toggle_checked));
 		} else {
 			hikeSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_selected));
+					isDefaultTheme ? R.color.sms_choice_selected
+							: R.color.white));
 			regularSmsText.setTextColor(context.getResources().getColor(
-					R.color.sms_choice_unselected));
+					isDefaultTheme ? R.color.sms_choice_unselected
+							: R.color.white));
 
 			hikeSmsText.setTextSize(
 					TypedValue.COMPLEX_UNIT_PX,

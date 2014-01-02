@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
-    android:versionCode="245"
+    android:versionCode="262"
     android:installLocation="auto"
-    android:versionName="2.6.16.2">
+    android:versionName="2.7.0.2">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
@@ -89,6 +89,7 @@
         </activity>
         <activity
             android:name=".ui.ChatThread"
+            android:theme="@style/ChatThreadTheme"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden" >
