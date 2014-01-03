@@ -867,8 +867,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			else if (hikeFileType == HikeFileType.AUDIO)
 			{
-				showThumbnail = true;
-				createAudioThumb(holder.fileThumb);
+				createMediaThumb(holder.fileThumb);
+				holder.fileThumb.setImageResource(R.drawable.ic_default_audio);
 				holder.fileInfo.setText(hikeFile.getFileName());
 				holder.fileInfo.setVisibility(View.VISIBLE);
 				holder.fileThumb.setVisibility(View.VISIBLE);
@@ -894,13 +894,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				if (showThumbnail)
 				{
 					holder.fileThumb.setBackgroundDrawable(thumbnail);
-					holder.fileThumb.setImageResource(R.drawable.ic_video_play);
 				}
 				else
 				{
-					holder.fileThumb.setBackgroundResource(R.drawable.ic_default_mov);
-					holder.fileThumb.setScaleType(ScaleType.CENTER);
+					//holder.fileThumb.setBackgroundResource(R.drawable.ic_default_mov);
+					createMediaThumb(holder.fileThumb);
+					holder.fileInfo.setText(hikeFile.getFileName());
+					holder.fileInfo.setVisibility(View.VISIBLE);
 				}
+				holder.fileThumb.setImageResource(R.drawable.ic_video_play);
 				holder.fileThumb.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
@@ -936,7 +938,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					{
 						holder.fileThumb.setBackgroundDrawable(thumbnail);
 					}
-					//else if(hikeFileType != HikeFileType.LOCATION)
+					else if(hikeFileType == HikeFileType.IMAGE)
+					{
+						createMediaThumb(holder.fileThumb);
+						holder.fileInfo.setText(hikeFile.getFileName());
+						holder.fileInfo.setVisibility(View.VISIBLE);
+						holder.fileThumb.setImageResource(R.drawable.ic_default_image);
+					}
 					else
 					{
 						holder.fileThumb.setBackgroundResource(R.drawable.ic_default_img);
@@ -1655,15 +1663,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		return ret;
 	}
 	
-	private void createAudioThumb(ImageView fileThumb)
+	private void createMediaThumb(ImageView fileThumb)
 	{
 		// TODO Auto-generated method stub
-		Log.d(getClass().getSimpleName(),"creating audio thumb. . . ");
+		Log.d(getClass().getSimpleName(),"creating default thumb. . . ");
 		int pixels = (int)(140 * Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
 		fileThumb.setBackgroundColor(0xffeae7e0);
-		fileThumb.setImageResource(R.drawable.ic_default_audio2 );
 	}
 
 	private void setFileButtonResource(ImageView button,
