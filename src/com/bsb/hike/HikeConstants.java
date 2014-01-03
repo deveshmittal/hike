@@ -187,7 +187,7 @@ public class HikeConstants {
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
 	//	@GM
 	//public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
-	public static final String MEDIA_AUTO_DOWNLOAD_PREF = "mediaAutoDownloadPref";
+	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
 	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mdAutoDownloadImagePref";
 	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mdAutoDownloadAudioPref";
 	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mdAutoDownloadVideoPref";

@@ -186,4 +186,5 @@
 	<color name="female_selected">#ff5874</color>
 	<color name="signup_disabled">#40ffffff</color>
 	<color name="free_sms_btn">#1891e1</color>
+	<color name="auto_download">#73716d</color>
 </resources>
