@@ -672,8 +672,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		{
 			String dateFormatted = convMessage.getMessageDate(context);
 			holder.dayTextView.setText(dateFormatted.toUpperCase());
-			holder.dayTextView.setVisibility(View.VISIBLE);
-			holder.dayContainer.setVisibility(View.VISIBLE);
 			
 			if (isDefaultTheme)
 			{
@@ -687,6 +685,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
 				holder.dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
 			}
+			holder.dayTextView.setVisibility(View.VISIBLE);
+			holder.dayLeft.setVisibility(View.VISIBLE);
+			holder.dayRight.setVisibility(View.VISIBLE);
+			holder.dayContainer.setVisibility(View.VISIBLE);
 		}	
 		boolean firstMessageFromParticipant = ifFirstMessageFromRecepient(convMessage, position);
 		MessageMetadata metadata = convMessage.getMetadata();
@@ -890,6 +892,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				{
 					thumbnail = hikeFile.getThumbnail();
 				}
+				if( (TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()))
+					showThumbnail=false;
 				
 				if (showThumbnail)
 				{
@@ -922,6 +926,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				{
 					thumbnail = hikeFile.getThumbnail();
 				}
+				if( (TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()))
+					showThumbnail=false;
 				
 				if (convMessage.isSent() && thumbnail == null)
 				{
@@ -965,8 +971,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			
 			//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>	Setting Thumbmail Dimentions
 			RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) holder.fileThumb.getLayoutParams();
-			if(hikeFileType == HikeFileType.AUDIO)
+			if((!showThumbnail) && (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE
+					|| hikeFileType == HikeFileType.VIDEO))
 			{
+				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
 			else if (showThumbnail && thumbnail != null)
 			{
@@ -1014,7 +1022,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			{
 				LayoutParams lp = (LayoutParams) holder.showFileBtn.getLayoutParams();
-				lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
+				//lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
+				lp.gravity = Gravity.BOTTOM;
 				holder.showFileBtn.setLayoutParams(lp);
 				
 				holder.showFileBtn.setBackgroundResource(0);
@@ -1052,7 +1061,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if(!convMessage.isSent())
 					{
 						LayoutParams lp = (LayoutParams) holder.showFileBtn.getLayoutParams();
-						lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
+						//lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
+						lp.gravity = Gravity.BOTTOM;
 						holder.showFileBtn.setLayoutParams(lp);
 						
 						holder.showFileBtn.setVisibility(View.VISIBLE);
@@ -1671,6 +1681,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
 		fileThumb.setBackgroundColor(0xffeae7e0);
+		fileThumb.setImageResource(0);
 	}
 
 	private void setFileButtonResource(ImageView button,
