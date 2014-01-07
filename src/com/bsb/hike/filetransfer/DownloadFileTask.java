@@ -26,6 +26,7 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
@@ -119,6 +120,8 @@ public class DownloadFileTask extends FileTransferBase
 		FTResult res = FTResult.SUCCESS;
 		BufferedInputStream in = null;
 		URLConnection conn = null;
+		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+		int chunkSize = networkType.getMinChunkSize();
 		while (shouldRetry())
 		{
 			try
@@ -170,8 +173,15 @@ public class DownloadFileTask extends FileTransferBase
 
 					// open the output file and seek to the start location
 					raf.seek(mStart);
-
-					int chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+					if(networkType == FileTransferManager.getInstance(context).getNetworkType())
+					{
+						chunkSize/=2;
+					}
+					else
+					{
+						networkType = FileTransferManager.getInstance(context).getNetworkType();
+						chunkSize = networkType.getMinChunkSize();
+					}
 					byte data[] = new byte[chunkSize];
 					int numRead;
 					while ((_state == FTState.IN_PROGRESS) && ((numRead = in.read(data, 0, chunkSize)) != -1))
@@ -189,10 +199,10 @@ public class DownloadFileTask extends FileTransferBase
 						Log.d(getClass().getSimpleName(),"ChunkSize : " + chunkSize + "Bytes");
 						// ChunkSize is increased within the limits
 						chunkSize *= 2;
-						if(chunkSize > FileTransferManager.getInstance(context).getMaxChunkSize())
-							chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
-						else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
-							chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+						if(chunkSize > networkType.getMaxChunkSize())
+							chunkSize = networkType.getMaxChunkSize();
+						else if (chunkSize < networkType.getMinChunkSize())
+							chunkSize = networkType.getMinChunkSize();
 						
 						/*
 						 * This chunk size should ideally be no more than 1/8 of the total memory available.

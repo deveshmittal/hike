@@ -49,6 +49,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -466,7 +467,8 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 		long length = sourceFile.length();
-		int chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+		int chunkSize = networkType.getMinChunkSize();
 		int start = mStart;
 		int end = (int) length;
 		if (end > (start + chunkSize))
@@ -518,7 +520,15 @@ public class UploadFileTask extends FileTransferBase
 					if(shouldRetry())
 					{
 						raf.seek(start);
-						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+						if(networkType == FileTransferManager.getInstance(context).getNetworkType())
+						{
+							chunkSize/=2;
+						}
+						else
+						{
+							networkType = FileTransferManager.getInstance(context).getNetworkType();
+							chunkSize = networkType.getMinChunkSize();
+						}
 					}
 					else
 					{
@@ -533,10 +543,10 @@ public class UploadFileTask extends FileTransferBase
 					start += chunkSize;
 					// ChunkSize is increased within the limits
 					chunkSize *= 2;
-					if(chunkSize > FileTransferManager.getInstance(context).getMaxChunkSize())
-						chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
-					else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
-						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
+					if(chunkSize > networkType.getMaxChunkSize())
+						chunkSize = networkType.getMaxChunkSize();
+					else if (chunkSize < networkType.getMinChunkSize())
+						chunkSize = networkType.getMinChunkSize();
 					
 					resetAndUpdate = true;	// To reset retry logic and update UI
 				}
