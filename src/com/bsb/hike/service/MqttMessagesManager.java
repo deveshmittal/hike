@@ -476,32 +476,27 @@ public class MqttMessagesManager {
 			{
 				HikeFile hikeFile = convMessage.getMetadata()
 						.getHikeFiles().get(0);
+				NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
 				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
 				{
-					if((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
-							&& appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
-							|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
-									&& appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
 					{
 						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
 					}
 				}
 				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO || hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 				{
-					if((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
-							&& appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_AUDIO_PREF,true))
-							|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
-									&& appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_AUDIO_PREF,true)))
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_AUDIO_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_AUDIO_PREF,false)))
 					{
 						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
 					}
 				}
 				else if (hikeFile.getHikeFileType() == HikeFileType.VIDEO)
 				{
-					if((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
-							&& appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_VIDEO_PREF,true))
-							|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
-									&& appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_VIDEO_PREF,true)))
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_VIDEO_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_VIDEO_PREF,false)))
 					{
 						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
 					}
