@@ -115,8 +115,6 @@ public class HikeConstants {
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
-	public static final String CATEGORY_ID = "catId";
-	public static final String STICKER_ID = "stId";
 	public static final String STICKER_IDS = "stIds";
 	public static final String STICKER = "stk";
 	public static final String RESOLUTION_ID = "resId";
@@ -422,7 +420,6 @@ public class HikeConstants {
 
 	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
 
-	public static final String BOLLYWOOD_CATEGORY = "bollywood";
 	/*
 	 * Contact Type
 	 */
@@ -596,8 +593,6 @@ public class HikeConstants {
 		public static final String SMS_ID = "smsId";
 		public static final String RECORDED_TIME = "recordedTime";
 		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
-		public static final String FWD_STICKER_ID = "fwdStickerId";
-		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 		public static final String POST_TO_TWITTER = "postToTwitter";
 		public static final String RECORDING_TIME = "recordingTime";
 		public static final String MAPPED_ID = "mappedId";

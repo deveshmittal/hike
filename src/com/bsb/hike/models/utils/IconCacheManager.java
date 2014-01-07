@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -62,8 +63,7 @@ public class IconCacheManager {
 	private static IconCacheManager mCacheManager;
 
 	public IconCacheManager() {
-		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(
-				getCacheSize()));
+		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(getCacheSize()));
 		mDb = HikeUserDatabase.getInstance();
 		hCDb = HikeConversationsDatabase.getInstance();
 	}
@@ -129,11 +129,13 @@ public class IconCacheManager {
 		return b;
 	}
 
-	public synchronized Drawable getStickerThumbnail(String stickerPath) {
+	public Drawable getStickerThumbnail(String stickerPath) {
 		Drawable b = mIcons.get(stickerPath);
 		if (b == null) {
+			long t1 = System.currentTimeMillis();
 			b = new BitmapDrawable(BitmapFactory.decodeFile(stickerPath));
-
+			long t2 = System.currentTimeMillis();
+			//Log.w("Sticker loading", "Time to load sticker bitmap : "+(t2-t1)+" ms");
 			if (b != null) {
 				mIcons.put(stickerPath, b);
 			}
@@ -141,7 +143,7 @@ public class IconCacheManager {
 		return b;
 	}
 
-	public synchronized Drawable getSticker(Context context, String stickerPath) {
+	public Drawable getSticker(Context context, String stickerPath) {
 		Drawable b = mIcons.get(stickerPath);
 		if (b == null) {
 			b = new BitmapDrawable(context.getResources(),

@@ -29,6 +29,11 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 		minWidth = (int) (48 * metrics.density);
 	}
 
+	/*TODO : This function is called twice, it should be handled properly so that it should run just once.
+	 * Also inorder to remove the red icon once stickers gets downloaded, we should handle it properly instead of
+	 * calling "notifyDataSetChanged" this again and again.
+	 */
+	
 	@Override
 	public void notifyDataSetChanged() {
 		mIconsLayout.removeAllViews();

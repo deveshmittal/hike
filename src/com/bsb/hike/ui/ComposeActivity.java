@@ -52,6 +52,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
@@ -527,7 +528,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)
 					|| presentIntent
-							.hasExtra(HikeConstants.Extras.FWD_CATEGORY_ID)) {
+							.hasExtra(StickerManager.FWD_CATEGORY_ID)) {
 				intent.putExtras(presentIntent);
 			} else if (type != null
 					&& (type.startsWith("image") || type.startsWith("audio") || type
