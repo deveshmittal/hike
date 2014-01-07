@@ -518,24 +518,7 @@ public class UploadFileTask extends FileTransferBase
 					if(shouldRetry())
 					{
 						raf.seek(start);
-						end = (int) length;
 						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
-						/*
-						 * This chunk size should ideally be no more than 1/8 of the total memory available.
-						 */
-						try
-						{
-							int maxMemory = (int) Runtime.getRuntime().maxMemory();
-							if( chunkSize > (maxMemory / 8) )
-							chunkSize = maxMemory / 8 ;
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-						}
-						if (end > (start + chunkSize))
-							end = start + chunkSize;
-						end--;
 					}
 					else
 					{
@@ -554,26 +537,26 @@ public class UploadFileTask extends FileTransferBase
 						chunkSize = FileTransferManager.getInstance(context).getMaxChunkSize();
 					else if (chunkSize < FileTransferManager.getInstance(context).getMinChunkSize())
 						chunkSize = FileTransferManager.getInstance(context).getMinChunkSize();
-					/*
-					 * This chunk size should ideally be no more than 1/8 of the total memory available.
-					 */
-					try
-					{
-						int maxMemory = (int) Runtime.getRuntime().maxMemory();
-						if( chunkSize > (maxMemory / 8) )
-						chunkSize = maxMemory / 8 ;
-					}
-					catch(Exception e)
-					{
-						e.printStackTrace();
-					}
 					
-					end = (int) length;
-					if (end > (start + chunkSize))
-						end = start + chunkSize;
-					end--;
 					resetAndUpdate = true;	// To reset retry logic and update UI
 				}
+				/*
+				 * This chunk size should ideally be no more than 1/8 of the total memory available.
+				 */
+				try
+				{
+					int maxMemory = (int) Runtime.getRuntime().maxMemory();
+					if( chunkSize > (maxMemory / 8) )
+					chunkSize = maxMemory / 8 ;
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				end = (int) length;
+				if (end > (start + chunkSize))
+					end = start + chunkSize;
+				end--;
 			}
 			/*
 			 * Resetting reconnect logic

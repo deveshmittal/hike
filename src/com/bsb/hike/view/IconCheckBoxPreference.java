@@ -22,10 +22,11 @@ public class IconCheckBoxPreference extends CheckBoxPreference {
 	private void setIcon(Context context, AttributeSet attrs) {
 		String iconName = attrs.getAttributeValue(null, "icon");
 
-		int id = context.getResources().getIdentifier(iconName, "drawable",
-				context.getPackageName());
-
-		this.mIcon = context.getResources().getDrawable(id);
+		if(iconName != null)
+		{
+			int id = context.getResources().getIdentifier(iconName, "drawable",context.getPackageName());
+			this.mIcon = context.getResources().getDrawable(id);
+		}
 	}
 
 	public IconCheckBoxPreference(Context context) {

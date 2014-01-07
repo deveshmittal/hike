@@ -71,6 +71,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		int preferences = intent.getIntExtra(HikeConstants.Extras.PREF, -1);
 		int titleRes = intent.getIntExtra(HikeConstants.Extras.TITLE, 0);
 
+		Log.d(getClass().getSimpleName(),preferences+" + "+titleRes);
 		addPreferencesFromResource(preferences);
 
 		Object retained = getLastNonConfigurationInstance();

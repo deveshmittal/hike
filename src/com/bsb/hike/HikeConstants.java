@@ -194,8 +194,17 @@ public class HikeConstants {
 	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
-	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
+
+	//	@GM
+	//public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
+	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
+	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mdAutoDownloadImagePref";
+	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mdAutoDownloadAudioPref";
+	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mdAutoDownloadVideoPref";
+	public static final String WF_AUTO_DOWNLOAD_IMAGE_PREF = "wfAutoDownloadImagePref";
+	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
+	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
 
 	public static final String HIKEBOT = "TD-HIKE";
 	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";

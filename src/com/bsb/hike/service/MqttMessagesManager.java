@@ -31,6 +31,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
@@ -483,6 +484,7 @@ public class MqttMessagesManager {
 			/*
 			 * Start auto download for images
 			 */
+			/*
 			if (convMessage.isFileTransferMessage()) {
 				if (appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF,
 						true)) {
@@ -493,6 +495,41 @@ public class MqttMessagesManager {
 						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
 					}
 				}
+			}
+			*/
+			/*
+			 * Start auto download for media files
+			 */
+			if (convMessage.isFileTransferMessage())
+			{
+				HikeFile hikeFile = convMessage.getMetadata()
+						.getHikeFiles().get(0);
+				NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+				{
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+					{
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
+					}
+				}
+				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO || hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+				{
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_AUDIO_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_AUDIO_PREF,false)))
+					{
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
+					}
+				}
+				else if (hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+				{
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_VIDEO_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_VIDEO_PREF,false)))
+					{
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
+					}
+				}
+				
 			}
 			removeTypingNotification(convMessage.getMsisdn(),
 					convMessage.getGroupParticipantMsisdn());
@@ -1242,8 +1279,10 @@ public class MqttMessagesManager {
 				// download the protip only if the URL is non empty
 				// also respect the user's auto photo download setting.
 				if (!TextUtils.isEmpty(protip.getImageURL())
-						&& appPrefs.getBoolean(
-								HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+						&& ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
+								&& appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+								|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
+										&& appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))) {
 					autoDownloadProtipImage(statusMessage, true);
 				}
 				pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
@@ -1404,7 +1443,11 @@ public class MqttMessagesManager {
 
 	private void autoDownloadProfileImage(StatusMessage statusMessage,
 			boolean statusUpdate) {
-		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+		if ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
+				&& !appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+				|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
+						&& !appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+		{
 			return;
 		}
 
@@ -1418,7 +1461,11 @@ public class MqttMessagesManager {
 	}
 
 	private void autoDownloadGroupImage(String id) {
-		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+		if ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
+							&& !appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+							|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
+									&& !appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+		{
 			return;
 		}
 		String fileName = Utils.getProfileImageFileName(id);
