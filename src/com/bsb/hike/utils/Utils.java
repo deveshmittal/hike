@@ -1158,6 +1158,13 @@ public class Utils {
 		options.inJustDecodeBounds = false;
 
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		/*
+		 * Should only happen when the external storage does not have enough
+		 * free space
+		 */
+		if (thumbnail == null) {
+			return null;
+		}
 		if (makeSquareThumbnail) {
 			return makeSquareThumbnail(thumbnail, dimensionLimit);
 		}
@@ -3224,5 +3231,10 @@ public class Utils {
 		convMessage.setSMS(!isOnhike);
 
 		return convMessage;
+	}
+
+	public static boolean hasEnoughFreeSpaceForProfilePic() {
+		double freeSpaceAvailable = getFreeSpace();
+		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
 	}
 }

@@ -1280,6 +1280,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 						.show();
 				return;
 			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			File selectedFileIcon = Utils.getOutputMediaFile(
 					HikeFileType.PROFILE, null, null); // create a file to save
@@ -1307,6 +1313,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 			if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 				Toast.makeText(getApplicationContext(),
 						R.string.no_external_storage, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
 						.show();
 				return;
 			}

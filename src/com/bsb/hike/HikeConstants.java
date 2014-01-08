@@ -488,6 +488,8 @@ public class HikeConstants {
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
+	public static final double PROFILE_PIC_FREE_SPACE = 3 * 1024 * 1024;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

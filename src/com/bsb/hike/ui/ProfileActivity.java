@@ -862,6 +862,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					mActivityState.destFilePath,
 					HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
 
+			if(smallerBitmap == null) {
+				failureWhileSettingProfilePic();
+				return;
+			}
+
 			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap,
 					Bitmap.CompressFormat.JPEG, 100);
 
@@ -874,18 +879,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					new HikeHttpRequest.HikeHttpCallback() {
 						public void onFailure() {
 							Log.d("ProfileActivity", "resetting image");
-							Utils.removeTempProfileImage(mLocalMSISDN);
-							mActivityState.destFilePath = null;
-							if (profileAdapter != null) {
-								/*
-								 * Reload the older image
-								 */
-								profileAdapter.setProfilePreview(null);
-								profileAdapter.notifyDataSetChanged();
-							}
-							if (isBackPressed) {
-								finishEditing();
-							}
+							failureWhileSettingProfilePic();
 						}
 
 						public void onSuccess(JSONObject response) {
@@ -1028,6 +1022,21 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			requests.toArray(r);
 			Utils.executeHttpTask(mActivityState.task, r);
 		} else if (isBackPressed) {
+			finishEditing();
+		}
+	}
+
+	private void failureWhileSettingProfilePic() {
+		Utils.removeTempProfileImage(mLocalMSISDN);
+		mActivityState.destFilePath = null;
+		if (profileAdapter != null) {
+			/*
+			 * Reload the older image
+			 */
+			profileAdapter.setProfilePreview(null);
+			profileAdapter.notifyDataSetChanged();
+		}
+		if (isBackPressed) {
 			finishEditing();
 		}
 	}
@@ -1205,6 +1214,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						.show();
 				return;
 			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE,
 					null, null); // create a file to save the image
@@ -1231,6 +1246,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 				Toast.makeText(getApplicationContext(),
 						R.string.no_external_storage, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
 						.show();
 				return;
 			}
