@@ -61,7 +61,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 					.beginTransaction();
 			fragmentTransaction.remove(fragment);
-			fragmentTransaction.commit();
+			fragmentTransaction.commitAllowingStateLoss();
 		} else {
 			HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
 			super.onBackPressed();
