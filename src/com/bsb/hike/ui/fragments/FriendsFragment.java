@@ -299,11 +299,11 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					}
 				}
 			}
-			Collections.sort(friendsAdapter.getFriendsList(),
-					ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					Collections.sort(friendsAdapter.getFriendsList(),
+							ContactInfo.lastSeenTimeComparator);
 					friendsAdapter.makeCompleteList(false);
 				}
 			});
