@@ -1381,7 +1381,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		if (showKeyboard && !wasOrientationChanged)
 			getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+					WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
 		setupActionBar(true);
 
