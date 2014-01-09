@@ -2714,6 +2714,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (smsCount == null) {
 			smsCount = (TextView) findViewById(R.id.sms_counter);
 		}
+		smsCount.setBackgroundColor(getResources().getColor(
+				mAdapter.isDefaultTheme() ? R.color.updates_text
+						: R.color.chat_thread_indicator_bg_custom_theme));
 		smsCount.setAnimation(slideUp);
 		smsCount.setVisibility(View.VISIBLE);
 		smsCount.setText(mCredits + " " + getString(R.string.sms_left));
@@ -2931,6 +2934,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				isMuted ? View.VISIBLE : View.GONE);
 	}
 
+	private void setMuteViewBackground() {
+		findViewById(R.id.conversation_mute)
+				.setBackgroundColor(
+						getResources()
+								.getColor(
+										mAdapter.isDefaultTheme() ? R.color.updates_text
+												: R.color.chat_thread_indicator_bg_custom_theme));
+	}
+
 	private void showThemePicker() {
 
 		attachmentWindow = new PopupWindow(this);
@@ -3063,6 +3075,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		chatLayout.setBackgroundDrawable(backgroundDrawable);
 		mAdapter.setChatTheme(chatTheme);
+
+		setMuteViewBackground();
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getResources().getDrawable(

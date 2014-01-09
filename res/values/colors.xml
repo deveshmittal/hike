@@ -195,4 +195,5 @@
     <color name="indian_btn_text_shadow">#4D000000</color>
     <color name="indian_div">#00000000</color>
     <color name="day_line">#1f73716d</color>
+    <color name="chat_thread_indicator_bg_custom_theme">#B3000000</color>
 </resources>

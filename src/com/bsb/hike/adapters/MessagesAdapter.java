@@ -165,6 +165,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		notifyDataSetChanged();
 	}
 
+	public boolean isDefaultTheme() {
+		return isDefaultTheme;
+	}
+
 	public void addMessage(ConvMessage convMessage) {
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent()) {
