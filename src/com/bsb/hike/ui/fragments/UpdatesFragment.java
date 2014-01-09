@@ -196,7 +196,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
+	public void onEventReceived(String type, final Object object) {
 
 		if (!isAdded()) {
 			return;
@@ -232,23 +232,23 @@ public class UpdatesFragment extends SherlockListFragment implements
 				}
 			});
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
-			if (!shouldAddFTUEItem()) {
-				removeFTUEItemIfExists();
-			} else {
-				addFTUEItem(statusMessages);
-			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
+					if (!shouldAddFTUEItem()) {
+						removeFTUEItemIfExists();
+					} else {
+						addFTUEItem(statusMessages);
+					}
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
-			addProtip((Protip) object);
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					addProtip((Protip) object);
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
