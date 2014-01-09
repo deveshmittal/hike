@@ -1419,12 +1419,6 @@ public class Utils {
 		}
 		int minStatusOrdinal;
 		int maxStatusOrdinal;
-		// No need to change the message state for typing notifications
-		if (HikeConstants.IS_TYPING.equals(convMessage.getMessage())
-				&& convMessage.getMsgID() == -1
-				&& convMessage.getMappedMsgID() == -1) {
-			return false;
-		}
 		if (stateOrdinal <= State.SENT_DELIVERED_READ.ordinal()) {
 			minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
 			maxStatusOrdinal = stateOrdinal;

@@ -47,6 +47,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
@@ -429,22 +430,16 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 		if (isTyping) {
 			ConvMessage message = messageList.get(messageList.size() - 1);
-			if (!HikeConstants.IS_TYPING.equals(message.getMessage())
-					&& message.getMsgID() != -1
-					&& message.getMappedMsgID() != -1) {
-				// Setting the msg id and mapped msg id as -1 to identify that
-				// this is an "is typing..." message.
-				ConvMessage convMessage = new ConvMessage(
-						HikeConstants.IS_TYPING, msisdn,
-						message.getTimestamp(),
-						ConvMessage.State.RECEIVED_UNREAD, -1, -1);
+			if (message.getTypingNotification() == null) {
+				ConvMessage convMessage = new ConvMessage(typingNotification);
+				convMessage.setTimestamp(message.getTimestamp());
+				convMessage.setMessage(HikeConstants.IS_TYPING);
+				convMessage.setState(State.RECEIVED_UNREAD);
 				messageList.add(convMessage);
 			}
 		} else {
 			ConvMessage message = messageList.get(messageList.size() - 1);
-			if (HikeConstants.IS_TYPING.equals(message.getMessage())
-					&& message.getMsgID() == -1
-					&& message.getMappedMsgID() == -1) {
+			if (message.getTypingNotification() != null) {
 				messageList.remove(message);
 			}
 		}

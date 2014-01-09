@@ -86,7 +86,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
-						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
+						&& (message.getTypingNotification() == null)) {
 					avatarframe
 							.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
 					unreadIndicator.setVisibility(View.VISIBLE);
