@@ -579,6 +579,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	public void onBackPressed() {
 		if (attachmentWindow != null && attachmentWindow.isShowing()) {
 			attachmentWindow.dismiss();
+			attachmentWindow = null;
 			return;
 		}
 
@@ -830,12 +831,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 
-		final PopupWindow overFlowWindow = new PopupWindow(this);
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
+
+		attachmentWindow = new PopupWindow(this);
 
 		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu,
 				chatLayout, false);
 
-		overFlowWindow.setContentView(parentView);
+		attachmentWindow.setContentView(parentView);
 
 		ListView overFlowListView = (ListView) parentView
 				.findViewById(R.id.overflow_menu_list);
@@ -877,7 +882,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-				overFlowWindow.dismiss();
+				attachmentWindow.dismiss();
 				OverFlowMenuItem item = (OverFlowMenuItem) adapterView
 						.getItemAtPosition(position);
 
@@ -913,25 +918,33 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		});
 
-		overFlowWindow.setBackgroundDrawable(getResources().getDrawable(
+		attachmentWindow.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss() {
+				attachmentWindow = null;
+			}
+		});
+
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(
 				android.R.color.transparent));
-		overFlowWindow.setOutsideTouchable(true);
-		overFlowWindow.setFocusable(true);
-		overFlowWindow.setWidth(getResources().getDimensionPixelSize(
+		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(getResources().getDimensionPixelSize(
 				R.dimen.overflow_menu_width));
-		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
 		/*
 		 * In some devices Activity crashes and a BadTokenException is thrown by
 		 * showAsDropDown method. Still need to find out exact repro of the bug.
 		 */
 		try {
-			overFlowWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
 		} catch (BadTokenException e) {
 			Log.e(getClass().getSimpleName(),
 					"Excepetion in HomeActivity Overflow popup", e);
 		}
-		overFlowWindow.getContentView().setFocusableInTouchMode(true);
-		overFlowWindow.getContentView().setOnKeyListener(
+		attachmentWindow.getContentView().setFocusableInTouchMode(true);
+		attachmentWindow.getContentView().setOnKeyListener(
 				new View.OnKeyListener() {
 					@Override
 					public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -2945,6 +2958,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private void showThemePicker() {
 
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
+
 		attachmentWindow = new PopupWindow(this);
 
 		View parentView = getLayoutInflater().inflate(
@@ -3010,6 +3027,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				setupActionBar(false);
 				showingChatThemePicker = false;
 				invalidateOptionsMenu();
+
+				attachmentWindow = null;
 			}
 		});
 
@@ -3194,6 +3213,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			optionImagesList.add(R.drawable.ic_attach_contact);
 		}
 
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
+
 		attachmentWindow = new PopupWindow(this);
 
 		View parentView = getLayoutInflater().inflate(R.layout.attachments,
@@ -3349,6 +3372,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
 				editor.commit();
 				startActivityForResult(chooserIntent, requestCode);
+			}
+		});
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss() {
+				attachmentWindow.dismiss();
 			}
 		});
 
