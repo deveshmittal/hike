@@ -94,41 +94,34 @@
                         android:background="@drawable/ic_default_img"
                         android:scaleType="centerInside"
                         android:visibility="gone" />
-                    
-                    <com.bsb.hike.view.CustomFontTextView
-                            android:id="@+id/file_info"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignLeft="@id/file_thumb"
-                        	android:layout_alignRight="@id/file_thumb"
-                            android:layout_alignParentTop="true"
-                            android:gravity="right"
-                            android:padding="5dp"
-                            android:background="#00000000"
-                            android:text=""
-                            android:textSize="12dp"
-                            android:textColor="#ff999690"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:visibility="gone" />
 
                     <RelativeLayout
                         android:id="@+id/overlayBg"
                         android:layout_width="wrap_content"
-                        android:layout_height="55dp"
+                        android:layout_height="40dp"
                         android:layout_alignLeft="@id/file_thumb"
                         android:layout_alignParentBottom="true"
                         android:layout_alignRight="@id/file_thumb"
                         android:layout_gravity="bottom"
                         android:background="#6E000000"
-                        android:padding="8dp"
+                        android:padding="4dp"
                         android:visibility="gone" >
 
                         <ImageView
-                            android:id="@+id/ibtn_resume"
+                            android:id="@+id/file_type_ic"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
-                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/ic_default_audio_rec"
+                            android:padding="2dp"
+                            android:visibility="gone" />
+                        
+                        <ImageView
+                            android:id="@+id/ft_action_button"
+                            android:layout_width="40dp"
+                            android:layout_height="32dp"
+                            android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:background="@drawable/ic_pause_ftr"
                             android:padding="2dp" />
@@ -137,13 +130,16 @@
                             android:id="@+id/data_transferred"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
+                            android:layout_alignParentLeft="true"
                             android:layout_alignParentTop="true"
-                            android:layout_toRightOf="@id/ibtn_resume"
-                            android:gravity="right"
+                            android:layout_toRightOf="@id/file_type_ic"
+                            android:layout_toLeftOf="@id/ft_action_button"
+                            android:layout_alignWithParentIfMissing="true"
+                            android:paddingLeft="8dp"
+                            android:gravity="left"
                             android:background="#00000000"
                             android:text=""
-                            android:textSize="12dp"
+                            android:textSize="9dp"
                             android:textColor="@color/white"
                             android:ellipsize="end"
                             android:maxLines="2"/>
@@ -153,10 +149,13 @@
                             style="?android:attr/progressBarStyleHorizontal"
                             android:layout_width="wrap_content"
                             android:layout_height="3dp"
-                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp"
                             android:layout_alignParentBottom="true"
-                            android:layout_toRightOf="@id/ibtn_resume"
-                            android:layout_alignParentRight="true"
+                            android:layout_toRightOf="@id/file_type_ic"
+                            android:layout_toLeftOf="@id/ft_action_button"
+                            android:layout_alignWithParentIfMissing="true"
+                            android:layout_alignParentLeft="true"
+                            android:paddingLeft="8dp"
                             android:progressDrawable="@drawable/file_transfer_progress_bar" />
                     </RelativeLayout>
                 </RelativeLayout>
@@ -188,8 +187,8 @@
                     android:text="This is the message a much"
                     android:textColor="@color/chat_color"
                     android:textSize="16sp" />
-
-                <ImageView
+                
+                  <ImageView
                     android:id="@+id/btn_open_file"
                     android:layout_width="@dimen/chat_file_button_width"
                     android:layout_height="wrap_content"
