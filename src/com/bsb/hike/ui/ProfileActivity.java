@@ -1621,11 +1621,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				this.participantMap.remove(msisdn);
 
 				groupConversation.setGroupMemberAliveCount(participantMap.size());
-				setupGroupProfileList();
 
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						setupGroupProfileList();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1655,10 +1655,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 							new GroupParticipant(participant));
 				}
 				groupConversation.setGroupMemberAliveCount(participantMap.size());
-				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						setupGroupProfileList();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1709,30 +1709,30 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						HikePubSub.USER_JOINED.equals(type));
 			}
 
-			if (profileType == ProfileType.GROUP_INFO) {
-				setupGroupProfileList();
-			} else {
-				setupContactProfileList();
-			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					if (profileType == ProfileType.GROUP_INFO) {
+						setupGroupProfileList();
+					} else {
+						setupContactProfileList();
+					}
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
-			StatusMessage statusMessage = (StatusMessage) object;
+			final StatusMessage statusMessage = (StatusMessage) object;
 			if (!mLocalMSISDN.equals(statusMessage.getMsisdn())
 					|| statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
 					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				return;
 			}
-			profileItems.add(showingRequestItem ? 2 : 1,
-					new ProfileItem.ProfileStatusItem(statusMessage));
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
+					profileItems.add(showingRequestItem ? 2 : 1,
+							new ProfileItem.ProfileStatusItem(statusMessage));
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -1748,11 +1748,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				return;
 			}
 			this.contactInfo.setFavoriteType(favoriteType);
-			setupContactProfileList();
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
+					setupContactProfileList();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
