@@ -539,6 +539,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.sms_choice_unselected));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.sms_choice_unselected));
+				holder.smsToggle
+						.setButtonDrawable(R.drawable.sms_checkbox);
+				v.setBackgroundResource(R.drawable.bg_sms_toggle);
 			} else {
 				holder.hikeSmsText.setTextColor(context.getResources()
 						.getColor(R.color.white));
@@ -546,6 +549,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.white));
+				holder.smsToggle
+						.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
+				v.setBackgroundResource(R.drawable.bg_sms_toggle_custom_theme);
 			}
 
 			boolean smsToggleOn = Utils.getSendSmsPref(context);
@@ -1907,35 +1913,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			hikeSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_unselected
-							: R.color.white));
+							: R.color.sms_choice_unselected_custom_theme));
 			regularSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_selected
 							: R.color.white));
 
-			hikeSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_unchecked));
-			regularSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_checked));
 		} else {
 			hikeSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_selected
 							: R.color.white));
 			regularSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_unselected
-							: R.color.white));
+							: R.color.sms_choice_unselected_custom_theme));
 
-			hikeSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_checked));
-			regularSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_unchecked));
 		}
 		smsToggleSubtext.setText(ssb);
 	}
