@@ -125,10 +125,10 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onEventReceived(final String type, final Object object) {
-		if (!isAdded()) {
-			return;
-		}
 		if (HikePubSub.ICON_CHANGED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -142,6 +142,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					.getContactInfoFromMSISDN((String) object, true);
 
 			if (contactInfo == null) {
+				return;
+			}
+			if (!isAdded()) {
 				return;
 			}
 			getActivity().runOnUiThread(new Runnable() {
@@ -161,6 +164,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
 				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -191,7 +197,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			if (contactInfo == null) {
 				return;
 			}
-
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -217,6 +225,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			String myMsisdn = preferences.getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
 
+			if (!isAdded()) {
+				return;
+			}
 			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
 
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
@@ -251,6 +262,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			if (contactInfo == null) {
 				return;
 			}
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -275,6 +289,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				return;
 			}
 
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -299,6 +316,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					}
 				}
 			}
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -310,6 +330,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 
 		} else if (HikePubSub.FRIENDS_TAB_QUERY.equals(type)) {
 			final String query = (String) object;
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -318,6 +341,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				}
 			});
 		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -329,6 +355,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				}
 			});
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -337,6 +366,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 				}
 			});
 		} else if (HikePubSub.INVITE_SENT.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override

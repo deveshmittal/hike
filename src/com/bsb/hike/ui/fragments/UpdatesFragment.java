@@ -207,6 +207,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 			final int startIndex = getStartIndex();
 			Utils.resetUnseenStatusCount(prefs);
 
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -224,6 +227,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 		} else if (HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -232,6 +238,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 				}
 			});
 		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
@@ -245,6 +254,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 				}
 			});
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
