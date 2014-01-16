@@ -923,6 +923,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.timestampcolor));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.list_item_header));
+				holder.container
+						.setBackgroundResource(R.drawable.bg_status_chat_thread);
 			} else {
 				holder.dayTextView.setTextColor(context.getResources()
 						.getColor(R.color.white));
@@ -930,10 +932,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.white));
+				holder.container
+						.setBackgroundResource(R.drawable.bg_status_chat_thread_custom_theme);
 			}
-
-			holder.container
-					.setBackgroundResource(R.drawable.bg_status_chat_thread);
 
 			StatusMessage statusMessage = convMessage.getMetadata()
 					.getStatusMessage();
