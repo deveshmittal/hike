@@ -485,7 +485,7 @@ public class ContactUtils {
 				phoneContactsCursor.close();
 			}
 			if (otherContactsCursor != null) {
-				phoneContactsCursor.close();
+				otherContactsCursor.close();
 			}
 		}
 	}
