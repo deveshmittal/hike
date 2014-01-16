@@ -1024,6 +1024,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		holder.stickerPlaceholder.setVisibility(View.GONE);
 
 		if (convMessage.isFileTransferMessage()) {
+			holder.circularProgress
+					.setProgressColor(context
+							.getResources()
+							.getColor(
+									isDefaultTheme ? R.color.progress_colour_default_theme
+											: R.color.white));
+
 			final HikeFile hikeFile = metadata.getHikeFiles().get(0);
 			HikeFileType hikeFileType = hikeFile.getHikeFileType();
 
