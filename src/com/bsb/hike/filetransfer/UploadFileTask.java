@@ -49,6 +49,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
@@ -433,6 +434,10 @@ public class UploadFileTask extends FileTransferBase
 		setFileTotalSize((int) sourceFile.length());
 		//Bug Fix: 13029
 		setBytesTransferred(fst.getTransferredSize());
+		long temp = _bytesTransferred;
+		temp *= 100;
+		temp /= _totalSize;
+		progressPercentage = (int) temp;
 		// represents this file is either not started or unrecovered error has happened
 		Log.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
@@ -578,12 +583,12 @@ public class UploadFileTask extends FileTransferBase
 				reconnectTime = 0;
 				retryAttempts = 0;
 				incrementBytesTransferred(fileBytes.length);
-				long temp = _bytesTransferred;
+				temp = _bytesTransferred;
 				temp *= 100;
 				temp /= _totalSize;
 				progressPercentage = (int) temp;
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-				showButton();
+				//showButton();
 			}
 			fileBytes = null;
 		}
@@ -598,7 +603,8 @@ public class UploadFileTask extends FileTransferBase
 			_state = FTState.COMPLETED;
 			deleteStateFile();
 			break;
-		case PAUSED:
+		case PAUSING:
+			_state = FTState.PAUSED;
 			Log.d(getClass().getSimpleName(), "FT PAUSED");
 			// In case upload was complete response JSON is to be saved not the Session_ID
 			if(responseJson != null)
@@ -653,13 +659,12 @@ public class UploadFileTask extends FileTransferBase
 		return true;
 	}
 
-	private void showButton()
-	{
-		Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
-		intent.putExtra("msgId", msgId);
-		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-
-	}
+//	private void showButton()
+//	{
+//		Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
+//		intent.putExtra("msgId", msgId);
+//		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+//	}
 	private String send(String contentRange, byte[] fileBytes)
 	{
 		HttpClient client = new DefaultHttpClient();
@@ -811,6 +816,6 @@ public class UploadFileTask extends FileTransferBase
 		{
 			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(selectedFile)));
 		}
-		showButton();
+		//showButton();
 	}
 }

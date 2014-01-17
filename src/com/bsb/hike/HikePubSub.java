@@ -148,7 +148,7 @@ public class HikePubSub implements Runnable {
 
 	public static final String FILE_TRANSFER_PROGRESS_UPDATED = "fileTransferProgressUpdated";
 	
-	public static final String RESUME_BUTTON_UPDATED = "resumeButtonUpdated";
+	//public static final String RESUME_BUTTON_UPDATED = "resumeButtonUpdated";
 
 	public static final String SHOW_PARTICIPANT_STATUS_MESSAGE = "showParticipantStatusMessage";
 

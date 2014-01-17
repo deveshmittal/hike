@@ -81,6 +81,7 @@ public class DownloadFileTask extends FileTransferBase
 				setBytesTransferred((int) raf.length());
 				// Bug Fix: 13029
 				setFileTotalSize(fst.getTotalSize());
+				progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 				return downloadFile(raf.length(), raf, AccountUtils.ssl);
 			}
 		}
@@ -184,8 +185,10 @@ public class DownloadFileTask extends FileTransferBase
 					}
 					byte data[] = new byte[chunkSize];
 					int numRead;
-					while ((_state == FTState.IN_PROGRESS) && ((numRead = in.read(data, 0, chunkSize)) != -1))
+					while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					{
+						if(_state != FTState.IN_PROGRESS)
+							break;
 						// write to buffer
 						try
 						{
@@ -224,7 +227,7 @@ public class DownloadFileTask extends FileTransferBase
 						// increase the downloaded size
 						incrementBytesTransferred(numRead);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
-						showButton();
+						//showButton();
 						sendProgress();
 					}
 
@@ -274,7 +277,8 @@ public class DownloadFileTask extends FileTransferBase
 							retry = false;
 						}
 						break;
-					case PAUSED:
+					case PAUSING:
+						_state = FTState.PAUSED;
 						Log.d(getClass().getSimpleName(), "FT PAUSED");
 						saveFileState();
 						retry = false;
@@ -360,13 +364,12 @@ public class DownloadFileTask extends FileTransferBase
 		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 	}
 	
-	private void showButton()
-	{
-		Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
-		intent.putExtra("msgId", msgId);
-		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-		
-	}
+//	private void showButton()
+//	{
+//		Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
+//		intent.putExtra("msgId", msgId);
+//		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);	
+//	}
 
 	private void error()
 	{
@@ -418,7 +421,7 @@ public class DownloadFileTask extends FileTransferBase
 				mFile.delete();
 			}
 		}
-		showButton();
+		//showButton();
 		sendProgress();
 	}
 }

@@ -59,7 +59,7 @@ public class ConvMessage {
 
 	private boolean shouldShowPush = true;
 	
-	private boolean showResumeButton = true;
+	//private boolean showResumeButton = true;
 
 	public boolean isInvite() {
 		return mInvite;
@@ -85,15 +85,15 @@ public class ConvMessage {
 		this.isStickerMessage = isStickerMessage;
 	}
 	
-	public void setResumeButtonVisibility(boolean visible)
-	{
-		showResumeButton = visible;
-	}
-	
-	public boolean getResumeButtonVisibility()
-	{
-		return showResumeButton;
-	}
+//	public void setResumeButtonVisibility(boolean visible)
+//	{
+//		showResumeButton = visible;
+//	}
+//	
+//	public boolean getResumeButtonVisibility()
+//	{
+//		return showResumeButton;
+//	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
 	public static enum State {

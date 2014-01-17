@@ -483,25 +483,9 @@ public class MqttMessagesManager {
 			}
 
 			/*
-			 * Start auto download for images
-			 */
-			/*
-			if (convMessage.isFileTransferMessage()) {
-				if (appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF,
-						true)) {
-					HikeFile hikeFile = convMessage.getMetadata()
-							.getHikeFiles().get(0);
-
-					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE) {
-						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
-					}
-				}
-			}
-			*/
-			/*
 			 * Start auto download for media files
 			 */
-			if (convMessage.isFileTransferMessage())
+			if (convMessage.isFileTransferMessage() && (!TextUtils.isEmpty(convMessage.getConversation().getContactName())))
 			{
 				HikeFile hikeFile = convMessage.getMetadata()
 						.getHikeFiles().get(0);

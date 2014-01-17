@@ -371,7 +371,7 @@ public class FileTransferManager
 		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 		if (obj != null)
 		{
-			((MyFutureTask) obj).getTask().setState(FTState.PAUSED);
+			((MyFutureTask) obj).getTask().setState(FTState.PAUSING);
 			Log.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
@@ -605,7 +605,7 @@ public class FileTransferManager
 		else
 			fss = getDownloadFileState(mFile, msgId);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSING || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			if (fss.getTotalSize() > 0)
 			{

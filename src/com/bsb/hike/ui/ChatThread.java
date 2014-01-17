@@ -586,7 +586,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 		/* registering localbroadcast manager */
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
+		//LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
 		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
 
 	}
@@ -5119,35 +5119,35 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				//@GM
 				mAdapter.notifyDataSetChanged();
 			}
-			else if(intent.getAction().equals(HikePubSub.RESUME_BUTTON_UPDATED))
-			{
-				//Log.d(getClass().getSimpleName(),"making button visible...1");
-				long msgId = intent.getLongExtra("msgId", -1);
-				if(msgId<0)
-					return;
-				//Log.d(getClass().getSimpleName(),"making button visible...2");
-				ConvMessage message = null;
-				for(int i=(messages.size()-1); i>=0; i--)
-				{
-					ConvMessage m = messages.get(i);
-					//Log.d(getClass().getSimpleName(), "comparing  : " +m.getMsgID() +" == " + msgId);
-					if(m != null && m.getMsgID() == msgId)
-					{
-						message = m;
-				    	break;
-					}
-				}
-				if (message == null)
-				return;
-				//Log.d(getClass().getSimpleName(),"making button visible...3");
-				
-				if(!message.getResumeButtonVisibility())
-				{
-					Log.d(getClass().getSimpleName(),"making button visible...DONE");
-					message.setResumeButtonVisibility(true);
-					mAdapter.notifyDataSetChanged();
-				}
-			}
+//			else if(intent.getAction().equals(HikePubSub.RESUME_BUTTON_UPDATED))
+//			{
+//				//Log.d(getClass().getSimpleName(),"making button visible...1");
+//				long msgId = intent.getLongExtra("msgId", -1);
+//				if(msgId<0)
+//					return;
+//				//Log.d(getClass().getSimpleName(),"making button visible...2");
+//				ConvMessage message = null;
+//				for(int i=(messages.size()-1); i>=0; i--)
+//				{
+//					ConvMessage m = messages.get(i);
+//					//Log.d(getClass().getSimpleName(), "comparing  : " +m.getMsgID() +" == " + msgId);
+//					if(m != null && m.getMsgID() == msgId)
+//					{
+//						message = m;
+//				    	break;
+//					}
+//				}
+//				if (message == null)
+//				return;
+//				//Log.d(getClass().getSimpleName(),"making button visible...3");
+//				
+//				if(!message.getResumeButtonVisibility())
+//				{
+//					Log.d(getClass().getSimpleName(),"making button visible...DONE");
+//					message.setResumeButtonVisibility(true);
+//					mAdapter.notifyDataSetChanged();
+//				}
+//			}
 		}
 	};
 	

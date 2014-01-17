@@ -137,23 +137,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_alignLeft="@id/file_thumb"
-                        android:layout_alignParentBottom="true"
+                        android:layout_alignBottom="@id/file_thumb"
                         android:layout_alignRight="@id/file_thumb"
                         android:layout_gravity="bottom"
                         android:background="#6E000000"
-                        android:padding="4dp"
+                        android:paddingRight="4dp"
                         android:visibility="gone" >
-                        
-                        <ImageView
-                            android:id="@+id/file_type_ic"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_alignParentLeft="true"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/ic_default_audio_rec"
-                            android:padding="2dp"
-                            android:visibility="gone" />
-                        
                          
                         <ImageView
                             android:id="@+id/ft_action_button"
@@ -163,40 +152,88 @@
                             android:layout_centerVertical="true"
                             android:background="@drawable/ic_pause_ftr"
                             android:padding="2dp" />
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentLeft="true"
+                            android:gravity="left|center_vertical"
+                            android:layout_toLeftOf="@id/ft_action_button" >
 
-                        <com.bsb.hike.view.CustomFontTextView
-                            android:id="@+id/data_transferred"
-                            android:layout_width="wrap_content"
+                        <ImageView
+                            android:id="@+id/audio_rec_ic"
+                            android:layout_width="15dp"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_default_audio_r"
+                            android:scaleType="center"
+                            android:gravity="center_vertical"
+                            android:visibility="gone" />
+                        
+                        <LinearLayout
+                            android:id="@+id/file_detail"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:layout_alignParentTop="true"
-                            android:layout_toRightOf="@id/file_type_ic"
-                            android:layout_toLeftOf="@id/ft_action_button"
-                            android:layout_alignWithParentIfMissing="true"
-                            android:paddingLeft="8dp"
-                            android:gravity="left"
-                            android:background="#00000000"
-                            android:text=""
-                            android:textSize="9dp"
-                            android:textColor="@color/white"
-                            android:ellipsize="end"
-                            android:maxLines="2" />
+                            android:layout_marginLeft="8dp"
+                            android:gravity="left|center_vertical"
+                            android:orientation="vertical" >
 
-                        <ProgressBar
-                            android:id="@+id/pbTransfer"
-                            style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="3dp"
-                            android:paddingRight="8dp"
-                            android:layout_alignParentBottom="true"
-                            android:layout_toRightOf="@id/file_type_ic"
-                            android:layout_toLeftOf="@id/ft_action_button"
-                            android:layout_alignWithParentIfMissing="true"
-                            android:layout_alignParentLeft="true"
-                            android:paddingLeft="8dp"
-                            android:progressDrawable="@drawable/file_transfer_progress_bar" />
-                       
-                    </RelativeLayout>
+                            <com.bsb.hike.view.CustomFontTextView
+                                android:id="@+id/file_type"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#00000000"
+                                android:gravity="left"
+                                android:textColor="@color/white"
+                                android:textSize="10dp"
+                                android:textStyle="bold"
+                                android:visibility="gone" />
+
+                            <!-- <com.bsb.hike.view.CustomFontTextView
+                                android:id="@+id/file_size"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#00000000"
+                                android:gravity="left"
+                                android:textColor="@color/white"
+                                android:textSize="10dp"
+                                android:visibility="gone" /> -->
+
+                            <com.bsb.hike.view.CustomFontTextView
+                                android:id="@+id/data_transferred"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#00000000"
+                                android:ellipsize="end"
+                                android:gravity="left"
+                                android:maxLines="2"
+                                android:text=""
+                                android:textColor="@color/white"
+                                android:textSize="9dp"
+                                android:visibility="gone" />
+
+                            <ProgressBar
+                                android:id="@+id/pbTransfer"
+                                style="?android:attr/progressBarStyleHorizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="2dp"
+                                android:layout_marginTop="6dp"
+                                android:progressDrawable="@drawable/file_transfer_progress_bar"
+                                android:visibility="gone" />
+                            
+                        </LinearLayout>
+                        </LinearLayout>
+                        <com.bsb.hike.view.CustomFontTextView
+                                android:id="@+id/rec_duration"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="#00000000"
+                                android:gravity="center"
+                                android:textColor="@color/white"
+                                android:textSize="10dp"
+                                android:textStyle="bold"
+                                android:visibility="gone" />
+
+					</RelativeLayout>
                 </RelativeLayout>
 
 	                <com.bsb.hike.view.CustomFontTextView
@@ -229,9 +266,9 @@
 	                    android:visibility="gone" />
 	                
 	                 <ImageView
-                            android:id="@+id/btn_open_file"
-                            android:layout_width="@dimen/chat_file_button_width"
-                            android:layout_height="wrap_content"
+                            android:id="@+id/btn_media_action"
+                            android:layout_width="40dp"
+                            android:layout_height="32dp"
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="5dp"
                             android:scaleType="centerInside"
