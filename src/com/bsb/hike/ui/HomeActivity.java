@@ -68,7 +68,6 @@ import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.ChatBgFtue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -200,13 +199,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		initialiseViewPager();
 		initialiseTabs();
 
-		if (savedInstanceState == null && dialogShowing == null) {
-			/*
-			 * Only show app rater if the tutorial is not being shown an the app
-			 * was just launched i.e not an orientation change
-			 */
-			AppRater.appLaunched(this);
-		} else if (dialogShowing != null) {
+		/*
+		 * Removed Apprater dialog from Nokia build
+		 */
+		if (dialogShowing != null) {
 			switch (dialogShowing) {
 			case SMS_CLIENT:
 				showSMSClientDialog();
@@ -224,7 +220,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 
-		if (!AppRater.showingDialog() && dialogShowing == null) {
+		if (dialogShowing == null) {
 			if (!accountPrefs.getBoolean(
 					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
 				showSMSClientDialog();
