@@ -80,7 +80,7 @@ public class HikeNotification {
 				R.drawable.hike_avtar_protip);
 		final int smallIconId = returnSmallIcon();
 
-		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), bodyString, bodyString, avatarDrawable, smallIconId);
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), bodyString, bodyString, avatarDrawable, smallIconId, false);
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 		
 		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
@@ -101,7 +101,7 @@ public class HikeNotification {
 				R.drawable.hike_avtar_protip);
 		final int smallIconId = returnSmallIcon();
 
-		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), proTip.getHeader(), proTip.getHeader(), avatarDrawable, smallIconId);
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), proTip.getHeader(), proTip.getHeader(), avatarDrawable, smallIconId, false);
 
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 		
@@ -124,7 +124,7 @@ public class HikeNotification {
 				R.drawable.hike_avtar_protip);
 		final int smallIconId = returnSmallIcon();
 
-		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), message, message, avatarDrawable, smallIconId);
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), message, message, avatarDrawable, smallIconId, false);
 
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("market://details?id=" + packageName));
@@ -421,15 +421,19 @@ public class HikeNotification {
 				.getIconForMSISDN(msisdn);
 		final int smallIconId = returnSmallIcon();
 
-		NotificationCompat.Builder mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId);
-
+		NotificationCompat.Builder mBuilder;
 		if(bigPictureImage != null){
+			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, true);
 			final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 			bigPicStyle.setBigContentTitle(key);
 			bigPicStyle.setSummaryText(message);
 			mBuilder.setStyle(bigPicStyle);
 			// set the big picture image
 			bigPicStyle.bigPicture(bigPictureImage);
+			
+			mBuilder.setSound(null);
+		} else{
+			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, false);
 		}
 
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
@@ -454,9 +458,11 @@ public class HikeNotification {
 	
 	/*
 	 * creates a notification builder with sound, led and vibrate option
-	 * set according to app preferences
+	 * set according to app preferences.
+	 * forceNotPlaySound : true if we want to force not to play notification
+	 * sounds or lights.
 	 */
-	public NotificationCompat.Builder getNotificationBuilder(String contentTitle, String contentText, String tickerText, Drawable avatarDrawable, int smallIconId){
+	public NotificationCompat.Builder getNotificationBuilder(String contentTitle, String contentText, String tickerText, Drawable avatarDrawable, int smallIconId, boolean forceNotPlaySound){
 
 		final SharedPreferences preferenceManager = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
@@ -485,17 +491,18 @@ public class HikeNotification {
 				.setTicker(tickerText).setDefaults(vibrate)
 				.setPriority(Notification.PRIORITY_HIGH);
 		
-		if (playNativeJingle && playSound != 0) {
-			mBuilder.setSound(Uri.parse("android.resource://"
-					+ context.getPackageName() + "/" + R.raw.v1));
-		} else if (playSound != 0) {
-			mBuilder.setDefaults(mBuilder.getNotification().defaults
-					| playSound);
+		if(!forceNotPlaySound){
+			if (playNativeJingle && playSound != 0 ) {
+				mBuilder.setSound(Uri.parse("android.resource://"
+						+ context.getPackageName() + "/" + R.raw.v1));
+			} else if (playSound != 0) {
+				mBuilder.setDefaults(mBuilder.getNotification().defaults
+						| playSound);
+			}
+			if (led) {
+				mBuilder.setLights(Color.BLUE, HikeConstants.LED_LIGHTS_ON_MS, HikeConstants.LED_LIGHTS_OFF_MS);
+			}
 		}
-		if (led) {
-			mBuilder.setLights(Color.BLUE, HikeConstants.LED_LIGHTS_ON_MS, HikeConstants.LED_LIGHTS_OFF_MS);
-		}
-		
 		return mBuilder;
 	}
 	
