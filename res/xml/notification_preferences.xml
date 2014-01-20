@@ -19,14 +19,17 @@
         android:title="@string/sound"
         android:widgetLayout="@layout/checkbox_widget" />    
 
-	<com.bsb.hike.view.IconCheckBoxPreference
+    <!-- this is the notificaion LED setting commented out for 
+    	 Nokia as current Nokia phone doesn't support LED notification -->
+    <!-- <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_led"
         android:defaultValue="true"
         android:key="ledPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/led_notification_info"
         android:title="@string/led_notification"
-        android:widgetLayout="@layout/checkbox_widget" />
+        android:visibility="@string/led_notification"
+        android:widgetLayout="@layout/checkbox_widget" /> -->
 
 	<com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_hike_jingle"
