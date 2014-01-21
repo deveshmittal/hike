@@ -490,6 +490,10 @@ public class HikeConstants {
 
 	public static final double PROFILE_PIC_FREE_SPACE = 3 * 1024 * 1024;
 
+	// LED light Notifications constants
+	public static final int LED_LIGHTS_ON_MS = 300;
+	public static final int LED_LIGHTS_OFF_MS = 1000;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
