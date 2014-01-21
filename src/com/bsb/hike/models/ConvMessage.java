@@ -56,7 +56,7 @@ public class ConvMessage {
 	private TypingNotification typingNotification;
 
 	private JSONArray readByArray;
-	
+
 	private boolean shouldShowPush = true;
 
 	public boolean isInvite() {
@@ -100,7 +100,7 @@ public class ConvMessage {
 		PARTICIPANT_LEFT, // The participant has left
 		PARTICIPANT_JOINED, // The participant has joined
 		GROUP_END, // Group chat has ended
-		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE;
+		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE, CHAT_BACKGROUND;
 
 		public static ParticipantInfoState fromJSON(JSONObject obj) {
 			String type = obj.optString(HikeConstants.TYPE);
@@ -131,6 +131,9 @@ public class ConvMessage {
 			} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE
 					.equals(type)) {
 				return STATUS_MESSAGE;
+			} else if (HikeConstants.MqttMessageTypes.CHAT_BACKGROUD
+					.equals(type)) {
+				return CHAT_BACKGROUND;
 			}
 			return NO_INFO;
 		}
@@ -231,10 +234,10 @@ public class ConvMessage {
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj
 				.optString(HikeConstants.SUB_TYPE));
 		/**
-		 * This is to specifically handle the hike bot cases for now
-		 * but can be generically used to control which messages have push enabled
+		 * This is to specifically handle the hike bot cases for now but can be
+		 * generically used to control which messages have push enabled
 		 */
-		if(data.has(HikeConstants.PUSH)){
+		if (data.has(HikeConstants.PUSH)) {
 			this.shouldShowPush = data.optBoolean(HikeConstants.PUSH, true);
 		}
 	}
@@ -338,6 +341,21 @@ public class ConvMessage {
 			 * We want all status message state to be read by default.
 			 */
 			isSelfGenerated = true;
+			break;
+		case CHAT_BACKGROUND:
+			if (conversation != null) {
+
+				String nameString;
+				if (conversation instanceof GroupConversation) {
+					nameString = ((GroupConversation) conversation)
+							.getGroupParticipantFirstName(metadata.getMsisdn());
+				} else {
+					nameString = Utils.getFirstName(conversation.getLabel());
+				}
+				this.mMessage = context.getString(R.string.chat_bg_changed,
+						nameString);
+				;
+			}
 			break;
 		}
 		this.mConversation = conversation;
@@ -469,32 +487,42 @@ public class ConvMessage {
 		JSONObject data = new JSONObject();
 		JSONObject md = null;
 		try {
-			if (metadata != null) {
-				if (isFileTransferMessage || isStickerMessage) {
-					md = metadata.getJSON();
-					data.put(HikeConstants.METADATA, md);
-				} else if (metadata.isPokeMessage()) {
-					data.put(HikeConstants.POKE, true);
+			if (participantInfoState == ParticipantInfoState.CHAT_BACKGROUND) {
+				object = metadata.getJSON();
+			} else {
+				if (metadata != null) {
+					if (isFileTransferMessage || isStickerMessage) {
+						md = metadata.getJSON();
+						data.put(HikeConstants.METADATA, md);
+					} else if (metadata.isPokeMessage()) {
+						data.put(HikeConstants.POKE, true);
+					}
 				}
-			}
-			data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
-					: HikeConstants.SMS_MESSAGE, mMessage);
-			data.put(HikeConstants.TIMESTAMP, mTimestamp);
-			data.put(HikeConstants.MESSAGE_ID, msgID);
+				data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
+						: HikeConstants.SMS_MESSAGE, mMessage);
+				data.put(HikeConstants.TIMESTAMP, mTimestamp);
 
-			object.put(HikeConstants.TO, mMsisdn);
-			object.put(HikeConstants.DATA, data);
-			if (isStickerMessage) {
-				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
-			}
+				if (mInvite) {
+					data.put(HikeConstants.MESSAGE_ID,
+							System.currentTimeMillis());
+				} else {
+					data.put(HikeConstants.MESSAGE_ID, msgID);
+				}
 
-			if (sendNativeInvite && mInvite) {
-				object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
-			}
+				object.put(HikeConstants.TO, mMsisdn);
+				object.put(HikeConstants.DATA, data);
+				if (isStickerMessage) {
+					object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
+				}
 
-			object.put(HikeConstants.TYPE,
-					mInvite ? HikeConstants.MqttMessageTypes.INVITE
-							: HikeConstants.MqttMessageTypes.MESSAGE);
+				if (sendNativeInvite && mInvite) {
+					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
+				}
+
+				object.put(HikeConstants.TYPE,
+						mInvite ? HikeConstants.MqttMessageTypes.INVITE
+								: HikeConstants.MqttMessageTypes.MESSAGE);
+			}
 		} catch (JSONException e) {
 			Log.e("ConvMessage", "invalid json message", e);
 		}
@@ -658,7 +686,8 @@ public class ConvMessage {
 	}
 
 	/**
-	 * @param shouldShowPush the shouldShowPush to set
+	 * @param shouldShowPush
+	 *            the shouldShowPush to set
 	 */
 	public void setShouldShowPush(boolean shouldShowPush) {
 		this.shouldShowPush = shouldShowPush;

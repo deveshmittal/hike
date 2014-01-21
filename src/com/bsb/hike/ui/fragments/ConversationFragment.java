@@ -174,17 +174,6 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		friendsList.setEmptyView(emptyView);
 
-		Button startChat = (Button) parent.findViewById(R.id.start_chat_btn);
-		startChat.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(getActivity(), ComposeActivity.class);
-				intent.putExtra(HikeConstants.Extras.EDIT, true);
-				startActivity(intent);
-			}
-		});
-
 		return parent;
 	}
 
@@ -195,13 +184,10 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 
 		View ftueNotEmptyView = emptyView.findViewById(R.id.ftue_not_empty);
-		View ftueEmptyView = emptyView.findViewById(R.id.ftue_empty);
 
 		if (HomeActivity.ftueList.isEmpty()) {
-			ftueEmptyView.setVisibility(View.VISIBLE);
 			ftueNotEmptyView.setVisibility(View.GONE);
 		} else {
-			ftueEmptyView.setVisibility(View.GONE);
 			ftueNotEmptyView.setVisibility(View.VISIBLE);
 
 			Button invite = (Button) emptyView.findViewById(R.id.invite);
@@ -213,7 +199,7 @@ public class ConversationFragment extends SherlockListFragment implements
 				public void onClick(View v) {
 					startActivity(new Intent(getActivity(), TellAFriend.class));
 
-					Utils.sendFTUELogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
 				}
 			});
 
@@ -224,7 +210,7 @@ public class ConversationFragment extends SherlockListFragment implements
 					startActivity(new Intent(getActivity(),
 							ComposeActivity.class));
 
-					Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
 				}
 			});
 
@@ -243,7 +229,7 @@ public class ConversationFragment extends SherlockListFragment implements
 					intent.setClass(getActivity(), ChatThread.class);
 					startActivity(intent);
 
-					Utils.sendFTUELogEvent(HikeConstants.LogEvent.GRID_6,
+					Utils.sendUILogEvent(HikeConstants.LogEvent.GRID_6,
 							contactInfo.getMsisdn());
 				}
 			});
@@ -869,8 +855,9 @@ public class ConversationFragment extends SherlockListFragment implements
 	public void onResume() {
 		SharedPreferences prefs = getActivity().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
-				.ordinal()) {
+		if (getActivity() == null
+				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
+						.ordinal()) {
 			/*
 			 * if there is a HikeBotConversation in Conversation list also it is
 			 * Viewed by user then delete this.

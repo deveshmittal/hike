@@ -300,7 +300,7 @@ public class Utils {
 				HikeConstants.Extras.MSISDN,
 				Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo
 						.getId() : contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
 
@@ -1019,15 +1019,23 @@ public class Utils {
 	}
 
 	public static boolean isUserOnline(Context context) {
-		if (context == null) {
-			Log.e("HikeService", "Hike service is null!!");
+		try {
+			if (context == null) {
+				Log.e("HikeService", "Hike service is null!!");
+				return false;
+			}
+			ConnectivityManager cm = (ConnectivityManager) context
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+			return (cm != null && cm.getActiveNetworkInfo() != null
+					&& cm.getActiveNetworkInfo().isAvailable() && cm
+					.getActiveNetworkInfo().isConnected());
+		} catch (NullPointerException e) {
+			/*
+			 * We were seeing NPEs on the console in this method. Added this
+			 * since could not find any reason why we would get an NPE here.
+			 */
 			return false;
 		}
-		ConnectivityManager cm = (ConnectivityManager) context
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		return (cm != null && cm.getActiveNetworkInfo() != null
-				&& cm.getActiveNetworkInfo().isAvailable() && cm
-				.getActiveNetworkInfo().isConnected());
 	}
 
 	/**
@@ -1452,6 +1460,11 @@ public class Utils {
 
 	public static void sendInvite(String msisdn, Context context,
 			boolean dbUpdated) {
+		sendInvite(msisdn, context, dbUpdated, false);
+	}
+
+	public static void sendInvite(String msisdn, Context context,
+			boolean dbUpdated, boolean sentMqttPacket) {
 
 		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
 				|| context.getSharedPreferences(
@@ -1460,8 +1473,10 @@ public class Utils {
 
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
 				context);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-				convMessage.serialize(sendNativeInvite));
+		if (!sentMqttPacket) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					convMessage.serialize(sendNativeInvite));
+		}
 
 		if (sendNativeInvite) {
 			SmsManager smsManager = SmsManager.getDefault();
@@ -1471,13 +1486,13 @@ public class Utils {
 			ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
 
 			/*
-			 * Adding blank pending intents as a workaround for where sms don't get sent
-			 * when we pass this as null
+			 * Adding blank pending intents as a workaround for where sms don't
+			 * get sent when we pass this as null
 			 */
 			for (int i = 0; i < messages.size(); i++) {
 				Intent intent = new Intent();
-				pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
-						PendingIntent.FLAG_CANCEL_CURRENT));
+				pendingIntents.add(PendingIntent.getBroadcast(context, 0,
+						intent, PendingIntent.FLAG_CANCEL_CURRENT));
 			}
 			/*
 			 * The try-catch block is needed for a bug in certain LG devices
@@ -1596,19 +1611,19 @@ public class Utils {
 
 		switch (whichScreen) {
 		case FRIENDS_TAB:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK
 							: HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK,
 					contactInfo.getMsisdn());
 			break;
 		case UPDATES_TAB:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK
 							: HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK,
 					contactInfo.getMsisdn());
 			break;
 		case SMS_SECTION:
-			Utils.sendFTUELogEvent(
+			Utils.sendUILogEvent(
 					!isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK
 							: HikeConstants.LogEvent.REMIND_SMS_CLICK,
 					contactInfo.getMsisdn());
@@ -2401,6 +2416,13 @@ public class Utils {
 
 	public static String getLastSeenTimeAsString(Context context,
 			long lastSeenTime, int offline, boolean groupParticipant) {
+		return getLastSeenTimeAsString(context, lastSeenTime, offline,
+				groupParticipant, false);
+	}
+
+	public static String getLastSeenTimeAsString(Context context,
+			long lastSeenTime, int offline, boolean groupParticipant,
+			boolean fromChatThread) {
 		/*
 		 * This refers to the setting being turned off
 		 */
@@ -2434,7 +2456,9 @@ public class Utils {
 		 * More than 7 days old.
 		 */
 		if ((lastSeenYear < nowYear) || ((nowDay - lastSeenDay) > 7)) {
-			return context.getString(R.string.last_seen_while_ago);
+			return context
+					.getString(fromChatThread ? R.string.last_seen_while_ago_ct
+							: R.string.last_seen_while_ago);
 		}
 
 		boolean is24Hour = android.text.format.DateFormat
@@ -2459,8 +2483,10 @@ public class Utils {
 							+ "' MMM, h:mmaaa";
 				}
 				DateFormat df = new SimpleDateFormat(format);
-				lastSeen = context.getString(R.string.last_seen_more,
-						df.format(lastSeenDate));
+				lastSeen = context.getString(
+						fromChatThread ? R.string.last_seen_more_ct
+								: R.string.last_seen_more, df
+								.format(lastSeenDate));
 			}
 		} else {
 			String format;
@@ -2476,10 +2502,16 @@ public class Utils {
 						.getString(R.string.last_seen_yesterday_group_participant)
 						: df.format(lastSeenDate);
 			} else {
-				lastSeen = context.getString(
-						(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
-								: R.string.last_seen_today, df
-								.format(lastSeenDate));
+				int stringRes;
+				if (fromChatThread) {
+					stringRes = (nowDay > lastSeenDay) ? R.string.last_seen_yesterday_ct
+							: R.string.last_seen_today_ct;
+				} else {
+					stringRes = (nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+							: R.string.last_seen_today;
+				}
+				lastSeen = context
+						.getString(stringRes, df.format(lastSeenDate));
 			}
 		}
 
@@ -2545,8 +2577,8 @@ public class Utils {
 
 		switch (tipType) {
 		case EMOTICON:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_left);
-			tipText.setText(R.string.emoticons_stickers_tip);
+			container.setBackgroundResource(R.drawable.bg_sticker_ftue);
+			tipText.setText(R.string.sticker_ftue_body);
 			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
@@ -2564,6 +2596,10 @@ public class Utils {
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
 			tipText.setText(R.string.walkie_talkie_tip);
 			break;
+		case CHAT_BG_FTUE:
+			container.setBackgroundResource(R.drawable.bg_tip_top_right);
+			tipText.setText(R.string.chat_bg_ftue_tip);
+			break;	
 		}
 		if (closeTip != null) {
 			closeTip.setOnClickListener(new OnClickListener() {
@@ -2601,6 +2637,9 @@ public class Utils {
 			break;
 		case WALKIE_TALKIE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
+			break;
+		case CHAT_BG_FTUE:
+			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
 			break;
 		}
 
@@ -3060,11 +3099,11 @@ public class Utils {
 		return formatter.format(calendar.getTime());
 	}
 
-	public static void sendFTUELogEvent(String key) {
-		sendFTUELogEvent(key, null);
+	public static void sendUILogEvent(String key) {
+		sendUILogEvent(key, null);
 	}
 
-	public static void sendFTUELogEvent(String key, String msisdn) {
+	public static void sendUILogEvent(String key, String msisdn) {
 		try {
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
@@ -3158,5 +3197,40 @@ public class Utils {
 		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
 
 		return intent;
+	}
+
+	public static void addCommonDeviceDetails(JSONObject jsonObject,
+			Context context) throws JSONException {
+		int height = context.getResources().getDisplayMetrics().heightPixels;
+		int width = context.getResources().getDisplayMetrics().widthPixels;
+
+		TelephonyManager manager = (TelephonyManager) context
+				.getSystemService(Context.TELEPHONY_SERVICE);
+
+		String res = height + "x" + width;
+		String operator = manager.getSimOperatorName();
+		String circle = manager.getSimOperator();
+		String pdm = Float.toString(Utils.densityMultiplier);
+
+		jsonObject.put(HikeConstants.RESOLUTION, res);
+		jsonObject.put(HikeConstants.OPERATOR, operator);
+		jsonObject.put(HikeConstants.CIRCLE, circle);
+		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
+	}
+
+	public static ConvMessage makeConvMessage(Conversation mConversation,
+			String msisdn, String message, boolean isOnhike) {
+		return makeConvMessage(mConversation, msisdn, message, isOnhike,
+				State.SENT_UNCONFIRMED);
+	}
+
+	public static ConvMessage makeConvMessage(Conversation mConversation,
+			String msisdn, String message, boolean isOnhike, State state) {
+		long time = (long) System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(message, msisdn, time, state);
+		convMessage.setConversation(mConversation);
+		convMessage.setSMS(!isOnhike);
+
+		return convMessage;
 	}
 }

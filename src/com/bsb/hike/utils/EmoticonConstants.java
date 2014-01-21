@@ -530,20 +530,27 @@ public class EmoticonConstants {
 			"008_dreaming.png", };
 
 	public static final String[] STICKER_CATEGORY_IDS = { "humanoid", "doggy",
-			"kitty", "expressions", HikeConstants.BOLLYWOOD_CATEGORY,
-			"rageface" };
+			"humanoid2", "expressions", "indian", "avatars",
+			"smileyexpressions", HikeConstants.BOLLYWOOD_CATEGORY, "rageface",
+			"kitty" };
 
 	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.humanoid,
-			R.drawable.doggy, R.drawable.kitty, R.drawable.expressions,
-			R.drawable.bollywood, R.drawable.rageface };
+			R.drawable.doggy, R.drawable.humanoid2, R.drawable.expressions,
+			R.drawable.indian, R.drawable.avtars,
+			R.drawable.smileyexpressions, R.drawable.bollywood,
+			R.drawable.rageface, R.drawable.kitty };
 
 	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
 			R.drawable.preview_humanoid, R.drawable.preview_doggy,
-			R.drawable.preview_kitty, R.drawable.preview_expressions,
-			R.drawable.preview_bollywood, R.drawable.preview_rageface };
+			R.drawable.preview_humanoid2, R.drawable.preview_expressions,
+			R.drawable.preview_indian, R.drawable.preview_avtars,
+			R.drawable.preview_smilyexpressions, R.drawable.preview_bollywood,
+			R.drawable.preview_rageface, R.drawable.preview_kitty };
 
 	public static final String[] STICKER_DOWNLOAD_PREF = {
 			"humanoidDownloadShown", "doggyDownloadShown",
-			"kittyDownloadShown", "expDownloadShown", "bollywoodDownloadShown",
-			"rfDownloadShown" };
+			"humanoid2DownloadShown", "expDownloadShown",
+			"indianDownloadShown", "avtarsDownloadShown",
+			"smileyexpressionDownloadShown", "bollywoodDownloadShown",
+			"rfDownloadShown", "kittyDownloadShown" };
 }

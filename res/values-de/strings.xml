@@ -674,5 +674,34 @@
   	<string name="number_confirmation_string">Ist %1$s deine Nummer?</string>
   	<string name="ftue_friends_subtext">Als Freund hinzufügen</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tippe hier, um die Freundschaftsvorschläge zu schließen.</string>
-  			
+	<string name="sticker_ftue_body">Probieren Sie unsere neuen Aufkleber!</string>  	
+  	
+  	<string name="select_all">Alle auswählen (%1$d)</string>
+	<string name="deselect_all">Auswahl löschen (%1$d)</string>
+	<string name="humanoid2_category">You and I</string>
+	<string name="se_category">Goofy Smileys</string>
+	<string name="avtars_category">Hikin Avatars</string>
+	<string name="chat_bg_changed">%1$s hat den Hintergrund geändert</string>
+	<string name="save_theme">Motiv speichern</string>
+	<string name="change_theme">Motiv ändern</string>
+	<string name="mute_chat_theme_notification_subtext">Zeigt eine Benachrichtigung an, wenn das Chatmotiv geändert wird</string>
+	<string name="mute_chat_theme_notification_header">Benachrichtigungen zu Motivänderungen</string>
+	<string name="indian_category">Things Indians say</string>
+	<string name="sent_via_sms">Als SMS gesendet - %1$s</string>
+	<string name="chat_theme">Chatmotiv</string>
+	<string name="unknown_chat_theme">Wow! Ein tolles neues Chatmotiv steht für dich bereit. Du hast jedoch noch eine alte Version von Hike. :( Hol dir hier das Update: http://hike.in</string>
+	<string name="merry_christmas_msg">Weihnachten ist ein zauberhaftes Fest! Wir haben eine Überraschung für dich...</string>	
+	<string name="open_it_up">Öffne es</string>	
+	<string name="chat_themes">Chatmotive!</string>
+	<string name="chat_themes_popup_msg">Personalisiere deine Chats mit herrlichen Motiven!</string>
+	<string name="give_it_a_spin">Probiere es einfach mal aus!</string>		
+	<string name="chat_bg_ftue_tip">Viele weitere Motive gibt es hier...</string>
+	<string name="last_seen_today_ct">heute, %1$s</string>
+	<string name="last_seen_yesterday_ct">gestern, %1$s</string>
+	<string name="last_seen_more_ct">%1$s</string>
+	<string name="last_seen_while_ago_ct">vor einiger Zeit</string>
+	<string name="apply">Gelten</string>
+	<string name="chat_theme_tip">Das Chat-Thema ändert sich für Sie und Ihr Freund</string>
+	<string name="chat_theme_tip_group">Das Chat-Thema wird für die gesamte Gruppe ändern</string>		
+	
 </resources>

@@ -15,12 +15,13 @@
 		android:gravity="center_vertical"
 		android:layout_marginTop="10dp">
 
-		<View 
+		<View
+		    android:id="@+id/day_left"
 		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
-		    android:background="@drawable/ic_chatthread_divider"/>
+		    android:background="@color/day_line"/>
 		    
 	    <com.bsb.hike.view.CustomFontTextView
 	        android:id="@+id/day"
@@ -35,12 +36,13 @@
         	android:textColor="@color/list_item_header"
         	android:textStyle="bold|italic" />
 
-	    <View 
+	    <View
+	        android:id="@+id/day_right" 
 		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
-		    android:background="@drawable/ic_chatthread_divider"/>
+		    android:background="@color/day_line"/>
 	</LinearLayout>
 	
 	<LinearLayout 
@@ -178,12 +180,19 @@
 	                android:gravity="center_vertical"
 	                android:src="@drawable/ic_nudge_hike_receive"
 	                android:visibility="visible"
-	                android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginRight="2dp"
-                    android:layout_marginLeft="7dp" />
+	                android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1.5dp"
+                    android:layout_marginRight="6dp"
+                    android:layout_marginLeft="9dp" />
 
 	        </LinearLayout>
+	        <ImageView
+	             android:id="@+id/poke_receive_custom"
+	             android:layout_width="wrap_content"
+	             android:layout_height="wrap_content"
+	             android:gravity="center_vertical"
+	             android:src="@drawable/ic_nudge_receive_custom"
+	             android:visibility="gone" />
 	        
 	        <LinearLayout
 	            android:id="@+id/typing_avatar_container"
