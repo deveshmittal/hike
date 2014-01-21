@@ -96,8 +96,8 @@
                         android:visibility="gone" />
                     <ImageView
                         android:id="@+id/file_ic"
-                        android:layout_width="46dp"
-                        android:layout_height="38dp"
+                        android:layout_width="47dp"
+                        android:layout_height="39dp"
                         android:layout_gravity="center"
                         android:background="@drawable/bg_blue_btn"
                         android:scaleType="centerInside"
@@ -112,7 +112,7 @@
                         android:layout_alignRight="@id/file_thumb"
                         android:layout_gravity="bottom"
                         android:background="#6E000000"
-                        android:paddingRight="4dp"
+                        android:padding="4dp"
                         android:visibility="gone" >
                         
                         <ImageView
@@ -194,19 +194,33 @@
                            
                         </LinearLayout>
                         </LinearLayout>
-
-                          <com.bsb.hike.view.CustomFontTextView
-                              android:id="@+id/rec_duration"
-                              android:layout_width="match_parent"
-                              android:layout_height="match_parent"
-                              android:background="#00000000"
-                              android:gravity="center"
-                              android:textColor="@color/white"
-                              android:textSize="10dp"
-                              android:textStyle="bold"
-                              android:visibility="gone" />
-
-					</RelativeLayout>
+				</RelativeLayout>
+				
+                <ImageView
+	                 android:id="@+id/audio_rec_progress"
+	                 android:layout_alignLeft="@id/overlayBg"
+                     android:layout_alignTop="@id/overlayBg"
+                     android:layout_alignBottom="@id/overlayBg"
+                     android:layout_height="match_parent"
+                     android:layout_width="0dp"
+	                 android:background="@drawable/bg_grey_dark"
+	                 android:visibility="gone" />
+					
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/rec_duration"
+	                android:layout_alignLeft="@id/overlayBg"
+                    android:layout_alignTop="@id/overlayBg"
+                    android:layout_alignRight="@id/overlayBg"
+                    android:layout_alignBottom="@id/overlayBg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#00000000"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="10dp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+                
                 </RelativeLayout>
 
                 <ImageView
