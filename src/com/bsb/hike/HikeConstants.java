@@ -487,11 +487,11 @@ public class HikeConstants {
 	public static final int FTUE_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
-	
-	//LED light Notifications constants
+
+	// LED light Notifications constants
 	public static final int LED_LIGHTS_ON_MS = 300;
 	public static final int LED_LIGHTS_OFF_MS = 1000;
-	
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

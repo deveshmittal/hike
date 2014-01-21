@@ -2599,7 +2599,7 @@ public class Utils {
 		case CHAT_BG_FTUE:
 			container.setBackgroundResource(R.drawable.bg_tip_top_right);
 			tipText.setText(R.string.chat_bg_ftue_tip);
-			break;	
+			break;
 		}
 		if (closeTip != null) {
 			closeTip.setOnClickListener(new OnClickListener() {
@@ -3191,8 +3191,9 @@ public class Utils {
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
 		prefEditor.commit();
 	}
-	
-	public static Intent getHomeActivityIntent(Context context, final int tabIndex) {
+
+	public static Intent getHomeActivityIntent(Context context,
+			final int tabIndex) {
 		final Intent intent = new Intent(context, HomeActivity.class);
 		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
 

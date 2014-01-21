@@ -188,13 +188,14 @@ public class ToastListener implements Listener {
 				return;
 			}
 			/*
-			 *  this object contains a Bundle containing 3 strings among which one is 
-			 *  imagepath of downloaded avtar. and other two are msisdn and name from  
-			 *  which notification has come. 
+			 * this object contains a Bundle containing 3 strings among which
+			 * one is imagepath of downloaded avtar. and other two are msisdn
+			 * and name from which notification has come.
 			 */
 			Bundle notifyBundle = (Bundle) object;
-			toaster.notifyBigPictureStatusNotification(notifyBundle.getString(HikeConstants.Extras.IMAGE_PATH), 
-					notifyBundle.getString(HikeConstants.Extras.MSISDN), 
+			toaster.notifyBigPictureStatusNotification(
+					notifyBundle.getString(HikeConstants.Extras.IMAGE_PATH),
+					notifyBundle.getString(HikeConstants.Extras.MSISDN),
 					notifyBundle.getString(HikeConstants.Extras.NAME));
 		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
 				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
@@ -247,16 +248,14 @@ public class ToastListener implements Listener {
 			// now the user has got a push update from our server.
 			// if its critical, let it go through, if its normal, check the
 			// preference.
-			toaster.notifyUpdatePush(
-					update,
-					context.getPackageName(),
-					context.getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-							HikeConstants.Extras.UPDATE_MESSAGE, ""), false);
+			toaster.notifyUpdatePush(update, context.getPackageName(), context
+					.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+					.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""), false);
 		} else if (HikePubSub.APPLICATIONS_PUSH.equals(type)) {
 			if (object instanceof String) {
 				String packageName = ((String) object);
-				toaster.notifyUpdatePush( -1,
+				toaster.notifyUpdatePush(
+						-1,
 						packageName,
 						context.getSharedPreferences(
 								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
