@@ -20,8 +20,8 @@ public class DownloadImageTask extends AsyncTask<Void, Void, Boolean> {
 	private Context context;
 	private ImageDownloadResult imageDownloadResult;
 
-	public DownloadImageTask(Context context, File destFile,
-			Uri picasaUri, ImageDownloadResult imageDownloadResult) {
+	public DownloadImageTask(Context context, File destFile, Uri picasaUri,
+			ImageDownloadResult imageDownloadResult) {
 		this.destFile = destFile;
 		this.imageUri = picasaUri;
 		this.context = context;
