@@ -81,7 +81,17 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 
 	@Override
 	public void onDestroy() {
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		/*
+		 * We have found that reference to friendsAdapter doesn't get cleared up
+		 * by GC whenever HomeActivity or FriendsFragment gets destroyed. This
+		 * leads to a severe memory Leak in our App. Now we are explicitly
+		 * making it null, So that it gets picked up by GC on its next run.
+		 */
+		if (friendsAdapter != null) {
+			friendsAdapter.destroy();
+			friendsAdapter = null;
+		}
 		super.onDestroy();
 	}
 
