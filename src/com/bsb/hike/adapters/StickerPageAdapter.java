@@ -21,15 +21,13 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
@@ -51,18 +49,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private LayoutInflater inflater;
 	private StickerCategory category;
 	private int numStickerRows;
-	private DisplayImageOptions op;
-	
-	protected ImageLoader imageLoader = ImageLoader.getInstance();
+	private ImageWorker mWorker;
 	
 	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
-			List<ViewType> viewTypeList,DisplayImageOptions options) {
+			List<ViewType> viewTypeList,ImageWorker worker) {
 		this.activity = activity;
 		this.stickerList = stickerList;
 		this.viewTypeList = viewTypeList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
-		this.op = options;
+		this.mWorker = worker;
 		calculateNumRowsAndSize(false);
 	}
 
@@ -213,7 +209,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 										.getStickerIndex()]);
 					}
 				} else {
-					imageLoader.displayImage("file://"+sticker.getSmallStickerPath(activity),imageView,op);
+					mWorker.loadImage(sticker.getSmallStickerPath(activity), imageView);
+					//imageLoader.displayImage("file://"+sticker.getSmallStickerPath(activity),imageView,op);
 						
 					/*imageView.setImageDrawable(IconCacheManager.getInstance()
 							.getStickerThumbnail(
