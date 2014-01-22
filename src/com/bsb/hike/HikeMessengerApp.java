@@ -49,6 +49,8 @@ import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
+import com.bsb.hike.smartcache.HikeLruCache;
+import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
@@ -58,9 +60,6 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 
 @ReportsCrashes(formKey = "", customReportContent = {
 		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
@@ -693,20 +692,20 @@ public class HikeMessengerApp extends Application implements Listener {
 		hikeBotNamesMap
 				.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
-		initImageLoader(getApplicationContext());
+		initHikeLruCache(getApplicationContext());
 	}
 
-	public void initImageLoader(Context context) 
+	private static HikeLruCache cache;
+	private void initHikeLruCache(Context applicationContext)
 	{
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
-				.threadPriority(Thread.NORM_PRIORITY - 1)
-				.denyCacheImageMultipleSizesInMemory()
-				.tasksProcessingOrder(QueueProcessingType.FIFO)
-				//.writeDebugLogs() // TODO : Remove for release app
-				.build();
-		
-		// Initialize ImageLoader with configuration.
-		ImageLoader.getInstance().init(config);
+		ImageCacheParams params = new ImageCacheParams();
+		params.setMemCacheSizePercent(0.25f);
+		cache = new HikeLruCache(params);
+	}
+
+	public static HikeLruCache getLruCache()
+	{
+		return cache;
 	}
 	
 	private void makeNoMediaFiles() {
