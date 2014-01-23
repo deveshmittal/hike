@@ -485,6 +485,8 @@ public class HikeConstants {
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
+	public static final double PROFILE_PIC_FREE_SPACE = 3 * 1024 * 1024;
+
 	// LED light Notifications constants
 	public static final int LED_LIGHTS_ON_MS = 300;
 	public static final int LED_LIGHTS_OFF_MS = 1000;

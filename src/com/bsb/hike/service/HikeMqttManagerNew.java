@@ -305,7 +305,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			Log.e(TAG, "Hike service is null!!");
 			return false;
 		}
-		return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
+		/*
+		 * We've seen NPEs in this method on the dev console but have not
+		 * been able to figure out the reason so putting this in a try
+		 * catch block.
+		 */
+		try
+		{
+			return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
+		}
+		catch(NullPointerException e)
+		{
+			return false;
+		}
 	}
 
 	private void setBrokerHostPort(boolean ssl)

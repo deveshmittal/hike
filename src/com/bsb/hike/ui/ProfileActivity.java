@@ -889,6 +889,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					mActivityState.destFilePath,
 					HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
 
+			if(smallerBitmap == null) {
+				failureWhileSettingProfilePic();
+				return;
+			}
+
 			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap,
 					Bitmap.CompressFormat.JPEG, 100);
 
@@ -901,18 +906,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					new HikeHttpRequest.HikeHttpCallback() {
 						public void onFailure() {
 							Log.d("ProfileActivity", "resetting image");
-							Utils.removeTempProfileImage(mLocalMSISDN);
-							mActivityState.destFilePath = null;
-							if (profileAdapter != null) {
-								/*
-								 * Reload the older image
-								 */
-								profileAdapter.setProfilePreview(null);
-								profileAdapter.notifyDataSetChanged();
-							}
-							if (isBackPressed) {
-								finishEditing();
-							}
+							failureWhileSettingProfilePic();
 						}
 
 						public void onSuccess(JSONObject response) {
@@ -1055,6 +1049,21 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			requests.toArray(r);
 			Utils.executeHttpTask(mActivityState.task, r);
 		} else if (isBackPressed) {
+			finishEditing();
+		}
+	}
+
+	private void failureWhileSettingProfilePic() {
+		Utils.removeTempProfileImage(mLocalMSISDN);
+		mActivityState.destFilePath = null;
+		if (profileAdapter != null) {
+			/*
+			 * Reload the older image
+			 */
+			profileAdapter.setProfilePreview(null);
+			profileAdapter.notifyDataSetChanged();
+		}
+		if (isBackPressed) {
 			finishEditing();
 		}
 	}
@@ -1232,6 +1241,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						.show();
 				return;
 			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE,
 					null, null); // create a file to save the image
@@ -1258,6 +1273,12 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 				Toast.makeText(getApplicationContext(),
 						R.string.no_external_storage, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
 						.show();
 				return;
 			}
@@ -1627,11 +1648,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				this.participantMap.remove(msisdn);
 
 				groupConversation.setGroupMemberAliveCount(participantMap.size());
-				setupGroupProfileList();
 
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						setupGroupProfileList();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1661,10 +1682,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 							new GroupParticipant(participant));
 				}
 				groupConversation.setGroupMemberAliveCount(participantMap.size());
-				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						setupGroupProfileList();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1715,30 +1736,30 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						HikePubSub.USER_JOINED.equals(type));
 			}
 
-			if (profileType == ProfileType.GROUP_INFO) {
-				setupGroupProfileList();
-			} else {
-				setupContactProfileList();
-			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					if (profileType == ProfileType.GROUP_INFO) {
+						setupGroupProfileList();
+					} else {
+						setupContactProfileList();
+					}
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
-			StatusMessage statusMessage = (StatusMessage) object;
+			final StatusMessage statusMessage = (StatusMessage) object;
 			if (!mLocalMSISDN.equals(statusMessage.getMsisdn())
 					|| statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
 					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				return;
 			}
-			profileItems.add(showingRequestItem ? 2 : 1,
-					new ProfileItem.ProfileStatusItem(statusMessage));
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
+					profileItems.add(showingRequestItem ? 2 : 1,
+							new ProfileItem.ProfileStatusItem(statusMessage));
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -1754,11 +1775,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				return;
 			}
 			this.contactInfo.setFavoriteType(favoriteType);
-			setupContactProfileList();
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
+					setupContactProfileList();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
