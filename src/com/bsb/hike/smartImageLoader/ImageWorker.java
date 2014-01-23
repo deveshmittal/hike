@@ -49,7 +49,7 @@ public abstract class ImageWorker
 
 	public static final String ROUND_SUFFIX = "round";
 
-	private static final int FADE_IN_TIME = 200;
+	private static final int FADE_IN_TIME = 100;
 
 	protected HikeLruCache mImageCache;
 

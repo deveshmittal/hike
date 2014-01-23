@@ -72,9 +72,7 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.LargeStickerLoader;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
@@ -150,12 +148,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private ChatTheme chatTheme;
 	private boolean isDefaultTheme = true;
 	private IconLoader iconLoader;
-	private LargeStickerLoader largeStickerLoader;
+	private StickerLoader largeStickerLoader;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
-		this.largeStickerLoader = new LargeStickerLoader(context);
-		this.largeStickerLoader.setResource(context);
+		this.largeStickerLoader = new StickerLoader(context);
 		this.iconLoader = new IconLoader(context,180);
 		this.context = context;
 		this.convMessages = objects;
@@ -2410,7 +2407,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		voiceMessagePlayer.resetPlayer();
 	}
 	
-	public LargeStickerLoader getStickerLoader()
+	public StickerLoader getStickerLoader()
 	{
 		return largeStickerLoader;
 	}

@@ -45,6 +45,7 @@ public class IconLoader extends ImageWorker
 	public IconLoader(Context ctx, int imageSize)
 	{
 		this(ctx,imageSize,imageSize);
+		mResources = ctx.getResources();
 	}
 
 	public void setImageSize(int width, int height)

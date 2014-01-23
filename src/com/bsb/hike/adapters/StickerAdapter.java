@@ -276,7 +276,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private void initStickers(StickerPageObjects spo, final StickerCategory category)
 	{
-		final StickerLoader worker = new StickerLoader();
+		final StickerLoader worker = new StickerLoader(activity);
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);

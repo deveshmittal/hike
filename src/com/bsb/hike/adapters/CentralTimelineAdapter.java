@@ -55,7 +55,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
-	private ImageLoader imageLoader;
 	private int mBigImageSize;
 	private TimelineImageLoader bigPicImageLoader;
 	private IconLoader iconImageLoader;
