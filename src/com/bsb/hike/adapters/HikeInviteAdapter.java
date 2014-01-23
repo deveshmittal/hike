@@ -19,9 +19,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 
 public class HikeInviteAdapter extends
 		HikeArrayAdapter<Pair<AtomicBoolean, ContactInfo>> implements
@@ -32,6 +34,7 @@ public class HikeInviteAdapter extends
 	private ContactFilter filter;
 	private String filterString;
 	private boolean showingBlockedList;
+	private IconLoader iconLoader;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId,
 			List<Pair<AtomicBoolean, ContactInfo>> completeList,
@@ -45,6 +48,7 @@ public class HikeInviteAdapter extends
 		this.completeList.addAll(completeList);
 		this.filter = new ContactFilter();
 		this.showingBlockedList = showingBLockedList;
+		iconLoader = new IconLoader(activity,180);
 	}
 
 	public void selectAllToggled() {
@@ -76,10 +80,14 @@ public class HikeInviteAdapter extends
 			v = inflater.inflate(R.layout.compose_list_item, parent, false);
 		}
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
-		imageView.setImageDrawable(pair != null ? IconCacheManager
-				.getInstance().getIconForMSISDN(contactInfo.getMsisdn(), true)
-				: getContext().getResources().getDrawable(
+		if(pair != null)
+		{
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView);
+		}
+		else
+			imageView.setImageDrawable(getContext().getResources().getDrawable(
 						R.drawable.ic_avatar1_rounded));
+
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());

@@ -69,6 +69,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 		super.onResume();
 		if (centralTimelineAdapter != null) {
 			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(false);
+			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(false);
 			centralTimelineAdapter.notifyDataSetChanged();
 		}
 	}
@@ -79,6 +80,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 		if (centralTimelineAdapter != null) {
 			centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
 			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(true);
+			centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
+			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}
 
@@ -203,13 +206,19 @@ public class UpdatesFragment extends SherlockListFragment implements
 			if (!Utils.hasHoneycomb())
 			{
 				if(centralTimelineAdapter != null)
+				{
 					centralTimelineAdapter.getTimelineImageLoader().setPauseWork(true);
+					centralTimelineAdapter.getIconImageLoader().setPauseWork(true);
+				}
 			}
 		}
 		else
 		{
 			if(centralTimelineAdapter != null)
+			{
 				centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
+				centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
+			}
 		}
 	}
 

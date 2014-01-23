@@ -58,9 +58,9 @@ public class ImageLoader
 		}
 		else
 		{
-			Drawable avatarDrawable = IconCacheManager.getInstance().getIconForMSISDN(imageViewerInfo.mappedId);
-			imageView.setImageDrawable(avatarDrawable);
-			queueImage(id, imageView);
+			//Drawable avatarDrawable = IconCacheManager.getInstance().getIconForMSISDN(imageViewerInfo.mappedId);
+			//imageView.setImageDrawable(avatarDrawable);
+			//queueImage(id, imageView);
 		}
 	}
 

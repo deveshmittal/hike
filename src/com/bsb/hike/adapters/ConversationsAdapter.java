@@ -24,17 +24,20 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
+	private IconLoader iconLoader;
 	private int mResourceId;
 
 	public ConversationsAdapter(Context context, int textViewResourceId,
 			List<Conversation> objects) {
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
+		iconLoader = new IconLoader(context,180);
 	}
 
 	@Override
@@ -273,9 +276,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		}
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
-		avatarView.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(conversation.getMsisdn(), true));
-
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView);
 		return v;
 	}
 

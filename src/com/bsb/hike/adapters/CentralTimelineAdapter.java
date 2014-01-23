@@ -55,7 +55,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
-	//private ImageLoader imageLoader;
+	private ImageLoader imageLoader;
 	private int mBigImageSize;
 	private TimelineImageLoader bigPicImageLoader;
 	private IconLoader iconImageLoader;
@@ -85,7 +85,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
-		this.iconImageLoader = new IconLoader(context, 180);
+		this.iconImageLoader = new IconLoader(context,180);
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;

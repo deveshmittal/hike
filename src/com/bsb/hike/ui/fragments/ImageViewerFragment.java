@@ -23,6 +23,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.ProfileImageLoader;
 import com.bsb.hike.utils.Utils;
 
@@ -37,11 +38,13 @@ public class ImageViewerFragment extends SherlockFragment implements
 	private boolean hasCustomImage;
 	private String fileName;
 	private String url;
+	private IconLoader iconLoader;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+		iconLoader = new IconLoader(getActivity(),180);
 	}
 
 	@Override
@@ -87,8 +90,9 @@ public class ImageViewerFragment extends SherlockFragment implements
 			}
 		}
 		if (downloadImage) {
-			imageView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(mappedId));
+			iconLoader.loadImage(mappedId, imageView);
+			//imageView.setImageDrawable(IconCacheManager.getInstance()
+				//	.getIconForMSISDN(mappedId));
 
 			getLoaderManager().initLoader(0, null, this);
 

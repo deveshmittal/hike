@@ -124,7 +124,8 @@ public class MqttMessagesManager {
 			this.userDb.setIcon(msisdn,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
-			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+			HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+			//IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
 			/*
 			 * Only auto download if the ic packet is not generated due to
@@ -159,7 +160,8 @@ public class MqttMessagesManager {
 			this.userDb.setIcon(groupId,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
-			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
+			HikeMessengerApp.getLruCache().clearIconForMSISDN(groupId);
+			//IconCacheManager.getInstance().clearIconForMSISDN(groupId);
 			autoDownloadGroupImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
@@ -219,7 +221,8 @@ public class MqttMessagesManager {
 					saveStatusMsg(jsonObj, groupId);
 				}
 			} else {
-				IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
+				HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+				//IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
 
 			/*
@@ -662,8 +665,9 @@ public class MqttMessagesManager {
 								Base64.DEFAULT);
 						this.userDb.setIcon(msisdn, profileImageBytes, false);
 
-						IconCacheManager.getInstance().clearIconForMSISDN(
-								msisdn);
+						HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+						//IconCacheManager.getInstance().clearIconForMSISDN(
+								//msisdn);
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.PROFILE_PIC_CHANGED, null);
 					} catch (Exception e) {

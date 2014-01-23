@@ -19,6 +19,7 @@ package com.bsb.hike.smartImageLoader;
 import java.lang.ref.WeakReference;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,7 +47,7 @@ public abstract class ImageWorker
 {
 	private static final String TAG = "ImageWorker";
 
-	protected static final String ROUND_SUFFIX = "round";
+	public static final String ROUND_SUFFIX = "round";
 
 	private static final int FADE_IN_TIME = 200;
 
@@ -69,6 +70,11 @@ public abstract class ImageWorker
 		this.mImageCache = HikeMessengerApp.getLruCache();
 	}
 
+	public void setResource(Context ctx)
+	{
+		mResources = ctx.getResources();
+	}
+	
 	public void loadImage(String data, boolean rounded, ImageView imageView)
 	{
 		String key = data + (rounded ? ROUND_SUFFIX : "");

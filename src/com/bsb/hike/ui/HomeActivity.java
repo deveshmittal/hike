@@ -1139,8 +1139,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
 				null);
-		myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
+		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(
 				msisdn, true);
+//		myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
+//				msisdn, true);
 
 		optionsList
 				.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));

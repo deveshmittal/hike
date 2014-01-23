@@ -576,8 +576,9 @@ public class HikeNotification {
 				.getBoolean(HikeConstants.LED_PREF, true);
 
 		final int smallIconId = returnSmallIcon();
-		final Drawable avatarDrawable = IconCacheManager.getInstance()
-				.getIconForMSISDN(msisdn);
+		final Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+//		final Drawable avatarDrawable = IconCacheManager.getInstance()
+//				.getIconForMSISDN(msisdn);
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
 				(Utils.drawableToBitmap(avatarDrawable)), context);
 
@@ -724,8 +725,10 @@ public class HikeNotification {
 
 		final int smallIconId = returnSmallIcon();
 
-		final Drawable avatarDrawable = IconCacheManager.getInstance()
-				.getIconForMSISDN(contactInfo.getMsisdn());
+		final Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(contactInfo.getMsisdn());
+
+//		final Drawable avatarDrawable = IconCacheManager.getInstance()
+//				.getIconForMSISDN(contactInfo.getMsisdn());
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap(
 				(Utils.drawableToBitmap(avatarDrawable)), context);
 		final int notificationId = convMessage.getMsisdn().hashCode(); // group the

@@ -726,8 +726,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		if (mActivityState.profileBitmap == null) {
-			mIconView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(msisdn, true));
+			mIconView.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true));
+//			mIconView.setImageDrawable(IconCacheManager.getInstance()
+//					.getIconForMSISDN(msisdn, true));
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}

@@ -7,16 +7,23 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Utils;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
@@ -32,7 +39,7 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 
 	// Constants to easily toggle various caches
 	private static final boolean DEFAULT_MEM_CACHE_ENABLED = true;
-	
+
 	private static HikeLruCache instance;
 
 	/**
@@ -55,11 +62,12 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		{
 			this.memCacheSize = memCacheSize;
 		}
+
 		public ImageCacheParams()
 		{
-			
+
 		}
-		
+
 		/**
 		 * Sets the memory cache size based on a percentage of the max available VM memory. Eg. setting percent to 0.2 would set the memory cache to one fifth of the available
 		 * memory. Throws {@link IllegalArgumentException} if percent is < 0.01 or > .8. memCacheSize is stored in kilobytes instead of bytes as this will eventually be passed to
@@ -101,7 +109,7 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Get the size in bytes of a bitmap in a BitmapDrawable. Note that from Android 4.4 (KitKat) onward this returns the allocated memory size of the bitmap which can be larger
 	 * than the actual bitmap data byte count (in the case it was re-used).
@@ -129,7 +137,7 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		// Pre HC-MR1
 		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
-	
+
 	/**
 	 * Measure item size in kilobytes rather than units which is more practical for a bitmap cache
 	 */
@@ -139,7 +147,7 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		final int bitmapSize = getBitmapSize(value) / 1024;
 		return bitmapSize == 0 ? 1 : bitmapSize;
 	}
-	
+
 	@Override
 	protected void entryRemoved(boolean evicted, String key, RecyclingBitmapDrawable oldValue, RecyclingBitmapDrawable newValue)
 	{
@@ -154,7 +162,7 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 			}
 		}
 	}
-	
+
 	public RecyclingBitmapDrawable putInCache(String data, RecyclingBitmapDrawable value)
 	{
 		if (null != value)
@@ -164,8 +172,8 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		}
 		return null;
 	}
-	
-	/** 
+
+	/**
 	 * @param options
 	 *            - BitmapFactory.Options with out* options populated
 	 * @return Bitmap that case be used for inBitmap
@@ -233,7 +241,7 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		int byteCount = width * height * getBytesPerPixel(candidate.getBitmap().getConfig());
 		return byteCount <= candidate.getBitmap().getAllocationByteCount();
 	}
-	
+
 	/**
 	 * Return the byte usage per pixel of a bitmap based on its configuration.
 	 * 
@@ -261,21 +269,56 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		}
 		return 1;
 	}
-	
+
+	protected Resources mResources;
+
 	/**
 	 * 
 	 * @param key
-	 * @return
-	 * This method is synchronous method and can call db if image is not found in cache
+	 * @return This method is synchronous method and can call db if image is not found in cache
 	 */
 	public BitmapDrawable getIconFromCache(String key)
 	{
+		return getIconFromCache(key,false);
+	}
+
+	public BitmapDrawable getIconFromCache(String key,boolean rounded)
+	{
 		RecyclingBitmapDrawable b = get(key);
-		if(b == null)
+		if (b == null)
 		{
-			return (BitmapDrawable)HikeUserDatabase.getInstance().getIcon(key, false);
+			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
+			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
+			putInCache(key, rbd);
+			return rbd;
 		}
 		else
 			return b;
+	}
+	
+	public void deleteIconForMSISDN(String msisdn)
+	{
+		HikeUserDatabase.getInstance().removeIcon(msisdn);
+		clearIconForMSISDN(msisdn);
+	}
+
+	public void clearIconForMSISDN(String msisdn)
+	{
+		remove(msisdn);
+		remove(msisdn);
+		remove(msisdn + IconLoader.ROUND_SUFFIX);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+	}
+
+	public void clearIconCache()
+	{
+		evictAll();
+	}
+
+	public Drawable getSticker(Context ctx, String path)
+	{
+		RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(ctx.getResources(),BitmapFactory.decodeFile(path));
+		putInCache(path, rbd);
+		return rbd;
 	}
 }

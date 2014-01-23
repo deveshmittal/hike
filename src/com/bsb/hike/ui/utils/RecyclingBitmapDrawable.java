@@ -41,6 +41,12 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 		super(res, bitmap);
 	}
 
+	@SuppressWarnings("deprecation")
+	public RecyclingBitmapDrawable(Bitmap bitmap)
+	{
+		super(bitmap);
+	}
+	
 	/**
 	 * Notify the drawable that the displayed state has changed. Internally a count is kept so that the drawable knows when it is no longer being displayed.
 	 * 

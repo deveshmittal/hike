@@ -33,6 +33,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -81,8 +82,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private String queryText;
 	private boolean lastSeenPref;
 	private boolean showSMSContacts;
+	private IconLoader iconloader;
 
 	public FriendsAdapter(final Context context) {
+		this.iconloader = new IconLoader(context,180);
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();
@@ -574,8 +577,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
-			avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar);
+			
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
 					.getMsisdn() : contactInfo.getName());
 

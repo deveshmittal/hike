@@ -49,6 +49,7 @@ import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -549,7 +550,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		HikeMqttPersistence.init(this);
 		SmileyParser.init(this);
-		IconCacheManager.init();
 
 		String twitterToken = settings.getString(
 				HikeMessengerApp.TWITTER_TOKEN, "");
@@ -702,7 +702,7 @@ public class HikeMessengerApp extends Application implements Listener {
 		params.setMemCacheSizePercent(0.25f);
 		cache = new HikeLruCache(params);
 	}
-
+	
 	public static HikeLruCache getLruCache()
 	{
 		return cache;

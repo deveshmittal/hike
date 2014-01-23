@@ -73,6 +73,9 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.LargeStickerLoader;
+import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
@@ -146,9 +149,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private boolean isGroupChat;
 	private ChatTheme chatTheme;
 	private boolean isDefaultTheme = true;
+	private IconLoader iconLoader;
+	private LargeStickerLoader largeStickerLoader;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
+		this.largeStickerLoader = new LargeStickerLoader(context);
+		this.largeStickerLoader.setResource(context);
+		this.iconLoader = new IconLoader(context,180);
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
@@ -512,10 +520,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					 * image which has been removed will be skipped.
 					 */
 					try {
-						imageView.setImageDrawable(IconCacheManager
-								.getInstance().getIconForMSISDN(
-										participantList.get(i), true));
-
+						iconLoader.loadImage(participantList.get(i),true ,imageView);
 						holder.typingAvatarContainer.addView(avatarContainer);
 					} catch (IndexOutOfBoundsException e) {
 
@@ -934,8 +939,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					R.string.xyz_posted_update,
 					Utils.getFirstName(conversation.getLabel())));
 
-			holder.image.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(conversation.getMsisdn(), true));
+			iconLoader.loadImage(conversation.getMsisdn(),true ,holder.image);
 
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(
 					true, context));
@@ -1032,8 +1036,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					|| hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 				if (hikeFile.getThumbnail() == null
 						&& !TextUtils.isEmpty(hikeFile.getFileKey())) {
-					thumbnail = IconCacheManager.getInstance()
-							.getFileThumbnail(hikeFile.getFileKey());
+					thumbnail = HikeMessengerApp.getLruCache().getIconFromCache(hikeFile.getFileKey());
+					
 					if (thumbnail != null) {
 						showThumbnail = true;
 					}
@@ -1292,9 +1296,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				if (stickerImage != null && stickerImage.exists()
 						&& !downloadingSticker) {
 					holder.stickerImage.setVisibility(View.VISIBLE);
-					holder.stickerImage.setImageDrawable(IconCacheManager
-							.getInstance().getSticker(context,
-									stickerImage.getPath()));
+					largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage);
+					//holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context,stickerImage.getPath()));
+//					holder.stickerImage.setImageDrawable(IconCacheManager
+//							.getInstance().getSticker(context,
+//									stickerImage.getPath()));
 				} else {
 					holder.stickerLoader.setVisibility(View.VISIBLE);
 					holder.stickerPlaceholder
@@ -1385,10 +1391,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (!convMessage.isSent()) {
 				if (firstMessageFromParticipant) {
 					holder.image.setVisibility(View.VISIBLE);
-					holder.image.setImageDrawable(IconCacheManager
-							.getInstance().getIconForMSISDN(
-									convMessage.getGroupParticipantMsisdn(),
-									true));
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image);
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				} else {
 					holder.avatarContainer
@@ -2405,5 +2408,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	public void resetPlayerIfRunning() {
 		voiceMessagePlayer.resetPlayer();
+	}
+	
+	public LargeStickerLoader getStickerLoader()
+	{
+		return largeStickerLoader;
+	}
+
+	public IconLoader getIconImageLoader()
+	{
+		return iconLoader;
 	}
 }

@@ -369,6 +369,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
+		if (mAdapter != null) {
+			mAdapter.getStickerLoader().setPauseWork(false);
+			mAdapter.getStickerLoader().setExitTasksEarly(true);
+			mAdapter.getIconImageLoader().setPauseWork(false);
+			mAdapter.getIconImageLoader().setExitTasksEarly(true);
+		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 	}
 
@@ -381,6 +387,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (mAdapter != null) {
+			mAdapter.getStickerLoader().setExitTasksEarly(false);
+			mAdapter.getIconImageLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
+		}
 		/* mark any messages unread as read */
 		setMessagesRead();
 
@@ -1670,7 +1681,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private OnScrollListener getOnScrollListenerForEmmaThread() {
 		return new OnScrollListener() {
 			@Override
-			public void onScrollStateChanged(AbsListView arg0, int arg1) {
+			public void onScrollStateChanged(AbsListView arg0, int scrollState) 
+			{
+				Log.d("ChatThread", "Message Adapter Scrolled");
+				// Pause fetcher to ensure smoother scrolling when flinging
+				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
+				{
+					// Before Honeycomb pause image loading on scroll to help with performance
+					if (!Utils.hasHoneycomb())
+					{
+						if ( mAdapter!= null)
+						{
+							mAdapter.getStickerLoader().setPauseWork(true);
+							mAdapter.getIconImageLoader().setPauseWork(true);
+						}
+					}
+				}
+				else
+				{
+					if (mAdapter != null)
+					{
+						mAdapter.getStickerLoader().setPauseWork(false);
+						mAdapter.getIconImageLoader().setPauseWork(false);
+					}
+				}
 			}
 
 			@Override
@@ -1795,8 +1829,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					0, 0, 0);
 		}
 
-		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(mContactNumber, true));
+		avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber,true));
+		//avatar.setImageDrawable(IconCacheManager.getInstance()
+			//	.getIconForMSISDN(mContactNumber, true));
 		mLabelView.setText(mLabel);
 
 		backContainer.setOnClickListener(new OnClickListener() {
@@ -2269,8 +2304,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 					@Override
 					public void run() {
-						avatar.setImageDrawable(IconCacheManager.getInstance()
-								.getIconForMSISDN(mContactNumber, true));
+						avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true));
+//						avatar.setImageDrawable(IconCacheManager.getInstance()
+//								.getIconForMSISDN(mContactNumber, true));
 					}
 				});
 			}
