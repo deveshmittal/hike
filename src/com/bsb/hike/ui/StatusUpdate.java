@@ -780,6 +780,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	protected void onDestroy() {
+		/*
+		 * We need to unregister all pubsublisteners whenever activity gets
+		 * destroyed. Otherwise reference to this activity gets attached with
+		 * our HikeMessengerApp which doesn't let GC pick up any instance of 
+		 * this activity. So whenever this activity gets destroyed its 
+		 * instance doesn't get cleared from heap.
+		 */
+		HikeMessengerApp.getPubSub().removeListeners(this, pubsubListeners);
 		super.onDestroy();
 		if (progressDialog != null) {
 			progressDialog.dismiss();
