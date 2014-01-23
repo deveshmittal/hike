@@ -737,6 +737,10 @@
 	<string name="apply">Apply</string>
 	<string name="chat_theme_tip">The chat theme will change for you and your friend</string>
 	<string name="chat_theme_tip_group">The chat theme will change for the group</string>		
+<<<<<<< HEAD
 	<string name="One">1</string>
 	<string name="Two">2</string>
+=======
+	<string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>		
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 </resources>

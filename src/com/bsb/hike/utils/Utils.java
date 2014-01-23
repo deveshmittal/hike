@@ -151,6 +151,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -1197,6 +1198,13 @@ public class Utils {
 		options.inJustDecodeBounds = false;
 
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		/*
+		 * Should only happen when the external storage does not have enough
+		 * free space
+		 */
+		if (thumbnail == null) {
+			return null;
+		}
 		if (makeSquareThumbnail) {
 			return makeSquareThumbnail(thumbnail, dimensionLimit);
 		}
@@ -1451,12 +1459,6 @@ public class Utils {
 		}
 		int minStatusOrdinal;
 		int maxStatusOrdinal;
-		// No need to change the message state for typing notifications
-		if (HikeConstants.IS_TYPING.equals(convMessage.getMessage())
-				&& convMessage.getMsgID() == -1
-				&& convMessage.getMappedMsgID() == -1) {
-			return false;
-		}
 		if (stateOrdinal <= State.SENT_DELIVERED_READ.ordinal()) {
 			minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
 			maxStatusOrdinal = stateOrdinal;
@@ -2558,7 +2560,7 @@ public class Utils {
 		case CHAT_BG_FTUE:
 			container.setBackgroundResource(R.drawable.bg_tip_top_right);
 			tipText.setText(R.string.chat_bg_ftue_tip);
-			break;	
+			break;
 		}
 		if (closeTip != null) {
 			closeTip.setOnClickListener(new OnClickListener() {
@@ -2967,9 +2969,8 @@ public class Utils {
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
-		Drawable d = IconCacheManager.getInstance().getIconForMSISDN(
-				conv.getMsisdn());
-		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+		//Drawable d = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
+		Bitmap bitmap = HikeMessengerApp.getLruCache().getIconFromCache(conv.getMsisdn()).getBitmap();
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
@@ -3196,6 +3197,14 @@ public class Utils {
 		return returnVal;
 	}
 
+	public static Intent getHomeActivityIntent(Context context,
+			final int tabIndex) {
+		final Intent intent = new Intent(context, HomeActivity.class);
+		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+
+		return intent;
+	}
+
 	public static void addCommonDeviceDetails(JSONObject jsonObject,
 			Context context) throws JSONException {
 		int height = context.getResources().getDisplayMetrics().heightPixels;
@@ -3229,5 +3238,48 @@ public class Utils {
 		convMessage.setSMS(!isOnhike);
 
 		return convMessage;
+	}
+	
+	public static boolean canInBitmap()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+	
+	public static boolean hasFroyo()
+	{
+		// Can use static final constants like FROYO, declared in later versions
+		// of the OS since they are inlined at compile time. This is guaranteed
+		// behavior.
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
+	}
+
+	public static boolean hasGingerbread()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
+	}
+
+	public static boolean hasHoneycomb()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+
+	public static boolean hasHoneycombMR1()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1;
+	}
+
+	public static boolean hasJellyBean()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+	}
+
+	public static boolean hasKitKat()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	}
+	
+	public static boolean hasEnoughFreeSpaceForProfilePic() {
+		double freeSpaceAvailable = getFreeSpace();
+		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
 	}
 }

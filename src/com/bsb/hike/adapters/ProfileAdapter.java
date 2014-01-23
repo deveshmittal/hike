@@ -19,6 +19,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -32,6 +33,8 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -52,8 +55,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private boolean groupProfile;
 	private boolean myProfile;
 	private boolean isContactBlocked;
-	private ImageLoader imageLoader;
 	private boolean lastSeenPref;
+	private IconLoader iconLoader;
+	private TimelineImageLoader bigPicImageLoader;
 
 	public ProfileAdapter(ProfileActivity profileActivity,
 			List<ProfileItem> itemList, GroupConversation groupConversation,
@@ -73,9 +77,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		this.groupConversation = groupConversation;
 		this.myProfile = myProfile;
 		this.isContactBlocked = isContactBlocked;
-		this.imageLoader = new ImageLoader(context);
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
 				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		this.iconLoader = new IconLoader(context,180);
+		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
 	}
 
 	@Override
@@ -240,7 +246,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null) {
-				imageLoader.loadImage(msisdn, viewHolder.image);
+				bigPicImageLoader.loadImage(msisdn, viewHolder.image);
 			} else {
 				viewHolder.image.setImageBitmap(profilePreview);
 			}
@@ -381,8 +387,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						avatarFrame
 								.setImageResource(R.drawable.frame_avatar_medium_selector);
 					}
-					avatar.setImageDrawable(IconCacheManager.getInstance()
-							.getIconForMSISDN(contactInfo.getMsisdn(), true));
+					iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar);
 
 					groupParticipantParentView
 							.setOnLongClickListener(profileActivity);
@@ -431,8 +436,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						.get(statusMessage.getMoodId()));
 				viewHolder.iconFrame.setVisibility(View.GONE);
 			} else {
-				viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
-						.getIconForMSISDN(statusMessage.getMsisdn(), true));
+				iconLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.icon);
 				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
@@ -444,18 +448,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 			viewHolder.subText
 					.setText(R.string.status_profile_pic_notification);
-
-			viewHolder.icon
-					.setImageDrawable(IconCacheManager.getInstance()
-							.getIconForMSISDN(
-									profilePicStatusUpdate.getMsisdn(), true));
+			iconLoader.loadImage(profilePicStatusUpdate.getMsisdn(), true, viewHolder.icon);
 
 			ImageViewerInfo imageViewerInfo2 = new ImageViewerInfo(
 					profilePicStatusUpdate.getMappedId(), null, true);
 
 			viewHolder.image.setTag(imageViewerInfo2);
 
-			imageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
+			bigPicImageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
 					viewHolder.image);
 
 			viewHolder.timeStamp.setText(profilePicStatusUpdate
@@ -504,8 +504,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		case REQUEST:
 			String contactFirstName = mContactInfo.getFirstName();
 
-			viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(mContactInfo.getMsisdn(), true));
+			iconLoader.loadImage(mContactInfo.getMsisdn(), true, viewHolder.icon);
 
 			viewHolder.text.setText(contactFirstName);
 
@@ -628,14 +627,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		return isContactBlocked;
 	}
 
-	public void stopImageLoaderThread() {
-		if (imageLoader == null) {
-			return;
-		}
-		imageLoader.interruptThread();
+
+	public TimelineImageLoader getTimelineImageLoader()
+	{
+		return bigPicImageLoader;
 	}
 
-	public void restartImageLoaderThread() {
-		imageLoader = new ImageLoader(context);
+	public IconLoader getIconImageLoader()
+	{
+		return iconLoader;
 	}
 }

@@ -62,7 +62,7 @@ public class IconCacheManager {
 	private HikeConversationsDatabase hCDb;
 	private static IconCacheManager mCacheManager;
 
-	public IconCacheManager() {
+	private IconCacheManager() {
 		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(getCacheSize()));
 		mDb = HikeUserDatabase.getInstance();
 		hCDb = HikeConversationsDatabase.getInstance();
@@ -86,7 +86,7 @@ public class IconCacheManager {
 		}
 	}
 
-	public static void init() {
+	private static void init() {
 		if (mCacheManager == null) {
 			synchronized (IconCacheManager.class) {
 				if (mCacheManager == null) {
@@ -96,7 +96,14 @@ public class IconCacheManager {
 		}
 	}
 
-	public static IconCacheManager getInstance() {
+	private static IconCacheManager getInstance() {
+		if (mCacheManager == null) {
+			synchronized (IconCacheManager.class) {
+				if (mCacheManager == null) {
+					mCacheManager = new IconCacheManager();
+				}
+			}
+		}
 		return mCacheManager;
 	}
 

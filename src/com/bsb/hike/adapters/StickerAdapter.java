@@ -37,6 +37,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
@@ -44,15 +46,9 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter
 {
-
-	private DisplayImageOptions options;
-	
 	private List<StickerCategory> stickerCategoryList;
 
 	private LayoutInflater inflater;
@@ -70,7 +66,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		private TextView downloadingText;
 
 		private Button downloadingFailed;
-		
+
 		private StickerPageAdapter spa;
 
 		public StickerPageObjects(ListView slv, View dp, TextView dt, Button df)
@@ -100,12 +96,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			return downloadingFailed;
 		}
-		
+
 		public void setStickerPageAdapter(StickerPageAdapter sp)
 		{
 			this.spa = sp;
 		}
-		
+
 		public StickerPageAdapter getStickerPageAdapter()
 		{
 			return spa;
@@ -120,19 +116,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		stickerObjMap = Collections.synchronizedMap(new EnumMap<StickerCategoryId, StickerAdapter.StickerPageObjects>(StickerCategoryId.class));
 		registerListener();
 		Log.d(getClass().getSimpleName(), "Sticker Adapter instantiated ....");
-		initDisplayOptions();
-	}
-
-	private void initDisplayOptions()
-	{
-		options = new DisplayImageOptions.Builder()
-		.cacheInMemory(true)
-		.cacheOnDisc(false)
-		.bitmapConfig(Bitmap.Config.RGB_565)
-		.displayer(new SimpleBitmapDisplayer())
-		.imageScaleType(ImageScaleType.IN_SAMPLE_POWER_OF_2)
-		.resetViewBeforeLoading(true)
-		.build();
 	}
 
 	@Override
@@ -186,13 +169,13 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			if (intent.getAction().equals(StickerManager.RECENTS_UPDATED))
 			{
 				StickerPageObjects spo = stickerObjMap.get(StickerCategoryId.recent);
-				if(spo != null)
+				if (spo != null)
 				{
 					final StickerPageAdapter stickerPageAdapter = spo.getStickerPageAdapter();
-					if(stickerPageAdapter != null)
+					if (stickerPageAdapter != null)
 					{
-						Sticker st = (Sticker)intent.getSerializableExtra(StickerManager.RECENT_STICKER_SENT);
-						if(st != null)
+						Sticker st = (Sticker) intent.getSerializableExtra(StickerManager.RECENT_STICKER_SENT);
+						if (st != null)
 						{
 							stickerPageAdapter.updateRecentsList(st);
 							activity.runOnUiThread(new Runnable()
@@ -200,7 +183,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								@Override
 								public void run()
 								{
-									stickerPageAdapter.notifyDataSetChanged();							
+									stickerPageAdapter.notifyDataSetChanged();
 								}
 							});
 						}
@@ -247,11 +230,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					else if (intent.getAction().equals(StickerManager.STICKERS_DOWNLOADED) && DownloadType.NEW_CATEGORY.equals(type))
 					{
 						activity.runOnUiThread(new Runnable()
-						{						
+						{
 							@Override
 							public void run()
 							{
-								initStickers(spo, cat);							
+								initStickers(spo, cat);
 							}
 						});
 					}
@@ -293,6 +276,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private void initStickers(StickerPageObjects spo, final StickerCategory category)
 	{
+		final StickerLoader worker = new StickerLoader(activity);
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);
@@ -301,17 +285,17 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			LinkedHashSet<Sticker> lhs = StickerManager.getInstance().getRecentStickerList();
 
-			/* here using LinkedList as in recents we have to remove the sticker frequently to move it to front
-			 * and in linked list remove operation is faster compared to arraylist
+			/*
+			 * here using LinkedList as in recents we have to remove the sticker frequently to move it to front and in linked list remove operation is faster compared to arraylist
 			 */
 			stickersList = new LinkedList<Sticker>();
 			Iterator<Sticker> it = lhs.iterator();
-			while(it.hasNext())
+			while (it.hasNext())
 			{
 				try
 				{
 					Sticker st = (Sticker) it.next();
-					stickersList.add(0,st);
+					stickersList.add(0, st);
 				}
 				catch (Exception e)
 				{
@@ -366,7 +350,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			viewTypeList.add(ViewType.DOWNLOADING_MORE);
 		}
-		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList,options);
+		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList, worker);
 		spo.setStickerPageAdapter(stickerPageAdapter);
 		spo.getStickerListView().setAdapter(stickerPageAdapter);
 		spo.getStickerListView().setOnScrollListener(new OnScrollListener()
@@ -374,6 +358,19 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState)
 			{
+				// Pause fetcher to ensure smoother scrolling when flinging
+				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
+				{
+					// Before Honeycomb pause image loading on scroll to help with performance
+					if (!Utils.hasHoneycomb())
+					{
+						worker.setPauseWork(true);
+					}
+				}
+				else
+				{
+					worker.setPauseWork(false);
+				}
 			}
 
 			@Override
@@ -392,7 +389,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					{
 						Log.d(getClass().getSimpleName(), "Downloading more stickers " + category.categoryId.name());
 						// if downloading more is not already inserted, then only insert that view
-						if(!viewTypeList.get(viewTypeList.size() - 1).equals(ViewType.DOWNLOADING_MORE))
+						if (!viewTypeList.get(viewTypeList.size() - 1).equals(ViewType.DOWNLOADING_MORE))
 							viewTypeList.add(ViewType.DOWNLOADING_MORE);
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS, stickerPageAdapter);
 

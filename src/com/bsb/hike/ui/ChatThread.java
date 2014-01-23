@@ -373,6 +373,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
+		if (mAdapter != null) {
+			mAdapter.getStickerLoader().setPauseWork(false);
+			mAdapter.getStickerLoader().setExitTasksEarly(true);
+			mAdapter.getIconImageLoader().setPauseWork(false);
+			mAdapter.getIconImageLoader().setExitTasksEarly(true);
+		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 	}
 
@@ -385,6 +391,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (mAdapter != null) {
+			mAdapter.getStickerLoader().setExitTasksEarly(false);
+			mAdapter.getIconImageLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
+		}
 		/* mark any messages unread as read */
 		setMessagesRead();
 
@@ -602,6 +613,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	public void onBackPressed() {
 		if (attachmentWindow != null && attachmentWindow.isShowing()) {
 			attachmentWindow.dismiss();
+			attachmentWindow = null;
 			return;
 		}
 
@@ -852,12 +864,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 
-		final PopupWindow overFlowWindow = new PopupWindow(this);
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
+
+		attachmentWindow = new PopupWindow(this);
 
 		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu,
 				chatLayout, false);
 
-		overFlowWindow.setContentView(parentView);
+		attachmentWindow.setContentView(parentView);
 
 		ListView overFlowListView = (ListView) parentView
 				.findViewById(R.id.overflow_menu_list);
@@ -899,7 +915,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-				overFlowWindow.dismiss();
+				attachmentWindow.dismiss();
 				OverFlowMenuItem item = (OverFlowMenuItem) adapterView
 						.getItemAtPosition(position);
 
@@ -935,25 +951,33 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		});
 
-		overFlowWindow.setBackgroundDrawable(getResources().getDrawable(
+		attachmentWindow.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss() {
+				attachmentWindow = null;
+			}
+		});
+
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(
 				android.R.color.transparent));
-		overFlowWindow.setOutsideTouchable(true);
-		overFlowWindow.setFocusable(true);
-		overFlowWindow.setWidth(getResources().getDimensionPixelSize(
+		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(getResources().getDimensionPixelSize(
 				R.dimen.overflow_menu_width));
-		overFlowWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
 		/*
 		 * In some devices Activity crashes and a BadTokenException is thrown by
 		 * showAsDropDown method. Still need to find out exact repro of the bug.
 		 */
 		try {
-			overFlowWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
 		} catch (BadTokenException e) {
 			Log.e(getClass().getSimpleName(),
 					"Excepetion in HomeActivity Overflow popup", e);
 		}
-		overFlowWindow.getContentView().setFocusableInTouchMode(true);
-		overFlowWindow.getContentView().setOnKeyListener(
+		attachmentWindow.getContentView().setFocusableInTouchMode(true);
+		attachmentWindow.getContentView().setOnKeyListener(
 				new View.OnKeyListener() {
 					@Override
 					public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -1415,7 +1439,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		if (showKeyboard && !wasOrientationChanged)
 			getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+					WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
 		setupActionBar(true);
 
@@ -1685,7 +1709,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private OnScrollListener getOnScrollListenerForEmmaThread() {
 		return new OnScrollListener() {
 			@Override
-			public void onScrollStateChanged(AbsListView arg0, int arg1) {
+			public void onScrollStateChanged(AbsListView arg0, int scrollState) 
+			{
+				Log.d("ChatThread", "Message Adapter Scrolled");
+				// Pause fetcher to ensure smoother scrolling when flinging
+				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
+				{
+					// Before Honeycomb pause image loading on scroll to help with performance
+					if (!Utils.hasHoneycomb())
+					{
+						if ( mAdapter!= null)
+						{
+							mAdapter.getStickerLoader().setPauseWork(true);
+							mAdapter.getIconImageLoader().setPauseWork(true);
+						}
+					}
+				}
+				else
+				{
+					if (mAdapter != null)
+					{
+						mAdapter.getStickerLoader().setPauseWork(false);
+						mAdapter.getIconImageLoader().setPauseWork(false);
+					}
+				}
 			}
 
 			@Override
@@ -1810,8 +1857,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					0, 0, 0);
 		}
 
-		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(mContactNumber, true));
+		avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber,true));
+		//avatar.setImageDrawable(IconCacheManager.getInstance()
+			//	.getIconForMSISDN(mContactNumber, true));
 		mLabelView.setText(mLabel);
 
 		backContainer.setOnClickListener(new OnClickListener() {
@@ -2284,8 +2332,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 					@Override
 					public void run() {
-						avatar.setImageDrawable(IconCacheManager.getInstance()
-								.getIconForMSISDN(mContactNumber, true));
+						avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true));
+//						avatar.setImageDrawable(IconCacheManager.getInstance()
+//								.getIconForMSISDN(mContactNumber, true));
 					}
 				});
 			}
@@ -2731,6 +2780,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (smsCount == null) {
 			smsCount = (TextView) findViewById(R.id.sms_counter);
 		}
+		smsCount.setBackgroundColor(getResources().getColor(
+				mAdapter.isDefaultTheme() ? R.color.updates_text
+						: R.color.chat_thread_indicator_bg_custom_theme));
 		smsCount.setAnimation(slideUp);
 		smsCount.setVisibility(View.VISIBLE);
 		smsCount.setText(mCredits + " " + getString(R.string.sms_left));
@@ -2948,7 +3000,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				isMuted ? View.VISIBLE : View.GONE);
 	}
 
+	private void setMuteViewBackground() {
+		findViewById(R.id.conversation_mute)
+				.setBackgroundColor(
+						getResources()
+								.getColor(
+										mAdapter.isDefaultTheme() ? R.color.updates_text
+												: R.color.chat_thread_indicator_bg_custom_theme));
+	}
+
 	private void showThemePicker() {
+
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -3015,6 +3080,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				setupActionBar(false);
 				showingChatThemePicker = false;
 				invalidateOptionsMenu();
+
+				attachmentWindow = null;
 			}
 		});
 
@@ -3080,6 +3147,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		chatLayout.setBackgroundDrawable(backgroundDrawable);
 		mAdapter.setChatTheme(chatTheme);
+
+		setMuteViewBackground();
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getResources().getDrawable(
@@ -3195,6 +3264,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 		if (canShareContacts) {
 			optionImagesList.add(R.drawable.ic_attach_contact);
+		}
+
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
 		}
 
 		attachmentWindow = new PopupWindow(this);
@@ -3351,6 +3424,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
 				editor.commit();
 				startActivityForResult(chooserIntent, requestCode);
+			}
+		});
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss() {
+				attachmentWindow.dismiss();
 			}
 		});
 

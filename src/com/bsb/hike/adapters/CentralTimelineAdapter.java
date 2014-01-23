@@ -34,6 +34,8 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
@@ -53,7 +55,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
-	private ImageLoader imageLoader;
+	private int mBigImageSize;
+	private TimelineImageLoader bigPicImageLoader;
+	private IconLoader iconImageLoader;
 	private LayoutInflater inflater;
 
 	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
@@ -76,9 +80,11 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	public CentralTimelineAdapter(Context context,
 			List<StatusMessage> statusMessages, String userMsisdn) {
 		this.context = context;
+		mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
-		this.imageLoader = new ImageLoader(context);
+		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
+		this.iconImageLoader = new IconLoader(context,180);
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
@@ -250,9 +256,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 								.get(statusMessage.getMoodId()));
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else {
-				viewHolder.avatar.setImageDrawable(IconCacheManager
-						.getInstance().getIconForMSISDN(
-								statusMessage.getMsisdn(), true));
+				iconImageLoader.loadImage(statusMessage.getMsisdn(),true,
+						viewHolder.avatar);
 				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 			viewHolder.name
@@ -370,7 +375,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
-					imageLoader.loadImage(protip.getMappedId(),
+					bigPicImageLoader.loadImage(protip.getMappedId(),
 							viewHolder.statusImg);
 					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
@@ -401,8 +406,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			viewHolder.avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(statusMessage.getMsisdn(), true));
+			iconImageLoader.loadImage(statusMessage.getMsisdn(),true,
+					viewHolder.avatar);
 			viewHolder.name
 					.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
 							: statusMessage.getNotNullName());
@@ -418,7 +423,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			/*
 			 * Fetch larger image
 			 */
-			imageLoader.loadImage(statusMessage.getMappedId(),
+			bigPicImageLoader.loadImage(statusMessage.getMappedId(),
 					viewHolder.largeProfilePic);
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
@@ -456,8 +461,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				TextView addBtn = (TextView) parentView
 						.findViewById(R.id.invite_btn);
 
-				avatar.setImageDrawable(IconCacheManager.getInstance()
-						.getIconForMSISDN(contactInfo.getMsisdn(), true));
+				iconImageLoader.loadImage(contactInfo.getMsisdn(),true,
+						avatar);
 				name.setText(contactInfo.getName());
 
 				addBtn.setTag(contactInfo);
@@ -666,17 +671,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		}
 	};
 
-	public void stopImageLoaderThread() {
-		if (imageLoader == null) {
-			return;
-		}
-		imageLoader.interruptThread();
-	}
-
-	public void restartImageLoaderThread() {
-		imageLoader = new ImageLoader(context);
-	}
-
 	/**
 	 * @return the protipIndex
 	 */
@@ -690,5 +684,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	 */
 	public void setProtipIndex(int protipIndex) {
 		this.protipIndex = protipIndex;
+	}
+
+	public TimelineImageLoader getTimelineImageLoader()
+	{
+		return bigPicImageLoader;
+	}
+
+	public IconLoader getIconImageLoader()
+	{
+		return iconImageLoader;
 	}
 }

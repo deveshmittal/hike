@@ -79,7 +79,13 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
+<<<<<<< HEAD
 import com.bsb.hike.models.utils.IconCacheManager;
+=======
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.StickerLoader;
+import com.bsb.hike.tasks.DownloadFileTask;
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
@@ -212,9 +218,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private ChatTheme chatTheme;
 
 	private boolean isDefaultTheme = true;
+	private IconLoader iconLoader;
+	private StickerLoader largeStickerLoader;
 
+<<<<<<< HEAD
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
+=======
+	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
+			Conversation conversation, ChatThread chatThread) {
+		this.largeStickerLoader = new StickerLoader(context);
+		this.iconLoader = new IconLoader(context,180);
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
@@ -233,8 +248,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		notifyDataSetChanged();
 	}
 
+<<<<<<< HEAD
 	public void addMessage(ConvMessage convMessage)
 	{
+=======
+	public boolean isDefaultTheme() {
+		return isDefaultTheme;
+	}
+
+	public void addMessage(ConvMessage convMessage) {
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent())
 		{
@@ -1023,6 +1046,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 * This case should ideally only happen when downloading a picasa image or the thumbnail for a location. In that case we won't have a thumbnail initially while
 					 * the image is being downloaded.
 					 */
+<<<<<<< HEAD
 					holder.loadingThumb.setVisibility(View.VISIBLE);
 					showThumbnail = true;
 				}
@@ -1081,6 +1105,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			holder.fileThumb.setScaleType(ScaleType.CENTER);
 			holder.fileThumb.setLayoutParams(fileThumbParams);
+=======
+					try {
+						iconLoader.loadImage(participantList.get(i),true ,imageView);
+						holder.typingAvatarContainer.addView(avatarContainer);
+					} catch (IndexOutOfBoundsException e) {
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting and Showing MessageTextView
 			if (hikeFileType == HikeFileType.AUDIO_RECORDING)
@@ -1467,6 +1497,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 
+<<<<<<< HEAD
 			if (showTip)
 			{
 				chatThread.tipView = v.findViewById(R.id.status_tip);
@@ -1476,6 +1507,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				v.findViewById(R.id.status_tip).setVisibility(View.GONE);
+=======
+			if (isDefaultTheme) {
+				holder.hikeSmsText.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.regularSmsText.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.sms_choice_unselected));
+				holder.smsToggle
+						.setButtonDrawable(R.drawable.sms_checkbox);
+				v.setBackgroundResource(R.drawable.bg_sms_toggle);
+			} else {
+				holder.hikeSmsText.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.regularSmsText.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.smsToggle
+						.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
+				v.setBackgroundResource(R.drawable.bg_sms_toggle_custom_theme);
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 			}
 
 			return v;
@@ -1748,6 +1801,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				((ViewGroup) holder.container).addView(mainMessage);
 			}
 			return v;
+<<<<<<< HEAD
 		}
 
 		if (convMessage.isSent() && holder.messageContainer != null)
@@ -1756,6 +1810,421 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (chatTheme == ChatTheme.DEFAULT)
 			{
 				holder.messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+=======
+		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
+			if (isDefaultTheme) {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_subtext));
+				holder.messageInfo.setTextColor(context.getResources()
+						.getColor(R.color.timestampcolor));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.list_item_header));
+				holder.container
+						.setBackgroundResource(R.drawable.bg_status_chat_thread);
+			} else {
+				holder.dayTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageInfo.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.messageTextView.setTextColor(context.getResources()
+						.getColor(R.color.white));
+				holder.container
+						.setBackgroundResource(R.drawable.bg_status_chat_thread_custom_theme);
+			}
+
+			StatusMessage statusMessage = convMessage.getMetadata()
+					.getStatusMessage();
+
+			holder.dayTextView.setText(context.getString(
+					R.string.xyz_posted_update,
+					Utils.getFirstName(conversation.getLabel())));
+
+			iconLoader.loadImage(conversation.getMsisdn(),true ,holder.image);
+
+			holder.messageInfo.setText(statusMessage.getTimestampFormatted(
+					true, context));
+
+			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
+				SmileyParser smileyParser = SmileyParser.getInstance();
+				holder.messageTextView.setText(smileyParser.addSmileySpans(
+						statusMessage.getText(), true));
+				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				holder.messageTextView.setText(R.string.changed_profile);
+			}
+
+			if (statusMessage.hasMood()) {
+				holder.image.setImageResource(EmoticonConstants.moodMapping
+						.get(statusMessage.getMoodId()));
+				holder.avatarFrame.setVisibility(View.GONE);
+			} else {
+				holder.avatarFrame.setVisibility(View.VISIBLE);
+			}
+
+			holder.container.setTag(convMessage);
+			holder.container.setOnClickListener(this);
+
+			boolean showTip = false;
+			boolean shownStatusTip = preferences.getBoolean(
+					HikeMessengerApp.SHOWN_STATUS_TIP, false);
+
+			if (!shownStatusTip) {
+				if (chatThread.tipView == null) {
+					showTip = true;
+				} else {
+					TipType tipType = (TipType) chatThread.tipView.getTag();
+					if (tipType == TipType.STATUS
+							&& statusMessage.getMappedId().equals(
+									statusIdForTip)) {
+						showTip = true;
+					}
+				}
+			}
+
+			if (showTip) {
+				chatThread.tipView = v.findViewById(R.id.status_tip);
+				statusIdForTip = statusMessage.getMappedId();
+				Utils.showTip(chatThread, TipType.STATUS, chatThread.tipView,
+						Utils.getFirstName(conversation.getLabel()));
+			} else {
+				v.findViewById(R.id.status_tip).setVisibility(View.GONE);
+			}
+
+			return v;
+		}
+
+		if (holder.poke != null) {
+			holder.poke.setVisibility(View.GONE);
+			holder.pokeCustom.setVisibility(View.GONE);
+		}
+
+		boolean firstMessageFromParticipant = false;
+		if (isGroupChat
+				&& !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn())) {
+			if (position != 0) {
+				ConvMessage previous = getItem(position - 1);
+				if (previous.getParticipantInfoState() != ParticipantInfoState.NO_INFO
+						|| !convMessage.getGroupParticipantMsisdn().equals(
+								previous.getGroupParticipantMsisdn())) {
+					firstMessageFromParticipant = true;
+				}
+			} else {
+				firstMessageFromParticipant = true;
+			}
+		}
+
+		MessageMetadata metadata = convMessage.getMetadata();
+
+		holder.stickerPlaceholder.setVisibility(View.GONE);
+
+		if (convMessage.isFileTransferMessage()) {
+			holder.circularProgress
+					.setProgressColor(context
+							.getResources()
+							.getColor(
+									isDefaultTheme ? R.color.progress_colour_default_theme
+											: R.color.white));
+
+			final HikeFile hikeFile = metadata.getHikeFiles().get(0);
+			HikeFileType hikeFileType = hikeFile.getHikeFileType();
+
+			boolean showThumbnail = ((convMessage.isSent())
+					|| (conversation instanceof GroupConversation)
+					|| (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
+					.wasFileDownloaded() && !HikeMessengerApp.fileTransferTaskMap
+					.containsKey(convMessage.getMsgID())))
+					&& (hikeFile.getThumbnail() != null)
+					&& (hikeFileType != HikeFileType.UNKNOWN);
+
+			Drawable thumbnail = null;
+			if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
+					|| hikeFile.getHikeFileType() == HikeFileType.VIDEO
+					|| hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
+				if (hikeFile.getThumbnail() == null
+						&& !TextUtils.isEmpty(hikeFile.getFileKey())) {
+					thumbnail = HikeMessengerApp.getLruCache().getIconFromCache(hikeFile.getFileKey());
+					
+					if (thumbnail != null) {
+						showThumbnail = true;
+					}
+				} else {
+					thumbnail = hikeFile.getThumbnail();
+				}
+			}
+
+			if (convMessage.isSent()
+					&& (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
+					&& thumbnail == null) {
+				/*
+				 * This case should ideally only happen when downloading a
+				 * picasa image or the thumbnail for a location. In that case we
+				 * won't have a thumbnail initially while the image is being
+				 * downloaded.
+				 */
+				holder.loadingThumb.setVisibility(View.VISIBLE);
+				holder.fileThumb.setVisibility(View.GONE);
+				showThumbnail = true;
+			} else {
+				if (holder.loadingThumb != null) {
+					holder.loadingThumb.setVisibility(View.GONE);
+					holder.fileThumb.setVisibility(View.VISIBLE);
+				}
+
+				if (showThumbnail) {
+					holder.fileThumb.setBackgroundDrawable(thumbnail);
+				} else {
+					switch (hikeFileType) {
+					case IMAGE:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_img);
+						break;
+					case VIDEO:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_mov);
+						break;
+					case AUDIO:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_audio);
+						break;
+					case CONTACT:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_contact);
+						break;
+					case AUDIO_RECORDING:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_audio_msg_received);
+						break;
+					case UNKNOWN:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_unknown_file);
+						break;
+					}
+				}
+			}
+
+			holder.fileThumb
+					.setImageResource(((hikeFileType == HikeFileType.VIDEO) && (showThumbnail)) ? R.drawable.ic_video_play
+							: 0);
+
+			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
+					.getLayoutParams();
+
+			if (showThumbnail && thumbnail != null) {
+				holder.fileThumb.setScaleType(ScaleType.CENTER);
+				fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
+				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
+						.getIntrinsicHeight());
+				/*
+				 * fixed the bug when imagethumbnail is very big. By specifying
+				 * a maximum width for the thumbnail so that download button can
+				 * also fit to the screen.
+				 */
+				int maxWidth = (int) (250 * Utils.densityMultiplier);
+				fileThumbParams.width = Math.min(fileThumbParams.width,
+						maxWidth);
+			} else {
+				holder.fileThumb.setScaleType(ScaleType.CENTER);
+				fileThumbParams.height = LayoutParams.WRAP_CONTENT;
+				fileThumbParams.width = LayoutParams.WRAP_CONTENT;
+			}
+			holder.fileThumb.setLayoutParams(fileThumbParams);
+
+			holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE
+					: View.GONE);
+
+			if (hikeFileType == HikeFileType.AUDIO_RECORDING) {
+				Utils.setupFormattedTime(holder.messageTextView,
+						hikeFile.getRecordingDuration());
+			} else if (hikeFileType == HikeFileType.UNKNOWN) {
+				holder.messageTextView.setText(context
+						.getString(R.string.unknown_msg));
+			} else {
+				holder.messageTextView.setText(hikeFile.getFileName());
+			}
+
+			if (holder.showFileBtn != null) {
+				if (hikeFile.wasFileDownloaded()
+						&& showThumbnail
+						&& !HikeMessengerApp.fileTransferTaskMap
+								.containsKey(convMessage.getMsgID())) {
+					holder.showFileBtn.setVisibility(View.GONE);
+
+				} else {
+					LayoutParams lp = (LayoutParams) holder.showFileBtn
+							.getLayoutParams();
+					lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL
+							: Gravity.BOTTOM;
+					holder.showFileBtn.setLayoutParams(lp);
+
+					if (hikeFileType == HikeFileType.AUDIO_RECORDING) {
+						holder.showFileBtn.setVisibility(View.VISIBLE);
+						holder.showFileBtn.setBackgroundResource(0);
+						holder.showFileBtn.setImageResource(0);
+						holder.showFileBtn
+								.setScaleType(ScaleType.CENTER_INSIDE);
+						if (hikeFile.getFileKey().equals(
+								voiceMessagePlayer.getFileKey())) {
+
+							if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING) {
+								holder.showFileBtn
+										.setImageResource(R.drawable.ic_pause_audio);
+							} else {
+								holder.showFileBtn
+										.setImageResource(R.drawable.ic_open_received_file);
+							}
+							holder.showFileBtn
+									.setBackgroundResource(R.drawable.bg_red_btn_selector);
+							holder.messageTextView
+									.setTag(hikeFile.getFileKey());
+							voiceMessagePlayer
+									.setDurationTxt(holder.messageTextView);
+						} else {
+							if (!convMessage.isSent()
+									|| !HikeMessengerApp.fileTransferTaskMap
+											.containsKey(convMessage.getMsgID())) {
+								holder.showFileBtn.setVisibility(View.VISIBLE);
+								setFileButtonResource(holder.showFileBtn,
+										convMessage, hikeFile);
+							} else {
+								holder.showFileBtn.setVisibility(View.GONE);
+							}
+						}
+
+					} else {
+						holder.showFileBtn
+								.setVisibility(convMessage.isSent() ? View.GONE
+										: View.VISIBLE);
+						holder.showFileBtn.setBackgroundResource(0);
+						setFileButtonResource(holder.showFileBtn, convMessage,
+								hikeFile);
+					}
+				}
+			}
+			if (holder.marginView != null) {
+				holder.marginView.setVisibility(hikeFile.getThumbnail() == null
+						&& !showThumbnail ? View.VISIBLE : View.GONE);
+			}
+			if (!convMessage.isSent()) {
+				if (firstMessageFromParticipant) {
+					holder.participantNameFT
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+					holder.participantNameFT.setVisibility(View.VISIBLE);
+				} else {
+					holder.participantNameFT.setVisibility(View.GONE);
+				}
+			}
+			holder.messageContainer.setTag(convMessage);
+			holder.messageContainer.setOnClickListener(this);
+			holder.messageContainer.setOnLongClickListener(this);
+		} else if (metadata != null && metadata.isPokeMessage()) {
+			holder.messageTextView.setVisibility(View.GONE);
+			holder.messageContainer.setVisibility(View.VISIBLE);
+			if (!convMessage.isSent()) {
+				if (firstMessageFromParticipant) {
+					holder.participantNameFT.setVisibility(View.VISIBLE);
+					holder.participantNameFT
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+				} else {
+					holder.participantNameFT.setVisibility(View.GONE);
+				}
+			}
+			if (isDefaultTheme) {
+				holder.poke.setVisibility(View.VISIBLE);
+				holder.poke
+						.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
+								: R.drawable.ic_nudge_hike_receive);
+				holder.messageContainer.setVisibility(View.VISIBLE);
+			} else {
+				holder.pokeCustom.setVisibility(View.VISIBLE);
+				holder.pokeCustom
+						.setImageResource(convMessage.isSent() ? chatTheme
+								.sentNudgeResId()
+								: R.drawable.ic_nudge_receive_custom);
+				holder.messageContainer.setVisibility(View.GONE);
+			}
+		} else if (convMessage.isStickerMessage()) {
+			holder.messageContainer.setVisibility(View.GONE);
+			holder.poke.setVisibility(View.GONE);
+			holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+			holder.stickerPlaceholder.setBackgroundResource(0);
+
+			holder.stickerImage.setVisibility(View.GONE);
+			holder.stickerLoader.setVisibility(View.GONE);
+			holder.stickerParticipantName.setVisibility(View.GONE);
+
+			Sticker sticker = metadata.getSticker();
+
+			if (!convMessage.isSent()) {
+				if (firstMessageFromParticipant) {
+					holder.stickerParticipantName.setVisibility(View.VISIBLE);
+					holder.stickerParticipantName
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+				} else {
+					holder.stickerParticipantName.setVisibility(View.GONE);
+				}
+			}
+			/*
+			 * If this is the default category, then the sticker are part of the
+			 * app bundle itself
+			 */
+			if (sticker.getStickerIndex() != -1) {
+				holder.stickerImage.setVisibility(View.VISIBLE);
+				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {
+					holder.stickerImage
+							.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker
+									.getStickerIndex()]);
+				} else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
+					holder.stickerImage
+							.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker
+									.getStickerIndex()]);
+				}
+			} else {
+				String categoryId = sticker.getCategory().categoryId.name();
+				String stickerId = sticker.getStickerId();
+
+				String categoryDirPath = StickerManager.getInstance()
+						.getStickerDirectoryForCategoryId(context, categoryId)
+						+ HikeConstants.LARGE_STICKER_ROOT;
+				File stickerImage = null;
+				if (categoryDirPath != null) {
+					stickerImage = new File(categoryDirPath, stickerId);
+				}
+
+				String key = categoryId + stickerId;
+				boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key); 
+
+				if (stickerImage != null && stickerImage.exists()
+						&& !downloadingSticker) {
+					holder.stickerImage.setVisibility(View.VISIBLE);
+					largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage);
+					//holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context,stickerImage.getPath()));
+//					holder.stickerImage.setImageDrawable(IconCacheManager
+//							.getInstance().getSticker(context,
+//									stickerImage.getPath()));
+				} else {
+					holder.stickerLoader.setVisibility(View.VISIBLE);
+					holder.stickerPlaceholder
+							.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+
+					/*
+					 * Download the sticker if not already downloading.
+					 */
+					if (!downloadingSticker) {
+						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(
+								context, categoryId, stickerId);
+						StickerManager.getInstance().insertTask(key,
+								downloadSingleStickerTask);
+						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
+					}
+				}
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 			}
 			else
 			{
@@ -1792,6 +2261,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 
+<<<<<<< HEAD
 	private boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
 	{
 		boolean ret = false;
@@ -1803,6 +2273,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (previous.getParticipantInfoState() != ParticipantInfoState.NO_INFO || !convMessage.getGroupParticipantMsisdn().equals(previous.getGroupParticipantMsisdn()))
 				{
 					ret = true;
+=======
+		if (convMessage.isFileTransferMessage()
+				&& HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
+						.getMsgID())) {
+			FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
+					.get(convMessage.getMsgID());
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgress.setProgressAngle(fileTransferTask
+					.getProgress());
+
+			if (holder.messageInfo != null) {
+				holder.messageInfo.setVisibility(View.INVISIBLE);
+			}
+			if (holder.sending != null) {
+				holder.sending.setVisibility(View.INVISIBLE);
+			}
+		} else if (convMessage.isFileTransferMessage()
+				&& convMessage.isSent()
+				&& TextUtils.isEmpty(metadata.getHikeFiles().get(0)
+						.getFileKey())) {
+			if (holder.circularProgress != null) {
+				holder.circularProgress.setVisibility(View.INVISIBLE);
+			}
+			holder.image.setVisibility(View.VISIBLE);
+			holder.image
+					.setImageResource(isDefaultTheme ? R.drawable.ic_download_failed
+							: R.drawable.ic_download_failed_custom);
+
+			if (holder.messageInfo != null) {
+				holder.messageInfo.setVisibility(View.INVISIBLE);
+			}
+			if (holder.sending != null) {
+				holder.sending.setVisibility(View.INVISIBLE);
+			}
+		} else {
+			if (holder.circularProgress != null) {
+				holder.circularProgress.setVisibility(View.INVISIBLE);
+			}
+			if (!convMessage.isSent()) {
+				if (firstMessageFromParticipant) {
+					holder.image.setVisibility(View.VISIBLE);
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image);
+					holder.avatarContainer.setVisibility(View.VISIBLE);
+				} else {
+					holder.avatarContainer
+							.setVisibility(isGroupChat ? View.INVISIBLE
+									: View.GONE);
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 				}
 			}
 			else
@@ -2359,6 +2877,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		String text = context.getString(isChecked ? R.string.messaging_my_number : R.string.messaging_hike_number, msisdn);
 		SpannableStringBuilder ssb = new SpannableStringBuilder(text);
 
+<<<<<<< HEAD
 		if (isChecked)
 		{
 			ssb.setSpan(new StyleSpan(Typeface.BOLD), text.indexOf(msisdn), text.indexOf(msisdn) + msisdn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -2376,6 +2895,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			hikeSmsText.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimensionPixelSize(R.dimen.sms_toggle_checked));
 			regularSmsText.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimensionPixelSize(R.dimen.sms_toggle_unchecked));
+=======
+		if (isChecked) {
+			ssb.setSpan(new StyleSpan(Typeface.BOLD), text.indexOf(msisdn),
+					text.indexOf(msisdn) + msisdn.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			hikeSmsText.setTextColor(context.getResources().getColor(
+					isDefaultTheme ? R.color.sms_choice_unselected
+							: R.color.sms_choice_unselected_custom_theme));
+			regularSmsText.setTextColor(context.getResources().getColor(
+					isDefaultTheme ? R.color.sms_choice_selected
+							: R.color.white));
+
+		} else {
+			hikeSmsText.setTextColor(context.getResources().getColor(
+					isDefaultTheme ? R.color.sms_choice_selected
+							: R.color.white));
+			regularSmsText.setTextColor(context.getResources().getColor(
+					isDefaultTheme ? R.color.sms_choice_unselected
+							: R.color.sms_choice_unselected_custom_theme));
+
+>>>>>>> 19b9ca74631b46b24837e2dd020c27a540c38785
 		}
 		smsToggleSubtext.setText(ssb);
 	}
@@ -2931,5 +3472,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void resetPlayerIfRunning()
 	{
 		voiceMessagePlayer.resetPlayer();
+	}
+	
+	public StickerLoader getStickerLoader()
+	{
+		return largeStickerLoader;
+	}
+
+	public IconLoader getIconImageLoader()
+	{
+		return iconLoader;
 	}
 }

@@ -56,8 +56,8 @@
                 android:drawablePadding="10dp"
                 android:text="99 SMS left"
                 android:drawableLeft="@drawable/ic_sms_user"
-                android:textColor="#b3b2ae"
-                android:textSize="13sp"
+                android:textColor="@color/actionbar_text"
+                android:textSize="14sp"
                 android:visibility="invisible" />
 
             <com.bsb.hike.view.CustomFontTextView
@@ -65,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:background="@color/updates_text"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:paddingLeft="18dp"
                 android:text="@string/group_mute"
                 android:textColor="@color/actionbar_text"

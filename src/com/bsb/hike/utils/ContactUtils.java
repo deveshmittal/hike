@@ -219,6 +219,14 @@ public class ContactUtils {
 			phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
 					new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null,
 					null, null);
+			/*
+			 * Added this check for an issue where the cursor is null in some
+			 * random cases (We suspect that happens when hotmail contacts are
+			 * synced.)
+			 */
+			if (phones == null) {
+				return null;
+			}
 
 			int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
 			int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
@@ -477,7 +485,7 @@ public class ContactUtils {
 				phoneContactsCursor.close();
 			}
 			if (otherContactsCursor != null) {
-				phoneContactsCursor.close();
+				otherContactsCursor.close();
 			}
 		}
 	}
