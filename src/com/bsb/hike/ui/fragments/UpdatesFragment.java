@@ -68,7 +68,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 	public void onResume() {
 		super.onResume();
 		if (centralTimelineAdapter != null) {
-			centralTimelineAdapter.restartImageLoaderThread();
+			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(false);
+			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(false);
+			centralTimelineAdapter.notifyDataSetChanged();
 		}
 	}
 
@@ -76,7 +78,10 @@ public class UpdatesFragment extends SherlockListFragment implements
 	public void onPause() {
 		super.onPause();
 		if (centralTimelineAdapter != null) {
-			centralTimelineAdapter.stopImageLoaderThread();
+			centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
+			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(true);
+			centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
+			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}
 
@@ -192,7 +197,29 @@ public class UpdatesFragment extends SherlockListFragment implements
 	}
 
 	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState) {
+	public void onScrollStateChanged(AbsListView view, int scrollState) 
+	{
+		// Pause fetcher to ensure smoother scrolling when flinging
+		if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
+		{
+			// Before Honeycomb pause image loading on scroll to help with performance
+			if (!Utils.hasHoneycomb())
+			{
+				if(centralTimelineAdapter != null)
+				{
+					centralTimelineAdapter.getTimelineImageLoader().setPauseWork(true);
+					centralTimelineAdapter.getIconImageLoader().setPauseWork(true);
+				}
+			}
+		}
+		else
+		{
+			if(centralTimelineAdapter != null)
+			{
+				centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
+				centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
+			}
+		}
 	}
 
 	@Override

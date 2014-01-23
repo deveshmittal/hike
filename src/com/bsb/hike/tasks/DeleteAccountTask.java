@@ -61,7 +61,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 			db.deleteAll();
 			convDb.deleteAll();
-			IconCacheManager.getInstance().clearIconCache();
+			HikeMessengerApp.getLruCache().clearIconCache();
+			//IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			appPrefEditor.clear();
 			Log.d("DeleteAccountTask", "account deleted");

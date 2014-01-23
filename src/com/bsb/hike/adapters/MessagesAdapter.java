@@ -72,7 +72,8 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
@@ -83,6 +84,8 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CircularProgress;
@@ -144,9 +147,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private boolean isGroupChat;
 	private ChatTheme chatTheme;
 	private boolean isDefaultTheme = true;
+	private IconLoader iconLoader;
+	private StickerLoader largeStickerLoader;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
+		this.largeStickerLoader = new StickerLoader(context);
+		this.iconLoader = new IconLoader(context,180);
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
@@ -510,10 +517,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					 * image which has been removed will be skipped.
 					 */
 					try {
-						imageView.setImageDrawable(IconCacheManager
-								.getInstance().getIconForMSISDN(
-										participantList.get(i), true));
-
+						iconLoader.loadImage(participantList.get(i),true ,imageView);
 						holder.typingAvatarContainer.addView(avatarContainer);
 					} catch (IndexOutOfBoundsException e) {
 
@@ -932,8 +936,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					R.string.xyz_posted_update,
 					Utils.getFirstName(conversation.getLabel())));
 
-			holder.image.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(conversation.getMsisdn(), true));
+			iconLoader.loadImage(conversation.getMsisdn(),true ,holder.image);
 
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(
 					true, context));
@@ -1030,8 +1033,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					|| hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 				if (hikeFile.getThumbnail() == null
 						&& !TextUtils.isEmpty(hikeFile.getFileKey())) {
-					thumbnail = IconCacheManager.getInstance()
-							.getFileThumbnail(hikeFile.getFileKey());
+					thumbnail = HikeMessengerApp.getLruCache().getIconFromCache(hikeFile.getFileKey());
+					
 					if (thumbnail != null) {
 						showThumbnail = true;
 					}
@@ -1258,25 +1261,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			}
 			/*
-			 * If this is the first category, then the sticker are a part of the
+			 * If this is the default category, then the sticker are part of the
 			 * app bundle itself
 			 */
 			if (sticker.getStickerIndex() != -1) {
 				holder.stickerImage.setVisibility(View.VISIBLE);
-				if (sticker.getCategoryIndex() == 1) {
+				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {
 					holder.stickerImage
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+							.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker
 									.getStickerIndex()]);
-				} else if (sticker.getCategoryIndex() == 0) {
+				} else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
 					holder.stickerImage
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+							.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker
 									.getStickerIndex()]);
 				}
 			} else {
-				String categoryId = sticker.getCategoryId();
+				String categoryId = sticker.getCategory().categoryId.name();
 				String stickerId = sticker.getStickerId();
 
-				String categoryDirPath = Utils
+				String categoryDirPath = StickerManager.getInstance()
 						.getStickerDirectoryForCategoryId(context, categoryId)
 						+ HikeConstants.LARGE_STICKER_ROOT;
 				File stickerImage = null;
@@ -1285,27 +1288,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 
 				String key = categoryId + stickerId;
-				boolean downloadingSticker = HikeMessengerApp.stickerTaskMap
-						.containsKey(key);
+				boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key); 
 
 				if (stickerImage != null && stickerImage.exists()
 						&& !downloadingSticker) {
 					holder.stickerImage.setVisibility(View.VISIBLE);
-					holder.stickerImage.setImageDrawable(IconCacheManager
-							.getInstance().getSticker(context,
-									stickerImage.getPath()));
+					largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage);
+					//holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context,stickerImage.getPath()));
+//					holder.stickerImage.setImageDrawable(IconCacheManager
+//							.getInstance().getSticker(context,
+//									stickerImage.getPath()));
 				} else {
 					holder.stickerLoader.setVisibility(View.VISIBLE);
 					holder.stickerPlaceholder
 							.setBackgroundResource(R.drawable.bg_sticker_placeholder);
 
 					/*
-					 * Download the sticker if not already downoading.
+					 * Download the sticker if not already downloading.
 					 */
 					if (!downloadingSticker) {
 						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(
 								context, categoryId, stickerId);
-						HikeMessengerApp.stickerTaskMap.put(key,
+						StickerManager.getInstance().insertTask(key,
 								downloadSingleStickerTask);
 						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
 					}
@@ -1384,10 +1388,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (!convMessage.isSent()) {
 				if (firstMessageFromParticipant) {
 					holder.image.setVisibility(View.VISIBLE);
-					holder.image.setImageDrawable(IconCacheManager
-							.getInstance().getIconForMSISDN(
-									convMessage.getGroupParticipantMsisdn(),
-									true));
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image);
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				} else {
 					holder.avatarContainer
@@ -2404,5 +2405,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	public void resetPlayerIfRunning() {
 		voiceMessagePlayer.resetPlayer();
+	}
+	
+	public StickerLoader getStickerLoader()
+	{
+		return largeStickerLoader;
+	}
+
+	public IconLoader getIconImageLoader()
+	{
+		return iconLoader;
 	}
 }

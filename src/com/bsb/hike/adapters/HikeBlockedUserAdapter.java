@@ -19,6 +19,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Utils;
 
 public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
@@ -26,6 +27,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 
 	private Set<String> blockedUsers;
 	private Activity context;
+	private IconLoader iconLoader;
 
 	private static List<ContactInfo> getItems(Activity activity) {
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
@@ -39,6 +41,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 		this.context = activity;
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		this.blockedUsers = db.getBlockedUsers();
+		iconLoader = new IconLoader(context,180);
 	}
 
 	@Override
@@ -61,8 +64,8 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 		imageView.setPadding(8, 8, 18, 8);
 
 		if (contactInfo.hasCustomPhoto()) {
-			imageView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView);
+
 		} else {
 			imageView.setImageDrawable(Utils.getDefaultIconForUser(context,
 					contactInfo.getMsisdn(), true));

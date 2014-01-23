@@ -93,6 +93,8 @@
 	<color name="doggy_text_shadow">#4D000000</color>
 	<color name="doggy_btn_text_shadow">#4DFFFFFF</color>
 	<color name="doggy_div">#a17233</color>
+	<color name="recent_btn_normal">#dcb36b</color>
+    <color name="recent_btn_pressed">#d5ac64</color>
 	<color name="kitty_bg">#f6b1b5</color>
 	<color name="kitty_btn_normal">#fcc4bd</color>
 	<color name="kitty_btn_pressed">#f8b9b1</color>

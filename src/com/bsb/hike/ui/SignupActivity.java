@@ -73,6 +73,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
@@ -264,7 +265,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				 */
 				String countryCode = accountPrefs.getString(
 						HikeMessengerApp.COUNTRY_CODE, "");
-				HikeMessengerApp.setIndianUser(
+				StickerManager.setStickersForIndianUsers(
 						HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode),
 						accountPrefs);
 
@@ -725,8 +726,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		if (mActivityState.profileBitmap == null) {
-			mIconView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(msisdn, true));
+			mIconView.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true));
+//			mIconView.setImageDrawable(IconCacheManager.getInstance()
+//					.getIconForMSISDN(msisdn, true));
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}

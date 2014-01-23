@@ -309,7 +309,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onResume() {
 		super.onResume();
 		if (profileAdapter != null) {
-			profileAdapter.restartImageLoaderThread();
+			profileAdapter.getTimelineImageLoader().setExitTasksEarly(false);
+			profileAdapter.getIconImageLoader().setExitTasksEarly(false);
+			profileAdapter.notifyDataSetChanged();
 		}
 	}
 
@@ -317,7 +319,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onPause() {
 		super.onPause();
 		if (profileAdapter != null) {
-			profileAdapter.stopImageLoaderThread();
+			profileAdapter.getTimelineImageLoader().setPauseWork(false);
+			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
+			profileAdapter.getIconImageLoader().setPauseWork(false);
+			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}
 
@@ -776,7 +781,29 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState) {
+	public void onScrollStateChanged(AbsListView view, int scrollState)
+	{
+		// Pause fetcher to ensure smoother scrolling when flinging
+		if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
+		{
+			// Before Honeycomb pause image loading on scroll to help with performance
+			if (!Utils.hasHoneycomb())
+			{
+				if (profileAdapter != null)
+				{
+					profileAdapter.getTimelineImageLoader().setPauseWork(true);
+					profileAdapter.getIconImageLoader().setPauseWork(true);
+				}
+			}
+		}
+		else
+		{
+			if (profileAdapter != null)
+			{
+				profileAdapter.getTimelineImageLoader().setPauseWork(false);
+				profileAdapter.getIconImageLoader().setPauseWork(false);
+			}
+		}
 	}
 
 	private void fetchPersistentData() {

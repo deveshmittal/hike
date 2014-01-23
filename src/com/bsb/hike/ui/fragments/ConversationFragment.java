@@ -51,6 +51,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
@@ -106,9 +107,11 @@ public class ConversationFragment extends SherlockListFragment implements
 
 	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo> {
 
+		private IconLoader iconLoader;
 		public FTUEGridAdapter(Context context, int textViewResourceId,
 				List<ContactInfo> objects) {
 			super(context, textViewResourceId, objects);
+			iconLoader = new IconLoader(context,180);
 		}
 
 		@Override
@@ -130,8 +133,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			avatarFrame
 					.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike
 							: R.drawable.frame_avatar_ftue_sms);
-			avatarImage.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage);
+			//avatarImage.setImageDrawable(IconCacheManager.getInstance()
+					//.getIconForMSISDN(contactInfo.getMsisdn(), true));
 			contactName.setText(contactInfo.getFirstName());
 
 			convertView.setTag(contactInfo);

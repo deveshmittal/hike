@@ -787,7 +787,7 @@ public class AccountUtils {
 			IllegalStateException, JSONException {
 
 		JSONObject request = new JSONObject();
-		request.put(HikeConstants.CATEGORY_ID, catId);
+		request.put(StickerManager.CATEGORY_ID, catId);
 		request.put(HikeConstants.STICKER_IDS, existingStickerIds);
 		request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 		request.put(HikeConstants.NUMBER_OF_STICKERS,

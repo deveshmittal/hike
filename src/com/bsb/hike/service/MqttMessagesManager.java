@@ -53,6 +53,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -123,7 +124,8 @@ public class MqttMessagesManager {
 			this.userDb.setIcon(msisdn,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
-			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+			HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+			//IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
 			/*
 			 * Only auto download if the ic packet is not generated due to
@@ -158,7 +160,8 @@ public class MqttMessagesManager {
 			this.userDb.setIcon(groupId,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
-			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
+			HikeMessengerApp.getLruCache().clearIconForMSISDN(groupId);
+			//IconCacheManager.getInstance().clearIconForMSISDN(groupId);
 			autoDownloadGroupImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
@@ -218,7 +221,8 @@ public class MqttMessagesManager {
 					saveStatusMsg(jsonObj, groupId);
 				}
 			} else {
-				IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
+				HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+				//IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
 
 			/*
@@ -661,8 +665,9 @@ public class MqttMessagesManager {
 								Base64.DEFAULT);
 						this.userDb.setIcon(msisdn, profileImageBytes, false);
 
-						IconCacheManager.getInstance().clearIconForMSISDN(
-								msisdn);
+						HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+						//IconCacheManager.getInstance().clearIconForMSISDN(
+								//msisdn);
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.PROFILE_PIC_CHANGED, null);
 					} catch (Exception e) {
@@ -1070,14 +1075,14 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.STICKER.equals(type)) {
 			String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			String categoryId = data.getString(HikeConstants.CATEGORY_ID);
+			String categoryId = data.getString(StickerManager.CATEGORY_ID);
 			if (HikeConstants.ADD_STICKER.equals(subType)) {
 				convDb.stickerUpdateAvailable(categoryId);
-				HikeMessengerApp.setStickerUpdateAvailable(categoryId, true);
+				StickerManager.getInstance().setStickerUpdateAvailable(categoryId, true);
 			} else if (HikeConstants.REMOVE_STICKER.equals(subType)
 					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
 
-				String categoryDirPath = Utils
+				String categoryDirPath = StickerManager.getInstance()
 						.getStickerDirectoryForCategoryId(context, categoryId);
 
 				if (categoryDirPath == null) {
@@ -1099,17 +1104,17 @@ public class MqttMessagesManager {
 					Utils.deleteFile(categoryDir);
 
 					String removedIds = settings.getString(
-							HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
+							StickerManager.REMOVED_CATGORY_IDS, "[]");
 
 					JSONArray removedIdArray = new JSONArray(removedIds);
 					removedIdArray.put(categoryId);
 
 					Editor editor = settings.edit();
-					editor.putString(HikeMessengerApp.REMOVED_CATGORY_IDS,
+					editor.putString(StickerManager.REMOVED_CATGORY_IDS,
 							removedIdArray.toString());
 					editor.commit();
 
-					HikeMessengerApp.setupStickerCategoryList(settings);
+					StickerManager.getInstance().setupStickerCategoryList(settings);
 
 				} else {
 					JSONArray stickerIds = data

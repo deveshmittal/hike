@@ -1340,7 +1340,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			insertRoundedThumbnailData(mDb, msisdn, roundedData);
 		}
-		IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		//IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		HikeMessengerApp.getLruCache().remove(msisdn);
 		ContentValues vals = new ContentValues(2);
 		vals.put(DBConstants.MSISDN, msisdn);
 		vals.put(DBConstants.IMAGE, data);

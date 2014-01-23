@@ -153,7 +153,8 @@ public class DbConversationListener implements Listener {
 			/*
 			 * We remove the icon for a blocked user as well.
 			 */
-			IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
+			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+//			IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, blockObj);
 		} else if (HikePubSub.UNBLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
@@ -350,7 +351,8 @@ public class DbConversationListener implements Listener {
 			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 		} else if (HikePubSub.REMOVE_PROTIP.equals(type)) {
 			String mappedId = (String) object;
-			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
+			HikeMessengerApp.getLruCache().deleteIconForMSISDN(mappedId);
+			//IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
 			mConversationDb.deleteProtip(mappedId);
 
 			sendDismissTipLogEvent(mappedId, null);
@@ -360,7 +362,8 @@ public class DbConversationListener implements Listener {
 			String mappedId = protip.getMappedId();
 			String url = protip.getGameDownlodURL();
 
-			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
+			HikeMessengerApp.getLruCache().deleteIconForMSISDN(mappedId);
+			//IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
 			mConversationDb.deleteProtip(mappedId);
 			sendDismissTipLogEvent(mappedId, url);
 		}

@@ -444,10 +444,9 @@ public class HikeNotification {
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		final Drawable avatarDrawable = IconCacheManager.getInstance()
-				.getIconForMSISDN(msisdn);
+		final Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 		final int smallIconId = returnSmallIcon();
-
+		
 		NotificationCompat.Builder mBuilder;
 		if (bigPictureImage != null) {
 			mBuilder = getNotificationBuilder(key, message, text.toString(),
