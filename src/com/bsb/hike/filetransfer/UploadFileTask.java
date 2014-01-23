@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -76,8 +77,6 @@ public class UploadFileTask extends FileTransferBase
 
 	private boolean isRecipientOnhike;
 
-	private boolean isCreateConvMessage;
-
 	private boolean isRecording;
 
 	private File selectedFile = null;
@@ -92,21 +91,20 @@ public class UploadFileTask extends FileTransferBase
 
 	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
 
-	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
-			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
-	{
-		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType);
-		this.token = token;
-		this.uId = uId;
-		this.msisdn = msisdn;
-		this.fileType = fileType;
-		this.isRecipientOnhike = isRecipientOnHike;
-		this.recordingDuration = recordingDuration;
-		this.isRecording = isRecording;
-		this.isForwardMsg = isForwardMsg;
-		this.isCreateConvMessage = true;
-		this.isRecipientOnhike = isRecipientOnHike;
-	}
+//	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
+//			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
+//	{
+//		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType);
+//		this.token = token;
+//		this.uId = uId;
+//		this.msisdn = msisdn;
+//		this.fileType = fileType;
+//		this.isRecipientOnhike = isRecipientOnHike;
+//		this.recordingDuration = recordingDuration;
+//		this.isRecording = isRecording;
+//		this.isForwardMsg = isForwardMsg;
+//		this.isRecipientOnhike = isRecipientOnHike;
+//	}
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Object convMessage,
 			boolean isRecipientOnHike)
@@ -115,22 +113,31 @@ public class UploadFileTask extends FileTransferBase
 		this.token = token;
 		this.uId = uId;
 		this.isRecipientOnhike = isRecipientOnHike;
-		isCreateConvMessage = false;
 		userContext = convMessage;
 	}
-
-	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri,
-			HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
+	
+	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri, Object convMessage,
+			boolean isRecipientOnHike)
 	{
 		super(handler, fileTaskMap, ctx, null, -1, null);
 		this.token = token;
 		this.uId = uId;
 		this.picasaUri = picasaUri;
-		this.hikeFileType = hikeFileType;
-		this.isCreateConvMessage = true;
-		this.msisdn = msisdn;
 		this.isRecipientOnhike = isRecipientOnHike;
+		userContext = convMessage;
 	}
+
+//	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri,
+//			HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
+//	{
+//		super(handler, fileTaskMap, ctx, null, -1, null);
+//		this.token = token;
+//		this.uId = uId;
+//		this.picasaUri = picasaUri;
+//		this.hikeFileType = hikeFileType;
+//		this.msisdn = msisdn;
+//		this.isRecipientOnhike = isRecipientOnHike;
+//	}
 
 	protected void setFutureTask(FutureTask<FTResult> fuTask)
 	{
@@ -145,25 +152,39 @@ public class UploadFileTask extends FileTransferBase
 	 * @throws Exception
 	 */
 	private void initFileUpload() throws FileTransferCancelledException, Exception
-	{
-		String fileName = null;
-		// this shows that convmessage is not yet created, so create it and publish it
-		if (isCreateConvMessage)
+	{	
+		_state = FTState.IN_PROGRESS;
+		msgId = ((ConvMessage) userContext).getMsgID();
+		fileTaskMap.put(msgId, futureTask);
+		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
+		hikeFileType = hikeFile.getHikeFileType();
+		
+		selectedFile = new File(hikeFile.getFilePath());
+		String fileName = selectedFile.getName();
+		if (hikeFile.getFilePath() == null)
 		{
-			fileName = Utils.getFinalFileName(hikeFileType);
-			if (picasaUri == null)
+			throw new FileNotFoundException("File is not accessible. SDCard unmount");
+		}
+		if(picasaUri == null)
+		{
+			if(hikeFile.getSourceFilePath() == null)
 			{
-				if (isForwardMsg)
+				Log.d("filepath: ",selectedFile.getPath());
+				Log.d("fillepath: ",Utils.getFileParent(hikeFileType));
+			}
+			else
+			{
+				mFile = new File(hikeFile.getSourceFilePath());
+				if(mFile.getPath().startsWith(Utils.getFileParent(hikeFileType)))
 				{
-					fileName = mFile.getName();
+					selectedFile = mFile;
 				}
-				// fileName = mFile.getName();
-				if (TextUtils.isEmpty(fileKey))
+				else
 				{
 					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName);
 					if (selectedFile == null)
 						throw new Exception(FileTransferManager.READ_FAIL);
-
+	
 					if (!selectedFile.exists())
 					{
 						// Saving the file to hike local folder
@@ -174,46 +195,29 @@ public class UploadFileTask extends FileTransferBase
 						}
 					}
 				}
-				else
-					selectedFile = mFile;
-				fileName = selectedFile.getName();
+				hikeFile.removeSourceFile();
+//				Bitmap thumbnail = null;
+//				String thumbnailString = null;
+//				if (hikeFileType == HikeFileType.IMAGE)
+//				{
+//					thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
+//				}
+//				else if (hikeFileType == HikeFileType.VIDEO)
+//				{
+//					thumbnail = ThumbnailUtils.createVideoThumbnail(selectedFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+//				}
+//				if (thumbnail != null)
+//				{
+//					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+//				}
+//				JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
+//				((ConvMessage) userContext).setMetadata(metadata);
+//				HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
 			}
-			else
-			// this is the case for picasa picture
-			{
-				String[] filePathColumn = { MediaColumns.DATA, MediaColumns.DISPLAY_NAME };
-				Cursor cursor = context.getContentResolver().query(picasaUri, filePathColumn, null, null, null);
-				// if it is a picasa image on newer devices with OS 3.0 and
-				// up
-				if (cursor != null)
-				{
-					cursor.moveToFirst();
-					int nameIdx = cursor.getColumnIndex(MediaColumns.DISPLAY_NAME);
-					if (nameIdx != -1)
-					{
-						// fileName = cursor.getString(nameIdx);
-					}
-				}
-				selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName);
-				if (TextUtils.isEmpty(fileName))
-				{
-					fileName = selectedFile.getName();
-				}
-
-				JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null);
-
-				userContext = createConvMessage(msisdn, fileName, metadata);
-
-				// Called so that the UI in the Conversation lists screen is
-				// updated
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
-
-				Utils.downloadAndSaveFile(context, selectedFile, picasaUri);
-			}
-
-			if (_state == FTState.CANCELLED)
-				throw new FileTransferCancelledException("User cancelled file tranfer");
-
+		}
+		else
+		{
+			Utils.downloadAndSaveFile(context, selectedFile, picasaUri);
 			Bitmap thumbnail = null;
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
@@ -228,45 +232,19 @@ public class UploadFileTask extends FileTransferBase
 			{
 				thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 			}
-
-			JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
-
-			if (userContext == null)
-			{
-				userContext = createConvMessage(msisdn, fileName, metadata);
-
-				if (TextUtils.isEmpty(fileKey))
-				{
-					// Called so that the UI in the Conversation lists
-					// screen is updated
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
-				}
-			}
 			else
 			{
-				/*
-				 * Only happens in case of Picasa files where we have already created a convMessage but did not initially have a thumbnail.
-				 */
-				((ConvMessage) userContext).setMetadata(metadata);
-				HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				throw new Exception("Network error");
 			}
+			JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
+			((ConvMessage) userContext).setMetadata(metadata);
+			HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
 		}
-		else
-		{
-			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
-
-			if (hikeFile.getFilePath() == null)
-			{
-				throw new FileNotFoundException("File is not accessible. SDCard unmount");
-			}
-			selectedFile = new File(hikeFile.getFilePath());
-			fileName = hikeFile.getFileName();
-			fileType = hikeFile.getFileTypeString();
-			hikeFileType = hikeFile.getHikeFileType();
-		}
-		msgId = ((ConvMessage) userContext).getMsgID();
-		fileTaskMap.put(msgId, futureTask);
+		
+		fileName = hikeFile.getFileName();
+		fileType = hikeFile.getFileTypeString();
+		hikeFileType = hikeFile.getHikeFileType();
+		
 		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 		Log.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
@@ -278,17 +256,6 @@ public class UploadFileTask extends FileTransferBase
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
-	}
-
-	private ConvMessage createConvMessage(String msisdn, String fileName, JSONObject metadata) throws JSONException
-	{
-		long time = System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setMetadata(metadata);
-		convMessage.setSMS(!isRecipientOnhike);
-		HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
-		return convMessage;
 	}
 
 	@Override
@@ -315,6 +282,8 @@ public class UploadFileTask extends FileTransferBase
 				Log.e(getClass().getSimpleName(), "Exception", e);
 				if (FileTransferManager.READ_FAIL.equals(e.getMessage()))
 					return FTResult.READ_FAIL;
+				else if(FileTransferManager.UNABLE_TO_DOWNLOAD.equals(e.getMessage()))
+					return FTResult.DOWNLOAD_FAILED;
 			}
 		}
 
@@ -801,7 +770,7 @@ public class UploadFileTask extends FileTransferBase
 		else if (result != FTResult.SUCCESS && result != FTResult.PAUSED)
 		{
 			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.FAILED_UNRECOVERABLE ? R.string.download_failed_fatal
-					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : R.string.upload_failed;
+					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
 
 			handler.post(new Runnable()
 			{

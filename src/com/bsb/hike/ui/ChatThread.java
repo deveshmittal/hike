@@ -1039,7 +1039,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			{
 				fss = FileTransferManager.getInstance(getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
 			}
-			if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED)
+			if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING)
 			{
 				optionsList.add(message.isSent() ? getString(R.string.cancel_upload) : getString(R.string.cancel_download));
 			}

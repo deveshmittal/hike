@@ -95,6 +95,8 @@ public class HikeFile {
 	private File file;
 	private long recordingDuration = -1;
 
+	private String sourceFilePath;
+	
 	private double latitude;
 	private double longitude;
 	private int zoomLevel;
@@ -113,6 +115,7 @@ public class HikeFile {
 				.optString(HikeConstants.THUMBNAIL, null);
 		this.thumbnail = thumbnail == null ? Utils
 				.stringToDrawable(thumbnailString) : thumbnail;
+		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
 		this.longitude = fileJSON.optDouble(HikeConstants.LONGITUDE);
@@ -145,6 +148,18 @@ public class HikeFile {
 		this.thumbnail = new BitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 	}
+	
+	public HikeFile(String fileName, String fileTypeString,
+			String thumbnailString, Bitmap thumbnail, long recordingDuration, String source) {
+		this.fileName = fileName;
+		this.fileTypeString = fileTypeString;
+		this.hikeFileType = HikeFileType.fromString(fileTypeString,
+				recordingDuration != -1);
+		this.thumbnailString = thumbnailString;
+		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.recordingDuration = recordingDuration;
+		this.sourceFilePath = source;
+	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel,
 			String address, String thumbnailString, Bitmap thumbnail) {
@@ -165,6 +180,7 @@ public class HikeFile {
 			fileJSON.putOpt(HikeConstants.CONTENT_TYPE, fileTypeString);
 			fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
+			fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
 			if (recordingDuration != -1) {
 				fileJSON.put(HikeConstants.PLAYTIME, recordingDuration);
@@ -285,6 +301,14 @@ public class HikeFile {
 			file = Utils.getOutputMediaFile(hikeFileType, fileName);
 		}
 		return file;
+	}
+	
+	public String getSourceFilePath() {
+		return sourceFilePath;
+	}
+	
+	public void removeSourceFile() {
+		sourceFilePath = null;
 	}
 
 	public String getDisplayName() {

@@ -57,6 +57,7 @@ public class HikeConstants {
 	public static final String FILES = "files";
 	public static final String CONTENT_TYPE = "ct";
 	public static final String THUMBNAIL = "tn";
+	public static final String SOURCE_FILE_PATH = "srcPath";
 	public static final String FILE_NAME = "fn";
 	public static final String FILE_KEY = "fk";
 	public static final String CREDITS = "credits";

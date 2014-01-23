@@ -628,7 +628,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder = (ViewHolder) v.getTag();
 		}
 
-		int fieldCount = 1;
+		//int fieldCount = 1;
 		for (Field field : holder.getClass().getDeclaredFields())
 		{
 			View view = null;
@@ -639,23 +639,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			try
 			{
-				// Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName());
-				if(field.get(holder) instanceof MessagesAdapter)
-				{
-					Toast.makeText(context, "found Instance of Message Adapter", Toast.LENGTH_LONG).show();
-					Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName() + "of type: "+field.getType() + "is instance of messageAdapter");
-				}
-				else
-				{
-					view = (View) field.get(holder);
-					Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName() + "of type: "+field.getType());
-				}
-//				else
+//				if(field.get(holder) instanceof MessagesAdapter)
 //				{
-//					Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName() + "of type: "+field.getType());
+//					Toast.makeText(context, "found Instance of Message Adapter", Toast.LENGTH_LONG).show();
+//					Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName() + "of type: "+field.getType() + "is instance of messageAdapter");
 //				}
-//				if(field.get(holder) == null)
-//					Log.d(getClass().getSimpleName(),"this is NULL");
+				if(field.get(holder) != null)
+				{
+					if(field.get(holder) instanceof View)
+						view = (View) field.get(holder);
+				}
 				
 				
 			}
@@ -673,7 +666,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				view.setVisibility(View.GONE);
 			}
-			fieldCount++;
+			//fieldCount++;
 		}
 		if (holder.bubbleContainer != null)
 			holder.bubbleContainer.setVisibility(View.VISIBLE);
