@@ -331,11 +331,18 @@ public class HikePubSub implements Runnable {
 		return true;
 	}
 
-	public void removeListener(String type, Listener listener) {
+	/*
+	 * We also need to make removeListener a synchronized method. if we
+	 * don't do that it would lead to memory inconsistency issue. in our
+	 * case some activities won't get destroyed unless we unregister all
+	 * listeners and in that slot if activity receives a pubsub event it
+	 * would try to handle this event which may lead to anything unusual.
+	 */
+	synchronized public void removeListener(String type, Listener listener) {
 		removeListeners(listener, type);
 	}
 
-	public void removeListeners(Listener listener, String... types) {
+	synchronized public void removeListeners(Listener listener, String... types) {
 		for (String type : types) {
 			Set<Listener> l = listeners.get(type);
 			if (l != null) {
