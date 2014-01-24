@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
@@ -288,6 +289,20 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
+			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
+			putInCache(key, rbd);
+			return rbd;
+		}
+		else
+			return b;
+	}
+	
+	public BitmapDrawable getFileIconFromCache(String key)
+	{
+		RecyclingBitmapDrawable b = get(key);
+		if (b == null)
+		{
+			BitmapDrawable bd = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
 			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
 			putInCache(key, rbd);
 			return rbd;

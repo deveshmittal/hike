@@ -1051,7 +1051,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					|| hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 				if (hikeFile.getThumbnail() == null
 						&& !TextUtils.isEmpty(hikeFile.getFileKey())) {
-					thumbnail = HikeMessengerApp.getLruCache().getIconFromCache(hikeFile.getFileKey());
+					thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
 					
 					if (thumbnail != null) {
 						showThumbnail = true;
