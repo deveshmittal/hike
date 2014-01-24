@@ -905,13 +905,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 				Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
 			}
+			
+			if (!convMessage.isSent())
+			{
+				if (firstMessageFromParticipant)
+				{
+					holder.image.setVisibility(View.VISIBLE);
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image);
+					holder.avatarContainer.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+				}
+			}
+			setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
 		}
 		else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
 		{
 			holder.messageContainer.setVisibility(View.VISIBLE);
-			//holder.ftAction.setVisibility(View.VISIBLE);
-			//holder.dataTransferred.setVisibility(View.VISIBLE);
-			//holder.barProgress.setVisibility(View.VISIBLE);
 
 			FileSavedState fss = null;
 			final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
@@ -984,7 +996,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()))
 					showThumbnail = false;
 
-				if (showThumbnail || thumbnail == null)
+				if (showThumbnail && thumbnail != null)
 				{
 					holder.fileThumb.setBackgroundDrawable(thumbnail);
 					holder.fileThumb.setImageResource(R.drawable.ic_video_play);
@@ -1001,6 +1013,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
 			{
+
 				showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
 						.wasFileDownloaded())) && (hikeFile.getThumbnail() != null);
 				thumbnail = null;
