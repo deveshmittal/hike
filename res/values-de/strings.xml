@@ -173,7 +173,7 @@
 	<string name="social_unlinking">Trenne Account...</string>
 	<string name="contact_selected_already">Diese Nummer befindet sich bereits in der Gruppe.</string>
 	<string name="share_file_message">Hey! Ich habe dir gerade bei hike eine Datei geschickt: %1$s</string>
-	<string name="max_file_size">Maximale Dateigröße beträgt 15 MB</string>
+	<string name="max_file_size">Maximale Dateigröße beträgt 25 MB</string>
 	<string name="unable_to_read">Datei nicht lesbar</string>
 	<string name="share_location">Standort teilen</string>
 	<string name="group_mute">Diese Unterhaltung ist stumm geschaltet.</string>

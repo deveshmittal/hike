@@ -57,6 +57,7 @@ public class HikeConstants {
 	public static final String FILES = "files";
 	public static final String CONTENT_TYPE = "ct";
 	public static final String THUMBNAIL = "tn";
+	public static final String SOURCE_FILE_PATH = "srcPath";
 	public static final String FILE_NAME = "fn";
 	public static final String FILE_KEY = "fk";
 	public static final String CREDITS = "credits";
@@ -192,8 +193,17 @@ public class HikeConstants {
 	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
-	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
+
+	//	@GM
+	//public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
+	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
+	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mdAutoDownloadImagePref";
+	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mdAutoDownloadAudioPref";
+	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mdAutoDownloadVideoPref";
+	public static final String WF_AUTO_DOWNLOAD_IMAGE_PREF = "wfAutoDownloadImagePref";
+	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
+	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
 
 	public static final String HIKEBOT = "TD-HIKE";
 	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";
@@ -303,7 +313,7 @@ public class HikeConstants {
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
-	public static final int MAX_FILE_SIZE = 15 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
@@ -401,6 +411,7 @@ public class HikeConstants {
 	public static final String VIDEO_ROOT = "/hike Videos";
 	public static final String AUDIO_ROOT = "/hike Audios";
 	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
+	public static final String OTHER_ROOT = "/hike Others";
 	public static final String STICKERS_ROOT = "/stickers";
 
 	public static final String LARGE_STICKER_ROOT = "/large";
@@ -833,7 +844,7 @@ public class HikeConstants {
 	}
 
 	public static enum FTResult {
-		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
+		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED, PAUSED, SERVER_ERROR, FAILED_UNRECOVERABLE, CARD_UNMOUNT
 	}
 
 	public static enum SMSSyncState {

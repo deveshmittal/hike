@@ -92,6 +92,8 @@
 	<string name="no_external_storage">External storage not found</string>
 	<string name="share_file">Share</string>
 	<string name="download_failed">Could not download file. Check network settings.</string>
+	<string name="download_failed_fatal">Could not download file. Please redownload file.</string>
+	<string name="card_unmount">File Inaccessible. Please mount SD Card and try again.</string>
 	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
 	<string name="dnd_one_to_one">%1$s is on DND. Waiting for %1$s to reply.</string>
 	<string name="optin_one_to_one">%1$s just opted in to hike!</string>
@@ -173,7 +175,7 @@
 	<string name="social_unlinking">Unlinking account...</string>
 	<string name="contact_selected_already">This number is already in the group.</string>
 	<string name="share_file_message">Hey! I just sent you a file through hike: %1$s</string>
-	<string name="max_file_size">Max file size can be 15 MB</string>
+	<string name="max_file_size">Max file size can be 25 MB</string>
 	<string name="unable_to_read">Unable to read file</string>
 	<string name="share_location">Select Location</string>
 	<string name="group_mute">This conversation is muted.</string>
@@ -209,6 +211,13 @@
 	<string name="sound_msg">Play a sound on new message</string>
 	<string name="free_sms">Free SMS to India</string>
 	<string name="free_sms_msg">Turn on to send free SMS to India</string>
+	<string name="auto_download_media">Auto download media</string>
+	<string name="auto_download_media_hinttext">Download settings for photos, videos, audio</string>
+	<string name="md_auto_download_media">When on mobile data</string>
+	<string name="wf_auto_download_media">When connected to Wi-Fi</string>
+	<string name="auto_download_image_title">Images</string>
+	<string name="auto_download_video_title">Video</string>
+	<string name="auto_download_audio_title">Audio</string>
 	<string name="delete_account">Delete Account</string>
 	<string name="unlink_facebook_account">Unlink Facebook Account</string>
 	<string name="unlink_twitter_account">Unlink Twitter Account</string>
@@ -622,8 +631,10 @@
 	<string name="last_seen_tip_friends">Only your friends can see when you were last seen</string>
 	<string name="from_your_number">from your own number</string>
 	<string name="at_sms_rate">At SMS rate</string>
+	<!--
 	<string name="auto_download_image_header">Image auto download</string>
 	<string name="auto_download_image_info">Images received by you will automatically be downloaded</string>
+	-->
 	<string name="humanoid_category">Hikins</string>
 	<string name="empty_chat">You have no chats :(\nStart one now!</string>
 	<string name="start_chat">Start a chat</string>
@@ -725,6 +736,8 @@
 	<string name="last_seen_while_ago_ct">a while ago</string>
 	<string name="apply">Apply</string>
 	<string name="chat_theme_tip">The chat theme will change for you and your friend</string>
-	<string name="chat_theme_tip_group">The chat theme will change for the group</string>		
-	<string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>		
+	<string name="chat_theme_tip_group">The chat theme will change for the group</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>
 </resources>
