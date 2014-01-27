@@ -423,6 +423,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
+		if (emoticonsAdapter != null
+				&& (emoticonsAdapter instanceof StickerAdapter)) {
+			((StickerAdapter) emoticonsAdapter).unregisterListeners();
+		}
+		
 		if (mComposeViewWatcher != null) {
 			// If we didn't send an end typing. We should send one before
 			// exiting
