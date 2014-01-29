@@ -740,4 +740,8 @@
 	<string name="One">1</string>
 	<string name="Two">2</string>
 	<string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>
+	<string name="are_you_sure">Are you sure?</string>
+	<string name="delete_confirm_msg_1">Deleting your account will delete all your data, free SMS and any hike rewards.</string>
+	<string name="please_confirm">Please Confirm</string>
+	<string name="delete_confirm_msg_2">This action is irreversible. Are you sure you want to delete your account?</string>
 </resources>
