@@ -211,6 +211,13 @@
 	<string name="sound_msg">Emitir sonido al recibir mensajes</string>
 	<string name="free_sms">SMS a la India gratis</string>
 	<string name="free_sms_msg">Permite enviar SMS gratis a la India.</string>
+	<string name="auto_download_media">Descarga automática de archivos multimedia</string>
+	<string name="auto_download_media_hinttext">Ajustes de descarga para fotos, vídeos y voz</string>
+	<string name="md_auto_download_media">Con conexión de datos móvil</string>
+	<string name="wf_auto_download_media">Con conexión por Wi-Fi</string>
+	<string name="auto_download_image_title">Imágenes</string>
+	<string name="auto_download_video_title">Vídeo</string>
+	<string name="auto_download_audio_title">Voz</string>
 	<string name="delete_account">Eliminar cuenta</string>
 	<string name="delete_account_msg">Eliminar mi cuenta permanentemente</string>
 	<string name="unlink_account">Desvincular cuenta</string>

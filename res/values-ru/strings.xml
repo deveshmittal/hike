@@ -211,6 +211,13 @@
 	<string name="sound_msg">Мелодия при новых сообщениях</string>
 	<string name="free_sms">Беспл. SMS в Индии</string>
 	<string name="free_sms_msg">Вкл для отправки беспл. SMS в Индии</string>
+	<string name="auto_download_media">Автозагрузка мультимедиа</string>
+	<string name="auto_download_media_hinttext">Загрузка параметров для фото, видео и аудио</string>
+	<string name="md_auto_download_media">При передаче моб. данных</string>
+	<string name="wf_auto_download_media">При подключении к Wi-Fi</string>
+	<string name="auto_download_image_title">Изображения</string>
+	<string name="auto_download_video_title">Видео</string>
+	<string name="auto_download_audio_title">Аудио</string>
 	<string name="delete_account">Удалить аккаунт</string>
 	<string name="delete_account_msg">Навсегда удалить ваш аккаунт</string>
 	<string name="unlink_account">Отвязать аккаунт</string>

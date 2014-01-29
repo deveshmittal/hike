@@ -211,6 +211,13 @@
 	<string name="sound_msg">Tocar som com nova mensagem</string>
 	<string name="free_sms">SMS grátis p/a Índia</string>
 	<string name="free_sms_msg">Ative e mande SMS grátis p/a Índia</string>
+	<string name="auto_download_media">Download automático de mídia</string>
+	<string name="auto_download_media_hinttext">Configurações de download para fotos, vídeos e áudio</string>
+	<string name="md_auto_download_media">Quando usar dados móveis</string>
+	<string name="wf_auto_download_media">Quando conectado a Wi-Fi</string>
+	<string name="auto_download_image_title">Imagens</string>
+	<string name="auto_download_video_title">Vídeo</string>
+	<string name="auto_download_audio_title">Áudio</string>
 	<string name="delete_account">Excluir conta</string>
 	<string name="delete_account_msg">Excluir conta permanentemente</string>
 	<string name="unlink_account">Desvincular conta</string>
