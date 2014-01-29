@@ -184,15 +184,26 @@ public class DownloadFileTask extends FileTransferBase
 						chunkSize = networkType.getMinChunkSize();
 					}
 					byte data[] = new byte[chunkSize];
-					int numRead;
-					while ((numRead = in.read(data, 0, chunkSize)) != -1)
+					//while ((numRead = in.read(data, 0, chunkSize)) != -1)
+					int numRead = 0;
+					while(_state == FTState.IN_PROGRESS)
 					{
-						if(_state != FTState.IN_PROGRESS)
+						int byteRead = 0;
+						if(numRead == -1)
 							break;
+						
+						while(byteRead < chunkSize)
+						{
+							numRead = in.read(data, byteRead, chunkSize-byteRead);
+							if(numRead == -1)
+								break;
+							byteRead+=numRead;
+						}
+							
 						// write to buffer
 						try
 						{
-							raf.write(data, 0, numRead);
+							raf.write(data, 0, byteRead);
 						}
 						catch(IOException e)
 						{
@@ -223,9 +234,9 @@ public class DownloadFileTask extends FileTransferBase
 						// change buffer size
 						data = new byte[chunkSize];
 						// increase the startByte for resume later
-						mStart += numRead;
+						mStart += byteRead;
 						// increase the downloaded size
-						incrementBytesTransferred(numRead);
+						incrementBytesTransferred(byteRead);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						//showButton();
 						sendProgress();

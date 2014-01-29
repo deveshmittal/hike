@@ -24,7 +24,7 @@
         <com.bsb.hike.view.IconCheckBoxPreference
             icon="ic_auto_download_audio"
             android:defaultValue="false"
-            android:key="mdAutoDownloadImagePref"
+            android:key="mdAutoDownloadAudioPref"
             android:layout="@layout/icon_preference"
             android:title="@string/auto_download_audio_title"
             android:widgetLayout="@layout/checkbox_widget" />
