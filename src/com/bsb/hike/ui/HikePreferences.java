@@ -292,10 +292,34 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 	public boolean onPreferenceClick(final Preference preference) {
 		Log.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF)) {
-			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
-			confirmDialog.setHeader(R.string.delete_account);
-			confirmDialog.setBody(R.string.delete_confirmation);
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			final CustomAlertDialog secondConfirmDialog = new CustomAlertDialog(HikePreferences.this);
+			final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(HikePreferences.this);
+			firstConfirmDialog.setHeader(R.string.are_you_sure);
+			firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);
+			View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					secondConfirmDialog.show();
+					firstConfirmDialog.dismiss();
+				}
+			}; 
+			
+			View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					firstConfirmDialog.dismiss();
+				}
+			};
+			
+			firstConfirmDialog.setOkButton(R.string.cancel, firstDialogOnCancelListener);
+			firstConfirmDialog.setCancelButton(R.string.continue_txt, firstDialogContinueClickListener);
+			firstConfirmDialog.show();
+
+			secondConfirmDialog.setHeader(R.string.please_confirm);
+			secondConfirmDialog.setBody(R.string.delete_confirm_msg_2);
+			View.OnClickListener secondDialogYesClickListener = new View.OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
@@ -304,13 +328,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					isDeleting = true;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
-					confirmDialog.dismiss();
+					secondConfirmDialog.dismiss();
 				}
 			}; 
 			
-			confirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-			confirmDialog.setCancelButton(R.string.cancel);
-			confirmDialog.show();
+			secondConfirmDialog.setOkButton(R.string.yes, secondDialogYesClickListener);
+			secondConfirmDialog.setCancelButton(R.string.no);
 
 		} else if (preference.getKey().equals(HikeConstants.UNLINK_PREF)) {
 			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
