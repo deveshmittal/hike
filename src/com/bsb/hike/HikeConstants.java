@@ -621,6 +621,8 @@ public class HikeConstants {
 		public static final String SHOW_STICKER_TIP_FOR_EMMA = "showStickerTipForEmma";
 		public static final String FROM_CHAT_THEME_FTUE = "fromChatThemeFtue";
 		public static final String NEW_USER = "newUser";
+		public static final String CHAT_THEME_WINDOW_OPEN = "chatThemeWindowOpen";
+		public static final String SELECTED_THEME = "selectedTheme";
 	}
 
 	public static final class LogEvent {

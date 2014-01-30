@@ -599,6 +599,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, false)) {
 				showStickerFtueTip();
 			}
+			if (savedInstanceState.getBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, false)) {
+				final ChatTheme chatTheme = ChatTheme.values()[savedInstanceState.getInt(HikeConstants.Extras.SELECTED_THEME, 0)];
+				/*
+				 * We need to queue this piece of code after the lifecycle methods are done.
+				 * Else the popup window throws an exception. 
+				 */
+				mHandler.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						setupThemePicker(chatTheme);
+						setChatTheme(chatTheme);
+					}
+				});
+			}
 		}
 
 		/* registering localbroadcast manager */
@@ -820,10 +835,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		switch (item.getItemId()) {
 		case R.id.chat_bg:
-			showThemePicker();
-			setupChatThemeActionBar();
-			showingChatThemePicker = true;
-			invalidateOptionsMenu();
+			setupThemePicker(null);
 			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
 					false)) {
 				Editor editor = prefs.edit();
@@ -842,6 +854,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		return true;
+	}
+
+	private void setupThemePicker(ChatTheme preSelectedTheme) {
+		showThemePicker(preSelectedTheme);
+		setupChatThemeActionBar();
+		showingChatThemePicker = true;
+		invalidateOptionsMenu();
 	}
 
 	private void dismissPopupWindow() {
@@ -3019,7 +3038,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 												: R.color.chat_thread_indicator_bg_custom_theme));
 	}
 
-	private void showThemePicker() {
+	private void showThemePicker(ChatTheme preSelectedTheme) {
 
 		dismissPopupWindow();
 
@@ -3048,7 +3067,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		chatThemeTip.setVisibility(mConversation.isOnhike() ? View.VISIBLE
 				: View.GONE);
 
-		temporaryTheme = selectedTheme;
+		temporaryTheme = preSelectedTheme == null ? selectedTheme : preSelectedTheme;
 
 		attachmentsGridView.setNumColumns(getNumColumnsChatThemes());
 
@@ -4386,6 +4405,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				&& findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE) {
 			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA,
 					true);
+		}
+		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null) {
+			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
+			outState.putInt(HikeConstants.Extras.SELECTED_THEME, temporaryTheme.ordinal());
 		}
 		super.onSaveInstanceState(outState);
 	}
