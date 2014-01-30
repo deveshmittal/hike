@@ -4489,7 +4489,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				@Override
 				public void run() {
+					final int selection = mConversationsView.getLastVisiblePosition();
+
 					emoticonLayout.setVisibility(View.VISIBLE);
+					/*
+					 * Making sure we keep the same selection as we did
+					 * before showing the sticker/emoticon layout.
+					 */
+					mHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							mConversationsView.setSelection(selection);
+						}
+					});
 				}
 			}, 45);
 			Utils.hideSoftKeyboard(this, mComposeView);
