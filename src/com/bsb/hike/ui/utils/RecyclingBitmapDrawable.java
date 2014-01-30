@@ -16,6 +16,8 @@
 
 package com.bsb.hike.ui.utils;
 
+import com.bsb.hike.utils.Utils;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -117,5 +119,25 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		Bitmap bitmap = getBitmap();
 		return null != bitmap && bitmap.isMutable();
+	}
+	
+	public int size()
+	{
+		Bitmap bitmap = this.getBitmap();
+
+		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
+		// larger than bitmap byte count.
+		if (Utils.hasKitKat())
+		{
+			return bitmap.getAllocationByteCount();
+		}
+
+		if (Utils.hasHoneycombMR1())
+		{
+			return bitmap.getByteCount();
+		}
+
+		// Pre HC-MR1
+		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
 }
