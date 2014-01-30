@@ -452,6 +452,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (mAdapter != null) {
 			mAdapter.resetPlayerIfRunning();
 		}
+		if (attachmentWindow != null && attachmentWindow.isShowing()) {
+			attachmentWindow.dismiss();
+			attachmentWindow = null;
+		}
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
 	}
 
