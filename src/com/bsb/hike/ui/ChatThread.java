@@ -618,7 +618,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onBackPressed() {
 		if (attachmentWindow != null && attachmentWindow.isShowing()) {
-			attachmentWindow.dismiss();
+			dismissPopupWindow();
 			attachmentWindow = null;
 			return;
 		}
@@ -844,6 +844,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		return true;
 	}
 
+	private void dismissPopupWindow() {
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
+	}
+
 	private void showOverFlowMenu() {
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
@@ -870,9 +876,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 
-		if(attachmentWindow != null) {
-			attachmentWindow.dismiss();
-		}
+		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -921,7 +925,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 				OverFlowMenuItem item = (OverFlowMenuItem) adapterView
 						.getItemAtPosition(position);
 
@@ -3017,9 +3021,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private void showThemePicker() {
 
-		if(attachmentWindow != null) {
-			attachmentWindow.dismiss();
-		}
+		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -3209,7 +3211,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			@Override
 			public void onClick(View v) {
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 			}
 		});
 
@@ -3226,7 +3228,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					selectedTheme = temporaryTheme;
 					sendChatThemeMessage();
 				}
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 			}
 		});
 
@@ -3272,9 +3274,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			optionImagesList.add(R.drawable.ic_attach_contact);
 		}
 
-		if(attachmentWindow != null) {
-			attachmentWindow.dismiss();
-		}
+		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -3315,7 +3315,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 
 				int requestCode;
 				Intent pickIntent = new Intent();
@@ -3437,7 +3437,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			
 			@Override
 			public void onDismiss() {
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 			}
 		});
 
