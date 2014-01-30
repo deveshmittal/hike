@@ -201,4 +201,6 @@
 	<color name="auto_download">#73716d</color>
     <color name="chat_thread_indicator_bg_custom_theme">#B3000000</color>
     <color name="progress_colour_default_theme">#FFAAAAAA</color>
+    <color name="webview_progress_bg">#CD000000</color>
+    <color name="webview_progress_fg">#009BFF</color>
 </resources>
