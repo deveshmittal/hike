@@ -3023,6 +3023,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		dismissPopupWindow();
 
+		if (emoticonLayout != null
+				&& emoticonLayout.getVisibility() == View.VISIBLE) {
+			onEmoticonBtnClicked(null, 0, true);
+		}
+		Utils.hideSoftKeyboard(this, mComposeView);
+
 		attachmentWindow = new PopupWindow(this);
 
 		View parentView = getLayoutInflater().inflate(
@@ -4403,6 +4409,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	public void onEmoticonBtnClicked(View v, int whichSubcategory,
 			boolean backPressed) {
+		dismissPopupWindow();
+
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout)
 				: emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
