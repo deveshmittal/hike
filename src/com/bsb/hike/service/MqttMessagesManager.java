@@ -682,8 +682,6 @@ public class MqttMessagesManager {
 						HikeMessengerApp.getLruCache().clearIconForMSISDN(userMsisdn);
 						//IconCacheManager.getInstance().clearIconForMSISDN(
 								//msisdn);
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.PROFILE_PIC_CHANGED, null);
 					} catch (Exception e) {
 						Log.w(getClass().getSimpleName(), "Invalid image bytes");
 					}

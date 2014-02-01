@@ -76,6 +76,7 @@ import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -924,8 +925,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 							if (profileType == ProfileType.USER_PROFILE
 									|| profileType == ProfileType.USER_PROFILE_EDIT) {
-								HikeMessengerApp.getPubSub().publish(
-										HikePubSub.PROFILE_PIC_CHANGED, null);
+
+								HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
 
 								/*
 								 * Making the profile pic change a status
