@@ -444,7 +444,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		case PROFILE_PIC_UPDATE:
 			StatusMessage profilePicStatusUpdate = ((ProfileStatusItem) profileItem)
 					.getStatusMessage();
-			viewHolder.text.setText(profilePicStatusUpdate.getNotNullName());
+			viewHolder.text.setText(myProfile ? context.getString(R.string.me)
+					: profilePicStatusUpdate.getNotNullName());
 
 			viewHolder.subText
 					.setText(R.string.status_profile_pic_notification);
