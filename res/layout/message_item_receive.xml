@@ -94,7 +94,8 @@
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/ic_bubble_white_selector"
 	            android:gravity="center_vertical"
-	            android:orientation="vertical" >
+	            android:orientation="vertical"
+	            android:paddingRight="4dp">
 
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
@@ -311,7 +312,7 @@
                             android:layout_width="40dp"
                             android:layout_height="32dp"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="4dp"
                             android:scaleType="centerInside"
                             android:background="@null"
                             android:src="@drawable/ic_open_received_file"

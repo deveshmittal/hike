@@ -103,7 +103,7 @@
 	<string name="invited_to_gc">%1$s wurde eingeladen</string>
 	<string name="share">Teilen</string>
 	<string name="start_rec">Aufnahmefunktion</string>
-	<string name="recording">AUFNAHME</string>
+	<string name="recording">Aufnahme</string>
 	<string name="start">Start</string>
 	<string name="stop">Stopp</string>
 	<string name="preview">Vorschau</string>
@@ -710,5 +710,4 @@
 	<string name="apply">Gelten</string>
 	<string name="chat_theme_tip">Das Chat-Thema ändert sich für Sie und Ihr Freund</string>
 	<string name="chat_theme_tip_group">Das Chat-Thema wird für die gesamte Gruppe ändern</string>		
-	
 </resources>

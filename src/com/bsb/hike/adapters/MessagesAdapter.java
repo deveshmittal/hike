@@ -240,6 +240,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	}
 
 	public void addMessage(ConvMessage convMessage) {
+		Log.d(getClass().getSimpleName(),"received convMsg" + convMessage.getMsgID());
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent())
 		{
@@ -1259,7 +1260,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.ftAction.setImageResource(R.drawable.ic_download_file);
 							holder.ftAction.setVisibility(View.VISIBLE);
 							}
-							holder.fileType.setText(hikeFile.getHikeFileType().toString());
+							if(hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+								holder.fileType.setText(R.string.recording);
+							else if(hikeFile.getHikeFileType() == HikeFileType.AUDIO)
+								holder.fileType.setText(R.string.audio);
+							else if(hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+								holder.fileType.setText(R.string.video);
+							else if(hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+								holder.fileType.setText(R.string.photo);
+							else
+								holder.fileType.setText("File");
 							holder.fileType.setVisibility(View.VISIBLE);
 							//holder.fileThumb.setScaleType(ScaleType.CENTER);
 						}

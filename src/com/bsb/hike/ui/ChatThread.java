@@ -534,6 +534,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
+		/* register listeners */
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 		if (prefs.contains(HikeMessengerApp.TEMP_NUM)) {
 			mContactName = prefs.getString(HikeMessengerApp.TEMP_NAME, null);
 			mContactNumber = prefs.getString(HikeMessengerApp.TEMP_NUM, null);
@@ -593,8 +595,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 
-		/* register listeners */
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 		/* registering localbroadcast manager */
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		//LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
@@ -2126,6 +2126,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						|| messages.get(messages.size() - 1)
 								.getTypingNotification() == null) {
 					addMessage(new ConvMessage(typingNotification));
+					Log.d(getClass().getSimpleName(),"calling chatThread.addMessage() Line no. : 2129");
 				} else if (messages.get(messages.size() - 1)
 						.getTypingNotification() != null) {
 					ConvMessage convMessage = messages.get(messages.size() - 1);
@@ -2217,6 +2218,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						}
 
 						addMessage(message);
+						Log.d(getClass().getSimpleName(),"calling chatThread.addMessage() Line no. : 2219");
 					}
 				});
 
@@ -2425,6 +2427,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					addMessage(convMessage);
+					Log.d(getClass().getSimpleName(),"calling chatThread.addMessage() Line no. : 2429");
 				}
 			});
 		} else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type)) {

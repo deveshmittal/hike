@@ -265,7 +265,7 @@
                     android:layout_width="40dp"
                     android:layout_height="32dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="3dp"
+                    android:layout_marginLeft="4dp"
                     android:background="@drawable/bg_audio_btn"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_play_audio"

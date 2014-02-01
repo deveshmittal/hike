@@ -303,6 +303,8 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
+			if(bd == null)
+				return null;
 			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
 			putInCache(key, rbd);
 			return rbd;

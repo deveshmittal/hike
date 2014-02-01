@@ -103,7 +103,7 @@
 	<string name="invited_to_gc">Se ha invitado a %1$s</string>
 	<string name="share">Compartir</string>
 	<string name="start_rec">Grabadora</string>
-	<string name="recording">GRABANDO</string>
+	<string name="recording">Grabación</string>
 	<string name="start">Iniciar</string>
 	<string name="stop">Detener</string>
 	<string name="preview">Vista previa</string>
@@ -720,5 +720,4 @@
 	<string name="apply">Aplique</string>
 	<string name="chat_theme_tip">El tema de charla va a cambiar para ti y tu amigo</string>
 	<string name="chat_theme_tip_group">El tema de charla va a cambiar para todo el grupo</string>		
-  			
 </resources>
