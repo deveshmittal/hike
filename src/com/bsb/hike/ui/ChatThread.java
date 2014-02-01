@@ -3926,6 +3926,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					&& (selectedFile == null || !selectedFile.exists())) {
 				Toast.makeText(getApplicationContext(), R.string.error_capture,
 						Toast.LENGTH_SHORT).show();
+				clearTempData();
 				return;
 			}
 
@@ -3945,6 +3946,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					 */
 					Toast.makeText(this, R.string.error_capture_video,
 							Toast.LENGTH_SHORT).show();
+					clearTempData();
 					return;
 				}
 			} else {
@@ -3953,6 +3955,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					// Picasa image
 					FileTransferManager.getInstance(getApplicationContext()).uploadFile(selectedFileUri,hikeFileType,mContactNumber,mConversation.isOnhike());
+					clearTempData();
 					return;
 				} else {
 					String fileUriStart = "file://";
