@@ -85,6 +85,8 @@ public class MqttMessagesManager {
 
 	private static MqttMessagesManager instance;
 
+	private String userMsisdn;
+
 	private MqttMessagesManager(Context context) {
 		this.convDb = HikeConversationsDatabase.getInstance();
 		this.userDb = HikeUserDatabase.getInstance();
@@ -96,6 +98,7 @@ public class MqttMessagesManager {
 				.getTypingNotificationSet();
 		this.clearTypingNotificationHandler = new Handler();
 		this.appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		this.userMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 	}
 
 	public static MqttMessagesManager getInstance(Context context) {
@@ -666,16 +669,13 @@ public class MqttMessagesManager {
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
-					String msisdn = settings.getString(
-							HikeMessengerApp.MSISDN_SETTING, "");
-
 					String iconBase64 = account.getString(HikeConstants.ICON);
 					try {
 						byte[] profileImageBytes = Base64.decode(iconBase64,
 								Base64.DEFAULT);
-						this.userDb.setIcon(msisdn, profileImageBytes, false);
+						this.userDb.setIcon(userMsisdn, profileImageBytes, false);
 
-						HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+						HikeMessengerApp.getLruCache().clearIconForMSISDN(userMsisdn);
 						//IconCacheManager.getInstance().clearIconForMSISDN(
 								//msisdn);
 						HikeMessengerApp.getPubSub().publish(
