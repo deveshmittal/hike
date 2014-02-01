@@ -1589,7 +1589,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				lp.setMargins(left, top, right, 0);
 				participantInfo.setLayoutParams(lp);
-
 				((ViewGroup) holder.container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.USER_JOIN || infoState == ParticipantInfoState.USER_OPT_IN)

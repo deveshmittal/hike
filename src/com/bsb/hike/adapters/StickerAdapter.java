@@ -422,4 +422,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		return stickerCategoryList.get(index).updateAvailable;
 	}
+	
+	public void unregisterListeners(){
+		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
+		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
+		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
+	}
 }
