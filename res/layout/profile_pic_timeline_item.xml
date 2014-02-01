@@ -10,7 +10,7 @@
         style="@style/UpdatesContainer"
         android:padding="6dp" >
 
-        <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/profile_pic"
             android:layout_width="match_parent"
             android:layout_height="282dp"

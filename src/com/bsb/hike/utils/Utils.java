@@ -1160,6 +1160,13 @@ public class Utils {
 		options.inJustDecodeBounds = false;
 
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		/*
+		 * Should only happen when the external storage does not have enough
+		 * free space
+		 */
+		if (thumbnail == null) {
+			return null;
+		}
 		if (makeSquareThumbnail) {
 			return makeSquareThumbnail(thumbnail, dimensionLimit);
 		}
@@ -1414,12 +1421,6 @@ public class Utils {
 		}
 		int minStatusOrdinal;
 		int maxStatusOrdinal;
-		// No need to change the message state for typing notifications
-		if (HikeConstants.IS_TYPING.equals(convMessage.getMessage())
-				&& convMessage.getMsgID() == -1
-				&& convMessage.getMappedMsgID() == -1) {
-			return false;
-		}
 		if (stateOrdinal <= State.SENT_DELIVERED_READ.ordinal()) {
 			minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
 			maxStatusOrdinal = stateOrdinal;
@@ -3192,5 +3193,10 @@ public class Utils {
 	public static boolean hasKitKat()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	}
+	
+	public static boolean hasEnoughFreeSpaceForProfilePic() {
+		double freeSpaceAvailable = getFreeSpace();
+		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
 	}
 }

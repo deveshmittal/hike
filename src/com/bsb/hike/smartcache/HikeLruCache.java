@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
@@ -27,7 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
-public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
+public class HikeLruCache extends LruCache<String, BitmapDrawable>
 {
 	// Default memory cache size in kilobytes
 	private static final int DEFAULT_MEM_CACHE_SIZE = 1024 * 5; // 5MB
@@ -89,12 +90,12 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		}
 	}
 
-	private final Set<SoftReference<RecyclingBitmapDrawable>> reusableBitmaps;
+	private final Set<SoftReference<Bitmap>> reusableBitmaps;
 
 	public HikeLruCache(ImageCacheParams cacheParams)
 	{
 		super(cacheParams.memCacheSize);
-		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<SoftReference<RecyclingBitmapDrawable>>()) : null;
+		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>()) : null;
 	}
 
 	public static HikeLruCache getInstance(ImageCacheParams cacheParams)
@@ -141,33 +142,39 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 	/**
 	 * Measure item size in kilobytes rather than units which is more practical for a bitmap cache
 	 */
-	@Override
-	protected int sizeOf(String key, RecyclingBitmapDrawable value)
+	protected int sizeOf(String key, BitmapDrawable value)
 	{
 		final int bitmapSize = getBitmapSize(value) / 1024;
 		return bitmapSize == 0 ? 1 : bitmapSize;
 	}
 
-	@Override
-	protected void entryRemoved(boolean evicted, String key, RecyclingBitmapDrawable oldValue, RecyclingBitmapDrawable newValue)
+	protected void entryRemoved(boolean evicted, String key, BitmapDrawable oldValue, BitmapDrawable newValue)
 	{
-		// Notify the wrapper that it's no longer being cached
-		oldValue.setIsCached(false);
-
-		if (reusableBitmaps != null && oldValue.isBitmapValid() && oldValue.isBitmapMutable())
+		if (RecyclingBitmapDrawable.class.isInstance(oldValue))
 		{
-			synchronized (reusableBitmaps)
+			// The removed entry is a recycling drawable, so notify it
+			// that it has been removed from the memory cache
+			((RecyclingBitmapDrawable) oldValue).setIsCached(false);
+		}
+		else
+		{
+			// The removed entry is a standard BitmapDrawable
+
+			if (Utils.hasHoneycomb())
 			{
-				reusableBitmaps.add(new SoftReference<RecyclingBitmapDrawable>(oldValue));
+				// We're running on Honeycomb or later, so add the bitmap
+				// to a SoftReference set for possible use with inBitmap later
+				reusableBitmaps.add(new SoftReference<Bitmap>(oldValue.getBitmap()));
 			}
 		}
 	}
 
-	public RecyclingBitmapDrawable putInCache(String data, RecyclingBitmapDrawable value)
+	public BitmapDrawable putInCache(String data, BitmapDrawable value)
 	{
 		if (null != value)
 		{
-			value.setIsCached(true);
+			if(RecyclingBitmapDrawable.class.isInstance(value))
+				((RecyclingBitmapDrawable) value).setIsCached(true);
 			return put(data, value);
 		}
 		return null;
@@ -186,19 +193,19 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 		{
 			synchronized (reusableBitmaps)
 			{
-				final Iterator<SoftReference<RecyclingBitmapDrawable>> iterator = reusableBitmaps.iterator();
-				RecyclingBitmapDrawable item;
+				final Iterator<SoftReference<Bitmap>> iterator = reusableBitmaps.iterator();
+				Bitmap item;
 
 				while (iterator.hasNext())
 				{
 					item = iterator.next().get();
 
-					if (null != item && item.isBitmapMutable())
+					if (null != item && item.isMutable())
 					{
 						// Check to see it the item can be used for inBitmap
 						if (canUseForInBitmap(item, options))
 						{
-							bitmap = item.getBitmap();
+							bitmap = item;
 
 							// Remove from reusable set so it can't be used again
 							iterator.remove();
@@ -225,21 +232,21 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 	 * @return true if <code>candidate</code> can be used for inBitmap re-use with <code>targetOptions</code>
 	 */
 	@TargetApi(VERSION_CODES.KITKAT)
-	private static boolean canUseForInBitmap(RecyclingBitmapDrawable candidate, BitmapFactory.Options targetOptions)
+	private static boolean canUseForInBitmap(Bitmap candidate, BitmapFactory.Options targetOptions)
 	{
 
 		if (!Utils.hasKitKat())
 		{
 			// On earlier versions, the dimensions must match exactly and the inSampleSize must be 1
-			return candidate.getBitmap().getWidth() == targetOptions.outWidth && candidate.getBitmap().getHeight() == targetOptions.outHeight && targetOptions.inSampleSize == 1;
+			return candidate.getWidth() == targetOptions.outWidth && candidate.getHeight() == targetOptions.outHeight && targetOptions.inSampleSize == 1;
 		}
 
 		// From Android 4.4 (KitKat) onward we can re-use if the byte size of the new bitmap
 		// is smaller than the reusable bitmap candidate allocation byte count.
 		int width = targetOptions.outWidth / targetOptions.inSampleSize;
 		int height = targetOptions.outHeight / targetOptions.inSampleSize;
-		int byteCount = width * height * getBytesPerPixel(candidate.getBitmap().getConfig());
-		return byteCount <= candidate.getBitmap().getAllocationByteCount();
+		int byteCount = width * height * getBytesPerPixel(candidate.getConfig());
+		return byteCount <= candidate.getAllocationByteCount();
 	}
 
 	/**
@@ -285,13 +292,37 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 	public BitmapDrawable getIconFromCache(String key,boolean rounded)
 	{
 		key = rounded ? key + IconLoader.ROUND_SUFFIX : key;
-		RecyclingBitmapDrawable b = get(key);
+		BitmapDrawable b = get(key);
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
-			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
-			putInCache(key, rbd);
-			return rbd;
+			if(!Utils.hasHoneycomb())
+			{
+				// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+				// which will recycle automagically
+				bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
+			}
+			putInCache(key, bd);
+			return bd;
+		}
+		else
+			return b;
+	}
+	
+	public BitmapDrawable getFileIconFromCache(String key)
+	{
+		BitmapDrawable b = get(key);
+		if (b == null)
+		{
+			BitmapDrawable bd = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
+			if(!Utils.hasHoneycomb())
+			{
+				// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+				// which will recycle automagically
+				bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
+			}
+			putInCache(key, bd);
+			return bd;
 		}
 		else
 			return b;
@@ -318,8 +349,14 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 
 	public Drawable getSticker(Context ctx, String path)
 	{
-		RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(ctx.getResources(),BitmapFactory.decodeFile(path));
-		putInCache(path, rbd);
-		return rbd;
+		BitmapDrawable bd = null;
+		if (Utils.hasHoneycomb())
+		{
+			bd = new BitmapDrawable(ctx.getResources(),BitmapFactory.decodeFile(path));
+		}
+		else
+			bd = new RecyclingBitmapDrawable(ctx.getResources(),BitmapFactory.decodeFile(path));
+		putInCache(path, bd);
+		return bd;
 	}
 }

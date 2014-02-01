@@ -124,7 +124,7 @@
                 android:text="@string/not_now" />
         </LinearLayout>
         
-       <!--  <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/status_pic"
             android:layout_width="match_parent"
             android:layout_height="180dp"
@@ -132,7 +132,7 @@
             android:layout_marginTop="10dp"
             android:onClick="onViewImageClicked"
             android:scaleType="centerCrop"
-            android:visibility="gone" /> -->
+            android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/moods_container"

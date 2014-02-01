@@ -65,7 +65,7 @@
                 android:textStyle="bold" />
         </RelativeLayout>
 
-        <view
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/image"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

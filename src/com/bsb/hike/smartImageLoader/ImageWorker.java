@@ -250,7 +250,7 @@ public abstract class ImageWorker
 	/**
 	 * The actual AsyncTask that will asynchronously process the image.
 	 */
-	private class BitmapWorkerTask extends MyAsyncTask<String, Void, RecyclingBitmapDrawable>
+	private class BitmapWorkerTask extends MyAsyncTask<String, Void, BitmapDrawable>
 	{
 		private String data;
 
@@ -265,13 +265,13 @@ public abstract class ImageWorker
 		 * Background processing.
 		 */
 		@Override
-		protected RecyclingBitmapDrawable doInBackground(String... params)
+		protected BitmapDrawable doInBackground(String... params)
 		{
 			Log.d(TAG, "doInBackground - starting work");
 			data = params[0];
 			final String dataString = data;
 			Bitmap bitmap = null;
-			RecyclingBitmapDrawable drawable = null;
+			BitmapDrawable drawable = null;
 
 			// Wait here if work is paused and the task is not cancelled
 			synchronized (mPauseWorkLock)
@@ -303,7 +303,19 @@ public abstract class ImageWorker
 			// bitmap to our cache as it might be used again in the future
 			if (bitmap != null)
 			{
-				drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+
+				if (Utils.hasHoneycomb())
+				{
+					// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+					drawable = new BitmapDrawable(mResources, bitmap);
+				}
+				else
+				{
+					// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+					// which will recycle automagically
+					drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+				}
+
 
 				if (mImageCache != null)
 				{
@@ -319,7 +331,7 @@ public abstract class ImageWorker
 		 * Once the image is processed, associates it to the imageView
 		 */
 		@Override
-		protected void onPostExecute(RecyclingBitmapDrawable value)
+		protected void onPostExecute(BitmapDrawable value)
 		{
 			// if cancel was called on this task or the "exit early" flag is set then we're done
 			if (isCancelled() || mExitTasksEarly)
@@ -335,7 +347,7 @@ public abstract class ImageWorker
 		}
 
 		@Override
-		protected void onCancelled(RecyclingBitmapDrawable value)
+		protected void onCancelled(BitmapDrawable value)
 		{
 			super.onCancelled(value);
 			synchronized (mPauseWorkLock)

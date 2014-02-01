@@ -34,6 +34,13 @@ public class CircularProgress extends View {
 		actualProgress.setAntiAlias(true);
 	}
 
+	public void setProgressColor(int color) {
+		outerBoundary.setColor(color);
+		actualProgress.setColor(color);
+
+		invalidate();
+	}
+
 	public CircularProgress(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 	}

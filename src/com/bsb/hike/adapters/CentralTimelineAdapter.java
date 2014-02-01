@@ -20,8 +20,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,15 +33,12 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
-import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -180,11 +175,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.noBtn = (TextView) convertView
 						.findViewById(R.id.no_btn);
 
-				viewHolder.statusImg = new RecyclingImageView(context);
-				LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, (int) (180*Utils.densityMultiplier));
-				params.setMargins(0, (int) (10*Utils.densityMultiplier), 0, 0);
-				params.addRule(RelativeLayout.BELOW, R.id.btn_container);
-				viewHolder.statusImg.setLayoutParams(params);
+				viewHolder.statusImg = (ImageView) convertView
+						.findViewById(R.id.status_pic);
 
 				viewHolder.buttonDivider = convertView
 						.findViewById(R.id.button_divider);

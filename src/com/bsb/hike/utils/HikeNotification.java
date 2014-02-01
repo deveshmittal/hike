@@ -21,11 +21,10 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -235,11 +234,11 @@ public class HikeNotification {
 				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
 
-			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-			ContactInfo participant = hUDB.getContactInfoFromMSISDN(
-					convMsg.getGroupParticipantMsisdn(), false);
+			GroupConversation gConv = (GroupConversation) convMsg
+					.getConversation();
 
-			Conversation gConv = convMsg.getConversation();
+			ContactInfo participant = gConv.getGroupParticipant(
+					convMsg.getGroupParticipantMsisdn()).getContactInfo();
 
 			key = participant.getName();
 			if (TextUtils.isEmpty(key)) {
@@ -445,7 +444,6 @@ public class HikeNotification {
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
 		final Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
-
 		final int smallIconId = returnSmallIcon();
 
 		NotificationCompat.Builder mBuilder;

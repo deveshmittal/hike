@@ -22,9 +22,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
@@ -49,10 +51,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private LayoutInflater inflater;
 	private StickerCategory category;
 	private int numStickerRows;
-	private ImageWorker mWorker;
+	private StickerLoader mWorker;
 	
 	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
-			List<ViewType> viewTypeList,ImageWorker worker) {
+			List<ViewType> viewTypeList,StickerLoader worker) {
 		this.activity = activity;
 		this.stickerList = stickerList;
 		this.viewTypeList = viewTypeList;
@@ -188,7 +190,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
 			int padding = (int) (5 * Utils.densityMultiplier);
 			for (int i = 0; i < maxCount; i++) {
-				ImageView imageView = new ImageView(activity);
+				ImageView imageView = new RecyclingImageView(activity);
 				imageView.setLayoutParams(childParams);
 				imageView.setScaleType(ScaleType.FIT_CENTER);
 				imageView.setPadding(padding, padding, padding, padding);

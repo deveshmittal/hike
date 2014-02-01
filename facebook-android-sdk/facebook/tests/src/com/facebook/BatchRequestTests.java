@@ -83,6 +83,33 @@ public class BatchRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    public void testExecuteBatchRequestsPathEncoding() throws IOException {
+        // ensures that paths passed to batch requests are encoded properly before
+        // we send it up to the server
+
+        setBatchApplicationIdForTestApp();
+
+        Request request1 = new Request(null, "TourEiffel");
+        request1.setBatchEntryName("eiffel");
+        request1.setBatchEntryOmitResultOnSuccess(false);
+        Request request2 = new Request(null, "{result=eiffel:$.id}");
+
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        assertEquals(2, responses.size());
+        assertTrue(responses.get(0).getError() == null);
+        assertTrue(responses.get(1).getError() == null);
+
+        GraphPlace eiffelTower1 = responses.get(0).getGraphObjectAs(GraphPlace.class);
+        GraphPlace eiffelTower2 = responses.get(1).getGraphObjectAs(GraphPlace.class);
+        assertTrue(eiffelTower1 != null);
+        assertTrue(eiffelTower2 != null);
+
+        assertEquals("Paris", eiffelTower1.getLocation().getCity());
+        assertEquals("Paris", eiffelTower2.getLocation().getCity());
+    }
+
+    @MediumTest
+    @LargeTest
     public void testExecuteBatchedGets() throws IOException {
         setBatchApplicationIdForTestApp();
 
@@ -126,8 +153,8 @@ public class BatchRequestTests extends FacebookTestCase {
     public void testBatchPostStatusUpdate() {
         TestSession session = openTestSessionWithSharedUser();
 
-        GraphObject statusUpdate1 = createStatusUpdate();
-        GraphObject statusUpdate2 = createStatusUpdate();
+        GraphObject statusUpdate1 = createStatusUpdate("1");
+        GraphObject statusUpdate2 = createStatusUpdate("2");
 
         Request postRequest1 = Request.newPostRequest(session, "me/feed", statusUpdate1, null);
         postRequest1.setBatchEntryName("postRequest1");
@@ -344,8 +371,8 @@ public class BatchRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    public void testCacheMyFriendsRequest() throws IOException {
-        Response.getResponseCache().clearForTest();
+    public void testCacheMyFriendsRequest() throws Exception {
+        TestUtils.clearFileLruCache(Response.getResponseCache());
         TestSession session = openTestSessionWithSharedUser();
 
         Request request = Request.newMyFriendsRequest(session, null);
@@ -384,13 +411,13 @@ public class BatchRequestTests extends FacebookTestCase {
         assertNull(response.getError());
         assertTrue(!response.getIsFromCache());
 
-        Response.getResponseCache().clearForTest();
+        TestUtils.clearFileLruCache(Response.getResponseCache());
     }
 
     @MediumTest
     @LargeTest
-    public void testCacheMeAndMyFriendsRequest() throws IOException {
-        Response.getResponseCache().clearForTest();
+    public void testCacheMeAndMyFriendsRequest() throws Exception {
+        TestUtils.clearFileLruCache(Response.getResponseCache());
         TestSession session = openTestSessionWithSharedUser();
 
         Request requestMe = Request.newMeRequest(session, null);
@@ -433,7 +460,7 @@ public class BatchRequestTests extends FacebookTestCase {
             assertTrue(!response.getIsFromCache());
         }
 
-        Response.getResponseCache().clearForTest();
+        TestUtils.clearFileLruCache(Response.getResponseCache());
     }
 
     @MediumTest

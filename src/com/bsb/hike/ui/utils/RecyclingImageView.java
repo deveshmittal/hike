@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 /**
@@ -29,12 +30,19 @@ public class RecyclingImageView extends ImageView
 		super(context, attrs);
 	}
 
+	public RecyclingImageView(Context context, AttributeSet attrs, int defStyle)
+	{
+		super(context, attrs, defStyle);
+	}
+
 	/**
 	 * @see android.widget.ImageView#onDetachedFromWindow()
 	 */
 	@Override
 	protected void onDetachedFromWindow()
 	{
+		final Drawable previousDrawable = getDrawable();
+		Log.d("RecyclingImageView","prev drawable : " + (previousDrawable));
 		// This has been detached from Window, so clear the drawable
 		setImageDrawable(null);
 

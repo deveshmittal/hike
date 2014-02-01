@@ -172,6 +172,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		notifyDataSetChanged();
 	}
 
+	public boolean isDefaultTheme() {
+		return isDefaultTheme;
+	}
+
 	public void addMessage(ConvMessage convMessage) {
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent()) {
@@ -539,6 +543,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.sms_choice_unselected));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.sms_choice_unselected));
+				holder.smsToggle
+						.setButtonDrawable(R.drawable.sms_checkbox);
+				v.setBackgroundResource(R.drawable.bg_sms_toggle);
 			} else {
 				holder.hikeSmsText.setTextColor(context.getResources()
 						.getColor(R.color.white));
@@ -546,6 +553,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.white));
+				holder.smsToggle
+						.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
+				v.setBackgroundResource(R.drawable.bg_sms_toggle_custom_theme);
 			}
 
 			boolean smsToggleOn = Utils.getSendSmsPref(context);
@@ -917,6 +927,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.timestampcolor));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.list_item_header));
+				holder.container
+						.setBackgroundResource(R.drawable.bg_status_chat_thread);
 			} else {
 				holder.dayTextView.setTextColor(context.getResources()
 						.getColor(R.color.white));
@@ -924,10 +936,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources()
 						.getColor(R.color.white));
+				holder.container
+						.setBackgroundResource(R.drawable.bg_status_chat_thread_custom_theme);
 			}
-
-			holder.container
-					.setBackgroundResource(R.drawable.bg_status_chat_thread);
 
 			StatusMessage statusMessage = convMessage.getMetadata()
 					.getStatusMessage();
@@ -1016,6 +1027,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		holder.stickerPlaceholder.setVisibility(View.GONE);
 
 		if (convMessage.isFileTransferMessage()) {
+			holder.circularProgress
+					.setProgressColor(context
+							.getResources()
+							.getColor(
+									isDefaultTheme ? R.color.progress_colour_default_theme
+											: R.color.white));
+
 			final HikeFile hikeFile = metadata.getHikeFiles().get(0);
 			HikeFileType hikeFileType = hikeFile.getHikeFileType();
 
@@ -1033,7 +1051,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					|| hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 				if (hikeFile.getThumbnail() == null
 						&& !TextUtils.isEmpty(hikeFile.getFileKey())) {
-					thumbnail = HikeMessengerApp.getLruCache().getIconFromCache(hikeFile.getFileKey());
+					thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
 					
 					if (thumbnail != null) {
 						showThumbnail = true;
@@ -1904,35 +1922,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			hikeSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_unselected
-							: R.color.white));
+							: R.color.sms_choice_unselected_custom_theme));
 			regularSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_selected
 							: R.color.white));
 
-			hikeSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_unchecked));
-			regularSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_checked));
 		} else {
 			hikeSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_selected
 							: R.color.white));
 			regularSmsText.setTextColor(context.getResources().getColor(
 					isDefaultTheme ? R.color.sms_choice_unselected
-							: R.color.white));
+							: R.color.sms_choice_unselected_custom_theme));
 
-			hikeSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_checked));
-			regularSmsText.setTextSize(
-					TypedValue.COMPLEX_UNIT_PX,
-					context.getResources().getDimensionPixelSize(
-							R.dimen.sms_toggle_unchecked));
 		}
 		smsToggleSubtext.setText(ssb);
 	}
