@@ -121,7 +121,11 @@ public class MqttMessagesManager {
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			if (Utils.isGroupConversation(msisdn)) {
+			/*
+			 * We don't consider this packet if the msisdn is the user's
+			 * msisdn or a group conversation.
+			 */
+			if (Utils.isGroupConversation(msisdn) || userMsisdn.equals(msisdn)) {
 				return;
 			}
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
