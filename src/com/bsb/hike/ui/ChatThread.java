@@ -1940,6 +1940,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					mConversation.getMsisdn());
 			startActivity(intent);
 		}
+		saveDraft();
 	}
 
 	private boolean shouldShowLastSeen() {
