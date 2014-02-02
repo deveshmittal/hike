@@ -2992,6 +2992,7 @@ public class Utils {
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 		activity.sendBroadcast(intent);
+		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
 	public static void onCallClicked(Activity activity,

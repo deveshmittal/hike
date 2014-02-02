@@ -746,5 +746,6 @@
 	<string name="email_body">Hi,\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\nWith hike\'s hilarious new stickers, you\'ll surely never send another plain boring message!\nhike also gives you the choice of Privacy with Last Seen so that you can keep you close friends closer.\n\nDownload it now http://hike.in and join the fun!</string>
 	<string name="twitter_msg">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now http://hike.in #gethike</string>
 	<string name="native_sms_invite_1">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now and lets chat for free http://hike.in</string>
+	<string name="shortcut_created">Shortcut created</string>
 	
 </resources>
