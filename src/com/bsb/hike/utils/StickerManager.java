@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -353,7 +354,7 @@ public class StickerManager
 
 	public Map<String, StickerTaskBase> stickerTaskMap;
 
-	private LinkedHashSet<Sticker> recentStickers;
+	private Set<Sticker> recentStickers;
 
 	private List<StickerCategory> stickerCategories;
 
@@ -554,7 +555,7 @@ public class StickerManager
 		editor.commit();
 	}
 
-	public LinkedHashSet<Sticker> getRecentStickerList()
+	public Set<Sticker> getRecentStickerList()
 	{
 		return recentStickers;
 	}
@@ -716,9 +717,9 @@ public class StickerManager
 	 * 
 	 *         This function can return null if file doesnot exist.
 	 */
-	public LinkedHashSet<Sticker> getSortedListForCategory(StickerCategoryId catId)
+	public Set<Sticker> getSortedListForCategory(StickerCategoryId catId)
 	{
-		LinkedHashSet<Sticker> list = null;
+		Set<Sticker> list = null;
 		try
 		{
 			long t1 = System.currentTimeMillis();
@@ -727,15 +728,15 @@ public class StickerManager
 			if (!dir.exists())
 			{
 				dir.mkdirs();
-				return new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT);
+				return Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 			}
 			File catFile = new File(extDir, catId.name() + ".bin");
 			if (!catFile.exists())
-				return new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT);
+				return Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 			FileInputStream fileIn = new FileInputStream(catFile);
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			int size = in.readInt();
-			list = new LinkedHashSet<Sticker>(size);
+			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(size));
 			for (int i = 0; i < size; i++)
 			{
 				Sticker s = new Sticker();
@@ -754,7 +755,7 @@ public class StickerManager
 		return list;
 	}
 
-	public void saveSortedListForCategory(StickerCategoryId catId, LinkedHashSet<Sticker> list)
+	public void saveSortedListForCategory(StickerCategoryId catId, Set<Sticker> list)
 	{
 		try
 		{
