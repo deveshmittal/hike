@@ -932,4 +932,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		this.filteredFriendsList = filteredFriendsList;
 	}
 
+	public void destroy() {
+		friendsList.clear();
+		hikeContactsList.clear();
+		smsContactsList.clear();
+		filteredFriendsList.clear();
+		filteredHikeContactsList.clear();
+		filteredSmsContactsList.clear();
+	}
 }

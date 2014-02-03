@@ -147,6 +147,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -2520,7 +2521,7 @@ public class Utils {
 		case CHAT_BG_FTUE:
 			container.setBackgroundResource(R.drawable.bg_tip_top_right);
 			tipText.setText(R.string.chat_bg_ftue_tip);
-			break;	
+			break;
 		}
 		if (closeTip != null) {
 			closeTip.setOnClickListener(new OnClickListener() {
@@ -3111,6 +3112,14 @@ public class Utils {
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
 		prefEditor.commit();
+	}
+
+	public static Intent getHomeActivityIntent(Context context,
+			final int tabIndex) {
+		final Intent intent = new Intent(context, HomeActivity.class);
+		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+
+		return intent;
 	}
 
 	public static void addCommonDeviceDetails(JSONObject jsonObject,
