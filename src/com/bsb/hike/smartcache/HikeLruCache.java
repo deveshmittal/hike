@@ -285,13 +285,13 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 
 	public BitmapDrawable getIconFromCache(String key,boolean rounded)
 	{
-		key = rounded ? key + IconLoader.ROUND_SUFFIX : key;
-		RecyclingBitmapDrawable b = get(key);
+		String cacheKey = rounded ? key + IconLoader.ROUND_SUFFIX : key;
+		RecyclingBitmapDrawable b = get(cacheKey);
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
 			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
-			putInCache(key, rbd);
+			putInCache(cacheKey, rbd);
 			return rbd;
 		}
 		else
