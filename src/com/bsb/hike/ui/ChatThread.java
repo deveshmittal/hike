@@ -4475,13 +4475,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		dialog.setOnCancelListener(new OnCancelListener() {
 
 			/*
-			 * If user cancels non fixed category , he should be taken to humanoid whose index is 1
+			 * If user cancels non fixed category , he should be taken to recents if not empty else to humanoid whose index is 1
 			 * */
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid) && !category.categoryId.equals(StickerCategoryId.doggy)
 						&& !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name())) {
-					emoticonViewPager.setCurrentItem(1, false);
+					int idx = 0;
+					if(StickerManager.getInstance().getRecentStickerList().size() == 0)
+						idx = 1;
+					emoticonViewPager.setCurrentItem(idx, false);
 				}
 			}
 		});
