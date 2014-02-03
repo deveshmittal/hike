@@ -5,14 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +32,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.facebook.FacebookRequestError.Category;
 
 public class StickerManager
 {
@@ -401,9 +404,10 @@ public class StickerManager
 
 	public void setupStickerCategoryList(SharedPreferences preferences)
 	{
-		/*TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and 
-				 stickerCategories will be called from UI thread also. 
-		*/
+		/*
+		 * TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and stickerCategories will be called from UI thread
+		 * also.
+		 */
 		stickerCategories = new ArrayList<StickerCategory>();
 		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = HikeConversationsDatabase.getInstance().stickerDataForCategories();
 		for (StickerCategoryId s : StickerCategoryId.values())
@@ -441,8 +445,44 @@ public class StickerManager
 		Iterator<StickerCategory> it = stickerCategories.iterator();
 		while (it.hasNext())
 		{
-			if (it.next().categoryId.name().equals(removedCategoryId))
+			StickerCategory cat = it.next();
+			if (cat.categoryId.equals(removedCategoryId))
+			{
+				removeCategoryFromRecents(cat);
 				it.remove();
+			}
+		}
+	}
+
+	private void removeCategoryFromRecents(StickerCategory category)
+	{
+		if (category.categoryId.equals(StickerCategoryId.doggy))
+		{
+			for (int i = 0; i < LOCAL_STICKER_IDS_DOGGY.length; i++)
+			{
+				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_DOGGY[i], i));
+			}
+		}
+		else if (category.categoryId.equals(StickerCategoryId.humanoid))
+		{
+			for (int i = 0; i < LOCAL_STICKER_IDS_HUMANOID.length; i++)
+			{
+				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_HUMANOID[i], i));
+			}
+		}
+		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.categoryId.name());
+		if (categoryDirPath != null)
+		{
+			File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+
+			if (categoryDir.exists())
+			{
+				String[] stickerIds = categoryDir.list();
+				for (String stickerId : stickerIds)
+				{
+					recentStickers.remove(new Sticker(category, stickerId));
+				}
+			}
 		}
 	}
 
@@ -524,7 +564,7 @@ public class StickerManager
 		boolean isRemoved = recentStickers.remove(st);
 		if (isRemoved) // this means list size is less than 30
 			recentStickers.add(st);
-		else if (recentStickers.size() == RECENT_STICKERS_COUNT) // if size is already 30 remove first element and then add
+		else if (recentStickers.size() == RECENT_STICKERS_COUNT) // if size is already RECENT_STICKERS_COUNT remove first element and then add
 		{
 			Sticker firstSt = recentStickers.iterator().next();
 			if (firstSt != null)
@@ -535,6 +575,11 @@ public class StickerManager
 		{
 			recentStickers.add(st);
 		}
+	}
+
+	public void removeStickerFromRecents(Sticker st)
+	{
+		recentStickers.remove(st);
 	}
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
@@ -740,5 +785,38 @@ public class StickerManager
 		{
 			Log.e(getClass().getSimpleName(), "Exception while saving category file.", e);
 		}
+	}
+
+	public void deleteStickers()
+	{
+		/*
+		 * First delete all stickers, if any, in the internal memory
+		 */
+		String dirPath = context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT;
+		File dir = new File(dirPath);
+		if (dir.exists())
+		{
+			Utils.deleteFile(dir);
+		}
+
+		/*
+		 * Next is the external memory. We first check if its available or not.
+		 */
+		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		{
+			return;
+		}
+		String extDirPath = context.getExternalFilesDir(null).getPath() + HikeConstants.STICKERS_ROOT;
+		File extDir = new File(extDirPath);
+		if (extDir.exists())
+		{
+			Utils.deleteFile(extDir);
+		}
+		
+		/* Delete recent stickers*/
+		String recentsDir = getStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name());
+		File rDir = new File(recentsDir);
+		if(rDir.exists())
+			Utils.deleteFile(rDir);
 	}
 }
