@@ -645,8 +645,8 @@ public class UploadFileTask extends FileTransferBase
 						try
 						{
 							int maxMemory = (int) Runtime.getRuntime().maxMemory();
-							if( chunkSize > (maxMemory / 4) )
-							chunkSize = (maxMemory / 4) ;
+							if( chunkSize > (maxMemory / 8) )
+							chunkSize = (maxMemory / 8) ;
 						}
 						catch(Exception e)
 						{
@@ -657,9 +657,8 @@ public class UploadFileTask extends FileTransferBase
 						if (end > (start + chunkSize))
 						{
 							end = start + chunkSize;
-							end--;
 						}
-						
+						end--;
 
 						fileByteLength = end - start + 1;
 						fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
