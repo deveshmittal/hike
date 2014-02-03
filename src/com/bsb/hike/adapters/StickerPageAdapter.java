@@ -51,7 +51,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private LayoutInflater inflater;
 	private StickerCategory category;
 	private int numStickerRows;
-	private StickerLoader mWorker;
+	private StickerLoader stickerLoader;
 	
 	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
 			List<ViewType> viewTypeList,StickerLoader worker) {
@@ -60,7 +60,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 		this.viewTypeList = viewTypeList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
-		this.mWorker = worker;
+		this.stickerLoader = worker;
 		calculateNumRowsAndSize(false);
 	}
 
@@ -200,23 +200,22 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					return null;
 				Sticker sticker = stickerList.get(index);
 
-				if (sticker.getStickerIndex() != -1) {
-					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {                                              
-						imageView
-								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker
-										.getStickerIndex()]);
-					} else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
-						imageView
-								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker
-										.getStickerIndex()]);
+				if (sticker.getStickerIndex() != -1)
+				{
+					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView);
+						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()]);
 					}
-				} else {
-					mWorker.loadImage(sticker.getSmallStickerPath(activity), imageView);
-					//imageLoader.displayImage("file://"+sticker.getSmallStickerPath(activity),imageView,op);
-						
-					/*imageView.setImageDrawable(IconCacheManager.getInstance()
-							.getStickerThumbnail(
-									sticker.getSmallStickerPath(activity)));*/
+					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView);
+						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
+					}
+				}
+				else
+				{
+					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView);
 				}
 				imageView.setTag(sticker);
 

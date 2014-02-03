@@ -1,17 +1,13 @@
 package com.bsb.hike.smartImageLoader;
 
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
-import com.bsb.hike.utils.Utils;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 
 public class StickerLoader extends ImageWorker
 {
 	private Context ctx;
+
 	public StickerLoader(Context ctx)
 	{
 		super();
@@ -22,16 +18,15 @@ public class StickerLoader extends ImageWorker
 	@Override
 	protected Bitmap processBitmap(String data)
 	{
-		Log.d("StickerLoader",mResources.toString());
-		BitmapDrawable bd = null;
-		if (Utils.hasHoneycomb())
+		if (data.contains("res:"))
 		{
-			bd = new BitmapDrawable(mResources,BitmapFactory.decodeFile(data));
+			int id = Integer.parseInt(data.substring(data.indexOf(":") + 1));
+			return BitmapFactory.decodeResource(mResources, id);
 		}
 		else
-			bd = new RecyclingBitmapDrawable(mResources,BitmapFactory.decodeFile(data));
-		
-		return bd.getBitmap();
+		{
+			return BitmapFactory.decodeFile(data);
+		}
 	}
 
 }
