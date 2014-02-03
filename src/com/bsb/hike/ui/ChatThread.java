@@ -171,7 +171,6 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -1354,7 +1353,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						.getIntExtra(StickerManager.FWD_STICKER_INDEX,-1);
 				Sticker sticker = new Sticker(categoryId, stickerId,stickerIdx);
 				sendSticker(sticker);
-
+				// add this sticker to recents
+				StickerManager.getInstance().addRecentSticker(sticker);
 				/*
 				 * Making sure the sticker is not forwarded again on orientation
 				 * change
@@ -4635,13 +4635,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		dialog.setOnCancelListener(new OnCancelListener() {
 
 			/*
-			 * If user cancels non fixed category , he should be taken to humanoid whose index is 1
+			 * If user cancels non fixed category , he should be taken to recents if not empty else to humanoid whose index is 1
 			 * */
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid) && !category.categoryId.equals(StickerCategoryId.doggy)
 						&& !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name())) {
-					emoticonViewPager.setCurrentItem(1, false);
+					int idx = 0;
+					if(StickerManager.getInstance().getRecentStickerList().size() == 0)
+						idx = 1;
+					emoticonViewPager.setCurrentItem(idx, false);
 				}
 			}
 		});

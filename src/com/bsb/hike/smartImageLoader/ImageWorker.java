@@ -34,6 +34,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Utils;
@@ -74,7 +75,7 @@ public abstract class ImageWorker
 	{
 		mResources = ctx.getResources();
 	}
-	
+
 	public void loadImage(String data, boolean rounded, ImageView imageView)
 	{
 		String key = data + (rounded ? ROUND_SUFFIX : "");
@@ -107,6 +108,7 @@ public abstract class ImageWorker
 
 		if (value != null)
 		{
+			Log.d(TAG,data + " Bitmap found in cache.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
@@ -250,7 +252,7 @@ public abstract class ImageWorker
 	/**
 	 * The actual AsyncTask that will asynchronously process the image.
 	 */
-	private class BitmapWorkerTask extends MyAsyncTask<String, Void, RecyclingBitmapDrawable>
+	private class BitmapWorkerTask extends MyAsyncTask<String, Void, BitmapDrawable>
 	{
 		private String data;
 
@@ -265,13 +267,13 @@ public abstract class ImageWorker
 		 * Background processing.
 		 */
 		@Override
-		protected RecyclingBitmapDrawable doInBackground(String... params)
+		protected BitmapDrawable doInBackground(String... params)
 		{
 			Log.d(TAG, "doInBackground - starting work");
 			data = params[0];
 			final String dataString = data;
 			Bitmap bitmap = null;
-			RecyclingBitmapDrawable drawable = null;
+			BitmapDrawable drawable = null;
 
 			// Wait here if work is paused and the task is not cancelled
 			synchronized (mPauseWorkLock)
@@ -303,11 +305,22 @@ public abstract class ImageWorker
 			// bitmap to our cache as it might be used again in the future
 			if (bitmap != null)
 			{
-				drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+
+				if (Utils.hasHoneycomb())
+				{
+					// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+					drawable = new BitmapDrawable(mResources, bitmap);
+				}
+				else
+				{
+					// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+					// which will recycle automagically
+					drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+				}
 
 				if (mImageCache != null)
 				{
-					Log.d(TAG,"Putting data in cache : "+dataString);
+					Log.d(TAG, "Putting data in cache : " + dataString);
 					mImageCache.putInCache(dataString, drawable);
 				}
 			}
@@ -319,7 +332,7 @@ public abstract class ImageWorker
 		 * Once the image is processed, associates it to the imageView
 		 */
 		@Override
-		protected void onPostExecute(RecyclingBitmapDrawable value)
+		protected void onPostExecute(BitmapDrawable value)
 		{
 			// if cancel was called on this task or the "exit early" flag is set then we're done
 			if (isCancelled() || mExitTasksEarly)
@@ -335,7 +348,7 @@ public abstract class ImageWorker
 		}
 
 		@Override
-		protected void onCancelled(RecyclingBitmapDrawable value)
+		protected void onCancelled(BitmapDrawable value)
 		{
 			super.onCancelled(value);
 			synchronized (mPauseWorkLock)
@@ -496,6 +509,44 @@ public abstract class ImageWorker
 		return BitmapFactory.decodeFile(filename, options);
 	}
 
+	/**
+	 * Decode and sample down a bitmap from a file to the requested width and height.
+	 * 
+	 * @param filename
+	 *            The full path of the file to decode
+	 * @param reqWidth
+	 *            The requested width of the resulting bitmap
+	 * @param reqHeight
+	 *            The requested height of the resulting bitmap
+	 * @param cache
+	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
+	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
+	 */
+	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight, HikeLruCache cache)
+	{
+		byte [] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
+		if(icondata == null)
+			return null;
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		
+		BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+
+		// Calculate inSampleSize
+		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+		// If we're running on Honeycomb or newer, try to use inBitmap
+		if (Utils.hasHoneycomb())
+		{
+			addInBitmapOptions(options, cache);
+		}
+
+		// Decode bitmap with inSampleSize set
+		options.inJustDecodeBounds = false;
+		return BitmapFactory.decodeByteArray(icondata,0,icondata.length, options);
+	}
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	protected static void addInBitmapOptions(BitmapFactory.Options options, HikeLruCache cache)
 	{
@@ -510,6 +561,7 @@ public abstract class ImageWorker
 
 			if (inBitmap != null)
 			{
+				Log.d(TAG,"Found a bitmap in reusable set.");
 				options.inBitmap = inBitmap;
 			}
 		}

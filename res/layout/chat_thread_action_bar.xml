@@ -29,7 +29,7 @@
             android:layout_marginRight="4dp"
             android:layout_marginTop="5dp" >
 
-            <ImageView
+            <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
                 style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />

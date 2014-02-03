@@ -16,6 +16,8 @@
 
 package com.bsb.hike.cropimage;
 
+import com.bsb.hike.ui.utils.RecyclingImageView;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -26,7 +28,7 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 
-abstract class ImageViewTouchBase extends ImageView {
+abstract class ImageViewTouchBase extends RecyclingImageView {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "ImageViewTouchBase";

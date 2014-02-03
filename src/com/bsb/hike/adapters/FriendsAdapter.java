@@ -32,7 +32,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
@@ -85,8 +84,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private IconLoader iconloader;
 	private boolean listFetchedOnce;
 
+	private int mIconImageSize;
+	
 	public FriendsAdapter(final Context context) {
-		this.iconloader = new IconLoader(context,180);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		this.iconloader = new IconLoader(context,mIconImageSize);
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();

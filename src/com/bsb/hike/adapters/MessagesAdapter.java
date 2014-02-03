@@ -91,7 +91,6 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-import com.bsb.hike.view.CustomProgress;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
@@ -212,11 +211,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isDefaultTheme = true;
 	private IconLoader iconLoader;
 	private StickerLoader largeStickerLoader;
+	private int mIconImageSize;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.largeStickerLoader = new StickerLoader(context);
-		this.iconLoader = new IconLoader(context,180);
+		this.iconLoader = new IconLoader(context,mIconImageSize);
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;

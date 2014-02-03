@@ -19,7 +19,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -32,10 +31,8 @@ import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
-import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
@@ -58,6 +55,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private boolean lastSeenPref;
 	private IconLoader iconLoader;
 	private TimelineImageLoader bigPicImageLoader;
+	private int mIconImageSize;
 
 	public ProfileAdapter(ProfileActivity profileActivity,
 			List<ProfileItem> itemList, GroupConversation groupConversation,
@@ -79,7 +77,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		this.isContactBlocked = isContactBlocked;
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
 				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
-		this.iconLoader = new IconLoader(context,180);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		this.iconLoader = new IconLoader(context,mIconImageSize);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
 	}

@@ -23,7 +23,6 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -32,12 +31,14 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 	private IconLoader iconLoader;
 	private int mResourceId;
+	private int mIconImageSize;
 
 	public ConversationsAdapter(Context context, int textViewResourceId,
 			List<Conversation> objects) {
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
-		iconLoader = new IconLoader(context,180);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconLoader = new IconLoader(context,mIconImageSize);
 	}
 
 	@Override

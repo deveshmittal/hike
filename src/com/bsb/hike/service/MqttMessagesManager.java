@@ -46,8 +46,8 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -1137,6 +1137,7 @@ public class MqttMessagesManager {
 						File stickerSmall = new File(categoryDir
 								+ HikeConstants.SMALL_STICKER_ROOT, stickerId);
 						stickerSmall.delete();
+						StickerManager.getInstance().removeStickerFromRecents(new Sticker(categoryId, stickerId));
 					}
 				}
 			}
