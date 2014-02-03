@@ -958,6 +958,17 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 										statusMessage.getMappedId(), bytes,
 										false);
 
+								String srcFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+										+ HikeConstants.PROFILE_ROOT + "/" +  msisdn + ".jpg";
+
+								String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+										+ HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
+
+								/*
+								 * Making a status update file so we don't need to download this file again.
+								 */
+								Utils.copyFile(srcFilePath, destFilePath, null);
+								
 								int unseenUserStatusCount = preferences
 										.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
 												0);
