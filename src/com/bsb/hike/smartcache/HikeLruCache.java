@@ -15,6 +15,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.customClasses.MySoftReference;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -90,12 +91,12 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		}
 	}
 
-	private final Set<SoftReference<Bitmap>> reusableBitmaps;
+	private final Set<MySoftReference<Bitmap>> reusableBitmaps;
 
 	public HikeLruCache(ImageCacheParams cacheParams)
 	{
 		super(cacheParams.memCacheSize);
-		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>()) : null;
+		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<MySoftReference<Bitmap>>()) : null;
 	}
 
 	public static HikeLruCache getInstance(ImageCacheParams cacheParams)
@@ -164,7 +165,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			{
 				// We're running on Honeycomb or later, so add the bitmap
 				// to a SoftReference set for possible use with inBitmap later
-				reusableBitmaps.add(new SoftReference<Bitmap>(oldValue.getBitmap()));
+				reusableBitmaps.add(new MySoftReference<Bitmap>(oldValue.getBitmap()));
 			}
 		}
 	}
@@ -193,7 +194,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		{
 			synchronized (reusableBitmaps)
 			{
-				final Iterator<SoftReference<Bitmap>> iterator = reusableBitmaps.iterator();
+				final Iterator<MySoftReference<Bitmap>> iterator = reusableBitmaps.iterator();
 				Bitmap item;
 
 				while (iterator.hasNext())
