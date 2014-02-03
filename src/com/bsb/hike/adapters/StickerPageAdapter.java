@@ -36,7 +36,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	public static final int MAX_STICKER_PER_ROW_LANDSCAPE = 6;
 
 	public static enum ViewType {
-		STICKER, UPDATING_STICKER, DOWNLOADING_MORE
+		STICKER, UPDATING_STICKER, DOWNLOADING_MORE, RECENT_EMPTY
 	}
 
 	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
@@ -96,6 +96,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			} else {
 				this.numStickerRows = stickerList.size() / numItemsRow + 1;
 			}
+			if (category.categoryId.equals(StickerCategoryId.recent)){
+				viewTypeList.clear();
+			}
 
 			int count = 0;
 			
@@ -115,6 +118,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			{
 				viewTypeList.add(category.updateAvailable ? 1 : 0, ViewType.STICKER);
 			}
+		} else if (category.categoryId.equals(StickerCategoryId.recent)){
+			viewTypeList.add(ViewType.RECENT_EMPTY);
 		}
 	}
 
@@ -158,6 +163,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			case DOWNLOADING_MORE:
 				convertView = inflater.inflate(
 						R.layout.downloading_new_stickers, null);
+				break;
+			case RECENT_EMPTY:
+				convertView = inflater.inflate(
+						R.layout.recent_empty_view, null);
 				break;
 			}
 		}
@@ -259,6 +268,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
 			break;
 		case DOWNLOADING_MORE:
+			break;
+		case RECENT_EMPTY:
 			break;
 		}
 
