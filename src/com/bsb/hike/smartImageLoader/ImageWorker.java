@@ -108,7 +108,7 @@ public abstract class ImageWorker
 		if (value != null)
 		{
 			// Bitmap found in memory cache
-			imageView.setImageDrawable(new BitmapDrawable(value.getBitmap()));
+			imageView.setImageDrawable(value);
 		}
 		else if (cancelPotentialWork(data, imageView))
 		{
@@ -330,7 +330,7 @@ public abstract class ImageWorker
 			final ImageView imageView = getAttachedImageView();
 			if (value != null && imageView != null)
 			{
-				setImageDrawable(imageView, new RecyclingBitmapDrawable(value.getBitmap()));
+				setImageDrawable(imageView, value);
 			}
 		}
 

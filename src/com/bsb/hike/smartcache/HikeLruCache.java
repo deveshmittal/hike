@@ -291,10 +291,10 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
 			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
 			putInCache(key, rbd);
-			return new RecyclingBitmapDrawable(rbd.getBitmap());
+			return rbd;
 		}
 		else
-			return new RecyclingBitmapDrawable(b.getBitmap());
+			return b;
 	}
 	
 	public BitmapDrawable getFileIconFromCache(String key)
@@ -307,10 +307,10 @@ public class HikeLruCache extends LruCache<String, RecyclingBitmapDrawable>
 				return null;
 			RecyclingBitmapDrawable rbd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
 			putInCache(key, rbd);
-			return new RecyclingBitmapDrawable(rbd.getBitmap());
+			return rbd;
 		}
 		else
-			return new RecyclingBitmapDrawable(b.getBitmap());
+			return b;
 	}
 	
 	public void deleteIconForMSISDN(String msisdn)
