@@ -2116,8 +2116,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				return;
 			}
 			Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
-			if (convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
-					&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
+			if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition))
+					&& isMessageUndelivered(convMessage) && convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
 			{
 				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
 
