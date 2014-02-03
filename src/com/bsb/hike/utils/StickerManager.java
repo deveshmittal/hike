@@ -567,10 +567,13 @@ public class StickerManager
 			recentStickers.add(st);
 		else if (recentStickers.size() == RECENT_STICKERS_COUNT) // if size is already RECENT_STICKERS_COUNT remove first element and then add
 		{
-			Sticker firstSt = recentStickers.iterator().next();
-			if (firstSt != null)
-				recentStickers.remove(firstSt);
-			recentStickers.add(st);
+			synchronized (recentStickers)
+			{
+				Sticker firstSt = recentStickers.iterator().next();
+				if (firstSt != null)
+					recentStickers.remove(firstSt);
+				recentStickers.add(st);
+			}
 		}
 		else
 		{
@@ -771,10 +774,13 @@ public class StickerManager
 			FileOutputStream fileOut = new FileOutputStream(catFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeInt(list.size());
-			Iterator<Sticker> it = list.iterator();
-			while (it.hasNext())
+			synchronized (recentStickers)
 			{
-				it.next().serializeObj(out);
+				Iterator<Sticker> it = list.iterator();
+				while (it.hasNext())
+				{
+					it.next().serializeObj(out);
+				}
 			}
 			out.flush();
 			out.close();
@@ -813,11 +819,11 @@ public class StickerManager
 		{
 			Utils.deleteFile(extDir);
 		}
-		
-		/* Delete recent stickers*/
+
+		/* Delete recent stickers */
 		String recentsDir = getStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name());
 		File rDir = new File(recentsDir);
-		if(rDir.exists())
+		if (rDir.exists())
 			Utils.deleteFile(rDir);
 	}
 }
