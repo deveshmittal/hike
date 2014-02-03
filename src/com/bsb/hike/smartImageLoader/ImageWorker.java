@@ -21,7 +21,6 @@ import java.lang.ref.WeakReference;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -35,7 +34,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
@@ -110,6 +108,7 @@ public abstract class ImageWorker
 
 		if (value != null)
 		{
+			Log.d(TAG,data + " Bitmap found in cache.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
@@ -562,6 +561,7 @@ public abstract class ImageWorker
 
 			if (inBitmap != null)
 			{
+				Log.d(TAG,"Found a bitmap in reusable set.");
 				options.inBitmap = inBitmap;
 			}
 		}
