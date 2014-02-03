@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.SocialNetFriendInfo;
-import com.bsb.hike.utils.ImageLoader;
+import com.bsb.hike.smartImageLoader.SocialIconLoader;
 import com.bsb.hike.utils.Utils;
 
 public class SocialNetInviteAdapter extends
@@ -33,7 +33,8 @@ public class SocialNetInviteAdapter extends
 	private ContactFilter filter;
 	private Context context;
 	private LayoutInflater l_Inflater;
-	ImageLoader imgLoader;
+	private SocialIconLoader imgLoader;
+	private int mIconImageSize; 
 
 	public SocialNetInviteAdapter(
 			Context context,
@@ -47,7 +48,8 @@ public class SocialNetInviteAdapter extends
 				completeFbFriendsList.size());
 		this.completeFriendsList.addAll(completeFbFriendsList);
 		this.filter = new ContactFilter();
-		imgLoader = new ImageLoader();
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		imgLoader = new SocialIconLoader(context,mIconImageSize);
 
 	}
 

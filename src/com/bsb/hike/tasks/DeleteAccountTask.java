@@ -1,7 +1,5 @@
 package com.bsb.hike.tasks;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -12,18 +10,14 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 

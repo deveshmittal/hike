@@ -27,6 +27,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 	private Set<String> blockedUsers;
 	private Activity context;
 	private IconLoader iconLoader;
+	private int mIconImageSize;
 
 	private static List<ContactInfo> getItems(Activity activity) {
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
@@ -40,7 +41,8 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 		this.context = activity;
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		this.blockedUsers = db.getBlockedUsers();
-		iconLoader = new IconLoader(context,180);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconLoader = new IconLoader(context,mIconImageSize);
 	}
 
 	@Override

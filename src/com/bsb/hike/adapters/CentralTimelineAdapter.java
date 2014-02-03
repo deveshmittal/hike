@@ -54,6 +54,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private Context context;
 	private String userMsisdn;
 	private int mBigImageSize;
+	private int mIconImageSize;
 	private TimelineImageLoader bigPicImageLoader;
 	private IconLoader iconImageLoader;
 	private LayoutInflater inflater;
@@ -79,10 +80,11 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			List<StatusMessage> statusMessages, String userMsisdn) {
 		this.context = context;
 		mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
-		this.iconImageLoader = new IconLoader(context,180);
+		this.iconImageLoader = new IconLoader(context,mIconImageSize);
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;

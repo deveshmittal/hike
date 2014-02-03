@@ -46,7 +46,6 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;

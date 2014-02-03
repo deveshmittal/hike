@@ -149,11 +149,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private boolean isDefaultTheme = true;
 	private IconLoader iconLoader;
 	private StickerLoader largeStickerLoader;
+	private int mIconImageSize;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.largeStickerLoader = new StickerLoader(context);
-		this.iconLoader = new IconLoader(context,180);
+		this.iconLoader = new IconLoader(context,mIconImageSize);
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;

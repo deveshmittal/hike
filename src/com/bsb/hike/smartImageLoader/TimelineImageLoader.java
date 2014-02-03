@@ -17,13 +17,9 @@
 package com.bsb.hike.smartImageLoader;
 
 import java.io.File;
-import java.io.IOException;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;

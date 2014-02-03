@@ -55,6 +55,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private boolean lastSeenPref;
 	private IconLoader iconLoader;
 	private TimelineImageLoader bigPicImageLoader;
+	private int mIconImageSize;
 
 	public ProfileAdapter(ProfileActivity profileActivity,
 			List<ProfileItem> itemList, GroupConversation groupConversation,
@@ -76,7 +77,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		this.isContactBlocked = isContactBlocked;
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(
 				context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
-		this.iconLoader = new IconLoader(context,180);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		this.iconLoader = new IconLoader(context,mIconImageSize);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
 	}
