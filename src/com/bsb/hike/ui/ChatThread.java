@@ -1260,6 +1260,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
+				
 				String fileKey = null;
 				String filePath = intent
 						.getStringExtra(HikeConstants.Extras.FILE_PATH);
@@ -1280,8 +1281,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:"
 						+ fileType + " Path: " + filePath);
-				initialiseFileTransfer(filePath, hikeFileType, fileType,
-						isRecording, recordingDuration, true);
+				
+				if (Utils.isPicasaUri(filePath))
+				{
+					FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath),hikeFileType,mContactNumber,mConversation.isOnhike());
+				}
+				else
+				{
+					initialiseFileTransfer(filePath, hikeFileType, fileType,isRecording, recordingDuration, true);
+				}
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
