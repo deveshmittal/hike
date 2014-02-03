@@ -540,10 +540,15 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 						.getParcelableExtra(Intent.EXTRA_STREAM);
 				Log.d(getClass().getSimpleName(),
 						"File path uri: " + fileUri.toString());
+				fileUri = Utils.makePicasaUri(fileUri);
 				String fileUriStart = "file:";
 				String fileUriString = fileUri.toString();
 				String filePath;
-				if (fileUriString.startsWith(fileUriStart)) {
+				if(Utils.isPicasaUri(fileUriString))
+				{
+					filePath = fileUriString;
+				}
+				else if (fileUriString.startsWith(fileUriStart)) {
 					File selectedFile = new File(URI.create(fileUriString));
 					/*
 					 * Done to fix the issue in a few Sony devices.

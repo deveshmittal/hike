@@ -94,7 +94,8 @@
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/ic_bubble_white_selector"
 	            android:gravity="center_vertical"
-	            android:orientation="vertical" >
+	            android:orientation="vertical"
+	            android:paddingRight="4dp">
 
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
@@ -233,7 +234,7 @@
                         </LinearLayout>
 					</RelativeLayout>
 				
-                    <ImageView
+                    <!-- <ImageView
 		                 android:id="@+id/audio_rec_progress"
 		                 android:layout_alignLeft="@id/overlayBg"
 	                     android:layout_alignTop="@id/overlayBg"
@@ -241,14 +242,32 @@
 	                     android:layout_width="0dp"
                          android:layout_height="match_parent"
 		                 android:background="@drawable/bg_grey_dark"
-		                 android:visibility="gone" />
+		                 android:visibility="gone" /> -->
+                    
+                    <!-- <com.bsb.hike.view.CustomProgress 
+	                 android:id="@+id/audio_rec_progress"
+	                 android:layout_gravity="center"
+                     android:layout_height="32dp"
+                     android:layout_width="108dp"
+	                 android:visibility="gone" /> -->
+                    
+                    <ProgressBar
+                    android:id="@+id/audio_rec_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_gravity="center"
+                    android:layout_height="32dp"
+                    android:layout_width="108dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/recording_play_progress" />
                     
                     <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/rec_duration"
-	                    android:layout_alignLeft="@id/overlayBg"
-	                    android:layout_alignTop="@id/overlayBg"
-	                    android:layout_alignRight="@id/overlayBg"
-	                    android:layout_alignBottom="@id/overlayBg"
+	                    android:layout_alignLeft="@id/audio_rec_progress"
+	                    android:layout_alignTop="@id/audio_rec_progress"
+	                    android:layout_alignRight="@id/audio_rec_progress"
+	                    android:layout_alignBottom="@id/audio_rec_progress"
 	                    android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 	                    android:background="#00000000"
@@ -293,7 +312,7 @@
                             android:layout_width="40dp"
                             android:layout_height="32dp"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="4dp"
                             android:scaleType="centerInside"
                             android:background="@null"
                             android:src="@drawable/ic_open_received_file"

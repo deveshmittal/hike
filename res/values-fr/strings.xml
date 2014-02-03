@@ -103,7 +103,7 @@
 	<string name="invited_to_gc">%1$s a été invité(e)</string>
 	<string name="share">Partager</string>
 	<string name="start_rec">Enregistreur</string>
-	<string name="recording">ENREGISTREMENT</string>
+	<string name="recording">Enregistrement</string>
 	<string name="start">Démarrer</string>
 	<string name="stop">Arrêt</string>
 	<string name="preview">Aperçu</string>
@@ -211,6 +211,13 @@
 	<string name="sound_msg">Jouer un son si nouveau message</string>
 	<string name="free_sms">SMS gratuits vers Inde</string>
 	<string name="free_sms_msg">Active et envoie des SMS en Inde</string>
+	<string name="auto_download_media">Téléchargement automatique des fichiers multimédias</string>
+	<string name="auto_download_media_hinttext">Paramètres de téléchargement des fichiers photos, vidéo et audio</string>
+	<string name="md_auto_download_media">Si connecté au réseau mobile</string>
+	<string name="wf_auto_download_media">Si connecté au Wi-Fi</string>
+	<string name="auto_download_image_title">Images</string>
+	<string name="auto_download_video_title">Vidéo</string>
+	<string name="auto_download_audio_title">Audio</string>
 	<string name="delete_account">Supprimer le compte</string>
 	<string name="delete_account_msg">Supprimer définitivement ton compte</string>
 	<string name="unlink_account">Désassocier compte</string>
@@ -711,5 +718,5 @@
 	<string name="apply">Appliquer</string>
 	<string name="chat_theme_tip">Le thème du chat va changer pour vous et votre amie</string>
 	<string name="chat_theme_tip_group">Le thème du chat va changer pour l\'ensemble du groupe</string>		
-				
+	<string name="recording_display_name">Enregistrement</string>		
 </resources>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customProgress="http://schemas.android.com/apk/res/com.bsb.hike.view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="30dp"
@@ -82,7 +83,7 @@
 	                changed the file thumbnail view with the following relative view
 	                that contains thumbnail + the realtion view of the overlay
 	            -->
-                <RelativeLayout
+                <RelativeLayout 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
 
@@ -196,22 +197,30 @@
                         </LinearLayout>
 				</RelativeLayout>
 				
-                <ImageView
+               <!--  <com.bsb.hike.view.CustomProgress 
 	                 android:id="@+id/audio_rec_progress"
-	                 android:layout_alignLeft="@id/overlayBg"
-                     android:layout_alignTop="@id/overlayBg"
-                     android:layout_alignBottom="@id/overlayBg"
-                     android:layout_height="match_parent"
-                     android:layout_width="0dp"
-	                 android:background="@drawable/bg_grey_dark"
-	                 android:visibility="gone" />
+	                 android:layout_gravity="center"
+                     android:layout_height="32dp"
+                     android:layout_width="108dp"
+	                 android:visibility="gone" /> -->
+                
+                <ProgressBar
+                    android:id="@+id/audio_rec_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_gravity="center"
+                    android:layout_height="32dp"
+                    android:layout_width="108dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/recording_play_progress" />
 					
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/rec_duration"
-	                android:layout_alignLeft="@id/overlayBg"
-                    android:layout_alignTop="@id/overlayBg"
-                    android:layout_alignRight="@id/overlayBg"
-                    android:layout_alignBottom="@id/overlayBg"
+	                android:layout_alignLeft="@id/audio_rec_progress"
+                    android:layout_alignTop="@id/audio_rec_progress"
+                    android:layout_alignRight="@id/audio_rec_progress"
+                    android:layout_alignBottom="@id/audio_rec_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#00000000"
@@ -256,7 +265,7 @@
                     android:layout_width="40dp"
                     android:layout_height="32dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="3dp"
+                    android:layout_marginLeft="4dp"
                     android:background="@drawable/bg_audio_btn"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_play_audio"

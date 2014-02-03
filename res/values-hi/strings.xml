@@ -104,7 +104,7 @@
 	<string name="invited_to_gc">%1$s को आमंत्रित किया गया</string>
 	<string name="share">साझा करें</string>
 	<string name="start_rec">रिकॉर्डर </string>
-	<string name="recording">रिकॉर्डिंग </string>
+	<string name="recording">रिकॉर्डिंग</string>
 	<string name="start">शुरु करें</string>
 	<string name="stop">बंद करें</string>
 	<string name="preview">समीक्षा</string>
@@ -212,6 +212,13 @@
 	<string name="sound_msg">नए संदेश पर ध्वनि बजाएं</string>
 	<string name="free_sms">भारत में मुफ्त SMS</string>
 	<string name="free_sms_msg">भारतमें SMS भेजने हेतु चालू करें</string>
+	<string name="auto_download_media">मीडिया स्वचालित रूप से डाउनलोड करें</string>
+	<string name="auto_download_media_hinttext">फ़ोटो, वीडियो, ऑडियो के लिए डाउनलोड सेटिंग्स</string>
+	<string name="md_auto_download_media">जब मोबाइल डेटा पर हों</string>
+	<string name="wf_auto_download_media">जब Wi-Fi से कनेक्टेड हों</string>
+	<string name="auto_download_image_title">छवियाँ</string>
+	<string name="auto_download_video_title">वीडियो</string>
+	<string name="auto_download_audio_title">ऑडियो</string>
 	<string name="delete_account">खाता डिलीट करें</string>
 	<string name="delete_account_msg">अपने खाते को स्थायी रूप से डिलीट करे</string>
 	<string name="unlink_account">खाता अनलिंक करें</string>
@@ -720,6 +727,5 @@
 	<string name="last_seen_while_ago_ct">कुछ समय पहले</string>		
 	<string name="apply">लागू करें</string>
 	<string name="chat_theme_tip">चैट थीम, आपके और आपके दोस्त के लिए बदल जाएगा</string>
-	<string name="chat_theme_tip_group">चैट थीम पूरे समूह के लिए बदल जाएगा</string>		
-	
+	<string name="chat_theme_tip_group">चैट थीम पूरे समूह के लिए बदल जाएगा</string>
 </resources>

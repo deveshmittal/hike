@@ -282,25 +282,8 @@ public class FileTransferManager
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		ConvMessage convMessage;
-		try
-		{
-			convMessage  = createConvMessage(null, sourceFile, hikeFileType, msisdn, isRecipientOnHike, fileType, recordingDuration);
-		}
-		catch (FileTransferCancelledException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		//UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike, recordingDuration);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike, recordingDuration);
+		//UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -324,25 +307,7 @@ public class FileTransferManager
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		ConvMessage convMessage;
-		try
-		{
-			convMessage = createConvMessage(picasaUri, null, hikeFileType, msisdn, isRecipientOnHike, null, -1);
-		}
-		catch (FileTransferCancelledException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		//UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, hikeFileType, msisdn, isRecipientOnHike);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, convMessage, isRecipientOnHike);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, hikeFileType, msisdn, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -372,83 +337,6 @@ public class FileTransferManager
 		pool.execute(ft);
 	}
 
-
-	private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long recordingDuration) throws FileTransferCancelledException, Exception
-	{
-		// TODO Auto-generated method stub
-		ConvMessage message = null;
-		File destinationFile;
-		String fileName = Utils.getFinalFileName(hikeFileType);
-		JSONObject metadata;
-		if (picasaUri == null)
-		{
-			destinationFile = mFile;
-			fileName = destinationFile.getName();
-			Bitmap thumbnail = null;
-			String thumbnailString = null;
-			if (hikeFileType == HikeFileType.IMAGE)
-			{
-				thumbnail = Utils.scaleDownImage(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
-			}
-			else if (hikeFileType == HikeFileType.VIDEO)
-			{
-				thumbnail = ThumbnailUtils.createVideoThumbnail(destinationFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-			}
-			if (thumbnail != null)
-			{
-				thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-			}
-
-			metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath());
-		}
-		else
-		// this is the case for picasa picture
-		{
-			String[] filePathColumn = { MediaColumns.DATA, MediaColumns.DISPLAY_NAME };
-			Cursor cursor = context.getContentResolver().query(picasaUri, filePathColumn, null, null, null);
-			// if it is a picasa image on newer devices with OS 3.0 and
-			// up
-			if (cursor != null)
-			{
-				cursor.moveToFirst();
-				int nameIdx = cursor.getColumnIndex(MediaColumns.DISPLAY_NAME);
-				if (nameIdx != -1)
-				{
-					// fileName = cursor.getString(nameIdx);
-				}
-			}
-			destinationFile = Utils.getOutputMediaFile(hikeFileType, fileName);
-			if (TextUtils.isEmpty(fileName))
-			{
-				fileName = destinationFile.getName();
-			}
-			metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null, recordingDuration, null);
-		}
-		message = createConvMessage(fileName, metadata, msisdn, isRecipientOnhike);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) message);
-		return message;
-	}
-	
-	private ConvMessage createConvMessage(String fileName, JSONObject metadata, String msisdn, boolean isRecipientOnhike) throws JSONException
-	{
-		long time = System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setMetadata(metadata);
-		convMessage.setSMS(!isRecipientOnhike);
-		HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
-		return convMessage;
-	}
-	
-	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, long recordingDuration, String sourceFilePath) throws JSONException
-	{
-		JSONArray files = new JSONArray();
-		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, sourceFilePath).serialize());
-		JSONObject metadata = new JSONObject();
-		metadata.put(HikeConstants.FILES, files);
-		return metadata;
-	}
-	
 	public void removeTask(long msgId)
 	{
 		fileTaskMap.remove(msgId);

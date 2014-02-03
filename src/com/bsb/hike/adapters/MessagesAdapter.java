@@ -91,6 +91,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.view.CustomProgress;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
@@ -167,13 +168,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		ImageView audRecIC;
 		
-		//ImageView fileIcon;
-		
 		TextView fileType;
 		
 		TextView recDuration;
 		
-		ImageView recProgress;
+		ProgressBar recProgress;
 
 		View dayLeft;
 
@@ -241,6 +240,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	}
 
 	public void addMessage(ConvMessage convMessage) {
+		Log.d(getClass().getSimpleName(),"received convMsg" + convMessage.getMsgID());
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent())
 		{
@@ -534,7 +534,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
 				holder.fileType = (TextView) v.findViewById(R.id.file_type);
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
-				holder.recProgress = (ImageView) v.findViewById(R.id.audio_rec_progress);
+				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				//holder.fileIcon = (ImageView) v.findViewById(R.id.file_ic);
 			case SEND_HIKE:
@@ -580,7 +580,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				//holder.fileIcon = (ImageView) v.findViewById(R.id.file_ic);
 				holder.fileType = (TextView) v.findViewById(R.id.file_type);
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
-				holder.recProgress = (ImageView) v.findViewById(R.id.audio_rec_progress);
+				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 			case RECEIVE:
@@ -645,11 +645,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			try
 			{
-//				if(field.get(holder) instanceof MessagesAdapter)
-//				{
-//					Toast.makeText(context, "found Instance of Message Adapter", Toast.LENGTH_LONG).show();
-//					Log.d(getClass().getSimpleName(),"field no. " + fieldCount + ": " + field.getName() + "of type: "+field.getType() + "is instance of messageAdapter");
-//				}
 				if(field.get(holder) != null)
 				{
 					if(field.get(holder) instanceof View)
@@ -966,18 +961,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			{
-				if(fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.NOT_STARTED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				if (fss.getFTState() == FTState.COMPLETED  || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					holder.fileThumb.getLayoutParams().width = (int) (108 * Utils.densityMultiplier);
+					
 				}
 				else
 				{
-					holder.fileThumb.getLayoutParams().width = (int) (155 * Utils.densityMultiplier);
+					if(fss.getFTState() == FTState.NOT_STARTED)
+					{
+						holder.fileThumb.getLayoutParams().width = (int) (108 * Utils.densityMultiplier);
+					}
+					else
+					{
+						holder.fileThumb.getLayoutParams().width = (int) (155 * Utils.densityMultiplier);
+					}
+					holder.fileThumb.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
+					holder.fileThumb.setBackgroundResource(R.drawable.bg_grey);
+					holder.fileThumb.setImageResource(0);
+					holder.fileThumb.setVisibility(View.VISIBLE);
 				}
-				holder.fileThumb.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
-				holder.fileThumb.setBackgroundResource(R.drawable.bg_grey);
-				holder.fileThumb.setImageResource(0);
-				holder.fileThumb.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
 			{
@@ -1126,7 +1128,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					holder.overlayBg.setBackgroundColor(0x00000000);
 					holder.mediaAction.setBackgroundResource(0);
 					holder.mediaAction.setImageResource(0);
 					holder.mediaAction.setScaleType(ScaleType.CENTER_INSIDE);
@@ -1203,17 +1204,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay Visibility
 			// Tap overlay will be there only in case of image and video.
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT) && (holder.fileThumb.getVisibility() == View.VISIBLE))
 			{
 				if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 				{
-					holder.overlayBg.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
-					holder.overlayBg.setVisibility(View.VISIBLE);
+					if(fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+					{
+						
+					}
+					else
+					{
+						holder.overlayBg.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
+						holder.overlayBg.setVisibility(View.VISIBLE);
+					}
 				}
 				else
 				{
 					holder.overlayBg.getLayoutParams().height = (int) (40 * Utils.densityMultiplier);
-					holder.overlayBg.setBackgroundColor(0x6E000000);
 					switch (fss.getFTState())
 					{
 					case NOT_STARTED:
@@ -1223,13 +1230,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						}
 						break;
 					case IN_PROGRESS:
-						holder.overlayBg.setVisibility(View.VISIBLE);
-						break;
 					case PAUSING:
-						holder.overlayBg.setVisibility(View.VISIBLE);
 					case PAUSED:
-						holder.overlayBg.setVisibility(View.VISIBLE);
-						break;
 					case ERROR:
 						holder.overlayBg.setVisibility(View.VISIBLE);
 						break;
@@ -1258,7 +1260,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.ftAction.setImageResource(R.drawable.ic_download_file);
 							holder.ftAction.setVisibility(View.VISIBLE);
 							}
-							holder.fileType.setText(hikeFile.getHikeFileType().toString());
+							if(hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+								holder.fileType.setText(R.string.recording);
+							else if(hikeFile.getHikeFileType() == HikeFileType.AUDIO)
+								holder.fileType.setText(R.string.audio);
+							else if(hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+								holder.fileType.setText(R.string.video);
+							else if(hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+								holder.fileType.setText(R.string.photo);
+							else
+								holder.fileType.setText("File");
 							holder.fileType.setVisibility(View.VISIBLE);
 							//holder.fileThumb.setScaleType(ScaleType.CENTER);
 						}
@@ -1328,7 +1339,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					case PAUSED:
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+						if(fss.getTotalSize() > 0)
+							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+						else
+							holder.dataTransferred.setText("Starting...");
 						holder.dataTransferred.setVisibility(View.VISIBLE);
 						holder.barProgress.setProgress(progress);
 						holder.barProgress.setVisibility(View.VISIBLE);
@@ -1347,7 +1361,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					case PAUSED:
 					case ERROR:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + " / " + dataDisplay(fss.getTotalSize()));
+						if(fss.getTotalSize() > 0)
+							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+						else
+							holder.dataTransferred.setText("Starting...");
 						holder.dataTransferred.setVisibility(View.VISIBLE);
 						holder.barProgress.setProgress(progress);
 						holder.barProgress.setVisibility(View.VISIBLE);
@@ -2281,7 +2298,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			ImageView showFileBtn = (ImageView) parent.findViewById(R.id.btn_media_action);
 			//TextView durationTxt = (TextView) parent.findViewById(convMessage.isSent() ? R.id.message_send : R.id.message_receive_ft);
 			TextView durationTxt = (TextView) parent.findViewById(R.id.rec_duration);
-			ImageView durationProgress = (ImageView) parent.findViewById(R.id.audio_rec_progress);
+			ProgressBar durationProgress = (ProgressBar) parent.findViewById(R.id.audio_rec_progress);
 			durationTxt.setVisibility(View.VISIBLE);
 			durationProgress.setVisibility(View.VISIBLE);
 
@@ -2758,7 +2775,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		TextView durationTxt;
 		
-		ImageView durationProgress;
+		ProgressBar durationProgress;
 
 		Handler handler;
 
@@ -2865,7 +2882,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return playerState;
 		}
 
-		public void setDurationTxt(TextView durationTxt, ImageView durationProgress)
+		public void setDurationTxt(TextView durationTxt, ProgressBar durationProgress)
 		{
 			this.durationTxt = durationTxt;
 			this.durationProgress = durationProgress;
@@ -2925,12 +2942,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				case PAUSED:
 					int progress = 0;
 					if( mediaPlayer.getDuration() !=0 )
-						progress = (mediaPlayer.getCurrentPosition()*108) / mediaPlayer.getDuration();
-					durationProgress.getLayoutParams().width = (int) (progress * Utils.densityMultiplier);
+						progress = (mediaPlayer.getCurrentPosition()*100) / mediaPlayer.getDuration();
+					durationProgress.setProgress(progress);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
-					durationProgress.getLayoutParams().width = 0;
+					durationProgress.setProgress(0);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getDuration() / 1000);
 					break;
 

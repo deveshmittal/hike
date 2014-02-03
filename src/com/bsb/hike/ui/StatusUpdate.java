@@ -718,7 +718,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		if (requestCode == HikeConstants.FACEBOOK_REQUEST_CODE) {
 			Session session = Session.getActiveSession();
 			if (session != null && resultCode == RESULT_OK) {
-				fb.setSelected(true);
+				mActivityTask.fbSelected = true;
 				session.onActivityResult(this, requestCode, resultCode, data);
 			} else if (session != null && resultCode == RESULT_CANCELED) {
 				Log.d("StatusUpdate", "Facebook Permission Cancelled");
@@ -727,10 +727,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				// throw an exception telling can not request publish
 				// permission, there
 				// is already a publish request pending.
-				fb.setSelected(false);
+				mActivityTask.fbSelected = false;
 				session.closeAndClearTokenInformation();
 				Session.setActiveSession(null);
 			}
+			fb.setSelected(mActivityTask.fbSelected);
 		}
 	}
 

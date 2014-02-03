@@ -103,7 +103,7 @@
 	<string name="invited_to_gc">%1$s wurde eingeladen</string>
 	<string name="share">Teilen</string>
 	<string name="start_rec">Aufnahmefunktion</string>
-	<string name="recording">AUFNAHME</string>
+	<string name="recording">Aufnahme</string>
 	<string name="start">Start</string>
 	<string name="stop">Stopp</string>
 	<string name="preview">Vorschau</string>
@@ -210,6 +210,13 @@
 	<string name="sound_msg">Bei neuer Nachricht Ton abspielen</string>
 	<string name="free_sms">Frei-SMS nach Indien</string>
 	<string name="free_sms_msg">Einschalten, um Frei-SMS nach Indien zu senden</string>
+	<string name="auto_download_media">Mediendateien automatisch downloaden</string>
+	<string name="auto_download_media_hinttext">Download-Einstellungen für Fotos, Videos, Audiodateien</string>
+	<string name="md_auto_download_media">Bei mobiler Datenübertragung</string>
+	<string name="wf_auto_download_media">Bei Verbindung über WLAN</string>
+	<string name="auto_download_image_title">Bilder</string>
+	<string name="auto_download_video_title">Video</string>
+	<string name="auto_download_audio_title">Audiodatei</string>
 	<string name="delete_account">Account löschen</string>
 	<string name="delete_account_msg">Dein Account endgültig löschen</string>
 	<string name="unlink_account">Account trennen</string>
@@ -703,5 +710,4 @@
 	<string name="apply">Gelten</string>
 	<string name="chat_theme_tip">Das Chat-Thema ändert sich für Sie und Ihr Freund</string>
 	<string name="chat_theme_tip_group">Das Chat-Thema wird für die gesamte Gruppe ändern</string>		
-	
 </resources>

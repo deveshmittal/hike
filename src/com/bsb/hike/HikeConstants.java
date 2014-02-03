@@ -394,6 +394,8 @@ public class HikeConstants {
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
 	// Picasa URI start for other devices
 	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
+	// Picasa URI prefix for creating convMessage
+	public static final String PICASA_PREFIX = "picasaUri:";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;

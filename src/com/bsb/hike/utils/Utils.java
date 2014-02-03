@@ -102,6 +102,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -2608,9 +2609,20 @@ public class Utils {
 	}
 
 	public static void blockOrientationChange(Activity activity) {
+		final int rotation = activity.getWindowManager().getDefaultDisplay()
+				.getOrientation();
+
 		boolean isPortrait = activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-		activity.setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO
+				|| rotation == Surface.ROTATION_0
+				|| rotation == Surface.ROTATION_90) {
+			activity.setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+					: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		} else if (rotation == Surface.ROTATION_180
+				|| rotation == Surface.ROTATION_270) {
+			activity.setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+					: ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+		}
 	}
 
 	public static void unblockOrientationChange(Activity activity) {
@@ -2980,6 +2992,7 @@ public class Utils {
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 		activity.sendBroadcast(intent);
+		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
 	public static void onCallClicked(Activity activity,

@@ -104,7 +104,7 @@
 	<string name="invited_to_gc">%1$s has been invited</string>
 	<string name="share">Share</string>
 	<string name="start_rec">Recorder</string>
-	<string name="recording">RECORDING</string>
+	<string name="recording">Recording</string>
 	<string name="start">Start</string>
 	<string name="stop">Stop</string>
 	<string name="preview">Preview</string>
@@ -619,7 +619,6 @@
 	<string name="friend_request_accepted_notification">You will now be able to see updates from %1$s</string>
 	<string name="only_friends_last_seen">Only your friends can see when you were last seen</string>
 	<string name="email_subject">hike. Keep close friends close.</string>
-	<string name="email_body">Hi!\n\nI\'ve started using hike, a simple beautiful messaging app that\'s absolutely free.\n\nhike lets you send free messages to your friends and family! With hike, you can message friends that are on hike and also those who aren\'t on hike! You\'ll never have to use another messaging app again. Better yet, it\'s absolutely FREE!\n\nhike comes with some hilarious stickers and emoticons. You can also post Status Updates to your friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
 	<string name="updates_friends">You can see updates from your friends here</string>
 	<string name="tap_plus">Tap on + to add a contact as your friend</string>
     <string name="add_as_friend_menu">Add as friend</string>
@@ -740,4 +739,14 @@
 	<string name="One">1</string>
 	<string name="Two">2</string>
 	<string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>
+	<string name="are_you_sure">Are you sure?</string>
+	<string name="delete_confirm_msg_1">Deleting your account will delete all your data, free SMS and any hike rewards.</string>
+	<string name="please_confirm">Please Confirm</string>
+	<string name="delete_confirm_msg_2">This action is irreversible. Are you sure you want to delete your account?</string>
+	<string name="email_body">Hi,\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\nWith hike\'s hilarious new stickers, you\'ll surely never send another plain boring message!\nhike also gives you the choice of Privacy with Last Seen so that you can keep you close friends closer.\n\nDownload it now http://hike.in and join the fun!</string>
+	<string name="twitter_msg">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now and lets chat for free http://hike.in</string>
+	<string name="shortcut_created">Shortcut created</string>
+	<string name="recent_empty_string">Recently used stickers will show up here.</string>
+	
 </resources>
