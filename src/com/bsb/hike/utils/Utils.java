@@ -3199,4 +3199,24 @@ public class Utils {
 		double freeSpaceAvailable = getFreeSpace();
 		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
 	}
+	
+	public static int getBitmapSize(Bitmap bitmap)
+	{
+		if(bitmap == null)
+			return 0;
+		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
+		// larger than bitmap byte count.
+		if (Utils.hasKitKat())
+		{
+			return bitmap.getAllocationByteCount();
+		}
+
+		if (Utils.hasHoneycombMR1())
+		{
+			return bitmap.getByteCount();
+		}
+
+		// Pre HC-MR1
+		return bitmap.getRowBytes() * bitmap.getHeight();
+	}
 }

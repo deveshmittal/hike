@@ -16,7 +16,7 @@
             android:layout_height="@dimen/small_avatar"
             android:layout_alignParentRight="true" >
 
-            <ImageView
+            <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/item_icon"
                 style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />

@@ -1,11 +1,11 @@
 package com.bsb.hike.smartImageLoader;
 
-import com.bsb.hike.db.HikeUserDatabase;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.Utils;
 
 public class IconLoader extends ImageWorker
 {
@@ -15,8 +15,6 @@ public class IconLoader extends ImageWorker
 	private int mImageWidth;
 
 	private int mImageHeight;
-	
-	private HikeUserDatabase mDb;
 	
 	private Context context;
 
@@ -33,7 +31,7 @@ public class IconLoader extends ImageWorker
 		this.context = ctx;
 		this.mImageWidth = imageWidth;
 		this.mImageHeight = imageHeight;
-		mDb = HikeUserDatabase.getInstance();
+		mResources = this.context.getResources();
 	}
 
 	/**
@@ -45,7 +43,6 @@ public class IconLoader extends ImageWorker
 	public IconLoader(Context ctx, int imageSize)
 	{
 		this(ctx,imageSize,imageSize);
-		mResources = ctx.getResources();
 	}
 
 	public void setImageSize(int width, int height)
@@ -80,7 +77,10 @@ public class IconLoader extends ImageWorker
 			id = id.substring(0,idx);
 			rounded = true;
 		}
-		BitmapDrawable b = (BitmapDrawable)mDb.getIcon(id, rounded);
-		return b.getBitmap();
+		Bitmap bm = decodeSampledBitmapFromByeArray(id,rounded,mImageWidth,mImageHeight,HikeMessengerApp.getLruCache());
+		if(bm == null)
+			return ((BitmapDrawable)Utils.getDefaultIconForUser(context, id, rounded)).getBitmap();
+		else	
+			return bm;
 	}
 }

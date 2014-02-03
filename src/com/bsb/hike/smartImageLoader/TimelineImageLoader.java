@@ -23,8 +23,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -53,6 +55,7 @@ public class TimelineImageLoader extends ImageWorker
 		this.context = ctx;
 		this.mImageWidth = imageWidth;
 		this.mImageHeight = imageHeight;
+		mResources = this.context.getResources();
 	}
 
 	/**
@@ -63,11 +66,7 @@ public class TimelineImageLoader extends ImageWorker
 	 */
 	public TimelineImageLoader(Context ctx, int imageSize)
 	{
-		super();
-		this.context = ctx;
-		mResources = ctx.getResources();
-		this.mImageWidth = imageSize;
-		this.mImageHeight = imageSize;
+		this(ctx,imageSize,imageSize);
 	}
 
 	public void setImageSize(int width, int height)
@@ -99,24 +98,14 @@ public class TimelineImageLoader extends ImageWorker
 		String fileName = Utils.getProfileImageFileName(id);
 		File orgFile = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT, fileName);
 		if (!orgFile.exists())
-		{
 			return null;
-		}
-		File outputDir = context.getCacheDir();
+		
 		try
 		{
-			File tempFile = File.createTempFile(id, ".jpg", outputDir);
-
-			Bitmap orgBitmap = BitmapFactory.decodeFile(orgFile.getPath());
-			if (orgBitmap == null)
-			{
-				return null;
-			}
-			Utils.saveBitmapToFile(tempFile, orgBitmap, CompressFormat.JPEG, 50);
-			bitmap = BitmapFactory.decodeFile(tempFile.getPath());
-			tempFile.delete();
+			bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+			//Log.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
 		}
-		catch (IOException e1)
+		catch (Exception e1)
 		{
 			e1.printStackTrace();
 		}

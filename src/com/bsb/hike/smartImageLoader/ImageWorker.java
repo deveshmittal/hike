@@ -21,6 +21,7 @@ import java.lang.ref.WeakReference;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -34,6 +35,8 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Utils;
@@ -74,7 +77,7 @@ public abstract class ImageWorker
 	{
 		mResources = ctx.getResources();
 	}
-	
+
 	public void loadImage(String data, boolean rounded, ImageView imageView)
 	{
 		String key = data + (rounded ? ROUND_SUFFIX : "");
@@ -316,10 +319,9 @@ public abstract class ImageWorker
 					drawable = new RecyclingBitmapDrawable(mResources, bitmap);
 				}
 
-
 				if (mImageCache != null)
 				{
-					Log.d(TAG,"Putting data in cache : "+dataString);
+					Log.d(TAG, "Putting data in cache : " + dataString);
 					mImageCache.putInCache(dataString, drawable);
 				}
 			}
@@ -506,6 +508,44 @@ public abstract class ImageWorker
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
 		return BitmapFactory.decodeFile(filename, options);
+	}
+
+	/**
+	 * Decode and sample down a bitmap from a file to the requested width and height.
+	 * 
+	 * @param filename
+	 *            The full path of the file to decode
+	 * @param reqWidth
+	 *            The requested width of the resulting bitmap
+	 * @param reqHeight
+	 *            The requested height of the resulting bitmap
+	 * @param cache
+	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
+	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
+	 */
+	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight, HikeLruCache cache)
+	{
+		byte [] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
+		if(icondata == null)
+			return null;
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		
+		BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+
+		// Calculate inSampleSize
+		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+		// If we're running on Honeycomb or newer, try to use inBitmap
+		if (Utils.hasHoneycomb())
+		{
+			addInBitmapOptions(options, cache);
+		}
+
+		// Decode bitmap with inSampleSize set
+		options.inJustDecodeBounds = false;
+		return BitmapFactory.decodeByteArray(icondata,0,icondata.length, options);
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
