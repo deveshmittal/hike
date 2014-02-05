@@ -40,11 +40,11 @@ public class Sticker implements Serializable, Comparable<Sticker> {
 		/*
 		 * Only set sticker index if the category is a local one
 		 */
-		if (category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy)) {
+		if (category != null && category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy)) {
 			int stickerNumber = Integer.valueOf(stickerId.substring(0,
 					stickerId.indexOf("_")));
 
-			if ((category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
+			if ((category != null &&  category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
 					|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length)) {
 				this.stickerIndex = stickerNumber - 1;
 			}
