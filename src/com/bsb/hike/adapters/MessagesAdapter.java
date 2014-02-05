@@ -213,6 +213,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private StickerLoader largeStickerLoader;
 	private int mIconImageSize;
 
+	private boolean isListFlinging;
+
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -859,7 +861,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					if (stickerImage != null && stickerImage.exists()
 							&& !downloadingSticker) {
 						holder.stickerImage.setVisibility(View.VISIBLE);
-						largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage);
+						largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
 						//holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context,stickerImage.getPath()));
 //						holder.stickerImage.setImageDrawable(IconCacheManager
 //								.getInstance().getSticker(context,
@@ -2967,7 +2969,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void resetPlayerIfRunning() {
 		voiceMessagePlayer.resetPlayer();
 	}
-	
+
+	public void setIsListFlinging(boolean b) {
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		largeStickerLoader.setPauseWork(isListFlinging);
+		iconLoader.setPauseWork(isListFlinging);
+
+		if(notify && !isListFlinging) {
+			notifyDataSetChanged();
+		}
+	}
+
 	public StickerLoader getStickerLoader()
 	{
 		return largeStickerLoader;

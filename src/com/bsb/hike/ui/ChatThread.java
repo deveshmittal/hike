@@ -1751,28 +1751,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onScrollStateChanged(AbsListView arg0, int scrollState) 
 			{
-				Log.d("ChatThread", "Message Adapter Scrolled");
-				// Pause fetcher to ensure smoother scrolling when flinging
-				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
-				{
-					// Before Honeycomb pause image loading on scroll to help with performance
-					if (!Utils.hasHoneycomb())
-					{
-						if ( mAdapter!= null)
-						{
-							mAdapter.getStickerLoader().setPauseWork(true);
-							mAdapter.getIconImageLoader().setPauseWork(true);
-						}
-					}
-				}
-				else
-				{
-					if (mAdapter != null)
-					{
-						mAdapter.getStickerLoader().setPauseWork(false);
-						mAdapter.getIconImageLoader().setPauseWork(false);
-					}
-				}
 			}
 
 			@Override
@@ -5064,8 +5042,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
-		// TODO Auto-generated method stub
-
+		Log.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
+		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 	}
 
 	private List<AccountData> getAccountList() {

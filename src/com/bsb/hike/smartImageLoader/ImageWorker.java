@@ -94,6 +94,11 @@ public abstract class ImageWorker
 	 */
 	public void loadImage(String data, ImageView imageView)
 	{
+		loadImage(data, imageView, false);
+	}
+
+	public void loadImage(String data, ImageView imageView, boolean isFlinging)
+	{
 		if (data == null)
 		{
 			return;
@@ -112,7 +117,7 @@ public abstract class ImageWorker
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
-		else if (cancelPotentialWork(data, imageView))
+		else if (!isFlinging && cancelPotentialWork(data, imageView))
 		{
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
 			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, task);
@@ -122,6 +127,8 @@ public abstract class ImageWorker
 			// framework and slightly modified. Refer to the docs at the top of the class
 			// for more info on what was changed.
 			task.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, data);
+		} else {
+			imageView.setImageDrawable(null);;
 		}
 	}
 
