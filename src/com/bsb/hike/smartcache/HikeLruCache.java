@@ -293,7 +293,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public BitmapDrawable getIconFromCache(String key,boolean rounded)
 	{
 		String cacheKey = rounded ? key + IconLoader.ROUND_SUFFIX : key;
-		key = rounded ? key + IconLoader.ROUND_SUFFIX : key;
 		BitmapDrawable b = get(cacheKey);
 		if (b == null)
 		{
