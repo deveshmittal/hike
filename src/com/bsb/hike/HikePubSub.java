@@ -147,6 +147,8 @@ public class HikePubSub implements Runnable {
 	public static final String UPLOAD_FINISHED = "uploadFinished";
 
 	public static final String FILE_TRANSFER_PROGRESS_UPDATED = "fileTransferProgressUpdated";
+	
+	//public static final String RESUME_BUTTON_UPDATED = "resumeButtonUpdated";
 
 	public static final String SHOW_PARTICIPANT_STATUS_MESSAGE = "showParticipantStatusMessage";
 
@@ -289,7 +291,7 @@ public class HikePubSub implements Runnable {
 	public static final String SERVICE_STARTED = "serviceStarted";
 
 	public static final String INVITE_SENT = "inviteSent";
-	
+
 	public static final String SHOW_FREE_INVITE_SMS = "showFreeInviteSMS";
 
 	public static final String CHAT_BACKGROUND_CHANGED = "chatBackgroundChanged";

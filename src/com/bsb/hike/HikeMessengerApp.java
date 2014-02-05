@@ -317,8 +317,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private ActivityTimeLogger activityTimeLogger;
 
-	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
-
 	public static Map<String, Long> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
@@ -359,9 +357,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	static {
 		mPubSubInstance = new HikePubSub();
-		if (HikeMessengerApp.fileTransferTaskMap == null) {
-			HikeMessengerApp.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
-		}
 		if (HikeMessengerApp.lastSeenFriendsMap == null) {
 			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
 		}

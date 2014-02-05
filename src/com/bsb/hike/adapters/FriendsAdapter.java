@@ -82,6 +82,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private boolean lastSeenPref;
 	private boolean showSMSContacts;
 	private IconLoader iconloader;
+	private boolean listFetchedOnce;
+
 	private int mIconImageSize;
 	
 	public FriendsAdapter(final Context context) {
@@ -105,6 +107,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
+
+		listFetchedOnce = false;
 
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask();
 		Utils.executeAsyncTask(fetchFriendsTask);
@@ -165,6 +169,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			filteredFriendsList.addAll(favoriteTaskList);
 			filteredHikeContactsList.addAll(hikeTaskList);
 			filteredSmsContactsList.addAll(smsTaskList);
+
+			listFetchedOnce = true;
+
 			makeCompleteList(true);
 		}
 	}
@@ -284,11 +291,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			return;
 		}
 
-		if ((friendsList.isEmpty() && hikeContactsList.isEmpty() && smsContactsList
+		/*
+		 * If we do not fetch the list even once and all the lists are empty,
+		 * we should show the spinner. Else we show the empty states
+		 */
+		if (!listFetchedOnce && ((friendsList.isEmpty() && hikeContactsList.isEmpty() && smsContactsList
 				.isEmpty())
 				|| (filteredFriendsList.isEmpty()
 						&& filteredHikeContactsList.isEmpty() && filteredSmsContactsList
-							.isEmpty())) {
+							.isEmpty()))) {
 			return;
 		}
 

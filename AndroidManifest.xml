@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
-    android:versionCode="281"
+
+    android:versionCode="283"
     android:installLocation="auto"
-    android:versionName="2.7.4.1">
+    android:versionName="2.7.4.3">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
@@ -231,7 +232,13 @@
         		<action android:name="com.android.vending.INSTALL_REFERRER" />
     		</intent-filter>
 		</receiver>
-
+		
+		<receiver android:name="com.bsb.hike.service.ConnectivityChangeReceiver"	>
+		    <intent-filter>
+		        <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+		    </intent-filter>
+		</receiver>
+		
     </application>
 
 </manifest>

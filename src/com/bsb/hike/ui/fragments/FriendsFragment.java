@@ -89,7 +89,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 		 * this. calling frinedsAdapter destroy method just to clear out all the
 		 * lists in this adapter.
 		 */
-		friendsAdapter.destroy();
+		if (friendsAdapter != null) {
+			friendsAdapter.destroy();
+		}
 		super.onDestroy();
 	}
 

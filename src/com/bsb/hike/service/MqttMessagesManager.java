@@ -30,6 +30,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
@@ -46,7 +48,6 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -84,6 +85,8 @@ public class MqttMessagesManager {
 
 	private static MqttMessagesManager instance;
 
+	private String userMsisdn;
+
 	private MqttMessagesManager(Context context) {
 		this.convDb = HikeConversationsDatabase.getInstance();
 		this.userDb = HikeUserDatabase.getInstance();
@@ -95,6 +98,7 @@ public class MqttMessagesManager {
 				.getTypingNotificationSet();
 		this.clearTypingNotificationHandler = new Handler();
 		this.appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		this.userMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 	}
 
 	public static MqttMessagesManager getInstance(Context context) {
@@ -117,7 +121,11 @@ public class MqttMessagesManager {
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			if (Utils.isGroupConversation(msisdn)) {
+			/*
+			 * We don't consider this packet if the msisdn is the user's
+			 * msisdn or a group conversation.
+			 */
+			if (Utils.isGroupConversation(msisdn) || userMsisdn.equals(msisdn)) {
 				return;
 			}
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -407,27 +415,21 @@ public class MqttMessagesManager {
 				MessageMetadata messageMetadata = convMessage.getMetadata();
 				HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
 
-				if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
-					JSONObject metadataJson = messageMetadata.getJSON();
-					JSONArray fileArray = metadataJson
-							.optJSONArray(HikeConstants.FILES);
-					for (int i = 0; i < fileArray.length(); i++) {
-						JSONObject fileJson = fileArray.getJSONObject(i);
-						Log.d(getClass().getSimpleName(), "Previous json: "
-								+ fileJson);
-						String timeStamp = new SimpleDateFormat(
-								"yyyyMMdd_HHmmss").format(new Date());
-						fileJson.put(HikeConstants.FILE_NAME, "AUD_"
-								+ timeStamp + ".m4a");
-						Log.d(getClass().getSimpleName(), "New json: "
-								+ fileJson);
-					}
-					/*
-					 * Resetting the metadata
-					 */
-					convMessage.setMetadata(metadataJson);
+				JSONObject metadataJson = messageMetadata.getJSON();
+				// this value indicates that file is not downloaded yet
+				JSONArray fileArray = metadataJson.optJSONArray(HikeConstants.FILES);
+				for (int i = 0; i < fileArray.length(); i++)
+				{
+					JSONObject fileJson = fileArray.getJSONObject(i);
+					Log.d(getClass().getSimpleName(), "Previous json: " + fileJson);
+					if(hikeFile.getHikeFileType() != HikeFileType.CONTACT && hikeFile.getHikeFileType() != HikeFileType.LOCATION) // dont change name for contact or location
+						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType()));
+					Log.d(getClass().getSimpleName(), "New json: " + fileJson);
 				}
-
+				/*
+				 * Resetting the metadata
+				 */
+				convMessage.setMetadata(metadataJson);
 			}
 			/*
 			 * Applying the offset.
@@ -491,23 +493,38 @@ public class MqttMessagesManager {
 			}
 
 			/*
-			 * Start auto download for images
+			 * Start auto download for media files
 			 */
-			if (convMessage.isFileTransferMessage()) {
-				if (appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF,
-						true)) {
-					HikeFile hikeFile = convMessage.getMetadata()
-							.getHikeFiles().get(0);
-
-					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE) {
-						DownloadFileTask downloadFile = new DownloadFileTask(
-								context, hikeFile.getFile(),
-								hikeFile.getFileKey(), convMessage,
-								hikeFile.getHikeFileType(),
-								convMessage.getMsgID(), false);
-						Utils.executeIntProgFtResultAsyncTask(downloadFile);
+			if (convMessage.isFileTransferMessage() && (!TextUtils.isEmpty(convMessage.getConversation().getContactName())))
+			{
+				HikeFile hikeFile = convMessage.getMetadata()
+						.getHikeFiles().get(0);
+				NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+				{
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+					{
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
 					}
 				}
+				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO || hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+				{
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_AUDIO_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_AUDIO_PREF,false)))
+					{
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
+					}
+				}
+				else if (hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+				{
+					if((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_VIDEO_PREF,true))
+							|| (networkType != NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_VIDEO_PREF,false)))
+					{
+						FileTransferManager.getInstance(context).downloadFile(hikeFile.getFile(), hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),convMessage,false);
+					}
+				}
+				
 			}
 			removeTypingNotification(convMessage.getMsisdn(),
 					convMessage.getGroupParticipantMsisdn());
@@ -656,20 +673,15 @@ public class MqttMessagesManager {
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
-					String msisdn = settings.getString(
-							HikeMessengerApp.MSISDN_SETTING, "");
-
 					String iconBase64 = account.getString(HikeConstants.ICON);
 					try {
 						byte[] profileImageBytes = Base64.decode(iconBase64,
 								Base64.DEFAULT);
-						this.userDb.setIcon(msisdn, profileImageBytes, false);
+						this.userDb.setIcon(userMsisdn, profileImageBytes, false);
 
-						HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+						HikeMessengerApp.getLruCache().clearIconForMSISDN(userMsisdn);
 						//IconCacheManager.getInstance().clearIconForMSISDN(
 								//msisdn);
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.PROFILE_PIC_CHANGED, null);
 					} catch (Exception e) {
 						Log.w(getClass().getSimpleName(), "Invalid image bytes");
 					}
@@ -1259,8 +1271,10 @@ public class MqttMessagesManager {
 				// download the protip only if the URL is non empty
 				// also respect the user's auto photo download setting.
 				if (!TextUtils.isEmpty(protip.getImageURL())
-						&& appPrefs.getBoolean(
-								HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+						&& ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
+								&& appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+								|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
+										&& appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))) {
 					autoDownloadProtipImage(statusMessage, true);
 				}
 				pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
@@ -1421,7 +1435,11 @@ public class MqttMessagesManager {
 
 	private void autoDownloadProfileImage(StatusMessage statusMessage,
 			boolean statusUpdate) {
-		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+		if ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
+				&& !appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+				|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
+						&& !appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+		{
 			return;
 		}
 
@@ -1435,7 +1453,11 @@ public class MqttMessagesManager {
 	}
 
 	private void autoDownloadGroupImage(String id) {
-		if (!appPrefs.getBoolean(HikeConstants.AUTO_DOWNLOAD_IMAGE_PREF, true)) {
+		if ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI
+							&& !appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF,true))
+							|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI
+									&& !appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF,true)))
+		{
 			return;
 		}
 		String fileName = Utils.getProfileImageFileName(id);

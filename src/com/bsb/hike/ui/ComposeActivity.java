@@ -196,6 +196,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			Intent intent = Utils
 					.createIntentFromContactInfo(conversationContactInfo, true);
 			intent.setClass(this, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			finish();
 		} else {
@@ -322,6 +323,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		Intent intent = Utils
 				.createIntentFromContactInfo(conversationContactInfo, true);
 		intent.setClass(this, ChatThread.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		finish();
 	}
@@ -516,6 +518,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 			intent.setClass(this, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			String type = presentIntent.getType();
 
 			if ("text/plain".equals(type)
@@ -537,10 +540,15 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 						.getParcelableExtra(Intent.EXTRA_STREAM);
 				Log.d(getClass().getSimpleName(),
 						"File path uri: " + fileUri.toString());
+				fileUri = Utils.makePicasaUri(fileUri);
 				String fileUriStart = "file:";
 				String fileUriString = fileUri.toString();
 				String filePath;
-				if (fileUriString.startsWith(fileUriStart)) {
+				if(Utils.isPicasaUri(fileUriString))
+				{
+					filePath = fileUriString;
+				}
+				else if (fileUriString.startsWith(fileUriStart)) {
 					File selectedFile = new File(URI.create(fileUriString));
 					/*
 					 * Done to fix the issue in a few Sony devices.

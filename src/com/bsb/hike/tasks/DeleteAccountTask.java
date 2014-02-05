@@ -14,6 +14,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
@@ -27,14 +28,17 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	private HikePreferences activity;
 	private boolean finished;
 	private boolean delete;
+	private Context ctx;
 
-	public DeleteAccountTask(HikePreferences activity, boolean delete) {
+	public DeleteAccountTask(HikePreferences activity, boolean delete,Context context) {
 		this.activity = activity;
 		this.delete = delete;
+		this.ctx = context;
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... unused) {
+		FileTransferManager.getInstance(ctx).shutDownAll();
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase
 				.getInstance();

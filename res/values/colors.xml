@@ -198,6 +198,9 @@
     <color name="indian_btn_text_shadow">#4D000000</color>
     <color name="indian_div">#00000000</color>
     <color name="day_line">#1f73716d</color>
+	<color name="auto_download">#73716d</color>
     <color name="chat_thread_indicator_bg_custom_theme">#B3000000</color>
     <color name="progress_colour_default_theme">#FFAAAAAA</color>
+    <color name="webview_progress_bg">#CD000000</color>
+    <color name="webview_progress_fg">#009BFF</color>
 </resources>

@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +18,10 @@ import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -107,6 +110,9 @@ public class AccountUtils {
 
 	public static String fileTransferBaseDownloadUrl = base
 			+ FILE_TRANSFER_DOWNLOAD_BASE;
+	
+	public static String partialfileTransferBaseUrl = base
+			+ "/user/pft";
 
 	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "hike.in/f/";
 
@@ -156,7 +162,7 @@ public class AccountUtils {
 		appVersion = version;
 	}
 
-	private static synchronized HttpClient getClient() {
+	public static synchronized HttpClient getClient() {
 		if (mClient != null) {
 			return mClient;
 		}
@@ -202,6 +208,9 @@ public class AccountUtils {
 
 	public static void addUserAgent(URLConnection urlConnection) {
 		urlConnection.addRequestProperty("User-Agent", "android-" + appVersion);
+	}
+	public static void addUserAgent(HttpRequestBase request) {
+		request.addHeader("User-Agent", "android-" + appVersion);
 	}
 
 	public static JSONObject executeRequest(HttpRequestBase request) {
@@ -454,7 +463,7 @@ public class AccountUtils {
 		return msisdn;
 	}
 
-	private static void addToken(HttpRequestBase req)
+	public static void addToken(HttpRequestBase req)
 			throws IllegalStateException {
 		assertIfTokenNull();
 		if (TextUtils.isEmpty(mToken)) {
@@ -707,65 +716,6 @@ public class AccountUtils {
 		}
 	}
 
-	static float maxSize;
-
-	public static JSONObject executeFileTransferRequest(String filePath,
-			String fileName, JSONObject request,
-			final FileTransferTaskBase uploadFileTask, String fileType)
-			throws Exception {
-
-		HttpClient httpClient = getClient();
-
-		HttpContext httpContext = new BasicHttpContext();
-
-		HttpPut httpPut = new HttpPut(fileTransferUploadBase + "/user/ft");
-
-		addToken(httpPut);
-		httpPut.addHeader("Connection", "Keep-Alive");
-		httpPut.addHeader("Content-Name", fileName);
-		Log.d("Upload", "Content type: " + fileType);
-		httpPut.addHeader("Content-Type", TextUtils.isEmpty(fileType) ? ""
-				: fileType);
-		httpPut.addHeader("X-Thumbnail-Required", "0");
-
-		final AbstractHttpEntity entity;
-		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)
-				&& !HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType)) {
-			entity = new CustomFileEntity(new File(filePath), "",
-					new ProgressListener() {
-						@Override
-						public void transferred(long num) {
-							uploadFileTask
-									.updateProgress((int) ((num / (float) maxSize) * 100));
-						}
-					});
-		} else {
-			entity = new CustomByteArrayEntity(request.toString().getBytes(),
-					new ProgressListener() {
-						@Override
-						public void transferred(long num) {
-							uploadFileTask
-									.updateProgress((int) ((num / (float) maxSize) * 100));
-						}
-					});
-		}
-
-		uploadFileTask.setEntity(entity);
-
-		maxSize = entity.getContentLength();
-
-		httpPut.setEntity(entity);
-		HttpResponse response = httpClient.execute(httpPut, httpContext);
-		String serverResponse = EntityUtils.toString(response.getEntity());
-
-		JSONObject responseJSON = new JSONObject(serverResponse);
-		if ((responseJSON == null)
-				|| (!"ok".equals(responseJSON.optString("stat")))) {
-			throw new NetworkErrorException("Unable to perform request");
-		}
-		return responseJSON;
-	}
-
 	public static void deleteSocialCredentials(boolean facebook)
 			throws NetworkErrorException, IllegalStateException {
 		String url = facebook ? "/account/connect/fb"
@@ -816,5 +766,67 @@ public class AccountUtils {
 			return null;
 		}
 
+	}
+	
+	public static int getBytesUploaded(String sessionId) throws ClientProtocolException, IOException
+	{
+		int val = 0;
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/pft/");
+		addToken(req);
+		req.addHeader("X-SESSION-ID", sessionId);
+		HttpClient httpclient = getClient();
+		HttpResponse response = httpclient.execute(req);
+		StatusLine statusLine = response.getStatusLine();
+		if (statusLine.getStatusCode() == HttpStatus.SC_OK)
+		{
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			response.getEntity().writeTo(out);
+			out.close();
+			String responseString = out.toString();
+			return Integer.parseInt(responseString) + 1;
+		}
+		else
+		{
+			// Closes the connection.
+			response.getEntity().getContent().close();
+		}
+		return val;
+	}
+	
+	public static String crcValue(String fileKey) throws ClientProtocolException, IOException
+	{
+		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase+"/user/ft/" + fileKey);
+		addToken(req);
+		HttpClient httpclient = getClient();
+		HttpResponse response = httpclient.execute(req);
+		StatusLine statusLine = response.getStatusLine();
+		if (statusLine.getStatusCode() == HttpStatus.SC_OK)
+		{
+			org.apache.http.Header msg = response.getFirstHeader("ETag");
+			return msg.getValue();
+		}
+		else
+		{
+			// Closes the connection.
+			try
+			{
+				response.getEntity().getContent().close();
+			}
+			catch (IllegalStateException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch(Exception e)
+			{
+				
+			}
+			return null;
+		}
 	}
 }
