@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.util.Log;
 
 /**
  * <p>
@@ -180,13 +181,13 @@ import android.os.Process;
  */
 public abstract class MyAsyncTask<Params, Progress, Result>
 {
-	private static final String LOG_TAG = "AsyncTask";
+	private static final String LOG_TAG = "MyAsyncTask";
 
 	private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
 
 	private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
 
-	private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+	private static final int MAXIMUM_POOL_SIZE = 10;//CPU_COUNT * 2 + 1;
 
 	private static final int KEEP_ALIVE = 1;
 
@@ -196,7 +197,10 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 
 		public Thread newThread(Runnable r)
 		{
-			return new Thread(r, "AsyncTask #" + mCount.getAndIncrement());
+			int threadCount = mCount.getAndIncrement();
+			Log.d(LOG_TAG,String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT,CORE_POOL_SIZE,MAXIMUM_POOL_SIZE));
+			Log.d(LOG_TAG,"Creating a new thread # " + threadCount);
+			return new Thread(r, "AsyncTask #" + threadCount);
 		}
 	};
 
@@ -623,6 +627,8 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		onPreExecute();
 
 		mWorker.mParams = params;
+		if(sPoolWorkQueue.size() > 20)
+			Log.d(LOG_TAG, "Thread pool size : "+ sPoolWorkQueue.size());
 		exec.execute(mFuture);
 
 		return this;
