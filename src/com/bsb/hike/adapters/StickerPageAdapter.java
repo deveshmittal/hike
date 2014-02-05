@@ -157,6 +157,22 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			switch (viewType) {
 			case STICKER:
 				convertView = new LinearLayout(activity);
+				AbsListView.LayoutParams parentParams = new LayoutParams(
+						LayoutParams.MATCH_PARENT, sizeEachImage);
+				convertView.setLayoutParams(parentParams);
+
+				LinearLayout.LayoutParams childParams = new LinearLayout.LayoutParams(
+						sizeEachImage, LayoutParams.MATCH_PARENT);
+
+				int padding = (int) (5 * Utils.densityMultiplier);
+				for (int i = 0; i < numItemsRow; i++) {
+					ImageView imageView = new RecyclingImageView(activity);
+					imageView.setLayoutParams(childParams);
+					imageView.setScaleType(ScaleType.FIT_CENTER);
+					imageView.setPadding(padding, padding, padding, padding);
+
+					((LinearLayout) convertView).addView(imageView);
+				}
 				break;
 			case UPDATING_STICKER:
 				convertView = inflater.inflate(R.layout.update_sticker_set,
@@ -175,38 +191,22 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
 		switch (viewType) {
 		case STICKER:
-			AbsListView.LayoutParams parentParams = new LayoutParams(
-					LayoutParams.MATCH_PARENT, sizeEachImage);
-			convertView.setLayoutParams(parentParams);
 
-			LinearLayout.LayoutParams childParams = new LinearLayout.LayoutParams(
-					sizeEachImage, LayoutParams.MATCH_PARENT);
-
-			((LinearLayout) convertView).removeAllViews();
 			/*
 			 * If this is the last item, its possible that the number of items
 			 * won't fill the complete row
 			 */
 			int startPosition = category.updateAvailable ? position - 1 : position;
 
-			int maxCount;
-			if ((startPosition == numStickerRows - 1)
-					&& (stickerList.size() % numItemsRow != 0)) {
-				maxCount = stickerList.size() % numItemsRow;
-			} else {
-				maxCount = numStickerRows != 0 ? numItemsRow : 0;
-			}
-
-			int padding = (int) (5 * Utils.densityMultiplier);
-			for (int i = 0; i < maxCount; i++) {
-				ImageView imageView = new RecyclingImageView(activity);
-				imageView.setLayoutParams(childParams);
-				imageView.setScaleType(ScaleType.FIT_CENTER);
-				imageView.setPadding(padding, padding, padding, padding);
+			for (int i = 0; i < numItemsRow; i++) {
+				ImageView imageView = (ImageView) ((LinearLayout) convertView).getChildAt(i);
 
 				int index = (startPosition * numItemsRow) + i;
-				if(index > stickerList.size() - 1)
-					return null;
+				if(index > stickerList.size() - 1) {
+					imageView.setImageDrawable(null);
+					continue;
+				}
+
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1)
@@ -229,8 +229,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				imageView.setTag(sticker);
 
 				imageView.setOnClickListener(this);
-
-				((LinearLayout) convertView).addView(imageView);
 			}
 			break;
 		case UPDATING_STICKER:
