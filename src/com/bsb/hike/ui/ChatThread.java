@@ -3118,7 +3118,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setFocusable(true);
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+
+		/*
+		 * Put this code in a try-catch block to prevent it from crashing
+		 * on GB and below devices when we try to show the palette on orientation
+		 * changes.
+		 */
+		try {
+			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+		} catch (BadTokenException e) {
+			
+		}
 
 		FrameLayout viewParent = (FrameLayout) parentView.getParent();
 		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
