@@ -592,6 +592,24 @@ public class AccountUtils {
 		}
 		return updateContacts;
 	}
+	
+	public static JSONObject getWAJsonContactList(
+			List<ContactInfo> contactsList) {
+		JSONObject contactsJson = new JSONObject();
+		try {
+			for (ContactInfo cInfo : contactsList) {
+				JSONObject waInfoObject = new JSONObject();
+				waInfoObject.put("t1", calculateWhatsappValue(cInfo.isOnWhatsapp()));
+				contactsJson.put(cInfo.getMsisdn(), waInfoObject);
+			}
+
+		} catch (JSONException e) {
+			Log.d("ACCOUNT UTILS",
+					"Json exception while getting WA info list.");
+			e.printStackTrace();
+		}
+		return contactsJson;
+	}
 
 	public static List<ContactInfo> getContactList(JSONObject obj,
 			Map<String, List<ContactInfo>> new_contacts_by_id) {
