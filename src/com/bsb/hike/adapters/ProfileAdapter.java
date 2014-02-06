@@ -637,4 +637,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	{
 		return iconLoader;
 	}
+	
+	private boolean isListFlinging;
+	public void setIsListFlinging(boolean b) {
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		bigPicImageLoader.setPauseWork(isListFlinging);
+		iconLoader.setPauseWork(isListFlinging);
+
+		if(notify && !isListFlinging) {
+			notifyDataSetChanged();
+		}
+	}
 }

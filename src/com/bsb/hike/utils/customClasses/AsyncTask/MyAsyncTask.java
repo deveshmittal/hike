@@ -627,7 +627,7 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		onPreExecute();
 
 		mWorker.mParams = params;
-		if(sPoolWorkQueue.size() > 20)
+		if(sPoolWorkQueue.size() > 2)
 			Log.d(LOG_TAG, "Thread pool size : "+ sPoolWorkQueue.size());
 		exec.execute(mFuture);
 

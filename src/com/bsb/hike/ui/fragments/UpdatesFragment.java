@@ -199,6 +199,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) 
 	{
+		Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
+		centralTimelineAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		/*
 		// Pause fetcher to ensure smoother scrolling when flinging
 		if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
 		{
@@ -220,6 +223,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 				centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
 			}
 		}
+		*/
 	}
 
 	@Override

@@ -784,6 +784,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
+		/*
 		// Pause fetcher to ensure smoother scrolling when flinging
 		if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
 		{
@@ -805,6 +806,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				profileAdapter.getIconImageLoader().setPauseWork(false);
 			}
 		}
+		*/
 	}
 
 	private void fetchPersistentData() {
