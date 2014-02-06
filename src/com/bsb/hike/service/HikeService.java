@@ -510,7 +510,7 @@ public class HikeService extends Service {
 						public void onFailure() {
 							Log.d(SendGCMIdToServerTrigger.this.getClass()
 									.getSimpleName(), "Send unsuccessful");
-							scheduleNextSendToServerAction(true);
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
 						}
 					});
 			JSONObject request = new JSONObject();
@@ -590,7 +590,7 @@ public class HikeService extends Service {
 							Log.d("TestUpdate", "Device details could not be sent");
 							Log.d(getClass().getSimpleName(),
 									"Send unsuccessful");
-							scheduleNextSendToServerAction(false);
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, sendDevDetailsToServer);
 						}
 					});
 			hikeHttpRequest.setJSONData(data);
@@ -633,14 +633,12 @@ public class HikeService extends Service {
 		}
 	}
 
-	private void scheduleNextSendToServerAction(boolean gcmReg) {
-		Log.d(getClass().getSimpleName(), "Scheduling next GCM registration");
+	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference) {
+		Log.d(getClass().getSimpleName(), "Scheduling next "+ lastBackOffTimePref+" send");
 
 		SharedPreferences preferences = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		int lastBackOffTime = preferences.getInt(
-				gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
-						: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, 0);
+		int lastBackOffTime = preferences.getInt(lastBackOffTimePref, 0);
 
 		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME
 				: (lastBackOffTime * 2);
@@ -649,17 +647,10 @@ public class HikeService extends Service {
 
 		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
 
-		if (gcmReg) {
-			postRunnableWithDelay(sendGCMIdToServer, lastBackOffTime * 1000);
-		} else {
-			postRunnableWithDelay(sendDevDetailsToServer,
-					lastBackOffTime * 1000);
-		}
-
+		postRunnableWithDelay(postRunnableReference, lastBackOffTime * 1000);
+		
 		Editor editor = preferences.edit();
-		editor.putInt(gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
-				: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS,
-				lastBackOffTime);
+		editor.putInt(lastBackOffTimePref,lastBackOffTime);
 		editor.commit();
 	}
 
