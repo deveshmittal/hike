@@ -4445,6 +4445,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
 				: emoticonViewPager;
 
+		View eraseKey = findViewById(R.id.erase_key);
+
 		boolean sameType = true;
 		if (v != null) {
 
@@ -4463,6 +4465,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					sameType = false;
 					emoticonType = EmoticonType.STICKERS;
 				}
+				eraseKey.setVisibility(View.GONE);
 			} else {
 				int offset = 0;
 				int emoticonsListSize = 0;
@@ -4497,6 +4500,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						whichSubcategory++;
 					}
 				}
+				eraseKey.setVisibility(View.VISIBLE);
+				eraseKey.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View view) {
+						mComposeView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+					}
+				});
 			}
 			setupEmoticonLayout(emoticonType, whichSubcategory, tabDrawables);
 		}
