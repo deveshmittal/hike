@@ -105,6 +105,7 @@ public class UploadFileTask extends FileTransferBase
 		this.isRecording = isRecording;
 		this.isForwardMsg = isForwardMsg;
 		this.isRecipientOnhike = isRecipientOnHike;
+		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
 
@@ -122,6 +123,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				this.picasaUri = Uri.parse(hikeFile.getSourceFilePath().substring(HikeConstants.PICASA_PREFIX.length()));
 			}
+		_state = FTState.INITIALIZED;
 	}
 	
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri, Object convMessage,
@@ -133,6 +135,7 @@ public class UploadFileTask extends FileTransferBase
 		this.picasaUri = picasaUri;
 		this.isRecipientOnhike = isRecipientOnHike;
 		userContext = convMessage;
+		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
 
@@ -146,14 +149,16 @@ public class UploadFileTask extends FileTransferBase
 		this.hikeFileType = hikeFileType;
 		this.msisdn = msisdn;
 		this.isRecipientOnhike = isRecipientOnHike;
+		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
 
 	protected void setFutureTask(FutureTask<FTResult> fuTask)
 	{
 		futureTask = fuTask;
+		fileTaskMap.put( ((ConvMessage) userContext).getMsgID() , futureTask);
 	}
-	
+
 	//private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long recordingDuration) throws FileTransferCancelledException, Exception
 	private void createConvMessage()
 	{
@@ -248,7 +253,7 @@ public class UploadFileTask extends FileTransferBase
 	{	
 		_state = FTState.IN_PROGRESS;
 		msgId = ((ConvMessage) userContext).getMsgID();
-		fileTaskMap.put(msgId, futureTask);
+		//fileTaskMap.put(msgId, futureTask);
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 		hikeFileType = hikeFile.getHikeFileType();
 		
@@ -543,80 +548,61 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 		long length = sourceFile.length();
-		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
-		int chunkSize = networkType.getMinChunkSize();
-		int start = mStart;
-		int end = (int) length;
-		if (end > (start + chunkSize))
-			end = start + chunkSize;
-		end--;
-		byte[] fileBytes = null;
-		int fileByteLength = end - start + 1;
+		
+		///// New Logic Test 1
+		
+		int chunkSize = getChunkSize(length);
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
-		fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+		
+		int start = mStart;
+		int end = (int) length;
+		if (end >= (start + chunkSize))
+		{
+			end = start + chunkSize;
+			end--;
+		}
+		else
+		{
+			end--;
+			chunkSize = end - start + 1;
+		}
+		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
 		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
-		/*
-		 * The following loops goes on till the end byte to read reaches the length
-		 * or we receive a json response from the server
-		 */
-		//
+		
 		while(end < length && responseJson == null)
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
-//			int fileByteLength = end - start + 1;
-//			String boundaryMesssage = getBoundaryMessage();
-//			String boundary = "\r\n--" + BOUNDARY + "--\r\n";
-//			fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
-//			System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
 			
 			boolean resetAndUpdate = false;
-			if (raf.read(fileBytes, boundaryMesssage.length(), fileByteLength) == -1)
+			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
+			if (bytesRead == -1)
 			{
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
+			
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
-			System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + fileByteLength, boundary.length());
+			System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + chunkSize, boundary.length());
 			String responseString = send(contentRange, fileBytes);
-			//Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
-			/*
-			 * When end byte uploaded is the last byte of the file and server send response
-			 * i.e. upload successfully completed
-			 */
-			 
+			
 			if(end == (length-1) && responseString != null)
 			{
 				responseJson = new JSONObject(responseString);
+				incrementBytesTransferred(chunkSize);
 				resetAndUpdate = true;	//To update UI
 			}
-			// When upload is not complete
 			else
 			{
+
 				// In case there is error uploading this chunk
 				if(responseString == null)
 				{
-					/*
-					 * If retry attempt is to be made.
-					 * The chunk size is reduced for next attempt
-					 */
-					 
 					if(shouldRetry())
 					{
 						raf.seek(start);
-						if(Utils.densityMultiplier > 1)
-						{
-							if(networkType == FileTransferManager.getInstance(context).getNetworkType())
-							{
-								chunkSize/=2;
-							}
-							else
-							{
-								networkType = FileTransferManager.getInstance(context).getNetworkType();
-								chunkSize = networkType.getMinChunkSize();
-							}
-						}
+						chunkSize = getChunkSize(length);
 					}
 					else
 					{
@@ -629,61 +615,25 @@ public class UploadFileTask extends FileTransferBase
 				else
 				{
 					start += chunkSize;
+					incrementBytesTransferred(chunkSize);
 					resetAndUpdate = true;	// To reset retry logic and update UI
-					
-					if(Utils.densityMultiplier > 1)
+						
+					end = (int) length;
+					if (end >= (start + chunkSize))
 					{
-						chunkSize *= 2;
-						if(chunkSize > networkType.getMaxChunkSize())
-							chunkSize = networkType.getMaxChunkSize();
-						else if (chunkSize < networkType.getMinChunkSize())
-							chunkSize = networkType.getMinChunkSize();
-						
-						/*
-						 * This chunk size should ideally be no more than 1/8 of the total memory available.
-						 */
-						try
-						{
-							int maxMemory = (int) Runtime.getRuntime().maxMemory();
-							if( chunkSize > (maxMemory / 8) )
-							chunkSize = (maxMemory / 8) ;
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-						}
-						
-						end = (int) length;
-						if (end > (start + chunkSize))
-						{
-							end = start + chunkSize;
-						}
+						end = start + chunkSize;
 						end--;
-
-						fileByteLength = end - start + 1;
-						fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
-						System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
 					}
 					else
 					{
-						end = (int) length;
-						if (end > (start + chunkSize))
-						{
-							end = start + chunkSize;
-							end--;
-						}
-						else
-						{
-							end--;
-							fileByteLength = end - start + 1;
-							fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
-							System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());			
-						}
+						end--;
+						chunkSize = end - start + 1;
+						fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
+						System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
 					}
 				}
-				// ChunkSize is increased within the limits
-				
 			}
+			
 			/*
 			 * Resetting reconnect logic
 			 * Updating UI
@@ -693,16 +643,190 @@ public class UploadFileTask extends FileTransferBase
 				retry = true;
 				reconnectTime = 0;
 				retryAttempts = 0;
-				incrementBytesTransferred(fileBytes.length);
 				temp = _bytesTransferred;
 				temp *= 100;
 				temp /= _totalSize;
 				progressPercentage = (int) temp;
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-				//showButton();
 			}
-			//fileBytes = null;
 		}
+		
+		
+		
+//		
+//		
+//		////>>>>>>>>old logic
+//		int chunkSize = networkType.getMinChunkSize();
+//		int start = mStart;
+//		int end = (int) length;
+//		if (end > (start + chunkSize))
+//			end = start + chunkSize;
+//		end--;
+//		byte[] fileBytes = null;
+//		int fileByteLength = end - start + 1;
+//		String boundaryMesssage = getBoundaryMessage();
+//		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
+//		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//		//fileBytes = new byte[fileByteLength];
+//		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+//		/*
+//		 * The following loops goes on till the end byte to read reaches the length
+//		 * or we receive a json response from the server
+//		 */
+//		//
+//		while(end < length && responseJson == null)
+//		{
+//			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
+//				break;
+////			int fileByteLength = end - start + 1;
+////			String boundaryMesssage = getBoundaryMessage();
+////			String boundary = "\r\n--" + BOUNDARY + "--\r\n";
+////			fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+////			System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+//			
+//			
+//			bos.write(boundaryMesssage.getBytes());
+//			fileBytes = new byte[fileByteLength];
+//			boolean resetAndUpdate = false;
+//			//if (raf.read(fileBytes, boundaryMesssage.length(), fileByteLength) == -1)
+//			if (raf.read(fileBytes) == -1)
+//			{
+//				raf.close();
+//				throw new IOException("Exception in partial read. files ended");
+//			}
+//			
+//			bos.write(fileBytes);
+//			bos.write(boundary.getBytes());
+//			String contentRange = "bytes " + start + "-" + end + "/" + length;
+//			//System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + fileByteLength, boundary.length());
+//			//String responseString = send(contentRange, fileBytes);
+//			String responseString = send(contentRange, bos.toByteArray());
+//			bos.flush();
+//			bos.close();
+//			//Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
+//			/*
+//			 * When end byte uploaded is the last byte of the file and server send response
+//			 * i.e. upload successfully completed
+//			 */
+//			 
+//			if(end == (length-1) && responseString != null)
+//			{
+//				responseJson = new JSONObject(responseString);
+//				resetAndUpdate = true;	//To update UI
+//			}
+//			// When upload is not complete
+//			else
+//			{
+//				// In case there is error uploading this chunk
+//				if(responseString == null)
+//				{
+//					/*
+//					 * If retry attempt is to be made.
+//					 * The chunk size is reduced for next attempt
+//					 */
+//					 
+//					if(shouldRetry())
+//					{
+//						raf.seek(start);
+//						//if(Utils.densityMultiplier > 1)
+//						//{
+//							if(networkType == FileTransferManager.getInstance(context).getNetworkType())
+//							{
+//								chunkSize/=2;
+//							}
+//							else
+//							{
+//								networkType = FileTransferManager.getInstance(context).getNetworkType();
+//								chunkSize = networkType.getMinChunkSize();
+//							}
+//						//}
+//					}
+//					else
+//					{
+//						raf.close();
+//						throw new IOException("Exception in partial upload. response null");
+//					}
+//					
+//				}
+//				// When the chunk uploaded successfully
+//				else
+//				{
+//					start += chunkSize;
+//					resetAndUpdate = true;	// To reset retry logic and update UI
+//					
+////					if(Utils.densityMultiplier > 1)
+////					{
+//						chunkSize *= 2;
+//						if(chunkSize > networkType.getMaxChunkSize())
+//							chunkSize = networkType.getMaxChunkSize();
+//						else if (chunkSize < networkType.getMinChunkSize())
+//							chunkSize = networkType.getMinChunkSize();
+//						
+//						/*
+//						 * This chunk size should ideally be no more than 1/8 of the total memory available.
+//						 */
+//						try
+//						{
+//							int maxMemory = (int) Runtime.getRuntime().maxMemory();
+//							if( chunkSize > (maxMemory / 8) )
+//							chunkSize = (maxMemory / 8) ;
+//						}
+//						catch(Exception e)
+//						{
+//							e.printStackTrace();
+//						}
+//						
+//						end = (int) length;
+//						if (end > (start + chunkSize))
+//						{
+//							end = start + chunkSize;
+//						}
+//						end--;
+//
+//						fileByteLength = end - start + 1;
+//						//fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+//						//System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+////					}
+////					else
+////					{
+////						end = (int) length;
+////						if (end > (start + chunkSize))
+////						{
+////							end = start + chunkSize;
+////							end--;
+////							fileByteLength = end - start + 1;
+////						}
+////						else
+////						{
+////							end--;
+////							fileByteLength = end - start + 1;
+////							//fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+////							//System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());			
+////						}
+////					}
+//				}
+//				// ChunkSize is increased within the limits
+//				
+//			}
+//			/*
+//			 * Resetting reconnect logic
+//			 * Updating UI
+//			 */
+//			if(resetAndUpdate)
+//			{
+//				retry = true;
+//				reconnectTime = 0;
+//				retryAttempts = 0;
+//				incrementBytesTransferred(fileBytes.length);
+//				temp = _bytesTransferred;
+//				temp *= 100;
+//				temp /= _totalSize;
+//				progressPercentage = (int) temp;
+//				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+//				//showButton();
+//			}
+//			//fileBytes = null;
+//		}
 		switch (_state)
 		{
 		case CANCELLED:
@@ -736,6 +860,33 @@ public class UploadFileTask extends FileTransferBase
 
 		}
 		return responseJson;
+	}
+
+	private int getChunkSize(long length)
+	{
+		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+		//int chunkSize = networkType.getMinChunkSize()*2;
+		int chunkSize;
+		if (Utils.densityMultiplier > 1)
+			chunkSize = networkType.getMaxChunkSize();
+		else if(Utils.densityMultiplier == 1)
+			chunkSize = networkType.getMinChunkSize() * 2;
+		else
+			chunkSize = networkType.getMinChunkSize();
+		
+		while (chunkSize > (length/10))
+			chunkSize/=2;
+		try
+		{
+			int maxMemory = (int) Runtime.getRuntime().maxMemory();
+			if( chunkSize > (maxMemory / 8) )
+			chunkSize = (maxMemory / 8) ;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return chunkSize;
 	}
 
 	String getBoundaryMessage()

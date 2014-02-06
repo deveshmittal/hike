@@ -22,7 +22,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 {
 	public enum FTState
 	{
-		NOT_STARTED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
+		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
 		PAUSED, CANCELLED, COMPLETED, ERROR,
 		PAUSING
 	}

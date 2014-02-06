@@ -26,6 +26,7 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -52,11 +53,16 @@ public class DownloadFileTask extends FileTransferBase
 		this.fileKey = fileKey;
 		this.showToast = showToast;
 		this.userContext = userContext;
+		_state = FTState.INITIALIZED;
 	}
 
 	@Override
 	public FTResult call()
 	{
+		if (_state == FTState.CANCELLED)
+			return FTResult.CANCELLED;
+
+		_state = FTState.IN_PROGRESS;
 		Log.d(getClass().getSimpleName(), "Instantiating download ....");
 		RandomAccessFile raf = null;
 		try

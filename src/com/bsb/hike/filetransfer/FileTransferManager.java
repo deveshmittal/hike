@@ -68,7 +68,7 @@ public class FileTransferManager
 	private File HIKE_TEMP_DIR; 
 
 	// Constant variables
-	private final int THREAD_POOL_SIZE = 10;
+	private int THREAD_POOL_SIZE = 10;
 
 	private final short KEEP_ALIVE_TIME = 60; // in seconds
 	
@@ -141,7 +141,7 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 64 * 1024;
+				return 32 * 1024;
 			}
 			
 			@Override
@@ -232,6 +232,10 @@ public class FileTransferManager
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
 		fileTaskMap = new ConcurrentHashMap<Long, FutureTask<FTResult>>();
 		// here choosing TimeUnit in seconds as minutes are added after api level 9
+		if(Utils.densityMultiplier > 1)
+			THREAD_POOL_SIZE = 3;
+		else
+			THREAD_POOL_SIZE = 2;
 		pool = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
@@ -262,12 +266,11 @@ public class FileTransferManager
 		if(isFileTaskExist(msgId))
 			return;
 		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast);
-		task.setState(FTState.IN_PROGRESS);
 		try
 		{
 			MyFutureTask ft = new MyFutureTask(task);
-			pool.execute(ft); // this future is used to cancel pause the task
 			fileTaskMap.put(msgId, ft);
+			pool.execute(ft); // this future is used to cancel pause the task
 		}
 		catch (RejectedExecutionException rjEx)
 		{
@@ -478,15 +481,18 @@ public class FileTransferManager
 	// this function gives the state of uploading for a file
 	public FileSavedState getUploadFileState(long msgId, File mFile)
 	{
+		Log.d(getClass().getSimpleName(), "Returning state for message ID : " + msgId);
 		if(isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
+				Log.d(getClass().getSimpleName(), "Returning: " + ((MyFutureTask) obj).getTask()._state.toString());
 				return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
 			}
 			else
-			{
+			{	
+				Log.d(getClass().getSimpleName(), "Returning: in_prog");
 				return new FileSavedState(FTState.IN_PROGRESS, 0, 0);
 			}
 		}
@@ -496,6 +502,7 @@ public class FileTransferManager
 
 	public FileSavedState getUploadFileState(File mFile, long msgId)
 	{
+		Log.d(getClass().getSimpleName(), "Returning from second call");
 		if (mFile == null) // @GM only for now. Has to be handled properly
 			return new FileSavedState();
 
