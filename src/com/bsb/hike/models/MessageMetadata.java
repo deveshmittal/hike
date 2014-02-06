@@ -111,8 +111,14 @@ public class MessageMetadata {
 			}
 			else // this is the case when you receive a sticker from another user
 			{
-				StickerCategory cat = StickerManager.getInstance().getCategoryForName(metadata.optString(StickerManager.CATEGORY_ID));
-				this.sticker = new Sticker(cat,metadata.optString(StickerManager.STICKER_ID));
+				String val = metadata.optString(StickerManager.CATEGORY_ID);
+				StickerCategory cat = StickerManager.getInstance().getCategoryForName(val);
+				if(cat != null) // sometimes cat is null
+					this.sticker = new Sticker(cat,metadata.optString(StickerManager.STICKER_ID));
+				else
+				{
+					Log.d(getClass().getSimpleName(), "Category Value received from server : "+val);
+				}
 			}
 		}
 	}

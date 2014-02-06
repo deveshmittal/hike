@@ -347,4 +347,18 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	{
 		evictAll();
 	}
+	
+	public Drawable getSticker(Context ctx, String path)
+	{
+		BitmapDrawable bd = get(path);
+		if(bd != null)
+			return bd;
+		
+		if (Utils.hasHoneycomb())
+			bd = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeFile(path));
+		else
+			bd = new RecyclingBitmapDrawable(ctx.getResources(), BitmapFactory.decodeFile(path));
+		putInCache(path, bd);
+		return bd;
+	}
 }

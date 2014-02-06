@@ -375,7 +375,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
 					bigPicImageLoader.loadImage(protip.getMappedId(),
-							viewHolder.statusImg);
+							viewHolder.statusImg,isListFlinging);
 					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
@@ -423,7 +423,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			 * Fetch larger image
 			 */
 			bigPicImageLoader.loadImage(statusMessage.getMappedId(),
-					viewHolder.largeProfilePic);
+					viewHolder.largeProfilePic,isListFlinging);
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
 					true, context));
@@ -693,5 +693,18 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	public IconLoader getIconImageLoader()
 	{
 		return iconImageLoader;
+	}
+	
+	private boolean isListFlinging;
+	public void setIsListFlinging(boolean b) {
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		bigPicImageLoader.setPauseWork(isListFlinging);
+		iconImageLoader.setPauseWork(isListFlinging);
+
+		if(notify && !isListFlinging) {
+			notifyDataSetChanged();
+		}
 	}
 }

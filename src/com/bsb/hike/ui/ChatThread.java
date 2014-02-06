@@ -373,8 +373,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	protected void onPause() {
 		super.onPause();
 		if (mAdapter != null) {
-			mAdapter.getStickerLoader().setPauseWork(false);
-			mAdapter.getStickerLoader().setExitTasksEarly(true);
+			//mAdapter.getStickerLoader().setPauseWork(false);
+			//mAdapter.getStickerLoader().setExitTasksEarly(true);
 			mAdapter.getIconImageLoader().setPauseWork(false);
 			mAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
@@ -391,7 +391,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	protected void onResume() {
 		super.onResume();
 		if (mAdapter != null) {
-			mAdapter.getStickerLoader().setExitTasksEarly(false);
+			//mAdapter.getStickerLoader().setExitTasksEarly(false);
 			mAdapter.getIconImageLoader().setExitTasksEarly(false);
 			mAdapter.notifyDataSetChanged();
 		}

@@ -17,6 +17,7 @@
 package com.bsb.hike.smartImageLoader;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -58,7 +59,7 @@ public abstract class ImageWorker
 
 	private boolean mFadeInBitmap = true;
 
-	private boolean mExitTasksEarly = false;
+	private AtomicBoolean mExitTasksEarly = new AtomicBoolean(false);
 
 	protected boolean mPauseWork = false;
 
@@ -174,7 +175,7 @@ public abstract class ImageWorker
 
 	public void setExitTasksEarly(boolean exitTasksEarly)
 	{
-		mExitTasksEarly = exitTasksEarly;
+		mExitTasksEarly.set(exitTasksEarly);
 		setPauseWork(false);
 	}
 
@@ -301,7 +302,7 @@ public abstract class ImageWorker
 			// another thread and the ImageView that was originally bound to this task is still
 			// bound back to this task and our "exit early" flag is not set, then call the main
 			// process method (as implemented by a subclass)
-			if (mImageCache != null && !isCancelled() && getAttachedImageView() != null && !mExitTasksEarly)
+			if (mImageCache != null && !isCancelled() && getAttachedImageView() != null && !mExitTasksEarly.get())
 			{
 				bitmap = processBitmap(dataString);
 			}
@@ -342,7 +343,7 @@ public abstract class ImageWorker
 		protected void onPostExecute(BitmapDrawable value)
 		{
 			// if cancel was called on this task or the "exit early" flag is set then we're done
-			if (isCancelled() || mExitTasksEarly)
+			if (isCancelled() || mExitTasksEarly.get())
 			{
 				value = null;
 			}
@@ -625,5 +626,10 @@ public abstract class ImageWorker
 			}
 		}
 		return inSampleSize;
+	}
+	
+	public HikeLruCache getLruCache()
+	{
+		return this.mImageCache;
 	}
 }

@@ -20,6 +20,8 @@ import java.io.File;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -35,7 +37,7 @@ public class TimelineImageLoader extends ImageWorker
 	private int mImageWidth;
 
 	private int mImageHeight;
-	
+
 	private Context context;
 
 	/**
@@ -62,7 +64,7 @@ public class TimelineImageLoader extends ImageWorker
 	 */
 	public TimelineImageLoader(Context ctx, int imageSize)
 	{
-		this(ctx,imageSize,imageSize);
+		this(ctx, imageSize, imageSize);
 	}
 
 	public void setImageSize(int width, int height)
@@ -94,16 +96,23 @@ public class TimelineImageLoader extends ImageWorker
 		String fileName = Utils.getProfileImageFileName(id);
 		File orgFile = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT, fileName);
 		if (!orgFile.exists())
-			return null;
-		
-		try
 		{
-			bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
-			//Log.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
+			BitmapDrawable b = this.getLruCache().getIconFromCache(id);
+			Log.d(TAG, "Bitmap from icondb");
+			if (b != null)
+				return b.getBitmap();
 		}
-		catch (Exception e1)
+		else
 		{
-			e1.printStackTrace();
+			try
+			{
+				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+				// Log.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
+			}
+			catch (Exception e1)
+			{
+				e1.printStackTrace();
+			}
 		}
 		return bitmap;
 	}

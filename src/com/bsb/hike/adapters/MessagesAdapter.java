@@ -210,7 +210,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean isDefaultTheme = true;
 	private IconLoader iconLoader;
-	private StickerLoader largeStickerLoader;
+	//private StickerLoader largeStickerLoader;
 	private int mIconImageSize;
 
 	private boolean isListFlinging;
@@ -218,7 +218,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
-		this.largeStickerLoader = new StickerLoader(context);
+		//this.largeStickerLoader = new StickerLoader(context);
 		this.iconLoader = new IconLoader(context,mIconImageSize);
 		this.context = context;
 		this.convMessages = objects;
@@ -861,8 +861,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					if (stickerImage != null && stickerImage.exists()
 							&& !downloadingSticker) {
 						holder.stickerImage.setVisibility(View.VISIBLE);
-						largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-						//holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context,stickerImage.getPath()));
+						//largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+						holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context,stickerImage.getPath()));
 //						holder.stickerImage.setImageDrawable(IconCacheManager
 //								.getInstance().getSticker(context,
 //										stickerImage.getPath()));
@@ -2974,7 +2974,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		largeStickerLoader.setPauseWork(isListFlinging);
+		//largeStickerLoader.setPauseWork(isListFlinging);
 		iconLoader.setPauseWork(isListFlinging);
 
 		if(notify && !isListFlinging) {
@@ -2982,10 +2982,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	public StickerLoader getStickerLoader()
-	{
-		return largeStickerLoader;
-	}
+//	public StickerLoader getStickerLoader()
+//	{
+//		return largeStickerLoader;
+//	}
 
 	public IconLoader getIconImageLoader()
 	{
