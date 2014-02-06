@@ -523,4 +523,78 @@ public class ContactUtils {
 			sb.append(number + ",");
 		}
 	}
+
+	public static void setWhatsappStatus(Context context, List<ContactInfo> contactinfos) {
+		Cursor whatsappContactsCursor = null;
+		Cursor phoneContactsCursor = null;
+		try {
+			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
+
+			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE
+					+ "= 'com.whatsapp'";
+			whatsappContactsCursor = context.getContentResolver().query(
+					ContactsContract.RawContacts.CONTENT_URI, projection,
+					selection, null, null);
+
+			int id = whatsappContactsCursor
+					.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+
+			StringBuilder whatsappContactIds = null;
+			if (whatsappContactsCursor.getCount() > 0) {
+				whatsappContactIds = new StringBuilder("(");
+
+				while (whatsappContactsCursor.moveToNext()) {
+					whatsappContactIds.append(whatsappContactsCursor.getInt(id)
+							+ ",");
+				}
+				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","),
+						whatsappContactIds.length(), ")");
+			}
+			
+			if (whatsappContactIds != null) {
+				String[] newProjection = new String[] { Phone.NUMBER,
+						Phone.DISPLAY_NAME };
+				String newSelection = (Phone.CONTACT_ID + " IN " + whatsappContactIds
+						.toString());
+
+				phoneContactsCursor = context.getContentResolver().query(
+						Phone.CONTENT_URI, newProjection, newSelection, null,
+						Phone.NUMBER + " DESC");
+
+				Log.d("PostWhatsappDetails", "whatsapp contacts count = "
+						+ phoneContactsCursor.getCount());
+				if(phoneContactsCursor.getCount() > 0){
+					setWhatsappContacs(phoneContactsCursor, contactinfos);
+				}
+			}
+
+		} finally {
+			if (whatsappContactsCursor != null) {
+				whatsappContactsCursor.close();
+			}
+			if (phoneContactsCursor != null) {
+				phoneContactsCursor.close();
+			}
+		}
+	}
+	
+	private static void setWhatsappContacs(Cursor c, List<ContactInfo> contactinfos) {
+		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+		HashSet<String> whatsappContacts = new HashSet<String>(c.getCount());
+		while (c.moveToNext()) {
+			String number = c.getString(numberColIdx);
+			whatsappContacts.add(number);
+		}
+		StringBuilder sb = new StringBuilder();
+		
+		for (ContactInfo contact : contactinfos) {
+			if(whatsappContacts.contains(contact.getPhoneNum())){
+				contact.setOnWhatsapp(true);
+				sb.append(contact.getPhoneNum()+",");
+			}
+		}
+		//for testing purposes
+		Log.d("PostWhatsappDetails", "WhatsApp Contact List = "+sb.toString());
+	}
+
 }

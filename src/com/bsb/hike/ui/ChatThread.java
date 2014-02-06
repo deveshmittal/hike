@@ -838,12 +838,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.chat_bg:
 			setupThemePicker(null);
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP,
 					false)) {
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-				editor.commit();
-
 				closeChatBgFtueTip();
 			}
 			break;
@@ -1661,7 +1657,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber)) {
 			if (!(mConversation instanceof GroupConversation)
 					|| ((GroupConversation) mConversation).getIsGroupAlive()) {
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP,
 						false)) {
 					showChatBgFtueTip();
 				} else if (!prefs.getBoolean(
