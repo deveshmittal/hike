@@ -37,7 +37,7 @@ public class TimelineImageLoader extends ImageWorker
 	private int mImageWidth;
 
 	private int mImageHeight;
-	
+
 	private Context context;
 
 	/**
@@ -64,7 +64,7 @@ public class TimelineImageLoader extends ImageWorker
 	 */
 	public TimelineImageLoader(Context ctx, int imageSize)
 	{
-		this(ctx,imageSize,imageSize);
+		this(ctx, imageSize, imageSize);
 	}
 
 	public void setImageSize(int width, int height)
@@ -98,18 +98,21 @@ public class TimelineImageLoader extends ImageWorker
 		if (!orgFile.exists())
 		{
 			BitmapDrawable b = this.getLruCache().getIconFromCache(id);
-			Log.d(TAG,"Bitmap from icondb");
-			if(b != null)
+			Log.d(TAG, "Bitmap from icondb");
+			if (b != null)
 				return b.getBitmap();
 		}
-		try
+		else
 		{
-			bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
-			//Log.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
-		}
-		catch (Exception e1)
-		{
-			e1.printStackTrace();
+			try
+			{
+				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+				// Log.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
+			}
+			catch (Exception e1)
+			{
+				e1.printStackTrace();
+			}
 		}
 		return bitmap;
 	}
