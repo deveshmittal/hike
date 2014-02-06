@@ -117,7 +117,7 @@ public abstract class ImageWorker
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
-		else if (!isFlinging && cancelPotentialWork(data, imageView))
+		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
 			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, task);
