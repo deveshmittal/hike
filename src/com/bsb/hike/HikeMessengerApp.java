@@ -292,6 +292,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String WHATSAPP_DETAILS_SENT = "whatsappDetailsSent";
 
 	public static final String LAST_BACK_OFF_TIME_WHATSAPP = "lastBackOffTimeWhatsapp";
+
+	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 	
 	public static CurrentState currentState = CurrentState.CLOSED;
 
