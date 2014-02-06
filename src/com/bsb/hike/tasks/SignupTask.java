@@ -343,6 +343,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					null);
 			List<ContactInfo> contactinfos = ContactUtils
 					.getContacts(this.context);
+			ContactUtils.setWhatsappStatus(this.context, contactinfos);
 			HikeUserDatabase db = null;
 			try {
 				Map<String, List<ContactInfo>> contacts = ContactUtils
@@ -389,6 +390,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 
 			Editor editor = settings.edit();
 			editor.putBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, true);
+			editor.putBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
 			editor.commit();
 			/*
 			 * addressbook scanned, sick
