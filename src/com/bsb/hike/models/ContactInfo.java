@@ -48,6 +48,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	private int offline = 1;
 
 	private long inviteTime;
+	
+	private boolean onWhatsapp = false;
 
 	public String getName() {
 		return name;
@@ -167,6 +169,15 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public void setInviteTime(long inviteTime) {
 		this.inviteTime = inviteTime;
 	}
+	
+	public boolean isOnWhatsapp() {
+		return onWhatsapp;
+	}
+
+	public void setOnWhatsapp(boolean onWhatsapp) {
+		this.onWhatsapp = onWhatsapp;
+	}
+
 
 	public String getFormattedHikeJoinTime() {
 		String format = "MMM ''yy";
