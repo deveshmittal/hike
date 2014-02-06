@@ -41,7 +41,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
@@ -1367,12 +1366,36 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				/* lookup based on this msisdn */
 				return Utils.getDefaultIconForUser(mContext, msisdn, rounded);
 			}
-
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
 			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata,
 					0, icondata.length));
 		} finally {
 			if (c != null) {
+				c.close();
+			}
+		}
+	}
+	
+	public byte[] getIconByteArray(String msisdn, boolean rounded)
+	{
+		Cursor c = null;
+		try
+		{
+			String table = rounded ? DBConstants.ROUNDED_THUMBNAIL_TABLE : DBConstants.THUMBNAILS_TABLE;
+			c = mDb.query(table, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+
+			if (!c.moveToFirst())
+			{
+				/* lookup based on this msisdn */
+				return null;
+			}
+			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+			return icondata;
+		}
+		finally
+		{
+			if (c != null)
+			{
 				c.close();
 			}
 		}

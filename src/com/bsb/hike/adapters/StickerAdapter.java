@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -283,7 +284,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		final List<Sticker> stickersList;
 		if (category.categoryId.equals(StickerCategoryId.recent))
 		{
-			LinkedHashSet<Sticker> lhs = StickerManager.getInstance().getRecentStickerList();
+			Set<Sticker> lhs = StickerManager.getInstance().getRecentStickerList();
 
 			/*
 			 * here using LinkedList as in recents we have to remove the sticker frequently to move it to front and in linked list remove operation is faster compared to arraylist

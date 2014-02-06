@@ -22,9 +22,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
@@ -49,16 +51,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private LayoutInflater inflater;
 	private StickerCategory category;
 	private int numStickerRows;
-	private ImageWorker mWorker;
+	private StickerLoader stickerLoader;
 	
 	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
-			List<ViewType> viewTypeList,ImageWorker worker) {
+			List<ViewType> viewTypeList,StickerLoader worker) {
 		this.activity = activity;
 		this.stickerList = stickerList;
 		this.viewTypeList = viewTypeList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
-		this.mWorker = worker;
+		this.stickerLoader = worker;
 		calculateNumRowsAndSize(false);
 	}
 
@@ -197,7 +199,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 
 			int padding = (int) (5 * Utils.densityMultiplier);
 			for (int i = 0; i < maxCount; i++) {
-				ImageView imageView = new ImageView(activity);
+				ImageView imageView = new RecyclingImageView(activity);
 				imageView.setLayoutParams(childParams);
 				imageView.setScaleType(ScaleType.FIT_CENTER);
 				imageView.setPadding(padding, padding, padding, padding);
@@ -207,23 +209,22 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					return null;
 				Sticker sticker = stickerList.get(index);
 
-				if (sticker.getStickerIndex() != -1) {
-					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId)) {                                              
-						imageView
-								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker
-										.getStickerIndex()]);
-					} else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId)) {
-						imageView
-								.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker
-										.getStickerIndex()]);
+				if (sticker.getStickerIndex() != -1)
+				{
+					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView);
+						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()]);
 					}
-				} else {
-					mWorker.loadImage(sticker.getSmallStickerPath(activity), imageView);
-					//imageLoader.displayImage("file://"+sticker.getSmallStickerPath(activity),imageView,op);
-						
-					/*imageView.setImageDrawable(IconCacheManager.getInstance()
-							.getStickerThumbnail(
-									sticker.getSmallStickerPath(activity)));*/
+					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView);
+						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
+					}
+				}
+				else
+				{
+					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView);
 				}
 				imageView.setTag(sticker);
 

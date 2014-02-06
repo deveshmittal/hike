@@ -126,7 +126,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
 
-                    <ImageView
+	                <com.bsb.hike.ui.utils.RecyclingImageView
 	                    android:id="@+id/file_thumb"
 	                    android:layout_width="100dp"
 	                    android:layout_height="100dp"
@@ -397,7 +397,7 @@
 	                android:layout_centerInParent="true"
 	                android:visibility="gone" />
 
-	            <ImageView
+	            <com.bsb.hike.ui.utils.RecyclingImageView
 	                android:id="@+id/sticker_image"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"

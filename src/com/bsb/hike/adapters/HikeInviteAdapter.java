@@ -22,7 +22,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 
 public class HikeInviteAdapter extends
@@ -35,12 +34,14 @@ public class HikeInviteAdapter extends
 	private String filterString;
 	private boolean showingBlockedList;
 	private IconLoader iconLoader;
+	private int mIconImageSize;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId,
 			List<Pair<AtomicBoolean, ContactInfo>> completeList,
 			boolean showingBLockedList) {
 
 		super(activity, viewItemId, completeList);
+		mIconImageSize = activity.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.activity = activity;
 		this.filteredList = completeList;
 		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(
@@ -48,7 +49,7 @@ public class HikeInviteAdapter extends
 		this.completeList.addAll(completeList);
 		this.filter = new ContactFilter();
 		this.showingBlockedList = showingBLockedList;
-		iconLoader = new IconLoader(activity,180);
+		iconLoader = new IconLoader(activity,mIconImageSize);
 	}
 
 	public void selectAllToggled() {

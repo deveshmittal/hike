@@ -46,8 +46,8 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -85,6 +85,8 @@ public class MqttMessagesManager {
 
 	private static MqttMessagesManager instance;
 
+	private String userMsisdn;
+
 	private MqttMessagesManager(Context context) {
 		this.convDb = HikeConversationsDatabase.getInstance();
 		this.userDb = HikeUserDatabase.getInstance();
@@ -96,6 +98,7 @@ public class MqttMessagesManager {
 				.getTypingNotificationSet();
 		this.clearTypingNotificationHandler = new Handler();
 		this.appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		this.userMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 	}
 
 	public static MqttMessagesManager getInstance(Context context) {
@@ -118,7 +121,11 @@ public class MqttMessagesManager {
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			if (Utils.isGroupConversation(msisdn)) {
+			/*
+			 * We don't consider this packet if the msisdn is the user's
+			 * msisdn or a group conversation.
+			 */
+			if (Utils.isGroupConversation(msisdn) || userMsisdn.equals(msisdn)) {
 				return;
 			}
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -666,20 +673,15 @@ public class MqttMessagesManager {
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
-					String msisdn = settings.getString(
-							HikeMessengerApp.MSISDN_SETTING, "");
-
 					String iconBase64 = account.getString(HikeConstants.ICON);
 					try {
 						byte[] profileImageBytes = Base64.decode(iconBase64,
 								Base64.DEFAULT);
-						this.userDb.setIcon(msisdn, profileImageBytes, false);
+						this.userDb.setIcon(userMsisdn, profileImageBytes, false);
 
-						HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+						HikeMessengerApp.getLruCache().clearIconForMSISDN(userMsisdn);
 						//IconCacheManager.getInstance().clearIconForMSISDN(
 								//msisdn);
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.PROFILE_PIC_CHANGED, null);
 					} catch (Exception e) {
 						Log.w(getClass().getSimpleName(), "Invalid image bytes");
 					}
@@ -1135,6 +1137,7 @@ public class MqttMessagesManager {
 						File stickerSmall = new File(categoryDir
 								+ HikeConstants.SMALL_STICKER_ROOT, stickerId);
 						stickerSmall.delete();
+						StickerManager.getInstance().removeStickerFromRecents(new Sticker(categoryId, stickerId));
 					}
 				}
 			}

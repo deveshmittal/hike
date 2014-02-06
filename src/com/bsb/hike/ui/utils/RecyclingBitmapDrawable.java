@@ -16,6 +16,8 @@
 
 package com.bsb.hike.ui.utils;
 
+import com.bsb.hike.utils.Utils;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -46,7 +48,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		super(bitmap);
 	}
-	
+
 	/**
 	 * Notify the drawable that the displayed state has changed. Internally a count is kept so that the drawable knows when it is no longer being displayed.
 	 * 
@@ -57,6 +59,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		synchronized (this)
 		{
+			Log.d(LOG_TAG, "Is Displayed : " + isDisplayed);
 			if (isDisplayed)
 			{
 				mDisplayRefCount++;
@@ -66,6 +69,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 			{
 				mDisplayRefCount--;
 			}
+			Log.d(LOG_TAG, "IsDisplayed Count : " + mDisplayRefCount);
 		}
 
 		// Check to see if recycle() can be called
@@ -82,6 +86,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		synchronized (this)
 		{
+			Log.d(LOG_TAG, "Is Cached : " + isCached);
 			if (isCached)
 			{
 				mCacheRefCount++;
@@ -90,6 +95,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 			{
 				mCacheRefCount--;
 			}
+			Log.d(LOG_TAG, "Is Cached Count : " + mCacheRefCount);
 		}
 
 		// Check to see if recycle() can be called
@@ -117,5 +123,25 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		Bitmap bitmap = getBitmap();
 		return null != bitmap && bitmap.isMutable();
+	}
+
+	public int size()
+	{
+		Bitmap bitmap = this.getBitmap();
+
+		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
+		// larger than bitmap byte count.
+		if (Utils.hasKitKat())
+		{
+			return bitmap.getAllocationByteCount();
+		}
+
+		if (Utils.hasHoneycombMR1())
+		{
+			return bitmap.getByteCount();
+		}
+
+		// Pre HC-MR1
+		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
 }

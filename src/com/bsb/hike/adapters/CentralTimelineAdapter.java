@@ -33,10 +33,8 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
-import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
@@ -56,6 +54,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private Context context;
 	private String userMsisdn;
 	private int mBigImageSize;
+	private int mIconImageSize;
 	private TimelineImageLoader bigPicImageLoader;
 	private IconLoader iconImageLoader;
 	private LayoutInflater inflater;
@@ -81,10 +80,11 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			List<StatusMessage> statusMessages, String userMsisdn) {
 		this.context = context;
 		mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
-		this.iconImageLoader = new IconLoader(context,180);
+		this.iconImageLoader = new IconLoader(context,mIconImageSize);
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
@@ -150,7 +150,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		final StatusMessage statusMessage = getItem(position);
 
 		final ViewHolder viewHolder;
-
 		if (convertView == null) {
 			viewHolder = new ViewHolder();
 

@@ -171,7 +171,6 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -452,6 +451,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (mAdapter != null) {
 			mAdapter.resetPlayerIfRunning();
 		}
+		if (attachmentWindow != null && attachmentWindow.isShowing()) {
+			attachmentWindow.dismiss();
+			attachmentWindow = null;
+		}
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
 	}
 
@@ -540,7 +543,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
 		/* register listeners */
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		mPubSub.addListeners(this, pubSubListeners);
 		if (prefs.contains(HikeMessengerApp.TEMP_NUM)) {
 			mContactName = prefs.getString(HikeMessengerApp.TEMP_NAME, null);
 			mContactNumber = prefs.getString(HikeMessengerApp.TEMP_NUM, null);
@@ -598,6 +601,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, false)) {
 				showStickerFtueTip();
 			}
+			if (savedInstanceState.getBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, false)) {
+				final ChatTheme chatTheme = ChatTheme.values()[savedInstanceState.getInt(HikeConstants.Extras.SELECTED_THEME, 0)];
+				/*
+				 * We need to queue this piece of code after the lifecycle methods are done.
+				 * Else the popup window throws an exception. 
+				 */
+				mHandler.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						setupThemePicker(chatTheme);
+						setChatTheme(chatTheme);
+					}
+				});
+			}
 		}
 
 		/* registering localbroadcast manager */
@@ -617,7 +635,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onBackPressed() {
 		if (attachmentWindow != null && attachmentWindow.isShowing()) {
-			attachmentWindow.dismiss();
+			dismissPopupWindow();
 			attachmentWindow = null;
 			return;
 		}
@@ -819,10 +837,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		switch (item.getItemId()) {
 		case R.id.chat_bg:
-			showThemePicker();
-			setupChatThemeActionBar();
-			showingChatThemePicker = true;
-			invalidateOptionsMenu();
+			setupThemePicker(null);
 			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
 					false)) {
 				Editor editor = prefs.edit();
@@ -841,6 +856,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		return true;
+	}
+
+	private void setupThemePicker(ChatTheme preSelectedTheme) {
+		showThemePicker(preSelectedTheme);
+		setupChatThemeActionBar();
+		showingChatThemePicker = true;
+		invalidateOptionsMenu();
+	}
+
+	private void dismissPopupWindow() {
+		if(attachmentWindow != null) {
+			attachmentWindow.dismiss();
+		}
 	}
 
 	private void showOverFlowMenu() {
@@ -869,9 +897,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 
-		if(attachmentWindow != null) {
-			attachmentWindow.dismiss();
-		}
+		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -920,7 +946,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 				OverFlowMenuItem item = (OverFlowMenuItem) adapterView
 						.getItemAtPosition(position);
 
@@ -1327,7 +1353,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						.getIntExtra(StickerManager.FWD_STICKER_INDEX,-1);
 				Sticker sticker = new Sticker(categoryId, stickerId,stickerIdx);
 				sendSticker(sticker);
-
+				// add this sticker to recents
+				StickerManager.getInstance().addRecentSticker(sticker);
 				/*
 				 * Making sure the sticker is not forwarded again on orientation
 				 * change
@@ -3026,11 +3053,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 												: R.color.chat_thread_indicator_bg_custom_theme));
 	}
 
-	private void showThemePicker() {
+	private void showThemePicker(ChatTheme preSelectedTheme) {
 
-		if(attachmentWindow != null) {
-			attachmentWindow.dismiss();
+		dismissPopupWindow();
+
+		if (emoticonLayout != null
+				&& emoticonLayout.getVisibility() == View.VISIBLE) {
+			onEmoticonBtnClicked(null, 0, true);
 		}
+		Utils.hideSoftKeyboard(this, mComposeView);
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -3051,7 +3082,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		chatThemeTip.setVisibility(mConversation.isOnhike() ? View.VISIBLE
 				: View.GONE);
 
-		temporaryTheme = selectedTheme;
+		temporaryTheme = preSelectedTheme == null ? selectedTheme : preSelectedTheme;
 
 		attachmentsGridView.setNumColumns(getNumColumnsChatThemes());
 
@@ -3220,7 +3251,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			@Override
 			public void onClick(View v) {
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 			}
 		});
 
@@ -3237,7 +3268,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					selectedTheme = temporaryTheme;
 					sendChatThemeMessage();
 				}
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 			}
 		});
 
@@ -3283,9 +3314,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			optionImagesList.add(R.drawable.ic_attach_contact);
 		}
 
-		if(attachmentWindow != null) {
-			attachmentWindow.dismiss();
-		}
+		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
 
@@ -3326,7 +3355,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 
 				int requestCode;
 				Intent pickIntent = new Intent();
@@ -3448,7 +3477,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			
 			@Override
 			public void onDismiss() {
-				attachmentWindow.dismiss();
+				dismissPopupWindow();
 			}
 		});
 
@@ -3908,6 +3937,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					&& (selectedFile == null || !selectedFile.exists())) {
 				Toast.makeText(getApplicationContext(), R.string.error_capture,
 						Toast.LENGTH_SHORT).show();
+				clearTempData();
 				return;
 			}
 
@@ -3927,6 +3957,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					 */
 					Toast.makeText(this, R.string.error_capture_video,
 							Toast.LENGTH_SHORT).show();
+					clearTempData();
 					return;
 				}
 			} else {
@@ -3935,6 +3966,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					// Picasa image
 					FileTransferManager.getInstance(getApplicationContext()).uploadFile(selectedFileUri,hikeFileType,mContactNumber,mConversation.isOnhike());
+					clearTempData();
 					return;
 				} else {
 					String fileUriStart = "file://";
@@ -4392,6 +4424,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA,
 					true);
 		}
+		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null) {
+			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
+			outState.putInt(HikeConstants.Extras.SELECTED_THEME, temporaryTheme.ordinal());
+		}
 		super.onSaveInstanceState(outState);
 	}
 
@@ -4414,6 +4450,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	public void onEmoticonBtnClicked(View v, int whichSubcategory,
 			boolean backPressed) {
+		dismissPopupWindow();
+
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout)
 				: emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
@@ -4500,7 +4538,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				@Override
 				public void run() {
+					final int selection = mConversationsView.getLastVisiblePosition();
+
 					emoticonLayout.setVisibility(View.VISIBLE);
+					/*
+					 * Making sure we keep the same selection as we did
+					 * before showing the sticker/emoticon layout.
+					 */
+					mHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							mConversationsView.setSelection(selection);
+						}
+					});
 				}
 			}, 45);
 			Utils.hideSoftKeyboard(this, mComposeView);
@@ -4585,13 +4635,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		dialog.setOnCancelListener(new OnCancelListener() {
 
 			/*
-			 * If user cancels non fixed category , he should be taken to humanoid whose index is 1
+			 * If user cancels non fixed category , he should be taken to recents if not empty else to humanoid whose index is 1
 			 * */
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid) && !category.categoryId.equals(StickerCategoryId.doggy)
 						&& !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name())) {
-					emoticonViewPager.setCurrentItem(1, false);
+					int idx = 0;
+					if(StickerManager.getInstance().getRecentStickerList().size() == 0)
+						idx = 1;
+					emoticonViewPager.setCurrentItem(idx, false);
 				}
 			}
 		});

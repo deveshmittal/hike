@@ -76,6 +76,7 @@ import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -924,8 +925,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 							if (profileType == ProfileType.USER_PROFILE
 									|| profileType == ProfileType.USER_PROFILE_EDIT) {
-								HikeMessengerApp.getPubSub().publish(
-										HikePubSub.PROFILE_PIC_CHANGED, null);
+
+								HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
 
 								/*
 								 * Making the profile pic change a status
@@ -957,6 +958,17 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 										statusMessage.getMappedId(), bytes,
 										false);
 
+								String srcFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+										+ HikeConstants.PROFILE_ROOT + "/" +  msisdn + ".jpg";
+
+								String destFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+										+ HikeConstants.PROFILE_ROOT + "/" + mappedId + ".jpg";
+
+								/*
+								 * Making a status update file so we don't need to download this file again.
+								 */
+								Utils.copyFile(srcFilePath, destFilePath, null);
+								
 								int unseenUserStatusCount = preferences
 										.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
 												0);

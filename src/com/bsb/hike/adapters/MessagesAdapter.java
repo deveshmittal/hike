@@ -213,11 +213,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isDefaultTheme = true;
 	private IconLoader iconLoader;
 	private StickerLoader largeStickerLoader;
+	private int mIconImageSize;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.largeStickerLoader = new StickerLoader(context);
-		this.iconLoader = new IconLoader(context,180);
+		this.iconLoader = new IconLoader(context,mIconImageSize);
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
@@ -2158,8 +2160,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				return;
 			}
 			Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
-			if (convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
-					&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
+			if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition))
+					&& isMessageUndelivered(convMessage) && convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
 			{
 				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
 

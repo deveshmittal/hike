@@ -145,7 +145,6 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
@@ -3294,5 +3293,25 @@ public class Utils {
 	public static boolean hasEnoughFreeSpaceForProfilePic() {
 		double freeSpaceAvailable = getFreeSpace();
 		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
+	}
+	
+	public static int getBitmapSize(Bitmap bitmap)
+	{
+		if(bitmap == null)
+			return 0;
+		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
+		// larger than bitmap byte count.
+		if (Utils.hasKitKat())
+		{
+			return bitmap.getAllocationByteCount();
+		}
+
+		if (Utils.hasHoneycombMR1())
+		{
+			return bitmap.getByteCount();
+		}
+
+		// Pre HC-MR1
+		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
 }

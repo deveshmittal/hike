@@ -1,16 +1,19 @@
 package com.bsb.hike.smartImageLoader;
 
+import java.net.URL;
+
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Utils;
 
-public class IconLoader extends ImageWorker
+public class SocialIconLoader extends ImageWorker
 {
 
-	private static final String TAG = "IconLoader";
+	private static final String TAG = "SocialIconLoader";
 
 	private int mImageWidth;
 
@@ -25,7 +28,7 @@ public class IconLoader extends ImageWorker
 	 * @param imageWidth
 	 * @param imageHeight
 	 */
-	public IconLoader(Context ctx, int imageWidth, int imageHeight)
+	public SocialIconLoader(Context ctx, int imageWidth, int imageHeight)
 	{
 		super();
 		this.context = ctx;
@@ -40,7 +43,7 @@ public class IconLoader extends ImageWorker
 	 * @param context
 	 * @param imageSize
 	 */
-	public IconLoader(Context ctx, int imageSize)
+	public SocialIconLoader(Context ctx, int imageSize)
 	{
 		this(ctx,imageSize,imageSize);
 	}
@@ -68,19 +71,17 @@ public class IconLoader extends ImageWorker
 	 *            The data to load the bitmap
 	 * @return The downloaded and resized bitmap
 	 */
-	protected Bitmap processBitmap(String id)
+	protected Bitmap processBitmap(String url)
 	{
-		int idx = id.indexOf(ROUND_SUFFIX);
-		boolean rounded = true;
-		if(idx > 0)
+		try
 		{
-			id = id.substring(0,idx);
-			rounded = true;
+			Bitmap bitmap = BitmapFactory.decodeStream(new URL(url).openConnection().getInputStream());
+			return bitmap;
 		}
-		Bitmap bm = decodeSampledBitmapFromByeArray(id,rounded,mImageWidth,mImageHeight,HikeMessengerApp.getLruCache());
-		if(bm == null)
-			return ((BitmapDrawable)Utils.getDefaultIconForUser(context, id, rounded)).getBitmap();
-		else	
-			return bm;
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			return null;
+		}
 	}
 }

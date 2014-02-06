@@ -31,7 +31,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 
 @SuppressWarnings("unchecked")
@@ -46,6 +45,7 @@ public class HikeSearchContactAdapter extends
 	private Map<String, GroupParticipant> groupParticipants;
 	private boolean forwarding;
 	private IconLoader iconLoader;
+	private int mIconImageSize;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<Pair<AtomicBoolean, ContactInfo>> contactList,
@@ -61,7 +61,8 @@ public class HikeSearchContactAdapter extends
 		this.groupId = groupId;
 		this.forwarding = forwarding;
 		this.groupParticipants = groupParticipants;
-		iconLoader = new IconLoader(context,180);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconLoader = new IconLoader(context,mIconImageSize);
 	}
 
 	Comparator<Pair<AtomicBoolean, ContactInfo>> comparator = new Comparator<Pair<AtomicBoolean, ContactInfo>>() {

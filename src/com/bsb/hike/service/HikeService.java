@@ -22,6 +22,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Messenger;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -37,6 +38,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -122,6 +124,8 @@ public class HikeService extends Service {
 
 	private Looper mContactHandlerLooper;
 
+	private StickerManager sm;
+	
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -231,7 +235,55 @@ public class HikeService extends Service {
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
+		setupStickers();
+	}
 
+	private void setupStickers()
+	{
+		sm = StickerManager.getInstance();
+		sm.init(getApplicationContext());
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		/*
+		 * If we had earlier removed bollywood stickers we need to display them
+		 * again.
+		 */
+		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS)) {
+			sm.setupBollywoodCategoryVisibility(settings);
+		}
+		
+		sm.setupStickerCategoryList(settings);
+
+		/*
+		 * This preference has been used here because of a bug where we were
+		 * inserting this key in the settings preference
+		 */
+		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS)) {
+			sm.removeHumanoidSticker();
+		}
+
+		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false)) {
+			sm.insertDoggyCategory();
+		}
+
+		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false)) {
+			sm.insertHumanoidCategory();
+		}
+
+		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
+			sm.resetReachedEndForDefaultStickers();
+		}
+
+		/*
+		 * Adding these preferences since they are used in the load more
+		 * stickers logic.
+		 */
+		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES,
+				false)) {
+			sm.setDialoguePref();
+		}
+		
 	}
 
 	@Override
@@ -302,6 +354,8 @@ public class HikeService extends Service {
 			unregisterReceiver(sendRai);
 			sendRai = null;
 		}
+		sm.getStickerCategoryList().clear();
+		sm.getRecentStickerList().clear();
 	}
 
 	public void unregisterDataChangeReceivers() {

@@ -99,5 +99,6 @@
 	<dimen name="fs_moving_ribbon1_height">276dp</dimen>
 	<dimen name="gift_card_width">208dp</dimen>
 	<dimen name="gift_card_height">220dp</dimen>
-	<dimen name="timeine_big_picture_size">150dp</dimen>
+	<dimen name="timeine_big_picture_size">200dp</dimen>
+	<dimen name="icon_picture_size">50dp</dimen>
 </resources>

@@ -332,7 +332,7 @@ public class UploadFileTask extends FileTransferBase
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
 			{
-				thumbnail = ThumbnailUtils.createVideoThumbnail(selectedFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+				thumbnail = ThumbnailUtils.createVideoThumbnail(selectedFile.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
 			}
 			if (thumbnail != null)
 			{

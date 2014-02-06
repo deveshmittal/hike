@@ -196,6 +196,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			Intent intent = Utils
 					.createIntentFromContactInfo(conversationContactInfo, true);
 			intent.setClass(this, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			finish();
 		} else {
@@ -322,6 +323,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		Intent intent = Utils
 				.createIntentFromContactInfo(conversationContactInfo, true);
 		intent.setClass(this, ChatThread.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		finish();
 	}
@@ -516,6 +518,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 			intent.setClass(this, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			String type = presentIntent.getType();
 
 			if ("text/plain".equals(type)

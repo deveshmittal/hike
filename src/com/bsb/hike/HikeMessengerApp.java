@@ -44,12 +44,10 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
-import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -57,7 +55,6 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
@@ -323,8 +320,6 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static Map<String, Long> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
-
-	private StickerManager sm;
 	
 	class IncomingHandler extends Handler {
 		@Override
@@ -635,47 +630,7 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
-		sm = StickerManager.getInstance();
-		sm.init(getApplicationContext());
 		
-		/*
-		 * If we had earlier removed bollywood stickers we need to display them
-		 * again.
-		 */
-		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS)) {
-			sm.setupBollywoodCategoryVisibility(settings);
-		}
-		
-		sm.setupStickerCategoryList(settings);
-
-		/*
-		 * This preference has been used here because of a bug where we were
-		 * inserting this key in the settings preference
-		 */
-		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS)) {
-			sm.removeHumanoidSticker();
-		}
-
-		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false)) {
-			sm.insertDoggyCategory();
-		}
-
-		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false)) {
-			sm.insertHumanoidCategory();
-		}
-
-		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
-			sm.resetReachedEndForDefaultStickers();
-		}
-
-		/*
-		 * Adding these preferences since they are used in the load more
-		 * stickers logic.
-		 */
-		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES,
-				false)) {
-			sm.setDialoguePref();
-		}
 
 		makeNoMediaFiles();
 
