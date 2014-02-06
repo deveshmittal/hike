@@ -134,6 +134,11 @@ public class ImageViewerFragment extends SherlockFragment implements
 					+ "/" + fileName));
 		}
 
+		/*
+		 * Removing the smaller icon in cache.
+		 */
+		HikeMessengerApp.getLruCache().remove(mappedId);
+
 		if (isStatusImage) {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
