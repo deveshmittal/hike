@@ -231,7 +231,7 @@
                                 android:textSize="9dp"
                                 android:visibility="gone" />
 
-                            <ProgressBar
+                            <com.bsb.hike.view.CustomProgressBar
                                 android:id="@+id/pbTransfer"
                                 style="?android:attr/progressBarStyleHorizontal"
                                 android:layout_width="match_parent"

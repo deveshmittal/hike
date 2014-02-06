@@ -141,13 +141,13 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 32 * 1024;
+				return 64 * 1024;
 			}
 			
 			@Override
 			public int getMinChunkSize()
 			{
-				return 8 * 1024;
+				return 32 * 1024;
 			}
 		};
 		
@@ -646,5 +646,18 @@ public class FileTransferManager
 		}
 		else
 			return 0;
+	}
+	
+	public int getChunkSize(long msgId)
+	{
+		if(isFileTaskExist(msgId))
+		{
+			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+			if (obj != null)
+			{
+				return ((MyFutureTask) obj).getTask().chunkSize ;
+			}
+		}
+		return 0;
 	}
 }

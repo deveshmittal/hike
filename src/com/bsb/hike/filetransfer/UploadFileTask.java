@@ -551,22 +551,14 @@ public class UploadFileTask extends FileTransferBase
 		
 		///// New Logic Test 1
 		
-		int chunkSize = getChunkSize(length);
+		setChunkSize(length);
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
 		
 		int start = mStart;
-		int end = (int) length;
-		if (end >= (start + chunkSize))
-		{
-			end = start + chunkSize;
-			end--;
-		}
-		else
-		{
-			end--;
-			chunkSize = end - start + 1;
-		}
+		int end = start + chunkSize;
+		end--;
+		
 		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
 		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
 		
@@ -602,7 +594,7 @@ public class UploadFileTask extends FileTransferBase
 					if(shouldRetry())
 					{
 						raf.seek(start);
-						chunkSize = getChunkSize(length);
+						setChunkSize(length);
 					}
 					else
 					{
@@ -862,11 +854,10 @@ public class UploadFileTask extends FileTransferBase
 		return responseJson;
 	}
 
-	private int getChunkSize(long length)
+	private void setChunkSize(long length)
 	{
 		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
 		//int chunkSize = networkType.getMinChunkSize()*2;
-		int chunkSize;
 		if (Utils.densityMultiplier > 1)
 			chunkSize = networkType.getMaxChunkSize();
 		else if(Utils.densityMultiplier == 1)
@@ -874,8 +865,9 @@ public class UploadFileTask extends FileTransferBase
 		else
 			chunkSize = networkType.getMinChunkSize();
 		
-		while (chunkSize > (length/10))
-			chunkSize/=2;
+		if(chunkSize > (int)length)
+			chunkSize = (int) length;
+		
 		try
 		{
 			int maxMemory = (int) Runtime.getRuntime().maxMemory();
@@ -886,7 +878,6 @@ public class UploadFileTask extends FileTransferBase
 		{
 			e.printStackTrace();
 		}
-		return chunkSize;
 	}
 
 	String getBoundaryMessage()

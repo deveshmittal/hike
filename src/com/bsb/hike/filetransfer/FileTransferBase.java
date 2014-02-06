@@ -67,6 +67,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected int _totalSize = 0;
 
 	protected int _bytesTransferred = 0;
+	
+	protected int chunkSize = 0;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 
