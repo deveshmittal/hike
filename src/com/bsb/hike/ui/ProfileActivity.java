@@ -784,6 +784,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
+		if (profileAdapter != null)
+		{
+			Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
+			profileAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		}
 		/*
 		// Pause fetcher to ensure smoother scrolling when flinging
 		if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)

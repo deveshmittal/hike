@@ -20,6 +20,8 @@ import java.io.File;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -94,8 +96,12 @@ public class TimelineImageLoader extends ImageWorker
 		String fileName = Utils.getProfileImageFileName(id);
 		File orgFile = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT, fileName);
 		if (!orgFile.exists())
-			return null;
-		
+		{
+			BitmapDrawable b = this.getLruCache().getIconFromCache(id);
+			Log.d(TAG,"Bitmap from icondb");
+			if(b != null)
+				return b.getBitmap();
+		}
 		try
 		{
 			bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
