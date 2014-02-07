@@ -119,6 +119,7 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -369,6 +370,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private boolean showingChatThemePicker;
 
+	private ImageView backgroundImage;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -507,6 +510,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		/* bind views to variables */
 		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
+		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
@@ -3163,12 +3167,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							chatTheme.bgResId()));
 			bitmapDrawable.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 			backgroundDrawable = bitmapDrawable;
+			backgroundImage.setScaleType(ScaleType.FIT_XY);
 		} else {
 			backgroundDrawable = getResources()
 					.getDrawable(chatTheme.bgResId());
+			backgroundImage.setScaleType(ScaleType.CENTER_CROP);
 		}
 
-		chatLayout.setBackgroundDrawable(backgroundDrawable);
+		backgroundImage.setImageDrawable(backgroundDrawable);
 		mAdapter.setChatTheme(chatTheme);
 
 		setMuteViewBackground();
