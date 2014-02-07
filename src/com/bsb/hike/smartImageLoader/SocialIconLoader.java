@@ -84,4 +84,11 @@ public class SocialIconLoader extends ImageWorker
 			return null;
 		}
 	}
+
+	@Override
+	protected Bitmap processBitmapOnUiThread(String data)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -589,7 +589,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
-			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar);
+			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar,true);
 			
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
 					.getMsisdn() : contactInfo.getName());

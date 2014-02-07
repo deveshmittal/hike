@@ -65,7 +65,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 		imageView.setPadding(8, 8, 18, 8);
 
 		if (contactInfo.hasCustomPhoto()) {
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView);
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView,true);
 
 		} else {
 			imageView.setImageDrawable(Utils.getDefaultIconForUser(context,

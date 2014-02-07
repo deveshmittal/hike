@@ -136,11 +136,11 @@ public class HikeSearchContactAdapter extends
 		ImageView avatar = (ImageView) v.findViewById(R.id.contact_image);
 		if (contactInfo != null
 				&& contactInfo.getId().equals(contactInfo.getPhoneNum())) {
-			iconLoader.loadImage(contactInfo.getPhoneNum(), true, avatar);
+			iconLoader.loadImage(contactInfo.getPhoneNum(), true, avatar,true);
 		} else {
 			if(contactInfo != null)
 			{
-				iconLoader.loadImage(contactInfo.getMsisdn(),true ,avatar);
+				iconLoader.loadImage(contactInfo.getMsisdn(),true ,avatar,true);
 			}
 			else
 			{
