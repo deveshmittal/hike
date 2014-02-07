@@ -146,7 +146,6 @@ public abstract class ImageWorker
 		else
 		{
 			imageView.setImageDrawable(null);
-			;
 		}
 	}
 
