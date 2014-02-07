@@ -2559,7 +2559,16 @@ public class Utils {
 			break;
 		case CHAT_BG_FTUE:
 			container.setBackgroundResource(R.drawable.bg_tip_top_right);
-			tipText.setText(R.string.chat_bg_ftue_tip);
+			SharedPreferences prefs = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			if(!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, false)){
+				tipText.setText(R.string.chat_bg_ftue_tip);
+			} else{
+				/*
+				 * Users who have already seen previous FTUE Tip
+				 * will see a new tip this time
+				 */
+				tipText.setText(R.string.chat_bg_valentine_ftue_tip);
+			}
 			break;
 		}
 		if (closeTip != null) {
@@ -2601,6 +2610,7 @@ public class Utils {
 			break;
 		case CHAT_BG_FTUE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
+			editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, true);
 			break;
 		}
 

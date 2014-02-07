@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,12 +32,15 @@ import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -91,6 +95,9 @@ public class HikeService extends Service {
 	public static final String SEND_DEV_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_DEV_DETAILS_TO_SERVER";
 
 	public static final String SEND_RAI_TO_SERVER_ACTION = "com.bsb.hike.SEND_RAI";
+	
+	// used to send Whatsapp details to server
+	public static final String SEND_WA_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_WA_DETAILS_TO_SERVER";
 
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -112,6 +119,8 @@ public class HikeService extends Service {
 	private SendGCMIdToServerTrigger sendGCMIdToServerTrigger;
 
 	private PostDeviceDetails postDeviceDetails;
+	
+	private PostWhatsappDetails postWhatsappDetails;
 
 	private HikeMqttManagerNew mMqttManager;
 
@@ -228,6 +237,14 @@ public class HikeService extends Service {
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
+		if (postWhatsappDetails == null) {
+			postWhatsappDetails = new PostWhatsappDetails();
+			registerReceiver(postWhatsappDetails, new IntentFilter(
+					SEND_WA_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_WA_DETAILS_TO_SERVER_ACTION));
+			Log.d("Whatsapp", "Whatsapp details sender registered");
+		}
+		
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE).getBoolean(
 				HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false)) {
@@ -356,6 +373,11 @@ public class HikeService extends Service {
 		}
 		sm.getStickerCategoryList().clear();
 		sm.getRecentStickerList().clear();
+		
+		if (postWhatsappDetails != null) {
+			unregisterReceiver(postWhatsappDetails);
+			postWhatsappDetails = null;
+		}
 	}
 
 	public void unregisterDataChangeReceivers() {
@@ -510,7 +532,7 @@ public class HikeService extends Service {
 						public void onFailure() {
 							Log.d(SendGCMIdToServerTrigger.this.getClass()
 									.getSimpleName(), "Send unsuccessful");
-							scheduleNextSendToServerAction(true);
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
 						}
 					});
 			JSONObject request = new JSONObject();
@@ -590,7 +612,7 @@ public class HikeService extends Service {
 							Log.d("TestUpdate", "Device details could not be sent");
 							Log.d(getClass().getSimpleName(),
 									"Send unsuccessful");
-							scheduleNextSendToServerAction(false);
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, sendDevDetailsToServer);
 						}
 					});
 			hikeHttpRequest.setJSONData(data);
@@ -633,14 +655,12 @@ public class HikeService extends Service {
 		}
 	}
 
-	private void scheduleNextSendToServerAction(boolean gcmReg) {
-		Log.d(getClass().getSimpleName(), "Scheduling next GCM registration");
+	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference) {
+		Log.d(getClass().getSimpleName(), "Scheduling next "+ lastBackOffTimePref+" send");
 
 		SharedPreferences preferences = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		int lastBackOffTime = preferences.getInt(
-				gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
-						: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, 0);
+		int lastBackOffTime = preferences.getInt(lastBackOffTimePref, 0);
 
 		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME
 				: (lastBackOffTime * 2);
@@ -649,17 +669,10 @@ public class HikeService extends Service {
 
 		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
 
-		if (gcmReg) {
-			postRunnableWithDelay(sendGCMIdToServer, lastBackOffTime * 1000);
-		} else {
-			postRunnableWithDelay(sendDevDetailsToServer,
-					lastBackOffTime * 1000);
-		}
-
+		postRunnableWithDelay(postRunnableReference, lastBackOffTime * 1000);
+		
 		Editor editor = preferences.edit();
-		editor.putInt(gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
-				: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS,
-				lastBackOffTime);
+		editor.putInt(lastBackOffTimePref,lastBackOffTime);
 		editor.commit();
 	}
 
@@ -674,6 +687,16 @@ public class HikeService extends Service {
 		@Override
 		public void run() {
 			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+		}
+	};
+	
+	private Runnable sendWhatsappDetailsToServer = new Runnable() {
+		@Override
+		public void run() {
+			PostWhatsappDetails postWhatsappDetails= new PostWhatsappDetails();
+			registerReceiver(postWhatsappDetails, new IntentFilter(
+					HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 		}
 	};
 
@@ -727,5 +750,48 @@ public class HikeService extends Service {
 
 	public boolean appIsConnected() {
 		return mApp != null;
+	}
+	
+	public class PostWhatsappDetails extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).getBoolean(
+					HikeMessengerApp.WHATSAPP_DETAILS_SENT, false)) {
+				Log.d(getClass().getSimpleName(), "Whatsapp details sent");
+				return;
+			}
+			Log.d(getClass().getSimpleName(),
+					"Sending Whatsapp details to server");
+			
+			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
+			ContactUtils.setWhatsappStatus(context, contactinfos);
+			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
+			
+			Log.d("PostWhatsappDetails", "WA Info Json data to be sent : " + data.toString());
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+					"/account/info", RequestType.OTHER,
+					new HikeHttpCallback() {
+						public void onSuccess(JSONObject response) {
+							Log.d("PostWhatsappDetails", "Whatsapp details sent successfully");
+							Editor editor = getSharedPreferences(
+									HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+							editor.putBoolean(
+									HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
+							editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, 0);
+							editor.commit();
+						}
+
+						public void onFailure() {
+							Log.d("PostWhatsappDetails", "WhatsappUpdate details could not be sent");
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, sendWhatsappDetailsToServer);
+						}
+					});
+			hikeHttpRequest.setJSONData(data);
+
+			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
+		}
 	}
 }

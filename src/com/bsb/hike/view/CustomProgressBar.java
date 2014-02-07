@@ -1,0 +1,116 @@
+package com.bsb.hike.view;
+
+import com.bsb.hike.utils.Utils;
+
+import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.ProgressBar;
+
+public class CustomProgressBar extends ProgressBar
+{
+	private int start = 0;
+	private int target = 0;
+	private int duration = 0;
+	private ObjectAnimator animation;
+	
+	public CustomProgressBar(Context context)
+	{
+		super(context);
+		// TODO Auto-generated constructor stub
+	}
+	
+	public CustomProgressBar(Context context, AttributeSet attrs)
+	{
+		super(context, attrs);
+		// TODO Auto-generated constructor stub
+	}
+	
+	public CustomProgressBar(Context context, AttributeSet attrs, int defStyle)
+	{
+		super(context, attrs, defStyle);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public synchronized void setProgress(int progress)
+	{
+		// TODO Auto-generated method stub
+		super.setProgress(progress);
+	}
+	
+	public synchronized void setAnimatedProgress(int start, int target, int duration)
+	{
+		start = filterPercentValue(start);
+		target = filterPercentValue(target);
+		
+		if((this.target == target) && (this.start == start) && (this.duration == duration))
+			return;
+		
+		setStart(start);
+		setTarget(target);
+		setDuration(duration);
+		
+		if(this.target <= this.start)
+		{
+			this.setProgress(this.target);
+			return;
+		}
+		
+		if(this.duration <= 0)
+		{
+			this.setProgress(this.target);
+			return;
+		}
+		
+		if(Utils.isHoneycombOrHigher())
+		{
+			if(animation == null)
+			{
+				animation = ObjectAnimator.ofInt(this, "progress", this.start, this.target);
+				animation.setDuration(this.duration); // 0.5 second
+			    animation.setInterpolator(new DecelerateInterpolator());
+			    if(android.os.Build.VERSION.SDK_INT >= 18)
+			    	animation.setAutoCancel(true);
+			    animation.start();
+			}
+			else
+			{
+				animation.setIntValues(this.start, this.target);
+				animation.setDuration(this.duration);
+				animation.start();
+			}
+		    
+		}
+		else 
+			this.setProgress(target);
+		
+		return;
+	}
+	
+	protected void setStart(int value)
+	{
+		this.start = value;
+	}
+	
+	protected void setTarget(int value)
+	{
+		this.target = value;
+	}
+	
+	protected void setDuration(int value)
+	{
+		this.duration = value;
+	}
+	
+	protected int filterPercentValue(int value)
+	{
+		if(value<0)
+			return 0;
+		else if(value > 100)
+			return 100;
+		else
+			return value;
+	}
+}

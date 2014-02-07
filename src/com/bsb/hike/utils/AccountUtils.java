@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -516,7 +517,7 @@ public class AccountUtils {
 		HttpPost httppost = new HttpPost(base + "/account/addressbook");
 		addToken(httppost);
 		JSONObject data;
-		data = getJsonContactList(contactsMap);
+		data = getJsonContactList(contactsMap, true);
 		if (data == null) {
 			return null;
 		}
@@ -550,7 +551,7 @@ public class AccountUtils {
 
 		try {
 			data.put("remove", ids_json);
-			data.put("update", getJsonContactList(new_contacts_by_id));
+			data.put("update", getJsonContactList(new_contacts_by_id, false));
 		} catch (JSONException e) {
 			Log.e("AccountUtils", "Invalid JSON put", e);
 			return null;
@@ -567,7 +568,7 @@ public class AccountUtils {
 	}
 
 	private static JSONObject getJsonContactList(
-			Map<String, List<ContactInfo>> contactsMap) {
+			Map<String, List<ContactInfo>> contactsMap, boolean sendWAValue) {
 		JSONObject updateContacts = new JSONObject();
 		for (String id : contactsMap.keySet()) {
 			try {
@@ -577,6 +578,9 @@ public class AccountUtils {
 					JSONObject contactInfo = new JSONObject();
 					contactInfo.put("name", cInfo.getName());
 					contactInfo.put("phone_no", cInfo.getPhoneNum());
+					if(sendWAValue){
+						contactInfo.put("t1", calculateWhatsappValue(cInfo.isOnWhatsapp()));
+					}
 					contactInfoList.put(contactInfo);
 				}
 				updateContacts.put(id, contactInfoList);
@@ -587,6 +591,24 @@ public class AccountUtils {
 			}
 		}
 		return updateContacts;
+	}
+	
+	public static JSONObject getWAJsonContactList(
+			List<ContactInfo> contactsList) {
+		JSONObject contactsJson = new JSONObject();
+		try {
+			for (ContactInfo cInfo : contactsList) {
+				JSONObject waInfoObject = new JSONObject();
+				waInfoObject.put("t1", calculateWhatsappValue(cInfo.isOnWhatsapp()));
+				contactsJson.put(cInfo.getMsisdn(), waInfoObject);
+			}
+
+		} catch (JSONException e) {
+			Log.d("ACCOUNT UTILS",
+					"Json exception while getting WA info list.");
+			e.printStackTrace();
+		}
+		return contactsJson;
 	}
 
 	public static List<ContactInfo> getContactList(JSONObject obj,
@@ -827,6 +849,16 @@ public class AccountUtils {
 				
 			}
 			return null;
+		}
+	}
+	
+	private static int calculateWhatsappValue(boolean isOnWhatsapp) {
+		int rand = (new Random()).nextInt(100);
+		int msb = (rand/10);
+		if(isOnWhatsapp){
+			return ((msb&1)==0?rand:(rand+10)%100);
+		} else{
+			return ((msb&1)!=0?rand:(rand+10));
 		}
 	}
 }

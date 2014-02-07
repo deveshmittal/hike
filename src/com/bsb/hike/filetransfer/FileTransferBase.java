@@ -22,7 +22,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 {
 	public enum FTState
 	{
-		NOT_STARTED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
+		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
 		PAUSED, CANCELLED, COMPLETED, ERROR,
 		PAUSING
 	}
@@ -67,6 +67,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected int _totalSize = 0;
 
 	protected int _bytesTransferred = 0;
+	
+	protected int chunkSize = 0;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 

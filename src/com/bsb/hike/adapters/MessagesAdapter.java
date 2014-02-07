@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import org.json.JSONArray;
 
+import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -44,6 +45,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -91,6 +93,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.view.CustomProgressBar;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
@@ -163,14 +166,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		TextView dataTransferred;
 
-		ProgressBar barProgress;
+		CustomProgressBar barProgress;
 
 		ImageView audRecIC;
 
 		TextView fileType;
 
 		TextView recDuration;
-
+	
+		ProgressBar wating;
+		
 		ProgressBar recProgress;
 
 		View dayLeft;
@@ -538,11 +543,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftAction = (ImageView) v.findViewById(R.id.ft_action_button);
 				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
 				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
-				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
+				holder.barProgress = (CustomProgressBar) v.findViewById(R.id.pbTransfer);
 				holder.fileType = (TextView) v.findViewById(R.id.file_type);
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
 				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
+				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
 				// holder.fileIcon = (ImageView) v.findViewById(R.id.file_ic);
 			case SEND_HIKE:
 			case SEND_SMS:
@@ -582,12 +588,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftAction = (ImageView) v.findViewById(R.id.ft_action_button);
 				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
 				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
-				holder.barProgress = (ProgressBar) v.findViewById(R.id.pbTransfer);
+				holder.barProgress = (CustomProgressBar) v.findViewById(R.id.pbTransfer);
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				// holder.fileIcon = (ImageView) v.findViewById(R.id.file_ic);
 				holder.fileType = (TextView) v.findViewById(R.id.file_type);
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
 				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
+				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 			case RECEIVE:
@@ -704,10 +711,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 * Catching OOB here since the participant list can be altered by another thread. In that case an OOB will be thrown here. The only impact that will have is
 					 * that the image which has been removed will be skipped.
 					 */
-
 					try
 					{
-						iconLoader.loadImage(participantList.get(i), true, imageView, true);
+						iconLoader.loadImage(participantList.get(i), true, imageView,true);
 						holder.typingAvatarContainer.addView(avatarContainer);
 					}
 					catch (IndexOutOfBoundsException e)
@@ -916,7 +922,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (firstMessageFromParticipant)
 				{
 					holder.image.setVisibility(View.VISIBLE);
-					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image, true);
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image,true);
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1005,7 +1011,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					thumbnail = hikeFile.getThumbnail();
 				}
-				if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()))
+				if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()) && !(conversation instanceof GroupConversation)
+						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
 				if (showThumbnail && thumbnail != null)
@@ -1041,34 +1048,51 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					thumbnail = hikeFile.getThumbnail();
 				}
-				if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()))
+				if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()) && !(conversation instanceof GroupConversation)
+						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
-				if (convMessage.isSent() && thumbnail == null)
+				// if (convMessage.isSent() && thumbnail == null)
+				// {
+				// /*
+				// * This case should ideally only happen when downloading a picasa image or the thumbnail for a location. In that case we won't have a thumbnail initially while
+				// * the image is being downloaded.
+				// */
+				// holder.loadingThumb.setVisibility(View.VISIBLE);
+				// showThumbnail = true;
+				// }
+				// else
+				// {
+				// if (showThumbnail)
+				// {
+				// holder.fileThumb.setBackgroundDrawable(thumbnail);
+				// }
+				// else if (hikeFileType == HikeFileType.IMAGE)
+				// {
+				// createMediaThumb(holder.fileThumb);
+				// holder.fileThumb.setImageResource(R.drawable.ic_default_image);
+				// }
+				// else
+				// {
+				// holder.fileThumb.setBackgroundResource(R.drawable.ic_default_img);
+				// }
+				// holder.fileThumb.setVisibility(View.VISIBLE);
+				// }
+
+				if (showThumbnail)
 				{
-					/*
-					 * This case should ideally only happen when downloading a picasa image or the thumbnail for a location. In that case we won't have a thumbnail initially while
-					 * the image is being downloaded.
-					 */
-					holder.loadingThumb.setVisibility(View.VISIBLE);
-					showThumbnail = true;
-				}
-				else
-				{
-					if (showThumbnail)
-					{
-						holder.fileThumb.setBackgroundDrawable(thumbnail);
-					}
-					else if (hikeFileType == HikeFileType.IMAGE)
-					{
-						createMediaThumb(holder.fileThumb);
-						holder.fileThumb.setImageResource(R.drawable.ic_default_image);
-					}
-					else
-					{
-						holder.fileThumb.setBackgroundResource(R.drawable.ic_default_img);
-					}
+					holder.fileThumb.setBackgroundDrawable(thumbnail);
 					holder.fileThumb.setVisibility(View.VISIBLE);
+				}
+				else if (hikeFileType == HikeFileType.IMAGE)
+				{
+					createMediaThumb(holder.fileThumb);
+					holder.fileThumb.setImageResource(R.drawable.ic_default_image);
+					holder.fileThumb.setVisibility(View.VISIBLE);
+				}
+				else if (hikeFileType == HikeFileType.LOCATION)
+				{
+					holder.loadingThumb.setVisibility(View.VISIBLE);
 				}
 			}
 			else if (hikeFileType == HikeFileType.UNKNOWN)
@@ -1236,6 +1260,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.overlayBg.setVisibility(View.VISIBLE);
 						}
 						break;
+					case INITIALIZED:
 					case IN_PROGRESS:
 					case PAUSING:
 					case PAUSED:
@@ -1249,8 +1274,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
-			// if (convMessage.getResumeButtonVisibility())
-			// {
 			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
 			{
 				Log.d(getClass().getSimpleName(), "updating button visibility : " + fss.getFTState().toString());
@@ -1279,6 +1302,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						holder.fileType.setVisibility(View.VISIBLE);
 						// holder.fileThumb.setScaleType(ScaleType.CENTER);
 					}
+					break;
+				case INITIALIZED:
+					holder.wating.setVisibility(View.VISIBLE);
+					holder.ftAction.setBackgroundResource(0);
+					holder.ftAction.setVisibility(View.INVISIBLE);
 					break;
 				case IN_PROGRESS:
 					holder.ftAction.setBackgroundResource(0);
@@ -1313,7 +1341,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				holder.overlayBg.setClickable(false);
 			}
-			// }
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up Overlay Contents
 			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
@@ -1341,16 +1368,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						holder.image.setVisibility(View.VISIBLE);
 						holder.image.setImageResource(R.drawable.ic_download_failed);
 						// break;
+					case INITIALIZED:
+						holder.dataTransferred.setText("Initializing...");
+						holder.dataTransferred.setVisibility(View.VISIBLE);
+						break;
 					case PAUSING:
 					case PAUSED:
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
+						int progressUpdate = 0;
 						if (fss.getTotalSize() > 0)
-							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+							progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
+						if (fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("Initializing...");
 						else
-							holder.dataTransferred.setText("Starting...");
+						{
+							if (fss.getTransferredSize() == 0)
+								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+							else
+								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+
+							holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000);
+						}
 						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setProgress(progress);
 						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					default:
@@ -1362,17 +1403,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Log.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
 					switch (fss.getFTState())
 					{
+					case INITIALIZED:
+						holder.dataTransferred.setText("Initializing...");
+						holder.dataTransferred.setVisibility(View.VISIBLE);
+						break;
 					case IN_PROGRESS:
 					case PAUSING:
 					case PAUSED:
 					case ERROR:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
+						int progressUpdate = 0;
 						if (fss.getTotalSize() > 0)
-							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+							progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
+						if (fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("Initializing...");
 						else
-							holder.dataTransferred.setText("Starting...");
+						{
+							if (fss.getTransferredSize() == 0)
+								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+							else
+								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+
+							holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000);
+						}
 						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setProgress(progress);
 						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					case NOT_STARTED:
@@ -1382,7 +1437,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						if (firstMessageFromParticipant)
 						{
 							holder.image.setVisibility(View.VISIBLE);
-							iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image, true);
+							iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image,true);
 							holder.avatarContainer.setVisibility(View.VISIBLE);
 						}
 						else
@@ -1399,7 +1454,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (convMessage.isSent())
 				{
 					if (TextUtils.isEmpty(hikeFile.getFileKey()) && !FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID())) // Cancelled/Not_Started(Not
-																																						// Completed)
+					// Completed)
 					{
 						holder.image.setVisibility(View.VISIBLE);
 						holder.image.setImageResource(R.drawable.ic_download_failed);
@@ -1465,7 +1520,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			iconLoader.loadImage(conversation.getMsisdn(), true, holder.image, true);
+			iconLoader.loadImage(conversation.getMsisdn(), true, holder.image,true);
 
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
@@ -1798,6 +1853,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (convMessage.isSent() && holder.messageContainer != null)
 		{
+			/* label outgoing hike conversations in green */
 			if (chatTheme == ChatTheme.DEFAULT)
 			{
 				holder.messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
@@ -1809,6 +1865,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		return v;
 	}
+
 
 	// @GM
 	// The following methods returns the user readable size when passed the bytes in size

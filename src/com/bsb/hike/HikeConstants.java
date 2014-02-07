@@ -96,6 +96,7 @@ public class HikeConstants {
 	public static final String ICON = "icon";
 	public static final String MUTED = "muted";
 	public static final String POST_AB = "postab";
+	public static final String POST_INFO = "postinfo";
 	public static final String PUSH = "push";
 	public static final String JOIN_TIME = "jointime";
 	public static final String STATUS_MESSAGE_2 = "status-message";

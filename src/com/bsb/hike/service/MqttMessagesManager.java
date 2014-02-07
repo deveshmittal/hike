@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -984,6 +985,15 @@ public class MqttMessagesManager {
 			}
 			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
 				setDefaultSMSClientTutorialSetting();
+			}
+			if (data.optBoolean(HikeConstants.POST_INFO)) {
+				Editor editor = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+				editor.putBoolean(
+						HikeMessengerApp.WHATSAPP_DETAILS_SENT, false);
+				editor.commit();
+				Log.d("WhatsappDetails", "Whatsapp postinfo packet recieved");
+				context.sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 			}
 		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {
 			StatusMessage statusMessage = new StatusMessage(jsonObj);

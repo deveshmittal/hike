@@ -838,12 +838,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.chat_bg:
 			setupThemePicker(null);
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP,
 					false)) {
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-				editor.commit();
-
 				closeChatBgFtueTip();
 			}
 			break;
@@ -1661,7 +1657,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber)) {
 			if (!(mConversation instanceof GroupConversation)
 					|| ((GroupConversation) mConversation).getIsGroupAlive()) {
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP,
 						false)) {
 					showChatBgFtueTip();
 				} else if (!prefs.getBoolean(
@@ -3118,7 +3114,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setFocusable(true);
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+
+		/*
+		 * Put this code in a try-catch block to prevent it from crashing
+		 * on GB and below devices when we try to show the palette on orientation
+		 * changes.
+		 */
+		try {
+			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+		} catch (BadTokenException e) {
+			
+		}
 
 		FrameLayout viewParent = (FrameLayout) parentView.getParent();
 		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
@@ -4435,6 +4441,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
 				: emoticonViewPager;
 
+		View eraseKey = findViewById(R.id.erase_key);
+
 		boolean sameType = true;
 		if (v != null) {
 
@@ -4453,6 +4461,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					sameType = false;
 					emoticonType = EmoticonType.STICKERS;
 				}
+				eraseKey.setVisibility(View.GONE);
 			} else {
 				int offset = 0;
 				int emoticonsListSize = 0;
@@ -4487,6 +4496,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						whichSubcategory++;
 					}
 				}
+				eraseKey.setVisibility(View.VISIBLE);
+				eraseKey.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View view) {
+						mComposeView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+					}
+				});
 			}
 			setupEmoticonLayout(emoticonType, whichSubcategory, tabDrawables);
 		}

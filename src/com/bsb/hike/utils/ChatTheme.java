@@ -40,6 +40,85 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_hike_sent;
 		}
 	},
+
+	OWL {
+
+		@Override
+		public String bgId() {
+			return "20";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.bg_ct_owl_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_owl;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_owl;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_owl;
+		}
+
+	},
+
+	NIGHT {
+
+		@Override
+		public String bgId() {
+			return "21";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.bg_ct_night_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_night;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_night;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+	},
+
 	LOVE {
 
 		@Override

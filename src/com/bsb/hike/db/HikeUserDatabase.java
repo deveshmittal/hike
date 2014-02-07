@@ -2122,6 +2122,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			selection = null;
 			break;
 		}
+		selection += (selection == null ? "" : " AND ") + DBConstants.MSISDN
+				+ " NOT IN (SELECT " + DBConstants.BLOCK_TABLE + "." + DBConstants.MSISDN
+				+ " FROM " + DBConstants.BLOCK_TABLE +")";
+
 		Cursor c = null;
 		try {
 			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
@@ -2158,11 +2162,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				JSONArray recommendedContactsArray = new JSONArray(
 						recommendedContactsString);
 				if (recommendedContactsArray.length() != 0) {
-					contactInfo = getContactInfoFromMSISDN(
-							recommendedContactsArray.getString(0), false);
+					for(int i = 0; i < recommendedContactsArray.length(); i++) {
+						String msisdn = recommendedContactsArray.getString(i);
 
-					if (contactInfo != null) {
-						return contactInfo;
+						if(isBlocked(msisdn)) {
+							continue;
+						}
+
+						contactInfo = getContactInfoFromMSISDN(
+								msisdn, false);
+
+						if (contactInfo != null) {
+							return contactInfo;
+						}
 					}
 				}
 			} catch (JSONException e) {
