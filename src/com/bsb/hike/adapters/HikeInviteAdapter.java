@@ -83,7 +83,7 @@ public class HikeInviteAdapter extends
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		if(pair != null)
 		{
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView);
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView,true);
 		}
 		else
 			imageView.setImageDrawable(getContext().getResources().getDrawable(

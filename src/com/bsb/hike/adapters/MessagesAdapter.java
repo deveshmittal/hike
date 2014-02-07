@@ -523,7 +523,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					 * image which has been removed will be skipped.
 					 */
 					try {
-						iconLoader.loadImage(participantList.get(i),true ,imageView);
+						iconLoader.loadImage(participantList.get(i),true ,imageView,true);
 						holder.typingAvatarContainer.addView(avatarContainer);
 					} catch (IndexOutOfBoundsException e) {
 
@@ -949,7 +949,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					R.string.xyz_posted_update,
 					Utils.getFirstName(conversation.getLabel())));
 
-			iconLoader.loadImage(conversation.getMsisdn(),true ,holder.image);
+			iconLoader.loadImage(conversation.getMsisdn(),true ,holder.image,true);
 
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(
 					true, context));
@@ -1408,7 +1408,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (!convMessage.isSent()) {
 				if (firstMessageFromParticipant) {
 					holder.image.setVisibility(View.VISIBLE);
-					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image);
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image,true);
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				} else {
 					holder.avatarContainer

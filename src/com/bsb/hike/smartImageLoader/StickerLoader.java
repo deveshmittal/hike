@@ -29,4 +29,11 @@ public class StickerLoader extends ImageWorker
 		}
 	}
 
+	@Override
+	protected Bitmap processBitmapOnUiThread(String data)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -70,6 +70,9 @@ public class IconLoader extends ImageWorker
 	 */
 	protected Bitmap processBitmap(String id)
 	{
+		BitmapDrawable bd = this.getImageCache().get(id);
+		if(bd != null)
+			return bd.getBitmap();
 		int idx = id.indexOf(ROUND_SUFFIX);
 		boolean rounded = true;
 		if(idx > 0)
@@ -82,5 +85,11 @@ public class IconLoader extends ImageWorker
 			return ((BitmapDrawable)Utils.getDefaultIconForUser(context, id, rounded)).getBitmap();
 		else	
 			return bm;
+	}
+
+	@Override
+	protected Bitmap processBitmapOnUiThread(String id)
+	{
+		return processBitmap(id);
 	}
 }

@@ -386,7 +386,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						avatarFrame
 								.setImageResource(R.drawable.frame_avatar_medium_selector);
 					}
-					iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar);
+					iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar,true);
 
 					groupParticipantParentView
 							.setOnLongClickListener(profileActivity);
@@ -435,7 +435,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 						.get(statusMessage.getMoodId()));
 				viewHolder.iconFrame.setVisibility(View.GONE);
 			} else {
-				iconLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.icon);
+				iconLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.icon,true);
 				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
@@ -447,7 +447,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 			viewHolder.subText
 					.setText(R.string.status_profile_pic_notification);
-			iconLoader.loadImage(profilePicStatusUpdate.getMsisdn(), true, viewHolder.icon);
+			iconLoader.loadImage(profilePicStatusUpdate.getMsisdn(), true, viewHolder.icon,true);
 
 			ImageViewerInfo imageViewerInfo2 = new ImageViewerInfo(
 					profilePicStatusUpdate.getMappedId(), null, true);
@@ -503,7 +503,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		case REQUEST:
 			String contactFirstName = mContactInfo.getFirstName();
 
-			iconLoader.loadImage(mContactInfo.getMsisdn(), true, viewHolder.icon);
+			iconLoader.loadImage(mContactInfo.getMsisdn(), true, viewHolder.icon,true);
 
 			viewHolder.text.setText(contactFirstName);
 
