@@ -607,7 +607,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				 * We need to queue this piece of code after the lifecycle methods are done.
 				 * Else the popup window throws an exception. 
 				 */
-				mHandler.post(new Runnable() {
+				chatLayout.post(new Runnable() {
 					
 					@Override
 					public void run() {
@@ -3115,16 +3115,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
 
-		/*
-		 * Put this code in a try-catch block to prevent it from crashing
-		 * on GB and below devices when we try to show the palette on orientation
-		 * changes.
-		 */
-		try {
-			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
-		} catch (BadTokenException e) {
-			
-		}
+		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
 
 		FrameLayout viewParent = (FrameLayout) parentView.getParent();
 		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
