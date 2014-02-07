@@ -303,8 +303,8 @@
 
         <ImageView 
             android:id="@+id/gift_card_img"
-            android:layout_width="82dp"
-            android:layout_height="66dp"
+            android:layout_width="67dp"
+            android:layout_height="57dp"
             android:layout_gravity="center_horizontal"
             android:src="@drawable/chat_bg_ftue_card_chris_tree"
             android:layout_marginTop="20dp"/>
@@ -312,11 +312,11 @@
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/merry_chris_msg_text"
             android:layout_width="match_parent"
-            android:layout_height="78dp"
+            android:layout_height="87dp"
             android:gravity="center_horizontal"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:paddingTop="16dp"
+            android:paddingTop="8dp"
             android:text="@string/merry_christmas_msg"
             android:textColor="#f14444"
             android:textSize="16sp" />
