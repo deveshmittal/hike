@@ -133,7 +133,7 @@ public class ConversationFragment extends SherlockListFragment implements
 			avatarFrame
 					.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike
 							: R.drawable.frame_avatar_ftue_sms);
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage);
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage,true);
 			//avatarImage.setImageDrawable(IconCacheManager.getInstance()
 					//.getIconForMSISDN(contactInfo.getMsisdn(), true));
 			contactName.setText(contactInfo.getFirstName());

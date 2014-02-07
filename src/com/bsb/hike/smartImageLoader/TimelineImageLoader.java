@@ -116,4 +116,11 @@ public class TimelineImageLoader extends ImageWorker
 		}
 		return bitmap;
 	}
+
+	@Override
+	protected Bitmap processBitmapOnUiThread(String data)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

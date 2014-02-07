@@ -77,10 +77,10 @@ public abstract class ImageWorker
 		mResources = ctx.getResources();
 	}
 
-	public void loadImage(String data, boolean rounded, ImageView imageView)
+	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread)
 	{
 		String key = data + (rounded ? ROUND_SUFFIX : "");
-		loadImage(key, imageView);
+		loadImage(key, imageView, false, runOnUiThread);
 	}
 
 	/**
@@ -100,6 +100,11 @@ public abstract class ImageWorker
 
 	public void loadImage(String data, ImageView imageView, boolean isFlinging)
 	{
+		loadImage(data, imageView, isFlinging, false);
+	}
+
+	public void loadImage(String data, ImageView imageView, boolean isFlinging, boolean runOnUiThread)
+	{
 		if (data == null)
 		{
 			return;
@@ -114,9 +119,18 @@ public abstract class ImageWorker
 
 		if (value != null)
 		{
-			Log.d(TAG,data + " Bitmap found in cache.");
+			Log.d(TAG, data + " Bitmap found in cache.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
+		}
+		else if (runOnUiThread)
+		{
+			Bitmap b = processBitmapOnUiThread(data);
+			if(b!=null && mImageCache != null)
+			{
+				BitmapDrawable bd = getBitmapDrawable(b);
+				mImageCache.putInCache(data, bd);
+			}
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
@@ -128,8 +142,11 @@ public abstract class ImageWorker
 			// framework and slightly modified. Refer to the docs at the top of the class
 			// for more info on what was changed.
 			task.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, data);
-		} else {
-			imageView.setImageDrawable(null);;
+		}
+		else
+		{
+			imageView.setImageDrawable(null);
+			;
 		}
 	}
 
@@ -188,6 +205,15 @@ public abstract class ImageWorker
 	 * @return The processed bitmap
 	 */
 	protected abstract Bitmap processBitmap(String data);
+
+	/**
+	 * Subclasses should override this to define any processing or work that must happen to produce the final bitmap. This will be executed in UI thread.
+	 * 
+	 * @param data
+	 *            The data to identify which image to process, as provided by {@link ImageWorker#loadImage(Object, ImageView)}
+	 * @return The processed bitmap
+	 */
+	protected abstract Bitmap processBitmapOnUiThread(String data);
 
 	/**
 	 * @return The {@link ImageCache} object currently being used by this ImageWorker.
@@ -314,17 +340,7 @@ public abstract class ImageWorker
 			if (bitmap != null)
 			{
 
-				if (Utils.hasHoneycomb())
-				{
-					// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
-					drawable = new BitmapDrawable(mResources, bitmap);
-				}
-				else
-				{
-					// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-					// which will recycle automagically
-					drawable = new RecyclingBitmapDrawable(mResources, bitmap);
-				}
+				drawable = getBitmapDrawable(bitmap);
 
 				if (mImageCache != null)
 				{
@@ -532,13 +548,13 @@ public abstract class ImageWorker
 	 */
 	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight, HikeLruCache cache)
 	{
-		byte [] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
-		if(icondata == null)
+		byte[] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
+		if (icondata == null)
 			return null;
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
-		
+
 		BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
 
 		// Calculate inSampleSize
@@ -552,7 +568,7 @@ public abstract class ImageWorker
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
-		return BitmapFactory.decodeByteArray(icondata,0,icondata.length, options);
+		return BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -569,7 +585,7 @@ public abstract class ImageWorker
 
 			if (inBitmap != null)
 			{
-				Log.d(TAG,"Found a bitmap in reusable set.");
+				Log.d(TAG, "Found a bitmap in reusable set.");
 				options.inBitmap = inBitmap;
 			}
 		}
@@ -627,9 +643,24 @@ public abstract class ImageWorker
 		}
 		return inSampleSize;
 	}
-	
+
 	public HikeLruCache getLruCache()
 	{
 		return this.mImageCache;
+	}
+
+	private BitmapDrawable getBitmapDrawable(final Bitmap bitmap)
+	{
+		if (Utils.hasHoneycomb())
+		{
+			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+			return new BitmapDrawable(mResources, bitmap);
+		}
+		else
+		{
+			// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+			// which will recycle automagically
+			return new RecyclingBitmapDrawable(mResources, bitmap);
+		}
 	}
 }

@@ -256,7 +256,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else {
 				iconImageLoader.loadImage(statusMessage.getMsisdn(),true,
-						viewHolder.avatar);
+						viewHolder.avatar,true);
 				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 			viewHolder.name
@@ -406,7 +406,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		case PROFILE_PIC_CHANGE:
 			iconImageLoader.loadImage(statusMessage.getMsisdn(),true,
-					viewHolder.avatar);
+					viewHolder.avatar,true);
 			viewHolder.name
 					.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
 							: statusMessage.getNotNullName());
@@ -461,7 +461,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						.findViewById(R.id.invite_btn);
 
 				iconImageLoader.loadImage(contactInfo.getMsisdn(),true,
-						avatar);
+						avatar,true);
 				name.setText(contactInfo.getName());
 
 				addBtn.setTag(contactInfo);

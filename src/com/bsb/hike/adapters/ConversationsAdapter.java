@@ -277,7 +277,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		}
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView);
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView,true);
 		return v;
 	}
 
