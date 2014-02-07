@@ -657,7 +657,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	private void initHikeLruCache(Context applicationContext)
 	{
 		ImageCacheParams params = new ImageCacheParams();
-		params.setMemCacheSizePercent(0.25f);
+		params.setMemCacheSizePercent(0.15f);
 		cache = new HikeLruCache(params);
 	}
 	
