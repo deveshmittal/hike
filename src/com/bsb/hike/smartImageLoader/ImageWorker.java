@@ -130,6 +130,7 @@ public abstract class ImageWorker
 			{
 				BitmapDrawable bd = getBitmapDrawable(b);
 				mImageCache.putInCache(data, bd);
+				imageView.setImageDrawable(bd);
 			}
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
