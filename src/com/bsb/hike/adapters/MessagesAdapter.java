@@ -1363,25 +1363,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						}
 					}
 						break;
+					case INITIALIZED:
+						holder.dataTransferred.setText("Initializing...");
+						holder.dataTransferred.setVisibility(View.VISIBLE);
+						break;
 					case ERROR:
 						Log.d(getClass().getSimpleName(), "error display");
 						holder.image.setVisibility(View.VISIBLE);
 						holder.image.setImageResource(R.drawable.ic_download_failed);
 						// break;
-					case INITIALIZED:
-						holder.dataTransferred.setText("Initializing...");
-						holder.dataTransferred.setVisibility(View.VISIBLE);
-						break;
 					case PAUSING:
 					case PAUSED:
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
 						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
 						int progressUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("Initializing...");
+						if(fss.getTotalSize() > 0)
+							progressUpdate = (int) ((chunkSize*100)/fss.getTotalSize());
+						if(fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("");
 						else
 						{
 							if (fss.getTransferredSize() == 0)
@@ -1414,10 +1414,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
 						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
 						int progressUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("Initializing...");
+						if(fss.getTotalSize() > 0)
+							progressUpdate = (int) ((chunkSize*100)/fss.getTotalSize());
+						if(fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("");
 						else
 						{
 							if (fss.getTransferredSize() == 0)

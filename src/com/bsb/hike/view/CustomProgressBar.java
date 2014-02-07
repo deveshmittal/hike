@@ -37,6 +37,9 @@ public class CustomProgressBar extends ProgressBar
 	public synchronized void setProgress(int progress)
 	{
 		// TODO Auto-generated method stub
+		progress = filterPercentValue(progress);
+		setStart(progress);
+		setTarget(progress);
 		super.setProgress(progress);
 	}
 	
