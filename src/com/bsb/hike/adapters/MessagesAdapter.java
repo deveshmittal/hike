@@ -43,9 +43,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -78,6 +80,7 @@ import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
@@ -258,21 +261,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			lastSentMessagePosition = convMessages.size() - 1;
 		}
-	}
-
-	public void addMessage(ConvMessage convMessage, int index)
-	{
-		convMessages.add(index, convMessage);
-		if (index > lastSentMessagePosition)
-		{
-			if (convMessage != null && convMessage.isSent())
-			{
-				lastSentMessagePosition = index;
-			}
-		}
-		else
-		{
-			lastSentMessagePosition++;
+		if (convMessage.getMetadata() != null && convMessage.getMetadata().isPokeMessage()) {
+			convMessage.getMetadata().setNudgeAnimationType(NudgeAnimationType.SINGLE);
 		}
 	}
 
@@ -810,11 +800,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.messageContainer.setVisibility(View.VISIBLE);
 					setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
 				}
-				else
+				else if (!chatTheme.isAnimated())
 				{
 					holder.pokeCustom.setVisibility(View.VISIBLE);
 					holder.messageContainer.setVisibility(View.GONE);
 					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+				} else {
+					holder.pokeCustom.setVisibility(View.VISIBLE);
+					holder.messageContainer.setVisibility(View.GONE);
+
+					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+					if(metadata.getNudgeAnimationType() != NudgeAnimationType.NONE) {
+						metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
+						holder.pokeCustom.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
+					}
 				}
 			}
 			else if (convMessage.isStickerMessage())

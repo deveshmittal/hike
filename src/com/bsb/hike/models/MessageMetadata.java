@@ -27,6 +27,11 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata {
+
+	public static enum NudgeAnimationType {
+		NONE, SINGLE
+	}
+
 	private String dndMissedCallNumber;
 	private boolean newUser;
 	private JSONObject json;
@@ -42,6 +47,7 @@ public class MessageMetadata {
 	private StatusMessage statusMessage;
 	private Sticker sticker;
 	private boolean oldUser;
+	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
 
 	public MessageMetadata(JSONObject metadata) throws JSONException {
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS)
@@ -196,6 +202,14 @@ public class MessageMetadata {
 
 	public boolean isOldUser() {
 		return oldUser;
+	}
+
+	public NudgeAnimationType getNudgeAnimationType() {
+		return nudgeAnimationType;
+	}
+
+	public void setNudgeAnimationType(NudgeAnimationType type) {
+		this.nudgeAnimationType = type;
 	}
 
 	public Spannable getMessage(final Context context,
