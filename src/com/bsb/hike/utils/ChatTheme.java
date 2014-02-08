@@ -100,11 +100,60 @@ public enum ChatTheme {
 
 	},
 
-	NIGHT {
+	NIGHT_PATTERN {
 
 		@Override
 		public String bgId() {
 			return "21";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.ic_ct_night_pattern_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_night_pattern;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_night;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+	},
+
+	NIGHT {
+
+		@Override
+		public String bgId() {
+			return "22";
 		}
 
 		@Override
@@ -135,6 +184,11 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
 		}
 
 		@Override
@@ -1091,11 +1145,6 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
-		}
-
-		@Override
-		public boolean isAnimated() {
-			return false;
 		}
 
 		@Override
