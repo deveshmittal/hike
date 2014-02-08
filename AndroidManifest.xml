@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
 
-    android:versionCode="284"
+    android:versionCode="286"
     android:installLocation="auto"
-    android:versionName="2.7.4.4">
+    android:versionName="2.7.4.6">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
