@@ -807,16 +807,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (isDefaultTheme)
 				{
 					holder.poke.setVisibility(View.VISIBLE);
-					holder.poke.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent : R.drawable.ic_nudge_hike_receive);
 					holder.messageContainer.setVisibility(View.VISIBLE);
+					setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
 				}
 				else
 				{
 					holder.pokeCustom.setVisibility(View.VISIBLE);
-					holder.pokeCustom.setImageResource(convMessage.isSent() ? chatTheme.sentNudgeResId() : R.drawable.ic_nudge_receive_custom);
 					holder.messageContainer.setVisibility(View.GONE);
+					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
 				}
-
 			}
 			else if (convMessage.isStickerMessage())
 			{
@@ -1866,6 +1865,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return v;
 	}
 
+	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent) {
+		iv.setImageResource(isMessageSent ? chatTheme.sentNudgeResId() : chatTheme.receivedNudgeResId());
+	}
 
 	// @GM
 	// The following methods returns the user readable size when passed the bytes in size
