@@ -693,9 +693,6 @@ public class HikeService extends Service {
 	private Runnable sendWhatsappDetailsToServer = new Runnable() {
 		@Override
 		public void run() {
-			PostWhatsappDetails postWhatsappDetails= new PostWhatsappDetails();
-			registerReceiver(postWhatsappDetails, new IntentFilter(
-					HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 		}
 	};
