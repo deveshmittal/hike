@@ -1366,6 +1366,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// break;
 					case PAUSING:
 					case PAUSED:
+					{
+						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+						if(fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("");
+						else
+							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+						holder.barProgress.setProgress(progress);
+					}
+						break;
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
 						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
@@ -1376,9 +1385,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.dataTransferred.setText("");
 						else
 						{
-							if (fss.getTransferredSize() == 0)
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-							else
+//							if (fss.getTransferredSize() == 0)
+//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+//							else
 								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
 
 							holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000);
@@ -1399,10 +1408,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						holder.dataTransferred.setText("Initializing...");
 						holder.dataTransferred.setVisibility(View.VISIBLE);
 						break;
-					case IN_PROGRESS:
 					case PAUSING:
 					case PAUSED:
 					case ERROR:
+					{
+						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+						if(fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("");
+						else
+							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+						holder.barProgress.setProgress(progress);
+					}
+						break;
+						
+					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
 						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
 						int progressUpdate = 0;
@@ -1412,9 +1431,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.dataTransferred.setText("");
 						else
 						{
-							if (fss.getTransferredSize() == 0)
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-							else
+//							if (fss.getTransferredSize() == 0)
+//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+//							else
 								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
 
 							holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000);
@@ -1426,16 +1445,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					case CANCELLED:
 					case COMPLETED:
 					default:
-						if (firstMessageFromParticipant)
-						{
-							holder.image.setVisibility(View.VISIBLE);
-							iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image,true);
-							holder.avatarContainer.setVisibility(View.VISIBLE);
-						}
-						else
-						{
-							holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
-						}
 						break;
 
 					}
@@ -1481,6 +1490,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else
 			{
+				if (firstMessageFromParticipant)
+				{
+					holder.image.setVisibility(View.VISIBLE);
+					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image,true);
+					holder.avatarContainer.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+				}
 				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
 			}
 		} // End of File Transfer Message

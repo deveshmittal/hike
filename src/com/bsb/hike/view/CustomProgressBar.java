@@ -14,6 +14,7 @@ public class CustomProgressBar extends ProgressBar
 	private int target = 0;
 	private int duration = 0;
 	private ObjectAnimator animation;
+	private boolean nonFirstProgress = false;
 	
 	public CustomProgressBar(Context context)
 	{
@@ -48,6 +49,12 @@ public class CustomProgressBar extends ProgressBar
 		start = filterPercentValue(start);
 		target = filterPercentValue(target);
 		
+		if(!nonFirstProgress)
+		{
+			nonFirstProgress = true;
+			super.setProgress(this.target);
+			return;
+		}
 		if((this.target == target) && (this.start == start) && (this.duration == duration))
 			return;
 		
@@ -57,13 +64,13 @@ public class CustomProgressBar extends ProgressBar
 		
 		if(this.target <= this.start)
 		{
-			this.setProgress(this.target);
+			super.setProgress(this.target);
 			return;
 		}
 		
 		if(this.duration <= 0)
 		{
-			this.setProgress(this.target);
+			super.setProgress(this.target);
 			return;
 		}
 		
@@ -87,7 +94,7 @@ public class CustomProgressBar extends ProgressBar
 		    
 		}
 		else 
-			this.setProgress(target);
+			super.setProgress(target);
 		
 		return;
 	}
