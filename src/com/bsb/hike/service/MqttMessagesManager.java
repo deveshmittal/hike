@@ -1098,8 +1098,6 @@ public class MqttMessagesManager {
 
 				if (HikeConstants.REMOVE_CATEGORY.equals(subType)) {
 
-					Utils.deleteFile(categoryDir);
-
 					String removedIds = settings.getString(
 							StickerManager.REMOVED_CATGORY_IDS, "[]");
 
