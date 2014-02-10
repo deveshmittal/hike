@@ -115,6 +115,12 @@ public abstract class ImageWorker
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
+			// if bitmap is found in cache and is recyclyed, remove this from cache and make thread get new Bitmap
+			if(value != null && value.getBitmap().isRecycled())
+			{
+				mImageCache.remove(data);
+				value = null;
+			}
 		}
 
 		if (value != null)
