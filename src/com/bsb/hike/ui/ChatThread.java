@@ -119,6 +119,7 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -369,6 +370,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private boolean showingChatThemePicker;
 
+	private ImageView backgroundImage;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -507,6 +510,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		/* bind views to variables */
 		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
+		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
@@ -607,7 +611,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				 * We need to queue this piece of code after the lifecycle methods are done.
 				 * Else the popup window throws an exception. 
 				 */
-				mHandler.post(new Runnable() {
+				chatLayout.post(new Runnable() {
 					
 					@Override
 					public void run() {
@@ -3115,16 +3119,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
 
-		/*
-		 * Put this code in a try-catch block to prevent it from crashing
-		 * on GB and below devices when we try to show the palette on orientation
-		 * changes.
-		 */
-		try {
-			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
-		} catch (BadTokenException e) {
-			
-		}
+		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
 
 		FrameLayout viewParent = (FrameLayout) parentView.getParent();
 		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
@@ -3172,12 +3167,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							chatTheme.bgResId()));
 			bitmapDrawable.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 			backgroundDrawable = bitmapDrawable;
+			backgroundImage.setScaleType(ScaleType.FIT_XY);
 		} else {
 			backgroundDrawable = getResources()
 					.getDrawable(chatTheme.bgResId());
+			backgroundImage.setScaleType(ScaleType.CENTER_CROP);
 		}
 
-		chatLayout.setBackgroundDrawable(backgroundDrawable);
+		backgroundImage.setImageDrawable(backgroundDrawable);
 		mAdapter.setChatTheme(chatTheme);
 
 		setMuteViewBackground();
@@ -4172,8 +4169,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			accountContainer.setVisibility(View.VISIBLE);
 			accounts.setAdapter(new AccountAdapter(getApplicationContext(),
 					getAccountList()));
-			accountInfo.setText(((AccountData) accounts.getSelectedItem())
-					.getName());
+			if (accounts.getSelectedItem() != null) {
+				accountInfo.setText(((AccountData) accounts.getSelectedItem())
+						.getName());
+			} else {
+				accountInfo.setText(R.string.device);
+			}
 		} else {
 			accountContainer.setVisibility(View.GONE);
 		}
@@ -4224,7 +4225,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				if (saveContact) {
-					saveContact(items, accounts, name);
+					if (accounts.getSelectedItem() != null) {
+						saveContact(items, accounts, name);
+					} else {
+						Utils.addToContacts(items, name, ChatThread.this);
+					}
 				} else {
 					initialiseContactTransfer(contactInfo);
 				}

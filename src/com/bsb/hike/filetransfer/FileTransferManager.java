@@ -406,17 +406,21 @@ public class FileTransferManager
 	// this will be used when user deletes account or unlink account
 	public void deleteAllFTRFiles()
 	{
-		for (File f : HIKE_TEMP_DIR.listFiles())
-		{
-			try
+		if(HIKE_TEMP_DIR != null)
+			for (File f : HIKE_TEMP_DIR.listFiles())
 			{
-				f.delete();
+				if(f != null)
+				{
+					try
+					{
+						f.delete();
+					}
+					catch (Exception e)
+					{
+						Log.e(getClass().getSimpleName(), "Exception while deleting state file : ", e);
+					}
+				}
 			}
-			catch (Exception e)
-			{
-				Log.e(getClass().getSimpleName(), "Exception while deleting state file : ", e);
-			}
-		}
 	}
 
 	// this function gives the state of downloading for a file

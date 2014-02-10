@@ -39,13 +39,170 @@ public enum ChatTheme {
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_hike_sent;
 		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_hike_receive;
+		}
+	},
+
+	VALENTINES_2 {
+
+		@Override
+		public String bgId() {
+			return "20";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.ic_ct_valentine_2_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_valentines_2_tile;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_valentines_2;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return true;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom_valentines_2;
+		}
+
+	},
+
+	NIGHT_PATTERN {
+
+		@Override
+		public String bgId() {
+			return "21";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.ic_ct_night_pattern_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_night_pattern;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_night;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+	},
+
+	NIGHT {
+
+		@Override
+		public String bgId() {
+			return "22";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.bg_ct_night_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_night;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_night;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 
 	OWL {
 
 		@Override
 		public String bgId() {
-			return "20";
+			return "23";
 		}
 
 		@Override
@@ -78,43 +235,14 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_owl;
 		}
 
-	},
-
-	NIGHT {
-
 		@Override
-		public String bgId() {
-			return "21";
-		}
-
-		@Override
-		public int headerBgResId() {
-			return R.drawable.bg_header_transparent;
-		}
-
-		@Override
-		public int previewResId() {
-			return R.drawable.bg_ct_night_preview;
-		}
-
-		@Override
-		public int bgResId() {
-			return R.drawable.bg_ct_night;
-		}
-
-		@Override
-		public int bubbleResId() {
-			return R.drawable.ic_bubble_night;
-		}
-
-		@Override
-		public boolean isTiled() {
+		public boolean isAnimated() {
 			return false;
 		}
 
 		@Override
-		public int sentNudgeResId() {
-			return R.drawable.ic_nudge_sent_custom_night;
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -156,6 +284,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	CHATTY {
 
@@ -192,6 +330,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_chatty_beachy_techy;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -232,6 +380,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	STARRY {
 
@@ -268,6 +426,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_starry_space;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -308,6 +476,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	SPORTY {
 
@@ -345,6 +523,16 @@ public enum ChatTheme {
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
 		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
 	},
 	SMILEY {
 
@@ -381,6 +569,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -421,6 +619,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_creepy;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	CELEBRATION {
 
@@ -457,6 +665,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_celebration_space;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -497,6 +715,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	FOREST {
 
@@ -533,6 +761,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -573,6 +811,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	TECHY {
 
@@ -609,6 +857,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_chatty_beachy_techy;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -649,6 +907,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	BEACH {
 
@@ -685,6 +953,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_chatty_beachy_techy;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -725,6 +1003,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	STUDY {
 
@@ -761,6 +1049,16 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
 		}
 
 	},
@@ -801,6 +1099,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	},
 	BIKER {
 
@@ -839,6 +1147,16 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
 	};
 
 	public abstract String bgId();
@@ -854,6 +1172,10 @@ public enum ChatTheme {
 	public abstract boolean isTiled();
 
 	public abstract int sentNudgeResId();
+
+	public abstract boolean isAnimated();
+
+	public abstract int receivedNudgeResId();
 
 	public static ChatTheme getThemeFromId(String bgId) {
 		if (bgId == null) {

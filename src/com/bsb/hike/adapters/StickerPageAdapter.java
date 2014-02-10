@@ -204,6 +204,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				int index = (startPosition * numItemsRow) + i;
 				if(index > stickerList.size() - 1) {
 					imageView.setImageDrawable(null);
+					imageView.setTag(null);
+					imageView.setOnClickListener(null);
 					continue;
 				}
 

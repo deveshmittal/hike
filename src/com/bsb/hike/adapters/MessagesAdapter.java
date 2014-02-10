@@ -10,7 +10,6 @@ import java.util.Locale;
 
 import org.json.JSONArray;
 
-import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -21,31 +20,29 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
-import android.media.ThumbnailUtils;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -78,11 +75,11 @@ import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
@@ -258,21 +255,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			lastSentMessagePosition = convMessages.size() - 1;
 		}
-	}
-
-	public void addMessage(ConvMessage convMessage, int index)
-	{
-		convMessages.add(index, convMessage);
-		if (index > lastSentMessagePosition)
-		{
-			if (convMessage != null && convMessage.isSent())
-			{
-				lastSentMessagePosition = index;
-			}
-		}
-		else
-		{
-			lastSentMessagePosition++;
+		if (convMessage.getMetadata() != null && convMessage.getMetadata().isPokeMessage()) {
+			convMessage.getMetadata().setNudgeAnimationType(NudgeAnimationType.SINGLE);
 		}
 	}
 
@@ -807,16 +791,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (isDefaultTheme)
 				{
 					holder.poke.setVisibility(View.VISIBLE);
-					holder.poke.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent : R.drawable.ic_nudge_hike_receive);
 					holder.messageContainer.setVisibility(View.VISIBLE);
+					setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
 				}
-				else
+				else if (!chatTheme.isAnimated())
 				{
 					holder.pokeCustom.setVisibility(View.VISIBLE);
-					holder.pokeCustom.setImageResource(convMessage.isSent() ? chatTheme.sentNudgeResId() : R.drawable.ic_nudge_receive_custom);
 					holder.messageContainer.setVisibility(View.GONE);
-				}
+					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+				} else {
+					holder.pokeCustom.setVisibility(View.VISIBLE);
+					holder.messageContainer.setVisibility(View.GONE);
 
+					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+					if(metadata.getNudgeAnimationType() != NudgeAnimationType.NONE) {
+						metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
+						holder.pokeCustom.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
+					}
+				}
 			}
 			else if (convMessage.isStickerMessage())
 			{
@@ -1363,25 +1355,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						}
 					}
 						break;
+					case INITIALIZED:
+						holder.dataTransferred.setText("Initializing...");
+						holder.dataTransferred.setVisibility(View.VISIBLE);
+						break;
 					case ERROR:
 						Log.d(getClass().getSimpleName(), "error display");
 						holder.image.setVisibility(View.VISIBLE);
 						holder.image.setImageResource(R.drawable.ic_download_failed);
 						// break;
-					case INITIALIZED:
-						holder.dataTransferred.setText("Initializing...");
-						holder.dataTransferred.setVisibility(View.VISIBLE);
-						break;
 					case PAUSING:
 					case PAUSED:
 					case IN_PROGRESS:
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
 						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
 						int progressUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("Initializing...");
+						if(fss.getTotalSize() > 0)
+							progressUpdate = (int) ((chunkSize*100)/fss.getTotalSize());
+						if(fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("");
 						else
 						{
 							if (fss.getTransferredSize() == 0)
@@ -1414,10 +1406,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
 						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
 						int progressUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("Initializing...");
+						if(fss.getTotalSize() > 0)
+							progressUpdate = (int) ((chunkSize*100)/fss.getTotalSize());
+						if(fss.getTotalSize() <= 0)
+							holder.dataTransferred.setText("");
 						else
 						{
 							if (fss.getTransferredSize() == 0)
@@ -1866,6 +1858,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return v;
 	}
 
+	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent) {
+		iv.setImageResource(isMessageSent ? chatTheme.sentNudgeResId() : chatTheme.receivedNudgeResId());
+	}
 
 	// @GM
 	// The following methods returns the user readable size when passed the bytes in size

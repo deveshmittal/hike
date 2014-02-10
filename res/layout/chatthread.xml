@@ -16,11 +16,16 @@
         android:layout_height="@dimen/st__action_bar_default_height"
         android:layout_alignParentTop="true" />
     
+    <ImageView
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@color/chat_thread_default_bg" />
+    
     <com.bsb.hike.view.CustomLinearLayout
         android:id="@+id/chat_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/chat_thread_default_bg"
         android:orientation="vertical" >
 
         <View
