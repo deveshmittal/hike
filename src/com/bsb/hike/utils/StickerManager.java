@@ -194,6 +194,46 @@ public class StickerManager
 				return "expDownloadShown";
 			}
 		},
+		love
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.love;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_love;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "loveDownloadShown";
+			}
+		},
+		angry
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.angry;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_angry;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "angryDownloadShown";
+			}
+		},
 		bollywood
 		{
 			@Override

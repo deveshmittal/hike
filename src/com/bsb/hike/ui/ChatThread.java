@@ -4838,6 +4838,40 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			dividerBg = getResources().getColor(R.color.indian_div);
 			break;
+		case love:
+			resParentBg = getResources().getColor(R.color.love_bg);
+
+			stickerBtnBg = R.drawable.love_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.love_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.love_btn_text_shadow);
+
+			categoryText = "I Love You";
+			categoryTextColor = getResources().getColor(R.color.love_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.love_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.love_div);
+			break;
+		case angry:
+			resParentBg = getResources().getColor(R.color.angry_bg);
+
+			stickerBtnBg = R.drawable.angry_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.angry_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.angry_btn_text_shadow);
+
+			categoryText = "Hot Heads";
+			categoryTextColor = getResources().getColor(R.color.angry_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.angry_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.angry_div);
+			break;
 		}
 
 		parentDrawable.setColor(resParentBg);
