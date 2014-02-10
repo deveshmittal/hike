@@ -125,7 +125,7 @@ public abstract class ImageWorker
 
 		if (value != null)
 		{
-			Log.d(TAG, data + " Bitmap found in cache.");
+			Log.d(TAG, data + " Bitmap found in cache and is not recycled.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
