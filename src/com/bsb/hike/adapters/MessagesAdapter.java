@@ -272,8 +272,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void removeMessage(ConvMessage convMessage)
 	{
-		int index = convMessages.indexOf(convMessage);
-		convMessages.remove(convMessage);
+		/*
+		 * Iterating in reverse order since its more
+		 * likely the user wants to delete one of his/her
+		 * latest messages.
+		 */
+		int index = convMessages.lastIndexOf(convMessage);
+		convMessages.remove(index);
 		/*
 		 * We need to update the last sent position
 		 */
