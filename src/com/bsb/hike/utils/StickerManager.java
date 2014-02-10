@@ -541,7 +541,7 @@ public class StickerManager
 		if (categoryDirPath != null)
 		{
 			File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
-
+			File bigCatDir = new File(categoryDirPath);
 			if (categoryDir.exists())
 			{
 				String[] stickerIds = categoryDir.list();
@@ -550,6 +550,7 @@ public class StickerManager
 					recentStickers.remove(new Sticker(category, stickerId));
 				}
 			}
+			Utils.deleteFile(bigCatDir);
 		}
 	}
 
