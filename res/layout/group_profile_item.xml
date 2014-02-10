@@ -20,7 +20,7 @@
             android:layout_width="@dimen/medium_avatar"
             android:layout_height="@dimen/medium_avatar" >
 
-            <ImageView
+            <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
                 style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
