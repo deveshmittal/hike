@@ -174,26 +174,6 @@ public class StickerManager
 				return "doggyDownloadShown";
 			}
 		},
-		humanoid2
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.humanoid2;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_humanoid2;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "humanoid2DownloadShown";
-			}
-		},
 		expressions
 		{
 			@Override
@@ -212,66 +192,6 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "expDownloadShown";
-			}
-		},
-		indian
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.indian;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_indian;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "indianDownloadShown";
-			}
-		},
-		avatars
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.avtars;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_avtars;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "avtarsDownloadShown";
-			}
-		},
-		smileyexpressions
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.smileyexpressions;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_smilyexpressions;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "smileyexpressionDownloadShown";
 			}
 		},
 		bollywood
@@ -312,6 +232,86 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "rfDownloadShown";
+			}
+		},
+		indian
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.indian;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_indian;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "indianDownloadShown";
+			}
+		},
+		humanoid2
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.humanoid2;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_humanoid2;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "humanoid2DownloadShown";
+			}
+		},
+		avatars
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.avtars;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_avtars;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "avtarsDownloadShown";
+			}
+		},
+		smileyexpressions
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.smileyexpressions;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_smilyexpressions;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "smileyexpressionDownloadShown";
 			}
 		},
 		kitty
