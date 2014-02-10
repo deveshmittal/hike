@@ -52,6 +52,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private StickerCategory category;
 	private int numStickerRows;
 	private StickerLoader stickerLoader;
+	private boolean isListFlinging;
 	
 	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
 			List<ViewType> viewTypeList,StickerLoader worker) {
@@ -215,18 +216,18 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				{
 					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
 					{
-						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView);
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
 						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()]);
 					}
 					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 					{
-						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView);
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
 						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
 					}
 				}
 				else
 				{
-					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView);
+					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
 				}
 				imageView.setTag(sticker);
 
@@ -303,6 +304,19 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 		{
 			StickerManager.getInstance().addRecentSticker(sticker);
 			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
+		}
+	}
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		stickerLoader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			notifyDataSetChanged();
 		}
 	}
 }

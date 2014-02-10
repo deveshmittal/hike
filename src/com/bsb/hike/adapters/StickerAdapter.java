@@ -356,27 +356,32 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		spo.getStickerListView().setAdapter(stickerPageAdapter);
 		spo.getStickerListView().setOnScrollListener(new OnScrollListener()
 		{
+			private int previousFirstVisibleItem;
+			private long previousEventTime;
+			private int velocity;
+
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState)
 			{
-				// Pause fetcher to ensure smoother scrolling when flinging
-				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
-				{
-					// Before Honeycomb pause image loading on scroll to help with performance
-					if (!Utils.hasHoneycomb())
-					{
-						worker.setPauseWork(true);
-					}
-				}
-				else
-				{
-					worker.setPauseWork(false);
-				}
+				/*
+				 * Only set flinging true if the list is actually flinging and the velocity
+				 * is greater than 10.
+				 */
+				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > 10);
 			}
 
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 			{
+		        if (previousFirstVisibleItem != firstVisibleItem){
+		            long currTime = System.currentTimeMillis();
+		            long timeToScrollOneElement = currTime - previousEventTime;
+		            velocity = (int) (((double)1/timeToScrollOneElement)*1000);
+
+		            previousFirstVisibleItem = firstVisibleItem;
+		            previousEventTime = currTime;
+		        }
+
 				int currentIdx = ((ChatThread) activity).getCurrentPage();
 				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 				if (stickersList.isEmpty() || !category.categoryId.equals(sc.categoryId)
