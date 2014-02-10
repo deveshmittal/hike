@@ -115,18 +115,24 @@ public abstract class ImageWorker
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
+			// if bitmap is found in cache and is recyclyed, remove this from cache and make thread get new Bitmap
+			if (value != null && value.getBitmap().isRecycled())
+			{
+				mImageCache.remove(data);
+				value = null;
+			}
 		}
 
 		if (value != null)
 		{
-			Log.d(TAG, data + " Bitmap found in cache.");
+			Log.d(TAG, data + " Bitmap found in cache and is not recycled.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
 		else if (runOnUiThread)
 		{
 			Bitmap b = processBitmapOnUiThread(data);
-			if(b!=null && mImageCache != null)
+			if (b != null && mImageCache != null)
 			{
 				BitmapDrawable bd = getBitmapDrawable(b);
 				mImageCache.putInCache(data, bd);
@@ -426,19 +432,31 @@ public abstract class ImageWorker
 	 */
 	private void setImageDrawable(ImageView imageView, Drawable drawable)
 	{
-		if (mFadeInBitmap)
+		if (drawable != null && ((BitmapDrawable) drawable).getBitmap().isRecycled())
 		{
-			// Transition drawable with a transparent drawable and the final drawable
-			final TransitionDrawable td = new TransitionDrawable(new Drawable[] { new ColorDrawable(android.R.color.transparent), drawable });
-			// Set background to loading bitmap
-			imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
-
-			imageView.setImageDrawable(td);
-			td.startTransition(FADE_IN_TIME);
+			Log.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
+			return;
 		}
-		else
+		try
 		{
-			imageView.setImageDrawable(drawable);
+			if (mFadeInBitmap)
+			{
+				// Transition drawable with a transparent drawable and the final drawable
+				final TransitionDrawable td = new TransitionDrawable(new Drawable[] { new ColorDrawable(android.R.color.transparent), drawable });
+				// Set background to loading bitmap
+				imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+
+				imageView.setImageDrawable(td);
+				td.startTransition(FADE_IN_TIME);
+			}
+			else
+			{
+				imageView.setImageDrawable(drawable);
+			}
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
 		}
 	}
 

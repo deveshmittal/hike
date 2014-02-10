@@ -187,7 +187,7 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 
 	private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
 
-	private static final int MAXIMUM_POOL_SIZE = 10;//CPU_COUNT * 2 + 1;
+	private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
 
 	private static final int KEEP_ALIVE = 1;
 
