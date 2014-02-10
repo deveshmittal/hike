@@ -444,10 +444,8 @@
 	<string name="friends_on_hike_tut">Amigos en hike</string>
 	<string name="remove_circle">Eliminar del círculo de amigos</string>
 	<string name="add_hike_friend">Ver amigos</string>
-	<string name="email_body">¡Hola!\n\nAcabo de unirme a hike, una app de mensajería fantástica. ¡Descárgatela en get.hike.in!\n\nhike viene con emoticonos muy graciosos y te permite publicar actualizaciones de estado para tu círculo de amigos. ¡Es como BBM, pero con muchas mejoras y compatible con más dispositivos!\n\nConsíguelo en get.hike.in y di adiós a los SMS aburridos.</string>
 	<string name="file_expire">Este archivo ya no existe.</string>
 	<string name="friends_on_hike_tut_info">Toca en el botón para ver a tus amigos en hike</string>
-	<string name="twitter_msg">Estoy usando @hikeapp 2.0, con estados y emoticonos. ¡Una forma sencilla, original y gratuita de mandar mensajes!</string>
 	<string name="facebook_description">¡Hola!\n\nAcabo de unirme a hike, una app de mensajería fantástica. ¡Descárgatela en get.hike.in!\n\nhike viene con emoticonos muy graciosos y te permite publicar actualizaciones de estado para tu círculo de amigos. ¡Es como BBM, pero con muchas mejoras y compatible con más dispositivos!</string>
 	<string name="invite_message">¡Hola! Descarga hike 2.0, ahora con actualizaciones de estado :) - get.hike.in</string>
 	<string name="error_setting_profile">Error al configurar tu imagen de perfil</string>
@@ -609,7 +607,6 @@
 	<string name="friend_request_accepted_notification">Ahora verás las actualizaciones de %1$s</string>
 	<string name="only_friends_last_seen">Solo tus amigos pueden ver tu última conexión</string>
 	<string name="email_subject">hike. Mantén a tus amigos cerca de ti.</string>
-	<string name="email_body">¡Hola!\n\nAcabo de empezar a utilizar hike, una aplicación de mensajería con un gran diseño y completamente gratuita.\n\nhike te permite enviar mensajes gratis a tus amigos y a tu familia. Con hike puedes enviar mensajes a los amigos que tengas en hike y a los que no. No tendrás que utilizar ninguna otra aplicación de mensajería. ¡Además, es GRATIS!\n\nhike viene con muchas pegatinas y emoticonos chulos. ¡También puedes publicar actualizaciones de estado! Es parecido a BBM, pero mucho mejor.\n\nDescárgatela ya y di adiós a los SMS.\n\nDescarga hike: http://get.hike.in</string>
 	<string name="updates_friends">Aquí verás las actualizaciones de tus amigos</string>
 	<string name="tap_plus">Toca + para añadir a un contacto como amigo</string>
 	<string name="add_as_friend_menu">Añadir como amigo</string>
@@ -719,5 +716,16 @@
 	<string name="last_seen_while_ago_ct">hace un rato</string>
 	<string name="apply">Aplique</string>
 	<string name="chat_theme_tip">El tema de charla va a cambiar para ti y tu amigo</string>
-	<string name="chat_theme_tip_group">El tema de charla va a cambiar para todo el grupo</string>		
+	<string name="chat_theme_tip_group">El tema de charla va a cambiar para todo el grupo</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Error al establecer foto de perfil. Libera espacio en tu tarjeta SD y vuelve a intentarlo.</string>
+	<string name="are_you_sure">¿Seguro?</string>
+	<string name="delete_confirm_msg_1">Si eliminas tu cuenta se borrarán todos tus datos, SMS gratuitos y los premios de hike.</string>
+	<string name="please_confirm">Confirma tu elección</string>
+	<string name="delete_confirm_msg_2">Esta acción no se puede cambiar. ¿Seguro que quieres borrar tu cuenta?</string>
+	<string name="email_body">Hola, \n: Acabo de probar la nueva aplicación de mensajería hike; es más rápida, sencilla y más bonita.\n¡Además, con las increíbles pegatinas nuevas de hike, se terminaron los mensajes aburridos!\nhike también te permite configurar la privacidad con la opción de "última conexión" para que puedas tener a tus amigos más cerca.\n\n¡Descárgatela ya en http://hike.in y diviértete!</string>
+	<string name="twitter_msg">¡Acabo de instalarme hike! Es más sencilla, rápida y tiene unas pegatinas increíbles! ¡Descárgatela ya en http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">¡Acabo de instalarme hike! Es más sencilla, rápida y con unas pegatinas increíbles! ¡Descárgatela ya en http://hike.in y chatea gratis!</string>
+			
 </resources>

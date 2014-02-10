@@ -513,7 +513,7 @@ public class StickerManager
 		while (it.hasNext())
 		{
 			StickerCategory cat = it.next();
-			if (cat.categoryId.equals(removedCategoryId))
+			if (cat.categoryId.name().equals(removedCategoryId))
 			{
 				removeCategoryFromRecents(cat);
 				it.remove();
