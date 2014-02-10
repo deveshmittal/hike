@@ -153,7 +153,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity
 							.beginTransaction();
 					fragmentTransaction.add(R.id.parent_layout,
 							imageViewerFragment, IMAGE_FRAGMENT_TAG);
-					fragmentTransaction.commit();
+					fragmentTransaction.commitAllowingStateLoss();
 				}
 			});
 		}
