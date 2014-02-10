@@ -15,6 +15,7 @@ public class CustomProgressBar extends ProgressBar
 	private int duration = 0;
 	private ObjectAnimator animation;
 	private boolean nonFirstProgress = false;
+	private long msgId = -1;
 	
 	public CustomProgressBar(Context context)
 	{
@@ -44,14 +45,15 @@ public class CustomProgressBar extends ProgressBar
 		super.setProgress(progress);
 	}
 	
-	public synchronized void setAnimatedProgress(int start, int target, int duration)
+	public synchronized void setAnimatedProgress(int start, int target, int duration, long id)
 	{
 		start = filterPercentValue(start);
 		target = filterPercentValue(target);
 		
-		if(!nonFirstProgress)
+		if((!nonFirstProgress) || (this.msgId != id))
 		{
 			nonFirstProgress = true;
+			this.msgId = id;
 			super.setProgress(this.target);
 			return;
 		}
@@ -87,7 +89,8 @@ public class CustomProgressBar extends ProgressBar
 			}
 			else
 			{
-				animation.setIntValues(this.start, this.target);
+				//animation.setIntValues(this.start, this.target);
+				animation.setIntValues(this.target);
 				animation.setDuration(this.duration);
 				animation.start();
 			}
