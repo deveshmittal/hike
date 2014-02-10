@@ -444,10 +444,8 @@
 	<string name="friends_on_hike_tut">Amigos no hike</string>
 	<string name="remove_circle">Remover do círculo de amigos</string>
 	<string name="add_hike_friend">Ver amigos</string>
-	<string name="email_body">Oi!\n\nAcabei de obter o hike, um excelente app novo de mensagens! Baixe o hike em get.hike.in.\n\nO hike tem emoticons hilários. Você também pode publicar atualizações de status para o círculo de amigos! É como o BBM para dispositivos não Blackberry, mas muito melhor!\n\nObtenha-o agora em get.hike.in e diga adeus aos SMS maçantes.</string>
 	<string name="file_expire">Esse arquivo não existe mais.</string>
 	<string name="friends_on_hike_tut_info">Toque no botão para ver amigos no hike</string>
-	<string name="twitter_msg">Estou usando o @hikeapp 2.0 com atualizações de status e humor. Mensagens simples e belas totalmente de graça.</string>
 	<string name="facebook_description">Oi!\n\nAcabei de obter o hike, um excelente app novo de mensagens! Baixe o hike em get.hike.in.\n\nO hike tem emoticons hilários. Você também pode publicar atualizações de status para o círculo de amigos! É como o BBM para dispositivos não Blackberry, mas muito melhor!</string>
 	<string name="invite_message">Ei! Baixe o hike 2.0. Agora com atualizações de status :) - get.hike.in</string>
 	<string name="error_setting_profile">Erro ao configurar a imagem do perfil.</string>
@@ -610,7 +608,6 @@
 	<string name="friend_request_accepted_notification">Agora você poderá ver as atualizações de %1$s</string>
 	<string name="only_friends_last_seen">Somente seus amigos podem ver onde você foi visto pela última vez</string>
 	<string name="email_subject">hike. Mantenha próximos os amigos próximos</string>
-	<string name="email_body">Olá!\n\nEu comecei a usar o hike, um aplicativo de mensagens simples, bonito e gratuito.\n\nO hike é um ótimo modo de mandar mensagens gratuitas para seus amigos e familiares. Com o hike, você pode enviar mensagens tanto aos amigos que o utilizam quanto aos que não o utilizam! Você nunca mais precisará usar outro aplicativo de mensagem. E o melhor é que é GRATUITO!\n\nO hike vem com adesivos e emoticons hilários. Você também pode postar suas Atualizações de Status para seus amigos. Pense nele como um BBM, mas muito, muito melhor!!\n\nAgora diga adeus às mensagens simples e entediantes.\n\nBaixe o hike: http://get.hike.in</string>
 	<string name="updates_friends">Você pode ver atualizações de seus amigos aqui</string>
 	<string name="tap_plus">Toque em + para adicionar um contato como amigo</string>
     <string name="add_as_friend_menu">Adic. como amigo</string>
@@ -720,4 +717,15 @@
 	<string name="apply">Aplicar</string>
 	<string name="chat_theme_tip">O tema do bate-papo vai mudar para você e seu amigo</string>
 	<string name="chat_theme_tip_group">O tema do bate-papo vai mudar para todo o grupo</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Não é possível definir a foto do perfil, libere espaço no Cartão SD e tente novamente.</string>
+	<string name="are_you_sure">Você tem certeza?</string>
+	<string name="delete_confirm_msg_1">Ao excluir sua conta todos os seus dados, SMS grátis e recompensas do hike também serão excluídos.</string>
+	<string name="please_confirm">Confirme</string>
+	<string name="delete_confirm_msg_2">Essa ação é irreversível. Tem certeza de que deseja excluir sua conta?</string>
+	<string name="email_body">Olá,\nAcabei de obter o novo e incrível hike. Ele é mais rápido, mais simples e mais bonito!\nCom os novos adesivos hilários do hike, você nunca mais enviará outra mensagem simples e entediante!\nO hike também dá a opção de Privacidade com Visto por último, para que você possa manter os amigos próximos mais perto.\n\nBaixe-o agora em http://hike.in e participe da diversão!</string>
+	<string name="twitter_msg">Acabei de obter o novo hike! Ele é mais simples, mais rápido, com novos adesivos hilários! Baixe-o agora em http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">Acabei de obter o novo hike! Ele é mais simples, mais rápido, com novos adesivos hilários! Baixe-o agora e vamos conversar de graça http://hike.in</string>
+	
 </resources>

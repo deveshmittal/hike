@@ -458,6 +458,7 @@ public class ConvMessage {
 		result = prime * result + ((mMsisdn == null) ? 0 : mMsisdn.hashCode());
 		result = prime * result + ((mState == null) ? 0 : mState.hashCode());
 		result = prime * result + (int) (mTimestamp ^ (mTimestamp >>> 32));
+		result = prime * result + (int) (msgID ^ (msgID >>> 32));
 		return result;
 	}
 
@@ -471,6 +472,9 @@ public class ConvMessage {
 			return false;
 		ConvMessage other = (ConvMessage) obj;
 
+		if (msgID != other.msgID) {
+			return false;
+		}
 		if (mIsSent != other.mIsSent)
 			return false;
 		if (mMessage == null) {

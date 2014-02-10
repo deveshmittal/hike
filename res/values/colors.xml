@@ -203,4 +203,20 @@
     <color name="progress_colour_default_theme">#FFAAAAAA</color>
     <color name="webview_progress_bg">#CD000000</color>
     <color name="webview_progress_fg">#009BFF</color>
+    <color name="love_bg">#e97598</color>
+    <color name="love_btn_normal">#f08dab</color>
+    <color name="love_btn_pressed">#d67290</color>
+    <color name="love_text">#ffffff</color>
+    <color name="love_btn_text">#ffffff</color>
+    <color name="love_text_shadow">#c44d71</color>
+    <color name="love_btn_text_shadow">#c44d71</color>
+    <color name="love_div">#c44d71</color>
+    <color name="angry_bg">#be251e</color>
+    <color name="angry_btn_normal">#c54943</color>
+    <color name="angry_btn_pressed">#ad3e39</color>
+    <color name="angry_text">#ffffff</color>
+    <color name="angry_btn_text">#ffffff</color>
+    <color name="angry_text_shadow">#a51d17</color>
+    <color name="angry_btn_text_shadow">#a51d17</color>
+    <color name="angry_div">#a51d17</color>
 </resources>

@@ -445,10 +445,8 @@
 	<string name="friends_on_hike_tut">Друзья в hike</string>
 	<string name="remove_circle">Удалить из круга друзей</string>
 	<string name="add_hike_friend">Посмот. друзей</string>
-	<string name="email_body">Привет!\n\nЯ начинаю использовать hike, новое приложение для чата. Загрузи его здесь: get.hike.in.\n\nhike имеет уморительные смайлики и позволяет публиковать обновления статуса для друзей! Это что-то вроде BBM для пользователей без Blackberry, но гораздо лучше!\n\nЗагрузи его сейчас по адресу get.hike.in и попрощайся со старыми скучными SMS.</string>
 	<string name="file_expire">Этот файл больше не существует.</string>
 	<string name="friends_on_hike_tut_info">Нажмите здесь, чтобы увидеть друзей в hike </string>
-	<string name="twitter_msg">Я использую @hikeapp 2.0 с обновлениями статуса и настроениями. Простой и красивый чат, совершенно бесплатно.</string>
 	<string name="facebook_description">Привет!\n\nЯ начинаю использовать hike, новое приложение для чата. Загрузи его здесь: get.hike.in.\n\nhike имеет уморительные смайлики и позволяет публиковать обновления статуса для друзей! Это что-то вроде BBM для пользователей без Blackberry, но гораздо лучше!</string>
 	<string name="invite_message">Привет! Загрузи hike 2.0. Теперь с обновлениями статуса :) - get.hike.in</string>
 	<string name="error_setting_profile">Ошибка при установке аватара.</string>
@@ -617,7 +615,6 @@
 	<string name="friend_request_accepted_notification">Теперь вы сможете видеть обновления статуса %1$s</string>
 	<string name="only_friends_last_seen">Только друзья увидят время вашего последнего появления в сети</string>
 	<string name="email_subject">hike. Близкие друзья всегда рядом.</string>
-	<string name="email_body">Привет!\n\nЯ использую hike — удобное бесплатное приложение-чат.\n\nhike позволяет отправлять бесплатные сообщения друзьям и родным! С его помощью можно общаться с друзьями из hike и не только! Вам больше не понадобятся другие приложения для чата. К тому же наше приложение абсолютно бесплатно!\n\nhike содержит уморительные стикеры и смайлики. И можно публиковать обновления статуса для друзей. Это как BBM, только намного круче!\n\nСкачайте прямо сейчас — и оставьте скучные SMS в прошлом.\n\nСкачайте hike: http://get.hike.in</string>
 	<string name="updates_friends">Здесь будут отображаться обновления ваших друзей</string>
 	<string name="tap_plus">Нажмите +, чтобы добавить контакт </string>
 	<string name="add_as_friend_menu">Добавить в друзья</string>
@@ -727,5 +724,16 @@
 	<string name="last_seen_while_ago_ct">недавно</string>
 	<string name="apply">Применить</string>
 	<string name="chat_theme_tip">Тема чата будет меняться для вас и вашего друга</string>
-	<string name="chat_theme_tip_group">Тема чата будет меняться для всей группы</string>	
+	<string name="chat_theme_tip_group">Тема чата будет меняться для всей группы</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Не удалось установить аватар. Освободите место на SD-карте и повторите попытку</string>
+	<string name="are_you_sure">Продолжить?</string>
+	<string name="delete_confirm_msg_1">При удалении вашей учетной записи будут удалены все ваши данные, бесплатные SMS и все поощрения hike.</string>
+	<string name="please_confirm">Подтвердите</string>
+	<string name="delete_confirm_msg_2">Это действие необратимо. Вы действительно хотите удалить свой аккаунт?</string>
+	<string name="email_body">Привет!\nУ меня появилось новое приложение-чат — hike! Еще удобнее, быстрее и симпатичнее.\nПопробовав классные стикеры hike, ты не захочешь вернуться к сухим текстовым сообщениям!\nК тому же, hike ценит конфиденциальность и позволяет тебе показывать свой статус в сети избранным друзьям.\n\n Скачай hike прямо сейчас с http://hike.in — и начинай общаться!</string>
+	<string name="twitter_msg">Привет! У меня появилось новое приложение-чат — hike! Еще удобнее, быстрее и с классными стикерами. Скачай его прямо сейчас с http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">Привет! У меня появилось новое приложение-чат — hike! Еще удобнее, быстрее и с классными стикерами. Скачай его прямо сейчас с http://hike.in — и будем общаться бесплатно!</string>
+		
 </resources>

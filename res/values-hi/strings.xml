@@ -446,10 +446,8 @@
 	<string name="friends_on_hike_tut">हाइक पर दोस्त</string>
 	<string name="remove_circle">दोस्तों के गुट से निकालें</string>
 	<string name="add_hike_friend">दोस्तो को देखे</string>
-	<string name="email_body">\n\nने hike इस्तेमाल करना शुरू किया है जो एक आसान सुंदर मैसेजिंग एप्प है और बिल्कुल मुफ्त है।\n\n hike शानदार इमोटिकॉन के साथ आता है। अपने मित्र मंडली में स्टेटस अपडेट पोस्ट कर सकते हैं!  इसे BBM जैसा समझ सकते हैं लेकिन यह उससे बहुत, बहुत बेहतर है!\n\nअभी पाएं और सादे बोरिंग SMS को अलविदा कहें!\n\n hike पाएं: http://get.hike.in</string>
 	<string name="file_expire">यह फाइल अब मौजूद नहीं है।</string>
 	<string name="friends_on_hike_tut_info">हाइक से जुड़े दोस्तों को देखने हेतु बटन पर टैप करें</string>
-	<string name="twitter_msg">मैं स्टेटस अपडेट और मूड्स के साथ @hikeapp 2.0 इस्तेमाल कर रहा हूँ। यह BBM जैसा लेकिन उससे बहुत, बहुत बेहतर है! http://get.hike.in #gethike पर hike पाएं</string>
 	<string name="facebook_description">मैंने हाइक इस्तेमाल करना शुरू किया है जो एक आसान सुंदर मैसेजिंग एप्प है और बिल्कुल मुफ्त है।\n\n हाइक शानदार इमोटिकॉन के साथ आता है। अपने मित्र मंडली में स्टेटस अपडेट पोस्ट कर सकते हैं! इसे BBM जैसा समझ सकते हैं लेकिन यह उससे बहुत, बहुत बेहतर है!\n\nइसे अभी पाएं और सादे बोरिंग SMS को अलविदा कहें।\n\n हाइक पाएं: http://get.hike.in</string>
 	<string name="invite_message">hike  2.0 प्राप्त करें | दुनियाभर में मुफ्त संदेश भेजें | अब स्थिति तथा मिजाज़ अवगत कराने के साथ उपलब्ध |http://get.hike.in/ से प्राप्त करें |</string>
 	<string name="error_setting_profile">आपके प्रोफाइल चित्र सेट करने में त्रुटि</string>
@@ -617,7 +615,6 @@
 	<string name="friend_request_accepted_notification">अब आप %1$s के अपडेट देख सकेंगे।</string>
 	<string name="only_friends_last_seen">केवल आपके मित्र देख सकते हैं कि आप पिछली बार कब दिखे थे</string>
 	<string name="email_subject">hike करें. क़रीबी दोस्तों को क़रीब रखें।</string>
-	<string name="email_body">हैलो!\n\n मैंने hike इस्तेमाल करना शुरू किया है, यह एक सरल और सुंदर मैसेजिंग एप्प है जो बिलकुल मुफ्त है।\n\nhike से आप अपने दोस्तों और परिवार को मुफ्त मैसेज भेज सकते हैं! hike से आप उन दोस्तों को मैसेज भेज सकते हैं जो hike पर हैं और उन्हें भी जो hike पर नहीं हैं! आपको फिर कभी कोई दूसरा मैसेजिंग एप्प इस्तेमाल नहीं करना पड़ेगा। इतना ही नहीं, यह बिल्कुल मुफ्त है!\n\n hike कुछ शानदार स्टिकरों और इमोटिकॉन के साथ आता है। आप अपने दोस्तों को स्टेटस अपडेट भी पोस्ट कर सकते हैं! इसे BBM जैसा समझ सकते हैं लेकिन यह उससे बहुत, बहुत बेहतर है!\n\n इसे अभी प्राप्त करें और सादे उबाऊ SMS को अलविदा कहें।\n\nhike यहाँ से प्राप्त करें: http://get.hike.in http://get.hike.in</string>
 	<string name="updates_friends">आप अपने मित्रों के अपडेट यहां देख सकते हैं</string>
 	<string name="tap_plus">किसी संपर्क को अपने मित्र के रूप में जोड़ने के लिए + पर टैप करें</string>
 	<string name="add_as_friend_menu">दोस्त में जोड़ें</string>
@@ -700,7 +697,6 @@
   	<string name="ftue_friends_tap_dismiss_friend_suggest">दोस्तों के सुझाव खारिज करने के लिए यहाँ टैप करें</string>
   	<string name="free_sms_use_tip">निशुल्क समस भेजने के लिए, शुरू करें एक नई चैट उन लोगों के साथ जिनके नाम के आगे हरे रंग का बबल ( gb ) हो। </string>
   	<string name="sticker_ftue_body">हमारे नए स्टिकर्स इस्तेमाल करें </string>
-
   	<string name="select_all">सभी चुनें (%1$d)</string>
 	<string name="deselect_all">सभी अचयनित करें (%1$d)</string>
 	<string name="humanoid2_category">You and I</string>
@@ -728,4 +724,15 @@
 	<string name="apply">लागू करें</string>
 	<string name="chat_theme_tip">चैट थीम, आपके और आपके दोस्त के लिए बदल जाएगा</string>
 	<string name="chat_theme_tip_group">चैट थीम पूरे समूह के लिए बदल जाएगा</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">प्रोफाइल चित्र सेट नहीं किया जा सका, कृपया अपने SD कार्ड पर कुछ स्थान खाली करें और पुनः प्रयास करें</string>
+	<string name="are_you_sure">क्या आप वाकई यह चाहते हैं?</string>
+	<string name="delete_confirm_msg_1">आपका खाता हटाने से आपका सभी डेटा, मुफ़्त एसएमएस और कोई भी hike पुरस्कार हट जाएँगे.</string>
+	<string name="please_confirm">कृपया पुष्टि करें</string>
+	<string name="delete_confirm_msg_2">यह कार्य अपरिवर्तनीय है। क्या आप वाकई अपना खाता हटाना चाहते हैं?</string>
+	<string name="email_body">हैलो,\nमैंने अभी अद्भुत नया hike मैसेंजर लिया है, यह बहुत तेज़, आसान और बहुत सुंदर भी है!\nआप hike के शानदार नए स्टिकर देखेंगे तो सचमुच फिर कभी कोई सादा बोरिंग संदेश नहीं भेजेंगे!\nhike पिछली बार दिखे के साथ आपको गोपनीयता का विकल्प भी देता है ताकि आप अपने नज़दीकी दोस्तों को और भी नज़दीक रख सकें।\n\nइसे अभी डाउनलोड करें http://hike.in और मज़े में शामिल हों!</string>
+	<string name="twitter_msg">मैंने अभी नया मैसेंजर लिया है! यह ज़्यादा आसान, ज़्यादा तेज़  है और इसमें नए हास्यप्रद स्टिकर हैं! इसे अभी डाउनलोड करें http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">मैंने अभी नया मैसेंजर लिया है! यह ज़्यादा आसान, ज़्यादा तेज़ है और इसमें नए हास्यप्रद स्टिकर हैं! इसे अभी डाउनलोड करें और हम मुफ़्त में चैट करेंगे http://hike.in</string>
+	
 </resources>

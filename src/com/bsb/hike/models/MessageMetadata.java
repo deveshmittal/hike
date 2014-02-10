@@ -24,6 +24,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata {
@@ -119,14 +120,18 @@ public class MessageMetadata {
 			{
 				String val = metadata.optString(StickerManager.CATEGORY_ID);
 				StickerCategory cat = StickerManager.getInstance().getCategoryForName(val);
-				if(cat != null) // sometimes cat is null
-					this.sticker = new Sticker(cat,metadata.optString(StickerManager.STICKER_ID));
-				else
-				{
-					Log.d(getClass().getSimpleName(), "Category Value received from server : "+val);
-				}
+				this.sticker = new Sticker(cat,metadata.optString(StickerManager.STICKER_ID));
 			}
 		}
+	}
+
+	/**
+	 * Returns the sticker category. Used only for cases where the 
+	 * category is an unknown one.
+	 * @return
+	 */
+	public String getUnknownStickerCategory() {
+		return json.optString(StickerManager.CATEGORY_ID);
 	}
 
 	private List<HikeFile> getHikeFileListFromJSONArray(JSONArray fileList) {

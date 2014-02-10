@@ -41,8 +41,6 @@ public class RecyclingImageView extends ImageView
 	@Override
 	protected void onDetachedFromWindow()
 	{
-		final Drawable previousDrawable = getDrawable();
-		Log.d("RecyclingImageView","prev drawable : " + (previousDrawable));
 		// This has been detached from Window, so clear the drawable
 		setImageDrawable(null);
 

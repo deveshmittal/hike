@@ -67,7 +67,7 @@
 	        android:layout_marginRight="2dp"
 	        android:visibility="gone" >
 
-	        <ImageView
+	        <com.bsb.hike.ui.utils.RecyclingImageView
 	            android:id="@+id/avatar"
 	            style="@style/AvatarStyle.Padding"
 	            android:src="@drawable/ic_avatar1_rounded" />

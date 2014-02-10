@@ -174,26 +174,6 @@ public class StickerManager
 				return "doggyDownloadShown";
 			}
 		},
-		humanoid2
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.humanoid2;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_humanoid2;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "humanoid2DownloadShown";
-			}
-		},
 		expressions
 		{
 			@Override
@@ -214,64 +194,44 @@ public class StickerManager
 				return "expDownloadShown";
 			}
 		},
-		indian
+		love
 		{
 			@Override
 			public int resId()
 			{
-				return R.drawable.indian;
+				return R.drawable.love;
 			}
 
 			@Override
 			public int previewResId()
 			{
-				return R.drawable.preview_indian;
+				return R.drawable.preview_love;
 			}
 
 			@Override
 			public String downloadPref()
 			{
-				return "indianDownloadShown";
+				return "loveDownloadShown";
 			}
 		},
-		avatars
+		angry
 		{
 			@Override
 			public int resId()
 			{
-				return R.drawable.avtars;
+				return R.drawable.angry;
 			}
 
 			@Override
 			public int previewResId()
 			{
-				return R.drawable.preview_avtars;
+				return R.drawable.preview_angry;
 			}
 
 			@Override
 			public String downloadPref()
 			{
-				return "avtarsDownloadShown";
-			}
-		},
-		smileyexpressions
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.smileyexpressions;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_smilyexpressions;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "smileyexpressionDownloadShown";
+				return "angryDownloadShown";
 			}
 		},
 		bollywood
@@ -314,6 +274,86 @@ public class StickerManager
 				return "rfDownloadShown";
 			}
 		},
+		indian
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.indian;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_indian;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "indianDownloadShown";
+			}
+		},
+		humanoid2
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.humanoid2;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_humanoid2;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "humanoid2DownloadShown";
+			}
+		},
+		avatars
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.avtars;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_avtars;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "avtarsDownloadShown";
+			}
+		},
+		smileyexpressions
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.smileyexpressions;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_smilyexpressions;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "smileyexpressionDownloadShown";
+			}
+		},
 		kitty
 		{
 			@Override
@@ -333,6 +373,27 @@ public class StickerManager
 			{
 				return "kittyDownloadShown";
 			}
+		},
+		unknown
+		{
+			@Override
+			public int resId() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int previewResId() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public String downloadPref() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
 		};
 
 		public static StickerCategoryId getCategoryIdFromName(String value)
@@ -417,6 +478,11 @@ public class StickerManager
 			{
 				stickerCategories.add(new StickerCategory(StickerCategoryId.recent));
 				continue;
+			} else if (StickerCategoryId.unknown.equals(s)) {
+				/*
+				 * We don't want to add the unknown category to this list.
+				 */
+				continue;
 			}
 			StickerCategory cat = stickerDataMap.get(s);
 			if (cat != null)
@@ -447,7 +513,7 @@ public class StickerManager
 		while (it.hasNext())
 		{
 			StickerCategory cat = it.next();
-			if (cat.categoryId.equals(removedCategoryId))
+			if (cat.categoryId.name().equals(removedCategoryId))
 			{
 				removeCategoryFromRecents(cat);
 				it.remove();
@@ -710,7 +776,7 @@ public class StickerManager
 			if (stickerCategories.get(i).categoryId.name().equals(categoryName))
 				return stickerCategories.get(i);
 		}
-		return null;
+		return new StickerCategory(StickerCategoryId.unknown);
 	}
 
 	/***

@@ -272,8 +272,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void removeMessage(ConvMessage convMessage)
 	{
-		int index = convMessages.indexOf(convMessage);
-		convMessages.remove(convMessage);
+		/*
+		 * Iterating in reverse order since its more
+		 * likely the user wants to delete one of his/her
+		 * latest messages.
+		 */
+		int index = convMessages.lastIndexOf(convMessage);
+		convMessages.remove(index);
 		/*
 		 * We need to update the last sent position
 		 */
@@ -847,7 +852,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					String categoryId = sticker.getCategory().categoryId.name();
+					String categoryId;
+					/*
+					 * If the category is an unknown one, we have the category id stored
+					 * in the metadata.
+					 */
+					if(sticker.getCategory().categoryId == StickerCategoryId.unknown) {
+						categoryId = metadata.getUnknownStickerCategory();
+					} else {
+						categoryId = sticker.getCategory().categoryId.name();
+					}
 					String stickerId = sticker.getStickerId();
 
 					String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
