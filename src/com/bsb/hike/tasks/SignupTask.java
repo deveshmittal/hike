@@ -237,9 +237,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				editor.commit();
 
 				/*
+				 * If the device is a kit kat device, we won't be able to pull in SMS
+				 * so no point waiting for 1 minute.
 				 * If the device can't pull in SMS no point waiting for the PIN.
 				 */
-				if (canPullInSms) {
+				if (!Utils.hasKitKat() && canPullInSms) {
 
 					publishProgress(new StateValue(State.PULLING_PIN, null));
 
