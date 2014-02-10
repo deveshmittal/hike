@@ -847,7 +847,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					String categoryId = sticker.getCategory().categoryId.name();
+					String categoryId;
+					/*
+					 * If the category is an unknown one, we have the category id stored
+					 * in the metadata.
+					 */
+					if(sticker.getCategory().categoryId == StickerCategoryId.unknown) {
+						categoryId = metadata.getUnknownStickerCategory();
+					} else {
+						categoryId = sticker.getCategory().categoryId.name();
+					}
 					String stickerId = sticker.getStickerId();
 
 					String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;

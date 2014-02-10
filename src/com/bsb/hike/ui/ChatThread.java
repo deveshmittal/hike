@@ -751,8 +751,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				}
 			} else if (message.isStickerMessage()) {
 				Sticker sticker = message.getMetadata().getSticker();
+				/*
+				 * If the category is an unknown one, we have the id saved in
+				 * the json.
+				 */
+				String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ?
+						message.getMetadata().getUnknownStickerCategory() : sticker.getCategory().categoryId.name();
 				intent.putExtra(StickerManager.FWD_CATEGORY_ID,
-						sticker.getCategory().categoryId.name());
+						categoryId);
 				intent.putExtra(StickerManager.FWD_STICKER_ID,
 						sticker.getStickerId());
 				intent.putExtra(StickerManager.FWD_STICKER_INDEX,

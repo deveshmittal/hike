@@ -373,6 +373,27 @@ public class StickerManager
 			{
 				return "kittyDownloadShown";
 			}
+		},
+		unknown
+		{
+			@Override
+			public int resId() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int previewResId() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public String downloadPref() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
 		};
 
 		public static StickerCategoryId getCategoryIdFromName(String value)
@@ -456,6 +477,11 @@ public class StickerManager
 			if (s.equals(StickerCategoryId.recent))
 			{
 				stickerCategories.add(new StickerCategory(StickerCategoryId.recent));
+				continue;
+			} else if (StickerCategoryId.unknown.equals(s)) {
+				/*
+				 * We don't want to add the unknown category to this list.
+				 */
 				continue;
 			}
 			StickerCategory cat = stickerDataMap.get(s);
@@ -750,7 +776,7 @@ public class StickerManager
 			if (stickerCategories.get(i).categoryId.name().equals(categoryName))
 				return stickerCategories.get(i);
 		}
-		return null;
+		return new StickerCategory(StickerCategoryId.unknown);
 	}
 
 	/***

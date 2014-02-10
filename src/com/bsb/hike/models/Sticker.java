@@ -83,8 +83,8 @@ public class Sticker implements Serializable, Comparable<Sticker> {
 	}
 
 	public String getStickerPath(Context context) {
-		String rootPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context,
-				category.categoryId.name());
+		String rootPath = category.categoryId == StickerCategoryId.unknown ? 
+				null : StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.categoryId.name());
 		if (rootPath == null) {
 			return null;
 		}
