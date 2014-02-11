@@ -3079,9 +3079,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					convertView = LayoutInflater.from(ChatThread.this).inflate(
 							R.layout.chat_bg_item, parent, false);
 				}
-				((ImageView) convertView).setBackgroundResource(getItem(
-						position).previewResId());
-				convertView.setEnabled(temporaryTheme == getItem(position));
+				ChatTheme chatTheme = getItem(position);
+
+				ImageView theme = (ImageView) convertView.findViewById(R.id.theme);
+				ImageView animatedThemeIndicator = (ImageView) convertView.findViewById(R.id.animated_theme_indicator);
+
+				animatedThemeIndicator.setVisibility(chatTheme.isAnimated() ? View.VISIBLE : View.GONE);
+				theme.setBackgroundResource(chatTheme.previewResId());
+				theme.setEnabled(temporaryTheme == chatTheme);
 
 				return convertView;
 			}
