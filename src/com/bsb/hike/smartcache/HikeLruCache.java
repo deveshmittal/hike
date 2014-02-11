@@ -44,6 +44,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	private static HikeLruCache instance;
 
+	protected Resources mResources;
+	private Context context;
 	/**
 	 * A holder class that contains cache parameters.
 	 */
@@ -93,20 +95,22 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	private final Set<MySoftReference<Bitmap>> reusableBitmaps;
 
-	public HikeLruCache(ImageCacheParams cacheParams)
+	public HikeLruCache(ImageCacheParams cacheParams, Context context)
 	{
 		super(cacheParams.memCacheSize);
 		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<MySoftReference<Bitmap>>()) : null;
+		this.context = context;
+		this.mResources = context.getResources();
 	}
 
-	public static HikeLruCache getInstance(ImageCacheParams cacheParams)
+	public static HikeLruCache getInstance(ImageCacheParams cacheParams, Context context)
 	{
 		if (instance == null)
 		{
 			synchronized (HikeLruCache.class)
 			{
 				if (instance == null)
-					instance = new HikeLruCache(cacheParams);
+					instance = new HikeLruCache(cacheParams, context);
 			}
 		}
 		return instance;
@@ -278,8 +282,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		return 1;
 	}
 
-	protected Resources mResources;
-
 	/**
 	 * 
 	 * @param key
@@ -356,16 +358,16 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		evictAll();
 	}
 	
-	public Drawable getSticker(Context ctx, String path)
+	public Drawable getSticker(String path)
 	{
 		BitmapDrawable bd = get(path);
 		if(bd != null)
 			return bd;
 		
 		if (Utils.hasHoneycomb())
-			bd = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeFile(path));
+			bd = new BitmapDrawable(mResources, BitmapFactory.decodeFile(path));
 		else
-			bd = new RecyclingBitmapDrawable(ctx.getResources(), BitmapFactory.decodeFile(path));
+			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeFile(path));
 		putInCache(path, bd);
 		return bd;
 	}
