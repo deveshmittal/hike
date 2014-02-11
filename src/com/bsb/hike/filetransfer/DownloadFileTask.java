@@ -419,7 +419,7 @@ public class DownloadFileTask extends FileTransferBase
 		else if (result != FTResult.PAUSED && result != FTResult.CANCELLED) // if no PAUSE and no SUCCESS
 		{
 			final int errorStringId = result == FTResult.FILE_TOO_LARGE ? R.string.not_enough_space : result == FTResult.CANCELLED ? R.string.download_cancelled
-					: result == FTResult.FILE_EXPIRED ? R.string.file_expire : result == FTResult.FAILED_UNRECOVERABLE ?
+					: (result == FTResult.FILE_EXPIRED || result == FTResult.SERVER_ERROR) ? R.string.file_expire : result == FTResult.FAILED_UNRECOVERABLE ?
 							R.string.download_failed_fatal : result == FTResult.CARD_UNMOUNT?
 									R.string.card_unmount : result == FTResult.NO_SD_CARD ?
 											R.string.no_sd_card : R.string.download_failed;
