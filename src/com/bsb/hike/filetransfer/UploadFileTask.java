@@ -949,7 +949,6 @@ public class UploadFileTask extends FileTransferBase
 //			}
 //			res = total.toString();
 			res = EntityUtils.toString(response.getEntity());
-			retry = false; // if success don't retry again till next time
 		}
 		catch (Exception e)
 		{
@@ -1062,7 +1061,7 @@ public class UploadFileTask extends FileTransferBase
 		{
 			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 		}
-		else if (result != FTResult.SUCCESS && result != FTResult.PAUSED)
+		else if (result != FTResult.SUCCESS && result != FTResult.PAUSED && result != FTResult.CANCELLED)
 		{
 			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
 					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
