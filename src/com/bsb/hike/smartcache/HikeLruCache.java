@@ -14,16 +14,19 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
+import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
@@ -31,6 +34,10 @@ import android.support.v4.util.LruCache;
 
 public class HikeLruCache extends LruCache<String, BitmapDrawable>
 {
+	private static final String CHAT_THEME_PREFIX = "ct:";
+	private static final String ORIENTATION_PORTRAIT_PREFIX = "port:";
+	private static final String ORIENTATION_LANDSCAPE_PREFIX = "land:";
+
 	// Default memory cache size in kilobytes
 	private static final int DEFAULT_MEM_CACHE_SIZE = 1024 * 5; // 5MB
 
@@ -369,6 +376,37 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		else
 			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeFile(path));
 		putInCache(path, bd);
+		return bd;
+	}
+
+	public Drawable getChatTheme(ChatTheme chatTheme)
+	{
+		String key;
+		if(chatTheme.isTiled()) {
+			key = CHAT_THEME_PREFIX + chatTheme.name();
+		} else {
+			/*
+			 * We have different non tiled bgs for portrait and landscape
+			 */
+			boolean isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+			key = CHAT_THEME_PREFIX + (isPortrait ? ORIENTATION_PORTRAIT_PREFIX : ORIENTATION_LANDSCAPE_PREFIX) + chatTheme.name();
+		}
+
+		BitmapDrawable bd = get(key);
+		if(bd != null)
+			return bd;
+		
+		if (Utils.hasHoneycomb()) {
+			bd = new BitmapDrawable(mResources, BitmapFactory.decodeResource(mResources, chatTheme.bgResId()));
+		} else {
+			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeResource(mResources, chatTheme.bgResId()));
+		}
+
+		if(chatTheme.isTiled()) {
+			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		}
+
+		putInCache(key, bd);
 		return bd;
 	}
 }

@@ -172,6 +172,7 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -3177,21 +3178,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void setChatTheme(ChatTheme chatTheme) {
-		Drawable backgroundDrawable;
-		if (chatTheme.isTiled()) {
-			BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(),
-					BitmapFactory.decodeResource(getResources(),
-							chatTheme.bgResId()));
-			bitmapDrawable.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-			backgroundDrawable = bitmapDrawable;
-			backgroundImage.setScaleType(ScaleType.FIT_XY);
+
+		if(chatTheme != ChatTheme.DEFAULT) {
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
+			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
 		} else {
-			backgroundDrawable = getResources()
-					.getDrawable(chatTheme.bgResId());
-			backgroundImage.setScaleType(ScaleType.CENTER_CROP);
+			backgroundImage.setImageResource(chatTheme.bgResId());
 		}
 
-		backgroundImage.setImageDrawable(backgroundDrawable);
 		mAdapter.setChatTheme(chatTheme);
 
 		setMuteViewBackground();
