@@ -219,4 +219,6 @@
     <color name="angry_text_shadow">#a51d17</color>
     <color name="angry_btn_text_shadow">#a51d17</color>
     <color name="angry_div">#a51d17</color>
+    <color name="valentine_nudge_white">#ffffef</color>
+    <color name="valenting_nudge_button_pressed">#26000000</color>
 </resources>

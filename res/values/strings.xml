@@ -748,5 +748,8 @@
 	<string name="merry_christmas_msg">Celebrate the month\nof love! we have a\ngift for you...</string>	
 	<string name="open_it_up">Open Gift</string>	
 	<string name="chat_bg_ftue_tip">Check out the special \'I Love You\' Theme!</string>
-	<string name="device">Device</string>	
+	<string name="device">Device</string>
+	<string name="valentine_nudge_header">Share the Love!</string>
+	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
+	<string name="valentine_nudge_button">Awesome</string>	
 </resources>

@@ -186,6 +186,7 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.RoundedRepeatingDrawable;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -1588,6 +1589,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			selectedTheme = mConversationDb
 					.getChatThemeForMsisdn(mContactNumber);
 			setChatTheme(selectedTheme);
+
+			if(selectedTheme == ChatTheme.VALENTINES_2) {
+				showValentineNudgeTip();
+			}
 		}
 
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)) {
@@ -3261,6 +3266,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					sendChatThemeMessage();
 				}
 				dismissPopupWindow();
+
+				/*
+				 * If we select the new valentines theme, we need to show the
+				 * nudge tut.
+				 */
+				if(selectedTheme == ChatTheme.VALENTINES_2) {
+					showValentineNudgeTip();
+				}
 			}
 		});
 
@@ -3273,6 +3286,37 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		closeBtn.startAnimation(slideIn);
 		saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(this,
 				R.anim.scale_in));
+	}
+
+	private void showValentineNudgeTip() {
+		if(prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, false)) {
+			return;
+		}
+
+		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.valentine_nudge_dialog);
+		dialog.setCancelable(false);
+
+		View container = dialog.findViewById(R.id.container);
+
+		Drawable bg = new RoundedRepeatingDrawable(BitmapFactory.decodeResource(
+				getResources(), R.drawable.bg_valentine_dialog), getResources().getDimension(R.dimen.preview_corner_radius));
+		container.setBackground(bg);
+
+		Button done = (Button) dialog.findViewById(R.id.ok_btn);
+		done.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View view) {
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, true);
+				editor.commit();
+
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState) {
