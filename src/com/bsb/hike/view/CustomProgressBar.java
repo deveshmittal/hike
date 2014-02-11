@@ -50,6 +50,13 @@ public class CustomProgressBar extends ProgressBar
 		start = filterPercentValue(start);
 		target = filterPercentValue(target);
 		
+		if((this.target == target) && (this.start == start) && (this.duration == duration))
+			return;
+		
+		setStart(start);
+		setTarget(target);
+		setDuration(duration);
+		
 		if((!nonFirstProgress) || (this.msgId != id))
 		{
 			nonFirstProgress = true;
@@ -57,12 +64,6 @@ public class CustomProgressBar extends ProgressBar
 			super.setProgress(this.target);
 			return;
 		}
-		if((this.target == target) && (this.start == start) && (this.duration == duration))
-			return;
-		
-		setStart(start);
-		setTarget(target);
-		setDuration(duration);
 		
 		if(this.target <= this.start)
 		{
@@ -89,8 +90,7 @@ public class CustomProgressBar extends ProgressBar
 			}
 			else
 			{
-				//animation.setIntValues(this.start, this.target);
-				animation.setIntValues(this.target);
+				animation.setIntValues(this.start, this.target);
 				animation.setDuration(this.duration);
 				animation.start();
 			}
@@ -100,6 +100,14 @@ public class CustomProgressBar extends ProgressBar
 			super.setProgress(target);
 		
 		return;
+	}
+	
+	public void stopAnimation()
+	{
+		if(animation != null)
+		{
+			animation.cancel();
+		}
 	}
 	
 	protected void setStart(int value)
