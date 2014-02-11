@@ -3133,7 +3133,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
 
-		attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+		try {
+			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+		} catch (BadTokenException e) {
+			Log.e(getClass().getSimpleName(),
+					"Excepetion in ChatThread ChatTheme picker", e);
+		}
 
 		FrameLayout viewParent = (FrameLayout) parentView.getParent();
 		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
