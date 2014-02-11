@@ -40,8 +40,6 @@ public class CustomProgressBar extends ProgressBar
 	{
 		// TODO Auto-generated method stub
 		progress = filterPercentValue(progress);
-		setStart(progress);
-		setTarget(progress);
 		super.setProgress(progress);
 	}
 	
@@ -61,19 +59,19 @@ public class CustomProgressBar extends ProgressBar
 		{
 			nonFirstProgress = true;
 			this.msgId = id;
-			super.setProgress(this.target);
+			this.setProgress(this.target);
 			return;
 		}
 		
 		if(this.target <= this.start)
 		{
-			super.setProgress(this.target);
+			this.setProgress(this.target);
 			return;
 		}
 		
 		if(this.duration <= 0)
 		{
-			super.setProgress(this.target);
+			this.setProgress(this.target);
 			return;
 		}
 		
@@ -91,13 +89,14 @@ public class CustomProgressBar extends ProgressBar
 			else
 			{
 				animation.setIntValues(this.start, this.target);
+				//animation.setIntValues(this.target);
 				animation.setDuration(this.duration);
 				animation.start();
 			}
 		    
 		}
 		else 
-			super.setProgress(target);
+			this.setProgress(target);
 		
 		return;
 	}
