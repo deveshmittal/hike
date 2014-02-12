@@ -14,16 +14,19 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
+import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
@@ -31,6 +34,10 @@ import android.support.v4.util.LruCache;
 
 public class HikeLruCache extends LruCache<String, BitmapDrawable>
 {
+	private static final String CHAT_THEME_PREFIX = "ct:";
+	private static final String ORIENTATION_PORTRAIT_PREFIX = "port:";
+	private static final String ORIENTATION_LANDSCAPE_PREFIX = "land:";
+
 	// Default memory cache size in kilobytes
 	private static final int DEFAULT_MEM_CACHE_SIZE = 1024 * 5; // 5MB
 
@@ -44,6 +51,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	private static HikeLruCache instance;
 
+	protected Resources mResources;
+	private Context context;
 	/**
 	 * A holder class that contains cache parameters.
 	 */
@@ -93,20 +102,22 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	private final Set<MySoftReference<Bitmap>> reusableBitmaps;
 
-	public HikeLruCache(ImageCacheParams cacheParams)
+	public HikeLruCache(ImageCacheParams cacheParams, Context context)
 	{
 		super(cacheParams.memCacheSize);
 		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<MySoftReference<Bitmap>>()) : null;
+		this.context = context;
+		this.mResources = context.getResources();
 	}
 
-	public static HikeLruCache getInstance(ImageCacheParams cacheParams)
+	public static HikeLruCache getInstance(ImageCacheParams cacheParams, Context context)
 	{
 		if (instance == null)
 		{
 			synchronized (HikeLruCache.class)
 			{
 				if (instance == null)
-					instance = new HikeLruCache(cacheParams);
+					instance = new HikeLruCache(cacheParams, context);
 			}
 		}
 		return instance;
@@ -278,8 +289,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		return 1;
 	}
 
-	protected Resources mResources;
-
 	/**
 	 * 
 	 * @param key
@@ -299,6 +308,10 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
 			if(!Utils.hasHoneycomb())
 			{
+				if (bd == null)
+				{
+					return null;
+				}
 				// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
 				// which will recycle automagically
 				bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
@@ -318,6 +331,10 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			BitmapDrawable bd = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
 			if(!Utils.hasHoneycomb())
 			{
+				if (bd == null)
+				{
+					return null;
+				}
 				// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
 				// which will recycle automagically
 				bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
@@ -348,17 +365,48 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		evictAll();
 	}
 	
-	public Drawable getSticker(Context ctx, String path)
+	public Drawable getSticker(String path)
 	{
 		BitmapDrawable bd = get(path);
 		if(bd != null)
 			return bd;
 		
 		if (Utils.hasHoneycomb())
-			bd = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeFile(path));
+			bd = new BitmapDrawable(mResources, BitmapFactory.decodeFile(path));
 		else
-			bd = new RecyclingBitmapDrawable(ctx.getResources(), BitmapFactory.decodeFile(path));
+			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeFile(path));
 		putInCache(path, bd);
+		return bd;
+	}
+
+	public Drawable getChatTheme(ChatTheme chatTheme)
+	{
+		String key;
+		if(chatTheme.isTiled()) {
+			key = CHAT_THEME_PREFIX + chatTheme.name();
+		} else {
+			/*
+			 * We have different non tiled bgs for portrait and landscape
+			 */
+			boolean isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+			key = CHAT_THEME_PREFIX + (isPortrait ? ORIENTATION_PORTRAIT_PREFIX : ORIENTATION_LANDSCAPE_PREFIX) + chatTheme.name();
+		}
+
+		BitmapDrawable bd = get(key);
+		if(bd != null)
+			return bd;
+		
+		if (Utils.hasHoneycomb()) {
+			bd = new BitmapDrawable(mResources, BitmapFactory.decodeResource(mResources, chatTheme.bgResId()));
+		} else {
+			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeResource(mResources, chatTheme.bgResId()));
+		}
+
+		if(chatTheme.isTiled()) {
+			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		}
+
+		putInCache(key, bd);
 		return bd;
 	}
 }

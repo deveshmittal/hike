@@ -178,7 +178,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			reconnectTime = reconnectTime > MAX_RECONNECT_TIME ? MAX_RECONNECT_TIME : reconnectTime;
 			try
 			{
-				Thread.sleep(reconnectTime);
+				Thread.sleep(reconnectTime * 1000);
 			}
 			catch (InterruptedException e)
 			{

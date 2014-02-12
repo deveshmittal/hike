@@ -98,8 +98,8 @@ public class DownloadFileTask extends FileTransferBase
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e(getClass().getSimpleName(), "File Expired", e);
-			return FTResult.FILE_EXPIRED;
+			Log.e(getClass().getSimpleName(), "No SD Card", e);
+			return FTResult.NO_SD_CARD;
 		}
 		catch (IOException e)
 		{
@@ -416,12 +416,13 @@ public class DownloadFileTask extends FileTransferBase
 					HikeMessengerApp.getPubSub().publish(HikePubSub.PUSH_FILE_DOWNLOADED, (ConvMessage) userContext);
 			}
 		}
-		else if (result != FTResult.PAUSED) // if no PAUSE and no SUCCESS
+		else if (result != FTResult.PAUSED && result != FTResult.CANCELLED) // if no PAUSE and no SUCCESS
 		{
 			final int errorStringId = result == FTResult.FILE_TOO_LARGE ? R.string.not_enough_space : result == FTResult.CANCELLED ? R.string.download_cancelled
-					: result == FTResult.FILE_EXPIRED ? R.string.file_expire : result == FTResult.FAILED_UNRECOVERABLE ?
+					: (result == FTResult.FILE_EXPIRED || result == FTResult.SERVER_ERROR) ? R.string.file_expire : result == FTResult.FAILED_UNRECOVERABLE ?
 							R.string.download_failed_fatal : result == FTResult.CARD_UNMOUNT?
-									R.string.card_unmount : R.string.download_failed;
+									R.string.card_unmount : result == FTResult.NO_SD_CARD ?
+											R.string.no_sd_card : R.string.download_failed;
 			if (showToast)
 			{
 				handler.post(new Runnable()

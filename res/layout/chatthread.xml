@@ -16,7 +16,7 @@
         android:layout_height="@dimen/st__action_bar_default_height"
         android:layout_alignParentTop="true" />
     
-    <ImageView
+    <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -8,7 +8,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Random;
 
@@ -31,7 +30,6 @@ import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -45,8 +43,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -59,7 +55,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
@@ -101,8 +96,8 @@ import android.view.WindowManager.BadTokenException;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -136,7 +131,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -182,9 +176,9 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.EmoticonConstants;
-import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.RoundedRepeatingDrawable;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -193,7 +187,6 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
-import com.facebook.FacebookRequestError.Category;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		HikePubSub.Listener, TextWatcher, OnEditorActionListener,
@@ -1587,6 +1580,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			selectedTheme = mConversationDb
 					.getChatThemeForMsisdn(mContactNumber);
 			setChatTheme(selectedTheme);
+
+			if(selectedTheme == ChatTheme.VALENTINES_2) {
+				showValentineNudgeTip();
+			}
 		}
 
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN)) {
@@ -3079,16 +3076,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					convertView = LayoutInflater.from(ChatThread.this).inflate(
 							R.layout.chat_bg_item, parent, false);
 				}
-				((ImageView) convertView).setBackgroundResource(getItem(
-						position).previewResId());
-				convertView.setEnabled(temporaryTheme == getItem(position));
+				ChatTheme chatTheme = getItem(position);
+
+				ImageView theme = (ImageView) convertView.findViewById(R.id.theme);
+				ImageView animatedThemeIndicator = (ImageView) convertView.findViewById(R.id.animated_theme_indicator);
+
+				animatedThemeIndicator.setVisibility(chatTheme.isAnimated() ? View.VISIBLE : View.GONE);
+				theme.setBackgroundResource(chatTheme.previewResId());
+				theme.setEnabled(temporaryTheme == chatTheme);
 
 				return convertView;
 			}
 		};
 
 		attachmentsGridView.setAdapter(gridAdapter);
-		attachmentsGridView.setSelection(temporaryTheme.ordinal());
+
+		int selection = temporaryTheme.ordinal();
+		if (tipView != null) {
+			TipType viewTipType = (TipType) tipView.getTag();
+			selection = viewTipType == TipType.CHAT_BG_FTUE ? 0 : temporaryTheme.ordinal();
+		}
+		attachmentsGridView.setSelection(selection);
 
 		attachmentsGridView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -3171,21 +3179,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void setChatTheme(ChatTheme chatTheme) {
-		Drawable backgroundDrawable;
-		if (chatTheme.isTiled()) {
-			BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(),
-					BitmapFactory.decodeResource(getResources(),
-							chatTheme.bgResId()));
-			bitmapDrawable.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-			backgroundDrawable = bitmapDrawable;
-			backgroundImage.setScaleType(ScaleType.FIT_XY);
+
+		if(chatTheme != ChatTheme.DEFAULT) {
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
+			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
 		} else {
-			backgroundDrawable = getResources()
-					.getDrawable(chatTheme.bgResId());
-			backgroundImage.setScaleType(ScaleType.CENTER_CROP);
+			backgroundImage.setImageResource(chatTheme.bgResId());
 		}
 
-		backgroundImage.setImageDrawable(backgroundDrawable);
 		mAdapter.setChatTheme(chatTheme);
 
 		setMuteViewBackground();
@@ -3261,6 +3262,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					sendChatThemeMessage();
 				}
 				dismissPopupWindow();
+
+				/*
+				 * If we select the new valentines theme, we need to show the
+				 * nudge tut.
+				 */
+				if(selectedTheme == ChatTheme.VALENTINES_2) {
+					showValentineNudgeTip();
+				}
 			}
 		});
 
@@ -3273,6 +3282,37 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		closeBtn.startAnimation(slideIn);
 		saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(this,
 				R.anim.scale_in));
+	}
+
+	private void showValentineNudgeTip() {
+		if(prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, false)) {
+			return;
+		}
+
+		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.valentine_nudge_dialog);
+		dialog.setCancelable(false);
+
+		View container = dialog.findViewById(R.id.container);
+
+		Drawable bg = new RoundedRepeatingDrawable(BitmapFactory.decodeResource(
+				getResources(), R.drawable.bg_valentine_dialog), getResources().getDimension(R.dimen.preview_corner_radius));
+		container.setBackground(bg);
+
+		Button done = (Button) dialog.findViewById(R.id.ok_btn);
+		done.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View view) {
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, true);
+				editor.commit();
+
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState) {
