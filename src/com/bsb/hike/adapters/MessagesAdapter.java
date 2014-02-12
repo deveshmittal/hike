@@ -826,6 +826,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.stickerParticipantName.setVisibility(View.VISIBLE);
 						holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+						holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
 					}
 					else
 					{
@@ -1538,15 +1539,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
 				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
-				holder.container.setBackgroundResource(R.drawable.bg_status_chat_thread);
 			}
 			else
 			{
 				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
 				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
-				holder.container.setBackgroundResource(R.drawable.bg_status_chat_thread_custom_theme);
 			}
+			holder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
 
 			StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
 
@@ -1625,7 +1625,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			int right = 0;
 			int bottom = positiveMargin;
 
-			int layoutRes = isDefaultTheme ? R.layout.participant_info : R.layout.participant_info_custom;
+			int layoutRes = chatTheme.systemMessageLayoutId();
 
 			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED)
 			{
