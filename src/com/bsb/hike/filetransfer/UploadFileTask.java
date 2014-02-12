@@ -269,6 +269,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				Log.d("This filepath: ",selectedFile.getPath());
 				Log.d("Hike filepath: ",Utils.getFileParent(hikeFileType));
+				throw new Exception(FileTransferManager.READ_FAIL);
 			}
 			else
 			{
@@ -279,13 +280,35 @@ public class UploadFileTask extends FileTransferBase
 				}
 				else
 				{
+					boolean makeCopy = true;
 					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName);
 					if (selectedFile == null)
 						throw new Exception(FileTransferManager.READ_FAIL);
 	
-					if (!selectedFile.exists())
+					if (selectedFile.exists())
 					{
-						// Saving the file to hike local folder
+						String sourceFile_md5Hash = Utils.fileToMD5(mFile.getPath());
+						String selectedFile_md5Hash = Utils.fileToMD5(selectedFile.getPath());
+						if((sourceFile_md5Hash != null) && (selectedFile_md5Hash != null))
+						{
+							if(sourceFile_md5Hash.equals(selectedFile_md5Hash))
+							{
+								selectedFile = mFile;
+								makeCopy = false;
+							}
+							else
+							{
+								selectedFile = Utils.getOutputMediaFile(hikeFileType, null);
+							}
+						}
+						else
+						{
+							selectedFile = Utils.getOutputMediaFile(hikeFileType, null);
+						}
+					}
+					// Saving the file to hike local folder
+					if(makeCopy)
+					{
 						if (!Utils.copyFile(mFile.getPath(), selectedFile.getPath(), hikeFileType))
 						{
 							Log.d(getClass().getSimpleName(), "throwing copy file exception");
@@ -512,8 +535,11 @@ public class UploadFileTask extends FileTransferBase
 		setBytesTransferred(fst.getTransferredSize());
 		long temp = _bytesTransferred;
 		temp *= 100;
-		temp /= _totalSize;
-		progressPercentage = (int) temp;
+		if(_totalSize > 0)
+		{
+			temp /= _totalSize;
+			progressPercentage = (int) temp;
+		}
 		// represents this file is either not started or unrecovered error has happened
 		Log.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
