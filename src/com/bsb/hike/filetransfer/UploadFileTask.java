@@ -293,6 +293,7 @@ public class UploadFileTask extends FileTransferBase
 						{
 							if(sourceFile_md5Hash.equals(selectedFile_md5Hash))
 							{
+								Log.d(getClass().getSimpleName(),"md5 matches: no need to copy");
 								selectedFile = mFile;
 								makeCopy = false;
 							}
