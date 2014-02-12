@@ -296,7 +296,9 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
-	
+
+	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -658,7 +660,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	{
 		ImageCacheParams params = new ImageCacheParams();
 		params.setMemCacheSizePercent(0.15f);
-		cache = new HikeLruCache(params);
+		cache = new HikeLruCache(params, getApplicationContext());
 	}
 	
 	public static HikeLruCache getLruCache()

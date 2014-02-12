@@ -876,7 +876,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.stickerImage.setVisibility(View.VISIBLE);
 						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-						holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(context, stickerImage.getPath()));
+						holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath()));
 						// holder.stickerImage.setImageDrawable(IconCacheManager
 						// .getInstance().getSticker(context,
 						// stickerImage.getPath()));

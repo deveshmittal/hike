@@ -431,8 +431,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			Log.d(getClass().getSimpleName(), "Conversation is empty");
 			return;
 		}
+		ConvMessage message;
 		if (isTyping) {
-			ConvMessage message = messageList.get(messageList.size() - 1);
+			message = messageList.get(messageList.size() - 1);
 			if (message.getTypingNotification() == null) {
 				ConvMessage convMessage = new ConvMessage(typingNotification);
 				convMessage.setTimestamp(message.getTimestamp());
@@ -441,12 +442,12 @@ public class ConversationFragment extends SherlockListFragment implements
 				messageList.add(convMessage);
 			}
 		} else {
-			ConvMessage message = messageList.get(messageList.size() - 1);
+			message = messageList.get(messageList.size() - 1);
 			if (message.getTypingNotification() != null) {
 				messageList.remove(message);
 			}
 		}
-		getActivity().runOnUiThread(this);
+		run();
 	}
 
 	@Override
@@ -731,9 +732,16 @@ public class ConversationFragment extends SherlockListFragment implements
 				return;
 			}
 
-			toggleTypingNotification(
-					HikePubSub.TYPING_CONVERSATION.equals(type),
-					(TypingNotification) object);
+			final boolean isTyping = HikePubSub.TYPING_CONVERSATION.equals(type);
+			final TypingNotification typingNotification = (TypingNotification) object;
+
+			getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					toggleTypingNotification(isTyping, typingNotification);
+				}
+			});
 		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
 			String msisdn = (String) object;
 			Conversation conv = mConversationsByMSISDN.get(msisdn);

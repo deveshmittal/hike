@@ -404,6 +404,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 			}
+			invalidateOptionsMenu();
 			break;
 		case R.id.edit_group_name:
 			onEditGroupNameClick(null);
