@@ -561,7 +561,6 @@
 	<string name="read_by_everyone">Прочитано всеми</string>
 	<string name="attach">Прикрепить</string>
 	<string name="new_chat">Новый чат</string>
-	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">отправил (-а) приглашение в друзья</string>
 	<string name="xyz_posted_update">%1$s опубликовал (-а) обновление</string>
 	<string name="sent_you_friend_request">отправил (-а) вам приглашение в друзья</string>

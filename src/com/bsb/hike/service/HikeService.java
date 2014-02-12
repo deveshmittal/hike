@@ -762,22 +762,19 @@ public class HikeService extends Service {
 			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 					MODE_PRIVATE).getBoolean(
 					HikeMessengerApp.WHATSAPP_DETAILS_SENT, false)) {
-				Log.d(getClass().getSimpleName(), "Whatsapp details sent");
+				Log.d("PostInfo", "info details sent");
 				return;
 			}
-			Log.d(getClass().getSimpleName(),
-					"Sending Whatsapp details to server");
 			
 			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
 			ContactUtils.setWhatsappStatus(context, contactinfos);
 			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
 			
-			Log.d("PostWhatsappDetails", "WA Info Json data to be sent : " + data.toString());
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 					"/account/info", RequestType.OTHER,
 					new HikeHttpCallback() {
 						public void onSuccess(JSONObject response) {
-							Log.d("PostWhatsappDetails", "Whatsapp details sent successfully");
+							Log.d("PostInfo", "info sent successfully");
 							Editor editor = getSharedPreferences(
 									HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 							editor.putBoolean(
@@ -787,7 +784,7 @@ public class HikeService extends Service {
 						}
 
 						public void onFailure() {
-							Log.d("PostWhatsappDetails", "WhatsappUpdate details could not be sent");
+							Log.d("PostInfo", "info could not be sent");
 							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, sendWhatsappDetailsToServer);
 						}
 					});

@@ -992,7 +992,6 @@ public class MqttMessagesManager {
 				editor.putBoolean(
 						HikeMessengerApp.WHATSAPP_DETAILS_SENT, false);
 				editor.commit();
-				Log.d("WhatsappDetails", "Whatsapp postinfo packet recieved");
 				context.sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 			}
 		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {

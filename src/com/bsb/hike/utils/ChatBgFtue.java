@@ -29,6 +29,9 @@ import com.bsb.hike.ui.HomeActivity;
 public class ChatBgFtue
 {
 	public static SnowFallView startAndSetSnowFallView(final Activity activity){
+		if(activity==null){
+			return null;
+		}
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.VISIBLE);
 		Handler animHandler = new Handler();
 		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
