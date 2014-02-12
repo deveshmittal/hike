@@ -714,7 +714,7 @@
 	<string name="merry_christmas_msg">क्रिसमस जादुई है! और प्यारे क्या हमारे पास तुम्हारे लिए कोई सरप्राइज़ है ...</string>	
 	<string name="open_it_up">इसे खोलें</string>	
 	<string name="chat_themes">चैट थीम!</string>
-	<string name="chat_themes_popup_msg">शानदार थीम से अपनी चैट निजीकृत करें।</string>
+	<string name="chat_themes_popup_msg">शानदार थीम से अपनी चैट\nनिजीकृत करें।</string>
 	<string name="give_it_a_spin">इसे आज़माएँ</string>		
 	<string name="chat_bg_ftue_tip">और यहाँ और बहुत सारे थीम हैं....</string>
 	<string name="last_seen_today_ct">आज, %1$s</string>

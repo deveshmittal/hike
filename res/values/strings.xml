@@ -723,7 +723,7 @@
 	<string name="chat_theme">Chat Theme</string>
 	<string name="unknown_chat_theme">This chat\'s theme was just changed. To use the new chat themes, update hike. http://get.hike.in</string>
 	<string name="chat_themes">Chat Themes!</string>
-	<string name="chat_themes_popup_msg">Personalise your chats with gorgeous themes.</string>
+	<string name="chat_themes_popup_msg">Personalise your chats\nwith gorgeous themes.</string>
 	<string name="give_it_a_spin">Give it a spin</string>		
 	<string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
 	<string name="last_seen_today_ct">today, %1$s</string>
