@@ -233,6 +233,8 @@ public class FileTransferManager
 		fileTaskMap = new ConcurrentHashMap<Long, FutureTask<FTResult>>();
 		// here choosing TimeUnit in seconds as minutes are added after api level 9
 		THREAD_POOL_SIZE = (Runtime.getRuntime().availableProcessors())*2;
+		if(THREAD_POOL_SIZE < 2)
+			THREAD_POOL_SIZE = 2;
 		pool = new ThreadPoolExecutor(1, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
