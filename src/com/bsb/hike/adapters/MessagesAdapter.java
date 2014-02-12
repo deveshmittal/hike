@@ -1402,9 +1402,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.dataTransferred.setText("");
 						else
 						{
-//							if (fss.getTransferredSize() == 0)
-//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-//							else
+							if (fss.getTransferredSize() == 0)
+								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+							else
 								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
 
 							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
@@ -1452,9 +1452,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.dataTransferred.setText("");
 						else
 						{
-//							if (fss.getTransferredSize() == 0)
-//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-//							else
+							if (fss.getTransferredSize() == 0)
+								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+							else
 								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
 
 							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());

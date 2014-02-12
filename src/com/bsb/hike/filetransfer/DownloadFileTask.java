@@ -87,7 +87,8 @@ public class DownloadFileTask extends FileTransferBase
 				setBytesTransferred((int) raf.length());
 				// Bug Fix: 13029
 				setFileTotalSize(fst.getTotalSize());
-				progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
+				if(_totalSize > 0)
+					progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 				return downloadFile(raf.length(), raf, AccountUtils.ssl);
 			}
 		}
@@ -315,7 +316,10 @@ public class DownloadFileTask extends FileTransferBase
 					// Is case id the task quits after making MAX attempts
 					// the file state is saved
 					if(retryAttempts >= MAX_RETRY_ATTEMPTS)
+					{
 						error();
+						res = FTResult.DOWNLOAD_FAILED;
+					}
 				}
 				else
 				{
@@ -329,7 +333,10 @@ public class DownloadFileTask extends FileTransferBase
 				Log.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
 			}
 		}
-		res = closeStreams(raf, in);
+		if(res == FTResult.SUCCESS)
+			res = closeStreams(raf, in);
+		else
+			closeStreams(raf, in);
 		return res;
 	}
 
