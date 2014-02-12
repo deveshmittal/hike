@@ -2,7 +2,9 @@ package com.bsb.hike.smartImageLoader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Utils;
@@ -82,7 +84,9 @@ public class IconLoader extends ImageWorker
 		}
 		Bitmap bm = decodeSampledBitmapFromByeArray(id,rounded,mImageWidth,mImageHeight,HikeMessengerApp.getLruCache());
 		if(bm == null)
-			return ((BitmapDrawable)Utils.getDefaultIconForUser(context, id, rounded)).getBitmap();
+		{
+			return decodeSampledBitmapFromResource(mResources, Utils.getId(id, rounded), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+		}
 		else	
 			return bm;
 	}

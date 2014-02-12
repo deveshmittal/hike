@@ -155,6 +155,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
+import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.maps.GeoPoint;
@@ -332,6 +333,20 @@ public class Utils {
 
 	public static Drawable getDefaultIconForUser(Context context,
 			String msisdn, boolean rounded) {
+		return context.getResources().getDrawable(getId(msisdn,rounded));
+	}
+
+	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context,
+			String msisdn) {
+		return getDefaultIconForUserFromDecodingRes(context,msisdn,false);
+	}
+	
+	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context,
+			String msisdn, boolean rounded) {
+		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getId(msisdn,rounded)));
+	}
+	public static int getId(String msisdn, boolean rounded)
+	{
 		if (isGroupConversation(msisdn)) {
 			int count = 6;
 			int id;
@@ -365,7 +380,7 @@ public class Utils {
 						: R.drawable.ic_group_avatar1;
 				break;
 			}
-			return context.getResources().getDrawable(id);
+			return id;
 		}
 		int count = 7;
 		int id;
@@ -404,9 +419,9 @@ public class Utils {
 			break;
 		}
 
-		return context.getResources().getDrawable(id);
+		return id;
 	}
-
+	
 	public static String getDefaultAvatarServerName(String msisdn) {
 		String name;
 		int count = 7;
@@ -3362,5 +3377,20 @@ public class Utils {
 
 		}
 		context.startActivity(i);
+	}
+	
+	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
+	{
+		if (Utils.hasHoneycomb())
+		{
+			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+			return new BitmapDrawable(mResources, bitmap);
+		}
+		else
+		{
+			// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+			// which will recycle automagically
+			return new RecyclingBitmapDrawable(mResources, bitmap);
+		}
 	}
 }
