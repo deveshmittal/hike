@@ -1363,7 +1363,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							Log.d(getClass().getSimpleName(), "error display");
 							holder.image.setVisibility(View.VISIBLE);
-							holder.image.setImageResource(R.drawable.ic_download_failed);
+							holder.image.setImageResource(getDownloadFailedResIcon());
 						}
 					}
 						break;
@@ -1374,7 +1374,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					case ERROR:
 						Log.d(getClass().getSimpleName(), "error display");
 						holder.image.setVisibility(View.VISIBLE);
-						holder.image.setImageResource(R.drawable.ic_download_failed);
+						holder.image.setImageResource(getDownloadFailedResIcon());
 						// break;
 					case PAUSING:
 					case PAUSED:
@@ -1479,7 +1479,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					// Completed)
 					{
 						holder.image.setVisibility(View.VISIBLE);
-						holder.image.setImageResource(R.drawable.ic_download_failed);
+						holder.image.setImageResource(getDownloadFailedResIcon());
 					}
 				}
 			}
@@ -1896,6 +1896,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 		return v;
+	}
+
+	private int getDownloadFailedResIcon() {
+		return isDefaultTheme ? R.drawable.ic_download_failed : R.drawable.ic_download_failed_custom;
 	}
 
 	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent) {
