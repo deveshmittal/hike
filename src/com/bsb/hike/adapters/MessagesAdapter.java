@@ -1386,7 +1386,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						if(fss.getTotalSize() <= 0)
 							holder.dataTransferred.setText("");
 						else
-							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+							holder.dataTransferred.setText(dataDisplay(fss.getTotalSize()));
 						holder.barProgress.stopAnimation();
 						holder.barProgress.setProgress(progress + progUpdate);
 						holder.dataTransferred.setVisibility(View.VISIBLE);
@@ -1402,10 +1402,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.dataTransferred.setText("");
 						else
 						{
-							if (fss.getTransferredSize() == 0)
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-							else
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+							holder.dataTransferred.setText(dataDisplay(fss.getTotalSize()));
 
 							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
 						}
@@ -1436,7 +1433,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						if(fss.getTotalSize() <= 0)
 							holder.dataTransferred.setText("");
 						else
-							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+							holder.dataTransferred.setText(dataDisplay(fss.getTotalSize()));
 						holder.barProgress.stopAnimation();
 						holder.barProgress.setProgress(progress + progUpdate);
 						holder.dataTransferred.setVisibility(View.VISIBLE);
@@ -1452,10 +1449,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.dataTransferred.setText("");
 						else
 						{
-							if (fss.getTransferredSize() == 0)
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-							else
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+							holder.dataTransferred.setText(dataDisplay(fss.getTotalSize()));
 
 							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
 						}
