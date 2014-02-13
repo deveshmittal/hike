@@ -521,8 +521,9 @@ public class Utils {
 	public static String getOriginalFile(HikeFileType type,String orgFileName)
 	{
 		// Create a media file name
-		String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
-						.format(new Date());
+//		String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
+//						.format(new Date());
+		String timeStamp =  Long.toString(System.currentTimeMillis());
 		// File name should only be blank in case of profile images or while
 		// capturing new media.
 		if (TextUtils.isEmpty(orgFileName)) {
@@ -545,8 +546,9 @@ public class Utils {
 	public static String getFinalFileName(HikeFileType type)
 	{
 		String orgFileName = "";
-		String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
-		.format(new Date());
+//		String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
+//		.format(new Date());
+		String timeStamp =  Long.toString(System.currentTimeMillis());
 		switch (type)
 		{
 		case PROFILE:

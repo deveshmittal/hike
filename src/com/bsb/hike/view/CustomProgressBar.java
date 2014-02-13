@@ -70,7 +70,7 @@ public class CustomProgressBar extends ProgressBar
 			return;
 		}
 		
-		if(this.target == 100)
+		if(this.target >= 99)
 		{
 			this.stopAnimation();
 			this.setProgress(this.start);

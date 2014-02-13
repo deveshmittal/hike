@@ -269,7 +269,6 @@ public class UploadFileTask extends FileTransferBase
 			{
 				Log.d("This filepath: ",selectedFile.getPath());
 				Log.d("Hike filepath: ",Utils.getFileParent(hikeFileType));
-				throw new Exception(FileTransferManager.READ_FAIL);
 			}
 			else
 			{
