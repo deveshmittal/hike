@@ -346,7 +346,7 @@ public abstract class ImageWorker
 			if (bitmap != null)
 			{
 
-				drawable = Utils.getBitmapDrawable(mResources ,bitmap);
+				drawable = Utils.getBitmapDrawable(mResources, bitmap);
 
 				if (mImageCache != null)
 				{
@@ -513,7 +513,20 @@ public abstract class ImageWorker
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
-		return BitmapFactory.decodeResource(res, resId, options);
+		Bitmap result = null;
+		try
+		{
+			result = BitmapFactory.decodeResource(res, resId, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = BitmapFactory.decodeResource(res, resId);
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Exception in decoding Bitmap from resources: ", e);
+		}
+		return result;
 	}
 
 	/**
@@ -548,7 +561,20 @@ public abstract class ImageWorker
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
-		return BitmapFactory.decodeFile(filename, options);
+		Bitmap result = null;
+		try
+		{
+			result = BitmapFactory.decodeFile(filename, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = BitmapFactory.decodeFile(filename, options);
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Exception in decoding Bitmap from file: ", e);
+		}
+		return result;
 	}
 
 	/**
@@ -586,7 +612,20 @@ public abstract class ImageWorker
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
-		return BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+		Bitmap result = null;
+		try
+		{
+			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
+		}
+		return result;
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
