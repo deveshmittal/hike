@@ -2096,8 +2096,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				tv.setVisibility(View.GONE);
 				iv.setVisibility(View.VISIBLE);
 
-				iv.setImageResource(isDefaultTheme ? R.drawable.sending : R.drawable.sending_custom);
-				AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
+				AnimationDrawable ad = (AnimationDrawable) context.getResources().getDrawable(isDefaultTheme ? R.drawable.sending : R.drawable.sending_custom);
+				iv.setImageDrawable(ad);
 				ad.setCallback(iv);
 				ad.setVisible(true, true);
 				ad.start();
