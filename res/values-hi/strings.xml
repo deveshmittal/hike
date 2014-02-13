@@ -740,7 +740,7 @@
 	<string name="open_it_up">उपहार खोलें</string>	
 	<string name="chat_bg_ftue_tip">विशेष \'I Love You\' थीम देखें!</string>
 	<string name="device">Device</string>
-	<string name="valentine_nudge_header">Share the Love!</string>
-	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
-	<string name="valentine_nudge_button">Awesome</string>	
+	<string name="valentine_nudge_header">प्यार बाँटें!</string>
+	<string name="valentine_nudge_body">दिल भेजने के लिए कॉन्वर्सेशन पे डबल टॅप करें</string>
+	<string name="valentine_nudge_button">बेहतरीन</string>	
 </resources>

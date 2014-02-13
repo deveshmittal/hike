@@ -153,6 +153,7 @@ public class DbConversationListener implements Listener {
 			 * We remove the icon for a blocked user as well.
 			 */
 			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 //			IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, blockObj);
 		} else if (HikePubSub.UNBLOCK_USER.equals(type)) {

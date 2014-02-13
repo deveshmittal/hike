@@ -134,6 +134,7 @@ public class MqttMessagesManager {
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 			//IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
 			/*
@@ -231,6 +232,7 @@ public class MqttMessagesManager {
 				}
 			} else {
 				HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 				//IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
 

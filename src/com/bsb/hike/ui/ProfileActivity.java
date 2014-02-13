@@ -129,7 +129,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.LARGER_IMAGE_DOWNLOADED };
 
 	private String[] profilePubSubListeners = {
-			HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.USER_JOIN_TIME_OBTAINED,
 			HikePubSub.LARGER_IMAGE_DOWNLOADED };
 
@@ -928,13 +927,13 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 							if (profileAdapter != null) {
 								profileAdapter.setProfilePreview(null);
-								profileAdapter.notifyDataSetChanged();
 							}
-
+							
 							if (profileType == ProfileType.USER_PROFILE
 									|| profileType == ProfileType.USER_PROFILE_EDIT) {
 
-								HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
+								
+								//HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
 
 								/*
 								 * Making the profile pic change a status
@@ -990,6 +989,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 								 * has added a self contact and received an mqtt
 								 * message before saving this to the db.
 								 */
+								
 								if (statusMessage.getId() != -1) {
 									HikeMessengerApp.getPubSub().publish(
 											HikePubSub.STATUS_MESSAGE_RECEIVED,
@@ -1000,6 +1000,17 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 													HikePubSub.TIMELINE_UPDATE_RECIEVED,
 													statusMessage);
 								}
+								
+								if (profileAdapter != null) {
+									profileItems.add(showingRequestItem ? 2 : 1,
+											new ProfileItem.ProfileStatusItem(statusMessage));
+								}
+							}
+							if (profileAdapter != null)
+							{
+								HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
+								HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
+								profileAdapter.notifyDataSetChanged();
 							}
 							if (isBackPressed) {
 								finishEditing();
