@@ -908,6 +908,10 @@ public class UploadFileTask extends FileTransferBase
 
 	String getBoundaryMessage()
 	{
+		String sendingFileType = "";
+		if(HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType)) {
+			sendingFileType = fileType;
+		}
 		StringBuffer res = new StringBuffer("--").append(BOUNDARY).append("\r\n");
 		//res.append("Content-Disposition: form-data; name=\"");
 		//res.append("Cookie").append("\"\r\n").append("\r\n");
@@ -919,7 +923,7 @@ public class UploadFileTask extends FileTransferBase
 		//res.append("X-SESSION-ID").append("\"\r\n").append("\r\n");
 		//res.append(X_SESSION_ID).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
 		res.append("Content-Disposition: form-data; name=\"").append("file").append("\"; filename=\"").append(selectedFile.getName()).append("\"\r\n").append("Content-Type: ")
-				.append(TextUtils.isEmpty(fileType) ? "" : fileType).append("\r\n\r\n");
+				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
 	}
 
