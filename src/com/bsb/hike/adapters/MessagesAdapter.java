@@ -1128,6 +1128,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
 				int minWidth = (int) (119 * Utils.densityMultiplier);
 				fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
+				
+				if(fileThumbParams.width == minWidth) {
+					fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
+				}
 			}
 			else
 			{
