@@ -356,7 +356,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	{
 		remove(msisdn);
 		remove(msisdn + IconLoader.ROUND_SUFFIX);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 	}
 
 	public void clearIconCache()
