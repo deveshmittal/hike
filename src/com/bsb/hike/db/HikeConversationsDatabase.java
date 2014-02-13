@@ -2966,16 +2966,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				SQLiteDatabase.CONFLICT_REPLACE);
 	}
 
-	public long getChatThemeTimestamp(String msisdn) {
+	public Pair<ChatTheme, Long> getChatThemeAndTimestamp(String msisdn) {
 		Cursor c = null;
 		try {
 			c = mDb.query(DBConstants.CHAT_BG_TABLE,
-					new String[] { DBConstants.TIMESTAMP }, DBConstants.MSISDN
+					new String[] { DBConstants.TIMESTAMP, DBConstants.BG_ID }, DBConstants.MSISDN
 							+ "=?", new String[] { msisdn }, null, null, null);
 			if (c.moveToFirst()) {
-				return c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+				ChatTheme chatTheme =  ChatTheme.getThemeFromId(c.getString(c
+						.getColumnIndex(DBConstants.BG_ID)));
+				Long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+
+				return new Pair<ChatTheme, Long>(chatTheme, timeStamp);
 			}
-			return 0;
+			return null;
 		} finally {
 			if (c != null) {
 				c.close();

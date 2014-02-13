@@ -826,6 +826,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.stickerParticipantName.setVisibility(View.VISIBLE);
 						holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+						holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
 					}
 					else
 					{
@@ -1363,7 +1364,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							Log.d(getClass().getSimpleName(), "error display");
 							holder.image.setVisibility(View.VISIBLE);
-							holder.image.setImageResource(R.drawable.ic_download_failed);
+							holder.image.setImageResource(getDownloadFailedResIcon());
 						}
 					}
 						break;
@@ -1374,7 +1375,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					case ERROR:
 						Log.d(getClass().getSimpleName(), "error display");
 						holder.image.setVisibility(View.VISIBLE);
-						holder.image.setImageResource(R.drawable.ic_download_failed);
+						holder.image.setImageResource(getDownloadFailedResIcon());
 						// break;
 					case PAUSING:
 					case PAUSED:
@@ -1479,7 +1480,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					// Completed)
 					{
 						holder.image.setVisibility(View.VISIBLE);
-						holder.image.setImageResource(R.drawable.ic_download_failed);
+						holder.image.setImageResource(getDownloadFailedResIcon());
 					}
 				}
 			}
@@ -1538,15 +1539,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
 				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
-				holder.container.setBackgroundResource(R.drawable.bg_status_chat_thread);
 			}
 			else
 			{
 				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
 				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
-				holder.container.setBackgroundResource(R.drawable.bg_status_chat_thread_custom_theme);
 			}
+			holder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
 
 			StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
 
@@ -1625,7 +1625,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			int right = 0;
 			int bottom = positiveMargin;
 
-			int layoutRes = isDefaultTheme ? R.layout.participant_info : R.layout.participant_info_custom;
+			int layoutRes = chatTheme.systemMessageLayoutId();
 
 			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED)
 			{
@@ -1896,6 +1896,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 		return v;
+	}
+
+	private int getDownloadFailedResIcon() {
+		return isDefaultTheme ? R.drawable.ic_download_failed : R.drawable.ic_download_failed_custom;
 	}
 
 	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent) {
@@ -2236,156 +2240,147 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public void onClick(View v)
 	{
-		try
+		ConvMessage convMessage = (ConvMessage) v.getTag();
+		if (convMessage == null)
 		{
-			ConvMessage convMessage = (ConvMessage) v.getTag();
-			if (convMessage == null)
-			{
-				return;
-			}
-			Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
-			if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
-					&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
-			{
-				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
+			return;
+		}
+		Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
+		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
+				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
+		{
+			long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
 
-				/*
-				 * Only show fallback if the message has not been sent for our max wait time.
-				 */
-				if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME || !Utils.isUserOnline(context))
+			/*
+			 * Only show fallback if the message has not been sent for our max wait time.
+			 */
+			if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME || !Utils.isUserOnline(context))
+			{
+
+				if (conversation.isOnhike())
 				{
-
-					if (conversation.isOnhike())
+					if (!Utils.isUserOnline(context))
 					{
-						if (!Utils.isUserOnline(context))
+						if (conversation instanceof GroupConversation)
 						{
-							if (conversation instanceof GroupConversation)
-							{
-								Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
-							}
-							else
-							{
-								showSMSDialog(true);
-							}
+							Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
 						}
 						else
 						{
-							if (conversation instanceof GroupConversation)
-							{
-								showSMSDialog(false);
-							}
-							else
-							{
-								/*
-								 * Only show the H2S fallback option if messaging indian numbers.
-								 */
-								showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-							}
+							showSMSDialog(true);
 						}
 					}
 					else
 					{
-						sendAllUnsentMessagesAsSMS(Utils.getSendSmsPref(context));
-					}
-					return;
-				}
-			}
-			if (convMessage.isFileTransferMessage())
-			{
-				// @GM
-				MessageMetadata messageMetadata = convMessage.getMetadata();
-				HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
-				// HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-				if (Utils.getExternalStorageState() == ExternalStorageState.NONE && hikeFile.getHikeFileType() != HikeFileType.CONTACT
-						&& hikeFile.getHikeFileType() != HikeFileType.LOCATION)
-				{
-					Toast.makeText(context, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-					return;
-				}
-				if (convMessage.isSent())
-				{
-					Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
-
-					if (!TextUtils.isEmpty(hikeFile.getFileKey()))
-					{
-						openFile(hikeFile, convMessage, v);
-					}
-					else
-					{
-						if ((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT))
+						if (conversation instanceof GroupConversation)
 						{
-							FileTransferManager.getInstance(context).uploadContactOrLocation(convMessage, (hikeFile.getHikeFileType() == HikeFileType.CONTACT),
-									conversation.isOnhike());
+							showSMSDialog(false);
 						}
 						else
 						{
-							File sentFile = hikeFile.getFile();
-							FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), sentFile);
-							if (fss.getFTState() == FTState.IN_PROGRESS)
-							{
-								FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
-							}
-							else
-							{
-								FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
-							}
-							notifyDataSetChanged();
+							/*
+							 * Only show the H2S fallback option if messaging indian numbers.
+							 */
+							showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
 						}
-
 					}
 				}
 				else
 				{
-					File receivedFile = hikeFile.getFile();
-					if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN)
+					sendAllUnsentMessagesAsSMS(Utils.getSendSmsPref(context));
+				}
+				return;
+			}
+		}
+		if (convMessage.isFileTransferMessage())
+		{
+			// @GM
+			MessageMetadata messageMetadata = convMessage.getMetadata();
+			HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
+			// HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			if (Utils.getExternalStorageState() == ExternalStorageState.NONE && hikeFile.getHikeFileType() != HikeFileType.CONTACT
+					&& hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+			{
+				Toast.makeText(context, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if (convMessage.isSent())
+			{
+				Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
+
+				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
+				{
+					openFile(hikeFile, convMessage, v);
+				}
+				else
+				{
+					if ((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT))
 					{
-						Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-						return;
-					}
-					if (((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || hikeFile.wasFileDownloaded()))
-					{
-						openFile(hikeFile, convMessage, v);
+						FileTransferManager.getInstance(context).uploadContactOrLocation(convMessage, (hikeFile.getHikeFileType() == HikeFileType.CONTACT),
+								conversation.isOnhike());
 					}
 					else
 					{
-						FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), receivedFile);
-
-						Log.d(getClass().getSimpleName(), fss.getFTState().toString());
-
-						if (fss.getFTState() == FTState.COMPLETED)
-						{
-							openFile(hikeFile, convMessage, v);
-						}
-						else if (fss.getFTState() == FTState.IN_PROGRESS)
+						File sentFile = hikeFile.getFile();
+						FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), sentFile);
+						if (fss.getFTState() == FTState.IN_PROGRESS)
 						{
 							FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 						}
 						else
 						{
-							FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),
-									convMessage, true);
+							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
 						notifyDataSetChanged();
 					}
+
 				}
 			}
-			else if (convMessage.getMetadata() != null && convMessage.getMetadata().getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+			else
 			{
-				Intent intent = new Intent(context, ProfileActivity.class);
-				intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-				intent.putExtra(HikeConstants.Extras.ON_HIKE, conversation.isOnhike());
+				File receivedFile = hikeFile.getFile();
+				if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN)
+				{
+					Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if (((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || hikeFile.wasFileDownloaded()))
+				{
+					openFile(hikeFile, convMessage, v);
+				}
+				else
+				{
+					FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), receivedFile);
 
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.putExtra(HikeConstants.Extras.CONTACT_INFO, convMessage.getMsisdn());
-				context.startActivity(intent);
+					Log.d(getClass().getSimpleName(), fss.getFTState().toString());
+
+					if (fss.getFTState() == FTState.COMPLETED)
+					{
+						openFile(hikeFile, convMessage, v);
+					}
+					else if (fss.getFTState() == FTState.IN_PROGRESS)
+					{
+						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
+					}
+					else
+					{
+						FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(),
+								convMessage, true);
+					}
+					notifyDataSetChanged();
+				}
 			}
 		}
-		catch (ActivityNotFoundException e)
+		else if (convMessage.getMetadata() != null && convMessage.getMetadata().getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
-			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
-			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-		}
+			Intent intent = new Intent(context, ProfileActivity.class);
+			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+			intent.putExtra(HikeConstants.Extras.ON_HIKE, conversation.isOnhike());
 
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(HikeConstants.Extras.CONTACT_INFO, convMessage.getMsisdn());
+			context.startActivity(intent);
+		}
 	}
 
 	private void openFile(HikeFile hikeFile, ConvMessage convMessage, View parent)
@@ -2459,7 +2454,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
 		}
-		context.startActivity(openFile);
+		try
+		{
+			context.startActivity(openFile);
+		}
+		catch (ActivityNotFoundException e)
+		{
+			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
+			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+		}
+
 	}
 
 	private void saveContact(HikeFile hikeFile)

@@ -238,6 +238,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 		
+		if((!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false))&&snowFallView==null){
+			(new Handler()).postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+				}
+			}, 300);
+		}
+		
 	}
 
 	public void setChatThemeFTUEContact(ContactInfo contactInfo) {
@@ -629,19 +642,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
-		if((!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false))&&snowFallView==null){
-			(new Handler()).postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
-				}
-			}, 300);
-		}
-		
 	}
 
 	@Override

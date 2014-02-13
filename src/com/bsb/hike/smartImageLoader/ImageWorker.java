@@ -134,7 +134,7 @@ public abstract class ImageWorker
 			Bitmap b = processBitmapOnUiThread(data);
 			if (b != null && mImageCache != null)
 			{
-				BitmapDrawable bd = getBitmapDrawable(b);
+				BitmapDrawable bd = Utils.getBitmapDrawable(mResources, b);
 				mImageCache.putInCache(data, bd);
 				imageView.setImageDrawable(bd);
 			}
@@ -346,7 +346,7 @@ public abstract class ImageWorker
 			if (bitmap != null)
 			{
 
-				drawable = getBitmapDrawable(bitmap);
+				drawable = Utils.getBitmapDrawable(mResources ,bitmap);
 
 				if (mImageCache != null)
 				{
@@ -665,20 +665,5 @@ public abstract class ImageWorker
 	public HikeLruCache getLruCache()
 	{
 		return this.mImageCache;
-	}
-
-	private BitmapDrawable getBitmapDrawable(final Bitmap bitmap)
-	{
-		if (Utils.hasHoneycomb())
-		{
-			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
-			return new BitmapDrawable(mResources, bitmap);
-		}
-		else
-		{
-			// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-			// which will recycle automagically
-			return new RecyclingBitmapDrawable(mResources, bitmap);
-		}
 	}
 }
