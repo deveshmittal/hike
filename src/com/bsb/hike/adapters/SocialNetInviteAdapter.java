@@ -85,7 +85,7 @@ public class SocialNetInviteAdapter extends
 		holder.txt_itemName.setText(currFriend.getName());
 		CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
 		checkBox.setChecked(getItem(position).first.get());
-		holder.itemImage.setImageDrawable(Utils.getDefaultIconForUser(context,
+		holder.itemImage.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context,
 				"+" + currFriend.getId()));
 		holder.itemImage.setTag(currFriend.getImageUrl());
 		imgLoader.loadImage(currFriend.getImageUrl(), holder.itemImage);

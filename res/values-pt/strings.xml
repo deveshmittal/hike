@@ -727,5 +727,13 @@
 	<string name="email_body">Olá,\nAcabei de obter o novo e incrível hike. Ele é mais rápido, mais simples e mais bonito!\nCom os novos adesivos hilários do hike, você nunca mais enviará outra mensagem simples e entediante!\nO hike também dá a opção de Privacidade com Visto por último, para que você possa manter os amigos próximos mais perto.\n\nBaixe-o agora em http://hike.in e participe da diversão!</string>
 	<string name="twitter_msg">Acabei de obter o novo hike! Ele é mais simples, mais rápido, com novos adesivos hilários! Baixe-o agora em http://hike.in #gethike</string>
 	<string name="native_sms_invite_1">Acabei de obter o novo hike! Ele é mais simples, mais rápido, com novos adesivos hilários! Baixe-o agora e vamos conversar de graça http://hike.in</string>
-	
+	<string name="shortcut_created">Atalho criado</string>
+	<string name="recent_empty_string">Adesivos usados recentemente serão mostrados aqui</string>
+	<string name="merry_christmas_msg">Celebre o mês do\namor! Há um presente\nesperando você....</string>	
+	<string name="open_it_up">Abrir presente</string>	
+	<string name="chat_bg_ftue_tip">Confira o tema especial \"I Love You\"!</string>
+	<string name="device">Device</string>
+	<string name="valentine_nudge_header">Share the Love!</string>
+	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
+	<string name="valentine_nudge_button">Awesome</string>	
 </resources>

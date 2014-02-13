@@ -68,7 +68,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView,true);
 
 		} else {
-			imageView.setImageDrawable(Utils.getDefaultIconForUser(context,
+			imageView.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context,
 					contactInfo.getMsisdn(), true));
 		}
 

@@ -3297,7 +3297,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		Drawable bg = new RoundedRepeatingDrawable(BitmapFactory.decodeResource(
 				getResources(), R.drawable.bg_valentine_dialog), getResources().getDimension(R.dimen.preview_corner_radius));
-		container.setBackground(bg);
+		container.setBackgroundDrawable(bg);
 
 		Button done = (Button) dialog.findViewById(R.id.ok_btn);
 		done.setOnClickListener(new OnClickListener() {
@@ -4815,7 +4815,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			stickerBtnShadowColor = getResources().getColor(
 					R.color.rf_btn_text_shadow);
 
-			categoryText = "Rage face";
+			categoryText = "Rage Face";
 			categoryTextColor = getResources().getColor(R.color.rf_text);
 			categoryTextShadowColor = getResources().getColor(
 					R.color.rf_text_shadow);
@@ -4882,7 +4882,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			stickerBtnShadowColor = getResources().getColor(
 					R.color.indian_btn_text_shadow);
 
-			categoryText = "Thinks Indians Say";
+			categoryText = "Things Indians Say";
 			categoryTextColor = getResources().getColor(R.color.indian_text);
 			categoryTextShadowColor = getResources().getColor(
 					R.color.indian_text_shadow);

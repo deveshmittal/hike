@@ -475,24 +475,30 @@ public class HikeService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(getClass().getSimpleName(), "Registering for GCM");
-			GCMRegistrar.checkDevice(HikeService.this);
-			GCMRegistrar.checkManifest(HikeService.this);
-			final String regId = GCMRegistrar
-					.getRegistrationId(HikeService.this);
-			if ("".equals(regId)) {
+			try{
+				GCMRegistrar.checkDevice(HikeService.this);
+				GCMRegistrar.checkManifest(HikeService.this);
+				final String regId = GCMRegistrar
+						.getRegistrationId(HikeService.this);
+				if ("".equals(regId)) {
+					/*
+					 * Since we are registering again, we should clear this
+					 * preference
+					 */
+					Editor editor = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					editor.remove(HikeMessengerApp.GCM_ID_SENT);
+					editor.commit();
+	
+					GCMRegistrar.register(HikeService.this,
+							HikeConstants.APP_PUSH_ID);
+				} else {
+					sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
+				}
+			} catch (UnsupportedOperationException e) {
 				/*
-				 * Since we are registering again, we should clear this
-				 * preference
+				 * User doesnt have google services
 				 */
-				Editor editor = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-				editor.remove(HikeMessengerApp.GCM_ID_SENT);
-				editor.commit();
-
-				GCMRegistrar.register(HikeService.this,
-						HikeConstants.APP_PUSH_ID);
-			} else {
-				sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
 			}
 		}
 	}

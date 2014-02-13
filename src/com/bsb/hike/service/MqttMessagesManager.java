@@ -1357,13 +1357,27 @@ public class MqttMessagesManager {
 			}
 			String id = isGroupConversation ? to : from;
 
-			long oldTimestamp = convDb.getChatThemeTimestamp(id);
-			if (oldTimestamp >= timestamp) {
-				/*
-				 * We should ignore this packet since its either old or
-				 * duplicate.
-				 */
-				return;
+			Pair<ChatTheme, Long> chatThemedata = convDb.getChatThemeAndTimestamp(id);
+
+			if(chatThemedata != null) {
+				long oldTimestamp = chatThemedata.second;
+				if (oldTimestamp > timestamp) {
+					/*
+					 * We should ignore this packet since its either old or
+					 * duplicate.
+					 */
+					return;
+				} else if (oldTimestamp == timestamp) {
+					JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+					String bgId = data.optString(HikeConstants.BG_ID);
+	
+					if(bgId.equals(chatThemedata.first.bgId())) {
+						/*
+						 * Duplicate theme.
+						 */
+						return;
+					}
+				}
 			}
 
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
