@@ -64,9 +64,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected HikeFileType hikeFileType;
 
-	protected int _totalSize = 0;
+	protected volatile int _totalSize = 0;
 
-	protected int _bytesTransferred = 0;
+	protected volatile int _bytesTransferred = 0;
 	
 	protected int chunkSize = 0;
 
@@ -99,6 +99,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState()
 	{
+		if(_totalSize <= 0)
+			return;
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred);
 		try
 		{
@@ -116,6 +118,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState(String uuid)
 	{
+		if(_totalSize <= 0)
+			return;
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
 		try
 		{
