@@ -859,6 +859,14 @@ public class ConversationFragment extends SherlockListFragment implements
 
 	@Override
 	public void onResume() {
+		/*
+		 * This is a temporary fix for the issue on 4.0 and above devices
+		 * where the profile picture is wrongly shown. We are simply forcing
+		 * getview to be called again.
+		 * TODO think of a proper fix. 
+		 */
+		run();
+
 		SharedPreferences prefs = getActivity().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (getActivity() == null

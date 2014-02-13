@@ -561,8 +561,6 @@ public class ContactUtils {
 						Phone.CONTENT_URI, newProjection, newSelection, null,
 						Phone.NUMBER + " DESC");
 
-				Log.d("PostWhatsappDetails", "whatsapp contacts count = "
-						+ phoneContactsCursor.getCount());
 				if(phoneContactsCursor.getCount() > 0){
 					setWhatsappContacs(phoneContactsCursor, contactinfos);
 				}
@@ -585,16 +583,12 @@ public class ContactUtils {
 			String number = c.getString(numberColIdx);
 			whatsappContacts.add(number);
 		}
-		StringBuilder sb = new StringBuilder();
 		
 		for (ContactInfo contact : contactinfos) {
 			if(whatsappContacts.contains(contact.getPhoneNum())){
 				contact.setOnWhatsapp(true);
-				sb.append(contact.getPhoneNum()+",");
 			}
 		}
-		//for testing purposes
-		Log.d("PostWhatsappDetails", "WhatsApp Contact List = "+sb.toString());
 	}
 
 }

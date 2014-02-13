@@ -232,11 +232,10 @@ public class FileTransferManager
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
 		fileTaskMap = new ConcurrentHashMap<Long, FutureTask<FTResult>>();
 		// here choosing TimeUnit in seconds as minutes are added after api level 9
-		if(Utils.densityMultiplier > 1)
-			THREAD_POOL_SIZE = 3;
-		else
+		THREAD_POOL_SIZE = (Runtime.getRuntime().availableProcessors())*2;
+		if(THREAD_POOL_SIZE < 2)
 			THREAD_POOL_SIZE = 2;
-		pool = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
+		pool = new ThreadPoolExecutor(2, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
 		handler = new Handler(context.getMainLooper());
