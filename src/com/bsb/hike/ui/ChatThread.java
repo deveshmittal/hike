@@ -4732,7 +4732,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			stickerBtnShadowColor = getResources().getColor(
 					R.color.humanoid_btn_text_shadow);
 
-			categoryText = "Hikin";
+			categoryText = "Hikins";
 			categoryTextColor = getResources().getColor(R.color.humanoid_text);
 			categoryTextShadowColor = getResources().getColor(
 					R.color.humanoid_text_shadow);
