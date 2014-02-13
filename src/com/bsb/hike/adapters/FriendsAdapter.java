@@ -286,7 +286,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	public void makeCompleteList(boolean filtered) {
-		if (!filtered) {
+		/*
+		 * Only try to filter if we've fetched the list
+		 * once.
+		 */
+		if (!filtered && listFetchedOnce) {
 			contactFilter.filter(queryText);
 			return;
 		}
