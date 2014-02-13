@@ -740,7 +740,7 @@
 	<string name="open_it_up">Открыть подарок</string>	
 	<string name="chat_bg_ftue_tip">Оцените нашу особую тему \"I Love You\"!</string>
 	<string name="device">Device</string>
-	<string name="valentine_nudge_header">Share the Love!</string>
-	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
-	<string name="valentine_nudge_button">Awesome</string>		
+	<string name="valentine_nudge_header">Поделитесь любовью!</string>
+	<string name="valentine_nudge_body">Нажмите дважды чат, чтобы отправить сердце!</string>
+	<string name="valentine_nudge_button">Супер!</string>
 </resources>
