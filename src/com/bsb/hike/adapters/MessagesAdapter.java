@@ -1369,8 +1369,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 						break;
 					case INITIALIZED:
-						holder.dataTransferred.setText("Initializing...");
-						holder.dataTransferred.setVisibility(View.VISIBLE);
+						setFileTypeText(holder.fileType,hikeFile.getHikeFileType());
+						holder.fileType.setVisibility(View.VISIBLE);
 						break;
 					case ERROR:
 						Log.d(getClass().getSimpleName(), "error display");
@@ -1423,8 +1423,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					switch (fss.getFTState())
 					{
 					case INITIALIZED:
-						holder.dataTransferred.setText("Initializing...");
-						holder.dataTransferred.setVisibility(View.VISIBLE);
+						setFileTypeText(holder.fileType,hikeFile.getHikeFileType());
+						holder.fileType.setVisibility(View.VISIBLE);
 						break;
 					case PAUSING:
 					case PAUSED:
@@ -1932,6 +1932,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else
 			return (Integer.toString(bytes) + " B");
 	}
+	
+	private void setFileTypeText(TextView fileType, HikeFileType hikeFileType)
+	{
+		if (hikeFileType == HikeFileType.AUDIO_RECORDING)
+			fileType.setText(R.string.recording);
+		else if (hikeFileType == HikeFileType.AUDIO)
+			fileType.setText(R.string.audio);
+		else if (hikeFileType == HikeFileType.VIDEO)
+			fileType.setText(R.string.video);
+		else if (hikeFileType == HikeFileType.IMAGE)
+			fileType.setText(R.string.photo);
+		else
+			fileType.setText("File");
+	}
+
 
 	private boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
 	{

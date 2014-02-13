@@ -65,12 +65,21 @@ public class CustomProgressBar extends ProgressBar
 		
 		if(this.target <= this.start)
 		{
+			this.stopAnimation();
 			this.setProgress(this.target);
+			return;
+		}
+		
+		if(this.target >= 99)
+		{
+			this.stopAnimation();
+			this.setProgress(this.start);
 			return;
 		}
 		
 		if(this.duration <= 0)
 		{
+			this.stopAnimation();
 			this.setProgress(this.target);
 			return;
 		}
