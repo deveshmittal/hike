@@ -11,8 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -34,17 +36,19 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
 
 		webView = (WebView) findViewById(R.id.t_and_c_page);
+		final ProgressBar bar = (ProgressBar) findViewById(R.id.progress);
 
 		WebViewClient client = new WebViewClient() {
 			@Override
 			public void onPageFinished(WebView view, String url) {
-				findViewById(R.id.loading_layout).setVisibility(View.INVISIBLE);
 				super.onPageFinished(view, url);
+				bar.setVisibility(View.INVISIBLE);
 			}
 
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon) {
-				findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
+				bar.setProgress(0);
+				bar.setVisibility(View.VISIBLE);
 				super.onPageStarted(view, url, favicon);
 			}
 
@@ -82,6 +86,13 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
+		webView.setWebChromeClient(new WebChromeClient() {
+			@Override
+			public void onProgressChanged(WebView view, int newProgress) {
+				super.onProgressChanged(view, newProgress);
+				bar.setProgress(newProgress);
+			}
+		});
 		setupActionBar(title);
 	}
 
@@ -111,10 +122,7 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(WebViewActivity.this,
-						HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				finish();
 			}
 		});
 

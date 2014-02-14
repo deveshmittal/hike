@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.StickerManager;
 
 public class Tutorial extends HikeAppStateBaseActivity {
 
@@ -32,7 +33,7 @@ public class Tutorial extends HikeAppStateBaseActivity {
 
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE).edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_STICKERS_TUTORIAL, true);
+		editor.putBoolean(StickerManager.SHOWN_STICKERS_TUTORIAL, true);
 		editor.commit();
 
 		Intent i = new Intent(Tutorial.this, HomeActivity.class);

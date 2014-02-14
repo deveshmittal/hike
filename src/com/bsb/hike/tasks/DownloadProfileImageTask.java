@@ -13,6 +13,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,7 +22,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.mqtt.client.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
 
@@ -171,15 +172,26 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED, id);
 		} else {
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.PROFILE_IMAGE_DOWNLOADED, id);
+			/*
+			 * Removing the smaller icon in cache.
+			 */
+			HikeMessengerApp.getLruCache().remove(id);
+
+			if(statusImage) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
+			}
+
 			if (this.name == null)
 				this.name = this.msisdn;  //show the msisdn if its an unsaved contact
 			if (statusImage && !TextUtils.isEmpty(this.fileName)
 					&& !TextUtils.isEmpty(this.msisdn)) {
+				Bundle bundle = new Bundle();
+				bundle.putString(HikeConstants.Extras.IMAGE_PATH, this.fileName);
+				bundle.putString(HikeConstants.Extras.MSISDN, this.msisdn);
+				bundle.putString(HikeConstants.Extras.NAME, this.name);
 				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.PUSH_AVATAR_DOWNLOADED,
-						new String[] { this.fileName, this.msisdn, this.name });
+						HikePubSub.PUSH_AVATAR_DOWNLOADED, bundle);
 			}
 		}
 	}

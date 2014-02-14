@@ -103,7 +103,7 @@
 	<string name="invited_to_gc">%1$s wurde eingeladen</string>
 	<string name="share">Teilen</string>
 	<string name="start_rec">Aufnahmefunktion</string>
-	<string name="recording">AUFNAHME</string>
+	<string name="recording">Aufnahme</string>
 	<string name="start">Start</string>
 	<string name="stop">Stopp</string>
 	<string name="preview">Vorschau</string>
@@ -173,7 +173,7 @@
 	<string name="social_unlinking">Trenne Account...</string>
 	<string name="contact_selected_already">Diese Nummer befindet sich bereits in der Gruppe.</string>
 	<string name="share_file_message">Hey! Ich habe dir gerade bei hike eine Datei geschickt: %1$s</string>
-	<string name="max_file_size">Maximale Dateigröße beträgt 15 MB</string>
+	<string name="max_file_size">Maximale Dateigröße beträgt 25 MB</string>
 	<string name="unable_to_read">Datei nicht lesbar</string>
 	<string name="share_location">Standort teilen</string>
 	<string name="group_mute">Diese Unterhaltung ist stumm geschaltet.</string>
@@ -210,6 +210,13 @@
 	<string name="sound_msg">Bei neuer Nachricht Ton abspielen</string>
 	<string name="free_sms">Frei-SMS nach Indien</string>
 	<string name="free_sms_msg">Einschalten, um Frei-SMS nach Indien zu senden</string>
+	<string name="auto_download_media">Mediendateien automatisch downloaden</string>
+	<string name="auto_download_media_hinttext">Download-Einstellungen für Fotos, Videos, Audiodateien</string>
+	<string name="md_auto_download_media">Bei mobiler Datenübertragung</string>
+	<string name="wf_auto_download_media">Bei Verbindung über WLAN</string>
+	<string name="auto_download_image_title">Bilder</string>
+	<string name="auto_download_video_title">Video</string>
+	<string name="auto_download_audio_title">Audiodatei</string>
 	<string name="delete_account">Account löschen</string>
 	<string name="delete_account_msg">Dein Account endgültig löschen</string>
 	<string name="unlink_account">Account trennen</string>
@@ -427,10 +434,8 @@
 	
 	<string name="remove_circle">Entfernen von Circle of Friends</string>
 	<string name="add_hike_friend">Freundeskreis anzeigen</string>
-	<string name="email_body">Hi!\n\nIch verwende hike - eine einfache, schöne Messaging-App, die absolut kostenlos ist.\n\nBei hike gibt es total witzige Emoticons. Außerdem kannst du Statusmeldungen für deinen Freundeskreis posten. Genau wie BBM, nur viel viel besser!\n\nHol dir jetzt hike und verabschiede dich von langweiligen SMS.\n\nHol dir hike: http://get.hike.in</string>
 	<string name="file_expire">Diese Datei existiert nicht mehr.</string>
 	<string name="friends_on_hike_tut_info">Tippen Sie auf die Schaltfläche, um Freunde auf hike sehen</string>
-	<string name="twitter_msg">Ich verwende @hikeapp 2.0 mit Statusmeldungen &amp; Smileys. Genau wie BBM, nur viel besser! Hol dir hike auf http://get.hike.in #gethike</string>
 	<string name="facebook_description">Ich verwende hike - eine einfache, schöne Messaging-App, die absolut kostenlos ist.\n\nBei hike gibt es total witzige Emoticons. Außerdem kannst du Statusmeldungen für deinen Freundeskreis posten. Genau wie BBM, nur viel viel besser!\n\nHol dir jetzt hike und verabschiede dich von langweiligen SMS.\n\nHol dir hike: http://get.hike.in</string>
 	<string name="invite_message">Hi! Hol dir hike 2.0. Kostenloses Messaging, weltweit. Jetzt mit Statusmeldungen und Smileys :) - http://get.hike.in/</string>
 	<string name="error_setting_profile">Es gab einen Fehler beim Festlegen deinem Profilbild.</string>
@@ -473,9 +478,6 @@
 	<string name="tutorial_sticker_info">Drücke deine Stimmung besser aus\nmit neuen hike-Stickern.</string>
 	<string name="tutorial_friends_header">Willkommen bei hike</string>
 	<string name="tutorial_friends_info">Teile deine Statusmeldungen jetzt\nmit deinem Freundeskreis.</string>
-	<string name="native_sms_invite_1">Hey, ich verwende hike und hier gibt es tolle Sticker und Emoticons, die ich mit dir teilen möchte. Hol dir jetzt http://hike.in/</string>
-	<string name="native_sms_invite_2">Hey, ich verwende hike - hier sieht meinen \"Zuletzt online\"-Status nicht jeder, nur ausgewählten Freunde. Hol dir jetzt http://hike.in/</string>
-	<string name="native_sms_invite_3">Hi, ich verwende hike mit einem coolen Walkie-Talkie, mit dem ich  gratis Sprachnachrichten senden kann. Besuche http://hike.in/</string>
 	<string name="chat">Chatten</string>
 	<string name="group">Gruppe</string>
 	<string name="posting_update">Wird gepostet...</string>
@@ -542,7 +544,6 @@
 	<string name="read_by_everyone">Von allen gelesen</string>
 	<string name="attach">Anhängen</string>
 	<string name="new_chat">Neuer Chat</string>
-	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">Freundschaftsanfrage gesendet</string>
 	<string name="xyz_posted_update">%1$s hat ein Update gepostet</string>
 	<string name="sent_you_friend_request">Hat dir eine Freundschaftsanfrage gesendet</string>
@@ -596,7 +597,6 @@
 	<string name="friend_request_accepted_notification">Du wirst nun Updates von %1$s sehen können.</string>
 	<string name="only_friends_last_seen">Nur deine Freunde können sehen wann du zuletzt online warst</string>
 	<string name="email_subject">hike. Behalte enge Freunde in deiner Nähe.</string>
-	<string name="email_body">Hi!\n\nIch nutze jetzt hike, eine simple, hübsche und kostenlose Messaging-App.\n\nMit hike kannst du kostenlose Nachrichten an deine Freunde und Familie senden! Mit hike kannst du deinen Freunden bei hike und denjenigen, die noch nicht bei hike sind, Nachrichten senden! Du wirst nie wieder eine andere Messaging-App benötigen. Und noch viel besser - es ist vollkommen GRATIS!\n\nBei hike gibt es lustige Sticker und Smileys. Du kannst ebenfalls Statusmeldungen für deine Freunde posten! Genau wie BBM, nur viel viel besser!\n\nHol dir jetzt hike und verabschiede dich von langweiligen SMS.\n\nHol dir hike: http://get.hike.in</string>
 	<string name="updates_friends">Hier kannst du Updates von deinen Freunden sehen</string>
 	<string name="tap_plus">Tippe auf +, um einen Kontakt als Freund hinzuzufügen</string>
 	<string name="add_as_friend_menu">Als Freund hinzufügen</string>
@@ -677,5 +677,52 @@
   	<string name="number_confirmation_string">Ist %1$s deine Nummer?</string>
   	<string name="ftue_friends_subtext">Als Freund hinzufügen</string>
   	<string name="ftue_friends_tap_dismiss_friend_suggest">Tippe hier, um die Freundschaftsvorschläge zu schließen.</string>
-  			
+	<string name="sticker_ftue_body">Probieren Sie unsere neuen Aufkleber!</string>  	
+  	
+  	<string name="select_all">Alle auswählen (%1$d)</string>
+	<string name="deselect_all">Auswahl löschen (%1$d)</string>
+	<string name="humanoid2_category">You and I</string>
+	<string name="se_category">Goofy Smileys</string>
+	<string name="avtars_category">Hikin Avatars</string>
+	<string name="chat_bg_changed">%1$s hat den Hintergrund geändert</string>
+	<string name="save_theme">Motiv speichern</string>
+	<string name="change_theme">Motiv ändern</string>
+	<string name="mute_chat_theme_notification_subtext">Zeigt eine Benachrichtigung an, wenn das Chatmotiv geändert wird</string>
+	<string name="mute_chat_theme_notification_header">Benachrichtigungen zu Motivänderungen</string>
+	<string name="indian_category">Things Indians say</string>
+	<string name="sent_via_sms">Als SMS gesendet - %1$s</string>
+	<string name="chat_theme">Chatmotiv</string>
+	<string name="unknown_chat_theme">Wow! Ein tolles neues Chatmotiv steht für dich bereit. Du hast jedoch noch eine alte Version von Hike. :( Hol dir hier das Update: http://hike.in</string>
+	<string name="merry_christmas_msg">Weihnachten ist ein zauberhaftes Fest! Wir haben eine Überraschung für dich...</string>	
+	<string name="open_it_up">Öffne es</string>	
+	<string name="chat_themes">Chatmotive!</string>
+	<string name="chat_themes_popup_msg">Personalisiere deine Chats mit herrlichen Motiven!</string>
+	<string name="give_it_a_spin">Probiere es einfach mal aus!</string>		
+	<string name="chat_bg_ftue_tip">Viele weitere Motive gibt es hier...</string>
+	<string name="last_seen_today_ct">heute, %1$s</string>
+	<string name="last_seen_yesterday_ct">gestern, %1$s</string>
+	<string name="last_seen_more_ct">%1$s</string>
+	<string name="last_seen_while_ago_ct">vor einiger Zeit</string>
+	<string name="apply">Gelten</string>
+	<string name="chat_theme_tip">Das Chat-Thema ändert sich für Sie und Ihr Freund</string>
+	<string name="chat_theme_tip_group">Das Chat-Thema wird für die gesamte Gruppe ändern</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Es konnte kein Profilbild eingerichtet werden. Bitte schaffe Platz auf deiner SD-Karte und versuche es erneut</string>
+	<string name="are_you_sure">Bist du sicher?</string>
+	<string name="delete_confirm_msg_1">Durch Löschen deines Kontos werden auch alle deine Daten, Gratis-SMS und hike-Belohnungen gelöscht.</string>
+	<string name="please_confirm">Bitte bestätigen</string>
+	<string name="delete_confirm_msg_2"> Diesen Vorgang kannst du nicht mehr rückgängig machen. Willst du deinen Account wirklich löschen?</string>
+	<string name="email_body">Hallo,\n ich hab gerade den coolen neuen hike-Messenger runtergeladen, der jetzt noch schneller, einfacher und schöner ist!\nMit den witzigen Stickern von hike musst du nie wieder langweilige Nachrichten verschicken!\nAußerdem gewährt dir hike mit "Zuletzt online" deine Privatsphäre, damit du mit engen Freunden noch enger Kontakt halten kannst.\n\nLade hike jetzt herunter auf http://hike.in und hab Spaß damit!</string>
+	<string name="twitter_msg">Ich habe gerade den neuen hike-Messenger runtergeladen, der jetzt noch schneller und einfacher ist, mit witzigen neuen Stickern. Lade ihn gleich herunter auf http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">Ich habe gerade den neuen hike-Messenger runtergeladen, der jetzt noch schneller und einfacher ist, mit witzigen neuen Stickern. Lade ihn gleich herunter und lass uns kostenlos chatten auf http://hike.in</string>
+	<string name="shortcut_created">Shortcut erstellt</string>
+	<string name="recent_empty_string">Zuletzt verwendete Sticker werden hier angezeigt</string>
+	<string name="merry_christmas_msg">Feiere den Monat der\nLiebe! Wir haben ein\nGeschenk für dich...</string>	
+	<string name="open_it_up">Geschenk öffnen</string>	
+	<string name="chat_bg_ftue_tip">Schau dir mal unser \'I Love You\'-Special an!</string>
+	<string name="device">Device</string>
+	<string name="valentine_nudge_header">Verteile Liebe!</string>
+	<string name="valentine_nudge_body">Tippe zweimal auf die Unterhaltung, um ein Herz zu verschicken!</string>
+	<string name="valentine_nudge_button">Großartig!</string>
 </resources>

@@ -41,7 +41,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
@@ -699,11 +698,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 			int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
 
+			Set<String> msisdnSet = new HashSet<String>();
+
 			while (c.moveToNext()) {
+				String msisdn = c.getString(msisdnIdx);
+
+				if (msisdnSet.contains(msisdn)) {
+					continue;
+				}
+
+				msisdnSet.add(msisdn);
+
 				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
-						c.getString(msisdnIdx), c.getString(nameIdx),
-						c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
-						c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
+						msisdn, c.getString(nameIdx), c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						c.getLong(lastMessagedIdx),
 						c.getInt(hasCustomPhotoIdx) == 1);
 				if (favoriteIdx != -1) {
 					int favoriteTypeOrd = c.getInt(favoriteIdx);
@@ -1330,7 +1339,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			insertRoundedThumbnailData(mDb, msisdn, roundedData);
 		}
-		IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		//IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		HikeMessengerApp.getLruCache().remove(msisdn);
 		ContentValues vals = new ContentValues(2);
 		vals.put(DBConstants.MSISDN, msisdn);
 		vals.put(DBConstants.IMAGE, data);
@@ -1354,14 +1364,38 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			if (!c.moveToFirst()) {
 				/* lookup based on this msisdn */
-				return Utils.getDefaultIconForUser(mContext, msisdn, rounded);
+				return Utils.getDefaultIconForUserFromDecodingRes(mContext, msisdn, rounded);
 			}
-
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
 			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata,
 					0, icondata.length));
 		} finally {
 			if (c != null) {
+				c.close();
+			}
+		}
+	}
+	
+	public byte[] getIconByteArray(String msisdn, boolean rounded)
+	{
+		Cursor c = null;
+		try
+		{
+			String table = rounded ? DBConstants.ROUNDED_THUMBNAIL_TABLE : DBConstants.THUMBNAILS_TABLE;
+			c = mDb.query(table, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+
+			if (!c.moveToFirst())
+			{
+				/* lookup based on this msisdn */
+				return null;
+			}
+			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+			return icondata;
+		}
+		finally
+		{
+			if (c != null)
+			{
 				c.close();
 			}
 		}
@@ -1968,13 +2002,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			int i = 0;
 			for (i = 0; i < serverRecommendedArray.length(); i++) {
 				String msisdn = serverRecommendedArray.optString(i);
-				if (myMsisdn.equals(msisdn)) {
-					continue;
+				if (!myMsisdn.equals(msisdn)) {
+					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
-				sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+			}
+			/*
+			 * Making sure the string exists.
+			 */
+			if (sb.lastIndexOf(",") == -1) {
+				return null;
 			}
 			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-
 			return sb.toString();
 		} catch (JSONException e) {
 			return null;
@@ -2068,5 +2106,113 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
 				+ "=?", new String[] { msisdn });
+	}
+
+	public ContactInfo getMostRecentContact(int hikeState) {
+		String selection;
+		switch (hikeState) {
+		case HikeConstants.ON_HIKE_VALUE:
+			selection = DBConstants.ONHIKE + "=1";
+			break;
+		case HikeConstants.NOT_ON_HIKE_VALUE:
+			selection = DBConstants.ONHIKE + "=0 AND " + DBConstants.MSISDN
+					+ " LIKE '+91%'";
+			break;
+		default:
+			selection = null;
+			break;
+		}
+		selection += (selection == null ? "" : " AND ") + DBConstants.MSISDN
+				+ " NOT IN (SELECT " + DBConstants.BLOCK_TABLE + "." + DBConstants.MSISDN
+				+ " FROM " + DBConstants.BLOCK_TABLE +")";
+
+		Cursor c = null;
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
+					DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
+					DBConstants.ONHIKE, DBConstants.PHONE,
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+					DBConstants.HAS_CUSTOM_PHOTO,
+					DBConstants.FAVORITE_TYPE_SELECTION,
+					DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE,
+					DBConstants.LAST_SEEN }, selection, null, null, null,
+					DBConstants.LAST_MESSAGED + " DESC LIMIT 1");
+			if (c.getCount() != 0) {
+				ContactInfo ci = extractContactInfo(c).get(0);
+				return ci;
+			}
+			return null;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public ContactInfo getChatThemeFTUEContact(Context context, boolean newUser) {
+		ContactInfo contactInfo;
+		if (newUser) {
+			/*
+			 * For new users, we first try to get a recommended hike contact.
+			 */
+			String recommendedContactsString = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null);
+			try {
+				JSONArray recommendedContactsArray = new JSONArray(
+						recommendedContactsString);
+				if (recommendedContactsArray.length() != 0) {
+					for(int i = 0; i < recommendedContactsArray.length(); i++) {
+						String msisdn = recommendedContactsArray.getString(i);
+
+						if(isBlocked(msisdn)) {
+							continue;
+						}
+
+						contactInfo = getContactInfoFromMSISDN(
+								msisdn, false);
+
+						if (contactInfo != null) {
+							return contactInfo;
+						}
+					}
+				}
+			} catch (JSONException e) {
+			}
+
+			/*
+			 * If we didn't find any, we pick a hike contact
+			 */
+			contactInfo = getMostRecentContact(HikeConstants.ON_HIKE_VALUE);
+			if (contactInfo != null) {
+				return contactInfo;
+			}
+
+			/*
+			 * If we didn't find any there as well, we pick an SMS contact that
+			 * is most contacted by the user.
+			 */
+			List<ContactInfo> contactList = getNonHikeMostContactedContacts(1);
+			if (contactList.isEmpty()) {
+				contactInfo = null;
+			} else {
+				contactInfo = contactList.get(0);
+			}
+		} else {
+			/*
+			 * For an existing user, we first try to pick his last contacted
+			 * hike contact.
+			 */
+			contactInfo = getMostRecentContact(HikeConstants.ON_HIKE_VALUE);
+			if (contactInfo != null) {
+				return contactInfo;
+			}
+
+			/*
+			 * Else we fetch his last contacted SMS contact.
+			 */
+			contactInfo = getMostRecentContact(HikeConstants.NOT_ON_HIKE_VALUE);
+		}
+		return contactInfo;
 	}
 }

@@ -718,7 +718,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		if (requestCode == HikeConstants.FACEBOOK_REQUEST_CODE) {
 			Session session = Session.getActiveSession();
 			if (session != null && resultCode == RESULT_OK) {
-				fb.setSelected(true);
+				mActivityTask.fbSelected = true;
 				session.onActivityResult(this, requestCode, resultCode, data);
 			} else if (session != null && resultCode == RESULT_CANCELED) {
 				Log.d("StatusUpdate", "Facebook Permission Cancelled");
@@ -727,10 +727,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				// throw an exception telling can not request publish
 				// permission, there
 				// is already a publish request pending.
-				fb.setSelected(false);
+				mActivityTask.fbSelected = false;
 				session.closeAndClearTokenInformation();
 				Session.setActiveSession(null);
 			}
+			fb.setSelected(mActivityTask.fbSelected);
 		}
 	}
 
@@ -780,6 +781,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	protected void onDestroy() {
+		/*
+		 * We need to unregister all pubsublisteners whenever activity gets
+		 * destroyed. Otherwise reference to this activity gets attached with
+		 * our HikeMessengerApp which doesn't let GC pick up any instance of 
+		 * this activity. So whenever this activity gets destroyed its 
+		 * instance doesn't get cleared from heap.
+		 */
+		HikeMessengerApp.getPubSub().removeListeners(this, pubsubListeners);
 		super.onDestroy();
 		if (progressDialog != null) {
 			progressDialog.dismiss();

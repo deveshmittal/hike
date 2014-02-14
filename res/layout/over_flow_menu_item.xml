@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:gravity="center"
-    android:paddingLeft="15dp"
-    android:paddingRight="16dp" >
+    android:paddingLeft="11dp"
+    android:paddingRight="11dp" >
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
             android:layout_height="@dimen/small_avatar"
             android:layout_alignParentRight="true" >
 
-            <ImageView
+            <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/item_icon"
                 style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />

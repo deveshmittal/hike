@@ -9,10 +9,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,10 +28,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -102,8 +107,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 			doneContainer.setVisibility(View.GONE);
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
-		getSupportActionBar().setBackgroundDrawable(
-				getResources().getDrawable(R.drawable.bg_header));
 		setLabel();
 	}
 
@@ -122,7 +125,16 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		if (type != Type.BLOCK) {
 			doneContainer = (ViewGroup) actionBarView
 					.findViewById(R.id.done_container);
+
+			int padding = (int) (7 * Utils.densityMultiplier);
+			doneContainer.setPadding(padding, 0, padding, 0);
+
 			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
+			doneText.setTextSize(14);
+			doneText.setTypeface(doneText.getTypeface(), Typeface.BOLD);
+
+			View tickView = actionBarView.findViewById(R.id.ic_tick);
+			tickView.setVisibility(View.GONE);
 
 			doneContainer.setOnClickListener(new OnClickListener() {
 
@@ -177,7 +189,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 	private void setLabel() {
 		if (type != Type.BLOCK) {
-			title.setText(R.string.invite_sms);
+			SharedPreferences preferences = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+					|| preferences.getBoolean(
+							HikeMessengerApp.SEND_NATIVE_INVITE, false);
+			title.setText(sendNativeInvite ? R.string.invite_sms
+					: R.string.invite_free_sms);
 		} else {
 			title.setText(R.string.blocked_list);
 		}
@@ -187,16 +205,22 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 		final SharedPreferences settings = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		if (!settings.getBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
+		boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+				|| settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
+						false);
+
+		if (sendNativeInvite
+				&& !settings.getBoolean(
+						HikeConstants.OPERATOR_SMS_ALERT_CHECKED, false)) {
 			final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 			dialog.setContentView(R.layout.operator_alert_popup);
 			dialog.setCancelable(true);
-	
+
 			TextView header = (TextView) dialog.findViewById(R.id.header);
 			TextView body = (TextView) dialog.findViewById(R.id.body_text);
 			Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
 			Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-	
+
 			btnCancel.setVisibility(View.GONE);
 			header.setText(R.string.native_header);
 			body.setText(R.string.native_info);
@@ -204,28 +228,29 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 			CheckBox checkBox = (CheckBox) dialog
 					.findViewById(R.id.body_checkbox);
 			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-	
+
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView,
 						boolean isChecked) {
 					Editor editor = settings.edit();
-					editor.putBoolean(
-							HikeConstants.OPERATOR_SMS_ALERT_CHECKED, isChecked);
+					editor.putBoolean(HikeConstants.OPERATOR_SMS_ALERT_CHECKED,
+							isChecked);
 					editor.commit();
 				}
 			});
-			checkBox.setText(getResources().getString(R.string.not_show_call_alert_msg));
-			
+			checkBox.setText(getResources().getString(
+					R.string.not_show_call_alert_msg));
+
 			btnOk.setOnClickListener(new OnClickListener() {
-	
+
 				@Override
 				public void onClick(View v) {
 					onTitleIconClick(null);
 				}
 			});
-	
+
 			dialog.show();
-		}else{
+		} else {
 			onTitleIconClick(null);
 		}
 	}
@@ -261,10 +286,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
-			/*
-			 * This would be true when we have pre checked items.
-			 */
-			if (type != Type.INVITE) {
+			ViewGroup selectAllContainer = (ViewGroup) findViewById(R.id.select_all_container);
+
+			switch (type) {
+			case BLOCK:
+				/*
+				 * This would be true when we have pre checked items.
+				 */
 				for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList) {
 					boolean checked = contactItem.first.get();
 					if (checked) {
@@ -273,6 +301,38 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 						break;
 					}
 				}
+				selectAllContainer.setVisibility(View.GONE);
+				break;
+			case INVITE:
+				selectAllContainer.setVisibility(View.VISIBLE);
+
+				final TextView selectAllText = (TextView) findViewById(R.id.select_all_text);
+				final CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+
+				final int size = contactList.size();
+
+				selectAllText.setText(getString(R.string.select_all, size));
+				selectAllCB
+						.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+							@Override
+							public void onCheckedChanged(
+									CompoundButton buttonView, boolean isChecked) {
+								selectAllToggled(isChecked);
+								selectAllText.setText(getString(
+										isChecked ? R.string.deselect_all
+												: R.string.select_all, size));
+							}
+						});
+
+				selectAllContainer.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						selectAllCB.setChecked(!selectAllCB.isChecked());
+					}
+				});
+				break;
 			}
 
 			adapter = new HikeInviteAdapter(HikeListActivity.this, -1,
@@ -281,7 +341,23 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 
 			listView.setAdapter(adapter);
 		}
+	}
 
+	public void selectAllToggled(boolean isChecked) {
+		List<Pair<AtomicBoolean, ContactInfo>> contactList = adapter
+				.getCompleteList();
+
+		for (Pair<AtomicBoolean, ContactInfo> pair : contactList) {
+			pair.first.set(isChecked);
+			String msisdn = pair.second.getMsisdn();
+			if (isChecked) {
+				selectedContacts.add(msisdn);
+			} else {
+				selectedContacts.remove(msisdn);
+			}
+		}
+		adapter.selectAllToggled();
+		setupActionBarElements();
 	}
 
 	private List<Pair<AtomicBoolean, ContactInfo>> getContactList() {
@@ -304,25 +380,64 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 	public void onTitleIconClick(View v) {
 		if (type != Type.BLOCK) {
 
-			Iterator<String> iterator = selectedContacts.iterator();
-
-			while (iterator.hasNext()) {
-				String msisdn = iterator.next();
-				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-				Utils.sendInvite(msisdn, this);
+			if (selectedContacts.isEmpty()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.select_invite_contacts, Toast.LENGTH_SHORT)
+						.show();
+				return;
 			}
 
-			if (!selectedContacts.isEmpty()) {
+			Iterator<String> iterator = selectedContacts.iterator();
+
+			boolean sendNativeInvite = !HikeMessengerApp.isIndianUser()
+					|| getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+							0).getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE,
+							false);
+
+			long time = System.currentTimeMillis();
+
+			try {
+				JSONObject mqttPacket = new JSONObject();
+				JSONObject data = new JSONObject();
+
+				mqttPacket.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.MULTI_INVITE);
+				if (sendNativeInvite) {
+					mqttPacket
+							.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
+				}
+				mqttPacket.put(HikeConstants.TIMESTAMP, time / 1000);
+
+				JSONArray inviteArray = new JSONArray();
+
+				while (iterator.hasNext()) {
+					String msisdn = iterator.next();
+					Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+					Utils.sendInvite(msisdn, this, false, true);
+
+					inviteArray.put(msisdn);
+				}
+				data.put(HikeConstants.MESSAGE_ID, time);
+				data.put(HikeConstants.LIST, inviteArray);
+
+				mqttPacket.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						mqttPacket);
+
+				CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+				if (selectAllCB.isChecked()) {
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_INVITE);
+				}
+
 				Toast.makeText(
 						getApplicationContext(),
 						selectedContacts.size() > 1 ? R.string.invites_sent
 								: R.string.invite_sent, Toast.LENGTH_SHORT)
 						.show();
 				finish();
-			} else {
-				Toast.makeText(getApplicationContext(),
-						R.string.select_invite_contacts, Toast.LENGTH_SHORT)
-						.show();
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
 		} else {
 			for (Entry<String, Boolean> toggleBlockEntry : toggleBlockMap
@@ -335,6 +450,16 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 								: HikePubSub.UNBLOCK_USER, msisdn);
 			}
 			finish();
+		}
+	}
+
+	private void setupActionBarElements() {
+		if (!selectedContacts.isEmpty()) {
+			doneContainer.setVisibility(View.VISIBLE);
+			doneText.setText(getString(R.string.send_invite,
+					selectedContacts.size()));
+		} else {
+			init();
 		}
 	}
 
@@ -354,15 +479,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity
 					selectedContacts.add(msisdn);
 				}
 
-				if (!selectedContacts.isEmpty()) {
-					doneContainer.setVisibility(View.VISIBLE);
-					doneText.setText(Integer.toString(selectedContacts.size()));
-					getSupportActionBar().setBackgroundDrawable(
-							getResources().getDrawable(
-									R.drawable.bg_header_compose));
-				} else {
-					init();
-				}
+				setupActionBarElements();
 
 			} else {
 				doneBtn.setEnabled(true);
