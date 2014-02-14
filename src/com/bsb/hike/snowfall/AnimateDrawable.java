@@ -13,8 +13,8 @@ public class AnimateDrawable extends ProxyDrawable {
     private Animation mAnimation;
     private Transformation mTransformation = new Transformation();
     
-    public AnimateDrawable(Drawable targetSmall, Drawable targetLarge, Animation animation) {
-    	super(targetSmall, targetLarge);
+    public AnimateDrawable(Drawable targetSmall, Drawable targetLarge, Drawable targetTrans, Animation animation) {
+    	super(targetSmall, targetLarge, targetTrans);
     	mAnimation = animation;
     }
     

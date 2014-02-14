@@ -219,6 +219,14 @@ public class ContactUtils {
 			phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
 					new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null,
 					null, null);
+			/*
+			 * Added this check for an issue where the cursor is null in some
+			 * random cases (We suspect that happens when hotmail contacts are
+			 * synced.)
+			 */
+			if (phones == null) {
+				return null;
+			}
 
 			int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
 			int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
@@ -477,7 +485,7 @@ public class ContactUtils {
 				phoneContactsCursor.close();
 			}
 			if (otherContactsCursor != null) {
-				phoneContactsCursor.close();
+				otherContactsCursor.close();
 			}
 		}
 	}
@@ -515,4 +523,72 @@ public class ContactUtils {
 			sb.append(number + ",");
 		}
 	}
+
+	public static void setWhatsappStatus(Context context, List<ContactInfo> contactinfos) {
+		Cursor whatsappContactsCursor = null;
+		Cursor phoneContactsCursor = null;
+		try {
+			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
+
+			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE
+					+ "= 'com.whatsapp'";
+			whatsappContactsCursor = context.getContentResolver().query(
+					ContactsContract.RawContacts.CONTENT_URI, projection,
+					selection, null, null);
+
+			int id = whatsappContactsCursor
+					.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+
+			StringBuilder whatsappContactIds = null;
+			if (whatsappContactsCursor.getCount() > 0) {
+				whatsappContactIds = new StringBuilder("(");
+
+				while (whatsappContactsCursor.moveToNext()) {
+					whatsappContactIds.append(whatsappContactsCursor.getInt(id)
+							+ ",");
+				}
+				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","),
+						whatsappContactIds.length(), ")");
+			}
+			
+			if (whatsappContactIds != null) {
+				String[] newProjection = new String[] { Phone.NUMBER,
+						Phone.DISPLAY_NAME };
+				String newSelection = (Phone.CONTACT_ID + " IN " + whatsappContactIds
+						.toString());
+
+				phoneContactsCursor = context.getContentResolver().query(
+						Phone.CONTENT_URI, newProjection, newSelection, null,
+						Phone.NUMBER + " DESC");
+
+				if(phoneContactsCursor.getCount() > 0){
+					setWhatsappContacs(phoneContactsCursor, contactinfos);
+				}
+			}
+
+		} finally {
+			if (whatsappContactsCursor != null) {
+				whatsappContactsCursor.close();
+			}
+			if (phoneContactsCursor != null) {
+				phoneContactsCursor.close();
+			}
+		}
+	}
+	
+	private static void setWhatsappContacs(Cursor c, List<ContactInfo> contactinfos) {
+		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+		HashSet<String> whatsappContacts = new HashSet<String>(c.getCount());
+		while (c.moveToNext()) {
+			String number = c.getString(numberColIdx);
+			whatsappContacts.add(number);
+		}
+		
+		for (ContactInfo contact : contactinfos) {
+			if(whatsappContacts.contains(contact.getPhoneNum())){
+				contact.setOnWhatsapp(true);
+			}
+		}
+	}
+
 }

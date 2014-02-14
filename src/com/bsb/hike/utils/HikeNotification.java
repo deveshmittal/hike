@@ -21,16 +21,14 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 
@@ -235,11 +233,11 @@ public class HikeNotification {
 				&& !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn())
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
 
-			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-			ContactInfo participant = hUDB.getContactInfoFromMSISDN(
-					convMsg.getGroupParticipantMsisdn(), false);
+			GroupConversation gConv = (GroupConversation) convMsg
+					.getConversation();
 
-			Conversation gConv = convMsg.getConversation();
+			ContactInfo participant = gConv.getGroupParticipant(
+					convMsg.getGroupParticipantMsisdn()).getContactInfo();
 
 			key = participant.getName();
 			if (TextUtils.isEmpty(key)) {
@@ -267,7 +265,7 @@ public class HikeNotification {
 				message = messageString;
 			// big picture messages ! intercept !
 			showNotification(notificationIntent, icon, timestamp,
-					notificationId, text, key, message, msisdn, bigPictureImage);
+					notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage());
 		} else {
 			// regular message
 			showNotification(notificationIntent, icon, timestamp,
@@ -440,26 +438,23 @@ public class HikeNotification {
 	private void showNotification(final Intent notificationIntent,
 			final int icon, final long timestamp, final int notificationId,
 			final CharSequence text, final String key, final String message,
-			final String msisdn, final Bitmap bigPictureImage) {
+			final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage) {
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		final Drawable avatarDrawable = IconCacheManager.getInstance()
-				.getIconForMSISDN(msisdn);
+		final Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 		final int smallIconId = returnSmallIcon();
 
 		NotificationCompat.Builder mBuilder;
 		if (bigPictureImage != null) {
 			mBuilder = getNotificationBuilder(key, message, text.toString(),
-					avatarDrawable, smallIconId, true);
+					avatarDrawable, smallIconId, isFTMessage);
 			final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 			bigPicStyle.setBigContentTitle(key);
 			bigPicStyle.setSummaryText(message);
 			mBuilder.setStyle(bigPicStyle);
 			// set the big picture image
 			bigPicStyle.bigPicture(bigPictureImage);
-
-			mBuilder.setSound(null);
 		} else {
 			mBuilder = getNotificationBuilder(key, message, text.toString(),
 					avatarDrawable, smallIconId, false);
@@ -473,6 +468,13 @@ public class HikeNotification {
 			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
 					: System.currentTimeMillis();
 		}
+	}
+
+	private void showNotification(final Intent notificationIntent,
+			final int icon, final long timestamp, final int notificationId,
+			final CharSequence text, final String key, final String message,
+			final String msisdn, final Bitmap bigPictureImage) {
+		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false);
 	}
 
 	private int returnSmallIcon() {

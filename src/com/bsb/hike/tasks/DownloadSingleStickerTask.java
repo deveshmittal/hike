@@ -23,6 +23,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -38,7 +39,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 	public DownloadSingleStickerTask(Context context, String catId, String stId) {
 		this.key = catId + stId;
 		this.stId = stId;
-		this.dirPath = Utils.getStickerDirectoryForCategoryId(context, catId);
+		this.dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, catId);
 
 		this.largeStickerPath = this.dirPath + HikeConstants.LARGE_STICKER_ROOT
 				+ "/" + stId;
@@ -134,7 +135,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 
 	@Override
 	protected void onPostExecute(FTResult result) {
-		HikeMessengerApp.stickerTaskMap.remove(key);
+		StickerManager.getInstance().removeTask(key);
 		if (result != FTResult.SUCCESS) {
 			(new File(largeStickerPath)).delete();
 			return;

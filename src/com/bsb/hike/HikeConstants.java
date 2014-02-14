@@ -57,6 +57,7 @@ public class HikeConstants {
 	public static final String FILES = "files";
 	public static final String CONTENT_TYPE = "ct";
 	public static final String THUMBNAIL = "tn";
+	public static final String SOURCE_FILE_PATH = "srcPath";
 	public static final String FILE_NAME = "fn";
 	public static final String FILE_KEY = "fk";
 	public static final String CREDITS = "credits";
@@ -95,6 +96,7 @@ public class HikeConstants {
 	public static final String ICON = "icon";
 	public static final String MUTED = "muted";
 	public static final String POST_AB = "postab";
+	public static final String POST_INFO = "postinfo";
 	public static final String PUSH = "push";
 	public static final String JOIN_TIME = "jointime";
 	public static final String STATUS_MESSAGE_2 = "status-message";
@@ -115,8 +117,6 @@ public class HikeConstants {
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
-	public static final String CATEGORY_ID = "catId";
-	public static final String STICKER_ID = "stId";
 	public static final String STICKER_IDS = "stIds";
 	public static final String STICKER = "stk";
 	public static final String RESOLUTION_ID = "resId";
@@ -194,8 +194,17 @@ public class HikeConstants {
 	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
-	public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref";
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
+
+	//	@GM
+	//public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
+	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
+	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mdAutoDownloadImagePref";
+	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mdAutoDownloadAudioPref";
+	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mdAutoDownloadVideoPref";
+	public static final String WF_AUTO_DOWNLOAD_IMAGE_PREF = "wfAutoDownloadImagePref";
+	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
+	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
 
 	public static final String HIKEBOT = "TD-HIKE";
 	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";
@@ -305,7 +314,7 @@ public class HikeConstants {
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
-	public static final int MAX_FILE_SIZE = 15 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
@@ -386,6 +395,8 @@ public class HikeConstants {
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
 	// Picasa URI start for other devices
 	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
+	// Picasa URI prefix for creating convMessage
+	public static final String PICASA_PREFIX = "picasaUri:";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
@@ -403,6 +414,7 @@ public class HikeConstants {
 	public static final String VIDEO_ROOT = "/hike Videos";
 	public static final String AUDIO_ROOT = "/hike Audios";
 	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
+	public static final String OTHER_ROOT = "/hike Others";
 	public static final String STICKERS_ROOT = "/stickers";
 
 	public static final String LARGE_STICKER_ROOT = "/large";
@@ -412,7 +424,6 @@ public class HikeConstants {
 
 	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
 
-	public static final String BOLLYWOOD_CATEGORY = "bollywood";
 	/*
 	 * Contact Type
 	 */
@@ -487,6 +498,8 @@ public class HikeConstants {
 	public static final int FTUE_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
+
+	public static final double PROFILE_PIC_FREE_SPACE = 3 * 1024 * 1024;
 
 	// LED light Notifications constants
 	public static final int LED_LIGHTS_ON_MS = 300;
@@ -590,8 +603,6 @@ public class HikeConstants {
 		public static final String SMS_ID = "smsId";
 		public static final String RECORDED_TIME = "recordedTime";
 		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
-		public static final String FWD_STICKER_ID = "fwdStickerId";
-		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 		public static final String POST_TO_TWITTER = "postToTwitter";
 		public static final String RECORDING_TIME = "recordingTime";
 		public static final String MAPPED_ID = "mappedId";
@@ -613,6 +624,8 @@ public class HikeConstants {
 		public static final String SHOW_STICKER_TIP_FOR_EMMA = "showStickerTipForEmma";
 		public static final String FROM_CHAT_THEME_FTUE = "fromChatThemeFtue";
 		public static final String NEW_USER = "newUser";
+		public static final String CHAT_THEME_WINDOW_OPEN = "chatThemeWindowOpen";
+		public static final String SELECTED_THEME = "selectedTheme";
 	}
 
 	public static final class LogEvent {
@@ -836,7 +849,7 @@ public class HikeConstants {
 	}
 
 	public static enum FTResult {
-		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
+		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED, PAUSED, SERVER_ERROR, FAILED_UNRECOVERABLE, CARD_UNMOUNT, NO_SD_CARD
 	}
 
 	public static enum SMSSyncState {

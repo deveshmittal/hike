@@ -3,6 +3,8 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,14 +18,17 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
@@ -33,7 +38,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	public static final int MAX_STICKER_PER_ROW_LANDSCAPE = 6;
 
 	public static enum ViewType {
-		STICKER, UPDATING_STICKER, DOWNLOADING_MORE
+		STICKER, UPDATING_STICKER, DOWNLOADING_MORE, RECENT_EMPTY
 	}
 
 	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
@@ -41,31 +46,36 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 	private int numItemsRow;
 	private int sizeEachImage;
 	private Activity activity;
-	private int numStickers;
 	private List<Sticker> stickerList;
 	private List<ViewType> viewTypeList;
 	private LayoutInflater inflater;
-	private String categoryId;
-	private int categoryIndex;
+	private StickerCategory category;
 	private int numStickerRows;
-	private boolean updateAvailable;
-
-	public StickerPageAdapter(Activity activity, List<Sticker> stickerList,
-			List<ViewType> viewTypeList, int categoryIndex,
-			boolean updateAvailable) {
+	private StickerLoader stickerLoader;
+	private boolean isListFlinging;
+	
+	public StickerPageAdapter(Activity activity, List<Sticker> stickerList, StickerCategory category,
+			List<ViewType> viewTypeList,StickerLoader worker) {
 		this.activity = activity;
 		this.stickerList = stickerList;
-		this.numStickers = stickerList.size();
 		this.viewTypeList = viewTypeList;
-		this.categoryIndex = categoryIndex;
-		this.categoryId = Utils.getCategoryIdForIndex(categoryIndex);
-		this.updateAvailable = updateAvailable;
+		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
-
-		calculateNumRowsAndSize();
+		this.stickerLoader = worker;
+		calculateNumRowsAndSize(false);
 	}
 
-	private void calculateNumRowsAndSize() {
+	public List<Sticker> getStickerList()
+	{
+		return stickerList;
+	}
+	
+	public List<ViewType> getViewTypeList()
+	{
+		return viewTypeList;
+	}
+	
+	public void calculateNumRowsAndSize(boolean recal) {
 		int screenWidth = activity.getResources().getDisplayMetrics().widthPixels;
 
 		this.numItemsRow = (int) (screenWidth / SIZE_IMAGE);
@@ -83,16 +93,36 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 		this.sizeEachImage = SIZE_IMAGE
 				+ ((int) (remainingSpace / this.numItemsRow));
 
-		if (numStickers != 0) {
-			if (numStickers % numItemsRow == 0) {
-				this.numStickerRows = numStickers / numItemsRow;
+		if (stickerList.size() != 0) {
+			if (stickerList.size() % numItemsRow == 0) {
+				this.numStickerRows = stickerList.size() / numItemsRow;
 			} else {
-				this.numStickerRows = numStickers / numItemsRow + 1;
+				this.numStickerRows = stickerList.size() / numItemsRow + 1;
+			}
+			if (category.categoryId.equals(StickerCategoryId.recent)){
+				viewTypeList.clear();
 			}
 
-			for (int i = 0; i < numStickerRows; i++) {
-				viewTypeList.add(updateAvailable ? 1 : 0, ViewType.STICKER);
+			int count = 0;
+			
+			/*
+			 * Recal will be used when you download new stickers while scrolling.
+			 * It will add new sticker rows at the end.
+			 * */
+			if (recal)
+			{
+				for (int i = 0; i < viewTypeList.size(); i++)
+				{
+					if (viewTypeList.get(i).equals(ViewType.STICKER))
+						count++;
+				}
 			}
+			for (int i = 0; i < numStickerRows - count; i++)
+			{
+				viewTypeList.add(category.updateAvailable ? 1 : 0, ViewType.STICKER);
+			}
+		} else if (category.categoryId.equals(StickerCategoryId.recent)){
+			viewTypeList.add(ViewType.RECENT_EMPTY);
 		}
 	}
 
@@ -128,6 +158,22 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			switch (viewType) {
 			case STICKER:
 				convertView = new LinearLayout(activity);
+				AbsListView.LayoutParams parentParams = new LayoutParams(
+						LayoutParams.MATCH_PARENT, sizeEachImage);
+				convertView.setLayoutParams(parentParams);
+
+				LinearLayout.LayoutParams childParams = new LinearLayout.LayoutParams(
+						sizeEachImage, LayoutParams.MATCH_PARENT);
+
+				int padding = (int) (5 * Utils.densityMultiplier);
+				for (int i = 0; i < numItemsRow; i++) {
+					ImageView imageView = new RecyclingImageView(activity);
+					imageView.setLayoutParams(childParams);
+					imageView.setScaleType(ScaleType.FIT_CENTER);
+					imageView.setPadding(padding, padding, padding, padding);
+
+					((LinearLayout) convertView).addView(imageView);
+				}
 				break;
 			case UPDATING_STICKER:
 				convertView = inflater.inflate(R.layout.update_sticker_set,
@@ -137,64 +183,55 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				convertView = inflater.inflate(
 						R.layout.downloading_new_stickers, null);
 				break;
+			case RECENT_EMPTY:
+				convertView = inflater.inflate(
+						R.layout.recent_empty_view, null);
+				break;
 			}
 		}
 
 		switch (viewType) {
 		case STICKER:
-			AbsListView.LayoutParams parentParams = new LayoutParams(
-					LayoutParams.MATCH_PARENT, sizeEachImage);
-			convertView.setLayoutParams(parentParams);
 
-			LinearLayout.LayoutParams childParams = new LinearLayout.LayoutParams(
-					sizeEachImage, LayoutParams.MATCH_PARENT);
-
-			((LinearLayout) convertView).removeAllViews();
 			/*
 			 * If this is the last item, its possible that the number of items
 			 * won't fill the complete row
 			 */
-			int startPosition = updateAvailable ? position - 1 : position;
+			int startPosition = category.updateAvailable ? position - 1 : position;
 
-			int maxCount;
-			if ((startPosition == numStickerRows - 1)
-					&& (numStickers % numItemsRow != 0)) {
-				maxCount = numStickers % numItemsRow;
-			} else {
-				maxCount = numStickerRows != 0 ? numItemsRow : 0;
-			}
-
-			int padding = (int) (5 * Utils.densityMultiplier);
-			for (int i = 0; i < maxCount; i++) {
-				ImageView imageView = new ImageView(activity);
-				imageView.setLayoutParams(childParams);
-				imageView.setScaleType(ScaleType.FIT_CENTER);
-				imageView.setPadding(padding, padding, padding, padding);
+			for (int i = 0; i < numItemsRow; i++) {
+				ImageView imageView = (ImageView) ((LinearLayout) convertView).getChildAt(i);
 
 				int index = (startPosition * numItemsRow) + i;
+				if(index > stickerList.size() - 1) {
+					imageView.setImageDrawable(null);
+					imageView.setTag(null);
+					imageView.setOnClickListener(null);
+					continue;
+				}
 
 				Sticker sticker = stickerList.get(index);
 
-				if (sticker.getStickerIndex() != -1) {
-					if (sticker.getCategoryIndex() == 1) {
-						imageView
-								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_2[sticker
-										.getStickerIndex()]);
-					} else if (sticker.getCategoryIndex() == 0) {
-						imageView
-								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_1[sticker
-										.getStickerIndex()]);
+				if (sticker.getStickerIndex() != -1)
+				{
+					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
+						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()]);
 					}
-				} else {
-					imageView.setImageDrawable(IconCacheManager.getInstance()
-							.getStickerThumbnail(
-									sticker.getSmallStickerPath(activity)));
+					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:"+StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
+						//imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
+					}
+				}
+				else
+				{
+					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
 				}
 				imageView.setTag(sticker);
 
 				imageView.setOnClickListener(this);
-
-				((LinearLayout) convertView).addView(imageView);
 			}
 			break;
 		case UPDATING_STICKER:
@@ -203,7 +240,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			ProgressBar progressBar = (ProgressBar) convertView
 					.findViewById(R.id.download_progress);
 
-			if (HikeMessengerApp.stickerTaskMap.containsKey(categoryId)) {
+			if (StickerManager.getInstance().isStickerDownloading(category.categoryId.name())) {
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
 				updateText.setTextColor(activity.getResources().getColor(
@@ -221,10 +258,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 					@Override
 					public void onClick(View v) {
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-								activity, categoryIndex, DownloadType.UPDATE);
+								activity, category, DownloadType.UPDATE,StickerPageAdapter.this);
 						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-						HikeMessengerApp.stickerTaskMap.put(categoryId,
+						StickerManager.getInstance().insertTask(category.categoryId.name(),
 								downloadStickerTask);
 						notifyDataSetChanged();
 					}
@@ -234,14 +271,52 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			break;
 		case DOWNLOADING_MORE:
 			break;
+		case RECENT_EMPTY:
+			break;
 		}
 
 		return convertView;
 	}
-
+	
+	/* This should be used only for recent stickers */
+	public void updateRecentsList(Sticker st)
+	{
+		stickerList.remove(st);
+		if (stickerList.size() == StickerManager.RECENT_STICKERS_COUNT) // if size is already 30 remove first element and then add
+		{
+			// remove last sticker
+			stickerList.remove(stickerList.size() - 1);
+		}
+		stickerList.add(0,st);
+		calculateNumRowsAndSize(true);
+	}
+	
 	@Override
-	public void onClick(View v) {
+	public void onClick(View v)
+	{
 		Sticker sticker = (Sticker) v.getTag();
 		((ChatThread) activity).sendSticker(sticker);
+		int currentIdx = ((ChatThread) activity).getCurrentPage();
+		StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
+
+		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. */
+		if (!StickerCategoryId.recent.equals(sc.categoryId))
+		{
+			StickerManager.getInstance().addRecentSticker(sticker);
+			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
+		}
+	}
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		stickerLoader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			notifyDataSetChanged();
+		}
 	}
 }

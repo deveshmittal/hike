@@ -172,8 +172,16 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED, id);
 		} else {
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.PROFILE_IMAGE_DOWNLOADED, id);
+			/*
+			 * Removing the smaller icon in cache.
+			 */
+			HikeMessengerApp.getLruCache().remove(id);
+
+			if(statusImage) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
+			}
+
 			if (this.name == null)
 				this.name = this.msisdn;  //show the msisdn if its an unsaved contact
 			if (statusImage && !TextUtils.isEmpty(this.fileName)

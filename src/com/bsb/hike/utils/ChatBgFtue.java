@@ -29,6 +29,9 @@ import com.bsb.hike.ui.HomeActivity;
 public class ChatBgFtue
 {
 	public static SnowFallView startAndSetSnowFallView(final Activity activity){
+		if(activity==null){
+			return null;
+		}
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.VISIBLE);
 		Handler animHandler = new Handler();
 		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
@@ -481,13 +484,9 @@ public class ChatBgFtue
 		aa5.setStartOffset(animDuration+200);
 		activity.findViewById(R.id.chat_theme_popup_glow).startAnimation(aa5);
 
-		boolean newUser = activity.getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
-		ContactInfo contactInfo = HikeUserDatabase.getInstance().getChatThemeFTUEContact(activity, newUser);
-		if(contactInfo == null) {
+		if(activity.getChatThemeFTUEContact() == null) {
 			TextView textView = (TextView) activity.findViewById(R.id.give_it_a_spin_text);
 			textView.setText(R.string.ok);
-		} else {
-			activity.setChatThemeFTUEContact(contactInfo);
 		}
 		
 		animHandler.postDelayed(new Runnable()
@@ -539,11 +538,24 @@ public class ChatBgFtue
 	}
 
 
-	public static void onChatBgGiveItASpinClick(final HomeActivity activity, View v, SnowFallView snowFallView){
+	public static void onChatBgGiveItASpinClick(final HomeActivity activity, View v, SnowFallView snowFallView, boolean haveNotSeenOldFtue){
 		if(snowFallView!= null){
 			snowFallView.clearAnimation();
 			snowFallView.setVisibility(View.GONE);
 		}
+		if(activity.findViewById(R.id.gift_card).getVisibility() != View.GONE){
+			activity.findViewById(R.id.gift_card).clearAnimation();
+			activity.findViewById(R.id.gift_card).setVisibility(View.GONE);
+		}
+		if(activity.findViewById(R.id.gift_box).getVisibility() != View.GONE){
+			activity.findViewById(R.id.gift_box).clearAnimation();
+			activity.findViewById(R.id.gift_box).setVisibility(View.GONE);
+		}
+		if(activity.findViewById(R.id.gift_box_bottom).getVisibility() != View.GONE){
+			activity.findViewById(R.id.gift_box_bottom).clearAnimation();
+			activity.findViewById(R.id.gift_box_bottom).setVisibility(View.GONE);
+		}
+		
 		activity.findViewById(R.id.chat_theme_popup).clearAnimation();
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.GONE);
 		activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();
@@ -551,7 +563,9 @@ public class ChatBgFtue
 		ContactInfo contactInfo = activity.getChatThemeFTUEContact();
 		if(contactInfo != null){
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo, false);
-			intent.putExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, true);
+			if(haveNotSeenOldFtue){
+				intent.putExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, true);
+			} 
 			intent.setClass(activity, ChatThread.class);
 			activity.startActivity(intent);
 		} else{
