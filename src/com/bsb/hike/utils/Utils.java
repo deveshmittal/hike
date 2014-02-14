@@ -3303,7 +3303,11 @@ public class Utils {
 
 	public static boolean hasKitKat()
 	{
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+		/* 
+		 * currently build target for Nokia can only be set as 16, 
+		 * So Build.VERSION_CODES.KITKAT doesn't work
+		 */ 
+		return Build.VERSION.SDK_INT >= 19;
 	}
 	
 	public static boolean hasEnoughFreeSpaceForProfilePic() {
@@ -3317,10 +3321,15 @@ public class Utils {
 			return 0;
 		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
 		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
+		/*
+		 * commenting out this path because currently for nokia android code will
+		 * never enter to this path. later on if Nokia build target can be set to
+		 * 19(KITKAT or above) we can uncomment this.
+		 */
+		/*if (Utils.hasKitKat())
 		{
 			return bitmap.getAllocationByteCount();
-		}
+		}*/
 
 		if (Utils.hasHoneycombMR1())
 		{
