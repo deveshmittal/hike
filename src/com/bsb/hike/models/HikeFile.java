@@ -95,6 +95,8 @@ public class HikeFile {
 	private File file;
 	private long recordingDuration = -1;
 
+	private String sourceFilePath;
+	
 	private double latitude;
 	private double longitude;
 	private int zoomLevel;
@@ -113,6 +115,7 @@ public class HikeFile {
 				.optString(HikeConstants.THUMBNAIL, null);
 		this.thumbnail = thumbnail == null ? Utils
 				.stringToDrawable(thumbnailString) : thumbnail;
+		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
 		this.longitude = fileJSON.optDouble(HikeConstants.LONGITUDE);
@@ -131,8 +134,8 @@ public class HikeFile {
 		this.recordingDuration = fileJSON.optLong(HikeConstants.PLAYTIME, -1);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString,
 				recordingDuration != -1);
-		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
-				.getOutputMediaFile(hikeFileType, fileName, fileKey);
+		//this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
+			//	.getOutputMediaFile(hikeFileType, fileName);
 	}
 
 	public HikeFile(String fileName, String fileTypeString,
@@ -144,6 +147,18 @@ public class HikeFile {
 		this.thumbnailString = thumbnailString;
 		this.thumbnail = new BitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
+	}
+	
+	public HikeFile(String fileName, String fileTypeString,
+			String thumbnailString, Bitmap thumbnail, long recordingDuration, String source) {
+		this.fileName = fileName;
+		this.fileTypeString = fileTypeString;
+		this.hikeFileType = HikeFileType.fromString(fileTypeString,
+				recordingDuration != -1);
+		this.thumbnailString = thumbnailString;
+		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.recordingDuration = recordingDuration;
+		this.sourceFilePath = source;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel,
@@ -165,6 +180,7 @@ public class HikeFile {
 			fileJSON.putOpt(HikeConstants.CONTENT_TYPE, fileTypeString);
 			fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
+			fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
 			if (recordingDuration != -1) {
 				fileJSON.put(HikeConstants.PLAYTIME, recordingDuration);
@@ -194,6 +210,11 @@ public class HikeFile {
 		return fileName;
 	}
 
+	public void setFile(File f)
+	{
+		this.file = f;
+	}
+	
 	public void setFileTypeString(String fileTypeString) {
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString,
@@ -218,7 +239,8 @@ public class HikeFile {
 
 	public void setFileKey(String fileKey) {
 		this.fileKey = fileKey;
-		this.file = Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
+		if(file == null)
+			this.file = Utils.getOutputMediaFile(hikeFileType, fileName);
 	}
 
 	public String getFileKey() {
@@ -258,8 +280,7 @@ public class HikeFile {
 			return false;
 		}
 		if (file == null) {
-			File file = Utils.getOutputMediaFile(hikeFileType, fileName,
-					fileKey);
+			File file = Utils.getOutputMediaFile(hikeFileType, fileName);
 			return file == null ? false : file.exists();
 		}
 		return file.exists();
@@ -270,17 +291,24 @@ public class HikeFile {
 			return null;
 		}
 		if (file == null) {
-			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey)
-					.getPath();
+			file = Utils.getOutputMediaFile(hikeFileType, fileName);
 		}
 		return file.getPath();
 	}
 
 	public File getFile() {
 		if (file == null) {
-			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
+			file = Utils.getOutputMediaFile(hikeFileType, fileName);
 		}
 		return file;
+	}
+	
+	public String getSourceFilePath() {
+		return sourceFilePath;
+	}
+	
+	public void removeSourceFile() {
+		sourceFilePath = null;
 	}
 
 	public String getDisplayName() {
@@ -301,6 +329,11 @@ public class HikeFile {
 
 	public JSONArray getEvents() {
 		return events;
+	}
+
+	public void setFileName(String fName)
+	{
+		fileName = fName;
 	}
 
 }

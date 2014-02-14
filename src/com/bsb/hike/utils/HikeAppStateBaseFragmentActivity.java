@@ -61,7 +61,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 					.beginTransaction();
 			fragmentTransaction.remove(fragment);
-			fragmentTransaction.commit();
+			fragmentTransaction.commitAllowingStateLoss();
 		} else {
 			HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
 			super.onBackPressed();
@@ -153,7 +153,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity
 							.beginTransaction();
 					fragmentTransaction.add(R.id.parent_layout,
 							imageViewerFragment, IMAGE_FRAGMENT_TAG);
-					fragmentTransaction.commit();
+					fragmentTransaction.commitAllowingStateLoss();
 				}
 			});
 		}

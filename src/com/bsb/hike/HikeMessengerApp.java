@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.acra.ACRA;
@@ -19,8 +17,6 @@ import org.acra.sender.HttpSender;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
@@ -28,6 +24,7 @@ import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -46,20 +43,18 @@ import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
+import com.bsb.hike.smartcache.HikeLruCache;
+import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
@@ -230,21 +225,9 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOWN_SMS_CLIENT_POPUP = "shownSMSClientPopup";
 	public static final String SHOWN_SMS_SYNC_POPUP = "shownSMSSyncPopup";
 
-	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
-
-	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
-
-	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
-
-	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
-
-	public static final String SECOND_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
-
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
 	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip1";
-
-	public static final String SHOWN_STICKERS_TIP = "shownStickerTip";
 
 	public static final String SHOWN_MOODS_TIP = "shownMoodsTip1";
 
@@ -264,23 +247,13 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOWN_FRIENDS_TUTORIAL = "shownFriendsTutorial";
 
-	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
-
 	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
 
-	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
-
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
-
-	public static final String REMOVE_HUMANOID_STICKERS = "removeHumanoiStickers";
 
 	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
-
-	public static final String RESET_REACHED_END_FOR_DEFAULT_STICKERS = "resetReachedEndForDefaultStickers";
-
-	public static final String CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES = "correctDefaultStickerDialogPreferences";
 
 	public static final String FIRST_VIEW_FTUE_LIST_TIMESTAMP = "firstViewFtueListTimestamp";
 
@@ -315,8 +288,16 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOWN_CHAT_BG_FTUE = "shownChatBgFtue";
 
 	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
+	
+	public static final String WHATSAPP_DETAILS_SENT = "whatsappDetailsSent";
 
-	public static List<StickerCategory> stickerCategories;
+	public static final String LAST_BACK_OFF_TIME_WHATSAPP = "lastBackOffTimeWhatsapp";
+
+	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
+
+	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
+
+	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -324,7 +305,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private static HikePubSub mPubSubInstance;
 
-	private static boolean isIndianUser;
+	public static boolean isIndianUser;
 
 	private static Messenger mMessenger;
 
@@ -346,14 +327,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private ActivityTimeLogger activityTimeLogger;
 
-	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
-
-	public static Map<String, StickerTaskBase> stickerTaskMap;
-
 	public static Map<String, Long> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
-
+	
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
@@ -390,12 +367,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	static {
 		mPubSubInstance = new HikePubSub();
-		if (HikeMessengerApp.fileTransferTaskMap == null) {
-			HikeMessengerApp.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
-		}
-		if (HikeMessengerApp.stickerTaskMap == null) {
-			HikeMessengerApp.stickerTaskMap = new HashMap<String, StickerTaskBase>();
-		}
 		if (HikeMessengerApp.lastSeenFriendsMap == null) {
 			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
 		}
@@ -579,7 +550,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		HikeMqttPersistence.init(this);
 		SmileyParser.init(this);
-		IconCacheManager.init();
 
 		String twitterToken = settings.getString(
 				HikeMessengerApp.TWITTER_TOKEN, "");
@@ -670,78 +640,7 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
-		/*
-		 * If we had earlier removed bollywood stickers we need to display them
-		 * again.
-		 */
-		if (settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
-			setupBollywoodCategoryVisibility(settings);
-		}
-		setupStickerCategoryList(settings);
-
-		/*
-		 * This preference has been used here because of a bug where we were
-		 * inserting this key in the settings preference
-		 */
-		if (!preferenceManager.contains(REMOVE_HUMANOID_STICKERS)) {
-			String categoryDirPath = Utils.getStickerDirectoryForCategoryId(
-					this, EmoticonConstants.STICKER_CATEGORY_IDS[0]);
-			if (categoryDirPath != null) {
-				File categoryDir = new File(categoryDirPath);
-				Utils.deleteFile(categoryDir);
-
-				Editor editor = preferenceManager.edit();
-				editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
-				editor.commit();
-			}
-		}
-
-		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
-			HikeConversationsDatabase.getInstance()
-					.insertDoggyStickerCategory();
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(FIRST_CATEGORY_INSERT_TO_DB, true);
-			editor.commit();
-		}
-
-		if (!preferenceManager.getBoolean(SECOND_CATEGORY_INSERT_TO_DB, false)) {
-			HikeConversationsDatabase.getInstance()
-					.insertHumanoidStickerCategory();
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(SECOND_CATEGORY_INSERT_TO_DB, true);
-			editor.commit();
-		}
-
-		if (!settings.getBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
-			HikeConversationsDatabase.getInstance()
-					.updateReachedEndForCategory(
-							EmoticonConstants.STICKER_CATEGORY_IDS[0], false);
-			HikeConversationsDatabase.getInstance()
-					.updateReachedEndForCategory(
-							EmoticonConstants.STICKER_CATEGORY_IDS[1], false);
-
-			Editor editor = settings.edit();
-			editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
-			editor.commit();
-		}
-
-		/*
-		 * Adding these preferences since they are used in the load more
-		 * stickers logic.
-		 */
-		if (!settings.getBoolean(CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES,
-				false)) {
-			Editor editor = settings.edit();
-			editor.putBoolean(stickerCategories.get(0).downloadDialogPref,
-					settings.getBoolean(
-							SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
-							false));
-			editor.putBoolean(stickerCategories.get(1).downloadDialogPref,
-					settings.getBoolean(
-							SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP, false));
-			editor.putBoolean(CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, true);
-			editor.commit();
-		}
+		
 
 		makeNoMediaFiles();
 
@@ -755,8 +654,22 @@ public class HikeMessengerApp extends Application implements Listener {
 		hikeBotNamesMap
 				.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
+		initHikeLruCache(getApplicationContext());
 	}
 
+	private static HikeLruCache cache;
+	private void initHikeLruCache(Context applicationContext)
+	{
+		ImageCacheParams params = new ImageCacheParams();
+		params.setMemCacheSizePercent(0.15f);
+		cache = new HikeLruCache(params, getApplicationContext());
+	}
+	
+	public static HikeLruCache getLruCache()
+	{
+		return cache;
+	}
+	
 	private void makeNoMediaFiles() {
 		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
 
@@ -780,33 +693,13 @@ public class HikeMessengerApp extends Application implements Listener {
 			}
 		}
 	}
-
-	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
-		/*
-		 * We now show the bollywood category for all users.
-		 */
-		Editor editor = prefs.edit();
-		editor.remove(SHOW_BOLLYWOOD_STICKERS);
-		editor.remove(REMOVED_CATGORY_IDS);
-		editor.commit();
-
-		setupStickerCategoryList(prefs);
-	}
-
+	
 	public static HikePubSub getPubSub() {
 		return mPubSubInstance;
 	}
 
 	public void setService(Messenger service) {
 		this.mService = service;
-	}
-
-	public static void setIndianUser(boolean isIndianUser,
-			SharedPreferences prefs) {
-		HikeMessengerApp.isIndianUser = isIndianUser;
-		if (!prefs.contains(SHOW_BOLLYWOOD_STICKERS)) {
-			setupBollywoodCategoryVisibility(prefs);
-		}
 	}
 
 	public static boolean isIndianUser() {
@@ -872,51 +765,5 @@ public class HikeMessengerApp extends Application implements Listener {
 					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 					isWifiConnection);
 		}
-	}
-
-	public static void setupStickerCategoryList(SharedPreferences preferences) {
-		stickerCategories = new ArrayList<StickerCategory>();
-
-		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
-			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance()
-					.isStickerUpdateAvailable(
-							EmoticonConstants.STICKER_CATEGORY_IDS[i]);
-			stickerCategories.add(new StickerCategory(
-					EmoticonConstants.STICKER_CATEGORY_IDS[i],
-					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i],
-					EmoticonConstants.STICKER_DOWNLOAD_PREF[i],
-					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i],
-					isUpdateAvailable));
-		}
-		String removedIds = preferences.getString(
-				HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
-
-		try {
-			JSONArray removedIdArray = new JSONArray(removedIds);
-			for (int i = 0; i < removedIdArray.length(); i++) {
-				String removedCategoryId = removedIdArray.getString(i);
-				StickerCategory removedStickerCategory = getStickerCategoryForCategoryId(removedCategoryId);
-
-				stickerCategories.remove(removedStickerCategory);
-			}
-		} catch (JSONException e) {
-			Log.w("HikeMessengerApp", "Invalid JSON", e);
-		}
-	}
-
-	public static StickerCategory getStickerCategoryForCategoryId(
-			String categoryId) {
-		return new StickerCategory(categoryId, 0, null, 0, false);
-	}
-
-	public static void setStickerUpdateAvailable(String categoryId,
-			boolean updateAvailable) {
-		int index = stickerCategories
-				.indexOf(getStickerCategoryForCategoryId(categoryId));
-		if (index == -1) {
-			return;
-		}
-		StickerCategory stickerCategory = stickerCategories.get(index);
-		stickerCategory.updateAvailable = updateAvailable;
 	}
 }

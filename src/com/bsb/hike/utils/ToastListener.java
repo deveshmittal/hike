@@ -187,10 +187,20 @@ public class ToastListener implements Listener {
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
-			String[] profileStruct = (String[]) object;
-			toaster.pushBigPictureStatusNotifications(profileStruct);
+			/*
+			 * this object contains a Bundle containing 3 strings among which
+			 * one is imagepath of downloaded avtar. and other two are msisdn
+			 * and name from which notification has come.
+			 */
+			Bundle notifyBundle = (Bundle) object;
+			toaster.notifyBigPictureStatusNotification(
+					notifyBundle.getString(HikeConstants.Extras.IMAGE_PATH),
+					notifyBundle.getString(HikeConstants.Extras.MSISDN),
+					notifyBundle.getString(HikeConstants.Extras.NAME));
 		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
 				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
+			if(object == null)
+				return;
 			ConvMessage message = (ConvMessage) object;
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
@@ -240,21 +250,20 @@ public class ToastListener implements Listener {
 			// now the user has got a push update from our server.
 			// if its critical, let it go through, if its normal, check the
 			// preference.
-			toaster.notifyHikeUpdate(
-					update,
-					context.getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-							HikeConstants.Extras.UPDATE_MESSAGE, ""));
+			toaster.notifyUpdatePush(update, context.getPackageName(), context
+					.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+					.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""), false);
 		} else if (HikePubSub.APPLICATIONS_PUSH.equals(type)) {
 			if (object instanceof String) {
 				String packageName = ((String) object);
-				toaster.notifyApplicationsPushUpdate(
+				toaster.notifyUpdatePush(
+						-1,
 						packageName,
 						context.getSharedPreferences(
 								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
 								.getString(
 										HikeConstants.Extras.APPLICATIONSPUSH_MESSAGE,
-										""));
+										""), true);
 			}
 
 		} else if (HikePubSub.SHOW_FREE_INVITE_SMS.equals(type)) {

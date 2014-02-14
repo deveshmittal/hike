@@ -92,6 +92,8 @@
 	<string name="no_external_storage">External storage not found</string>
 	<string name="share_file">Share</string>
 	<string name="download_failed">Could not download file. Check network settings.</string>
+	<string name="download_failed_fatal">Could not download file. Please redownload file.</string>
+	<string name="card_unmount">File Inaccessible. Please mount SD Card and try again.</string>
 	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
 	<string name="dnd_one_to_one">%1$s is on DND. Waiting for %1$s to reply.</string>
 	<string name="optin_one_to_one">%1$s just opted in to hike!</string>
@@ -102,7 +104,7 @@
 	<string name="invited_to_gc">%1$s has been invited</string>
 	<string name="share">Share</string>
 	<string name="start_rec">Recorder</string>
-	<string name="recording">RECORDING</string>
+	<string name="recording">Recording</string>
 	<string name="start">Start</string>
 	<string name="stop">Stop</string>
 	<string name="preview">Preview</string>
@@ -173,7 +175,7 @@
 	<string name="social_unlinking">Unlinking account...</string>
 	<string name="contact_selected_already">This number is already in the group.</string>
 	<string name="share_file_message">Hey! I just sent you a file through hike: %1$s</string>
-	<string name="max_file_size">Max file size can be 15 MB</string>
+	<string name="max_file_size">Max file size can be 25 MB</string>
 	<string name="unable_to_read">Unable to read file</string>
 	<string name="share_location">Select Location</string>
 	<string name="group_mute">This conversation is muted.</string>
@@ -209,6 +211,13 @@
 	<string name="sound_msg">Play a sound on new message</string>
 	<string name="free_sms">Free SMS to India</string>
 	<string name="free_sms_msg">Turn on to send free SMS to India</string>
+	<string name="auto_download_media">Auto download media</string>
+	<string name="auto_download_media_hinttext">Download settings for photos, videos, audio</string>
+	<string name="md_auto_download_media">When on mobile data</string>
+	<string name="wf_auto_download_media">When connected to Wi-Fi</string>
+	<string name="auto_download_image_title">Images</string>
+	<string name="auto_download_video_title">Video</string>
+	<string name="auto_download_audio_title">Audio</string>
 	<string name="delete_account">Delete Account</string>
 	<string name="unlink_facebook_account">Unlink Facebook Account</string>
 	<string name="unlink_twitter_account">Unlink Twitter Account</string>
@@ -610,7 +619,6 @@
 	<string name="friend_request_accepted_notification">You will now be able to see updates from %1$s</string>
 	<string name="only_friends_last_seen">Only your friends can see when you were last seen</string>
 	<string name="email_subject">hike. Keep close friends close.</string>
-	<string name="email_body">Hi!\n\nI\'ve started using hike, a simple beautiful messaging app that\'s absolutely free.\n\nhike lets you send free messages to your friends and family! With hike, you can message friends that are on hike and also those who aren\'t on hike! You\'ll never have to use another messaging app again. Better yet, it\'s absolutely FREE!\n\nhike comes with some hilarious stickers and emoticons. You can also post Status Updates to your friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
 	<string name="updates_friends">You can see updates from your friends here</string>
 	<string name="tap_plus">Tap on + to add a contact as your friend</string>
     <string name="add_as_friend_menu">Add as friend</string>
@@ -622,8 +630,10 @@
 	<string name="last_seen_tip_friends">Only your friends can see when you were last seen</string>
 	<string name="from_your_number">from your own number</string>
 	<string name="at_sms_rate">At SMS rate</string>
+	<!--
 	<string name="auto_download_image_header">Image auto download</string>
 	<string name="auto_download_image_info">Images received by you will automatically be downloaded</string>
+	-->
 	<string name="humanoid_category">Hikins</string>
 	<string name="empty_chat">You have no chats :(\nStart one now!</string>
 	<string name="start_chat">Start a chat</string>
@@ -713,12 +723,9 @@
 	<string name="sent_via_sms">Sent as SMS - %1$s</string>
 	<string name="chat_theme">Chat Theme</string>
 	<string name="unknown_chat_theme">This chat\'s theme was just changed. To use the new chat themes, update hike. http://get.hike.in</string>
-	<string name="merry_christmas_msg">What are holidays without any gifts? Happy Hiking!</string>	
-	<string name="open_it_up">Open gift...</string>	
 	<string name="chat_themes">Chat Themes!</string>
-	<string name="chat_themes_popup_msg">Personalise your chats with gorgeous themes.</string>
+	<string name="chat_themes_popup_msg">Personalise your chats\nwith gorgeous themes.</string>
 	<string name="give_it_a_spin">Give it a spin</string>		
-	<string name="chat_bg_ftue_tip">More gorgeous themes here...</string>
 	<string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
 	<string name="last_seen_today_ct">today, %1$s</string>
 	<string name="last_seen_yesterday_ct">yesterday, %1$s</string>
@@ -726,5 +733,24 @@
 	<string name="last_seen_while_ago_ct">a while ago</string>
 	<string name="apply">Apply</string>
 	<string name="chat_theme_tip">The chat theme will change for you and your friend</string>
-	<string name="chat_theme_tip_group">The chat theme will change for the group</string>		
+	<string name="chat_theme_tip_group">The chat theme will change for the group</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>
+	<string name="are_you_sure">Are you sure?</string>
+	<string name="delete_confirm_msg_1">Deleting your account will delete all your data, free SMS and any hike rewards.</string>
+	<string name="please_confirm">Please Confirm</string>
+	<string name="delete_confirm_msg_2">This action is irreversible. Are you sure you want to delete your account?</string>
+	<string name="email_body">Hi,\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\nWith hike\'s hilarious new stickers, you\'ll surely never send another plain boring message!\nhike also gives you the choice of Privacy with Last Seen so that you can keep you close friends closer.\n\nDownload it now http://hike.in and join the fun!</string>
+	<string name="twitter_msg">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now and lets chat for free http://hike.in</string>
+	<string name="shortcut_created">Shortcut created</string>
+	<string name="recent_empty_string">Recently used stickers will show up here.</string>
+	<string name="merry_christmas_msg">Celebrate the month\nof love! We have a\ngift for you...</string>	
+	<string name="open_it_up">Open Gift</string>	
+	<string name="chat_bg_ftue_tip">Check out the special \'I Love You\' Theme!</string>
+	<string name="device">Device</string>
+	<string name="valentine_nudge_header">Share the Love!</string>
+	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
+	<string name="valentine_nudge_button">Awesome</string>	
 </resources>

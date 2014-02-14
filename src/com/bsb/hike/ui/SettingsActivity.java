@@ -36,14 +36,16 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.notifications));
+		items.add(getString(R.string.auto_download_media));
 		items.add(getString(R.string.sms));
 		items.add(getString(R.string.privacy));
 		items.add(getString(R.string.help));
 		items.add(null);
-
+		
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.notifications_hintext));
+		itemsSummary.add(getString(R.string.auto_download_media_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
 		itemsSummary.add(getString(R.string.help_hinttext));
@@ -51,6 +53,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
 		itemIcons.add(R.drawable.ic_account_settings);
 		itemIcons.add(R.drawable.ic_notifications_settings);
+		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
 		itemIcons.add(R.drawable.ic_help_settings);
@@ -173,16 +176,22 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			break;
 		case 2:
 			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF,
+					R.xml.auto_download_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
+			break;
+		case 3:
+			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF, R.xml.sms_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.sms);
 			break;
-		case 3:
+		case 4:
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF,
 					R.xml.privacy_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
 			break;
-		case 4:
+		case 5:
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF, R.xml.help_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);

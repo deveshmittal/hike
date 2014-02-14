@@ -58,6 +58,8 @@ public class ConvMessage {
 	private JSONArray readByArray;
 
 	private boolean shouldShowPush = true;
+	
+	//private boolean showResumeButton = true;
 
 	public boolean isInvite() {
 		return mInvite;
@@ -82,6 +84,16 @@ public class ConvMessage {
 	public void setIsStickerMessage(boolean isStickerMessage) {
 		this.isStickerMessage = isStickerMessage;
 	}
+	
+//	public void setResumeButtonVisibility(boolean visible)
+//	{
+//		showResumeButton = visible;
+//	}
+//	
+//	public boolean getResumeButtonVisibility()
+//	{
+//		return showResumeButton;
+//	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
 	public static enum State {
@@ -446,6 +458,7 @@ public class ConvMessage {
 		result = prime * result + ((mMsisdn == null) ? 0 : mMsisdn.hashCode());
 		result = prime * result + ((mState == null) ? 0 : mState.hashCode());
 		result = prime * result + (int) (mTimestamp ^ (mTimestamp >>> 32));
+		result = prime * result + (int) (msgID ^ (msgID >>> 32));
 		return result;
 	}
 
@@ -459,6 +472,9 @@ public class ConvMessage {
 			return false;
 		ConvMessage other = (ConvMessage) obj;
 
+		if (msgID != other.msgID) {
+			return false;
+		}
 		if (mIsSent != other.mIsSent)
 			return false;
 		if (mMessage == null) {

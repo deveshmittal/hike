@@ -1,7 +1,5 @@
 package com.bsb.hike.tasks;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -12,17 +10,15 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.utils.StickerManager;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -32,14 +28,17 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	private HikePreferences activity;
 	private boolean finished;
 	private boolean delete;
+	private Context ctx;
 
-	public DeleteAccountTask(HikePreferences activity, boolean delete) {
+	public DeleteAccountTask(HikePreferences activity, boolean delete,Context context) {
 		this.activity = activity;
 		this.delete = delete;
+		this.ctx = context;
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... unused) {
+		FileTransferManager.getInstance(ctx).shutDownAll();
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase
 				.getInstance();
@@ -61,7 +60,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 			db.deleteAll();
 			convDb.deleteAll();
-			IconCacheManager.getInstance().clearIconCache();
+			HikeMessengerApp.getLruCache().clearIconCache();
+			//IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			appPrefEditor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
@@ -70,7 +70,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			if (session != null) {
 				session.closeAndClearTokenInformation();
 			}
-			deleteStickers();
+			StickerManager.getInstance().deleteStickers();
 
 			return true;
 		} catch (Exception e) {
@@ -79,31 +79,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		} finally {
 			editor.commit();
 			appPrefEditor.commit();
-		}
-	}
-
-	private void deleteStickers() {
-		/*
-		 * First delete all stickers, if any, in the internal memory
-		 */
-		String dirPath = activity.getFilesDir().getPath()
-				+ HikeConstants.STICKERS_ROOT;
-		File dir = new File(dirPath);
-		if (dir.exists()) {
-			Utils.deleteFile(dir);
-		}
-
-		/*
-		 * Next is the external memory. We first check if its available or not.
-		 */
-		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE) {
-			return;
-		}
-		String extDirPath = activity.getExternalFilesDir(null).getPath()
-				+ HikeConstants.STICKERS_ROOT;
-		File extDir = new File(extDirPath);
-		if (extDir.exists()) {
-			Utils.deleteFile(extDir);
 		}
 	}
 

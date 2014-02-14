@@ -61,7 +61,6 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
@@ -166,7 +165,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private void initialiseHomeScreen(Bundle savedInstanceState) {
 
 		setContentView(!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue
+				HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue
 				: R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
@@ -182,7 +181,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 		
 		if(!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
+				HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false)){
 			Utils.blockOrientationChange(HomeActivity.this);
 			//if chat bg ftue is not shown show this on the highest priority
 			dialogShowing = DialogShowing.CHAT_BG_FTUE;
@@ -239,6 +238,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 		
+		if((!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false))&&snowFallView==null){
+			(new Handler()).postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+				}
+			}, 300);
+		}
+		
 	}
 
 	public void setChatThemeFTUEContact(ContactInfo contactInfo) {
@@ -254,7 +266,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 	
 	public void onChatBgOpenItUpClick(View v){
-		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
+		boolean newUser = getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
+		ContactInfo contactInfo = HikeUserDatabase.getInstance().getChatThemeFTUEContact(HomeActivity.this, newUser);
+		setChatThemeFTUEContact(contactInfo);
+		if(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
+			ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
+		} else {
+			/*
+			 * Users who have already seen previous FTUE will be
+			 * taken directly to chatthread
+			 */
+			onChatBgGiveItASpinClick(v);
+		}
 	}
 
 	public void onChatBgGiveItASpinClick(View v){
@@ -277,11 +301,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}, 2000);
 		
+		Utils.unblockOrientationChange(HomeActivity.this);
+		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView, !accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false));
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
+		editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, true);
 		editor.commit();
-		Utils.unblockOrientationChange(HomeActivity.this);
-		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
 		return;
 	}
 	
@@ -616,19 +642,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
-		if((!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))&&snowFallView==null){
-			(new Handler()).postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
-				}
-			}, 300);
-		}
-		
 	}
 
 	@Override
@@ -1139,8 +1152,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
 				null);
-		myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
+		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(
 				msisdn, true);
+//		myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
+//				msisdn, true);
 
 		optionsList
 				.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));

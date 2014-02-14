@@ -33,8 +33,8 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.ImageLoader;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
@@ -53,7 +53,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
-	private ImageLoader imageLoader;
+	private int mBigImageSize;
+	private int mIconImageSize;
+	private TimelineImageLoader bigPicImageLoader;
+	private IconLoader iconImageLoader;
 	private LayoutInflater inflater;
 
 	private int[] moodsRow1 = { R.drawable.mood_09_chilling,
@@ -76,9 +79,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	public CentralTimelineAdapter(Context context,
 			List<StatusMessage> statusMessages, String userMsisdn) {
 		this.context = context;
+		mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
-		this.imageLoader = new ImageLoader(context);
+		this.bigPicImageLoader = new TimelineImageLoader(context,mBigImageSize);
+		this.iconImageLoader = new IconLoader(context,mIconImageSize);
 		this.inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
@@ -144,7 +150,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		final StatusMessage statusMessage = getItem(position);
 
 		final ViewHolder viewHolder;
-
 		if (convertView == null) {
 			viewHolder = new ViewHolder();
 
@@ -250,9 +255,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 								.get(statusMessage.getMoodId()));
 				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else {
-				viewHolder.avatar.setImageDrawable(IconCacheManager
-						.getInstance().getIconForMSISDN(
-								statusMessage.getMsisdn(), true));
+				iconImageLoader.loadImage(statusMessage.getMsisdn(),true,
+						viewHolder.avatar,true);
 				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 			viewHolder.name
@@ -370,8 +374,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
-					imageLoader.loadImage(protip.getMappedId(),
-							viewHolder.statusImg);
+					bigPicImageLoader.loadImage(protip.getMappedId(),
+							viewHolder.statusImg,isListFlinging);
 					viewHolder.statusImg.setVisibility(View.VISIBLE);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
@@ -401,8 +405,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			viewHolder.avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(statusMessage.getMsisdn(), true));
+			iconImageLoader.loadImage(statusMessage.getMsisdn(),true,
+					viewHolder.avatar,true);
 			viewHolder.name
 					.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
 							: statusMessage.getNotNullName());
@@ -418,8 +422,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			/*
 			 * Fetch larger image
 			 */
-			imageLoader.loadImage(statusMessage.getMappedId(),
-					viewHolder.largeProfilePic);
+			bigPicImageLoader.loadImage(statusMessage.getMappedId(),
+					viewHolder.largeProfilePic,isListFlinging);
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
 					true, context));
@@ -456,8 +460,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				TextView addBtn = (TextView) parentView
 						.findViewById(R.id.invite_btn);
 
-				avatar.setImageDrawable(IconCacheManager.getInstance()
-						.getIconForMSISDN(contactInfo.getMsisdn(), true));
+				iconImageLoader.loadImage(contactInfo.getMsisdn(),true,
+						avatar,true);
 				name.setText(contactInfo.getName());
 
 				addBtn.setTag(contactInfo);
@@ -666,17 +670,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		}
 	};
 
-	public void stopImageLoaderThread() {
-		if (imageLoader == null) {
-			return;
-		}
-		imageLoader.interruptThread();
-	}
-
-	public void restartImageLoaderThread() {
-		imageLoader = new ImageLoader(context);
-	}
-
 	/**
 	 * @return the protipIndex
 	 */
@@ -690,5 +683,28 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	 */
 	public void setProtipIndex(int protipIndex) {
 		this.protipIndex = protipIndex;
+	}
+
+	public TimelineImageLoader getTimelineImageLoader()
+	{
+		return bigPicImageLoader;
+	}
+
+	public IconLoader getIconImageLoader()
+	{
+		return iconImageLoader;
+	}
+	
+	private boolean isListFlinging;
+	public void setIsListFlinging(boolean b) {
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		bigPicImageLoader.setPauseWork(isListFlinging);
+		iconImageLoader.setPauseWork(isListFlinging);
+
+		if(notify && !isListFlinging) {
+			notifyDataSetChanged();
+		}
 	}
 }
