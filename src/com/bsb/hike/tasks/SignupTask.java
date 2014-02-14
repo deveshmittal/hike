@@ -237,9 +237,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				editor.commit();
 
 				/*
+				 * If the device is a kit kat device, we won't be able to pull in SMS
+				 * so no point waiting for 1 minute.
 				 * If the device can't pull in SMS no point waiting for the PIN.
 				 */
-				if (canPullInSms) {
+				if (!Utils.hasKitKat() && canPullInSms) {
 
 					publishProgress(new StateValue(State.PULLING_PIN, null));
 
@@ -343,6 +345,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					null);
 			List<ContactInfo> contactinfos = ContactUtils
 					.getContacts(this.context);
+			ContactUtils.setWhatsappStatus(this.context, contactinfos);
 			HikeUserDatabase db = null;
 			try {
 				Map<String, List<ContactInfo>> contacts = ContactUtils
@@ -389,6 +392,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 
 			Editor editor = settings.edit();
 			editor.putBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, true);
+			editor.putBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
 			editor.commit();
 			/*
 			 * addressbook scanned, sick

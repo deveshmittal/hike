@@ -41,7 +41,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
@@ -1340,7 +1339,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			insertRoundedThumbnailData(mDb, msisdn, roundedData);
 		}
-		IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		//IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		HikeMessengerApp.getLruCache().remove(msisdn);
 		ContentValues vals = new ContentValues(2);
 		vals.put(DBConstants.MSISDN, msisdn);
 		vals.put(DBConstants.IMAGE, data);
@@ -1364,14 +1364,38 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			if (!c.moveToFirst()) {
 				/* lookup based on this msisdn */
-				return Utils.getDefaultIconForUser(mContext, msisdn, rounded);
+				return Utils.getDefaultIconForUserFromDecodingRes(mContext, msisdn, rounded);
 			}
-
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
 			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata,
 					0, icondata.length));
 		} finally {
 			if (c != null) {
+				c.close();
+			}
+		}
+	}
+	
+	public byte[] getIconByteArray(String msisdn, boolean rounded)
+	{
+		Cursor c = null;
+		try
+		{
+			String table = rounded ? DBConstants.ROUNDED_THUMBNAIL_TABLE : DBConstants.THUMBNAILS_TABLE;
+			c = mDb.query(table, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+
+			if (!c.moveToFirst())
+			{
+				/* lookup based on this msisdn */
+				return null;
+			}
+			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+			return icondata;
+		}
+		finally
+		{
+			if (c != null)
+			{
 				c.close();
 			}
 		}
@@ -1978,10 +2002,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			int i = 0;
 			for (i = 0; i < serverRecommendedArray.length(); i++) {
 				String msisdn = serverRecommendedArray.optString(i);
-				if (myMsisdn.equals(msisdn)) {
-					continue;
+				if (!myMsisdn.equals(msisdn)) {
+					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
-				sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 			}
 			/*
 			 * Making sure the string exists.
@@ -1990,7 +2013,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				return null;
 			}
 			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-
 			return sb.toString();
 		} catch (JSONException e) {
 			return null;
@@ -2100,6 +2122,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			selection = null;
 			break;
 		}
+		selection += (selection == null ? "" : " AND ") + DBConstants.MSISDN
+				+ " NOT IN (SELECT " + DBConstants.BLOCK_TABLE + "." + DBConstants.MSISDN
+				+ " FROM " + DBConstants.BLOCK_TABLE +")";
+
 		Cursor c = null;
 		try {
 			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
@@ -2136,11 +2162,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				JSONArray recommendedContactsArray = new JSONArray(
 						recommendedContactsString);
 				if (recommendedContactsArray.length() != 0) {
-					contactInfo = getContactInfoFromMSISDN(
-							recommendedContactsArray.getString(0), false);
+					for(int i = 0; i < recommendedContactsArray.length(); i++) {
+						String msisdn = recommendedContactsArray.getString(i);
 
-					if (contactInfo != null) {
-						return contactInfo;
+						if(isBlocked(msisdn)) {
+							continue;
+						}
+
+						contactInfo = getContactInfoFromMSISDN(
+								msisdn, false);
+
+						if (contactInfo != null) {
+							return contactInfo;
+						}
 					}
 				}
 			} catch (JSONException e) {

@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +23,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Messenger;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -30,13 +32,17 @@ import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -89,6 +95,9 @@ public class HikeService extends Service {
 	public static final String SEND_DEV_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_DEV_DETAILS_TO_SERVER";
 
 	public static final String SEND_RAI_TO_SERVER_ACTION = "com.bsb.hike.SEND_RAI";
+	
+	// used to send Whatsapp details to server
+	public static final String SEND_WA_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_WA_DETAILS_TO_SERVER";
 
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -110,6 +119,8 @@ public class HikeService extends Service {
 	private SendGCMIdToServerTrigger sendGCMIdToServerTrigger;
 
 	private PostDeviceDetails postDeviceDetails;
+	
+	private PostWhatsappDetails postWhatsappDetails;
 
 	private HikeMqttManagerNew mMqttManager;
 
@@ -122,6 +133,8 @@ public class HikeService extends Service {
 
 	private Looper mContactHandlerLooper;
 
+	private StickerManager sm;
+	
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -224,6 +237,14 @@ public class HikeService extends Service {
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
+		if (postWhatsappDetails == null) {
+			postWhatsappDetails = new PostWhatsappDetails();
+			registerReceiver(postWhatsappDetails, new IntentFilter(
+					SEND_WA_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_WA_DETAILS_TO_SERVER_ACTION));
+			Log.d("Whatsapp", "Whatsapp details sender registered");
+		}
+		
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE).getBoolean(
 				HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false)) {
@@ -231,7 +252,55 @@ public class HikeService extends Service {
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
+		setupStickers();
+	}
 
+	private void setupStickers()
+	{
+		sm = StickerManager.getInstance();
+		sm.init(getApplicationContext());
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		/*
+		 * If we had earlier removed bollywood stickers we need to display them
+		 * again.
+		 */
+		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS)) {
+			sm.setupBollywoodCategoryVisibility(settings);
+		}
+		
+		sm.setupStickerCategoryList(settings);
+
+		/*
+		 * This preference has been used here because of a bug where we were
+		 * inserting this key in the settings preference
+		 */
+		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS)) {
+			sm.removeHumanoidSticker();
+		}
+
+		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false)) {
+			sm.insertDoggyCategory();
+		}
+
+		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false)) {
+			sm.insertHumanoidCategory();
+		}
+
+		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
+			sm.resetReachedEndForDefaultStickers();
+		}
+
+		/*
+		 * Adding these preferences since they are used in the load more
+		 * stickers logic.
+		 */
+		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES,
+				false)) {
+			sm.setDialoguePref();
+		}
+		
 	}
 
 	@Override
@@ -301,6 +370,13 @@ public class HikeService extends Service {
 		if (sendRai != null) {
 			unregisterReceiver(sendRai);
 			sendRai = null;
+		}
+		sm.getStickerCategoryList().clear();
+		sm.getRecentStickerList().clear();
+		
+		if (postWhatsappDetails != null) {
+			unregisterReceiver(postWhatsappDetails);
+			postWhatsappDetails = null;
 		}
 	}
 
@@ -399,24 +475,30 @@ public class HikeService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(getClass().getSimpleName(), "Registering for GCM");
-			GCMRegistrar.checkDevice(HikeService.this);
-			GCMRegistrar.checkManifest(HikeService.this);
-			final String regId = GCMRegistrar
-					.getRegistrationId(HikeService.this);
-			if ("".equals(regId)) {
+			try{
+				GCMRegistrar.checkDevice(HikeService.this);
+				GCMRegistrar.checkManifest(HikeService.this);
+				final String regId = GCMRegistrar
+						.getRegistrationId(HikeService.this);
+				if ("".equals(regId)) {
+					/*
+					 * Since we are registering again, we should clear this
+					 * preference
+					 */
+					Editor editor = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					editor.remove(HikeMessengerApp.GCM_ID_SENT);
+					editor.commit();
+	
+					GCMRegistrar.register(HikeService.this,
+							HikeConstants.APP_PUSH_ID);
+				} else {
+					sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
+				}
+			} catch (UnsupportedOperationException e) {
 				/*
-				 * Since we are registering again, we should clear this
-				 * preference
+				 * User doesnt have google services
 				 */
-				Editor editor = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-				editor.remove(HikeMessengerApp.GCM_ID_SENT);
-				editor.commit();
-
-				GCMRegistrar.register(HikeService.this,
-						HikeConstants.APP_PUSH_ID);
-			} else {
-				sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
 			}
 		}
 	}
@@ -456,7 +538,7 @@ public class HikeService extends Service {
 						public void onFailure() {
 							Log.d(SendGCMIdToServerTrigger.this.getClass()
 									.getSimpleName(), "Send unsuccessful");
-							scheduleNextSendToServerAction(true);
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
 						}
 					});
 			JSONObject request = new JSONObject();
@@ -536,7 +618,7 @@ public class HikeService extends Service {
 							Log.d("TestUpdate", "Device details could not be sent");
 							Log.d(getClass().getSimpleName(),
 									"Send unsuccessful");
-							scheduleNextSendToServerAction(false);
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, sendDevDetailsToServer);
 						}
 					});
 			hikeHttpRequest.setJSONData(data);
@@ -579,14 +661,12 @@ public class HikeService extends Service {
 		}
 	}
 
-	private void scheduleNextSendToServerAction(boolean gcmReg) {
-		Log.d(getClass().getSimpleName(), "Scheduling next GCM registration");
+	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference) {
+		Log.d(getClass().getSimpleName(), "Scheduling next "+ lastBackOffTimePref+" send");
 
 		SharedPreferences preferences = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		int lastBackOffTime = preferences.getInt(
-				gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
-						: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, 0);
+		int lastBackOffTime = preferences.getInt(lastBackOffTimePref, 0);
 
 		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME
 				: (lastBackOffTime * 2);
@@ -595,17 +675,10 @@ public class HikeService extends Service {
 
 		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
 
-		if (gcmReg) {
-			postRunnableWithDelay(sendGCMIdToServer, lastBackOffTime * 1000);
-		} else {
-			postRunnableWithDelay(sendDevDetailsToServer,
-					lastBackOffTime * 1000);
-		}
-
+		postRunnableWithDelay(postRunnableReference, lastBackOffTime * 1000);
+		
 		Editor editor = preferences.edit();
-		editor.putInt(gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
-				: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS,
-				lastBackOffTime);
+		editor.putInt(lastBackOffTimePref,lastBackOffTime);
 		editor.commit();
 	}
 
@@ -620,6 +693,13 @@ public class HikeService extends Service {
 		@Override
 		public void run() {
 			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+		}
+	};
+	
+	private Runnable sendWhatsappDetailsToServer = new Runnable() {
+		@Override
+		public void run() {
+			sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 		}
 	};
 
@@ -673,5 +753,45 @@ public class HikeService extends Service {
 
 	public boolean appIsConnected() {
 		return mApp != null;
+	}
+	
+	public class PostWhatsappDetails extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).getBoolean(
+					HikeMessengerApp.WHATSAPP_DETAILS_SENT, false)) {
+				Log.d("PostInfo", "info details sent");
+				return;
+			}
+			
+			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
+			ContactUtils.setWhatsappStatus(context, contactinfos);
+			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
+			
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+					"/account/info", RequestType.OTHER,
+					new HikeHttpCallback() {
+						public void onSuccess(JSONObject response) {
+							Log.d("PostInfo", "info sent successfully");
+							Editor editor = getSharedPreferences(
+									HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+							editor.putBoolean(
+									HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
+							editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, 0);
+							editor.commit();
+						}
+
+						public void onFailure() {
+							Log.d("PostInfo", "info could not be sent");
+							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, sendWhatsappDetailsToServer);
+						}
+					});
+			hikeHttpRequest.setJSONData(data);
+
+			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
+		}
 	}
 }

@@ -88,7 +88,7 @@
 	<dimen name="chat_theme_popup_brush_padding_top">36dp</dimen>
 	<dimen name="chat_themes_text_height">42dp</dimen>
 	<dimen name="chat_themes_text_padding_top">14dp</dimen>
-	<dimen name="chat_themes_msg_text_padding_left">38dp</dimen>
+	<dimen name="chat_themes_msg_text_padding_left">20dp</dimen>
 	<dimen name="chat_themes_msg_text_height">56dp</dimen>
 	
 	<dimen name="box_left_fold_width">140dp</dimen>
@@ -99,4 +99,6 @@
 	<dimen name="fs_moving_ribbon1_height">276dp</dimen>
 	<dimen name="gift_card_width">208dp</dimen>
 	<dimen name="gift_card_height">220dp</dimen>
+	<dimen name="timeine_big_picture_size">200dp</dimen>
+	<dimen name="icon_picture_size">50dp</dimen>
 </resources>

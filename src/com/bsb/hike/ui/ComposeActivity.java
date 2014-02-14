@@ -52,6 +52,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
@@ -195,6 +196,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			Intent intent = Utils
 					.createIntentFromContactInfo(conversationContactInfo, true);
 			intent.setClass(this, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			finish();
 		} else {
@@ -321,6 +323,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		Intent intent = Utils
 				.createIntentFromContactInfo(conversationContactInfo, true);
 		intent.setClass(this, ChatThread.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		finish();
 	}
@@ -515,6 +518,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 			intent.setClass(this, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			String type = presentIntent.getType();
 
 			if ("text/plain".equals(type)
@@ -527,7 +531,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)
 					|| presentIntent
-							.hasExtra(HikeConstants.Extras.FWD_CATEGORY_ID)) {
+							.hasExtra(StickerManager.FWD_CATEGORY_ID)) {
 				intent.putExtras(presentIntent);
 			} else if (type != null
 					&& (type.startsWith("image") || type.startsWith("audio") || type
@@ -536,10 +540,15 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 						.getParcelableExtra(Intent.EXTRA_STREAM);
 				Log.d(getClass().getSimpleName(),
 						"File path uri: " + fileUri.toString());
+				fileUri = Utils.makePicasaUri(fileUri);
 				String fileUriStart = "file:";
 				String fileUriString = fileUri.toString();
 				String filePath;
-				if (fileUriString.startsWith(fileUriStart)) {
+				if(Utils.isPicasaUri(fileUriString))
+				{
+					filePath = fileUriString;
+				}
+				else if (fileUriString.startsWith(fileUriStart)) {
 					File selectedFile = new File(URI.create(fileUriString));
 					/*
 					 * Done to fix the issue in a few Sony devices.

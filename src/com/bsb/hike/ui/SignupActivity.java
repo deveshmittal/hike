@@ -66,13 +66,13 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
@@ -264,7 +264,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				 */
 				String countryCode = accountPrefs.getString(
 						HikeMessengerApp.COUNTRY_CODE, "");
-				HikeMessengerApp.setIndianUser(
+				StickerManager.setStickersForIndianUsers(
 						HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode),
 						accountPrefs);
 
@@ -725,8 +725,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		if (mActivityState.profileBitmap == null) {
-			mIconView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(msisdn, true));
+			mIconView.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true));
+//			mIconView.setImageDrawable(IconCacheManager.getInstance()
+//					.getIconForMSISDN(msisdn, true));
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}
@@ -1280,9 +1281,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 						.show();
 				return;
 			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			File selectedFileIcon = Utils.getOutputMediaFile(
-					HikeFileType.PROFILE, null, null); // create a file to save
+			File selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null); // create a file to save
 														// the image
 			if (selectedFileIcon != null) {
 				intent.putExtra(MediaStore.EXTRA_OUTPUT,
@@ -1307,6 +1313,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 			if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 				Toast.makeText(getApplicationContext(),
 						R.string.no_external_storage, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
+			if (!Utils.hasEnoughFreeSpaceForProfilePic()) {
+				Toast.makeText(getApplicationContext(),
+						R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT)
 						.show();
 				return;
 			}
@@ -1370,8 +1382,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements
 				selectedFileUri = data.getData();
 				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					isPicasaImage = true;
-					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null,
-							null).getAbsolutePath();
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null).getAbsolutePath();
 				} else {
 					String fileUriStart = "file://";
 					String fileUriString = selectedFileUri.toString();

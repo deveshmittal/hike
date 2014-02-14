@@ -39,7 +39,264 @@ public enum ChatTheme {
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_hike_sent;
 		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_hike_receive;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info;
+		}
 	},
+
+	VALENTINES_2 {
+
+		@Override
+		public String bgId() {
+			return "20";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.ic_ct_valentine_2_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_valentines_2_tile;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_valentines_2;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return true;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom_valentines_2;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
+	},
+
+	NIGHT_PATTERN {
+
+		@Override
+		public String bgId() {
+			return "21";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.ic_ct_night_pattern_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_night_pattern;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_night;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return true;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom_dark;
+		}
+
+	},
+
+	NIGHT {
+
+		@Override
+		public String bgId() {
+			return "22";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.bg_ct_night_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_night;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_night;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_night;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom_dark;
+		}
+
+	},
+
+	OWL {
+
+		@Override
+		public String bgId() {
+			return "23";
+		}
+
+		@Override
+		public int headerBgResId() {
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId() {
+			return R.drawable.bg_ct_owl_preview;
+		}
+
+		@Override
+		public int bgResId() {
+			return R.drawable.bg_ct_owl;
+		}
+
+		@Override
+		public int bubbleResId() {
+			return R.drawable.ic_bubble_owl;
+		}
+
+		@Override
+		public boolean isTiled() {
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId() {
+			return R.drawable.ic_nudge_sent_custom_owl;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
+	},
+
 	LOVE {
 
 		@Override
@@ -75,6 +332,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -115,6 +392,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_chatty_beachy_techy;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	GIRLY {
 
@@ -151,6 +448,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -191,6 +508,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_starry_space;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	CHEERS {
 
@@ -227,6 +564,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -266,6 +623,26 @@ public enum ChatTheme {
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
 		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
 	},
 	SMILEY {
 
@@ -302,6 +679,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -342,6 +739,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_creepy;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	CELEBRATION {
 
@@ -378,6 +795,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_celebration_space;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -418,6 +855,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	FOREST {
 
@@ -454,6 +911,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -494,6 +971,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	TECHY {
 
@@ -530,6 +1027,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_chatty_beachy_techy;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -570,6 +1087,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	BEACH {
 
@@ -606,6 +1143,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_chatty_beachy_techy;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -646,6 +1203,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	STUDY {
 
@@ -682,6 +1259,26 @@ public enum ChatTheme {
 		@Override
 		public int sentNudgeResId() {
 			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+		}
+
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -722,6 +1319,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	},
 	BIKER {
 
@@ -760,6 +1377,26 @@ public enum ChatTheme {
 			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public boolean isAnimated() {
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId() {
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId() {
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId() {
+			return R.layout.participant_info_custom;
+		}
+
 	};
 
 	public abstract String bgId();
@@ -775,6 +1412,14 @@ public enum ChatTheme {
 	public abstract boolean isTiled();
 
 	public abstract int sentNudgeResId();
+
+	public abstract boolean isAnimated();
+
+	public abstract int receivedNudgeResId();
+
+	public abstract int inLineUpdateBGResId();
+
+	public abstract int systemMessageLayoutId();
 
 	public static ChatTheme getThemeFromId(String bgId) {
 		if (bgId == null) {

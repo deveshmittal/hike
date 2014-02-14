@@ -23,9 +23,16 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata {
+
+	public static enum NudgeAnimationType {
+		NONE, SINGLE
+	}
+
 	private String dndMissedCallNumber;
 	private boolean newUser;
 	private JSONObject json;
@@ -41,6 +48,7 @@ public class MessageMetadata {
 	private StatusMessage statusMessage;
 	private Sticker sticker;
 	private boolean oldUser;
+	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
 
 	public MessageMetadata(JSONObject metadata) throws JSONException {
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS)
@@ -101,11 +109,29 @@ public class MessageMetadata {
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
 		this.json = metadata;
-		if (metadata.has(HikeConstants.STICKER_ID)) {
-			this.sticker = new Sticker(
-					metadata.optString(HikeConstants.CATEGORY_ID),
-					metadata.optString(HikeConstants.STICKER_ID));
+		if (metadata.has(StickerManager.STICKER_ID))
+		{
+			if (metadata.has(StickerManager.STICKER_INDEX))
+			{
+				this.sticker = new Sticker(metadata.optString(StickerManager.CATEGORY_ID), metadata.optString(StickerManager.STICKER_ID),
+						metadata.optInt(StickerManager.STICKER_INDEX));
+			}
+			else // this is the case when you receive a sticker from another user
+			{
+				String val = metadata.optString(StickerManager.CATEGORY_ID);
+				StickerCategory cat = StickerManager.getInstance().getCategoryForName(val);
+				this.sticker = new Sticker(cat,metadata.optString(StickerManager.STICKER_ID));
+			}
 		}
+	}
+
+	/**
+	 * Returns the sticker category. Used only for cases where the 
+	 * category is an unknown one.
+	 * @return
+	 */
+	public String getUnknownStickerCategory() {
+		return json.optString(StickerManager.CATEGORY_ID);
 	}
 
 	private List<HikeFile> getHikeFileListFromJSONArray(JSONArray fileList) {
@@ -181,6 +207,14 @@ public class MessageMetadata {
 
 	public boolean isOldUser() {
 		return oldUser;
+	}
+
+	public NudgeAnimationType getNudgeAnimationType() {
+		return nudgeAnimationType;
+	}
+
+	public void setNudgeAnimationType(NudgeAnimationType type) {
+		this.nudgeAnimationType = type;
 	}
 
 	public Spannable getMessage(final Context context,

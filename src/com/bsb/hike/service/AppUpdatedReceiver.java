@@ -11,6 +11,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
@@ -63,7 +64,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.putString(HikeMessengerApp.COUNTRY_CODE,
 						HikeConstants.INDIA_COUNTRY_CODE);
 				editor.commit();
-				HikeMessengerApp.setIndianUser(true, prefs);
+				StickerManager.setStickersForIndianUsers(true, prefs);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.REFRESH_RECENTS, null);
 			}

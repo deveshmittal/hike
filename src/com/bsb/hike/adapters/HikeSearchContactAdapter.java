@@ -27,10 +27,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 
 @SuppressWarnings("unchecked")
 public class HikeSearchContactAdapter extends
@@ -43,6 +44,8 @@ public class HikeSearchContactAdapter extends
 	private String groupId;
 	private Map<String, GroupParticipant> groupParticipants;
 	private boolean forwarding;
+	private IconLoader iconLoader;
+	private int mIconImageSize;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<Pair<AtomicBoolean, ContactInfo>> contactList,
@@ -58,6 +61,8 @@ public class HikeSearchContactAdapter extends
 		this.groupId = groupId;
 		this.forwarding = forwarding;
 		this.groupParticipants = groupParticipants;
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconLoader = new IconLoader(context,mIconImageSize);
 	}
 
 	Comparator<Pair<AtomicBoolean, ContactInfo>> comparator = new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
@@ -131,13 +136,17 @@ public class HikeSearchContactAdapter extends
 		ImageView avatar = (ImageView) v.findViewById(R.id.contact_image);
 		if (contactInfo != null
 				&& contactInfo.getId().equals(contactInfo.getPhoneNum())) {
-			avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getPhoneNum(), true));
+			iconLoader.loadImage(contactInfo.getPhoneNum(), true, avatar,true);
 		} else {
-			avatar.setImageDrawable(contactInfo != null ? IconCacheManager
-					.getInstance().getIconForMSISDN(contactInfo.getMsisdn(),
-							true) : context.getResources().getDrawable(
-					R.drawable.ic_avatar1_rounded));
+			if(contactInfo != null)
+			{
+				iconLoader.loadImage(contactInfo.getMsisdn(),true ,avatar,true);
+			}
+			else
+			{
+				avatar.setImageDrawable(context.getResources().getDrawable(
+						R.drawable.ic_avatar1_rounded));
+			}
 		}
 
 		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE
