@@ -91,8 +91,15 @@ public class CustomProgressBar extends ProgressBar
 				animation = ObjectAnimator.ofInt(this, "progress", this.start, this.target);
 				animation.setDuration(this.duration); // 0.5 second
 			    animation.setInterpolator(new DecelerateInterpolator());
+			    /*
+				 * commenting out this path because currently for nokia android code will
+				 * never enter to this path. later on if Nokia build target can be set to
+				 * 18(or above) we can uncomment this.
+				 */
+				/*
 			    if(android.os.Build.VERSION.SDK_INT >= 18)
 			    	animation.setAutoCancel(true);
+			    */
 			    animation.start();
 			}
 			else

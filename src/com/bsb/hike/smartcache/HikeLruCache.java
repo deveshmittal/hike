@@ -130,17 +130,22 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	 * @param value
 	 * @return size in bytes
 	 */
-	@TargetApi(VERSION_CODES.KITKAT)
+	//@TargetApi(VERSION_CODES.KITKAT)
 	public static int getBitmapSize(BitmapDrawable value)
 	{
 		Bitmap bitmap = value.getBitmap();
 
 		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
 		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
+		/*
+		 * commenting out this path because currently for nokia android code will
+		 * never enter to this path. later on if Nokia build target can be set to
+		 * 19(KITKAT or above) we can uncomment this.
+		 */
+		/*if (Utils.hasKitKat())
 		{
 			return bitmap.getAllocationByteCount();
-		}
+		}*/
 
 		if (Utils.hasHoneycombMR1())
 		{
@@ -243,22 +248,29 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	 *            - Options that have the out* value populated
 	 * @return true if <code>candidate</code> can be used for inBitmap re-use with <code>targetOptions</code>
 	 */
-	@TargetApi(VERSION_CODES.KITKAT)
+	//@TargetApi(VERSION_CODES.KITKAT)
 	private static boolean canUseForInBitmap(Bitmap candidate, BitmapFactory.Options targetOptions)
 	{
 
-		if (!Utils.hasKitKat())
-		{
+		//if (!Utils.hasKitKat())
+		//{
 			// On earlier versions, the dimensions must match exactly and the inSampleSize must be 1
 			return candidate.getWidth() == targetOptions.outWidth && candidate.getHeight() == targetOptions.outHeight && targetOptions.inSampleSize == 1;
-		}
+		//}
 
 		// From Android 4.4 (KitKat) onward we can re-use if the byte size of the new bitmap
 		// is smaller than the reusable bitmap candidate allocation byte count.
+		/*
+		 * commenting out this path because currently for nokia android code will
+		 * never enter to this path. later on if Nokia build target can be set to
+		 * 19(KITKAT or above) we can uncomment this.
+		 */
+		/*
 		int width = targetOptions.outWidth / targetOptions.inSampleSize;
 		int height = targetOptions.outHeight / targetOptions.inSampleSize;
 		int byteCount = width * height * getBytesPerPixel(candidate.getConfig());
 		return byteCount <= candidate.getAllocationByteCount();
+		*/
 	}
 
 	/**
