@@ -47,10 +47,11 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
@@ -106,9 +107,11 @@ public class ConversationFragment extends SherlockListFragment implements
 
 	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo> {
 
+		private IconLoader iconLoader;
 		public FTUEGridAdapter(Context context, int textViewResourceId,
 				List<ContactInfo> objects) {
 			super(context, textViewResourceId, objects);
+			iconLoader = new IconLoader(context,180);
 		}
 
 		@Override
@@ -130,8 +133,9 @@ public class ConversationFragment extends SherlockListFragment implements
 			avatarFrame
 					.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike
 							: R.drawable.frame_avatar_ftue_sms);
-			avatarImage.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage,true);
+			//avatarImage.setImageDrawable(IconCacheManager.getInstance()
+					//.getIconForMSISDN(contactInfo.getMsisdn(), true));
 			contactName.setText(contactInfo.getFirstName());
 
 			convertView.setTag(contactInfo);
@@ -174,17 +178,6 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		friendsList.setEmptyView(emptyView);
 
-		Button startChat = (Button) parent.findViewById(R.id.start_chat_btn);
-		startChat.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(getActivity(), ComposeActivity.class);
-				intent.putExtra(HikeConstants.Extras.EDIT, true);
-				startActivity(intent);
-			}
-		});
-
 		return parent;
 	}
 
@@ -195,13 +188,10 @@ public class ConversationFragment extends SherlockListFragment implements
 		}
 
 		View ftueNotEmptyView = emptyView.findViewById(R.id.ftue_not_empty);
-		View ftueEmptyView = emptyView.findViewById(R.id.ftue_empty);
 
 		if (HomeActivity.ftueList.isEmpty()) {
-			ftueEmptyView.setVisibility(View.VISIBLE);
 			ftueNotEmptyView.setVisibility(View.GONE);
 		} else {
-			ftueEmptyView.setVisibility(View.GONE);
 			ftueNotEmptyView.setVisibility(View.VISIBLE);
 
 			Button invite = (Button) emptyView.findViewById(R.id.invite);
@@ -213,7 +203,7 @@ public class ConversationFragment extends SherlockListFragment implements
 				public void onClick(View v) {
 					startActivity(new Intent(getActivity(), TellAFriend.class));
 
-					Utils.sendFTUELogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
 				}
 			});
 
@@ -224,7 +214,7 @@ public class ConversationFragment extends SherlockListFragment implements
 					startActivity(new Intent(getActivity(),
 							ComposeActivity.class));
 
-					Utils.sendFTUELogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
 				}
 			});
 
@@ -243,7 +233,7 @@ public class ConversationFragment extends SherlockListFragment implements
 					intent.setClass(getActivity(), ChatThread.class);
 					startActivity(intent);
 
-					Utils.sendFTUELogEvent(HikeConstants.LogEvent.GRID_6,
+					Utils.sendUILogEvent(HikeConstants.LogEvent.GRID_6,
 							contactInfo.getMsisdn());
 				}
 			});
@@ -441,28 +431,23 @@ public class ConversationFragment extends SherlockListFragment implements
 			Log.d(getClass().getSimpleName(), "Conversation is empty");
 			return;
 		}
+		ConvMessage message;
 		if (isTyping) {
-			ConvMessage message = messageList.get(messageList.size() - 1);
-			if (!HikeConstants.IS_TYPING.equals(message.getMessage())
-					&& message.getMsgID() != -1
-					&& message.getMappedMsgID() != -1) {
-				// Setting the msg id and mapped msg id as -1 to identify that
-				// this is an "is typing..." message.
-				ConvMessage convMessage = new ConvMessage(
-						HikeConstants.IS_TYPING, msisdn,
-						message.getTimestamp(),
-						ConvMessage.State.RECEIVED_UNREAD, -1, -1);
+			message = messageList.get(messageList.size() - 1);
+			if (message.getTypingNotification() == null) {
+				ConvMessage convMessage = new ConvMessage(typingNotification);
+				convMessage.setTimestamp(message.getTimestamp());
+				convMessage.setMessage(HikeConstants.IS_TYPING);
+				convMessage.setState(State.RECEIVED_UNREAD);
 				messageList.add(convMessage);
 			}
 		} else {
-			ConvMessage message = messageList.get(messageList.size() - 1);
-			if (HikeConstants.IS_TYPING.equals(message.getMessage())
-					&& message.getMsgID() == -1
-					&& message.getMappedMsgID() == -1) {
+			message = messageList.get(messageList.size() - 1);
+			if (message.getTypingNotification() != null) {
 				messageList.remove(message);
 			}
 		}
-		getActivity().runOnUiThread(this);
+		run();
 	}
 
 	@Override
@@ -747,9 +732,16 @@ public class ConversationFragment extends SherlockListFragment implements
 				return;
 			}
 
-			toggleTypingNotification(
-					HikePubSub.TYPING_CONVERSATION.equals(type),
-					(TypingNotification) object);
+			final boolean isTyping = HikePubSub.TYPING_CONVERSATION.equals(type);
+			final TypingNotification typingNotification = (TypingNotification) object;
+
+			getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					toggleTypingNotification(isTyping, typingNotification);
+				}
+			});
 		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
 			String msisdn = (String) object;
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
@@ -867,10 +859,19 @@ public class ConversationFragment extends SherlockListFragment implements
 
 	@Override
 	public void onResume() {
+		/*
+		 * This is a temporary fix for the issue on 4.0 and above devices
+		 * where the profile picture is wrongly shown. We are simply forcing
+		 * getview to be called again.
+		 * TODO think of a proper fix. 
+		 */
+		run();
+
 		SharedPreferences prefs = getActivity().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
-				.ordinal()) {
+		if (getActivity() == null
+				&& prefs.getInt(HikeConstants.HIKEBOT_CONV_STATE, 0) == hikeBotConvStat.VIEWED
+						.ordinal()) {
 			/*
 			 * if there is a HikeBotConversation in Conversation list also it is
 			 * Viewed by user then delete this.

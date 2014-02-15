@@ -68,7 +68,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 	public void onResume() {
 		super.onResume();
 		if (centralTimelineAdapter != null) {
-			centralTimelineAdapter.restartImageLoaderThread();
+			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(false);
+			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(false);
+			centralTimelineAdapter.notifyDataSetChanged();
 		}
 	}
 
@@ -76,7 +78,10 @@ public class UpdatesFragment extends SherlockListFragment implements
 	public void onPause() {
 		super.onPause();
 		if (centralTimelineAdapter != null) {
-			centralTimelineAdapter.stopImageLoaderThread();
+			centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
+			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(true);
+			centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
+			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}
 
@@ -192,11 +197,37 @@ public class UpdatesFragment extends SherlockListFragment implements
 	}
 
 	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState) {
+	public void onScrollStateChanged(AbsListView view, int scrollState) 
+	{
+		Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
+		centralTimelineAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		/*
+		// Pause fetcher to ensure smoother scrolling when flinging
+		if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING)
+		{
+			// Before Honeycomb pause image loading on scroll to help with performance
+			if (!Utils.hasHoneycomb())
+			{
+				if(centralTimelineAdapter != null)
+				{
+					centralTimelineAdapter.getTimelineImageLoader().setPauseWork(true);
+					centralTimelineAdapter.getIconImageLoader().setPauseWork(true);
+				}
+			}
+		}
+		else
+		{
+			if(centralTimelineAdapter != null)
+			{
+				centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
+				centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
+			}
+		}
+		*/
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
+	public void onEventReceived(String type, final Object object) {
 
 		if (!isAdded()) {
 			return;
@@ -207,6 +238,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 			final int startIndex = getStartIndex();
 			Utils.resetUnseenStatusCount(prefs);
 
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -224,18 +258,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 		} else if (HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED.equals(type)) {
-			getActivity().runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					centralTimelineAdapter.notifyDataSetChanged();
-				}
-			});
-		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
-			if (!shouldAddFTUEItem()) {
-				removeFTUEItemIfExists();
-			} else {
-				addFTUEItem(statusMessages);
+			if (!isAdded()) {
+				return;
 			}
 			getActivity().runOnUiThread(new Runnable() {
 
@@ -244,11 +268,30 @@ public class UpdatesFragment extends SherlockListFragment implements
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
+		} else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type)) {
+			if (!isAdded()) {
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (!shouldAddFTUEItem()) {
+						removeFTUEItemIfExists();
+					} else {
+						addFTUEItem(statusMessages);
+					}
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
 		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
-			addProtip((Protip) object);
+			if (!isAdded()) {
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					addProtip((Protip) object);
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});

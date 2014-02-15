@@ -23,19 +23,22 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
-import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
+	private IconLoader iconLoader;
 	private int mResourceId;
+	private int mIconImageSize;
 
 	public ConversationsAdapter(Context context, int textViewResourceId,
 			List<Conversation> objects) {
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconLoader = new IconLoader(context,mIconImageSize);
 	}
 
 	@Override
@@ -87,7 +90,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
-						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
+						&& (message.getTypingNotification() == null)) {
 					avatarframe
 							.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
 					unreadIndicator.setVisibility(View.VISIBLE);
@@ -219,6 +222,26 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						participantName);
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
 				markedUp = context.getString(R.string.block_internation_sms);
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String nameString;
+				if (conversation instanceof GroupConversation) {
+					nameString = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you)
+							: ((GroupConversation) conversation)
+									.getGroupParticipantFirstName(msisdn);
+				} else {
+					nameString = userMsisdn.equals(msisdn) ? context
+							.getString(R.string.you) : Utils
+							.getFirstName(conversation.getLabel());
+				}
+
+				markedUp = context.getString(R.string.chat_bg_changed,
+						nameString);
 			} else {
 				String msg = message.getMessage();
 				markedUp = msg.substring(0, Math.min(msg.length(),
@@ -254,9 +277,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		}
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
-		avatarView.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(conversation.getMsisdn(), true));
-
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView,true);
 		return v;
 	}
 

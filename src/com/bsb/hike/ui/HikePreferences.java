@@ -71,6 +71,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		int preferences = intent.getIntExtra(HikeConstants.Extras.PREF, -1);
 		int titleRes = intent.getIntExtra(HikeConstants.Extras.TITLE, 0);
 
+		Log.d(getClass().getSimpleName(),preferences+" + "+titleRes);
 		addPreferencesFromResource(preferences);
 
 		Object retained = getLastNonConfigurationInstance();
@@ -199,6 +200,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			mutePreference.setOnPreferenceClickListener(this);
 		}
 
+		Preference muteChatBgPreference = getPreferenceScreen().findPreference(
+				HikeConstants.CHAT_BG_NOTIFICATION_PREF);
+		if (muteChatBgPreference != null) {
+			muteChatBgPreference.setOnPreferenceClickListener(this);
+		}
+
 		if (savedInstanceState != null) {
 			int dialogShowingOrdinal = savedInstanceState.getInt(
 					HikeConstants.Extras.DIALOG_SHOWING, -1);
@@ -286,25 +293,48 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 	public boolean onPreferenceClick(final Preference preference) {
 		Log.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF)) {
-			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
-			confirmDialog.setHeader(R.string.delete_account);
-			confirmDialog.setBody(R.string.delete_confirmation);
-			View.OnClickListener dialogOkClickListener = new View.OnClickListener() {
+			final CustomAlertDialog secondConfirmDialog = new CustomAlertDialog(HikePreferences.this);
+			final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(HikePreferences.this);
+			firstConfirmDialog.setHeader(R.string.are_you_sure);
+			firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);
+			View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					secondConfirmDialog.show();
+					firstConfirmDialog.dismiss();
+				}
+			}; 
+			
+			View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					firstConfirmDialog.dismiss();
+				}
+			};
+			
+			firstConfirmDialog.setOkButton(R.string.cancel, firstDialogOnCancelListener);
+			firstConfirmDialog.setCancelButton(R.string.continue_txt, firstDialogContinueClickListener);
+			firstConfirmDialog.show();
+
+			secondConfirmDialog.setHeader(R.string.please_confirm);
+			secondConfirmDialog.setBody(R.string.delete_confirm_msg_2);
+			View.OnClickListener secondDialogYesClickListener = new View.OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
 					DeleteAccountTask task = new DeleteAccountTask(
-							HikePreferences.this, true);
+							HikePreferences.this, true,getApplicationContext());
 					isDeleting = true;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
-					confirmDialog.dismiss();
+					secondConfirmDialog.dismiss();
 				}
 			}; 
 			
-			confirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-			confirmDialog.setCancelButton(R.string.cancel);
-			confirmDialog.show();
+			secondConfirmDialog.setOkButton(R.string.yes, secondDialogYesClickListener);
+			secondConfirmDialog.setCancelButton(R.string.no);
 
 		} else if (preference.getKey().equals(HikeConstants.UNLINK_PREF)) {
 			final CustomAlertDialog confirmDialog = new CustomAlertDialog(HikePreferences.this);
@@ -315,7 +345,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				@Override
 				public void onClick(View v) {
 					DeleteAccountTask task = new DeleteAccountTask(
-							HikePreferences.this, false);
+							HikePreferences.this, false,getApplicationContext());
 					isDeleting = false;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
@@ -479,6 +509,28 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				JSONObject jsonObject = new JSONObject();
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.PUSH_SU, newValue);
+				jsonObject.put(HikeConstants.DATA, data);
+				jsonObject.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						jsonObject);
+
+			} catch (JSONException e) {
+				Log.w(getClass().getSimpleName(), e);
+			}
+		} else if (HikeConstants.CHAT_BG_NOTIFICATION_PREF.equals(preference
+				.getKey())) {
+			/*
+			 * Send to server
+			 */
+			SharedPreferences settingPref = PreferenceManager
+					.getDefaultSharedPreferences(this);
+			try {
+				JSONObject jsonObject = new JSONObject();
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.CHAT_BACKGROUD_NOTIFICATION, settingPref
+						.getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF,
+								true) ? 0 : -1);
 				jsonObject.put(HikeConstants.DATA, data);
 				jsonObject.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);

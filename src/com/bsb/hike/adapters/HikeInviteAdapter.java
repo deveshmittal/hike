@@ -19,9 +19,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 
 public class HikeInviteAdapter extends
 		HikeArrayAdapter<Pair<AtomicBoolean, ContactInfo>> implements
@@ -30,14 +31,17 @@ public class HikeInviteAdapter extends
 	private List<Pair<AtomicBoolean, ContactInfo>> completeList;
 	private List<Pair<AtomicBoolean, ContactInfo>> filteredList;
 	private ContactFilter filter;
-	private String unknownNumber;
+	private String filterString;
 	private boolean showingBlockedList;
+	private IconLoader iconLoader;
+	private int mIconImageSize;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId,
 			List<Pair<AtomicBoolean, ContactInfo>> completeList,
 			boolean showingBLockedList) {
 
 		super(activity, viewItemId, completeList);
+		mIconImageSize = activity.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.activity = activity;
 		this.filteredList = completeList;
 		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(
@@ -45,6 +49,15 @@ public class HikeInviteAdapter extends
 		this.completeList.addAll(completeList);
 		this.filter = new ContactFilter();
 		this.showingBlockedList = showingBLockedList;
+		iconLoader = new IconLoader(activity,mIconImageSize);
+	}
+
+	public void selectAllToggled() {
+		filter.filter(filterString);
+	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getCompleteList() {
+		return completeList;
 	}
 
 	@Override
@@ -57,8 +70,8 @@ public class HikeInviteAdapter extends
 			isChecked = pair.first;
 			contactInfo = pair.second;
 		} else {
-			contactInfo = new ContactInfo(unknownNumber, unknownNumber,
-					unknownNumber, unknownNumber);
+			contactInfo = new ContactInfo(filterString, filterString,
+					filterString, filterString);
 		}
 
 		LayoutInflater inflater = (LayoutInflater) activity
@@ -68,10 +81,14 @@ public class HikeInviteAdapter extends
 			v = inflater.inflate(R.layout.compose_list_item, parent, false);
 		}
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
-		imageView.setImageDrawable(pair != null ? IconCacheManager
-				.getInstance().getIconForMSISDN(contactInfo.getMsisdn(), true)
-				: getContext().getResources()
-						.getDrawable(R.drawable.ic_avatar1_rounded));
+		if(pair != null)
+		{
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView,true);
+		}
+		else
+			imageView.setImageDrawable(getContext().getResources().getDrawable(
+						R.drawable.ic_avatar1_rounded));
+
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
@@ -111,7 +128,7 @@ public class HikeInviteAdapter extends
 	@Override
 	public void afterTextChanged(Editable s) {
 		filter.filter(s);
-		unknownNumber = s.toString();
+		filterString = s.toString();
 	}
 
 	@Override
@@ -189,7 +206,7 @@ public class HikeInviteAdapter extends
 	@Override
 	public boolean isEnabled(int position) {
 		if (filteredList.get(position) == null) {
-			return unknownNumber.matches(HikeConstants.VALID_MSISDN_REGEX);
+			return filterString.matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
 		return super.isEnabled(position);
 	}

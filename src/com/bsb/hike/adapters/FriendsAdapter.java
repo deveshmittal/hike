@@ -32,7 +32,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -81,8 +81,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private String queryText;
 	private boolean lastSeenPref;
 	private boolean showSMSContacts;
+	private IconLoader iconloader;
+	private boolean listFetchedOnce;
 
+	private int mIconImageSize;
+	
 	public FriendsAdapter(final Context context) {
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		this.iconloader = new IconLoader(context,mIconImageSize);
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();
@@ -101,6 +107,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
+
+		listFetchedOnce = false;
 
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask();
 		Utils.executeAsyncTask(fetchFriendsTask);
@@ -161,6 +169,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			filteredFriendsList.addAll(favoriteTaskList);
 			filteredHikeContactsList.addAll(hikeTaskList);
 			filteredSmsContactsList.addAll(smsTaskList);
+
+			listFetchedOnce = true;
+
 			makeCompleteList(true);
 		}
 	}
@@ -275,16 +286,24 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	public void makeCompleteList(boolean filtered) {
-		if (!filtered) {
+		/*
+		 * Only try to filter if we've fetched the list
+		 * once.
+		 */
+		if (!filtered && listFetchedOnce) {
 			contactFilter.filter(queryText);
 			return;
 		}
 
-		if ((friendsList.isEmpty() && hikeContactsList.isEmpty() && smsContactsList
+		/*
+		 * If we do not fetch the list even once and all the lists are empty,
+		 * we should show the spinner. Else we show the empty states
+		 */
+		if (!listFetchedOnce && ((friendsList.isEmpty() && hikeContactsList.isEmpty() && smsContactsList
 				.isEmpty())
 				|| (filteredFriendsList.isEmpty()
 						&& filteredHikeContactsList.isEmpty() && filteredSmsContactsList
-							.isEmpty())) {
+							.isEmpty()))) {
 			return;
 		}
 
@@ -574,8 +593,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
-			avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar,true);
+			
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
 					.getMsisdn() : contactInfo.getName());
 
@@ -874,7 +893,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteAdded);
 
-			Utils.sendFTUELogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK, contactInfo2.getMsisdn());
+			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK, contactInfo2.getMsisdn());
 
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(
@@ -932,4 +951,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		this.filteredFriendsList = filteredFriendsList;
 	}
 
+	public void destroy() {
+		friendsList.clear();
+		hikeContactsList.clear();
+		smsContactsList.clear();
+		filteredFriendsList.clear();
+		filteredHikeContactsList.clear();
+		filteredSmsContactsList.clear();
+	}
 }
