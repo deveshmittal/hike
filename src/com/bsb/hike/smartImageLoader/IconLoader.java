@@ -2,9 +2,7 @@ package com.bsb.hike.smartImageLoader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Utils;

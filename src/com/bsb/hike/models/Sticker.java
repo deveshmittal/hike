@@ -5,16 +5,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
-import com.bsb.hike.utils.Utils;
 
 public class Sticker implements Serializable, Comparable<Sticker>
 {

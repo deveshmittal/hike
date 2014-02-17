@@ -1,11 +1,11 @@
 package com.bsb.hike.service;
 
-import com.bsb.hike.filetransfer.FileTransferManager;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
+import com.bsb.hike.filetransfer.FileTransferManager;
 
 public class ConnectivityChangeReceiver extends BroadcastReceiver
 {

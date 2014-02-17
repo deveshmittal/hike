@@ -16,41 +16,22 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
-import android.provider.MediaStore;
-import android.provider.MediaStore.MediaColumns;
-import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants.FTResult;
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.utils.FileTransferCancelledException;
-import com.bsb.hike.utils.Utils;
 
 /* 
  * This manager will manage the upload and download (File Transfers).

@@ -1,7 +1,5 @@
 package com.bsb.hike.view;
 
-import com.bsb.hike.utils.Utils;
-
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -19,6 +17,8 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import com.bsb.hike.utils.Utils;
 
 public class TwitterOAuthView extends WebView
 {

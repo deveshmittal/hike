@@ -37,7 +37,6 @@ import android.widget.ImageView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 
