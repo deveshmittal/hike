@@ -876,12 +876,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 					if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
 					{
-						holder.stickerImage.setVisibility(View.VISIBLE);
-						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-						holder.stickerImage.setImageDrawable(HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath()));
-						// holder.stickerImage.setImageDrawable(IconCacheManager
-						// .getInstance().getSticker(context,
-						// stickerImage.getPath()));
+						Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
+						if (stickerDrawable != null)
+						{
+							holder.stickerImage.setVisibility(View.VISIBLE);
+							// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+							holder.stickerImage.setImageDrawable(stickerDrawable);
+							// holder.stickerImage.setImageDrawable(IconCacheManager
+							// .getInstance().getSticker(context,
+							// stickerImage.getPath()));
+						}
+						else
+						{
+							holder.stickerLoader.setVisibility(View.VISIBLE);
+							holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+						}
 					}
 					else
 					{
