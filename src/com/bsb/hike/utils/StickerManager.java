@@ -823,6 +823,7 @@ public class StickerManager
 		catch (Exception e)
 		{
 			Log.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
 	}
