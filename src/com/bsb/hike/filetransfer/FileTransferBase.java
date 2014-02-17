@@ -23,14 +23,13 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	public enum FTState
 	{
 		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
-		PAUSED, CANCELLED, COMPLETED, ERROR,
-		PAUSING
+		PAUSED, CANCELLED, COMPLETED, ERROR, PAUSING
 	}
 
 	protected static String NETWORK_ERROR_1 = "Connection timed out";
 
 	protected static String NETWORK_ERROR_2 = "Unable to resolve host";
-	
+
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
@@ -67,7 +66,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile int _totalSize = 0;
 
 	protected volatile int _bytesTransferred = 0;
-	
+
 	protected int chunkSize = 0;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
@@ -92,6 +91,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		_bytesTransferred += value;
 	}
+
 	protected void setBytesTransferred(int value)
 	{
 		_bytesTransferred = value;
@@ -99,7 +99,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState()
 	{
-		if(_totalSize <= 0)
+		if (_totalSize <= 0)
 			return;
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred);
 		try
@@ -118,7 +118,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState(String uuid)
 	{
-		if(_totalSize <= 0)
+		if (_totalSize <= 0)
 			return;
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
 		try
@@ -134,7 +134,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			i.printStackTrace();
 		}
 	}
-	
+
 	protected void saveFileState(JSONObject response)
 	{
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, response);

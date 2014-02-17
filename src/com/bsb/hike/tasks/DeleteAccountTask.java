@@ -22,97 +22,105 @@ import com.bsb.hike.utils.StickerManager;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
-public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
-		ActivityCallableTask {
+public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
+{
 
 	private HikePreferences activity;
+
 	private boolean finished;
+
 	private boolean delete;
+
 	private Context ctx;
 
-	public DeleteAccountTask(HikePreferences activity, boolean delete,Context context) {
+	public DeleteAccountTask(HikePreferences activity, boolean delete, Context context)
+	{
 		this.activity = activity;
 		this.delete = delete;
 		this.ctx = context;
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... unused) {
+	protected Boolean doInBackground(Void... unused)
+	{
 		FileTransferManager.getInstance(ctx).shutDownAll();
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		HikeConversationsDatabase convDb = HikeConversationsDatabase
-				.getInstance();
-		Editor editor = activity.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
-		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(
-				activity).edit();
+		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
+		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(activity).edit();
 
-		try {
+		try
+		{
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
 
 			// Unregister from GCM service
 			GCMRegistrar.unregister(activity.getApplicationContext());
 
-			HikeMessengerApp app = (HikeMessengerApp) activity
-					.getApplicationContext();
+			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
 			app.disconnectFromService();
 			activity.stopService(new Intent(activity, HikeService.class));
 
 			db.deleteAll();
 			convDb.deleteAll();
 			HikeMessengerApp.getLruCache().clearIconCache();
-			//IconCacheManager.getInstance().clearIconCache();
+			// IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			appPrefEditor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
 
 			Session session = Session.getActiveSession();
-			if (session != null) {
+			if (session != null)
+			{
 				session.closeAndClearTokenInformation();
 			}
 			StickerManager.getInstance().deleteStickers();
 
 			return true;
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			Log.e("DeleteAccountTask", "error deleting account", e);
 			return false;
-		} finally {
+		}
+		finally
+		{
 			editor.commit();
 			appPrefEditor.commit();
 		}
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result) {
+	protected void onPostExecute(Boolean result)
+	{
 		finished = true;
-		if (result.booleanValue()) {
+		if (result.booleanValue())
+		{
 			/* clear any toast notifications */
-			NotificationManager mgr = (NotificationManager) activity
-					.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+			NotificationManager mgr = (NotificationManager) activity.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 			mgr.cancelAll();
 
 			// redirect user to the welcome screen
 			activity.accountDeleted();
-		} else {
+		}
+		else
+		{
 			activity.dismissProgressDialog();
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(
-					activity,
-					this.delete ? activity.getResources().getString(
-							R.string.delete_account_failed) : activity
-							.getResources().getString(
-									R.string.unlink_account_failed), duration);
+			Toast toast = Toast.makeText(activity,
+					this.delete ? activity.getResources().getString(R.string.delete_account_failed) : activity.getResources().getString(R.string.unlink_account_failed), duration);
 			toast.show();
 		}
 	}
 
 	@Override
-	public void setActivity(Activity activity) {
+	public void setActivity(Activity activity)
+	{
 		this.activity = (HikePreferences) activity;
 	}
 
 	@Override
-	public boolean isFinished() {
+	public boolean isFinished()
+	{
 		return finished;
 	}
 

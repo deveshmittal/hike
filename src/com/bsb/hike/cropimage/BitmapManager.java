@@ -28,36 +28,43 @@ import android.util.Log;
 /**
  * This class provides several utilities to cancel bitmap decoding.
  * 
- * The function decodeFileDescriptor() is used to decode a bitmap. During
- * decoding if another thread wants to cancel it, it calls the function
- * cancelThreadDecoding() specifying the Thread which is in decoding.
+ * The function decodeFileDescriptor() is used to decode a bitmap. During decoding if another thread wants to cancel it, it calls the function cancelThreadDecoding() specifying the
+ * Thread which is in decoding.
  * 
  * cancelThreadDecoding() is sticky until allowThreadDecoding() is called.
  * 
- * You can also cancel decoding for a set of threads using ThreadSet as the
- * parameter for cancelThreadDecoding. To put a thread into a ThreadSet, use the
- * add() method. A ThreadSet holds (weak) references to the threads, so you
- * don't need to remove Thread from it if some thread dies.
+ * You can also cancel decoding for a set of threads using ThreadSet as the parameter for cancelThreadDecoding. To put a thread into a ThreadSet, use the add() method. A ThreadSet
+ * holds (weak) references to the threads, so you don't need to remove Thread from it if some thread dies.
  */
-public class BitmapManager {
+public class BitmapManager
+{
 	private static final String TAG = "BitmapManager";
 
-	private static enum State {
+	private static enum State
+	{
 		CANCEL, ALLOW
 	}
 
-	private static class ThreadStatus {
+	private static class ThreadStatus
+	{
 		public State mState = State.ALLOW;
+
 		public BitmapFactory.Options mOptions;
 
 		@Override
-		public String toString() {
+		public String toString()
+		{
 			String s;
-			if (mState == State.CANCEL) {
+			if (mState == State.CANCEL)
+			{
 				s = "Cancel";
-			} else if (mState == State.ALLOW) {
+			}
+			else if (mState == State.ALLOW)
+			{
 				s = "Allow";
-			} else {
+			}
+			else
+			{
 				s = "?";
 			}
 			s = "thread state = " + s + ", options = " + mOptions;
@@ -65,18 +72,22 @@ public class BitmapManager {
 		}
 	}
 
-	public static class ThreadSet implements Iterable<Thread> {
+	public static class ThreadSet implements Iterable<Thread>
+	{
 		private final WeakHashMap<Thread, Object> mWeakCollection = new WeakHashMap<Thread, Object>();
 
-		public void add(Thread t) {
+		public void add(Thread t)
+		{
 			mWeakCollection.put(t, null);
 		}
 
-		public void remove(Thread t) {
+		public void remove(Thread t)
+		{
 			mWeakCollection.remove(t);
 		}
 
-		public Iterator<Thread> iterator() {
+		public Iterator<Thread> iterator()
+		{
 			return mWeakCollection.keySet().iterator();
 		}
 	}
@@ -85,15 +96,18 @@ public class BitmapManager {
 
 	private static BitmapManager sManager = null;
 
-	private BitmapManager() {
+	private BitmapManager()
+	{
 	}
 
 	/**
 	 * Get thread status and create one if specified.
 	 */
-	private synchronized ThreadStatus getOrCreateThreadStatus(Thread t) {
+	private synchronized ThreadStatus getOrCreateThreadStatus(Thread t)
+	{
 		ThreadStatus status = mThreadStatus.get(t);
-		if (status == null) {
+		if (status == null)
+		{
 			status = new ThreadStatus();
 			mThreadStatus.put(t, status);
 		}
@@ -101,47 +115,52 @@ public class BitmapManager {
 	}
 
 	/**
-	 * The following three methods are used to keep track of
-	 * BitmapFaction.Options used for decoding and cancelling.
+	 * The following three methods are used to keep track of BitmapFaction.Options used for decoding and cancelling.
 	 */
-	private synchronized void setDecodingOptions(Thread t,
-			BitmapFactory.Options options) {
+	private synchronized void setDecodingOptions(Thread t, BitmapFactory.Options options)
+	{
 		getOrCreateThreadStatus(t).mOptions = options;
 	}
 
-	synchronized BitmapFactory.Options getDecodingOptions(Thread t) {
+	synchronized BitmapFactory.Options getDecodingOptions(Thread t)
+	{
 		ThreadStatus status = mThreadStatus.get(t);
 		return status != null ? status.mOptions : null;
 	}
 
-	synchronized void removeDecodingOptions(Thread t) {
+	synchronized void removeDecodingOptions(Thread t)
+	{
 		ThreadStatus status = mThreadStatus.get(t);
 		status.mOptions = null;
 	}
 
 	/**
-	 * The following two methods are used to allow/cancel a set of threads for
-	 * bitmap decoding.
+	 * The following two methods are used to allow/cancel a set of threads for bitmap decoding.
 	 */
-	public synchronized void allowThreadDecoding(ThreadSet threads) {
-		for (Thread t : threads) {
+	public synchronized void allowThreadDecoding(ThreadSet threads)
+	{
+		for (Thread t : threads)
+		{
 			allowThreadDecoding(t);
 		}
 	}
 
-	public synchronized void cancelThreadDecoding(ThreadSet threads) {
-		for (Thread t : threads) {
+	public synchronized void cancelThreadDecoding(ThreadSet threads)
+	{
+		for (Thread t : threads)
+		{
 			cancelThreadDecoding(t);
 		}
 	}
 
 	/**
-	 * The following three methods are used to keep track of which thread is
-	 * being disabled for bitmap decoding.
+	 * The following three methods are used to keep track of which thread is being disabled for bitmap decoding.
 	 */
-	public synchronized boolean canThreadDecoding(Thread t) {
+	public synchronized boolean canThreadDecoding(Thread t)
+	{
 		ThreadStatus status = mThreadStatus.get(t);
-		if (status == null) {
+		if (status == null)
+		{
 			// allow decoding by default
 			return true;
 		}
@@ -150,14 +169,17 @@ public class BitmapManager {
 		return result;
 	}
 
-	public synchronized void allowThreadDecoding(Thread t) {
+	public synchronized void allowThreadDecoding(Thread t)
+	{
 		getOrCreateThreadStatus(t).mState = State.ALLOW;
 	}
 
-	public synchronized void cancelThreadDecoding(Thread t) {
+	public synchronized void cancelThreadDecoding(Thread t)
+	{
 		ThreadStatus status = getOrCreateThreadStatus(t);
 		status.mState = State.CANCEL;
-		if (status.mOptions != null) {
+		if (status.mOptions != null)
+		{
 			status.mOptions.requestCancelDecode();
 		}
 
@@ -168,21 +190,21 @@ public class BitmapManager {
 	/**
 	 * A debugging routine.
 	 */
-	public synchronized void dump() {
-		Iterator<Map.Entry<Thread, ThreadStatus>> i = mThreadStatus.entrySet()
-				.iterator();
+	public synchronized void dump()
+	{
+		Iterator<Map.Entry<Thread, ThreadStatus>> i = mThreadStatus.entrySet().iterator();
 
-		while (i.hasNext()) {
+		while (i.hasNext())
+		{
 			Map.Entry<Thread, ThreadStatus> entry = i.next();
-			Log.v(TAG,
-					"[Dump] Thread " + entry.getKey() + " ("
-							+ entry.getKey().getId() + ")'s status is "
-							+ entry.getValue());
+			Log.v(TAG, "[Dump] Thread " + entry.getKey() + " (" + entry.getKey().getId() + ")'s status is " + entry.getValue());
 		}
 	}
 
-	public static synchronized BitmapManager instance() {
-		if (sManager == null) {
+	public static synchronized BitmapManager instance()
+	{
+		if (sManager == null)
+		{
 			sManager = new BitmapManager();
 		}
 		return sManager;
@@ -191,14 +213,16 @@ public class BitmapManager {
 	/**
 	 * The real place to delegate bitmap decoding to BitmapFactory.
 	 */
-	public Bitmap decodeFileDescriptor(FileDescriptor fd,
-			BitmapFactory.Options options) {
-		if (options.mCancel) {
+	public Bitmap decodeFileDescriptor(FileDescriptor fd, BitmapFactory.Options options)
+	{
+		if (options.mCancel)
+		{
 			return null;
 		}
 
 		Thread thread = Thread.currentThread();
-		if (!canThreadDecoding(thread)) {
+		if (!canThreadDecoding(thread))
+		{
 			Log.d(TAG, "Thread " + thread + " is not allowed to decode.");
 			return null;
 		}

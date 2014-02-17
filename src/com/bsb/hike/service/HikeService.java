@@ -46,18 +46,22 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
-public class HikeService extends Service {
+public class HikeService extends Service
+{
 
-	public class ContactsChanged implements Runnable {
+	public class ContactsChanged implements Runnable
+	{
 
 		private Context context;
 
-		public ContactsChanged(Context ctx) {
+		public ContactsChanged(Context ctx)
+		{
 			this.context = ctx;
 		}
 
 		@Override
-		public void run() {
+		public void run()
+		{
 			Log.d("ContactsChanged", "calling syncUpdates");
 			ContactUtils.syncUpdates(this.context);
 		}
@@ -95,7 +99,7 @@ public class HikeService extends Service {
 	public static final String SEND_DEV_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_DEV_DETAILS_TO_SERVER";
 
 	public static final String SEND_RAI_TO_SERVER_ACTION = "com.bsb.hike.SEND_RAI";
-	
+
 	// used to send Whatsapp details to server
 	public static final String SEND_WA_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_WA_DETAILS_TO_SERVER";
 
@@ -119,7 +123,7 @@ public class HikeService extends Service {
 	private SendGCMIdToServerTrigger sendGCMIdToServerTrigger;
 
 	private PostDeviceDetails postDeviceDetails;
-	
+
 	private PostWhatsappDetails postWhatsappDetails;
 
 	private HikeMqttManagerNew mMqttManager;
@@ -129,12 +133,13 @@ public class HikeService extends Service {
 	private ContactListChangeIntentReceiver contactsReceived;
 
 	private Handler mContactsChangedHandler;
+
 	private Runnable mContactsChanged;
 
 	private Looper mContactHandlerLooper;
 
 	private StickerManager sm;
-	
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -142,51 +147,43 @@ public class HikeService extends Service {
 	// see http://developer.android.com/guide/topics/fundamentals.html#lcycles
 
 	@Override
-	public void onCreate() {
+	public void onCreate()
+	{
 		super.onCreate();
 
 		Log.d("TestUpdate", "Service started");
-		
-		if (registerToGCMTrigger == null) {
+
+		if (registerToGCMTrigger == null)
+		{
 			registerToGCMTrigger = new RegisterToGCMTrigger();
-			registerReceiver(registerToGCMTrigger, new IntentFilter(
-					REGISTER_TO_GCM_ACTION));
+			registerReceiver(registerToGCMTrigger, new IntentFilter(REGISTER_TO_GCM_ACTION));
 			sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
 		}
-		if (sendGCMIdToServerTrigger == null) {
+		if (sendGCMIdToServerTrigger == null)
+		{
 			sendGCMIdToServerTrigger = new SendGCMIdToServerTrigger();
-			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(
-					SEND_TO_SERVER_ACTION));
+			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(SEND_TO_SERVER_ACTION));
 		}
 
 		Log.d("HikeService", "onCreate called");
 
 		// reset status variable to initial state
-		//mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
+		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
 		mMqttManager.init();
 		networkTypeChangeIntentReceiver = new NetworkTypeChangeIntentReceiver();
-		registerReceiver(networkTypeChangeIntentReceiver, new IntentFilter(
-				ConnectivityManager.CONNECTIVITY_ACTION));
+		registerReceiver(networkTypeChangeIntentReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 		/*
-		 * notify android that our service represents a user visible action, so
-		 * it should not be killable. In order to do so, we need to show a
-		 * notification so the user understands what's going on
+		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
+		 * what's going on
 		 */
 
 		/*
-		 * Remove this for now because a) it's irritating and b) it may be
-		 * causing increased battery usage. Notification notification = new
-		 * Notification(R.drawable.ic_contact_logo,
-		 * getResources().getString(R.string.service_running_message),
-		 * System.currentTimeMillis()); notification.flags |=
-		 * Notification.FLAG_AUTO_CANCEL;
+		 * Remove this for now because a) it's irritating and b) it may be causing increased battery usage. Notification notification = new Notification(R.drawable.ic_contact_logo,
+		 * getResources().getString(R.string.service_running_message), System.currentTimeMillis()); notification.flags |= Notification.FLAG_AUTO_CANCEL;
 		 * 
-		 * Intent notificationIntent = new Intent(this, MessagesList.class);
-		 * PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-		 * notificationIntent, 0); notification.setLatestEventInfo(this, "Hike",
-		 * "Hike", contentIntent);
-		 * startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
+		 * Intent notificationIntent = new Intent(this, MessagesList.class); PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 
 		HandlerThread contactHandlerThread = new HandlerThread("");
@@ -196,58 +193,52 @@ public class HikeService extends Service {
 		mContactsChanged = new ContactsChanged(this);
 
 		/*
-		 * register with the Contact list to get an update whenever the phone
-		 * book changes. Use the application thread for the intent receiver, the
-		 * IntentReceiver will take care of running the event on a different
-		 * thread
+		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
+		 * running the event on a different thread
 		 */
 		contactsReceived = new ContactListChangeIntentReceiver(new Handler());
 		/* listen for changes in the addressbook */
-		getContentResolver().registerContentObserver(
-				ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
+		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
 		/*
 		 * listen for changes in sim contacts
 		 */
-		getContentResolver().registerContentObserver(
-				Uri.parse("content://icc/adn"), true, contactsReceived);
-		if (manualContactSyncTrigger == null) {
+		getContentResolver().registerContentObserver(Uri.parse("content://icc/adn"), true, contactsReceived);
+		if (manualContactSyncTrigger == null)
+		{
 			manualContactSyncTrigger = new ManualContactSyncTrigger();
-			registerReceiver(manualContactSyncTrigger, new IntentFilter(
-					MQTT_CONTACT_SYNC_ACTION));
+			registerReceiver(manualContactSyncTrigger, new IntentFilter(MQTT_CONTACT_SYNC_ACTION));
 			/*
-			 * Forcing a sync first time service is created to fix bug where if
-			 * the app is force stopped no contacts are synced if they are added
-			 * when the app is in force stopped state
+			 * Forcing a sync first time service is created to fix bug where if the app is force stopped no contacts are synced if they are added when the app is in force stopped
+			 * state
 			 */
-			getContentResolver().notifyChange(
-					ContactsContract.Contacts.CONTENT_URI, null);
+			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
 		}
-		
-		if (postDeviceDetails == null) {
+
+		if (postDeviceDetails == null)
+		{
 			postDeviceDetails = new PostDeviceDetails();
-			registerReceiver(postDeviceDetails, new IntentFilter(
-					SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			registerReceiver(postDeviceDetails, new IntentFilter(SEND_DEV_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
-		if (sendRai == null) {
+		if (sendRai == null)
+		{
 			sendRai = new SendRai();
 			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
-		if (postWhatsappDetails == null) {
+		if (postWhatsappDetails == null)
+		{
 			postWhatsappDetails = new PostWhatsappDetails();
-			registerReceiver(postWhatsappDetails, new IntentFilter(
-					SEND_WA_DETAILS_TO_SERVER_ACTION));
+			registerReceiver(postWhatsappDetails, new IntentFilter(SEND_WA_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_WA_DETAILS_TO_SERVER_ACTION));
 			Log.d("Whatsapp", "Whatsapp details sender registered");
 		}
-		
-		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).getBoolean(
-				HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false)) {
+
+		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
+		{
 			Log.d(getClass().getSimpleName(), "SYNCING");
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
@@ -260,65 +251,68 @@ public class HikeService extends Service {
 		sm = StickerManager.getInstance();
 		sm.init(getApplicationContext());
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		SharedPreferences preferenceManager = PreferenceManager
-				.getDefaultSharedPreferences(this);
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 		/*
-		 * If we had earlier removed bollywood stickers we need to display them
-		 * again.
+		 * If we had earlier removed bollywood stickers we need to display them again.
 		 */
-		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS)) {
+		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS))
+		{
 			sm.setupBollywoodCategoryVisibility(settings);
 		}
-		
+
 		sm.setupStickerCategoryList(settings);
 
 		/*
-		 * This preference has been used here because of a bug where we were
-		 * inserting this key in the settings preference
+		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
 		 */
-		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS)) {
+		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS))
+		{
 			sm.removeHumanoidSticker();
 		}
 
-		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false)) {
+		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false))
+		{
 			sm.insertDoggyCategory();
 		}
 
-		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false)) {
+		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false))
+		{
 			sm.insertHumanoidCategory();
 		}
 
-		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false)) {
+		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false))
+		{
 			sm.resetReachedEndForDefaultStickers();
 		}
 
 		/*
-		 * Adding these preferences since they are used in the load more
-		 * stickers logic.
+		 * Adding these preferences since they are used in the load more stickers logic.
 		 */
-		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES,
-				false)) {
+		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, false))
+		{
 			sm.setDialoguePref();
 		}
-		
+
 	}
 
 	@Override
-	public int onStartCommand(final Intent intent, int flags, final int startId) {
-		Log.d("HikeService","Start MQTT Thread.");
+	public int onStartCommand(final Intent intent, int flags, final int startId)
+	{
+		Log.d("HikeService", "Start MQTT Thread.");
 		mMqttManager.connectOnMqttThread();
 		Log.d("HikeService", "Intent is " + intent);
-		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE)) {
-			String s = intent.getExtras().getString(
-					HikeConstants.Extras.SMS_MESSAGE);
-			try {
+		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
+		{
+			String s = intent.getExtras().getString(HikeConstants.Extras.SMS_MESSAGE);
+			try
+			{
 				JSONObject msg = new JSONObject(s);
-				Log.d("HikeService",
-						"Intent contained SMS message "
-								+ msg.getString(HikeConstants.TYPE));
+				Log.d("HikeService", "Intent contained SMS message " + msg.getString(HikeConstants.TYPE));
 				MqttMessagesManager mgr = MqttMessagesManager.getInstance(this);
 				mgr.saveMqttMessage(msg);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				e.printStackTrace();
 			}
 		}
@@ -328,9 +322,9 @@ public class HikeService extends Service {
 		return START_STICKY;
 	}
 
-
 	@Override
-	public void onDestroy() {
+	public void onDestroy()
+	{
 		super.onDestroy();
 
 		Log.i("HikeService", "onDestroy.  Shutting down service");
@@ -338,51 +332,61 @@ public class HikeService extends Service {
 		this.mMqttManager = null;
 		// inform the app that the app has successfully disconnected
 		unregisterDataChangeReceivers();
-		if (contactsReceived != null) {
+		if (contactsReceived != null)
+		{
 			getContentResolver().unregisterContentObserver(contactsReceived);
 			contactsReceived = null;
 		}
 
-		if (mContactHandlerLooper != null) {
+		if (mContactHandlerLooper != null)
+		{
 			mContactHandlerLooper.quit();
 		}
 
-		if (manualContactSyncTrigger != null) {
+		if (manualContactSyncTrigger != null)
+		{
 			unregisterReceiver(manualContactSyncTrigger);
 			manualContactSyncTrigger = null;
 		}
 
-		if (registerToGCMTrigger != null) {
+		if (registerToGCMTrigger != null)
+		{
 			unregisterReceiver(registerToGCMTrigger);
 			registerToGCMTrigger = null;
 		}
 
-		if (sendGCMIdToServerTrigger != null) {
+		if (sendGCMIdToServerTrigger != null)
+		{
 			unregisterReceiver(sendGCMIdToServerTrigger);
 			sendGCMIdToServerTrigger = null;
 		}
 
-		if (postDeviceDetails != null) {
+		if (postDeviceDetails != null)
+		{
 			unregisterReceiver(postDeviceDetails);
 			postDeviceDetails = null;
 		}
 
-		if (sendRai != null) {
+		if (sendRai != null)
+		{
 			unregisterReceiver(sendRai);
 			sendRai = null;
 		}
 		sm.getStickerCategoryList().clear();
 		sm.getRecentStickerList().clear();
-		
-		if (postWhatsappDetails != null) {
+
+		if (postWhatsappDetails != null)
+		{
 			unregisterReceiver(postWhatsappDetails);
 			postWhatsappDetails = null;
 		}
 	}
 
-	public void unregisterDataChangeReceivers() {
-		
-		if (networkTypeChangeIntentReceiver != null) {
+	public void unregisterDataChangeReceivers()
+	{
+
+		if (networkTypeChangeIntentReceiver != null)
+		{
 			unregisterReceiver(networkTypeChangeIntentReceiver);
 			networkTypeChangeIntentReceiver = null;
 		}
@@ -399,7 +403,8 @@ public class HikeService extends Service {
 	// methods used to notify the user of what has happened for times when
 	// the app Activity UI isn't running
 
-	public void notifyUser(String alert, String title, String body) {
+	public void notifyUser(String alert, String title, String body)
+	{
 		Log.w("HikeService", alert + ":" + "body");
 	}
 
@@ -408,7 +413,8 @@ public class HikeService extends Service {
 	/************************************************************************/
 
 	@Override
-	public IBinder onBind(Intent intent) {
+	public IBinder onBind(Intent intent)
+	{
 		return mMqttManager.getMessenger().getBinder();
 	}
 
@@ -416,86 +422,95 @@ public class HikeService extends Service {
 	/* METHODS - wrappers for some of the MQTT methods that we use */
 	/************************************************************************/
 
-	private class ContactListChangeIntentReceiver extends ContentObserver {
+	private class ContactListChangeIntentReceiver extends ContentObserver
+	{
 
-		public ContactListChangeIntentReceiver(Handler handler) {
+		public ContactListChangeIntentReceiver(Handler handler)
+		{
 			super(handler);
 		}
 
 		@Override
-		public void onChange(boolean selfChange) {
+		public void onChange(boolean selfChange)
+		{
 			Log.d(getClass().getSimpleName(), "Contact content observer called");
 
-			HikeService.this.mContactsChangedHandler
-					.removeCallbacks(mContactsChanged);
-			HikeService.this.mContactsChangedHandler.postDelayed(
-					mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
+			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
 			// Schedule the next manual sync to happed 24 hours from now.
 			scheduleNextManualContactSync();
 		}
 	}
 
-	private class NetworkTypeChangeIntentReceiver extends BroadcastReceiver {
+	private class NetworkTypeChangeIntentReceiver extends BroadcastReceiver
+	{
 
 		boolean wasWifiOnLastTime = false;
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(Context context, Intent intent)
+		{
 			boolean isWifiOn = Utils.switchSSLOn(getApplicationContext());
-			if (wasWifiOnLastTime == isWifiOn) {
-				Log.d("SSL", "Same connection type as before. Wifi? "
-						+ isWifiOn);
+			if (wasWifiOnLastTime == isWifiOn)
+			{
+				Log.d("SSL", "Same connection type as before. Wifi? " + isWifiOn);
 				return;
 			}
 			Log.d("SSL", "Different connection type. Wifi? " + isWifiOn);
 			wasWifiOnLastTime = isWifiOn;
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.SWITCHED_DATA_CONNECTION, isWifiOn);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCHED_DATA_CONNECTION, isWifiOn);
 		}
 	}
 
-	private void postRunnableWithDelay(Runnable runnable, long delay) {
+	private void postRunnableWithDelay(Runnable runnable, long delay)
+	{
 		mContactsChangedHandler.removeCallbacks(runnable);
 		mContactsChangedHandler.postDelayed(runnable, delay);
 	}
 
-	private long getScheduleTime(long wakeUpTime) {
+	private long getScheduleTime(long wakeUpTime)
+	{
 		return (wakeUpTime - System.currentTimeMillis());
 	}
 
-	private class ManualContactSyncTrigger extends BroadcastReceiver {
+	private class ManualContactSyncTrigger extends BroadcastReceiver
+	{
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			getContentResolver().notifyChange(
-					ContactsContract.Contacts.CONTENT_URI, null);
+		public void onReceive(Context context, Intent intent)
+		{
+			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
 		}
 	}
 
-	private class RegisterToGCMTrigger extends BroadcastReceiver {
+	private class RegisterToGCMTrigger extends BroadcastReceiver
+	{
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(Context context, Intent intent)
+		{
 			Log.d(getClass().getSimpleName(), "Registering for GCM");
-			try{
+			try
+			{
 				GCMRegistrar.checkDevice(HikeService.this);
 				GCMRegistrar.checkManifest(HikeService.this);
-				final String regId = GCMRegistrar
-						.getRegistrationId(HikeService.this);
-				if ("".equals(regId)) {
+				final String regId = GCMRegistrar.getRegistrationId(HikeService.this);
+				if ("".equals(regId))
+				{
 					/*
-					 * Since we are registering again, we should clear this
-					 * preference
+					 * Since we are registering again, we should clear this preference
 					 */
-					Editor editor = getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.remove(HikeMessengerApp.GCM_ID_SENT);
 					editor.commit();
-	
-					GCMRegistrar.register(HikeService.this,
-							HikeConstants.APP_PUSH_ID);
-				} else {
+
+					GCMRegistrar.register(HikeService.this, HikeConstants.APP_PUSH_ID);
+				}
+				else
+				{
 					sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
 				}
-			} catch (UnsupportedOperationException e) {
+			}
+			catch (UnsupportedOperationException e)
+			{
 				/*
 				 * User doesnt have google services
 				 */
@@ -503,49 +518,52 @@ public class HikeService extends Service {
 		}
 	}
 
-	private class SendGCMIdToServerTrigger extends BroadcastReceiver {
+	private class SendGCMIdToServerTrigger extends BroadcastReceiver
+	{
 		@Override
-		public void onReceive(final Context context, Intent intent) {
+		public void onReceive(final Context context, Intent intent)
+		{
 			Log.d(getClass().getSimpleName(), "Sending GCM ID");
 			final String regId = GCMRegistrar.getRegistrationId(context);
-			if ("".equals(regId)) {
+			if ("".equals(regId))
+			{
 				sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
 				Log.d(getClass().getSimpleName(), "GCM id not found");
 				return;
 			}
 
-			final SharedPreferences prefs = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-			if (prefs.getBoolean(HikeMessengerApp.GCM_ID_SENT, false)) {
+			final SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			if (prefs.getBoolean(HikeMessengerApp.GCM_ID_SENT, false))
+			{
 				Log.d(getClass().getSimpleName(), "GCM id sent");
 				return;
 			}
 
-			Log.d(getClass().getSimpleName(),
-					"GCM id was not sent. Sending now");
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-					"/account/device", RequestType.OTHER,
-					new HikeHttpCallback() {
-						public void onSuccess(JSONObject response) {
-							Log.d(SendGCMIdToServerTrigger.this.getClass()
-									.getSimpleName(), "Send successful");
-							Editor editor = prefs.edit();
-							editor.putBoolean(HikeMessengerApp.GCM_ID_SENT,
-									true);
-							editor.commit();
-						}
+			Log.d(getClass().getSimpleName(), "GCM id was not sent. Sending now");
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/device", RequestType.OTHER, new HikeHttpCallback()
+			{
+				public void onSuccess(JSONObject response)
+				{
+					Log.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send successful");
+					Editor editor = prefs.edit();
+					editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, true);
+					editor.commit();
+				}
 
-						public void onFailure() {
-							Log.d(SendGCMIdToServerTrigger.this.getClass()
-									.getSimpleName(), "Send unsuccessful");
-							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
-						}
-					});
+				public void onFailure()
+				{
+					Log.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
+					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
+				}
+			});
 			JSONObject request = new JSONObject();
-			try {
+			try
+			{
 				request.put(GCMIntentService.DEV_TYPE, HikeConstants.ANDROID);
 				request.put(GCMIntentService.DEV_TOKEN, regId);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				Log.d(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			hikeHttpRequest.setJSONData(request);
@@ -555,38 +573,40 @@ public class HikeService extends Service {
 		}
 	}
 
-	private class PostDeviceDetails extends BroadcastReceiver {
+	private class PostDeviceDetails extends BroadcastReceiver
+	{
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-					MODE_PRIVATE).getBoolean(
-					HikeMessengerApp.DEVICE_DETAILS_SENT, false)) {
+		public void onReceive(Context context, Intent intent)
+		{
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, false))
+			{
 				Log.d(getClass().getSimpleName(), "Device details sent");
 				return;
 			}
 			Log.d("TestUpdate", "Sending device details to server");
-			Log.d(getClass().getSimpleName(),
-					"Sending device details to server");
+			Log.d(getClass().getSimpleName(), "Sending device details to server");
 
 			String osVersion = Build.VERSION.RELEASE;
 			String devType = HikeConstants.ANDROID;
 			String os = HikeConstants.ANDROID;
 			String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = "";
-			try {
-				appVersion = context.getPackageManager().getPackageInfo(
-						context.getPackageName(), 0).versionName;
-			} catch (NameNotFoundException e) {
+			try
+			{
+				appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+			}
+			catch (NameNotFoundException e)
+			{
 				Log.e("AccountUtils", "Unable to get app version");
 			}
 
-			TelephonyManager manager = (TelephonyManager) context
-					.getSystemService(Context.TELEPHONY_SERVICE);
+			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			String deviceKey = manager.getDeviceId();
 
 			JSONObject data = new JSONObject();
-			try {
+			try
+			{
 				data.put(HikeConstants.DEV_TYPE, devType);
 				data.put(HikeConstants.APP_VERSION, appVersion);
 				data.put(HikeConstants.LogEvent.OS, os);
@@ -594,33 +614,32 @@ public class HikeService extends Service {
 				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
 				data.put(HikeConstants.DEVICE_KEY, deviceKey);
 				Utils.addCommonDeviceDetails(data, context);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 
 			Log.d("TestUpdate", "Sending data: " + data.toString());
-			
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-					"/account/update", RequestType.OTHER,
-					new HikeHttpCallback() {
-						public void onSuccess(JSONObject response) {
-							Log.d("TestUpdate", "Device details sent successfully");
-							Log.d(getClass().getSimpleName(), "Send successful");
-							Editor editor = getSharedPreferences(
-									HikeMessengerApp.ACCOUNT_SETTINGS,
-									MODE_PRIVATE).edit();
-							editor.putBoolean(
-									HikeMessengerApp.DEVICE_DETAILS_SENT, true);
-							editor.commit();
-						}
 
-						public void onFailure() {
-							Log.d("TestUpdate", "Device details could not be sent");
-							Log.d(getClass().getSimpleName(),
-									"Send unsuccessful");
-							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, sendDevDetailsToServer);
-						}
-					});
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/update", RequestType.OTHER, new HikeHttpCallback()
+			{
+				public void onSuccess(JSONObject response)
+				{
+					Log.d("TestUpdate", "Device details sent successfully");
+					Log.d(getClass().getSimpleName(), "Send successful");
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
+					editor.commit();
+				}
+
+				public void onFailure()
+				{
+					Log.d("TestUpdate", "Device details could not be sent");
+					Log.d(getClass().getSimpleName(), "Send unsuccessful");
+					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, sendDevDetailsToServer);
+				}
+			});
 			hikeHttpRequest.setJSONData(data);
 
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
@@ -628,13 +647,14 @@ public class HikeService extends Service {
 		}
 	}
 
-	private class SendRai extends BroadcastReceiver {
+	private class SendRai extends BroadcastReceiver
+	{
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-					MODE_PRIVATE).getBoolean(
-					HikeMessengerApp.UPGRADE_RAI_SENT, false)) {
+		public void onReceive(Context context, Intent intent)
+		{
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, false))
+			{
 				Log.d(getClass().getSimpleName(), "Rai was already sent");
 				return;
 			}
@@ -643,67 +663,69 @@ public class HikeService extends Service {
 			// Send the device details again which includes the new app
 			// version
 			JSONObject obj = Utils.getDeviceDetails(context);
-			if (obj != null) {
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH, obj);
+			if (obj != null)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 			}
 
 			Utils.requestAccountInfo(true, false);
 
-			Editor editor = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS,
-					MODE_PRIVATE).edit();
-			editor.putBoolean(
-					HikeMessengerApp.UPGRADE_RAI_SENT, true);
+			Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+			editor.putBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, true);
 			editor.commit();
 
 			Log.d("TestUpdate", "rai packet sent to server");
 		}
 	}
 
-	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference) {
-		Log.d(getClass().getSimpleName(), "Scheduling next "+ lastBackOffTimePref+" send");
+	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference)
+	{
+		Log.d(getClass().getSimpleName(), "Scheduling next " + lastBackOffTimePref + " send");
 
-		SharedPreferences preferences = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+		SharedPreferences preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		int lastBackOffTime = preferences.getInt(lastBackOffTimePref, 0);
 
-		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME
-				: (lastBackOffTime * 2);
-		lastBackOffTime = Math.min(HikeConstants.MAX_RECONNECT_TIME,
-				lastBackOffTime);
+		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME : (lastBackOffTime * 2);
+		lastBackOffTime = Math.min(HikeConstants.MAX_RECONNECT_TIME, lastBackOffTime);
 
 		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
 
 		postRunnableWithDelay(postRunnableReference, lastBackOffTime * 1000);
-		
+
 		Editor editor = preferences.edit();
-		editor.putInt(lastBackOffTimePref,lastBackOffTime);
+		editor.putInt(lastBackOffTimePref, lastBackOffTime);
 		editor.commit();
 	}
 
-	private Runnable sendGCMIdToServer = new Runnable() {
+	private Runnable sendGCMIdToServer = new Runnable()
+	{
 		@Override
-		public void run() {
+		public void run()
+		{
 			sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
 		}
 	};
 
-	private Runnable sendDevDetailsToServer = new Runnable() {
+	private Runnable sendDevDetailsToServer = new Runnable()
+	{
 		@Override
-		public void run() {
+		public void run()
+		{
 			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
 		}
 	};
-	
-	private Runnable sendWhatsappDetailsToServer = new Runnable() {
+
+	private Runnable sendWhatsappDetailsToServer = new Runnable()
+	{
 		@Override
-		public void run() {
+		public void run()
+		{
 			sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
 		}
 	};
 
-	private void scheduleNextManualContactSync() {
+	private void scheduleNextManualContactSync()
+	{
 		Calendar wakeUpTime = Calendar.getInstance();
 		wakeUpTime.add(Calendar.HOUR, 24);
 
@@ -712,14 +734,17 @@ public class HikeService extends Service {
 		postRunnableWithDelay(contactSyncRunnable, scheduleTime);
 	}
 
-	private Runnable contactSyncRunnable = new Runnable() {
+	private Runnable contactSyncRunnable = new Runnable()
+	{
 		@Override
-		public void run() {
+		public void run()
+		{
 			sendBroadcast(new Intent(MQTT_CONTACT_SYNC_ACTION));
 		}
 	};
 
-	private void scheduleNextUserStatsSending() {
+	private void scheduleNextUserStatsSending()
+	{
 		Calendar wakeUpTime = Calendar.getInstance();
 		wakeUpTime.add(Calendar.HOUR, 12);
 
@@ -728,66 +753,70 @@ public class HikeService extends Service {
 		postRunnableWithDelay(sendUserStats, scheduleTime);
 	}
 
-	private Runnable sendUserStats = new Runnable() {
+	private Runnable sendUserStats = new Runnable()
+	{
 
 		@Override
-		public void run() {
+		public void run()
+		{
 			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
-			if (obj != null) {
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-						obj);
+			if (obj != null)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 			}
 			scheduleNextUserStatsSending();
 		}
 	};
 
-	private Runnable checkForUpdates = new Runnable() {
+	private Runnable checkForUpdates = new Runnable()
+	{
 
 		@Override
-		public void run() {
-			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
-					HikeService.this);
+		public void run()
+		{
+			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(HikeService.this);
 			Utils.executeBoolResultAsyncTask(checkForUpdateTask);
 		}
 	};
 
-	public boolean appIsConnected() {
+	public boolean appIsConnected()
+	{
 		return mApp != null;
 	}
-	
-	public class PostWhatsappDetails extends BroadcastReceiver {
+
+	public class PostWhatsappDetails extends BroadcastReceiver
+	{
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-					MODE_PRIVATE).getBoolean(
-					HikeMessengerApp.WHATSAPP_DETAILS_SENT, false)) {
+		public void onReceive(Context context, Intent intent)
+		{
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, false))
+			{
 				Log.d("PostInfo", "info details sent");
 				return;
 			}
-			
+
 			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
 			ContactUtils.setWhatsappStatus(context, contactinfos);
 			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
-			
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-					"/account/info", RequestType.OTHER,
-					new HikeHttpCallback() {
-						public void onSuccess(JSONObject response) {
-							Log.d("PostInfo", "info sent successfully");
-							Editor editor = getSharedPreferences(
-									HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-							editor.putBoolean(
-									HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
-							editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, 0);
-							editor.commit();
-						}
 
-						public void onFailure() {
-							Log.d("PostInfo", "info could not be sent");
-							scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, sendWhatsappDetailsToServer);
-						}
-					});
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()
+			{
+				public void onSuccess(JSONObject response)
+				{
+					Log.d("PostInfo", "info sent successfully");
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					editor.putBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
+					editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, 0);
+					editor.commit();
+				}
+
+				public void onFailure()
+				{
+					Log.d("PostInfo", "info could not be sent");
+					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, sendWhatsappDetailsToServer);
+				}
+			});
 			hikeHttpRequest.setJSONData(data);
 
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);

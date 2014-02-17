@@ -10,9 +10,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
 
-public class HikePubSub implements Runnable {
-	public class Operation {
-		public Operation(String type, Object o) {
+public class HikePubSub implements Runnable
+{
+	public class Operation
+	{
+		public Operation(String type, Object o)
+		{
 			this.type = type;
 			this.payload = o;
 		}
@@ -22,18 +25,17 @@ public class HikePubSub implements Runnable {
 		public final Object payload;
 	}
 
-	public interface Listener {
+	public interface Listener
+	{
 		public void onEventReceived(String type, Object object);
 	}
 
 	private static final Operation DONE_OPERATION = null; /*
-														 * TODO this can't be
-														 * null
+														 * TODO this can't be null
 														 */
 
 	/*
-	 * broadcast when the sender sends the message (click the send button in
-	 * chat thread view)
+	 * broadcast when the sender sends the message (click the send button in chat thread view)
 	 */
 	public static final String MESSAGE_SENT = "messagesent";
 
@@ -72,8 +74,7 @@ public class HikePubSub implements Runnable {
 	public static final String NEW_CONVERSATION = "newconv";
 
 	/*
-	 * Broadcast after we've received a message and written it to our DB. Status
-	 * is RECEIVED_UNREAD
+	 * Broadcast after we've received a message and written it to our DB. Status is RECEIVED_UNREAD
 	 */
 	public static final String MESSAGE_RECEIVED = "messagereceived";
 
@@ -89,14 +90,12 @@ public class HikePubSub implements Runnable {
 	public static final String SMS_CREDIT_CHANGED = "smscredits";
 
 	/*
-	 * broadcast when the server receives the message and replies with a
-	 * confirmation
+	 * broadcast when the server receives the message and replies with a confirmation
 	 */
 	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
 
 	/*
-	 * broadcast when a message is received from the sender but before it's been
-	 * written our DB
+	 * broadcast when a message is received from the sender but before it's been written our DB
 	 */
 	public static final String MESSAGE_RECEIVED_FROM_SENDER = "messageReceivedFromSender";
 
@@ -147,8 +146,8 @@ public class HikePubSub implements Runnable {
 	public static final String UPLOAD_FINISHED = "uploadFinished";
 
 	public static final String FILE_TRANSFER_PROGRESS_UPDATED = "fileTransferProgressUpdated";
-	
-	//public static final String RESUME_BUTTON_UPDATED = "resumeButtonUpdated";
+
+	// public static final String RESUME_BUTTON_UPDATED = "resumeButtonUpdated";
 
 	public static final String SHOW_PARTICIPANT_STATUS_MESSAGE = "showParticipantStatusMessage";
 
@@ -281,12 +280,12 @@ public class HikePubSub implements Runnable {
 	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
-	
-	public static final String UPDATE_PUSH = "updatePush";
-	
-	public static final String APPLICATIONS_PUSH ="applicationsPush";
 
-	public static final String  UPDATE_AVAILABLE ="updateAvailable"; //TODO: get rid of this.
+	public static final String UPDATE_PUSH = "updatePush";
+
+	public static final String APPLICATIONS_PUSH = "applicationsPush";
+
+	public static final String UPDATE_AVAILABLE = "updateAvailable"; // TODO: get rid of this.
 
 	public static final String SERVICE_STARTED = "serviceStarted";
 
@@ -302,22 +301,26 @@ public class HikePubSub implements Runnable {
 
 	private Map<String, Set<Listener>> listeners;
 
-	public HikePubSub() {
-		listeners = Collections
-				.synchronizedMap(new HashMap<String, Set<Listener>>());
+	public HikePubSub()
+	{
+		listeners = Collections.synchronizedMap(new HashMap<String, Set<Listener>>());
 		mQueue = new LinkedBlockingQueue<Operation>();
 		mThread = new Thread(this);
 		mThread.start();
 	}
 
-	synchronized public void addListener(String type, Listener listener) {
+	synchronized public void addListener(String type, Listener listener)
+	{
 		addListeners(listener, type);
 	}
 
-	synchronized public void addListeners(Listener listener, String... types) {
-		for (String type : types) {
+	synchronized public void addListeners(Listener listener, String... types)
+	{
+		for (String type : types)
+		{
 			Set<Listener> list = listeners.get(type);
-			if (list == null) {
+			if (list == null)
+			{
 				list = new CopyOnWriteArraySet<Listener>();
 				listeners.put(type, list);
 			}
@@ -325,8 +328,10 @@ public class HikePubSub implements Runnable {
 		}
 	}
 
-	synchronized public boolean publish(String type, Object o) {
-		if (!listeners.containsKey(type)) {
+	synchronized public boolean publish(String type, Object o)
+	{
+		if (!listeners.containsKey(type))
+		{
 			return false;
 		}
 		mQueue.add(new Operation(type, o));
@@ -334,36 +339,43 @@ public class HikePubSub implements Runnable {
 	}
 
 	/*
-	 * We also need to make removeListener a synchronized method. if we
-	 * don't do that it would lead to memory inconsistency issue. in our
-	 * case some activities won't get destroyed unless we unregister all
-	 * listeners and in that slot if activity receives a pubsub event it
-	 * would try to handle this event which may lead to anything unusual.
+	 * We also need to make removeListener a synchronized method. if we don't do that it would lead to memory inconsistency issue. in our case some activities won't get destroyed
+	 * unless we unregister all listeners and in that slot if activity receives a pubsub event it would try to handle this event which may lead to anything unusual.
 	 */
-	synchronized public void removeListener(String type, Listener listener) {
+	synchronized public void removeListener(String type, Listener listener)
+	{
 		removeListeners(listener, type);
 	}
 
-	synchronized public void removeListeners(Listener listener, String... types) {
-		for (String type : types) {
+	synchronized public void removeListeners(Listener listener, String... types)
+	{
+		for (String type : types)
+		{
 			Set<Listener> l = listeners.get(type);
-			if (l != null) {
+			if (l != null)
+			{
 				l.remove(listener);
 			}
 		}
 	}
 
 	@Override
-	public void run() {
+	public void run()
+	{
 		Operation op;
-		while (true) {
-			try {
+		while (true)
+		{
+			try
+			{
 				op = mQueue.take();
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e)
+			{
 				Log.e("PubSub", "exception while running", e);
 				continue;
 			}
-			if (op == DONE_OPERATION) {
+			if (op == DONE_OPERATION)
+			{
 				break;
 			}
 
@@ -372,11 +384,13 @@ public class HikePubSub implements Runnable {
 
 			Set<Listener> list = listeners.get(type);
 
-			if (list == null) {
+			if (list == null)
+			{
 				continue;
 			}
 
-			for (Listener l : list) {
+			for (Listener l : list)
+			{
 
 				l.onEventReceived(type, o);
 			}

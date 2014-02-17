@@ -27,72 +27,78 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 
-public class DownloadSingleStickerTask extends StickerTaskBase {
+public class DownloadSingleStickerTask extends StickerTaskBase
+{
 
 	private String urlString;
+
 	private String dirPath;
+
 	private String largeStickerPath;
+
 	private String smallStickerPath;
+
 	private String key;
+
 	private String stId;
 
-	public DownloadSingleStickerTask(Context context, String catId, String stId) {
+	public DownloadSingleStickerTask(Context context, String catId, String stId)
+	{
 		this.key = catId + stId;
 		this.stId = stId;
 		this.dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, catId);
 
-		this.largeStickerPath = this.dirPath + HikeConstants.LARGE_STICKER_ROOT
-				+ "/" + stId;
-		this.smallStickerPath = this.dirPath + HikeConstants.SMALL_STICKER_ROOT
-				+ "/" + stId;
+		this.largeStickerPath = this.dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stId;
+		this.smallStickerPath = this.dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stId;
 
-		this.urlString = AccountUtils.base + "/stickers?catId=" + catId
-				+ "&stId=" + stId + "&resId=" + Utils.getResolutionId();
+		this.urlString = AccountUtils.base + "/stickers?catId=" + catId + "&stId=" + stId + "&resId=" + Utils.getResolutionId();
 	}
 
 	@Override
-	protected FTResult doInBackground(Void... arg0) {
-		if (dirPath == null) {
+	protected FTResult doInBackground(Void... arg0)
+	{
+		if (dirPath == null)
+		{
 			return FTResult.DOWNLOAD_FAILED;
 		}
 
 		FileOutputStream fos = null;
-		try {
+		try
+		{
 			File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
-			if (!largeDir.exists()) {
-				if (!largeDir.mkdirs()) {
+			if (!largeDir.exists())
+			{
+				if (!largeDir.mkdirs())
+				{
 					return FTResult.DOWNLOAD_FAILED;
 				}
 			}
 			File smallDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			if (!smallDir.exists()) {
-				if (!smallDir.mkdirs()) {
+			if (!smallDir.exists())
+			{
+				if (!smallDir.mkdirs())
+				{
 					return FTResult.DOWNLOAD_FAILED;
 				}
 			}
 
-			Log.d(getClass().getSimpleName(), "Downloading sticker: "
-					+ urlString);
+			Log.d(getClass().getSimpleName(), "Downloading sticker: " + urlString);
 			URL url = new URL(urlString);
 
 			URLConnection connection = url.openConnection();
 			AccountUtils.addUserAgent(connection);
-			connection.addRequestProperty("Cookie", "user="
-					+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
+			connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
-			Log.d(getClass().getSimpleName(),
-					"File size: " + connection.getContentLength());
-			if (AccountUtils.ssl) {
-				((HttpsURLConnection) connection)
-						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+			Log.d(getClass().getSimpleName(), "File size: " + connection.getContentLength());
+			if (AccountUtils.ssl)
+			{
+				((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
 
-			JSONObject response = AccountUtils.getResponse(connection
-					.getInputStream());
+			JSONObject response = AccountUtils.getResponse(connection.getInputStream());
 
-			if (response == null
-					|| !HikeConstants.OK.equals(response
-							.getString(HikeConstants.STATUS))) {
+			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
+			{
 				return FTResult.DOWNLOAD_FAILED;
 			}
 
@@ -100,32 +106,43 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 
 			String stickerData = data.getString(stId);
 
-			Utils.saveBase64StringToFile(new File(largeStickerPath),
-					stickerData);
+			Utils.saveBase64StringToFile(new File(largeStickerPath), stickerData);
 
 			boolean isDisabled = data.optBoolean(HikeConstants.DISABLED_ST);
-			if (!isDisabled) {
-				Bitmap thumbnail = Utils.scaleDownImage(largeStickerPath, -1,
-						false);
+			if (!isDisabled)
+			{
+				Bitmap thumbnail = Utils.scaleDownImage(largeStickerPath, -1, false);
 
 				File smallImage = new File(smallStickerPath);
 				Utils.saveBitmapToFile(smallImage, thumbnail);
 			}
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			return FTResult.DOWNLOAD_FAILED;
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e)
+		{
 			Log.e(getClass().getSimpleName(), "Invalid URL", e);
 			return FTResult.DOWNLOAD_FAILED;
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
-		} finally {
-			try {
-				if (fos != null) {
+		}
+		finally
+		{
+			try
+			{
+				if (fos != null)
+				{
 					fos.close();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e)
+			{
 				Log.e(getClass().getSimpleName(), "Error while closing file", e);
 				return FTResult.DOWNLOAD_FAILED;
 			}
@@ -134,13 +151,14 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 	}
 
 	@Override
-	protected void onPostExecute(FTResult result) {
+	protected void onPostExecute(FTResult result)
+	{
 		StickerManager.getInstance().removeTask(key);
-		if (result != FTResult.SUCCESS) {
+		if (result != FTResult.SUCCESS)
+		{
 			(new File(largeStickerPath)).delete();
 			return;
 		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED,
-				null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
 	}
 }

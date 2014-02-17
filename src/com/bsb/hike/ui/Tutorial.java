@@ -12,11 +12,13 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.StickerManager;
 
-public class Tutorial extends HikeAppStateBaseActivity {
+public class Tutorial extends HikeAppStateBaseActivity
+{
 
 	boolean friendsTutorial;
 
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tutorial);
 
@@ -29,10 +31,10 @@ public class Tutorial extends HikeAppStateBaseActivity {
 		image.setImageResource(R.drawable.stickers_intro);
 	}
 
-	public void onClick(View v) {
+	public void onClick(View v)
+	{
 
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).edit();
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 		editor.putBoolean(StickerManager.SHOWN_STICKERS_TUTORIAL, true);
 		editor.commit();
 

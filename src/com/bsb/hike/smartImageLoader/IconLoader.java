@@ -17,7 +17,7 @@ public class IconLoader extends ImageWorker
 	private int mImageWidth;
 
 	private int mImageHeight;
-	
+
 	private Context context;
 
 	/**
@@ -44,7 +44,7 @@ public class IconLoader extends ImageWorker
 	 */
 	public IconLoader(Context ctx, int imageSize)
 	{
-		this(ctx,imageSize,imageSize);
+		this(ctx, imageSize, imageSize);
 	}
 
 	public void setImageSize(int width, int height)
@@ -73,21 +73,21 @@ public class IconLoader extends ImageWorker
 	protected Bitmap processBitmap(String id)
 	{
 		BitmapDrawable bd = this.getImageCache().get(id);
-		if(bd != null)
+		if (bd != null)
 			return bd.getBitmap();
 		int idx = id.indexOf(ROUND_SUFFIX);
 		boolean rounded = false;
-		if(idx > 0)
+		if (idx > 0)
 		{
-			id = id.substring(0,idx);
+			id = id.substring(0, idx);
 			rounded = true;
 		}
-		Bitmap bm = decodeSampledBitmapFromByeArray(id,rounded,mImageWidth,mImageHeight,HikeMessengerApp.getLruCache());
-		if(bm == null)
+		Bitmap bm = decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+		if (bm == null)
 		{
 			return decodeSampledBitmapFromResource(mResources, Utils.getId(id, rounded), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
 		}
-		else	
+		else
 			return bm;
 	}
 

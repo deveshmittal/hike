@@ -18,7 +18,7 @@ public class SocialIconLoader extends ImageWorker
 	private int mImageWidth;
 
 	private int mImageHeight;
-	
+
 	private Context context;
 
 	/**
@@ -45,7 +45,7 @@ public class SocialIconLoader extends ImageWorker
 	 */
 	public SocialIconLoader(Context ctx, int imageSize)
 	{
-		this(ctx,imageSize,imageSize);
+		this(ctx, imageSize, imageSize);
 	}
 
 	public void setImageSize(int width, int height)
