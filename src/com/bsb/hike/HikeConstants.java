@@ -771,6 +771,8 @@ public class HikeConstants
 	public static final int LED_LIGHTS_ON_MS = 300;
 
 	public static final int LED_LIGHTS_OFF_MS = 1000;
+	
+	public static final int JOINED_HIKE_STATUS_ID = -1;
 
 	public static final class Extras
 	{

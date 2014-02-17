@@ -104,7 +104,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (unlinkFacebookPreference != null)
 		{
 			Session session = Session.getActiveSession();
-			if (Session.getActiveSession() != null)
+			if (session != null && session.isOpened() )
 			{
 				unlinkFacebookPreference.setOnPreferenceClickListener(this);
 			}
@@ -392,7 +392,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					if (session != null)
 					{
 						session.closeAndClearTokenInformation();
-						session.setActiveSession(null);
+						Session.setActiveSession(null);
 					}
 					Toast.makeText(getApplicationContext(), R.string.social_unlink_success, Toast.LENGTH_SHORT).show();
 					getPreferenceScreen().removePreference(getPreferenceScreen().findPreference(HikeConstants.UNLINK_FB));
