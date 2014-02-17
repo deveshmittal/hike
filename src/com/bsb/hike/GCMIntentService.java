@@ -6,10 +6,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bsb.hike.service.HikeMqttManagerNew;
-//import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMBaseIntentService;
+//import com.bsb.hike.service.HikeMqttManager;
 
 public class GCMIntentService extends GCMBaseIntentService
 {

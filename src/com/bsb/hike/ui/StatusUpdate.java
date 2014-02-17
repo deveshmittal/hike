@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.Arrays;
 import java.util.Calendar;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,8 +54,8 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 import com.facebook.Session;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;

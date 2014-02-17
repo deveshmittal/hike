@@ -1,7 +1,9 @@
 package com.bsb.hike.utils;
 
 import org.json.JSONObject;
+
 import android.util.Log;
+
 import com.mobileapptracker.MATResponse;
 
 public class MatResponse implements MATResponse

@@ -1,12 +1,12 @@
 package com.bsb.hike.view;
 
-import com.bsb.hike.utils.Utils;
-
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
+
+import com.bsb.hike.utils.Utils;
 
 public class CustomProgressBar extends ProgressBar
 {

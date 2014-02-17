@@ -1,36 +1,32 @@
 package com.bsb.hike.smartcache;
 
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.smartImageLoader.ImageWorker;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
-import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.customClasses.MySoftReference;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
+
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
+import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.customClasses.MySoftReference;
 
 public class HikeLruCache extends LruCache<String, BitmapDrawable>
 {

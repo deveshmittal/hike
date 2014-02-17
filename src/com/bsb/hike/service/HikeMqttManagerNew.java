@@ -16,16 +16,6 @@ import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.MqttPersistenceException;
-import com.bsb.hike.models.HikePacket;
-import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
-import com.bsb.hike.utils.Utils;
-
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +34,16 @@ import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.db.MqttPersistenceException;
+import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Utils;
 
 /**
  * Author : GK

@@ -1,10 +1,10 @@
 package com.bsb.hike.service;
 
-import com.mobileapptracker.Tracker;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import com.mobileapptracker.Tracker;
 
 public class AppTrackerReceiver extends BroadcastReceiver
 {
