@@ -65,15 +65,15 @@ public class FileTransferManager
 
 	private String HIKE_TEMP_DIR_NAME = "hikeTmp";
 
-	private File HIKE_TEMP_DIR; 
+	private File HIKE_TEMP_DIR;
 
 	// Constant variables
 	private int THREAD_POOL_SIZE = 10;
 
 	private final short KEEP_ALIVE_TIME = 60; // in seconds
-	
+
 	private static int minChunkSize = 10 * 1024;
-	
+
 	private static int maxChunkSize = 100 * 1024;
 
 	private ExecutorService pool;
@@ -89,7 +89,7 @@ public class FileTransferManager
 	public static String READ_FAIL = "read_fail";
 
 	public static String UPLOAD_FAILED = "upload_failed";
-	
+
 	public static String UNABLE_TO_DOWNLOAD = "unable_to_download";
 
 	public enum NetworkType
@@ -101,7 +101,7 @@ public class FileTransferManager
 			{
 				return 1024 * 1024;
 			}
-			
+
 			@Override
 			public int getMinChunkSize()
 			{
@@ -115,7 +115,7 @@ public class FileTransferManager
 			{
 				return 512 * 1024;
 			}
-			
+
 			@Override
 			public int getMinChunkSize()
 			{
@@ -129,7 +129,7 @@ public class FileTransferManager
 			{
 				return 256 * 1024;
 			}
-			
+
 			@Override
 			public int getMinChunkSize()
 			{
@@ -143,16 +143,16 @@ public class FileTransferManager
 			{
 				return 64 * 1024;
 			}
-			
+
 			@Override
 			public int getMinChunkSize()
 			{
 				return 32 * 1024;
 			}
 		};
-		
+
 		public abstract int getMaxChunkSize();
-		
+
 		public abstract int getMinChunkSize();
 	};
 
@@ -194,7 +194,7 @@ public class FileTransferManager
 		@Override
 		public void run()
 		{
-			Log.d(getClass().getSimpleName(),"TimeCheck: Starting time : " + System.currentTimeMillis());
+			Log.d(getClass().getSimpleName(), "TimeCheck: Starting time : " + System.currentTimeMillis());
 			super.run();
 		}
 
@@ -222,8 +222,8 @@ public class FileTransferManager
 				((UploadFileTask) task).postExecute(result);
 			else
 				((UploadContactOrLocationTask) task).postExecute(result);
-			
-			Log.d(getClass().getSimpleName(),"TimeCheck: Exiting  time : " + System.currentTimeMillis());
+
+			Log.d(getClass().getSimpleName(), "TimeCheck: Exiting  time : " + System.currentTimeMillis());
 		}
 	}
 
@@ -232,8 +232,8 @@ public class FileTransferManager
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
 		fileTaskMap = new ConcurrentHashMap<Long, FutureTask<FTResult>>();
 		// here choosing TimeUnit in seconds as minutes are added after api level 9
-		THREAD_POOL_SIZE = (Runtime.getRuntime().availableProcessors())*2;
-		if(THREAD_POOL_SIZE < 2)
+		THREAD_POOL_SIZE = (Runtime.getRuntime().availableProcessors()) * 2;
+		if (THREAD_POOL_SIZE < 2)
 			THREAD_POOL_SIZE = 2;
 		pool = new ThreadPoolExecutor(2, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
 		context = ctx;
@@ -262,7 +262,7 @@ public class FileTransferManager
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
-		if(isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId))
 			return;
 		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast);
 		try
@@ -284,8 +284,9 @@ public class FileTransferManager
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike, recordingDuration);
-		//UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
+				recordingDuration);
+		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -293,7 +294,7 @@ public class FileTransferManager
 
 	public void uploadFile(ConvMessage convMessage, boolean isRecipientOnHike)
 	{
-		if(isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID()))
 			return;
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
@@ -405,10 +406,10 @@ public class FileTransferManager
 	// this will be used when user deletes account or unlink account
 	public void deleteAllFTRFiles()
 	{
-		if(HIKE_TEMP_DIR != null)
+		if (HIKE_TEMP_DIR != null)
 			for (File f : HIKE_TEMP_DIR.listFiles())
 			{
-				if(f != null)
+				if (f != null)
 				{
 					try
 					{
@@ -425,7 +426,7 @@ public class FileTransferManager
 	// this function gives the state of downloading for a file
 	public FileSavedState getDownloadFileState(long msgId, File mFile)
 	{
-		if(isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
@@ -485,7 +486,7 @@ public class FileTransferManager
 	public FileSavedState getUploadFileState(long msgId, File mFile)
 	{
 		Log.d(getClass().getSimpleName(), "Returning state for message ID : " + msgId);
-		if(isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
@@ -494,7 +495,7 @@ public class FileTransferManager
 				return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
 			}
 			else
-			{	
+			{
 				Log.d(getClass().getSimpleName(), "Returning: in_prog");
 				return new FileSavedState(FTState.IN_PROGRESS, 0, 0);
 			}
@@ -543,7 +544,7 @@ public class FileTransferManager
 		return fss != null ? fss : new FileSavedState();
 
 	}
-	
+
 	// Fetches the type of internet connection the device is using
 	public NetworkType getNetworkType()
 	{
@@ -553,39 +554,39 @@ public class FileTransferManager
 		NetworkInfo info = cm.getActiveNetworkInfo();
 		if (info != null)
 		{
-			//If device is connected via WiFi
-			if(info.getType() == ConnectivityManager.TYPE_WIFI)
-				return NetworkType.WIFI;			//return 1024 * 1024;
+			// If device is connected via WiFi
+			if (info.getType() == ConnectivityManager.TYPE_WIFI)
+				return NetworkType.WIFI; // return 1024 * 1024;
 			else
 				networkType = info.getSubtype();
-		}	
+		}
 
-		//There are following types of mobile networks
+		// There are following types of mobile networks
 		switch (networkType)
 		{
-		case TelephonyManager.NETWORK_TYPE_HSUPA:	// ~ 1-23 Mbps
-		case TelephonyManager.NETWORK_TYPE_LTE:		// ~ 10+ Mbps	// API level 11
-		case TelephonyManager.NETWORK_TYPE_HSPAP:	// ~ 10-20 Mbps	// API level 13
-		case TelephonyManager.NETWORK_TYPE_EVDO_B:	// ~ 5 Mbps		// API level 9
+		case TelephonyManager.NETWORK_TYPE_HSUPA: // ~ 1-23 Mbps
+		case TelephonyManager.NETWORK_TYPE_LTE: // ~ 10+ Mbps // API level 11
+		case TelephonyManager.NETWORK_TYPE_HSPAP: // ~ 10-20 Mbps // API level 13
+		case TelephonyManager.NETWORK_TYPE_EVDO_B: // ~ 5 Mbps // API level 9
 			return NetworkType.FOUR_G;
-		case TelephonyManager.NETWORK_TYPE_EVDO_0:	// ~ 400-1000 kbps
-		case TelephonyManager.NETWORK_TYPE_EVDO_A:	// ~ 600-1400 kbps
-		case TelephonyManager.NETWORK_TYPE_HSDPA:	// ~ 2-14 Mbps
-		case TelephonyManager.NETWORK_TYPE_HSPA:	// ~ 700-1700 kbps
-		case TelephonyManager.NETWORK_TYPE_UMTS:	// ~ 400-7000 kbps 
-		case TelephonyManager.NETWORK_TYPE_EHRPD:	// ~ 1-2 Mbps	// API level 11
+		case TelephonyManager.NETWORK_TYPE_EVDO_0: // ~ 400-1000 kbps
+		case TelephonyManager.NETWORK_TYPE_EVDO_A: // ~ 600-1400 kbps
+		case TelephonyManager.NETWORK_TYPE_HSDPA: // ~ 2-14 Mbps
+		case TelephonyManager.NETWORK_TYPE_HSPA: // ~ 700-1700 kbps
+		case TelephonyManager.NETWORK_TYPE_UMTS: // ~ 400-7000 kbps
+		case TelephonyManager.NETWORK_TYPE_EHRPD: // ~ 1-2 Mbps // API level 11
 			return NetworkType.THREE_G;
-		case TelephonyManager.NETWORK_TYPE_1xRTT:	// ~ 50-100 kbps
-		case TelephonyManager.NETWORK_TYPE_CDMA:	// ~ 14-64 kbps
-		case TelephonyManager.NETWORK_TYPE_EDGE:	// ~ 50-100 kbps
-		case TelephonyManager.NETWORK_TYPE_GPRS:	// ~ 100 kbps
-		case TelephonyManager.NETWORK_TYPE_IDEN:	// ~25 kbps		// API level 8
+		case TelephonyManager.NETWORK_TYPE_1xRTT: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_CDMA: // ~ 14-64 kbps
+		case TelephonyManager.NETWORK_TYPE_EDGE: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_GPRS: // ~ 100 kbps
+		case TelephonyManager.NETWORK_TYPE_IDEN: // ~25 kbps // API level 8
 		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
 		default:
 			return NetworkType.TWO_G;
 		}
 	}
-	
+
 	// Set the limits of chunk sizes of files to transfer
 	public void setChunkSize()
 	{
@@ -593,12 +594,12 @@ public class FileTransferManager
 		maxChunkSize = networkType.getMaxChunkSize();
 		minChunkSize = networkType.getMinChunkSize();
 	}
-	
+
 	public int getMaxChunkSize()
 	{
 		return maxChunkSize;
 	}
-	
+
 	public int getMinChunkSize()
 	{
 		return minChunkSize;
@@ -616,15 +617,15 @@ public class FileTransferManager
 	public int getFTProgress(long msgId, File mFile, boolean sent)
 	{
 		FileSavedState fss;
-		if(isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
-				return ((MyFutureTask) obj).getTask().progressPercentage ;
+				return ((MyFutureTask) obj).getTask().progressPercentage;
 			}
 		}
-		
+
 		if (sent)
 			fss = getUploadFileState(mFile, msgId);
 		else
@@ -639,7 +640,7 @@ public class FileTransferManager
 				temp /= fss.getTotalSize();
 				return (int) temp;
 			}
-				
+
 			else
 				return 0;
 		}
@@ -650,15 +651,15 @@ public class FileTransferManager
 		else
 			return 0;
 	}
-	
+
 	public int getChunkSize(long msgId)
 	{
-		if(isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
-				return ((MyFutureTask) obj).getTask().chunkSize ;
+				return ((MyFutureTask) obj).getTask().chunkSize;
 			}
 		}
 		return 0;

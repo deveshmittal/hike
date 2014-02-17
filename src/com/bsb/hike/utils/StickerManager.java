@@ -377,23 +377,26 @@ public class StickerManager
 		unknown
 		{
 			@Override
-			public int resId() {
+			public int resId()
+			{
 				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
-			public int previewResId() {
+			public int previewResId()
+			{
 				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
-			public String downloadPref() {
+			public String downloadPref()
+			{
 				// TODO Auto-generated method stub
 				return null;
 			}
-			
+
 		};
 
 		public static StickerCategoryId getCategoryIdFromName(String value)
@@ -478,7 +481,9 @@ public class StickerManager
 			{
 				stickerCategories.add(new StickerCategory(StickerCategoryId.recent));
 				continue;
-			} else if (StickerCategoryId.unknown.equals(s)) {
+			}
+			else if (StickerCategoryId.unknown.equals(s))
+			{
 				/*
 				 * We don't want to add the unknown category to this list.
 				 */

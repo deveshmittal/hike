@@ -14,8 +14,8 @@ public class ConnectivityChangeReceiver extends BroadcastReceiver
 	public void onReceive(Context context, Intent intent)
 	{
 		// TODO Auto-generated method stub
-		Log.d(getClass().getSimpleName(),"Connectivity Change Occured");
+		Log.d(getClass().getSimpleName(), "Connectivity Change Occured");
 		FileTransferManager.getInstance(context).setChunkSize();
 	}
-	
+
 }

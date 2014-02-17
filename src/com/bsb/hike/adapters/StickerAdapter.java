@@ -357,15 +357,16 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		spo.getStickerListView().setOnScrollListener(new OnScrollListener()
 		{
 			private int previousFirstVisibleItem;
+
 			private long previousEventTime;
+
 			private int velocity;
 
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState)
 			{
 				/*
-				 * Only set flinging true if the list is actually flinging and the velocity
-				 * is greater than 10.
+				 * Only set flinging true if the list is actually flinging and the velocity is greater than 10.
 				 */
 				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > 10);
 			}
@@ -373,14 +374,15 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 			{
-		        if (previousFirstVisibleItem != firstVisibleItem){
-		            long currTime = System.currentTimeMillis();
-		            long timeToScrollOneElement = currTime - previousEventTime;
-		            velocity = (int) (((double)1/timeToScrollOneElement)*1000);
+				if (previousFirstVisibleItem != firstVisibleItem)
+				{
+					long currTime = System.currentTimeMillis();
+					long timeToScrollOneElement = currTime - previousEventTime;
+					velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
 
-		            previousFirstVisibleItem = firstVisibleItem;
-		            previousEventTime = currTime;
-		        }
+					previousFirstVisibleItem = firstVisibleItem;
+					previousEventTime = currTime;
+				}
 
 				int currentIdx = ((ChatThread) activity).getCurrentPage();
 				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
@@ -428,8 +430,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		return stickerCategoryList.get(index).updateAvailable;
 	}
-	
-	public void unregisterListeners(){
+
+	public void unregisterListeners()
+	{
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);

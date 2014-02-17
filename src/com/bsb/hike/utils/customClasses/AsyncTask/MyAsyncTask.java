@@ -198,8 +198,8 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		public Thread newThread(Runnable r)
 		{
 			int threadCount = mCount.getAndIncrement();
-			Log.d(LOG_TAG,String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT,CORE_POOL_SIZE,MAXIMUM_POOL_SIZE));
-			Log.d(LOG_TAG,"Creating a new thread # " + threadCount);
+			Log.d(LOG_TAG, String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT, CORE_POOL_SIZE, MAXIMUM_POOL_SIZE));
+			Log.d(LOG_TAG, "Creating a new thread # " + threadCount);
 			return new Thread(r, "AsyncTask #" + threadCount);
 		}
 	};
@@ -627,8 +627,8 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		onPreExecute();
 
 		mWorker.mParams = params;
-		if(sPoolWorkQueue.size() > 2)
-			Log.d(LOG_TAG, "Thread pool size : "+ sPoolWorkQueue.size());
+		if (sPoolWorkQueue.size() > 2)
+			Log.d(LOG_TAG, "Thread pool size : " + sPoolWorkQueue.size());
 		exec.execute(mFuture);
 
 		return this;

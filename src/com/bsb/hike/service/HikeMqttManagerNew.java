@@ -306,15 +306,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			return false;
 		}
 		/*
-		 * We've seen NPEs in this method on the dev console but have not
-		 * been able to figure out the reason so putting this in a try
-		 * catch block.
+		 * We've seen NPEs in this method on the dev console but have not been able to figure out the reason so putting this in a try catch block.
 		 */
 		try
 		{
 			return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
 		}
-		catch(NullPointerException e)
+		catch (NullPointerException e)
 		{
 			return false;
 		}
@@ -683,34 +681,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					try
 					{
 						/*
-						String[] topics = new String[3];
-						topics[0] = uid + "/s";
-						topics[1] = uid + "/a";
-						topics[2] = uid + "/u";
-						int[] qos = new int[] { 1, 1, 1 };
-						mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener()
-						{
-							@Override
-							public void onSuccess(IMqttToken arg0)
-							{
-								Log.d(TAG, "Successfully subscribed to topics.");
-							}
-
-							@Override
-							public void onFailure(IMqttToken arg0, Throwable arg1)
-							{
-								Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage());
-							}
-						});
-						*/
+						 * String[] topics = new String[3]; topics[0] = uid + "/s"; topics[1] = uid + "/a"; topics[2] = uid + "/u"; int[] qos = new int[] { 1, 1, 1 };
+						 * mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener() {
+						 * 
+						 * @Override public void onSuccess(IMqttToken arg0) { Log.d(TAG, "Successfully subscribed to topics."); }
+						 * 
+						 * @Override public void onFailure(IMqttToken arg0, Throwable arg1) { Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage()); } });
+						 */
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
-					
-					/*catch (MqttException e)
-					{
-						handleMqttException(e, true);
-					}
-					*/
+
+					/*
+					 * catch (MqttException e) { handleMqttException(e, true); }
+					 */
 					catch (Exception e) // although this might not happen , but still catching it
 					{
 						e.printStackTrace();
