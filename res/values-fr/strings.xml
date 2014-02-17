@@ -103,7 +103,7 @@
 	<string name="invited_to_gc">%1$s a été invité(e)</string>
 	<string name="share">Partager</string>
 	<string name="start_rec">Enregistreur</string>
-	<string name="recording">ENREGISTREMENT</string>
+	<string name="recording">Enregistrement</string>
 	<string name="start">Démarrer</string>
 	<string name="stop">Arrêt</string>
 	<string name="preview">Aperçu</string>
@@ -174,7 +174,7 @@
 	<string name="social_unlinking">Désassociation du compte</string>
 	<string name="contact_selected_already">Ce numéro figure déjà dans le groupe.</string>
 	<string name="share_file_message">Je viens de t\'envoyer un fichier par hike : %1$s</string>
-	<string name="max_file_size">Volume max. du fichier : 15 Mo</string>
+	<string name="max_file_size">Volume max. du fichier : 25 Mo</string>
 	<string name="unable_to_read">Lect. fichier impossible</string>
 	<string name="share_location">Partage localisation</string>
 	<string name="group_mute">Conversation en sourdine.</string>
@@ -211,6 +211,13 @@
 	<string name="sound_msg">Jouer un son si nouveau message</string>
 	<string name="free_sms">SMS gratuits vers Inde</string>
 	<string name="free_sms_msg">Active et envoie des SMS en Inde</string>
+	<string name="auto_download_media">Téléchargement automatique des fichiers multimédias</string>
+	<string name="auto_download_media_hinttext">Paramètres de téléchargement des fichiers photos, vidéo et audio</string>
+	<string name="md_auto_download_media">Si connecté au réseau mobile</string>
+	<string name="wf_auto_download_media">Si connecté au Wi-Fi</string>
+	<string name="auto_download_image_title">Images</string>
+	<string name="auto_download_video_title">Vidéo</string>
+	<string name="auto_download_audio_title">Audio</string>
 	<string name="delete_account">Supprimer le compte</string>
 	<string name="delete_account_msg">Supprimer définitivement ton compte</string>
 	<string name="unlink_account">Désassocier compte</string>
@@ -437,10 +444,8 @@
 	<string name="friends_on_hike_tut">Amis sur hike</string>
 	<string name="remove_circle">Supprimer du Cercle d\'amis</string>
 	<string name="add_hike_friend">Voir les amis</string>
-	<string name="email_body">Salut !\n\nJ\'utilise hike, une super appli de messagerie ! Toi aussi, télécharge hike sur get.hike.in.\n\nhike intègre des émoticônes très drôles. Mets ton statut à jour pour prévenir ton premier cercle d\'amis ! BBM, tu connais ? hike est mieux et fonctionne sur tous les appareils !\n\nObtiens l\'appli sur get.hike.in et dis au revoir aux SMS. </string>
 	<string name="file_expire">Ce fichier n\'existe plus.</string>
 	<string name="friends_on_hike_tut_info">Touche le bouton pour voir tes amis sur hike</string>
-	<string name="twitter_msg">J\'utilise @hikeapp 2.0 (avec humeurs et mises à jour du statut). Une messagerie simple, belle, totalement gratuite.</string>
 	<string name="facebook_description">Salut !\n\nJ\'utilise hike, une super appli de messagerie ! Toi aussi, télécharge hike sur get.hike.in.\n\nhike intègre des émoticônes très drôles. Mets ton statut à jour pour prévenir ton premier cercle d\'amis ! BBM, tu connais ? hike est mieux et fonctionne sur tous les appareils !</string>
 	<string name="invite_message">Salut. Télécharge hike 2.0. Avec mises à jour du statut :) - get.hike.in</string>
 	<string name="error_setting_profile">Erreur de réglage sur ton image de profil.</string>
@@ -711,5 +716,25 @@
 	<string name="apply">Appliquer</string>
 	<string name="chat_theme_tip">Le thème du chat va changer pour vous et votre amie</string>
 	<string name="chat_theme_tip_group">Le thème du chat va changer pour l\'ensemble du groupe</string>		
-				
+	<string name="recording_display_name">Enregistrement</string>
+	<string name="One">1</string>
+	<string name="Two">2</string>
+	<string name="not_enough_space_profile_pic">Impossible de définir la photo de profil. Fais de la place sur ta carte SD et réessaie.</string>
+	<string name="are_you_sure">Tu es sûr(e) ?</string>
+	<string name="delete_confirm_msg_1">La suppression de votre compte entraîne la suppression de l\'ensemble de vos données, SMS gratuits et récompenses hike.</string>
+	<string name="please_confirm">Merci de confirmer</string>
+	<string name="delete_confirm_msg_2">Ce choix est définitif. Veux-tu vraiment supprimer ton compte ?</string>
+	<string name="email_body">Salut,\nJe viens de découvrir la nouvelle messagerie hike. Encore plus rapide, belle et simple !\nGrâce aux nouveaux stickers très drôles, tu n\'enverras plus jamais de message ennuyeux !\nhike garantit aussi ta confidentialité avec l\'info Dernière connexion pour être toujours plus proche de tes amis.\n\nRejoins-nous vite en la téléchargeant maintenant sur http://hike.in !</string>
+	<string name="twitter_msg">J\'utilise la nouvelle messagerie hike ! Plus simple, rapide avec des stickers drôles et inédits ! Télécharge-la sur http://hike.in #gethike</string>
+	<string name="native_sms_invite_1">J\'utilise la nouvelle messagerie hike ! Plus simple, rapide avec des stickers drôles et inédits ! Télécharge-la sur http://hike.in pour tchater gratuitement</string>
+	<string name="shortcut_created">Raccourci créé</string>
+	<string name="recent_empty_string">Les derniers stickers utilisés s\'afficheront ici</string>
+	<string name="merry_christmas_msg">Fête le mois de l\'amour ! Nous avons\nun cadeau pour toi...</string>	
+	<string name="open_it_up">Ouvre le cadeau</string>	
+	<string name="chat_bg_ftue_tip">Découvre le thème spécial \"Je t\'aime\" !</string>
+	<string name="device">Device</string>
+	<string name="valentine_nudge_header">Envoie de l\'amour !</string>
+	<string name="valentine_nudge_body">Envoie un cœur en touchant la conversation deux fois !</string>
+	<string name="valentine_nudge_button">Génial !</string>
+			
 </resources>

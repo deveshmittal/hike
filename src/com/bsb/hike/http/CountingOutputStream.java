@@ -6,21 +6,26 @@ import java.io.OutputStream;
 
 import com.bsb.hike.utils.ProgressListener;
 
-public class CountingOutputStream extends FilterOutputStream {
+public class CountingOutputStream extends FilterOutputStream
+{
 
 	private final ProgressListener listener;
+
 	private long transferred;
+
 	private boolean cancel = false;;
 
-	public CountingOutputStream(final OutputStream out,
-			final ProgressListener listener) {
+	public CountingOutputStream(final OutputStream out, final ProgressListener listener)
+	{
 		super(out);
 		this.listener = listener;
 		this.transferred = 0;
 	}
 
-	public void write(byte[] b, int off, int len) throws IOException {
-		if (cancel) {
+	public void write(byte[] b, int off, int len) throws IOException
+	{
+		if (cancel)
+		{
 			throw new IOException();
 		}
 		out.write(b, off, len);
@@ -29,8 +34,10 @@ public class CountingOutputStream extends FilterOutputStream {
 		this.listener.transferred(this.transferred);
 	}
 
-	public void write(int b) throws IOException {
-		if (cancel) {
+	public void write(int b) throws IOException
+	{
+		if (cancel)
+		{
 			throw new IOException();
 		}
 		out.write(b);
@@ -39,7 +46,8 @@ public class CountingOutputStream extends FilterOutputStream {
 		this.listener.transferred(this.transferred);
 	}
 
-	public void cancel() {
+	public void cancel()
+	{
 		cancel = true;
 	}
 }

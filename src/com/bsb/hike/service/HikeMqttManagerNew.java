@@ -16,16 +16,6 @@ import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.MqttPersistenceException;
-import com.bsb.hike.models.HikePacket;
-import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
-import com.bsb.hike.utils.Utils;
-
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +34,16 @@ import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.db.MqttPersistenceException;
+import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Utils;
 
 /**
  * Author : GK
@@ -305,7 +305,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			Log.e(TAG, "Hike service is null!!");
 			return false;
 		}
-		return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
+		/*
+		 * We've seen NPEs in this method on the dev console but have not been able to figure out the reason so putting this in a try catch block.
+		 */
+		try
+		{
+			return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
+		}
+		catch (NullPointerException e)
+		{
+			return false;
+		}
 	}
 
 	private void setBrokerHostPort(boolean ssl)
@@ -671,34 +681,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					try
 					{
 						/*
-						String[] topics = new String[3];
-						topics[0] = uid + "/s";
-						topics[1] = uid + "/a";
-						topics[2] = uid + "/u";
-						int[] qos = new int[] { 1, 1, 1 };
-						mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener()
-						{
-							@Override
-							public void onSuccess(IMqttToken arg0)
-							{
-								Log.d(TAG, "Successfully subscribed to topics.");
-							}
-
-							@Override
-							public void onFailure(IMqttToken arg0, Throwable arg1)
-							{
-								Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage());
-							}
-						});
-						*/
+						 * String[] topics = new String[3]; topics[0] = uid + "/s"; topics[1] = uid + "/a"; topics[2] = uid + "/u"; int[] qos = new int[] { 1, 1, 1 };
+						 * mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener() {
+						 * 
+						 * @Override public void onSuccess(IMqttToken arg0) { Log.d(TAG, "Successfully subscribed to topics."); }
+						 * 
+						 * @Override public void onFailure(IMqttToken arg0, Throwable arg1) { Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage()); } });
+						 */
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
-					
-					/*catch (MqttException e)
-					{
-						handleMqttException(e, true);
-					}
-					*/
+
+					/*
+					 * catch (MqttException e) { handleMqttException(e, true); }
+					 */
 					catch (Exception e) // although this might not happen , but still catching it
 					{
 						e.printStackTrace();

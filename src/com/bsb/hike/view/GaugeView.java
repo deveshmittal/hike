@@ -11,9 +11,12 @@ import android.widget.ImageView;
 
 import com.bsb.hike.utils.Utils;
 
-public class GaugeView extends ImageView {
+public class GaugeView extends ImageView
+{
 	private Paint gaugeBackgroundPaint;
+
 	private Paint maxCreditsPaint;
+
 	private int maxCreditsAngle;
 
 	private static final int START_ANGLE = 200;
@@ -28,12 +31,12 @@ public class GaugeView extends ImageView {
 
 	private RectF gaugeArcArea;
 
-	public GaugeView(Context context, AttributeSet attrs, int defStyle) {
+	public GaugeView(Context context, AttributeSet attrs, int defStyle)
+	{
 		super(context, attrs, defStyle);
 
 		DisplayMetrics metrics = new DisplayMetrics();
-		((Activity) context).getWindowManager().getDefaultDisplay()
-				.getMetrics(metrics);
+		((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
 		gaugeBackgroundPaint = new Paint();
 		gaugeBackgroundPaint.setColor(0xffb2d989);
@@ -47,43 +50,48 @@ public class GaugeView extends ImageView {
 		maxCreditsPaint.setStrokeWidth(56f * Utils.densityMultiplier);
 		maxCreditsPaint.setAntiAlias(true);
 
-		gaugeArcArea = new RectF((int) (24 * Utils.densityMultiplier),
-				(int) (29 * Utils.densityMultiplier),
-				(int) (214 * Utils.densityMultiplier),
+		gaugeArcArea = new RectF((int) (24 * Utils.densityMultiplier), (int) (29 * Utils.densityMultiplier), (int) (214 * Utils.densityMultiplier),
 				(int) (224 * Utils.densityMultiplier));
 
 	}
 
-	public GaugeView(Context context, AttributeSet attrs) {
+	public GaugeView(Context context, AttributeSet attrs)
+	{
 		this(context, attrs, 0);
 	}
 
-	public void setMaxCreditsAngle(int credits) {
+	public void setMaxCreditsAngle(int credits)
+	{
 		this.maxCreditsAngle = creditsToAngle(credits);
 		invalidate();
 	}
 
-	public GaugeView(Context context) {
+	public GaugeView(Context context)
+	{
 		this(context, null, 0);
 	}
 
 	@Override
-	protected void onDraw(Canvas canvas) {
-		canvas.drawArc(gaugeArcArea, START_ANGLE - OFFSET, END_ANGLE, false,
-				gaugeBackgroundPaint);
+	protected void onDraw(Canvas canvas)
+	{
+		canvas.drawArc(gaugeArcArea, START_ANGLE - OFFSET, END_ANGLE, false, gaugeBackgroundPaint);
 		// Only show the arc if we have the credits per month is larger than
 		// zero
-		if (maxCreditsAngle > 0) {
-			canvas.drawArc(gaugeArcArea, START_ANGLE - OFFSET, maxCreditsAngle
-					+ OFFSET, false, maxCreditsPaint);
+		if (maxCreditsAngle > 0)
+		{
+			canvas.drawArc(gaugeArcArea, START_ANGLE - OFFSET, maxCreditsAngle + OFFSET, false, maxCreditsPaint);
 		}
 		super.onDraw(canvas);
 	}
 
-	private int creditsToAngle(int credits) {
-		if (credits == MAX_CREDITS_TO_SHOW) {
+	private int creditsToAngle(int credits)
+	{
+		if (credits == MAX_CREDITS_TO_SHOW)
+		{
 			return MAX_ANGLE;
-		} else if (credits > MAX_CREDITS_TO_SHOW) {
+		}
+		else if (credits > MAX_CREDITS_TO_SHOW)
+		{
 			return END_ANGLE;
 		}
 		float ratio = (credits * 100) / MAX_CREDITS_TO_SHOW;

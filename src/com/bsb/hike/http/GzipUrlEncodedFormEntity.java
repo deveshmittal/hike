@@ -11,28 +11,30 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HTTP;
 
-public class GzipUrlEncodedFormEntity extends ByteArrayEntity {
+public class GzipUrlEncodedFormEntity extends ByteArrayEntity
+{
 
-	public GzipUrlEncodedFormEntity(
-			final List<? extends NameValuePair> parameters,
-			final String encoding) throws UnsupportedEncodingException {
+	public GzipUrlEncodedFormEntity(final List<? extends NameValuePair> parameters, final String encoding) throws UnsupportedEncodingException
+	{
 		super(gzip(parameters, encoding));
-		setContentType(URLEncodedUtils.CONTENT_TYPE + HTTP.CHARSET_PARAM
-				+ HTTP.DEFAULT_CONTENT_CHARSET);
+		setContentType(URLEncodedUtils.CONTENT_TYPE + HTTP.CHARSET_PARAM + HTTP.DEFAULT_CONTENT_CHARSET);
 		setContentEncoding("gzip");
 	}
 
-	private static byte[] gzip(List<? extends NameValuePair> parameters,
-			String encoding) {
+	private static byte[] gzip(List<? extends NameValuePair> parameters, String encoding)
+	{
 		String encoded = URLEncodedUtils.format(parameters, encoding);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		GZIPOutputStream zos;
-		try {
+		try
+		{
 			zos = new GZIPOutputStream(bos);
 			zos.write(encoded.getBytes());
 			zos.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;

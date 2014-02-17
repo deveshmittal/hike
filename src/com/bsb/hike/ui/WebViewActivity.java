@@ -11,8 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -20,59 +22,73 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
-public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
+public class WebViewActivity extends HikeAppStateBaseFragmentActivity
+{
 
 	private WebView webView;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.webview_activity);
 
-		String urlToLoad = getIntent().getStringExtra(
-				HikeConstants.Extras.URL_TO_LOAD);
+		String urlToLoad = getIntent().getStringExtra(HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
 
 		webView = (WebView) findViewById(R.id.t_and_c_page);
+		final ProgressBar bar = (ProgressBar) findViewById(R.id.progress);
 
-		WebViewClient client = new WebViewClient() {
+		WebViewClient client = new WebViewClient()
+		{
 			@Override
-			public void onPageFinished(WebView view, String url) {
-				findViewById(R.id.loading_layout).setVisibility(View.INVISIBLE);
+			public void onPageFinished(WebView view, String url)
+			{
 				super.onPageFinished(view, url);
+				bar.setVisibility(View.INVISIBLE);
 			}
 
 			@Override
-			public void onPageStarted(WebView view, String url, Bitmap favicon) {
-				findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
+			public void onPageStarted(WebView view, String url, Bitmap favicon)
+			{
+				bar.setProgress(0);
+				bar.setVisibility(View.VISIBLE);
 				super.onPageStarted(view, url, favicon);
 			}
 
 			@Override
-			public boolean shouldOverrideUrlLoading(WebView view, String url) {
-				if (url == null) {
+			public boolean shouldOverrideUrlLoading(WebView view, String url)
+			{
+				if (url == null)
+				{
 					return false;
 				}
-				if (url.startsWith("mailto:")) {
+				if (url.startsWith("mailto:"))
+				{
 					MailTo mt = MailTo.parse(url);
-					Intent i = newEmailIntent(WebViewActivity.this, mt.getTo(),
-							mt.getSubject(), mt.getBody(), mt.getCc());
+					Intent i = newEmailIntent(WebViewActivity.this, mt.getTo(), mt.getSubject(), mt.getBody(), mt.getCc());
 					startActivity(i);
 					view.reload();
-				} else if (url.toLowerCase().endsWith("hike.in/rewards/invite")) {
-					Intent i = new Intent(WebViewActivity.this,
-							HikeListActivity.class);
+				}
+				else if (url.toLowerCase().endsWith("hike.in/rewards/invite"))
+				{
+					Intent i = new Intent(WebViewActivity.this, HikeListActivity.class);
 					startActivity(i);
-				} else if (url.startsWith("market://")
-						|| url.contains("play.google.com/store/apps/details?id")) {
-					try {
-						view.getContext().startActivity(
-								new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-					} catch (ActivityNotFoundException e) {
+				}
+				else if (url.startsWith("market://") || url.contains("play.google.com/store/apps/details?id"))
+				{
+					try
+					{
+						view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+					}
+					catch (ActivityNotFoundException e)
+					{
 						Log.w(getClass().getSimpleName(), e);
 						view.loadUrl(url);
 					}
-				} else {
+				}
+				else
+				{
 					view.loadUrl(url);
 				}
 				return true;
@@ -82,11 +98,20 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
+		webView.setWebChromeClient(new WebChromeClient()
+		{
+			@Override
+			public void onProgressChanged(WebView view, int newProgress)
+			{
+				super.onProgressChanged(view, newProgress);
+				bar.setProgress(newProgress);
+			}
+		});
 		setupActionBar(title);
 	}
 
-	public Intent newEmailIntent(Context context, String address,
-			String subject, String body, String cc) {
+	public Intent newEmailIntent(Context context, String address, String subject, String body, String cc)
+	{
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { address });
 		intent.putExtra(Intent.EXTRA_TEXT, body);
@@ -96,25 +121,24 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 		return intent;
 	}
 
-	private void setupActionBar(String titleString) {
+	private void setupActionBar(String titleString)
+	{
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
-		View actionBarView = LayoutInflater.from(this).inflate(
-				R.layout.compose_action_bar, null);
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(titleString);
-		backContainer.setOnClickListener(new OnClickListener() {
+		backContainer.setOnClickListener(new OnClickListener()
+		{
 
 			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(WebViewActivity.this,
-						HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+			public void onClick(View v)
+			{
+				finish();
 			}
 		});
 
@@ -122,10 +146,14 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity {
 	}
 
 	@Override
-	public void onBackPressed() {
-		if (webView.canGoBack()) {
+	public void onBackPressed()
+	{
+		if (webView.canGoBack())
+		{
 			webView.goBack();
-		} else {
+		}
+		else
+		{
 			super.onBackPressed();
 		}
 	}
