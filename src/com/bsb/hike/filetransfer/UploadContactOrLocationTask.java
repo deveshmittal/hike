@@ -77,6 +77,8 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		this.msisdn = msisdn;
 		this.uploadingContact = false;
 		this.isRecipientOnhike = isRecipientOnhike;
+		_state = FTState.INITIALIZED;
+		createConvMessage();
 	}
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String msisdn, JSONObject contactJson,
@@ -87,6 +89,8 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		this.contactJson = contactJson;
 		this.uploadingContact = true;
 		this.isRecipientOnhike = isRecipientOnhike;
+		_state = FTState.INITIALIZED;
+		createConvMessage();
 	}
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, Object convMessage, boolean uploadingContact,
@@ -96,11 +100,13 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		this.userContext = convMessage;
 		this.uploadingContact = uploadingContact;
 		this.isRecipientOnhike = isRecipientOnhike;
+		_state = FTState.INITIALIZED;
 	}
 
 	protected void setFutureTask(FutureTask<FTResult> fuTask)
 	{
 		futureTask = fuTask;
+		fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
 	}
 
 	@Override
@@ -110,36 +116,10 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		{
 			if (userContext == null)
 			{
-				JSONObject metadata;
-				if (!uploadingContact)
-				{
-					metadata = getFileTransferMetadataForLocation(latitude, longitude, zoomLevel, null, null);
-				}
-				else
-				{
-					metadata = getFileTransferMetadataForContact(contactJson);
-				}
-
-				userContext = createConvMessage(msisdn, metadata);
-				long id = ((ConvMessage) userContext).getMsgID();
-				fileTaskMap.put(id, futureTask);
-				if (TextUtils.isEmpty(fileKey))
-				{
-					// Called so that the UI in the Conversation lists screen is
-					// updated
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
-				}
-
-				if (!uploadingContact)
-				{
-					address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
-
-					fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
-				}
+				createConvMessage();
 			}
 			else if (!uploadingContact)
 			{
-				fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
 				HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 				latitude = hikeFile.getLatitude();
 				longitude = hikeFile.getLongitude();
@@ -257,6 +237,43 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		metadata.put(HikeConstants.FILES, files);
 
 		return metadata;
+	}
+
+	private void createConvMessage()
+	{
+		try
+		{
+			JSONObject metadata;
+			if (!uploadingContact)
+			{
+				metadata = getFileTransferMetadataForLocation(latitude, longitude, zoomLevel, null, null);
+			}
+			else
+			{
+				metadata = getFileTransferMetadataForContact(contactJson);
+			}
+
+			userContext = createConvMessage(msisdn, metadata);
+			long id = ((ConvMessage) userContext).getMsgID();
+			if (TextUtils.isEmpty(fileKey))
+			{
+				// Called so that the UI in the Conversation lists screen is
+				// updated
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
+			}
+
+			if (!uploadingContact)
+			{
+				address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
+
+				fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getSimpleName(), "Exception", e);
+			return;
+		}
 	}
 
 	private ConvMessage createConvMessage(String msisdn, JSONObject metadata) throws JSONException

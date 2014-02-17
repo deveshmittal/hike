@@ -315,6 +315,8 @@ public class FileTransferManager
 
 	public void uploadContactOrLocation(ConvMessage convMessage, boolean uploadingContact, boolean isRecipientOnhike)
 	{
+		if(isFileTaskExist(convMessage.getMsgID()))
+			return;
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, convMessage, uploadingContact, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
