@@ -755,11 +755,18 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 			AsyncTask<Void, Void, List<StatusMessage>> asyncTask = new AsyncTask<Void, Void, List<StatusMessage>>()
 			{
+				private boolean isLastMessageJoinedHike = false;
 
 				@Override
 				protected List<StatusMessage> doInBackground(Void... params)
 				{
 					StatusMessage statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 1)).getStatusMessage();
+					
+					if (statusMessage != null && statusMessage.getId() == HikeConstants.JOINED_HIKE_STATUS_ID)
+					{
+						statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 2)).getStatusMessage();
+						isLastMessageJoinedHike = true;
+					}
 
 					if (statusMessage == null)
 					{
@@ -767,6 +774,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					}
 					List<StatusMessage> olderMessages = HikeConversationsDatabase.getInstance().getStatusMessages(true, HikeConstants.MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME,
 							(int) statusMessage.getId(), mLocalMSISDN);
+					if (!olderMessages.isEmpty() && isLastMessageJoinedHike)
+					{
+						olderMessages.add(((ProfileStatusItem)getJoinedHikeStatus(contactInfo)).getStatusMessage());
+					}
 					return olderMessages;
 				}
 
@@ -775,6 +786,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				{
 					if (!olderMessages.isEmpty())
 					{
+						if (isLastMessageJoinedHike)
+						{
+							profileItems.remove(profileItems.size() - 1);
+						}
 						addStatusMessageAsProfileItems(olderMessages);
 						profileAdapter.notifyDataSetChanged();
 						profileContent.setSelection(firstVisibleItem);
@@ -1925,7 +1940,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private ProfileItem getJoinedHikeStatus(ContactInfo contactInfo)
 	{
-		return new ProfileItem.ProfileStatusItem(new StatusMessage(0, null, contactInfo.getMsisdn(), contactInfo.getName(), getString(R.string.joined_hike_update),
+		return new ProfileItem.ProfileStatusItem(new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(), getString(R.string.joined_hike_update),
 				StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime()));
 	}
 
