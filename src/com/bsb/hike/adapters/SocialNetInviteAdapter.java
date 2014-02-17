@@ -41,6 +41,8 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 
 	private int mIconImageSize;
 
+	private boolean isListFlinging;
+
 	public SocialNetInviteAdapter(Context context, int viewItemId, ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> completeFbFriendsList)
 	{
 		super(context, viewItemId, completeFbFriendsList);
@@ -196,4 +198,21 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 		return super.isEnabled(position);
 	}
 
+	public SocialIconLoader getSocialIconLoader()
+	{
+		return imgLoader;
+	}
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		imgLoader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			notifyDataSetChanged();
+		}
+	}
 }

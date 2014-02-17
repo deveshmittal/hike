@@ -29,6 +29,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
@@ -317,6 +319,19 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			adapter = new SocialNetInviteAdapter(SocialNetInviteActivity.this, -1, list);
 			input.addTextChangedListener(adapter);
 			listView.setAdapter(adapter);
+			listView.setOnScrollListener(new OnScrollListener()
+			{
+				@Override
+				public void onScrollStateChanged(AbsListView view, int scrollState)
+				{
+					adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+				}
+
+				@Override
+				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+				{
+				}
+			});
 			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
