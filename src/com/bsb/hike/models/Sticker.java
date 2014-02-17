@@ -45,12 +45,18 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		 */
 		if (category != null && category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy))
 		{
-			int stickerNumber = Integer.valueOf(stickerId.substring(0, stickerId.indexOf("_")));
-
-			if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
-					|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
+			/*
+			 * Making sure there is an '_' character in the sticker name.
+			 */
+			if (stickerId.indexOf("_") != -1)
 			{
-				this.stickerIndex = stickerNumber - 1;
+				int stickerNumber = Integer.valueOf(stickerId.substring(0, stickerId.indexOf("_")));
+
+				if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
+						|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
+				{
+					this.stickerIndex = stickerNumber - 1;
+				}
 			}
 		}
 
