@@ -57,8 +57,8 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, Runnable
 {

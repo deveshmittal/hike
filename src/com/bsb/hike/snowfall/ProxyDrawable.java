@@ -2,12 +2,12 @@ package com.bsb.hike.snowfall;
 
 import java.util.Random;
 
-import com.bsb.hike.utils.Utils;
-
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+
+import com.bsb.hike.utils.Utils;
 
 public class ProxyDrawable extends Drawable
 {

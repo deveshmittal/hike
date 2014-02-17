@@ -11,15 +11,15 @@ import java.net.URLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.HikeSSLUtil;
-import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.Utils;
-
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Utils;
 
 public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 {

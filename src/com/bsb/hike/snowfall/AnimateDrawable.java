@@ -1,7 +1,5 @@
 package com.bsb.hike.snowfall;
 
-import java.util.Random;
-
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;

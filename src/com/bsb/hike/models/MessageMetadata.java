@@ -24,7 +24,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata

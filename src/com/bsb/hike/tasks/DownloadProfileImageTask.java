@@ -22,8 +22,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Utils;
 
 public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
