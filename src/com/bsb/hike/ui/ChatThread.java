@@ -894,7 +894,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		optionsList.add(new OverFlowMenuItem(
 				getString(R.string.email_conversation), 3));
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
+		/*
+		 * removing add shortcut option for nokia
+		 */
+		//optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 
 		dismissPopupWindow();
 
