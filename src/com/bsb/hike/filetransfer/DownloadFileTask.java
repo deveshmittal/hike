@@ -47,8 +47,6 @@ public class DownloadFileTask extends FileTransferBase
 			HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
 		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType);
-		tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");
-		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".bin." + msgId);
 		this.fileKey = fileKey;
 		this.showToast = showToast;
 		this.userContext = userContext;
@@ -60,6 +58,16 @@ public class DownloadFileTask extends FileTransferBase
 	{
 		if (_state == FTState.CANCELLED)
 			return FTResult.CANCELLED;
+		
+		try
+		{
+			tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");
+			stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".bin." + msgId);
+		}
+		catch(NullPointerException e)
+		{
+			return FTResult.NO_SD_CARD;
+		}
 
 		_state = FTState.IN_PROGRESS;
 		Log.d(getClass().getSimpleName(), "Instantiating download ....");
