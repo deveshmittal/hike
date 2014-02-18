@@ -162,6 +162,7 @@ public class DownloadFileTask extends FileTransferBase
 					retryAttempts = 0;
 					// Check for valid content length.
 					int contentLength = conn.getContentLength();
+					String md5Hash = conn.getHeaderField(ETAG);
 					if ((contentLength - raf.length()) > Utils.getFreeSpace())
 					{
 						closeStreams(raf, in);
@@ -257,7 +258,6 @@ public class DownloadFileTask extends FileTransferBase
 						closeStreams(raf, in);
 						return FTResult.CANCELLED;
 					case IN_PROGRESS:
-						String md5Hash = AccountUtils.crcValue(fileKey);
 						Log.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
 						if (md5Hash != null)
 						{
