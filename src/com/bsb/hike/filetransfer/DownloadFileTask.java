@@ -47,8 +47,6 @@ public class DownloadFileTask extends FileTransferBase
 			HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
 		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType);
-		tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");
-		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".bin." + msgId);
 		this.fileKey = fileKey;
 		this.showToast = showToast;
 		this.userContext = userContext;
@@ -60,6 +58,16 @@ public class DownloadFileTask extends FileTransferBase
 	{
 		if (_state == FTState.CANCELLED)
 			return FTResult.CANCELLED;
+		
+		try
+		{
+			tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");
+			stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".bin." + msgId);
+		}
+		catch(NullPointerException e)
+		{
+			return FTResult.NO_SD_CARD;
+		}
 
 		_state = FTState.IN_PROGRESS;
 		Log.d(getClass().getSimpleName(), "Instantiating download ....");
@@ -163,6 +171,7 @@ public class DownloadFileTask extends FileTransferBase
 					retryAttempts = 0;
 					// Check for valid content length.
 					int contentLength = conn.getContentLength();
+					String md5Hash = conn.getHeaderField(ETAG);
 					if ((contentLength - raf.length()) > Utils.getFreeSpace())
 					{
 						closeStreams(raf, in);
@@ -258,26 +267,27 @@ public class DownloadFileTask extends FileTransferBase
 						closeStreams(raf, in);
 						return FTResult.CANCELLED;
 					case IN_PROGRESS:
-						String md5Hash = AccountUtils.crcValue(fileKey);
 						Log.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
+						String file_md5Hash = Utils.fileToMD5(tempDownloadedFile.getPath());
 						if (md5Hash != null)
 						{
-							String file_md5Hash = Utils.fileToMD5(tempDownloadedFile.getPath());
 							Log.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
 							if (!md5Hash.equals(file_md5Hash))
 							{
 								Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-								deleteTempFile();
-								deleteStateFile();
-								return FTResult.FAILED_UNRECOVERABLE;
+								sendCrcLog(file_md5Hash);
+//								deleteTempFile();
+//								deleteStateFile();
+//								return FTResult.FAILED_UNRECOVERABLE;
 							}
 
 						}
 						else
 						{
-							deleteTempFile();
-							deleteStateFile();
-							return FTResult.FAILED_UNRECOVERABLE;
+							sendCrcLog(file_md5Hash);
+//							deleteTempFile();
+//							deleteStateFile();
+//							return FTResult.FAILED_UNRECOVERABLE;
 						}
 						if (!tempDownloadedFile.renameTo(mFile)) // if failed
 						{
@@ -405,6 +415,11 @@ public class DownloadFileTask extends FileTransferBase
 	{
 		if (tempDownloadedFile != null && tempDownloadedFile.exists())
 			tempDownloadedFile.delete();
+	}
+	
+	private void sendCrcLog(String md5)
+	{
+		Utils.sendMd5MismatchEvent(mFile.getName(), fileKey, md5, _bytesTransferred, true);
 	}
 
 	protected void postExecute(FTResult result)
