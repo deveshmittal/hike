@@ -901,7 +901,7 @@ public class UploadFileTask extends FileTransferBase
 	String getBoundaryMessage()
 	{
 		String sendingFileType = "";
-		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType))
+		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType) || HikeConstants.VOICE_MESSAGE_CONTENT_TYPE.equals(fileType))
 		{
 			sendingFileType = fileType;
 		}
