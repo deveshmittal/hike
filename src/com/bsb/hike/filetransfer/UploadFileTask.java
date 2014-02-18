@@ -446,19 +446,18 @@ public class UploadFileTask extends FileTransferBase
 				{
 					String file_md5Hash = Utils.fileToMD5(selectedFile.getPath());
 					Log.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
-					if (!md5Hash.equals(file_md5Hash))
-					{
-						Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-						deleteStateFile();
-						return FTResult.FAILED_UNRECOVERABLE;
-					}
-
+//					if (!md5Hash.equals(file_md5Hash))
+//					{
+//						Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
+//						deleteStateFile();
+//						return FTResult.FAILED_UNRECOVERABLE;
+//					}
 				}
-				else
-				{
-					deleteStateFile();
-					return FTResult.FAILED_UNRECOVERABLE;
-				}
+//				else
+//				{
+//					deleteStateFile();
+//					return FTResult.FAILED_UNRECOVERABLE;
+//				}
 			}
 
 			JSONObject metadata = new JSONObject();

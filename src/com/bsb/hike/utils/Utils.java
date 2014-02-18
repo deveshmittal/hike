@@ -3324,6 +3324,30 @@ public class Utils
 			Log.w("LE", "Invalid json");
 		}
 	}
+	
+	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
+	{
+		try
+		{
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.CRC_EVENT);
+
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.FILE_NAME, fileName);
+			metadata.put(HikeConstants.FILE_KEY, fileKey);
+			metadata.put(HikeConstants.MD5_HASH, md5);
+			metadata.put(HikeConstants.FILE_SIZE, recBytes);
+			metadata.put(HikeConstants.DOWNLOAD, downloading);
+			
+			data.put(HikeConstants.METADATA, metadata);
+
+			sendLogEvent(data);
+		}
+		catch (JSONException e)
+		{
+			Log.w("LE", "Invalid json");
+		}
+	}
 
 	public static Bitmap returnBigPicture(ConvMessage convMessage, Context context)
 	{
