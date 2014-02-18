@@ -125,6 +125,7 @@ public class DownloadFileTask extends FileTransferBase
 			((HttpsURLConnection) conn).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 		}
 		AccountUtils.addUserAgent(conn);
+		AccountUtils.setNoTransform(conn);;
 		return conn;
 	}
 

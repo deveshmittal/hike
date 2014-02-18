@@ -923,4 +923,9 @@ public class AccountUtils
 			return ((msb & 1) != 0 ? rand : (rand + 10));
 		}
 	}
+
+	public static void setNoTransform(URLConnection urlConnection)
+	{
+		urlConnection.setRequestProperty("Cache-Control", "no-transform");
+	}
 }
