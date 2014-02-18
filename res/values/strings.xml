@@ -14,7 +14,7 @@
     <string name="preferences">Preferences</string>
     <string name="resend">Resend</string>
     <string name="delete_account_failed">hike couldn\'t delete your account. Please try again.</string>
-    <string name="unlink_account_failed">Hike couldn\'t logout your account. Please try again</string>
+    <string name="unlink_account_failed">hike couldn\'t logout your account. Please try again</string>
     <string name="hike_network_connection">Network Connection</string>
     <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
     <string name="notconnected_no_internet">Boss, check the internet!</string>
