@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
@@ -445,19 +446,18 @@ public class UploadFileTask extends FileTransferBase
 				{
 					String file_md5Hash = Utils.fileToMD5(selectedFile.getPath());
 					Log.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
-					if (!md5Hash.equals(file_md5Hash))
-					{
-						Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-						deleteStateFile();
-						return FTResult.FAILED_UNRECOVERABLE;
-					}
-
+//					if (!md5Hash.equals(file_md5Hash))
+//					{
+//						Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
+//						deleteStateFile();
+//						return FTResult.FAILED_UNRECOVERABLE;
+//					}
 				}
-				else
-				{
-					deleteStateFile();
-					return FTResult.FAILED_UNRECOVERABLE;
-				}
+//				else
+//				{
+//					deleteStateFile();
+//					return FTResult.FAILED_UNRECOVERABLE;
+//				}
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -918,13 +918,14 @@ public class UploadFileTask extends FileTransferBase
 		String name = selectedFile.getName();
 		try
 		{
-			name = selectedFile.getName().getBytes("UTF-8").toString();
+			name = URLEncoder.encode(selectedFile.getName(), "UTF-8");
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		Log.d(getClass().getSimpleName(),"encode file name: " + name);
 		res.append("Content-Disposition: form-data; name=\"").append("file").append("\"; filename=\"").append(name).append("\"\r\n").append("Content-Type: ")
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
