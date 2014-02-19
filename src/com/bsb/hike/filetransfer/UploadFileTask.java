@@ -1093,9 +1093,9 @@ public class UploadFileTask extends FileTransferBase
 		{
 			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 		}
-		else if (result != FTResult.SUCCESS && result != FTResult.PAUSED && result != FTResult.CANCELLED)
+		else if (result != FTResult.PAUSED)
 		{
-			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
+			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
 					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
 
 			handler.post(new Runnable()
