@@ -128,7 +128,10 @@ public class UploadContactOrLocationTask extends FileTransferBase
 				if(address == null)
 					address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
 
-				fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
+				if(TextUtils.isEmpty(hikeFile.getThumbnailString()))
+				{
+					fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
+				}
 			}
 
 			if (!fileTaskMap.containsKey(((ConvMessage) userContext).getMsgID()))
