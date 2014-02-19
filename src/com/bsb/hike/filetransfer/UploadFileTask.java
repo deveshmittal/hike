@@ -249,7 +249,7 @@ public class UploadFileTask extends FileTransferBase
 	 */
 	private void initFileUpload() throws FileTransferCancelledException, Exception
 	{
-		_state = FTState.IN_PROGRESS;
+		//_state = FTState.IN_PROGRESS;
 		msgId = ((ConvMessage) userContext).getMsgID();
 		// fileTaskMap.put(msgId, futureTask);
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
@@ -440,6 +440,7 @@ public class UploadFileTask extends FileTransferBase
 				JSONObject fileJSON = response.getJSONObject(HikeConstants.DATA_2);
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
+				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 				String md5Hash = fileJSON.optString("md5_original");
 				Log.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
 				if (md5Hash != null)
@@ -465,6 +466,7 @@ public class UploadFileTask extends FileTransferBase
 
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 			hikeFile.setFileKey(fileKey);
+			hikeFile.setFileSize(fileSize);
 			hikeFile.setFileTypeString(fileType);
 
 			filesArray.put(hikeFile.serialize());
