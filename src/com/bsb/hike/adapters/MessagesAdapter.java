@@ -2347,9 +2347,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
-						notifyDataSetChanged();
 					}
-
+					notifyDataSetChanged();
 				}
 			}
 			else
