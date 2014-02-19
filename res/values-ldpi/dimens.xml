@@ -8,4 +8,5 @@
     <dimen name="micromax_margin">10dp</dimen>
     <dimen name="hike_logo_margin">50dp</dimen>
     <dimen name="version_item_marginTop">40dp</dimen>
+    <dimen name="icon_picture_size">65dp</dimen>
 </resources>

@@ -118,14 +118,17 @@ public class UploadContactOrLocationTask extends FileTransferBase
 			{
 				createConvMessage();
 			}
-			else if (!uploadingContact)
+			if (!uploadingContact)
 			{
 				HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 				latitude = hikeFile.getLatitude();
 				longitude = hikeFile.getLongitude();
 				address = hikeFile.getAddress();
+				
+				if(address == null)
+					address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
 
-				if (TextUtils.isEmpty(hikeFile.getThumbnailString()))
+				if(TextUtils.isEmpty(hikeFile.getThumbnailString()))
 				{
 					fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
 				}
@@ -262,13 +265,6 @@ public class UploadContactOrLocationTask extends FileTransferBase
 				// Called so that the UI in the Conversation lists screen is
 				// updated
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
-			}
-
-			if (!uploadingContact)
-			{
-				address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
-
-				fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
 			}
 		}
 		catch (Exception e)
