@@ -202,7 +202,7 @@ public class DownloadFileTask extends FileTransferBase
 					byte data[] = new byte[chunkSize];
 					// while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					int numRead = 0;
-					while (_state == FTState.IN_PROGRESS)
+					do
 					{
 						int byteRead = 0;
 						if (numRead == -1)
@@ -257,6 +257,7 @@ public class DownloadFileTask extends FileTransferBase
 						// showButton();
 						sendProgress();
 					}
+					while (_state == FTState.IN_PROGRESS);
 
 					switch (_state)
 					{
