@@ -95,7 +95,7 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 		checkBox.setChecked(getItem(position).first.get());
 		holder.itemImage.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context, "+" + currFriend.getId()));
 		holder.itemImage.setTag(currFriend.getImageUrl());
-		imgLoader.loadImage(currFriend.getImageUrl(), holder.itemImage);
+		imgLoader.loadImage(currFriend.getImageUrl(), holder.itemImage, isListFlinging);
 		// }
 		return convertView;
 	}
