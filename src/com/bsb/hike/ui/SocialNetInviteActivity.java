@@ -319,19 +319,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			adapter = new SocialNetInviteAdapter(SocialNetInviteActivity.this, -1, list);
 			input.addTextChangedListener(adapter);
 			listView.setAdapter(adapter);
-			listView.setOnScrollListener(new OnScrollListener()
-			{
-				@Override
-				public void onScrollStateChanged(AbsListView view, int scrollState)
-				{
-					adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
-				}
-
-				@Override
-				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-				{
-				}
-			});
+			listView.setOnScrollListener(scrollListener);
 			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
@@ -381,6 +369,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			input.addTextChangedListener(adapter);
 
 			listView.setAdapter(adapter);
+			listView.setOnScrollListener(scrollListener);
 
 			adapter.notifyDataSetChanged();
 			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
@@ -389,6 +378,20 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		}
 	}
+
+	OnScrollListener scrollListener = new OnScrollListener()
+	{
+		@Override
+		public void onScrollStateChanged(AbsListView view, int scrollState)
+		{
+			adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		}
+
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+		{
+		}
+	};
 
 	public void sendInvite()
 	{
