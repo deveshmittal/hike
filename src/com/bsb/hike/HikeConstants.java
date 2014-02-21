@@ -771,6 +771,8 @@ public class HikeConstants
 	public static final int LED_LIGHTS_ON_MS = 300;
 
 	public static final int LED_LIGHTS_OFF_MS = 1000;
+	
+	public static final int JOINED_HIKE_STATUS_ID = -1;
 
 	public static final class Extras
 	{
@@ -1013,6 +1015,8 @@ public class HikeConstants
 		public static final String CHAT_THEME_WINDOW_OPEN = "chatThemeWindowOpen";
 
 		public static final String SELECTED_THEME = "selectedTheme";
+		
+		public static final String BLOKING_TASK_TYPE = "blockingTaskType";
 	}
 
 	public static final class LogEvent

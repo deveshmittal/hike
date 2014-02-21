@@ -31,6 +31,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
+import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.Utils;
@@ -44,12 +45,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	{
 		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
 	}
+	
+	private enum BlockingTaskType
+	{
+		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER
+	}
 
 	private ActivityCallableTask mTask;
 
 	ProgressDialog mDialog;
 
 	private boolean isDeleting;
+	
+	private BlockingTaskType blockingTaskType = BlockingTaskType.NONE;
 
 	private DialogShowing dialogShowing;
 
@@ -79,7 +87,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask)
 		{
-			isDeleting = savedInstanceState != null ? savedInstanceState.getBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT) : isDeleting;
+			if(savedInstanceState != null){
+				blockingTaskType = BlockingTaskType.values()[savedInstanceState.getInt(HikeConstants.Extras.BLOKING_TASK_TYPE)];
+			}
 			setBlockingTask((ActivityCallableTask) retained);
 			mTask.setActivity(this);
 		}
@@ -104,7 +114,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (unlinkFacebookPreference != null)
 		{
 			Session session = Session.getActiveSession();
-			if (Session.getActiveSession() != null)
+			if (session != null && session.isOpened() )
 			{
 				unlinkFacebookPreference.setOnPreferenceClickListener(this);
 			}
@@ -250,7 +260,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
-		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT, isDeleting);
+		outState.putInt(HikeConstants.Extras.BLOKING_TASK_TYPE, blockingTaskType.ordinal());
 		if (mDialog != null && mDialog.isShowing())
 		{
 			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
@@ -282,7 +292,23 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (!task.isFinished())
 		{
 			mTask = task;
-			mDialog = ProgressDialog.show(this, getString(R.string.account), isDeleting ? getString(R.string.deleting_account) : getString(R.string.unlinking_account));
+			String message="";
+			switch (blockingTaskType)
+			{
+			case DELETING_ACCOUNT:
+				message = getString(R.string.deleting_account);
+				break;
+			case UNLINKING_ACCOUNT:
+				message = getString(R.string.unlinking_account);
+				break;
+			case UNLINKING_TWITTER:
+				message = getString(R.string.social_unlinking);
+				break;
+
+			default:
+				return;
+			}
+			mDialog = ProgressDialog.show(this, getString(R.string.account), message);
 		}
 	}
 
@@ -339,7 +365,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				public void onClick(View v)
 				{
 					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, true, getApplicationContext());
-					isDeleting = true;
+					blockingTaskType = BlockingTaskType.DELETING_ACCOUNT;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
 					secondConfirmDialog.dismiss();
@@ -362,7 +388,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				public void onClick(View v)
 				{
 					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, false, getApplicationContext());
-					isDeleting = false;
+					blockingTaskType = BlockingTaskType.UNLINKING_ACCOUNT;
 					setBlockingTask(task);
 					Utils.executeBoolResultAsyncTask(task);
 					confirmDialog.dismiss();
@@ -392,7 +418,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					if (session != null)
 					{
 						session.closeAndClearTokenInformation();
-						session.setActiveSession(null);
+						Session.setActiveSession(null);
 					}
 					Toast.makeText(getApplicationContext(), R.string.social_unlink_success, Toast.LENGTH_SHORT).show();
 					getPreferenceScreen().removePreference(getPreferenceScreen().findPreference(HikeConstants.UNLINK_FB));
@@ -416,14 +442,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				@Override
 				public void onClick(View v)
 				{
-					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-					editor.putBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false);
-					editor.putString(HikeMessengerApp.TWITTER_TOKEN, "");
-					editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
-					editor.commit();
-
-					Toast.makeText(getApplicationContext(), R.string.social_unlink_success, Toast.LENGTH_SHORT).show();
-					getPreferenceScreen().removePreference(getPreferenceScreen().findPreference(HikeConstants.UNLINK_TWITTER));
+					UnlinkTwitterTask task = new UnlinkTwitterTask(HikePreferences.this, getApplicationContext());
+					blockingTaskType = BlockingTaskType.UNLINKING_TWITTER;
+					setBlockingTask(task);
+					Utils.executeBoolResultAsyncTask(task);
 					confirmDialog.dismiss();
 				}
 			};

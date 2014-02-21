@@ -72,6 +72,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			if (session != null)
 			{
 				session.closeAndClearTokenInformation();
+				Session.setActiveSession(null);
 			}
 			StickerManager.getInstance().deleteStickers();
 
