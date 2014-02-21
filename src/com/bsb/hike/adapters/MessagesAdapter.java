@@ -1979,6 +1979,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.dataTransferred.setText("");
 			holder.barProgress.setProgress(0);
 			showTransferInitialization(holder, hikeFile);
+			holder.wating.setVisibility(View.VISIBLE);
+			holder.ftAction.setBackgroundResource(0);
+			holder.ftAction.setVisibility(View.INVISIBLE);
 		}
 		else
 		{
