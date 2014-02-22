@@ -122,13 +122,13 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 64 * 1024;
+				return 32 * 1024;
 			}
 
 			@Override
 			public int getMinChunkSize()
 			{
-				return 32 * 1024;
+				return 16 * 1024;
 			}
 		};
 
