@@ -1964,9 +1964,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
 			holder.fileSize.setVisibility(View.VISIBLE);
 		}
-		holder.wating.setVisibility(View.VISIBLE);
-		holder.ftAction.setBackgroundResource(0);
-		holder.ftAction.setVisibility(View.INVISIBLE);
 	}
 	
 	private void showTransferProgress(ViewHolder holder, FileSavedState fss, long msgId, HikeFile hikeFile, boolean isSent)
@@ -1983,9 +1980,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.barProgress.setProgress(0);
 			showTransferInitialization(holder, hikeFile);
 			holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
-//			holder.wating.setVisibility(View.VISIBLE);
-//			holder.ftAction.setBackgroundResource(0);
-//			holder.ftAction.setVisibility(View.INVISIBLE);
+			holder.wating.setVisibility(View.VISIBLE);
+			holder.ftAction.setBackgroundResource(0);
+			holder.ftAction.setVisibility(View.INVISIBLE);
 		}
 		else
 		{
