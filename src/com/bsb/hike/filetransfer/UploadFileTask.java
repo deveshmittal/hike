@@ -885,8 +885,11 @@ public class UploadFileTask extends FileTransferBase
 		else
 			chunkSize = networkType.getMinChunkSize();
 
-		if (chunkSize > (int) length)
-			chunkSize = (int) length;
+//		if (chunkSize > (int) length)
+//			chunkSize = (int) length;
+		
+		while(chunkSize > length)
+			chunkSize/=2;
 
 		try
 		{

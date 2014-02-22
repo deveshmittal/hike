@@ -1424,7 +1424,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 //							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
 //						}
 //						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setVisibility(View.VISIBLE);
+//						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					default:
 					}
@@ -1964,6 +1964,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
 			holder.fileSize.setVisibility(View.VISIBLE);
 		}
+		holder.wating.setVisibility(View.VISIBLE);
+		holder.ftAction.setBackgroundResource(0);
+		holder.ftAction.setVisibility(View.INVISIBLE);
 	}
 	
 	private void showTransferProgress(ViewHolder holder, FileSavedState fss, long msgId, HikeFile hikeFile, boolean isSent)
@@ -1974,20 +1977,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (fss.getTotalSize() > 0)
 			progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
 		
-		if (fss.getTotalSize() <= 0)
+		if (fss.getTotalSize() <= 0 || fss.getTransferredSize() == 0)
 		{
 			holder.dataTransferred.setText("");
 			holder.barProgress.setProgress(0);
 			showTransferInitialization(holder, hikeFile);
-			holder.wating.setVisibility(View.VISIBLE);
-			holder.ftAction.setBackgroundResource(0);
-			holder.ftAction.setVisibility(View.INVISIBLE);
+			holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
+//			holder.wating.setVisibility(View.VISIBLE);
+//			holder.ftAction.setBackgroundResource(0);
+//			holder.ftAction.setVisibility(View.INVISIBLE);
 		}
 		else
 		{
-			if (fss.getTransferredSize() == 0)
-				holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-			else
+//			if (fss.getTransferredSize() == 0)
+//				holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + chunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+//			else
 				holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
 
 			holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
