@@ -797,7 +797,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			/*
 			 * Sending a blank query search to ensure all friends are shown.
 			 */
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY, "");
+			if (position == CHATS_TAB_INDEX)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY, "");
+			}
 
 			if (position == UPDATES_TAB_INDEX)
 			{
