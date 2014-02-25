@@ -4132,7 +4132,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (recorder != null)
 		{
-			recorder.stop();
+			/*
+			 * Catching RuntimeException here to prevent the app from crashing when
+			 * the the media recorder is immediately stopped after starting.
+			 */
+			try
+			{
+				recorder.stop();
+			}
+			catch (RuntimeException e)
+			{
+			}
 			recorder.reset();
 			recorder.release();
 			recorder = null;
