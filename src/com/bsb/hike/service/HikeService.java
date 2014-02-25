@@ -100,8 +100,8 @@ public class HikeService extends Service
 
 	public static final String SEND_RAI_TO_SERVER_ACTION = "com.bsb.hike.SEND_RAI";
 
-	// used to send Whatsapp details to server
-	public static final String SEND_WA_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_WA_DETAILS_TO_SERVER";
+	// used to send GreenBlue details to server
+	public static final String SEND_GB_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_GB_DETAILS_TO_SERVER";
 
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -124,7 +124,7 @@ public class HikeService extends Service
 
 	private PostDeviceDetails postDeviceDetails;
 
-	private PostWhatsappDetails postWhatsappDetails;
+	private PostGreenBlueDetails postGreenBlueDetails;
 
 	private HikeMqttManagerNew mMqttManager;
 
@@ -229,12 +229,11 @@ public class HikeService extends Service
 			Log.d("TestUpdate", "Update details sender registered");
 		}
 
-		if (postWhatsappDetails == null)
+		if (postGreenBlueDetails == null)
 		{
-			postWhatsappDetails = new PostWhatsappDetails();
-			registerReceiver(postWhatsappDetails, new IntentFilter(SEND_WA_DETAILS_TO_SERVER_ACTION));
-			sendBroadcast(new Intent(SEND_WA_DETAILS_TO_SERVER_ACTION));
-			Log.d("Whatsapp", "Whatsapp details sender registered");
+			postGreenBlueDetails = new PostGreenBlueDetails();
+			registerReceiver(postGreenBlueDetails, new IntentFilter(SEND_GB_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
 
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
@@ -375,10 +374,10 @@ public class HikeService extends Service
 		sm.getStickerCategoryList().clear();
 		sm.getRecentStickerList().clear();
 
-		if (postWhatsappDetails != null)
+		if (postGreenBlueDetails != null)
 		{
-			unregisterReceiver(postWhatsappDetails);
-			postWhatsappDetails = null;
+			unregisterReceiver(postGreenBlueDetails);
+			postGreenBlueDetails = null;
 		}
 	}
 
@@ -715,12 +714,12 @@ public class HikeService extends Service
 		}
 	};
 
-	private Runnable sendWhatsappDetailsToServer = new Runnable()
+	private Runnable sendGreenBlueDetailsToServer = new Runnable()
 	{
 		@Override
 		public void run()
 		{
-			sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
 	};
 
@@ -784,20 +783,20 @@ public class HikeService extends Service
 		return mApp != null;
 	}
 
-	public class PostWhatsappDetails extends BroadcastReceiver
+	public class PostGreenBlueDetails extends BroadcastReceiver
 	{
 
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, false))
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false))
 			{
 				Log.d("PostInfo", "info details sent");
 				return;
 			}
 
 			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
-			ContactUtils.setWhatsappStatus(context, contactinfos);
+			ContactUtils.setGreenBlueStatus(context, contactinfos);
 			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
 
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()
@@ -806,15 +805,15 @@ public class HikeService extends Service
 				{
 					Log.d("PostInfo", "info sent successfully");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-					editor.putBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, true);
-					editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, 0);
+					editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, true);
+					editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, 0);
 					editor.commit();
 				}
 
 				public void onFailure()
 				{
 					Log.d("PostInfo", "info could not be sent");
-					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_WHATSAPP, sendWhatsappDetailsToServer);
+					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, sendGreenBlueDetailsToServer);
 				}
 			});
 			hikeHttpRequest.setJSONData(data);
