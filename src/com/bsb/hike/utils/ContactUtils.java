@@ -395,12 +395,12 @@ public class ContactUtils
 	}
 
 	/**
-	 * This method will give us the user's most contacted contacts. We also try to get the whatsapp contacts if the user has them synced and then sort those based on times
+	 * This method will give us the user's most contacted contacts. We also try to get the greenblue contacts if the user has them synced and then sort those based on times
 	 * contacts.
 	 */
 	public static Pair<String, Map<String, Integer>> getMostContactedContacts(Context context, int limit)
 	{
-		Cursor whatsappContactsCursor = null;
+		Cursor greenblueContactsCursor = null;
 		Cursor phoneContactsCursor = null;
 		Cursor otherContactsCursor = null;
 
@@ -409,25 +409,25 @@ public class ContactUtils
 			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
 
 			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE + "= 'com.whatsapp'";
-			whatsappContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
+			greenblueContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
 
-			int id = whatsappContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+			int id = greenblueContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
 
-			StringBuilder whatsappContactIds = null;
+			StringBuilder greenblueContactIds = null;
 
-			if (whatsappContactsCursor.getCount() > 0)
+			if (greenblueContactsCursor.getCount() > 0)
 			{
-				whatsappContactIds = new StringBuilder("(");
+				greenblueContactIds = new StringBuilder("(");
 
-				while (whatsappContactsCursor.moveToNext())
+				while (greenblueContactsCursor.moveToNext())
 				{
-					whatsappContactIds.append(whatsappContactsCursor.getInt(id) + ",");
+					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
 				}
-				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","), whatsappContactIds.length(), ")");
+				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
 			}
 
 			String[] newProjection = new String[] { Phone.NUMBER, Phone.TIMES_CONTACTED };
-			String newSelection = whatsappContactIds != null ? (Phone.CONTACT_ID + " IN " + whatsappContactIds.toString()) : null;
+			String newSelection = greenblueContactIds != null ? (Phone.CONTACT_ID + " IN " + greenblueContactIds.toString()) : null;
 
 			phoneContactsCursor = context.getContentResolver().query(Phone.CONTENT_URI, newProjection, newSelection, null, Phone.TIMES_CONTACTED + " DESC LIMIT " + limit);
 
@@ -442,15 +442,15 @@ public class ContactUtils
 
 			}
 			/*
-			 * This number is required when the user does not have enough whatsapp contacts.
+			 * This number is required when the user does not have enough greenblue contacts.
 			 */
 			int otherContactsRequired = limit - mostContactedNumbers.size();
 
 			if (otherContactsRequired > 0)
 			{
-				if (whatsappContactIds != null)
+				if (greenblueContactIds != null)
 				{
-					newSelection = Phone.CONTACT_ID + " NOT IN " + whatsappContactIds.toString();
+					newSelection = Phone.CONTACT_ID + " NOT IN " + greenblueContactIds.toString();
 				}
 				else
 				{
@@ -484,9 +484,9 @@ public class ContactUtils
 		}
 		finally
 		{
-			if (whatsappContactsCursor != null)
+			if (greenblueContactsCursor != null)
 			{
-				whatsappContactsCursor.close();
+				greenblueContactsCursor.close();
 			}
 			if (phoneContactsCursor != null)
 			{
@@ -499,7 +499,7 @@ public class ContactUtils
 		}
 	}
 
-	private static void extractContactInfo(Cursor c, StringBuilder sb, Map<String, Integer> numbers, boolean whatsappContacts)
+	private static void extractContactInfo(Cursor c, StringBuilder sb, Map<String, Integer> numbers, boolean greenblueContacts)
 	{
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
 		int timesContactedIdx = c.getColumnIndex(Phone.TIMES_CONTACTED);
@@ -514,9 +514,9 @@ public class ContactUtils
 			}
 
 			/*
-			 * We apply a multiplier of 2 for whatsapp contacts to give them a greater weight.
+			 * We apply a multiplier of 2 for greenblue contacts to give them a greater weight.
 			 */
-			int lastTimeContacted = whatsappContacts ? 2 * c.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
+			int lastTimeContacted = greenblueContacts ? 2 * c.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
 
 			/*
 			 * Checking if we already have this number and whether the last time contacted was sooner than the newer value.
@@ -532,50 +532,50 @@ public class ContactUtils
 		}
 	}
 
-	public static void setWhatsappStatus(Context context, List<ContactInfo> contactinfos)
+	public static void setGreenBlueStatus(Context context, List<ContactInfo> contactinfos)
 	{
-		Cursor whatsappContactsCursor = null;
+		Cursor greenblueContactsCursor = null;
 		Cursor phoneContactsCursor = null;
 		try
 		{
 			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
 
 			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE + "= 'com.whatsapp'";
-			whatsappContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
+			greenblueContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
 
-			int id = whatsappContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+			int id = greenblueContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
 
-			StringBuilder whatsappContactIds = null;
-			if (whatsappContactsCursor.getCount() > 0)
+			StringBuilder greenblueContactIds = null;
+			if (greenblueContactsCursor.getCount() > 0)
 			{
-				whatsappContactIds = new StringBuilder("(");
+				greenblueContactIds = new StringBuilder("(");
 
-				while (whatsappContactsCursor.moveToNext())
+				while (greenblueContactsCursor.moveToNext())
 				{
-					whatsappContactIds.append(whatsappContactsCursor.getInt(id) + ",");
+					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
 				}
-				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","), whatsappContactIds.length(), ")");
+				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
 			}
 
-			if (whatsappContactIds != null)
+			if (greenblueContactIds != null)
 			{
 				String[] newProjection = new String[] { Phone.NUMBER, Phone.DISPLAY_NAME };
-				String newSelection = (Phone.CONTACT_ID + " IN " + whatsappContactIds.toString());
+				String newSelection = (Phone.CONTACT_ID + " IN " + greenblueContactIds.toString());
 
 				phoneContactsCursor = context.getContentResolver().query(Phone.CONTENT_URI, newProjection, newSelection, null, Phone.NUMBER + " DESC");
 
 				if (phoneContactsCursor.getCount() > 0)
 				{
-					setWhatsappContacs(phoneContactsCursor, contactinfos);
+					setGreenBlueContacs(phoneContactsCursor, contactinfos);
 				}
 			}
 
 		}
 		finally
 		{
-			if (whatsappContactsCursor != null)
+			if (greenblueContactsCursor != null)
 			{
-				whatsappContactsCursor.close();
+				greenblueContactsCursor.close();
 			}
 			if (phoneContactsCursor != null)
 			{
@@ -584,21 +584,21 @@ public class ContactUtils
 		}
 	}
 
-	private static void setWhatsappContacs(Cursor c, List<ContactInfo> contactinfos)
+	private static void setGreenBlueContacs(Cursor c, List<ContactInfo> contactinfos)
 	{
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-		HashSet<String> whatsappContacts = new HashSet<String>(c.getCount());
+		HashSet<String> greenBlueContacts = new HashSet<String>(c.getCount());
 		while (c.moveToNext())
 		{
 			String number = c.getString(numberColIdx);
-			whatsappContacts.add(number);
+			greenBlueContacts.add(number);
 		}
 
 		for (ContactInfo contact : contactinfos)
 		{
-			if (whatsappContacts.contains(contact.getPhoneNum()))
+			if (greenBlueContacts.contains(contact.getPhoneNum()))
 			{
-				contact.setOnWhatsapp(true);
+				contact.setOnGreenBlue(true);
 			}
 		}
 	}

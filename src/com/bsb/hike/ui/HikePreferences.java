@@ -114,7 +114,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (unlinkFacebookPreference != null)
 		{
 			Session session = Session.getActiveSession();
-			if (session != null && session.isOpened() )
+			if (session != null )
 			{
 				unlinkFacebookPreference.setOnPreferenceClickListener(this);
 			}
