@@ -840,7 +840,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					e.printStackTrace();
 				}
 			}
-			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), 1, false, packet, new IMqttActionListener()
+			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListener()
 			{
 				@Override
 				public void onSuccess(IMqttToken arg0)
