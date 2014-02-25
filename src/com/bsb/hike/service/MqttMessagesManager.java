@@ -988,9 +988,9 @@ public class MqttMessagesManager
 			if (data.optBoolean(HikeConstants.POST_INFO))
 			{
 				Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putBoolean(HikeMessengerApp.WHATSAPP_DETAILS_SENT, false);
+				editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false);
 				editor.commit();
-				context.sendBroadcast(new Intent(HikeService.SEND_WA_DETAILS_TO_SERVER_ACTION));
+				context.sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type))
