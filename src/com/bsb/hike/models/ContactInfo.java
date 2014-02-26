@@ -52,7 +52,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	private long inviteTime;
 
-	private boolean onWhatsapp = false;
+	private boolean onGreenBlue = false;
 
 	public String getName()
 	{
@@ -202,14 +202,14 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.inviteTime = inviteTime;
 	}
 
-	public boolean isOnWhatsapp()
+	public boolean isOnGreenBlue()
 	{
-		return onWhatsapp;
+		return onGreenBlue;
 	}
 
-	public void setOnWhatsapp(boolean onWhatsapp)
+	public void setOnGreenBlue(boolean onGreenBlue)
 	{
-		this.onWhatsapp = onWhatsapp;
+		this.onGreenBlue = onGreenBlue;
 	}
 
 	public String getFormattedHikeJoinTime()
