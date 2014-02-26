@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -33,7 +31,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-import com.facebook.FacebookRequestError.Category;
 
 public class StickerManager
 {
@@ -377,23 +374,26 @@ public class StickerManager
 		unknown
 		{
 			@Override
-			public int resId() {
+			public int resId()
+			{
 				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
-			public int previewResId() {
+			public int previewResId()
+			{
 				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
-			public String downloadPref() {
+			public String downloadPref()
+			{
 				// TODO Auto-generated method stub
 				return null;
 			}
-			
+
 		};
 
 		public static StickerCategoryId getCategoryIdFromName(String value)
@@ -478,7 +478,9 @@ public class StickerManager
 			{
 				stickerCategories.add(new StickerCategory(StickerCategoryId.recent));
 				continue;
-			} else if (StickerCategoryId.unknown.equals(s)) {
+			}
+			else if (StickerCategoryId.unknown.equals(s))
+			{
 				/*
 				 * We don't want to add the unknown category to this list.
 				 */
@@ -821,6 +823,7 @@ public class StickerManager
 		catch (Exception e)
 		{
 			Log.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
 	}

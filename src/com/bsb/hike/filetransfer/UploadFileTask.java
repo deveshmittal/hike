@@ -1,31 +1,27 @@
 package com.bsb.hike.filetransfer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,12 +42,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
@@ -125,7 +120,7 @@ public class UploadFileTask extends FileTransferBase
 			}
 		_state = FTState.INITIALIZED;
 	}
-	
+
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri, Object convMessage,
 			boolean isRecipientOnHike)
 	{
@@ -156,10 +151,11 @@ public class UploadFileTask extends FileTransferBase
 	protected void setFutureTask(FutureTask<FTResult> fuTask)
 	{
 		futureTask = fuTask;
-		fileTaskMap.put( ((ConvMessage) userContext).getMsgID() , futureTask);
+		fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
 	}
 
-	//private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long recordingDuration) throws FileTransferCancelledException, Exception
+	// private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long
+	// recordingDuration) throws FileTransferCancelledException, Exception
 	private void createConvMessage()
 	{
 		try
@@ -221,7 +217,7 @@ public class UploadFileTask extends FileTransferBase
 			return;
 		}
 	}
-	
+
 	private ConvMessage createConvMessage(String fileName, JSONObject metadata, String msisdn, boolean isRecipientOnhike) throws JSONException
 	{
 		long time = System.currentTimeMillis() / 1000;
@@ -232,11 +228,13 @@ public class UploadFileTask extends FileTransferBase
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
 		return convMessage;
 	}
-	
-	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, long recordingDuration, String sourceFilePath) throws JSONException
+
+	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, long recordingDuration,
+			String sourceFilePath) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, sourceFilePath).serialize());
+		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration,
+				sourceFilePath).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
@@ -250,30 +248,30 @@ public class UploadFileTask extends FileTransferBase
 	 * @throws Exception
 	 */
 	private void initFileUpload() throws FileTransferCancelledException, Exception
-	{	
+	{
 		_state = FTState.IN_PROGRESS;
 		msgId = ((ConvMessage) userContext).getMsgID();
-		//fileTaskMap.put(msgId, futureTask);
+		// fileTaskMap.put(msgId, futureTask);
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 		hikeFileType = hikeFile.getHikeFileType();
-		
+
 		selectedFile = new File(hikeFile.getFilePath());
 		String fileName = selectedFile.getName();
 		if (hikeFile.getFilePath() == null)
 		{
 			throw new FileNotFoundException("File is not accessible. SDCard unmount");
 		}
-		if(picasaUri == null)
+		if (picasaUri == null)
 		{
-			if(hikeFile.getSourceFilePath() == null)
+			if (hikeFile.getSourceFilePath() == null)
 			{
-				Log.d("This filepath: ",selectedFile.getPath());
-				Log.d("Hike filepath: ",Utils.getFileParent(hikeFileType));
+				Log.d("This filepath: ", selectedFile.getPath());
+				Log.d("Hike filepath: ", Utils.getFileParent(hikeFileType));
 			}
 			else
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
-				if(mFile.getPath().startsWith(Utils.getFileParent(hikeFileType)))
+				if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType)))
 				{
 					selectedFile = mFile;
 				}
@@ -283,16 +281,16 @@ public class UploadFileTask extends FileTransferBase
 					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName);
 					if (selectedFile == null)
 						throw new Exception(FileTransferManager.READ_FAIL);
-	
+
 					if (selectedFile.exists())
 					{
 						String sourceFile_md5Hash = Utils.fileToMD5(mFile.getPath());
 						String selectedFile_md5Hash = Utils.fileToMD5(selectedFile.getPath());
-						if((sourceFile_md5Hash != null) && (selectedFile_md5Hash != null))
+						if ((sourceFile_md5Hash != null) && (selectedFile_md5Hash != null))
 						{
-							if(sourceFile_md5Hash.equals(selectedFile_md5Hash))
+							if (sourceFile_md5Hash.equals(selectedFile_md5Hash))
 							{
-								Log.d(getClass().getSimpleName(),"md5 matches: no need to copy");
+								Log.d(getClass().getSimpleName(), "md5 matches: no need to copy");
 								selectedFile = mFile;
 								makeCopy = false;
 							}
@@ -307,7 +305,7 @@ public class UploadFileTask extends FileTransferBase
 						}
 					}
 					// Saving the file to hike local folder
-					if(makeCopy)
+					if (makeCopy)
 					{
 						if (!Utils.copyFile(mFile.getPath(), selectedFile.getPath(), hikeFileType))
 						{
@@ -317,23 +315,23 @@ public class UploadFileTask extends FileTransferBase
 					}
 				}
 				hikeFile.removeSourceFile();
-//				Bitmap thumbnail = null;
-//				String thumbnailString = null;
-//				if (hikeFileType == HikeFileType.IMAGE)
-//				{
-//					thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
-//				}
-//				else if (hikeFileType == HikeFileType.VIDEO)
-//				{
-//					thumbnail = ThumbnailUtils.createVideoThumbnail(selectedFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-//				}
-//				if (thumbnail != null)
-//				{
-//					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-//				}
-//				JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
-//				((ConvMessage) userContext).setMetadata(metadata);
-//				HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
+				// Bitmap thumbnail = null;
+				// String thumbnailString = null;
+				// if (hikeFileType == HikeFileType.IMAGE)
+				// {
+				// thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
+				// }
+				// else if (hikeFileType == HikeFileType.VIDEO)
+				// {
+				// thumbnail = ThumbnailUtils.createVideoThumbnail(selectedFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+				// }
+				// if (thumbnail != null)
+				// {
+				// thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+				// }
+				// JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
+				// ((ConvMessage) userContext).setMetadata(metadata);
+				// HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
 			}
 		}
 		else
@@ -370,11 +368,11 @@ public class UploadFileTask extends FileTransferBase
 			((ConvMessage) userContext).setMetadata(metadata);
 			HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
 		}
-		
+
 		fileName = hikeFile.getFileName();
 		fileType = hikeFile.getFileTypeString();
 		hikeFileType = hikeFile.getHikeFileType();
-		
+
 		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 		Log.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
@@ -412,7 +410,7 @@ public class UploadFileTask extends FileTransferBase
 				Log.e(getClass().getSimpleName(), "Exception", e);
 				if (FileTransferManager.READ_FAIL.equals(e.getMessage()))
 					return FTResult.READ_FAIL;
-				else if(FileTransferManager.UNABLE_TO_DOWNLOAD.equals(e.getMessage()))
+				else if (FileTransferManager.UNABLE_TO_DOWNLOAD.equals(e.getMessage()))
 					return FTResult.DOWNLOAD_FAILED;
 			}
 		}
@@ -448,19 +446,18 @@ public class UploadFileTask extends FileTransferBase
 				{
 					String file_md5Hash = Utils.fileToMD5(selectedFile.getPath());
 					Log.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
-					if (!md5Hash.equals(file_md5Hash))
-					{
-						Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-						deleteStateFile();
-						return FTResult.FAILED_UNRECOVERABLE;
-					}
-
+//					if (!md5Hash.equals(file_md5Hash))
+//					{
+//						Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
+//						deleteStateFile();
+//						return FTResult.FAILED_UNRECOVERABLE;
+//					}
 				}
-				else
-				{
-					deleteStateFile();
-					return FTResult.FAILED_UNRECOVERABLE;
-				}
+//				else
+//				{
+//					deleteStateFile();
+//					return FTResult.FAILED_UNRECOVERABLE;
+//				}
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -531,11 +528,11 @@ public class UploadFileTask extends FileTransferBase
 		JSONObject responseJson = null;
 		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(sourceFile, msgId);
 		setFileTotalSize((int) sourceFile.length());
-		//Bug Fix: 13029
+		// Bug Fix: 13029
 		setBytesTransferred(fst.getTransferredSize());
 		long temp = _bytesTransferred;
 		temp *= 100;
-		if(_totalSize > 0)
+		if (_totalSize > 0)
 		{
 			temp /= _totalSize;
 			progressPercentage = (int) temp;
@@ -550,17 +547,15 @@ public class UploadFileTask extends FileTransferBase
 		}
 		else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 		{
-			/* 
-			 * In case user paused the transfer during the last chunk.
-			 * The Upload was completed and the response from server was stored with the state file.
-			 * So when resumed, the response is read from state file.
-			 * If this is not null the response is returned.
+			/*
+			 * In case user paused the transfer during the last chunk. The Upload was completed and the response from server was stored with the state file. So when resumed, the
+			 * response is read from state file. If this is not null the response is returned.
 			 */
-			if(fst.getResponseJson() != null)
+			if (fst.getResponseJson() != null)
 			{
 				_state = FTState.COMPLETED;
 				deleteStateFile();
-				
+
 				responseJson = fst.getResponseJson();
 				return responseJson;
 			}
@@ -574,25 +569,25 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 		long length = sourceFile.length();
-		
-		///// New Logic Test 1
-		
+
+		// /// New Logic Test 1
+
 		setChunkSize(length);
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
-		
+
 		int start = mStart;
 		int end = start + chunkSize;
 		end--;
-		
+
 		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
 		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
-		
-		while(end < length && responseJson == null)
+
+		while (end < length && responseJson == null)
 		{
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
-			
+
 			boolean resetAndUpdate = false;
 			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
 			if (bytesRead == -1)
@@ -600,24 +595,24 @@ public class UploadFileTask extends FileTransferBase
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
-			
+
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
 			System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + chunkSize, boundary.length());
 			String responseString = send(contentRange, fileBytes);
-			
-			if(end == (length-1) && responseString != null)
+
+			if (end == (length - 1) && responseString != null)
 			{
 				responseJson = new JSONObject(responseString);
 				incrementBytesTransferred(chunkSize);
-				resetAndUpdate = true;	//To update UI
+				resetAndUpdate = true; // To update UI
 			}
 			else
 			{
 
 				// In case there is error uploading this chunk
-				if(responseString == null)
+				if (responseString == null)
 				{
-					if(shouldRetry())
+					if (shouldRetry())
 					{
 						raf.seek(start);
 						setChunkSize(length);
@@ -627,15 +622,15 @@ public class UploadFileTask extends FileTransferBase
 						raf.close();
 						throw new IOException("Exception in partial upload. response null");
 					}
-					
+
 				}
 				// When the chunk uploaded successfully
 				else
 				{
 					start += chunkSize;
 					incrementBytesTransferred(chunkSize);
-					resetAndUpdate = true;	// To reset retry logic and update UI
-						
+					resetAndUpdate = true; // To reset retry logic and update UI
+
 					end = (int) length;
 					if (end >= (start + chunkSize))
 					{
@@ -651,12 +646,11 @@ public class UploadFileTask extends FileTransferBase
 					}
 				}
 			}
-			
+
 			/*
-			 * Resetting reconnect logic
-			 * Updating UI
+			 * Resetting reconnect logic Updating UI
 			 */
-			if(resetAndUpdate)
+			if (resetAndUpdate)
 			{
 				retry = true;
 				reconnectTime = 0;
@@ -668,183 +662,181 @@ public class UploadFileTask extends FileTransferBase
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
-		
-		
-		
-//		
-//		
-//		////>>>>>>>>old logic
-//		int chunkSize = networkType.getMinChunkSize();
-//		int start = mStart;
-//		int end = (int) length;
-//		if (end > (start + chunkSize))
-//			end = start + chunkSize;
-//		end--;
-//		byte[] fileBytes = null;
-//		int fileByteLength = end - start + 1;
-//		String boundaryMesssage = getBoundaryMessage();
-//		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
-//		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//		//fileBytes = new byte[fileByteLength];
-//		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
-//		/*
-//		 * The following loops goes on till the end byte to read reaches the length
-//		 * or we receive a json response from the server
-//		 */
-//		//
-//		while(end < length && responseJson == null)
-//		{
-//			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
-//				break;
-////			int fileByteLength = end - start + 1;
-////			String boundaryMesssage = getBoundaryMessage();
-////			String boundary = "\r\n--" + BOUNDARY + "--\r\n";
-////			fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
-////			System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
-//			
-//			
-//			bos.write(boundaryMesssage.getBytes());
-//			fileBytes = new byte[fileByteLength];
-//			boolean resetAndUpdate = false;
-//			//if (raf.read(fileBytes, boundaryMesssage.length(), fileByteLength) == -1)
-//			if (raf.read(fileBytes) == -1)
-//			{
-//				raf.close();
-//				throw new IOException("Exception in partial read. files ended");
-//			}
-//			
-//			bos.write(fileBytes);
-//			bos.write(boundary.getBytes());
-//			String contentRange = "bytes " + start + "-" + end + "/" + length;
-//			//System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + fileByteLength, boundary.length());
-//			//String responseString = send(contentRange, fileBytes);
-//			String responseString = send(contentRange, bos.toByteArray());
-//			bos.flush();
-//			bos.close();
-//			//Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
-//			/*
-//			 * When end byte uploaded is the last byte of the file and server send response
-//			 * i.e. upload successfully completed
-//			 */
-//			 
-//			if(end == (length-1) && responseString != null)
-//			{
-//				responseJson = new JSONObject(responseString);
-//				resetAndUpdate = true;	//To update UI
-//			}
-//			// When upload is not complete
-//			else
-//			{
-//				// In case there is error uploading this chunk
-//				if(responseString == null)
-//				{
-//					/*
-//					 * If retry attempt is to be made.
-//					 * The chunk size is reduced for next attempt
-//					 */
-//					 
-//					if(shouldRetry())
-//					{
-//						raf.seek(start);
-//						//if(Utils.densityMultiplier > 1)
-//						//{
-//							if(networkType == FileTransferManager.getInstance(context).getNetworkType())
-//							{
-//								chunkSize/=2;
-//							}
-//							else
-//							{
-//								networkType = FileTransferManager.getInstance(context).getNetworkType();
-//								chunkSize = networkType.getMinChunkSize();
-//							}
-//						//}
-//					}
-//					else
-//					{
-//						raf.close();
-//						throw new IOException("Exception in partial upload. response null");
-//					}
-//					
-//				}
-//				// When the chunk uploaded successfully
-//				else
-//				{
-//					start += chunkSize;
-//					resetAndUpdate = true;	// To reset retry logic and update UI
-//					
-////					if(Utils.densityMultiplier > 1)
-////					{
-//						chunkSize *= 2;
-//						if(chunkSize > networkType.getMaxChunkSize())
-//							chunkSize = networkType.getMaxChunkSize();
-//						else if (chunkSize < networkType.getMinChunkSize())
-//							chunkSize = networkType.getMinChunkSize();
-//						
-//						/*
-//						 * This chunk size should ideally be no more than 1/8 of the total memory available.
-//						 */
-//						try
-//						{
-//							int maxMemory = (int) Runtime.getRuntime().maxMemory();
-//							if( chunkSize > (maxMemory / 8) )
-//							chunkSize = (maxMemory / 8) ;
-//						}
-//						catch(Exception e)
-//						{
-//							e.printStackTrace();
-//						}
-//						
-//						end = (int) length;
-//						if (end > (start + chunkSize))
-//						{
-//							end = start + chunkSize;
-//						}
-//						end--;
-//
-//						fileByteLength = end - start + 1;
-//						//fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
-//						//System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
-////					}
-////					else
-////					{
-////						end = (int) length;
-////						if (end > (start + chunkSize))
-////						{
-////							end = start + chunkSize;
-////							end--;
-////							fileByteLength = end - start + 1;
-////						}
-////						else
-////						{
-////							end--;
-////							fileByteLength = end - start + 1;
-////							//fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
-////							//System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());			
-////						}
-////					}
-//				}
-//				// ChunkSize is increased within the limits
-//				
-//			}
-//			/*
-//			 * Resetting reconnect logic
-//			 * Updating UI
-//			 */
-//			if(resetAndUpdate)
-//			{
-//				retry = true;
-//				reconnectTime = 0;
-//				retryAttempts = 0;
-//				incrementBytesTransferred(fileBytes.length);
-//				temp = _bytesTransferred;
-//				temp *= 100;
-//				temp /= _totalSize;
-//				progressPercentage = (int) temp;
-//				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-//				//showButton();
-//			}
-//			//fileBytes = null;
-//		}
+
+		//
+		//
+		// ////>>>>>>>>old logic
+		// int chunkSize = networkType.getMinChunkSize();
+		// int start = mStart;
+		// int end = (int) length;
+		// if (end > (start + chunkSize))
+		// end = start + chunkSize;
+		// end--;
+		// byte[] fileBytes = null;
+		// int fileByteLength = end - start + 1;
+		// String boundaryMesssage = getBoundaryMessage();
+		// String boundary = "\r\n--" + BOUNDARY + "--\r\n";
+		// ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		// //fileBytes = new byte[fileByteLength];
+		// System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		// /*
+		// * The following loops goes on till the end byte to read reaches the length
+		// * or we receive a json response from the server
+		// */
+		// //
+		// while(end < length && responseJson == null)
+		// {
+		// if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
+		// break;
+		// // int fileByteLength = end - start + 1;
+		// // String boundaryMesssage = getBoundaryMessage();
+		// // String boundary = "\r\n--" + BOUNDARY + "--\r\n";
+		// // fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+		// // System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		//
+		//
+		// bos.write(boundaryMesssage.getBytes());
+		// fileBytes = new byte[fileByteLength];
+		// boolean resetAndUpdate = false;
+		// //if (raf.read(fileBytes, boundaryMesssage.length(), fileByteLength) == -1)
+		// if (raf.read(fileBytes) == -1)
+		// {
+		// raf.close();
+		// throw new IOException("Exception in partial read. files ended");
+		// }
+		//
+		// bos.write(fileBytes);
+		// bos.write(boundary.getBytes());
+		// String contentRange = "bytes " + start + "-" + end + "/" + length;
+		// //System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + fileByteLength, boundary.length());
+		// //String responseString = send(contentRange, fileBytes);
+		// String responseString = send(contentRange, bos.toByteArray());
+		// bos.flush();
+		// bos.close();
+		// //Log.d(getClass().getSimpleName(), "JSON response : " + responseString);
+		// /*
+		// * When end byte uploaded is the last byte of the file and server send response
+		// * i.e. upload successfully completed
+		// */
+		//
+		// if(end == (length-1) && responseString != null)
+		// {
+		// responseJson = new JSONObject(responseString);
+		// resetAndUpdate = true; //To update UI
+		// }
+		// // When upload is not complete
+		// else
+		// {
+		// // In case there is error uploading this chunk
+		// if(responseString == null)
+		// {
+		// /*
+		// * If retry attempt is to be made.
+		// * The chunk size is reduced for next attempt
+		// */
+		//
+		// if(shouldRetry())
+		// {
+		// raf.seek(start);
+		// //if(Utils.densityMultiplier > 1)
+		// //{
+		// if(networkType == FileTransferManager.getInstance(context).getNetworkType())
+		// {
+		// chunkSize/=2;
+		// }
+		// else
+		// {
+		// networkType = FileTransferManager.getInstance(context).getNetworkType();
+		// chunkSize = networkType.getMinChunkSize();
+		// }
+		// //}
+		// }
+		// else
+		// {
+		// raf.close();
+		// throw new IOException("Exception in partial upload. response null");
+		// }
+		//
+		// }
+		// // When the chunk uploaded successfully
+		// else
+		// {
+		// start += chunkSize;
+		// resetAndUpdate = true; // To reset retry logic and update UI
+		//
+		// // if(Utils.densityMultiplier > 1)
+		// // {
+		// chunkSize *= 2;
+		// if(chunkSize > networkType.getMaxChunkSize())
+		// chunkSize = networkType.getMaxChunkSize();
+		// else if (chunkSize < networkType.getMinChunkSize())
+		// chunkSize = networkType.getMinChunkSize();
+		//
+		// /*
+		// * This chunk size should ideally be no more than 1/8 of the total memory available.
+		// */
+		// try
+		// {
+		// int maxMemory = (int) Runtime.getRuntime().maxMemory();
+		// if( chunkSize > (maxMemory / 8) )
+		// chunkSize = (maxMemory / 8) ;
+		// }
+		// catch(Exception e)
+		// {
+		// e.printStackTrace();
+		// }
+		//
+		// end = (int) length;
+		// if (end > (start + chunkSize))
+		// {
+		// end = start + chunkSize;
+		// }
+		// end--;
+		//
+		// fileByteLength = end - start + 1;
+		// //fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+		// //System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		// // }
+		// // else
+		// // {
+		// // end = (int) length;
+		// // if (end > (start + chunkSize))
+		// // {
+		// // end = start + chunkSize;
+		// // end--;
+		// // fileByteLength = end - start + 1;
+		// // }
+		// // else
+		// // {
+		// // end--;
+		// // fileByteLength = end - start + 1;
+		// // //fileBytes = new byte[boundaryMesssage.length() + fileByteLength + boundary.length()];
+		// // //System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		// // }
+		// // }
+		// }
+		// // ChunkSize is increased within the limits
+		//
+		// }
+		// /*
+		// * Resetting reconnect logic
+		// * Updating UI
+		// */
+		// if(resetAndUpdate)
+		// {
+		// retry = true;
+		// reconnectTime = 0;
+		// retryAttempts = 0;
+		// incrementBytesTransferred(fileBytes.length);
+		// temp = _bytesTransferred;
+		// temp *= 100;
+		// temp /= _totalSize;
+		// progressPercentage = (int) temp;
+		// LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+		// //showButton();
+		// }
+		// //fileBytes = null;
+		// }
 		switch (_state)
 		{
 		case CANCELLED:
@@ -860,7 +852,7 @@ public class UploadFileTask extends FileTransferBase
 			_state = FTState.PAUSED;
 			Log.d(getClass().getSimpleName(), "FT PAUSED");
 			// In case upload was complete response JSON is to be saved not the Session_ID
-			if(responseJson != null)
+			if (responseJson != null)
 				saveFileState(responseJson);
 			else
 				saveFileState(X_SESSION_ID);
@@ -883,24 +875,24 @@ public class UploadFileTask extends FileTransferBase
 	private void setChunkSize(long length)
 	{
 		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
-		//int chunkSize = networkType.getMinChunkSize()*2;
+		// int chunkSize = networkType.getMinChunkSize()*2;
 		if (Utils.densityMultiplier > 1)
 			chunkSize = networkType.getMaxChunkSize();
-		else if(Utils.densityMultiplier == 1)
+		else if (Utils.densityMultiplier == 1)
 			chunkSize = networkType.getMinChunkSize() * 2;
 		else
 			chunkSize = networkType.getMinChunkSize();
-		
-		if(chunkSize > (int)length)
+
+		if (chunkSize > (int) length)
 			chunkSize = (int) length;
-		
+
 		try
 		{
 			int maxMemory = (int) Runtime.getRuntime().maxMemory();
-			if( chunkSize > (maxMemory / 8) )
-			chunkSize = (maxMemory / 8) ;
+			if (chunkSize > (maxMemory / 8))
+				chunkSize = (maxMemory / 8);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -909,27 +901,38 @@ public class UploadFileTask extends FileTransferBase
 	String getBoundaryMessage()
 	{
 		String sendingFileType = "";
-		if(HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType)) {
+		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType) || HikeConstants.VOICE_MESSAGE_CONTENT_TYPE.equals(fileType))
+		{
 			sendingFileType = fileType;
 		}
 		StringBuffer res = new StringBuffer("--").append(BOUNDARY).append("\r\n");
-		//res.append("Content-Disposition: form-data; name=\"");
-		//res.append("Cookie").append("\"\r\n").append("\r\n");
-		//res.append(uId).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
-		//res.append("Content-Disposition: form-data; name=\"");
-		//res.append("X-CONTENT-RANGE").append("\"\r\n").append("\r\n");
-		//res.append(contentRange).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
-		//res.append("Content-Disposition: form-data; name=\"");
-		//res.append("X-SESSION-ID").append("\"\r\n").append("\r\n");
-		//res.append(X_SESSION_ID).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
-		res.append("Content-Disposition: form-data; name=\"").append("file").append("\"; filename=\"").append(selectedFile.getName()).append("\"\r\n").append("Content-Type: ")
+		// res.append("Content-Disposition: form-data; name=\"");
+		// res.append("Cookie").append("\"\r\n").append("\r\n");
+		// res.append(uId).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
+		// res.append("Content-Disposition: form-data; name=\"");
+		// res.append("X-CONTENT-RANGE").append("\"\r\n").append("\r\n");
+		// res.append(contentRange).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
+		// res.append("Content-Disposition: form-data; name=\"");
+		// res.append("X-SESSION-ID").append("\"\r\n").append("\r\n");
+		// res.append(X_SESSION_ID).append("\r\n").append("--").append(BOUNDARY).append("\r\n");
+		String name = selectedFile.getName();
+		try
+		{
+			name = URLEncoder.encode(selectedFile.getName(), "UTF-8");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Log.d(getClass().getSimpleName(),"encode file name: " + name);
+		res.append("Content-Disposition: form-data; name=\"").append("file").append("\"; filename=\"").append(name).append("\"\r\n").append("Content-Type: ")
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
 	}
 
 	/*
-	 * this function was created to notify the UI
-	 * but is not required for now. Not deleted if required again
+	 * this function was created to notify the UI but is not required for now. Not deleted if required again
 	 */
 	private boolean shouldSendProgress()
 	{
@@ -942,20 +945,20 @@ public class UploadFileTask extends FileTransferBase
 		return true;
 	}
 
-//	private void showButton()
-//	{
-//		Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
-//		intent.putExtra("msgId", msgId);
-//		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-//	}
-	
+	// private void showButton()
+	// {
+	// Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
+	// intent.putExtra("msgId", msgId);
+	// LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+	// }
+
 	private String send(String contentRange, byte[] fileBytes)
 	{
 		HttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
 		try
-		{	
+		{
 			post.addHeader("Connection", "Keep-Alive");
 			post.addHeader("Content-Name", selectedFile.getName());
 			post.addHeader("X-Thumbnail-Required", "0");
@@ -964,27 +967,26 @@ public class UploadFileTask extends FileTransferBase
 			post.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
-			//byte[] postBytes = getPostBytes(fileBytes);
-			//post.setEntity(new ByteArrayEntity(postBytes));
+			// byte[] postBytes = getPostBytes(fileBytes);
+			// post.setEntity(new ByteArrayEntity(postBytes));
 			post.setEntity(new ByteArrayEntity(fileBytes));
-//			Log.d(getClass().getSimpleName(), "Before Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
+			// Log.d(getClass().getSimpleName(), "Before Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
 			HttpResponse response = client.execute(post);
-//			Log.d(getClass().getSimpleName(), "After Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
-//		    BufferedReader r = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-//			StringBuilder total = new StringBuilder();
-//			String line;
-//			while ((line = r.readLine()) != null)
-//			{
-//				total.append(line);
-//			}
-//			res = total.toString();
+			// Log.d(getClass().getSimpleName(), "After Thread Details : " + Thread.currentThread().toString() + "Time : " + System.currentTimeMillis() / 1000);
+			// BufferedReader r = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			// StringBuilder total = new StringBuilder();
+			// String line;
+			// while ((line = r.readLine()) != null)
+			// {
+			// total.append(line);
+			// }
+			// res = total.toString();
 			res = EntityUtils.toString(response.getEntity());
 		}
 		catch (Exception e)
 		{
 			Log.d(getClass().getSimpleName(), "Caught Exception: " + e.getMessage());
-			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)
-					|| e.getMessage().contains(NETWORK_ERROR_3)))
+			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2) || e.getMessage().contains(NETWORK_ERROR_3)))
 			{
 				Log.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
 				// we should retry if failed due to network
@@ -1034,7 +1036,7 @@ public class UploadFileTask extends FileTransferBase
 
 	private byte[] getPostBytes(byte[] fileBytes)
 	{
-		//ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		// ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] postBytes = null;
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
@@ -1042,33 +1044,33 @@ public class UploadFileTask extends FileTransferBase
 		System.arraycopy(boundaryMesssage.getBytes(), 0, postBytes, 0, boundaryMesssage.length());
 		System.arraycopy(fileBytes, 0, postBytes, boundaryMesssage.length(), fileBytes.length);
 		System.arraycopy(boundary.getBytes(), 0, postBytes, boundaryMesssage.length() + fileBytes.length, boundary.length());
-//		try
-//		{
-//			bos.write(getBoundaryMessage(contentRange).getBytes());
-//			bos.write(fileBytes);
-//			bos.write(("\r\n--" + BOUNDARY + "--\r\n").getBytes());
-//			postBytes = bos.toByteArray();
-//			bos.flush();
-//			bos.close();
-//		}
-//		catch (IOException e)
-//		{
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		finally
-//		{
-//			if (bos != null)
-//				try
-//				{
-//					bos.close();
-//				}
-//				catch (IOException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//		}
+		// try
+		// {
+		// bos.write(getBoundaryMessage(contentRange).getBytes());
+		// bos.write(fileBytes);
+		// bos.write(("\r\n--" + BOUNDARY + "--\r\n").getBytes());
+		// postBytes = bos.toByteArray();
+		// bos.flush();
+		// bos.close();
+		// }
+		// catch (IOException e)
+		// {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// finally
+		// {
+		// if (bos != null)
+		// try
+		// {
+		// bos.close();
+		// }
+		// catch (IOException e)
+		// {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// }
 		return postBytes;
 	}
 
@@ -1109,6 +1111,6 @@ public class UploadFileTask extends FileTransferBase
 		{
 			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(selectedFile)));
 		}
-		//showButton();
+		// showButton();
 	}
 }

@@ -8,25 +8,27 @@ import android.graphics.drawable.Drawable;
 /**
  * A container class used to repreresent all known information about an account.
  */
-public class AccountData {
+public class AccountData
+{
 	private String mName;
+
 	private String mType;
+
 	private CharSequence mTypeLabel;
+
 	private Drawable mIcon;
 
 	/**
 	 * @param name
-	 *            The name of the account. This is usually the user's email
-	 *            address or username.
+	 *            The name of the account. This is usually the user's email address or username.
 	 * @param description
-	 *            The description for this account. This will be dictated by the
-	 *            type of account returned, and can be obtained from the system
-	 *            AccountManager.
+	 *            The description for this account. This will be dictated by the type of account returned, and can be obtained from the system AccountManager.
 	 */
-	public AccountData(String name, AuthenticatorDescription description,
-			Context context) {
+	public AccountData(String name, AuthenticatorDescription description, Context context)
+	{
 		mName = name;
-		if (description != null) {
+		if (description != null)
+		{
 			mType = description.type;
 
 			// The type string is stored in a resource, so we need to
@@ -35,46 +37,56 @@ public class AccountData {
 			String packageName = description.packageName;
 			PackageManager pm = context.getPackageManager();
 
-			if (description.labelId != 0) {
+			if (description.labelId != 0)
+			{
 				mTypeLabel = pm.getText(packageName, description.labelId, null);
-				if (mTypeLabel == null) {
-					throw new IllegalArgumentException(
-							"LabelID provided, but label not found");
+				if (mTypeLabel == null)
+				{
+					throw new IllegalArgumentException("LabelID provided, but label not found");
 				}
-			} else {
+			}
+			else
+			{
 				mTypeLabel = "";
 			}
 
-			if (description.iconId != 0) {
+			if (description.iconId != 0)
+			{
 				mIcon = pm.getDrawable(packageName, description.iconId, null);
-				if (mIcon == null) {
-					throw new IllegalArgumentException(
-							"IconID provided, but drawable not " + "found");
+				if (mIcon == null)
+				{
+					throw new IllegalArgumentException("IconID provided, but drawable not " + "found");
 				}
-			} else {
-				mIcon = context.getResources().getDrawable(
-						android.R.drawable.sym_def_app_icon);
+			}
+			else
+			{
+				mIcon = context.getResources().getDrawable(android.R.drawable.sym_def_app_icon);
 			}
 		}
 	}
 
-	public String getName() {
+	public String getName()
+	{
 		return mName;
 	}
 
-	public String getType() {
+	public String getType()
+	{
 		return mType;
 	}
 
-	public CharSequence getTypeLabel() {
+	public CharSequence getTypeLabel()
+	{
 		return mTypeLabel;
 	}
 
-	public Drawable getIcon() {
+	public Drawable getIcon()
+	{
 		return mIcon;
 	}
 
-	public String toString() {
+	public String toString()
+	{
 		return mName;
 	}
 }

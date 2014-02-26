@@ -53,20 +53,18 @@ import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
-import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
-@ReportsCrashes(formKey = "", customReportContent = {
-		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
-		ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
-		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE,
-		ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application implements Listener {
+@ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
+		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
+public class HikeMessengerApp extends Application implements Listener
+{
 
-	public static enum CurrentState {
+	public static enum CurrentState
+	{
 		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED
 	}
 
@@ -156,32 +154,40 @@ public class HikeMessengerApp extends Application implements Listener {
 												// OFF for Production
 
 	/*
-	 * Setting name for the day the was logged on fiksu for
-	 * "First message sent in day"
+	 * Setting name for the day the was logged on fiksu for "First message sent in day"
 	 */
 	public static final String DAY_RECORDED = "dayRecorded";
 
 	public static final String LAST_BACK_OFF_TIME = "lastBackOffTime";
 
 	public static final String FACEBOOK_TOKEN = "facebookToken";
+
 	public static final String FACEBOOK_TOKEN_EXPIRES = "facebookTokenExpires";
+
 	public static final String FACEBOOK_USER_ID = "facebookUserId";
+
 	public static final String FACEBOOK_AUTH_COMPLETE = "facebookAuthComplete";
 
 	public static final String TWITTER_TOKEN = "twitterToken";
+
 	public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
+
 	public static final String TWITTER_AUTH_COMPLETE = "twitterAuthComplete";
 
 	public static final String MSISDN_ENTERED = "msisdnEntered";
 
 	public static final String BROKER_HOST = "brokerHost";
+
 	public static final String BROKER_PORT = "brokerPort";
 
 	public static final String FAVORITES_INTRO_SHOWN = "favoritesIntroShown";
+
 	public static final String NUDGE_INTRO_SHOWN = "nudgeIntroShown";
 
 	public static final String REWARDS_TOKEN = "rewardsToken";
+
 	public static final String SHOW_REWARDS = "showRewards";
+
 	public static final String TALK_TIME = "talkTime";
 
 	public static final String GAMES_TOKEN = "gamesToken";
@@ -189,12 +195,15 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOW_GAMES = "showGames";
 
 	public static final String GCK_SHOWN = "gckShown";
+
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 
 	public static final String LAST_STATUS = "lastStatus";
+
 	public static final String LAST_MOOD = "lastMood";
 
 	public static final String APP_LAUNCHES = "appLaunches";
+
 	public static final String DONT_SHOW_APP_RATER = "dontShowAppRater";
 
 	public static final String INTRO_DONE = "introDone";
@@ -212,6 +221,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String USER_JOIN_TIME = "userJoinTime";
 
 	public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
+
 	public static final String LAST_BACK_OFF_TIME_DEV_DETAILS = "lastBackOffTimeDevDetails";
 
 	public static final String SHOW_CRICKET_MOODS = "showCricketMoods";
@@ -223,6 +233,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String STATUS_IDS = "statusIds";
 
 	public static final String SHOWN_SMS_CLIENT_POPUP = "shownSMSClientPopup";
+
 	public static final String SHOWN_SMS_SYNC_POPUP = "shownSMSSyncPopup";
 
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
@@ -284,14 +295,14 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String FREE_INVITE_POPUP_BODY = "freeInvitePopupBody";
 
 	public static final String FREE_INVITE_POPUP_DEFAULT_IMAGE = "freeInviteDefaultImage";
-	
+
 	public static final String SHOWN_CHAT_BG_FTUE = "shownChatBgFtue";
 
 	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
-	
-	public static final String WHATSAPP_DETAILS_SENT = "whatsappDetailsSent";
 
-	public static final String LAST_BACK_OFF_TIME_WHATSAPP = "lastBackOffTimeWhatsapp";
+	public static final String GREENBLUE_DETAILS_SENT = "whatsappDetailsSent";
+
+	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeWhatsapp";
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
@@ -330,60 +341,67 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static Map<String, Long> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
-	
-	class IncomingHandler extends Handler {
+
+	class IncomingHandler extends Handler
+	{
 		@Override
-		public void handleMessage(Message msg) {
+		public void handleMessage(Message msg)
+		{
 			Log.d("HikeMessengerApp", "In handleMessage " + msg.what);
-			switch (msg.what) {
+			switch (msg.what)
+			{
 			case HikeService.MSG_APP_MESSAGE_STATUS:
 				boolean success = msg.arg1 != 0;
 				Long msgId = (Long) msg.obj;
-				Log.d("HikeMessengerApp", "received msg status msgId:" + msgId
-						+ " state: " + success);
+				Log.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
 				// TODO handle this where we are saving all the mqtt messages
-				String event = success ? HikePubSub.SERVER_RECEIVED_MSG
-						: HikePubSub.MESSAGE_FAILED;
+				String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
 				mPubSubInstance.publish(event, msgId);
 				break;
 			case HikeService.MSG_APP_CONN_STATUS:
-				Log.d("HikeMessengerApp", "received connection status "
-						+ msg.arg1);
+				Log.d("HikeMessengerApp", "received connection status " + msg.arg1);
 				int s = msg.arg1;
 				MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
 				mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
 				break;
 			case HikeService.MSG_APP_INVALID_TOKEN:
-				Log.d("HikeMessengerApp",
-						"received invalid token message from service");
+				Log.d("HikeMessengerApp", "received invalid token message from service");
 				HikeMessengerApp.this.disconnectFromService();
-				HikeMessengerApp.this.stopService(new Intent(
-						HikeMessengerApp.this, HikeService.class));
-				HikeMessengerApp.this.startActivity(new Intent(
-						HikeMessengerApp.this, WelcomeActivity.class));
+				HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
+				HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
 			}
 		}
 	}
 
-	static {
+	static
+	{
 		mPubSubInstance = new HikePubSub();
-		if (HikeMessengerApp.lastSeenFriendsMap == null) {
+		if (HikeMessengerApp.lastSeenFriendsMap == null)
+		{
 			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
 		}
 	}
 
-	public void sendToService(Message message) {
-		try {
+	public void sendToService(Message message)
+	{
+		try
+		{
 			mService.send(message);
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e)
+		{
 			Log.e("HikeMessengerApp", "Unable to connect to service", e);
 		}
 	}
 
-	public void disconnectFromService() {
-		if (mInitialized) {
-			synchronized (HikeMessengerApp.class) {
-				if (mInitialized) {
+	public void disconnectFromService()
+	{
+		if (mInitialized)
+		{
+			synchronized (HikeMessengerApp.class)
+			{
+				if (mInitialized)
+				{
 					mInitialized = false;
 					unbindService(mServiceConnection);
 					mServiceConnection = null;
@@ -392,54 +410,58 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 	}
 
-	public void connectToService() {
+	public void connectToService()
+	{
 		Log.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
-		if (!mInitialized) {
-			synchronized (HikeMessengerApp.class) {
-				if (!mInitialized) {
+		if (!mInitialized)
+		{
+			synchronized (HikeMessengerApp.class)
+			{
+				if (!mInitialized)
+				{
 					mInitialized = true;
 					Log.d("HikeMessengerApp", "Initializing service");
-					mServiceConnection = HikeServiceConnection
-							.createConnection(this, mMessenger);
+					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
 				}
 			}
 		}
 	}
 
 	/*
-	 * Implement a Custom report sender to add our own custom msisdn and token
-	 * for the username and password
+	 * Implement a Custom report sender to add our own custom msisdn and token for the username and password
 	 */
-	private class CustomReportSender implements ReportSender {
+	private class CustomReportSender implements ReportSender
+	{
 		@Override
-		public void send(CrashReportData crashReportData)
-				throws ReportSenderException {
+		public void send(CrashReportData crashReportData) throws ReportSenderException
+		{
 			/* only send ACRA reports if we're in release mode */
-			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE)) {
+			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE))
+			{
 				return;
 			}
 
-			try {
+			try
+			{
 				final String reportUrl = AccountUtils.base + "/logs/android";
-				Log.d(HikeMessengerApp.this.getClass().getSimpleName(),
-						"Connect to " + reportUrl.toString());
+				Log.d(HikeMessengerApp.this.getClass().getSimpleName(), "Connect to " + reportUrl.toString());
 
 				final String login = msisdn;
 				final String password = token;
 
-				if (login != null && password != null) {
+				if (login != null && password != null)
+				{
 					final HttpRequest request = new HttpRequest();
 					request.setLogin(login);
 					request.setPassword(password);
 					String paramsAsString = getParamsAsString(crashReportData);
-					Log.e(HikeMessengerApp.this.getClass().getSimpleName(),
-							"Params: " + paramsAsString);
-					request.send(new URL(reportUrl), HttpSender.Method.POST,
-							paramsAsString, HttpSender.Type.FORM);
+					Log.e(HikeMessengerApp.this.getClass().getSimpleName(), "Params: " + paramsAsString);
+					request.send(new URL(reportUrl), HttpSender.Method.POST, paramsAsString, HttpSender.Type.FORM);
 				}
-			} catch (IOException e) {
-				Log.e(HikeMessengerApp.this.getClass().getSimpleName(),
-						"IOException", e);
+			}
+			catch (IOException e)
+			{
+				Log.e(HikeMessengerApp.this.getClass().getSimpleName(), "IOException", e);
 			}
 		}
 
@@ -454,17 +476,18 @@ public class HikeMessengerApp extends Application implements Listener {
 	 * @throws UnsupportedEncodingException
 	 *             if one of the parameters couldn't be converted to UTF-8.
 	 */
-	private String getParamsAsString(Map<?, ?> parameters)
-			throws UnsupportedEncodingException {
+	private String getParamsAsString(Map<?, ?> parameters) throws UnsupportedEncodingException
+	{
 
 		final StringBuilder dataBfr = new StringBuilder();
-		for (final Object key : parameters.keySet()) {
-			if (dataBfr.length() != 0) {
+		for (final Object key : parameters.keySet())
+		{
+			if (dataBfr.length() != 0)
+			{
 				dataBfr.append('&');
 			}
 			final Object preliminaryValue = parameters.get(key);
-			final Object value = (preliminaryValue == null) ? ""
-					: preliminaryValue;
+			final Object value = (preliminaryValue == null) ? "" : preliminaryValue;
 			dataBfr.append(URLEncoder.encode(key.toString(), "UTF-8"));
 			dataBfr.append('=');
 			dataBfr.append(URLEncoder.encode(value.toString(), "UTF-8"));
@@ -473,17 +496,16 @@ public class HikeMessengerApp extends Application implements Listener {
 		return dataBfr.toString();
 	}
 
-	public void onCreate() {
+	public void onCreate()
+	{
 
-		SharedPreferences settings = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		// this is the setting to check whether the avtar DB migration has
 		// started or not
-		int avtarInt = settings.getInt(
-				HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
+		int avtarInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1);
 		// this is the setting to check whether the conv DB migration has
 		// started or not
 		// -1 in both cases means an uninitialized setting, mostly on first
@@ -498,7 +520,8 @@ public class HikeMessengerApp extends Application implements Listener {
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
 		// first time or failed DB upgrade.
-		if (avtarInt == -1 && convInt == -1) {
+		if (avtarInt == -1 && convInt == -1)
+		{
 			Editor mEditor = settings.edit();
 			// set the pref to 0 to indicate we've reached the state to init the
 			// hike conversation database.
@@ -509,14 +532,17 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
-		try {
-			actualAppVersion = getPackageManager().getPackageInfo(
-					getPackageName(), 0).versionName;
-		} catch (NameNotFoundException e) {
+		try
+		{
+			actualAppVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
 			Log.e("AccountUtils", "Unable to get app version");
 		}
 
-		if(!currentAppVersion.equals(actualAppVersion)) {
+		if (!currentAppVersion.equals(actualAppVersion))
+		{
 			Utils.resetUpdateParams(settings);
 
 			/*
@@ -534,9 +560,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings
-				.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)
-				|| TEST) {
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST)
+		{
 			// turn off future push notifications as soon as the app has
 			// started.
 			// this has to be turned on whenever the upgrade finishes.
@@ -551,55 +576,47 @@ public class HikeMessengerApp extends Application implements Listener {
 		HikeMqttPersistence.init(this);
 		SmileyParser.init(this);
 
-		String twitterToken = settings.getString(
-				HikeMessengerApp.TWITTER_TOKEN, "");
-		String twitterTokenSecret = settings.getString(
-				HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
+		String twitterToken = settings.getString(HikeMessengerApp.TWITTER_TOKEN, "");
+		String twitterTokenSecret = settings.getString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
 		makeTwitterInstance(twitterToken, twitterTokenSecret);
 
-		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
-				HikeConstants.INDIA_COUNTRY_CODE);
+		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
 
-		SharedPreferences preferenceManager = PreferenceManager
-				.getDefaultSharedPreferences(this);
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// adding a check here for MobileAppTracker SDK update case
 		// we use this preference to check if this is a fresh install case or an
 		// update case
 		// in case of an update the SSL pref would not be null
-		TrackerUtil tUtil = TrackerUtil.getInstance(this
-				.getApplicationContext());
-		if (tUtil != null) {
-			tUtil.setTrackOptions(!preferenceManager
-					.contains(HikeConstants.SSL_PREF));
-			Log.d(getClass().getSimpleName(),
-					"Init for apptracker sdk finished"
-							+ !preferenceManager
-									.contains(HikeConstants.SSL_PREF));
+		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
+		if (tUtil != null)
+		{
+			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
+			Log.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
 		}
 
-		if (!preferenceManager.contains(HikeConstants.SSL_PREF)) {
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF))
+		{
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
 			editor.commit();
 		}
 
-		if (!preferenceManager.contains(HikeConstants.RECEIVE_SMS_PREF)) {
+		if (!preferenceManager.contains(HikeConstants.RECEIVE_SMS_PREF))
+		{
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, false);
 			editor.commit();
 		}
 
-		if (!preferenceManager.contains(HikeConstants.STATUS_BOOLEAN_PREF)) {
+		if (!preferenceManager.contains(HikeConstants.STATUS_BOOLEAN_PREF))
+		{
 			Editor editor = preferenceManager.edit();
-			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF,
-					preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
+			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF, preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
 			editor.commit();
 		}
 
-		Utils.setupServerURL(
-				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
-				Utils.switchSSLOn(getApplicationContext()));
+		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
@@ -607,32 +624,34 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		mMessenger = new Messenger(new IncomingHandler());
 
-		if (token != null) {
+		if (token != null)
+		{
 			AccountUtils.setToken(token);
 		}
-		if (uid != null) {
+		if (uid != null)
+		{
 			AccountUtils.setUID(uid);
 		}
-		try {
-			AccountUtils.setAppVersion(getPackageManager().getPackageInfo(
-					getPackageName(), 0).versionName);
-		} catch (NameNotFoundException e) {
+		try
+		{
+			AccountUtils.setAppVersion(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+		}
+		catch (NameNotFoundException e)
+		{
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
 
 		/*
-		 * We will increase the unseen status count by one if the user has not
-		 * posted any updates and if we have never notified the user of this
-		 * before.
+		 * We will increase the unseen status count by one if the user has not posted any updates and if we have never notified the user of this before.
 		 */
-		if (!settings.contains(NOTIFIED_NO_STATUS)) {
-			String lastStatus = settings.getString(
-					HikeMessengerApp.LAST_STATUS, "");
+		if (!settings.contains(NOTIFIED_NO_STATUS))
+		{
+			String lastStatus = settings.getString(HikeMessengerApp.LAST_STATUS, "");
 
 			Editor editor = settings.edit();
-			if (TextUtils.isEmpty(lastStatus)) {
-				int count = settings.getInt(
-						HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+			if (TextUtils.isEmpty(lastStatus))
+			{
+				int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 				count++;
 				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
 			}
@@ -640,35 +659,33 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
-		
-
 		makeNoMediaFiles();
 
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
 
 		hikeBotNamesMap = new HashMap<String, String>();
 		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
-		hikeBotNamesMap
-				.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		initHikeLruCache(getApplicationContext());
 	}
 
 	private static HikeLruCache cache;
+
 	private void initHikeLruCache(Context applicationContext)
 	{
 		ImageCacheParams params = new ImageCacheParams();
 		params.setMemCacheSizePercent(0.15f);
 		cache = new HikeLruCache(params, getApplicationContext());
 	}
-	
+
 	public static HikeLruCache getLruCache()
 	{
 		return cache;
 	}
-	
-	private void makeNoMediaFiles() {
+
+	private void makeNoMediaFiles()
+	{
 		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
 
 		File profileRoot = new File(root + HikeConstants.PROFILE_ROOT);
@@ -678,90 +695,107 @@ public class HikeMessengerApp extends Application implements Listener {
 		makeNoMediaFile(recordingRoot);
 	}
 
-	private void makeNoMediaFile(File root) {
-		if (!root.exists()) {
+	private void makeNoMediaFile(File root)
+	{
+		if (!root.exists())
+		{
 			root.mkdirs();
 		}
 		File file = new File(root, ".nomedia");
-		if (!file.exists()) {
-			try {
+		if (!file.exists())
+		{
+			try
+			{
 				file.createNewFile();
-			} catch (IOException e) {
+			}
+			catch (IOException e)
+			{
 				Log.d(getClass().getSimpleName(), "failed to make nomedia file");
 			}
 		}
 	}
-	
-	public static HikePubSub getPubSub() {
+
+	public static HikePubSub getPubSub()
+	{
 		return mPubSubInstance;
 	}
 
-	public void setService(Messenger service) {
+	public void setService(Messenger service)
+	{
 		this.mService = service;
 	}
 
-	public static boolean isIndianUser() {
+	public static boolean isIndianUser()
+	{
 		return isIndianUser;
 	}
 
-	public static void makeTwitterInstance(String token, String tokenSecret) {
+	public static void makeTwitterInstance(String token, String tokenSecret)
+	{
 		AccessToken accessToken = null;
-		try {
+		try
+		{
 			accessToken = new AccessToken(token, tokenSecret);
 
-			OAuthAuthorization authorization = new OAuthAuthorization(
-					ConfigurationContext.getInstance());
+			OAuthAuthorization authorization = new OAuthAuthorization(ConfigurationContext.getInstance());
 			authorization.setOAuthAccessToken(accessToken);
-			authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID,
-					HikeConstants.APP_TWITTER_SECRET);
+			authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID, HikeConstants.APP_TWITTER_SECRET);
 
 			twitter = new TwitterFactory().getInstance(authorization);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			Log.w("HikeMessengerApp", "Invalid format", e);
 			return;
 		}
 	}
 
-	public static Twitter getTwitterInstance(String token, String tokenSecret) {
+	public static Twitter getTwitterInstance(String token, String tokenSecret)
+	{
 
-		try {
+		try
+		{
 			makeTwitterInstance(token, tokenSecret);
 
 			return twitter;
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e)
+		{
 			Log.w("HikeMessengerApp", "Invalid format", e);
 			return null;
 		}
 	}
 
-	public static Map<String, TypingNotification> getTypingNotificationSet() {
+	public static Map<String, TypingNotification> getTypingNotificationSet()
+	{
 		return typingNotificationMap;
 	}
 
-	public void initialiseListeners() {
-		if (dbConversationListener == null) {
-			dbConversationListener = new DbConversationListener(
-					getApplicationContext());
+	public void initialiseListeners()
+	{
+		if (dbConversationListener == null)
+		{
+			dbConversationListener = new DbConversationListener(getApplicationContext());
 		}
-		if (toastListener == null) {
+		if (toastListener == null)
+		{
 			toastListener = new ToastListener(getApplicationContext());
 		}
-		if (activityTimeLogger == null) {
+		if (activityTimeLogger == null)
+		{
 			activityTimeLogger = new ActivityTimeLogger();
 		}
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
-		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
-			SharedPreferences settings = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			boolean isWifiConnection = object != null ? (Boolean) object
-					: Utils.switchSSLOn(getApplicationContext());
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type))
+		{
+			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			boolean isWifiConnection = object != null ? (Boolean) object : Utils.switchSSLOn(getApplicationContext());
 
-			Utils.setupServerURL(
-					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
-					isWifiConnection);
+			Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), isWifiConnection);
 		}
 	}
 }

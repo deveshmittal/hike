@@ -16,12 +16,12 @@
 
 package com.bsb.hike.ui.utils;
 
-import com.bsb.hike.utils.Utils;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
+
+import com.bsb.hike.utils.Utils;
 
 /**
  * A BitmapDrawable that keeps track of whether it is being displayed or cached. When the drawable is no longer being displayed or cached, {@link Bitmap#recycle() recycle()} will

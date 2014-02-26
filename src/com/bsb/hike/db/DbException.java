@@ -1,13 +1,16 @@
 package com.bsb.hike.db;
 
-public class DbException extends Exception {
+public class DbException extends Exception
+{
 	public Exception parentExc;
 
-	public DbException(Exception e) {
+	public DbException(Exception e)
+	{
 		this.parentExc = e;
 	}
 
-	public String toString() {
+	public String toString()
+	{
 		return "DbException " + this.parentExc.toString();
 	}
 }

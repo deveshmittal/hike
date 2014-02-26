@@ -3,245 +3,465 @@ package com.bsb.hike;
 import android.net.Uri;
 import android.os.Environment;
 
-public class HikeConstants {
+public class HikeConstants
+{
 	public static final String APP_PUSH_ID = "bsbmsngr";
+
 	public static final String APP_FACEBOOK_ID = "425850510764995";
+
 	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
+
 	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
 
 	public static final String MAP_API_KEY_DEBUG = "0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA";
+
 	public static final String MAP_API_KEY_PROD = "0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw";
 
 	public static final String MA_TRACKER_AD_ID = "9198";
+
 	public static final String MA_TRACKER_KEY = "00774f47f97b5173432b958a986f0061";
+
 	public static final String MA_TRACKER_USERID = "bsb_hike";
+
 	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
+
 	public static final String MA_SITE_ID = "27576";
 
 	public static final String ANDROID = "android";
 	public static final String NOKIA = "nokia";
 
 	public static final String MESSAGE = "msg";
+
 	public static final String UI_TOPIC = "/u";
+
 	public static final String APP_TOPIC = "/a";
+
 	public static final String SERVICE_TOPIC = "/s";
+
 	public static final String PUBLISH_TOPIC = "/p";
 
 	public static final String TYPE = "t";
+
 	public static final String DATA = "d";
+
 	public static final String TO = "to";
+
 	public static final String FROM = "f";
+
 	public static final String SUB_TYPE = "st";
 
 	public static final String HIKE_MESSAGE = "hm";
+
 	public static final String SMS_MESSAGE = "sm";
+
 	public static final String TIMESTAMP = "ts";
+
 	public static final String MESSAGE_ID = "i";
+
 	public static final String METADATA = "md";
+
 	public static final String METADATA_DND = "dnd";
+
 	public static final String ANALYTICS_EVENT = "ae";
+
 	public static final String ALL_INVITEE = "ai";
+
 	public static final String ALL_INVITEE_JOINED = "aij";
+
 	public static final String ALL_INVITEE_2 = "all_invitee";
+
 	public static final String ALL_INVITEE_JOINED_2 = "all_invitee_joined";
+
 	public static final String NAME = "name";
+
 	public static final String MSISDN = "msisdn";
+
 	public static final String NEW_USER = "nu";
+
 	public static final String EMAIL = "email";
+
 	public static final String GENDER = "gender";
+
 	public static final String VERSION = "v";
+
 	public static final String CRITICAL = "c";
+
 	public static final String CRITICAL_UPDATE_KEY = "critical";
+
 	public static final String INVITE_TOKEN = "invite_token";
+
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
+
 	public static final String DND_NUMBERS = "dndnumbers";
+
 	public static final String FILES = "files";
+
 	public static final String CONTENT_TYPE = "ct";
+
 	public static final String THUMBNAIL = "tn";
+
 	public static final String SOURCE_FILE_PATH = "srcPath";
+
 	public static final String FILE_NAME = "fn";
+
 	public static final String FILE_KEY = "fk";
+
 	public static final String CREDITS = "credits";
+
 	public static final String ON_HIKE = "onhike";
+
 	public static final String DND = "dnd";
+
 	public static final String DND_USERS = "dndUsers";
+
 	public static final String LATITUDE = "lat";
+
 	public static final String LONGITUDE = "long";
+
 	public static final String ZOOM_LEVEL = "zoom";
+
 	public static final String ADDRESS = "add";
+
 	public static final String POKE = "poke";
+
 	public static final String ID = "id";
+
 	public static final String TOKEN = "token";
+
 	public static final String EXPIRES = "expires";
+
 	public static final String POST = "post";
+
 	public static final String ACCOUNT = "account";
+
 	public static final String ACCOUNTS = "accounts";
+
 	public static final String FAVORITES = "favorites";
+
 	public static final String PENDING = "pending";
+
 	public static final String MSISDNS = "msisdns";
+
 	public static final String REWARDS_TOKEN = "reward_token";
+
 	public static final String SHOW_REWARDS = "show_rewards";
+
 	public static final String REWARDS = "rewards";
+
 	public static final String GAMES_TOKEN = "games_token";
+
 	public static final String SHOW_GAMES = "show_games";
+
 	public static final String GAMES = "games";
+
 	public static final String TALK_TIME = "tt";
+
 	public static final String PHONE_NUMBERS = "phone_numbers";
+
 	public static final String EMAILS = "emails";
+
 	public static final String ADDRESSES = "addresses";
+
 	public static final String EVENTS = "events";
+
 	public static final String STATUS_ID = "statusid";
+
 	public static final String MOOD = "mood";
+
 	public static final String STATUS_MESSAGE = "msg";
+
 	public static final String PROFILE = "profile";
+
 	public static final String ICON = "icon";
+
 	public static final String MUTED = "muted";
+
 	public static final String POST_AB = "postab";
+
 	public static final String POST_INFO = "postinfo";
+
 	public static final String PUSH = "push";
+
 	public static final String JOIN_TIME = "jointime";
+
 	public static final String STATUS_MESSAGE_2 = "status-message";
+
 	public static final String FACEBOOK_STATUS = "fb";
+
 	public static final String TWITTER_STATUS = "twitter";
+
 	public static final String TIME_OF_DAY = "timeofday";
+
 	public static final String REQUEST_PENDING = "requestpending";
+
 	public static final String LOCALE = "locale";
+
 	public static final String ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS = "enablepushbatchingforsu";
+
 	public static final String PUSH_SU = "pushsu";
+
 	public static final String BATCH_HEADER = "h";
+
 	public static final String BATCH_MESSAGE = "m";
+
 	public static final String UPGRADE = "upgrade";
+
 	public static final String DEV_TYPE = "dev_type";
+
 	public static final String APP_VERSION = "app_version";
+
 	public static final String UPDATE_VERSION = "version";
+
 	public static final String DEVICE_VERSION = "deviceversion";
+
 	public static final String CRICKET_MOODS = "cmoods";
+
 	public static final String COUNT = "c";
+
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
+
 	public static final String STICKER_IDS = "stIds";
+
 	public static final String STICKER = "stk";
+
 	public static final String RESOLUTION_ID = "resId";
+
 	public static final String NUMBER_OF_STICKERS = "nos";
+
 	public static final String DATA_2 = "data";
+
 	public static final String ADD_STICKER = "addStk";
+
 	public static final String REMOVE_STICKER = "remStk";
+
 	public static final String REMOVE_CATEGORY = "remCat";
+
 	public static final String DISABLED_ST = "disabled";
+
 	public static final String STATUS = "stat";
+
 	public static final String OK = "ok";
+
 	public static final String REACHED_STICKER_END = "st";
+
 	public static final String PLAYTIME = "pt";
+
 	public static final String FOREGROUND = "fg";
+
 	public static final String BACKGROUND = "bg";
+
 	public static final String JUST_OPENED = "justOpened";
+
 	public static final String BULK_LAST_SEEN = "bulklastseen";
+
 	public static final String LAST_SEEN = "ls";
+
 	public static final String LAST_SEEN_SETTING = "lastseen";
+
 	public static final String BULK_LAST_SEEN_KEY = "lastseens";
+
 	public static final String PROTIP_HEADER = "h";
+
 	public static final String PROTIP_TEXT = "t";
+
 	public static final String PROTIP_IMAGE_URL = "img";
+
 	public static final String PROTIP_WAIT_TIME = "wt";
+
 	public static final String PROTIP_GAME_DOWNLOAD_URL = "url";
+
 	public static final String PROTIP_SHOW_PUSH = "fp";
+
 	public static final String NO_SMS = "nosms";
+
 	public static final String RETURNING_USER = "ru";
+
 	public static final String NUMBER_OF_SMS = "no_of_sms";
+
 	public static final String OFFLINE = "offline";
+
 	public static final String SENDER = "sender";
+
 	public static final String RECIPIENT = "recipient";
+
 	public static final String IS_H2H = "is_h2h";
+
 	public static final String NATIVE_SMS = "native_sms";
+
 	public static final String UNIFIED_INBOX = "unified_inbox";
+
 	public static final String PULL_OLD_SMS = "pull_old_sms";
+
 	public static final String TIP_ID = "tip_id";
+
 	public static final String TIP_URL = "tip_url";
+
 	public static final String SMS = "sms";
+
 	public static final String UI_EVENT = "uiEvent";
+	
+	public static final String CRC_EVENT = "crc";
+	
+	public static final String MD5_HASH = "md5";
+	
+	public static final String FILE_SIZE = "fs";
+	
+	public static final String DOWNLOAD = "dwnld";
+
 	public static final String LOGEVENT_TAG = "mob";
+
 	public static final String FREE_SMS_ON = "free_sms_on";
+
 	public static final String NATIVE_INVITES = "nativeinvites";
+
 	public static final String PREF = "pref";
+
 	public static final String CONTACTS = "contacts";
+
 	public static final String SENDBOT = "sendbot";
+
 	public static final String EVENT_TYPE = "et";
+
 	public static final String EVENT_KEY = "ek";
+
 	public static final String PACKAGE = "pkg";
+
 	public static final String SIGNUP_IC = "signupIc";
+
 	public static final String DEVICE_KEY = "device_key";
+
 	public static final String ENABLE_FREE_INVITES = "enable_free_invites";
+
 	public static final String SHOW_FREE_INVITES = "show_free_invites";
+
 	public static final String FREE_INVITE_POPUP_TITLE = "free_invite_popup_title";
+
 	public static final String FREE_INVITE_POPUP_TEXT = "free_invite_popup_text";
+
 	public static final String LIST = "list";
+
 	public static final String BG_ID = "bg_id";
+
 	public static final String CHAT_BACKGROUNDS = "cbgs";
+
 	public static final String CHAT_BACKGROUND = "cbg";
+
 	public static final String CHAT_BACKGROUD_NOTIFICATION = "pushcbg";
+
 	public static final String RESOLUTION = "res";
+
 	public static final String OPERATOR = "op";
+
 	public static final String CIRCLE = "circle";
+
 	public static final String PIXEL_DENSITY_MULTIPLIER = "pdm";
+
 	public static final String CUSTOM = "custom";
 
 	public static final String SOUND_PREF = "soundPref";
+
 	public static final String VIBRATE_PREF = "vibratePref";
+
 	public static final String FREE_SMS_PREF = "freeSmsPref";
+
 	public static final String LED_PREF = "ledPref";
+
 	public static final String NATIVE_JINGLE_PREF = "jinglePref";
+
 	public static final String SSL_PREF = "sslPref";
+
 	public static final String STATUS_PREF = "statusPref";
+
 	public static final String SEND_SMS_PREF = "sendSmsPref";
+
 	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
+
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
+
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
+
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
-	//	@GM
-	//public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
+	// @GM
+	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
+
 	public static final String MD_AUTO_DOWNLOAD_IMAGE_PREF = "mdAutoDownloadImagePref";
+
 	public static final String MD_AUTO_DOWNLOAD_AUDIO_PREF = "mdAutoDownloadAudioPref";
+
 	public static final String MD_AUTO_DOWNLOAD_VIDEO_PREF = "mdAutoDownloadVideoPref";
+
 	public static final String WF_AUTO_DOWNLOAD_IMAGE_PREF = "wfAutoDownloadImagePref";
+
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
+
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
 
 	public static final String HIKEBOT = "TD-HIKE";
+
 	public static final String HIKEBOT_CONV_STATE = "isHikeBotConvState";
+
 	public static final String FTUE_TEAMHIKE_MSISDN = "+hike+";
+
 	public static final String FTUE_HIKEBOT_MSISDN = "+hike1+";
+
 	public static final String FTUE_GAMING_MSISDN = "+hike2+";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
+
 	public static final String DELETE_PREF = "deleteAccount";
+
 	public static final String UNLINK_FB = "unlinkFacebook";
+
 	public static final String UNLINK_TWITTER = "unlinkTwitter";
+
 	public static final String BLOKED_LIST_PREF = "blockedList";
+
 	public static final String SYSTEM_HEALTH_PREF = "systemHealth";
+
 	public static final String HELP_FAQS_PREF = "helpFaqs";
+
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
+
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
+
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
+
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
+
 	public static final String NO_CALL_ALERT_CHECKED = "noCallAlertChecked";
+
 	public static final String CRITICAL_STRING = "critical";
+
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
+
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
+
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
+
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
+
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
+
 	public static final String PIN_ERROR = "PinError";
+
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
+
 	public static final String CHANGE_NUMBER = "ChangeNumber";
 
 	public static final String SEPARATOR = " - ";
+
 	public static final String GROUP_PARTICIPANT_SEPARATOR = ", ";
 
 	public static final String HELP_URL = "http://www.hike.in/help/android";
+
 	public static final String T_AND_C_URL = "http://www.hike.in/terms/android";
+
 	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
 
 	public static final String IS_TYPING = "is typing...";
@@ -258,8 +478,7 @@ public class HikeConstants {
 	public static final long PING_TIMEOUT = 5 * 1000;
 
 	/*
-	 * how long to wait to resend message. This should significantly greathr
-	 * than PING_TIMEOUT
+	 * how long to wait to resend message. This should significantly greathr than PING_TIMEOUT
 	 */
 	public static final long MESSAGE_RETRY_INTERVAL = 15 * 1000;
 
@@ -283,46 +502,62 @@ public class HikeConstants {
 
 	/* the max amount of time we wait for the PIN */
 	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
+
 	/*
 	 * the amount to wait before showing the PIN screen on non sim devices.
 	 */
 	public static final int NON_SIM_WAIT_TIME = 30 * 1000;
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
+
 	public static final String ADAPTER_NAME = "hikeadapter";
 
 	/* constants for defining what to do after checking for updates */
 	public static final int NORMAL_UPDATE = 2;
+
 	public static final int CRITICAL_UPDATE = 1;
+
 	public static final int NO_UPDATE = 0;
 
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
+
 	public static final String APP_API_VERSION = "2";
 
 	public static final int NUM_SMS_PER_FRIEND = 10;
+
 	public static final int INITIAL_NUM_SMS = 100;
 
 	public static final int MAX_CHAR_IN_NAME = 20;
 
 	public static final int MAX_CONTACTS_IN_GROUP = 50;
+
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
 	public static final int PROFILE_IMAGE_DIMENSIONS = 120;
+
 	public static final int SIGNUP_PROFILE_IMAGE_DIMENSIONS = 200;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
+
 	public static final int MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
+
 	public static final int IMAGE_TRANSFER_CODE = 1188;
+
 	public static final int VIDEO_TRANSFER_CODE = 1189;
+
 	public static final int AUDIO_TRANSFER_CODE = 1190;
+
 	public static final int SHARE_LOCATION_CODE = 1192;
+
 	public static final int SHARE_CONTACT_CODE = 1193;
+
 	public static final int FACEBOOK_REQUEST_CODE = 64206;
 
 	public static final int MAX_DURATION_RECORDING_SEC = 360;
@@ -338,7 +573,9 @@ public class HikeConstants {
 	public static final int INITIAL_PROGRESS = 5;
 
 	public static final int NO_CHANGE = 0;
+
 	public static final int PARTICIPANT_STATUS_CHANGE = 1;
+
 	public static final int NEW_PARTICIPANT = 2;
 
 	public static final String MAIL = "support@hike.in";
@@ -348,10 +585,12 @@ public class HikeConstants {
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
 	public static final int LOCAL_CLEAR_TYPING_TIME = 3 * 1000;
+
 	public static final int RESEND_TYPING_TIME = 2 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
+
 	// Number of auto recommend contacts to show in favorites.
 	public static final int MAX_AUTO_RECOMMENDED_FAVORITE = 5;
 
@@ -360,32 +599,38 @@ public class HikeConstants {
 
 	// Fiksu Usernames
 	public static final String FACEBOOK = "facebook";
+
 	public static final String TWITTER = "twitter";
+
 	public static final String INVITE = "invite";
+
 	public static final String FIRST_MESSAGE = "first_message";
 
 	// Fiksu Prices
 	public static final int FACEBOOK_CONNECT = 100;
+
 	public static final int TWITTER_CONNECT = 100;
+
 	public static final int INVITE_SENT = 50;
+
 	public static final int FIRST_MSG_IN_DAY = 10;
 
 	/*
-	 * Maximum number of conversations to be made automatically when the user
-	 * signs up
+	 * Maximum number of conversations to be made automatically when the user signs up
 	 */
 	public static final int MAX_CONVERSATIONS = 6;
 
 	/*
-	 * Constant used as a type to signify that this message was added locally by
-	 * the client when the user signed up
+	 * Constant used as a type to signify that this message was added locally by the client when the user signed up
 	 */
 	public static final String INTRO_MESSAGE = "im";
 
 	public static final String LOCATION_CONTENT_TYPE = "hikemap/location";
+
 	public static final String LOCATION_FILE_NAME = "Location";
 
 	public static final String CONTACT_CONTENT_TYPE = "contact/share";
+
 	public static final String CONTACT_FILE_NAME = "Contact";
 
 	public static final int DEFAULT_ZOOM_LEVEL = 16;
@@ -394,31 +639,43 @@ public class HikeConstants {
 
 	// Picasa URI start for JB devices
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
+
 	// Picasa URI start for other devices
 	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
+
 	// Picasa URI prefix for creating convMessage
 	public static final String PICASA_PREFIX = "picasaUri:";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
+
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
+
 	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 10;
 
 	public static final int MAX_STATUSES_TO_LOAD_INITIALLY = 30;
+
 	public static final int MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME = 20;
 
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
-	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment
-			.getExternalStorageDirectory() + "/Hike/Media";
+	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Media";
+
 	public static final String PROFILE_ROOT = "/hike Profile Images";
+
 	public static final String IMAGE_ROOT = "/hike Images";
+
 	public static final String VIDEO_ROOT = "/hike Videos";
+
 	public static final String AUDIO_ROOT = "/hike Audios";
+
 	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
+
 	public static final String OTHER_ROOT = "/hike Others";
+
 	public static final String STICKERS_ROOT = "/stickers";
 
 	public static final String LARGE_STICKER_ROOT = "/large";
+
 	public static final String SMALL_STICKER_ROOT = "/small";
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
@@ -429,7 +686,9 @@ public class HikeConstants {
 	 * Contact Type
 	 */
 	public static final int ON_HIKE_VALUE = 1;
+
 	public static final int NOT_ON_HIKE_VALUE = 0;
+
 	public static final int BOTH_VALUE = -1;
 
 	public static final String INDIA_COUNTRY_CODE = "+91";
@@ -449,25 +708,31 @@ public class HikeConstants {
 	 */
 	/* dialog IDs */
 	public static final int PROFILE_PICTURE_FROM_CAMERA = 0;
+
 	public static final int PROFILE_PICTURE_FROM_GALLERY = 1;
 
 	/* activityForResult IDs */
 	public static final int CAMERA_RESULT = 0;
+
 	public static final int GALLERY_RESULT = 1;
+
 	public static final int CROP_RESULT = 2991;
 
 	public static final int MIN_STATUS_COUNT = 5;
 
 	public static final int MAX_NUX_CONTACTS = 30;
+
 	public static final int MAX_PRECHECKED_CONTACTS = 15;
 
 	public static final int MAX_TWITTER_POST_LENGTH = 140;
+
 	public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
 
 	public static final int MAX_NUM_STICKER_REQUEST = 10;
 
 	/* In seconds */
 	public static final int DEFAULT_PROTIP_WAIT_TIME = 300;
+
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
 	/* In seconds */
@@ -484,18 +749,27 @@ public class HikeConstants {
 	public static final int MAX_READ_BY_NAMES = 3;
 
 	public static final int LDPI_ID = 4;
+
 	public static final int MDPI_ID = 3;
+
 	public static final int HDPI_ID = 2;
+
 	public static final int XHDPI_ID = 1;
+
 	public static final int XXHDPI_ID = 0;
 
 	public static final int LDPI_CACHE = 15;
+
 	public static final int MDPI_CACHE = 20;
+
 	public static final int HDPI_CACHE = 25;
+
 	public static final int XHDPI_CACHE = 30;
+
 	public static final int XXHDPI_CACHE = 30;
 
 	public static final int EMPTY_CONVERSATIONS_PREFILL_LIMIT = 6;
+
 	public static final int FTUE_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
@@ -504,141 +778,274 @@ public class HikeConstants {
 
 	// LED light Notifications constants
 	public static final int LED_LIGHTS_ON_MS = 300;
-	public static final int LED_LIGHTS_OFF_MS = 1000;
 
-	public static final class Extras {
+	public static final int LED_LIGHTS_OFF_MS = 1000;
+	
+	public static final int JOINED_HIKE_STATUS_ID = -1;
+
+	public static final class Extras
+	{
 		public static final String MSISDN = "msisdn";
+
 		public static final String NAME = "name";
+
 		public static final String PREV_MSISDN = "prevMsisdn";
+
 		public static final String PREV_NAME = "prevName";
+
 		public static final String INVITE = "invite";
+
 		public static final String MSG = "msg";
+
 		public static final String PREF = "pref";
+
 		public static final String EDIT = "edit";
+
 		public static final String IMAGE_PATH = "image-path";
+
 		public static final String SCALE = "scale";
+
 		public static final String OUTPUT_X = "outputX";
+
 		public static final String OUTPUT_Y = "outputY";
+
 		public static final String ASPECT_X = "aspectX";
+
 		public static final String ASPECT_Y = "aspectY";
+
 		public static final String DATA = "data";
+
 		public static final String RETURN_DATA = "return-data";
+
 		public static final String BITMAP = "bitmap";
+
 		public static final String CIRCLE_CROP = "circleCrop";
+
 		public static final String SCALE_UP = "scaleUpIfNeeded";
+
 		public static final String UPDATE_AVAILABLE = "updateAvailable";
+
 		public static final String KEEP_MESSAGE = "keepMessage";
+
 		public static final String SHOW_CREDITS_HELP = "showCreditsHelp";
+
 		public static final String CREDITS_HELP_COUNTER = "CreditsHelpCounter";
+
 		public static final String SIGNUP_TASK_RUNNING = "signupTaskRunning";
+
 		public static final String SIGNUP_PART = "signupPart";
+
 		public static final String SIGNUP_TEXT = "signupText";
+
 		public static final String SIGNUP_ERROR = "signupError";
+
 		public static final String TOOLTIP_SHOWING = "tooltipShowing";
+
 		public static final String FADE_OUT = "fadeOut";
+
 		public static final String FADE_IN = "fadeIn";
+
 		public static final String ANIMATED_ONCE = "animatedOnce";
+
 		public static final String EDIT_PROFILE = "editProfile";
+
 		public static final String EMAIL = "email";
+
 		public static final String GENDER = "gender";
+
 		public static final String OVERLAY_SHOWING = "overlayShowing";
+
 		public static final String GROUP_CHAT = "groupChat";
+
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
+
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
+
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
+
 		public static final String APP_STARTED_FIRST_TIME = "appStartedFirstTime";
+
 		public static final String LATEST_VERSION = "latestVersion";
+
 		public static final String SHOW_UPDATE_OVERLAY = "showUpdateOverlay";
+
 		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip";
+
 		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
+
 		public static final String UPDATE_MESSAGE = "updateMessage";
+
 		public static final String APPLICATIONSPUSH_MESSAGE = "applicationsPushMessage";
+
 		public static final String URL_TO_LOAD = "urlToLoad";
+
 		public static final String TITLE = "title";
+
 		public static final String FIRST_TIME_USER = "firstTimeUser";
+
 		public static final String IS_DELETING_ACCOUNT = "isDeletingAccount";
+
 		public static final String SMS_MESSAGE = "incomingSMSMessage";
+
 		public static final String GROUP_LEFT = "groupLeft";
+
 		public static final String ALERT_CANCELLED = "alertCancelled";
+
 		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
+
 		public static final String SIGNUP_MSISDN_ERROR = "signupMsisdnError";
+
 		public static final String FILE_TRANSFER_DIALOG_SHOWING = "fileTransferDialogShowing";
+
 		public static final String FILE_PATH = "filePath";
+
 		public static final String FILE_KEY = "fileKey";
+
 		public static final String FILE_TYPE = "fileType";
+
 		public static final String FILE_NAME = "fileName";
+
 		public static final String RECORDER_DIALOG_SHOWING = "recorderDialogShowing";
+
 		public static final String RECORDER_START_TIME = "recorderStartTime";
+
 		public static final String IS_LEFT_DRAWER_VISIBLE = "isLeftDrawerVisible";
+
 		public static final String IS_RIGHT_DRAWER_VISIBLE = "isRightDrawerVisible";
+
 		public static final String FORWARD_MESSAGE = "forwardMessage";
+
 		public static final String HELP_PAGE = "helpPage";
+
 		public static final String WHICH_EMOTICON_CATEGORY = "whichEmoticonCategory";
+
 		public static final String WHICH_EMOTICON_SUBCATEGORY = "whichEmoticonSubcategory";
+
 		public static final String COUNTRY_CODE = "countryCode";
+
 		public static final String GOING_BACK_TO_HOME = "goingBackToHome";
+
 		public static final String UPDATE_URL = "updateURL";
+
 		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
+
 		public static final String INTRO_MESSAGE_ADDED = "introMessageAdded";
+
 		public static final String LATITUDE = "latitude";
+
 		public static final String LONGITUDE = "longitude";
+
 		public static final String ZOOM_LEVEL = "zoomLevel";
+
 		public static final String CONTACT_INFO = "contactInfo";
+
 		public static final String ON_HIKE = "onHike";
+
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
+
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
+
 		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
+
 		public static final String REWARDS_PAGE = "rewardsPage";
+
 		public static final String GAMES_PAGE = "gamesPage";
+
 		public static final String CUSTOM_LOCATION_SELECTED = "customLocationSelected";
+
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
+
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
+
 		public static final String OPEN_FAVORITES = "openFavorites";
+
 		public static final String CONTACT_METADATA = "contactMetadata";
+
 		public static final String FROM_CENTRAL_TIMELINE = "fromCentralTimeline";
+
 		public static final String BLOCKED_LIST = "blockedList";
+
 		public static final String NUX1_NUMBERS = "nux1Numbers";
+
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
+
 		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
+
 		public static final String DIALOG_SHOWING = "dialogShowing";
+
 		public static final String SMS_ID = "smsId";
+
 		public static final String RECORDED_TIME = "recordedTime";
+
 		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
+
 		public static final String POST_TO_TWITTER = "postToTwitter";
+
 		public static final String RECORDING_TIME = "recordingTime";
+
 		public static final String MAPPED_ID = "mappedId";
+
 		public static final String IS_STATUS_IMAGE = "isStatusImage";
+
 		public static final String URL = "url";
+
 		public static final String TAB_INDEX = "tabIndex";
+
 		public static final String IS_TEXT_SEARCH = "isTextSearch";
+
 		public static final String HTTP_SEARCH_STR = "searchStr";
+
 		public static final String IS_FACEBOOK = "isFacebook";
+
 		public static final String EMOTICON_TYPE = "emoticonType";
+
 		public static final String CREATE_GROUP = "createGroup";
+
 		public static final String FROM_CREDITS_SCREEN = "fromCreditsScreen";
+
 		public static final String SHOW_KEYBOARD = "ShowKeyboard";
+
 		public static final String IS_HOME_POPUP_SHOWING = "isHomePopupShowing";
+
 		public static final String LAST_UPDATE_PACKET_ID = "lastUpdatePacketId";
+
 		public static final String LAST_APPLICATION_PUSH_PACKET_ID = "lastApplicationPushPacketId";
+
 		public static final String FREE_SMS_POPUP_BODY = "freeSMSPopupBody";
+
 		public static final String FREE_SMS_POPUP_HEADER = "freeSMSPopupHeader";
+
 		public static final String SHOW_STICKER_TIP_FOR_EMMA = "showStickerTipForEmma";
+
 		public static final String FROM_CHAT_THEME_FTUE = "fromChatThemeFtue";
+
 		public static final String NEW_USER = "newUser";
+
 		public static final String CHAT_THEME_WINDOW_OPEN = "chatThemeWindowOpen";
+
 		public static final String SELECTED_THEME = "selectedTheme";
+		
+		public static final String BLOKING_TASK_TYPE = "blockingTaskType";
 	}
 
-	public static final class LogEvent {
+	public static final class LogEvent
+	{
 		// Common tags for Countly. Don't change.
 
 		public static final String TAG = "tag";
+
 		public static final String DEVICE_ID = "device_id";
+
 		public static final String OS = "_os";
+
 		public static final String OS_VERSION = "_os_version";
+
 		public static final String DEVICE = "_device";
+
 		public static final String RESOLUTION = "_resolution";
+
 		public static final String CARRIER = "_carrier";
+
 		public static final String APP_VERSION = "_app_version";
 
 		/*
@@ -646,57 +1053,79 @@ public class HikeConstants {
 		 */
 
 		/*
-		 * Home screen events <screen> = hoS <event> = profS, invS, feedS,
-		 * delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY,
-		 * upDOBD, upDOB, smSY, smSN, groupS, dRB
+		 * Home screen events <screen> = hoS <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB, smSY, smSN, groupS, dRB
 		 */
 		public static final String MENU = "hoS";
+
 		public static final String DELETE_ALL_CONVERSATIONS_MENU = "hoSdelAC";
+
 		public static final String DELETE_CONVERSATION = "hoSdelC";
+
 		public static final String COMPOSE_BUTTON = "hoScompB";
+
 		public static final String ADD_SHORTCUT = "hoSaddSC";
+
 		public static final String HOME_TOOL_TIP_CLOSED = "hoScreDtiPN";
+
 		public static final String HOME_TOOL_TIP_CLICKED = "hoScreDtiPY";
+
 		public static final String HOME_UPDATE_TOOL_TIP_CLOSED = "hoSupDtiPN";
+
 		public static final String HOME_UPDATE_TOOL_TIP_CLICKED = "hoSupDtiPY";
+
 		public static final String HOME_UPDATE_OVERLAY_DISMISSED = "hoSupDOBD";
+
 		public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
+
 		public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
+
 		public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
+
 		public static final String DRAWER_BUTTON = "hoSdRB";
+
 		public static final String EMAIL_CONVERSATION = "hoSecON";
 
 		/*
-		 * Profile screen events <screen> = profS <event> = proES, credS, notyS,
-		 * privS, helpS
+		 * Profile screen events <screen> = profS <event> = proES, credS, notyS, privS, helpS
 		 */
 		public static final String EDIT_PROFILE = "profSproES";
+
 		public static final String NOTIFICATION_SCREEN = "profSnotyS";
+
 		public static final String PRIVACY_SCREEN = "profSprivS";
 
 		/*
-		 * Invite screen events <screen> = invS <event> = credB, creDtiPN,
-		 * creDtiPY
+		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
 		 */
 		public static final String INVITE_TOOL_TIP_CLOSED = "invScreDtiPN";
+
 		public static final String INVITE_TOOL_TIP_CLICKED = "invScreDtiPY";
+
 		public static final String CREDIT_TOP_BUTTON = "invScredB";
 
 		/*
-		 * Chat thread screen events <screen> = chatS <event> = inVtiPN,
-		 * inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP, calL, adD,
-		 * grPinfO
+		 * Chat thread screen events <screen> = chatS <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP, calL, adD, grPinfO
 		 */
 		public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatSinVtiPN";
+
 		public static final String CHAT_INVITE_TOP_BUTTON = "chatSinVtopB";
+
 		public static final String MENU_BLOCK = "chatSblocK";
+
 		public static final String FORWARD_MSG = "chatSforMSG";
+
 		public static final String I_BUTTON = "chatSinfoB";
+
 		public static final String INVITE_OVERLAY_BUTTON = "chatSinvOB";
+
 		public static final String INVITE_OVERLAY_DISMISS = "chatSinvOBD";
+
 		public static final String OPT_IN_TAP_HERE = "chatSopTiNtaP";
+
 		public static final String MENU_CALL = "chatScalL";
+
 		public static final String MENU_ADD_TO_CONTACTS = "chatSadD";
+
 		public static final String GROUP_INFO_TOP_BUTTON = "chatSgrPinfO";
 
 		/*
@@ -715,157 +1144,243 @@ public class HikeConstants {
 		public static final String SIGNUP_ERROR = "signupSerroR";
 
 		/*
-		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD,
-		 * proF, settinG
+		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
 		 */
 		public static final String DRAWER_HOME = "drShomE";
+
 		public static final String DRAWER_GROUP_CHAT = "drSgC";
+
 		public static final String DRAWER_INVITE = "drSinV";
+
 		public static final String DRAWER_REWARDS = "drSreW";
+
 		public static final String DRAWER_CREDITS = "drScreD";
+
 		public static final String DRAWER_PROFILE = "drSproF";
+
 		public static final String DRAWER_SETTINGS = "drSsettinG";
 
 		/*
 		 * Rewards screen <screen> = rewS <event> = inV, clM, faQ
 		 */
 		public static final String REWARDS_INVITE = "rewSinV";
+
 		public static final String REWARDS_CLAIM = "rewSclM";
+
 		public static final String REWARDS_FAQ = "rewSfaQ";
 
 		/*
 		 * Help screen <screen> = helpS <event> = conT, faQ
 		 */
 		public static final String HELP_CONTACT = "helpSconT";
+
 		public static final String HELP_FAQ = "helpSfaQ";
 
 		/*
 		 * FTUE
 		 */
 		public static final String CLICK = "click";
+
 		public static final String GRID_6 = "grid6";
+
 		public static final String ADD_FRIENDS_CLICK = "addFriends";
+
 		public static final String ADD_UPDATES_CLICK = "addUpdates";
+
 		public static final String INVITE_FTUE_FRIENDS_CLICK = "inviteFTUEFriendsClick";
+
 		public static final String REMIND_FTUE_FRIENDS_CLICK = "remindFTUEFriendsClick";
+
 		public static final String INVITE_SMS_CLICK = "inviteSMSClick";
+
 		public static final String REMIND_SMS_CLICK = "remindSMSClick";
+
 		public static final String INVITE_FTUE_UPDATES_CLICK = "inviteFTUEUpdatesClick";
+
 		public static final String REMIND_FTUE_UPDATES_CLICK = "remindFTUEUpdatesClick";
+
 		public static final String POST_UPDATE_FROM_CARD = "postUpdateFromCard";
+
 		public static final String POST_UPDATE_FROM_TOP_BAR = "postUpdateFromTopBar";
+
 		public static final String NEW_CHAT_FROM_GRID = "newChatFromGrid";
+
 		public static final String NEW_CHAT_FROM_TOP_BAR = "newChatFromTopBar";
+
 		public static final String INVITE_FROM_GRID = "inviteFromGrid";
+
 		public static final String FB_CLICK = "fbClick";
+
 		/*
 		 * Invite keys
 		 */
 		public static final String INVITE_FRIENDS_FROM_POPUP_FREE_SMS = "inviteFriendsFromPopupFreeSMS";
+
 		public static final String INVITE_FRIENDS_FROM_POPUP_REWARDS = "inviteFriendsFromPopupRewards";
+
 		public static final String INVITE_SMS_SCREEN_FROM_INVITE = "inviteSMSScreenFromInvite";
+
 		public static final String INVITE_SMS_SCREEN_FROM_CREDIT = "inviteSMSScreenFromCredit";
+
 		public static final String SELECT_ALL_INVITE = "selectAllInvite";
+
 		/*
 		 * Sticker Ftue
 		 */
 		public static final String STICKER_FTUE_BTN_CLICK = "stickerFtueBtnClick";
 	}
 
-	public static final class MqttMessageTypes {
+	public static final class MqttMessageTypes
+	{
 		public static final String MESSAGE_READ = "mr";
+
 		public static final String MESSAGE = "m";
+
 		public static final String SMS_CREDITS = "sc";
+
 		public static final String DELIVERY_REPORT = "dr";
+
 		public static final String USER_JOINED = "uj";
+
 		public static final String USER_LEFT = "ul";
+
 		public static final String START_TYPING = "st";
+
 		public static final String END_TYPING = "et";
+
 		public static final String INVITE = "i";
+
 		public static final String ICON = "ic";
+
 		public static final String INVITE_INFO = "ii";
+
 		public static final String GROUP_CHAT_JOIN = "gcj";
+
 		public static final String GROUP_CHAT_LEAVE = "gcl";
+
 		public static final String GROUP_CHAT_END = "gce";
+
 		public static final String GROUP_CHAT_NAME = "gcn";
+
 		public static final String ANALYTICS_EVENT = "le";
+
 		public static final String UPDATE_AVAILABLE = "ua";
+
 		public static final String ACCOUNT_INFO = "ai";
+
 		public static final String REQUEST_ACCOUNT_INFO = "rai";
+
 		public static final String USER_OPT_IN = "uo";
+
 		public static final String BLOCK_INTERNATIONAL_SMS = "bis";
+
 		public static final String ADD_FAVORITE = "af";
+
 		public static final String REMOVE_FAVORITE = "rf";
+
 		public static final String MUTE = "mute";
+
 		public static final String UNMUTE = "unmute";
+
 		public static final String GROUP_CHAT_KICK = "gck";
+
 		public static final String ACCOUNT_CONFIG = "ac";
+
 		public static final String REWARDS = "rewards";
+
 		public static final String GAMES = "games";
+
 		public static final String DISPLAY_PIC = "dp";
+
 		public static final String STATUS_UPDATE = "su";
+
 		public static final String ACTION = "action";
+
 		public static final String DELETE_STATUS = "dsu";
+
 		public static final String POSTPONE_FAVORITE = "pf";
+
 		public static final String BATCH_STATUS_UPDATE = "bsu";
+
 		public static final String FORCE_SMS = "fsms";
+
 		public static final String STICKER = "stk";
+
 		public static final String APP_STATE = "app";
+
 		public static final String LAST_SEEN = "ls";
+
 		public static final String SERVER_TIMESTAMP = "sts";
+
 		public static final String REQUEST_SERVER_TIMESTAMP = "rsts";
+
 		public static final String PROTIP = "pt";
+
 		public static final String BULK_LAST_SEEN = "bls";
+
 		public static final String FACEBOOK = "fb";
+
 		public static final String UPDATE_PUSH = "update";
+
 		public static final String APPLICATIONS_PUSH = "applications";
+
 		public static final String MULTI_INVITE = "mi";
+
 		public static final String CHAT_BACKGROUD = "cbg";
 	}
 
-	public static final class SMSNative {
+	public static final class SMSNative
+	{
 		/*
 		 * SMS URIs
 		 */
 		public static final Uri CONTENT_URI = Uri.parse("content://sms");
 
-		public static final Uri INBOX_CONTENT_URI = Uri.withAppendedPath(
-				CONTENT_URI, "inbox");
+		public static final Uri INBOX_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "inbox");
 
-		public static final Uri SENTBOX_CONTENT_URI = Uri.withAppendedPath(
-				CONTENT_URI, "sent");
+		public static final Uri SENTBOX_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "sent");
 
 		public static final String NUMBER = "address";
+
 		public static final String DATE = "date";
+
 		public static final String MESSAGE = "body";
+
 		public static final String READ = "read";
 
 	}
 
-	public static final class SocialPostResponse {
+	public static final class SocialPostResponse
+	{
 		public static final String NO_TOKEN = "notoken";
+
 		public static final String INVALID_TOKEN = "invalidtoken";
+
 		public static final String FAILURE = "failure";
+
 		public static final String SUCCESS = "success";
 	}
 
-	public static enum FTResult {
+	public static enum FTResult
+	{
 		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED, PAUSED, SERVER_ERROR, FAILED_UNRECOVERABLE, CARD_UNMOUNT, NO_SD_CARD
 	}
 
-	public static enum SMSSyncState {
+	public static enum SMSSyncState
+	{
 		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
 	}
 
-	public static enum TipType {
+	public static enum TipType
+	{
 		EMOTICON, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
 	}
 
-	public static enum EmoticonType {
+	public static enum EmoticonType
+	{
 		EMOTICON, STICKERS
 	}
 
-	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
-			R.string.native_sms_invite_2 };
+	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
 
 }

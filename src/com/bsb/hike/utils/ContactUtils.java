@@ -23,54 +23,52 @@ import android.util.Pair;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
-public class ContactUtils {
+public class ContactUtils
+{
 	/*
-	 * Call this when we think the address book has changed. Checks for updates,
-	 * posts to the server, writes them to the local database and updates
-	 * existing conversations
+	 * Call this when we think the address book has changed. Checks for updates, posts to the server, writes them to the local database and updates existing conversations
 	 */
-	public static void syncUpdates(Context ctx) {
+	public static void syncUpdates(Context ctx)
+	{
 
-		if (!Utils.isUserOnline(ctx)) {
-			Log.d("CONTACT UTILS",
-					"Airplane mode is on , skipping sync update tasks.");
+		if (!Utils.isUserOnline(ctx))
+		{
+			Log.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			return;
 		}
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 
 		List<ContactInfo> newContacts = getContacts(ctx);
-		if (newContacts == null) {
+		if (newContacts == null)
+		{
 			return;
 		}
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(newContacts);
-		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db
-				.getContacts(false));
+		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts(false));
 
 		/*
-		 * iterate over every item in the phone db, items that are equal remove
-		 * from both maps items that are different, leave in 'new' map and
-		 * remove from 'hike' map send the 'new' map as items to add, and send
-		 * the 'hike' map as IDs to remove
+		 * iterate over every item in the phone db, items that are equal remove from both maps items that are different, leave in 'new' map and remove from 'hike' map send the
+		 * 'new' map as items to add, and send the 'hike' map as IDs to remove
 		 */
 		Map.Entry<String, List<ContactInfo>> entry = null;
-		for (Iterator<Map.Entry<String, List<ContactInfo>>> iterator = new_contacts_by_id
-				.entrySet().iterator(); iterator.hasNext();) {
+		for (Iterator<Map.Entry<String, List<ContactInfo>>> iterator = new_contacts_by_id.entrySet().iterator(); iterator.hasNext();)
+		{
 			entry = iterator.next();
 			String id = entry.getKey();
 			List<ContactInfo> contacts_for_id = entry.getValue();
-			List<ContactInfo> hike_contacts_for_id = hike_contacts_by_id
-					.get(id);
+			List<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
 
 			/*
-			 * If id is not present in hike user DB i.e new contact is added to
-			 * Phone AddressBook. When the items are the same, we remove the
-			 * item @ the current iterator. This will result in the item *not*
-			 * being sent to the server
+			 * If id is not present in hike user DB i.e new contact is added to Phone AddressBook. When the items are the same, we remove the item @ the current iterator. This will
+			 * result in the item *not* being sent to the server
 			 */
-			if (hike_contacts_for_id == null) {
+			if (hike_contacts_for_id == null)
+			{
 				continue;
-			} else if (areListsEqual(contacts_for_id, hike_contacts_for_id)) {
+			}
+			else if (areListsEqual(contacts_for_id, hike_contacts_for_id))
+			{
 				/* hike db is up to date, so don't send update */
 				iterator.remove();
 				hike_contacts_by_id.remove(id);
@@ -81,25 +79,25 @@ public class ContactUtils {
 		}
 
 		/*
-		 * our address object should an update dictionary, and a list of IDs to
-		 * remove
+		 * our address object should an update dictionary, and a list of IDs to remove
 		 */
 
 		/* return early if things are in sync */
-		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty())) {
+		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty()))
+		{
 			Log.d("ContactUtils", "DB in sync");
 			return;
 		}
 
-		try {
+		try
+		{
 			JSONArray ids_json = new JSONArray();
-			for (String string : hike_contacts_by_id.keySet()) {
+			for (String string : hike_contacts_by_id.keySet())
+			{
 				ids_json.put(string);
 			}
-			Log.d("ContactUtils", "New contacts:" + new_contacts_by_id.size()
-					+ " DELETED contacts: " + ids_json.length());
-			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(
-					new_contacts_by_id, ids_json);
+			Log.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
+			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
 			/* Delete ids from hike user DB */
 			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will
@@ -113,55 +111,65 @@ public class ContactUtils {
 																	// Addressbook.
 			db.updateContacts(updatedContacts);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			Log.e("ContactUtils", "error updating addressbook", e);
 		}
 	}
 
-	private static boolean areListsEqual(List<ContactInfo> list1,
-			List<ContactInfo> list2) {
-		if (list1 != null && list2 != null) {
+	private static boolean areListsEqual(List<ContactInfo> list1, List<ContactInfo> list2)
+	{
+		if (list1 != null && list2 != null)
+		{
 			if (list1.size() != list2.size())
 				return false;
-			else if (list1.size() == 0 && list2.size() == 0) {
+			else if (list1.size() == 0 && list2.size() == 0)
+			{
 				return false;
-			} else
+			}
+			else
 			// represents same number of elements
 			{
 				/* compare each element */
-				HashSet<ContactInfo> set1 = new HashSet<ContactInfo>(
-						list1.size());
-				for (ContactInfo c : list1) {
+				HashSet<ContactInfo> set1 = new HashSet<ContactInfo>(list1.size());
+				for (ContactInfo c : list1)
+				{
 					set1.add(c);
 				}
 				boolean flag = true;
-				for (ContactInfo c : list2) {
-					if (!set1.contains(c)) {
+				for (ContactInfo c : list2)
+				{
+					if (!set1.contains(c))
+					{
 						flag = false;
 						break;
 					}
 				}
 				return flag;
 			}
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
 
-	public static Map<String, List<ContactInfo>> convertToMap(
-			List<ContactInfo> contacts) {
-		Map<String, List<ContactInfo>> ret = new HashMap<String, List<ContactInfo>>(
-				contacts.size());
-		for (ContactInfo contactInfo : contacts) {
-			if ("__HIKE__".equals(contactInfo.getId())) {
+	public static Map<String, List<ContactInfo>> convertToMap(List<ContactInfo> contacts)
+	{
+		Map<String, List<ContactInfo>> ret = new HashMap<String, List<ContactInfo>>(contacts.size());
+		for (ContactInfo contactInfo : contacts)
+		{
+			if ("__HIKE__".equals(contactInfo.getId()))
+			{
 				continue;
 			}
 
 			List<ContactInfo> l = ret.get(contactInfo.getId());
-			if (l == null) {
+			if (l == null)
+			{
 				/*
-				 * Linked list is used because removal using iterator is O(1) in
-				 * linked list vs O(n) in Arraylist
+				 * Linked list is used because removal using iterator is O(1) in linked list vs O(n) in Arraylist
 				 */
 				l = new LinkedList<ContactInfo>();
 				ret.put(contactInfo.getId(), l);
@@ -172,70 +180,69 @@ public class ContactUtils {
 		return ret;
 	}
 
-	public static List<ContactInfo> getContacts(Context ctx) {
+	public static List<ContactInfo> getContacts(Context ctx)
+	{
 		HashSet<String> contactsToStore = new HashSet<String>();
-		String[] projection = new String[] { ContactsContract.Contacts._ID,
-				ContactsContract.Contacts.HAS_PHONE_NUMBER,
-				ContactsContract.Contacts.DISPLAY_NAME };
+		String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.HAS_PHONE_NUMBER, ContactsContract.Contacts.DISPLAY_NAME };
 
 		String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
 		Cursor contacts = null;
 
 		List<ContactInfo> contactinfos = new ArrayList<ContactInfo>();
 		Map<String, String> contactNames = new HashMap<String, String>();
-		try {
-			contacts = ctx.getContentResolver().query(
-					ContactsContract.Contacts.CONTENT_URI, projection,
-					selection, null, null);
+		try
+		{
+			contacts = ctx.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, projection, selection, null, null);
 
 			/*
-			 * Added this check for an issue where the cursor is null in some
-			 * random cases (We suspect that happens when hotmail contacts are
-			 * synced.)
+			 * Added this check for an issue where the cursor is null in some random cases (We suspect that happens when hotmail contacts are synced.)
 			 */
-			if (contacts == null) {
+			if (contacts == null)
+			{
 				return null;
 			}
 
-			int idFieldColumnIndex = contacts
-					.getColumnIndex(ContactsContract.Contacts._ID);
-			int nameFieldColumnIndex = contacts
-					.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+			int idFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts._ID);
+			int nameFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
 			Log.d("ContactUtils", "Starting to scan address book");
-			while (contacts.moveToNext()) {
+			while (contacts.moveToNext())
+			{
 				String id = contacts.getString(idFieldColumnIndex);
 				String name = contacts.getString(nameFieldColumnIndex);
 				contactNames.put(id, name);
 			}
-		} finally {
-			if (contacts != null) {
+		}
+		finally
+		{
+			if (contacts != null)
+			{
 				contacts.close();
 			}
 		}
 
 		Cursor phones = null;
 
-		try {
-			phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
-					new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null,
-					null, null);
+		try
+		{
+			phones = ctx.getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null, null, null);
 			/*
-			 * Added this check for an issue where the cursor is null in some
-			 * random cases (We suspect that happens when hotmail contacts are
-			 * synced.)
+			 * Added this check for an issue where the cursor is null in some random cases (We suspect that happens when hotmail contacts are synced.)
 			 */
-			if (phones == null) {
+			if (phones == null)
+			{
 				return null;
 			}
 
 			int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
 			int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
 
-			while (phones.moveToNext()) {
+			while (phones.moveToNext())
+			{
 				String number = phones.getString(numberColIdx);
 				String id = phones.getString(idColIdx);
 				String name = contactNames.get(id);
-				if ((name != null) && (number != null)) {
+				if ((name != null) && (number != null))
+				{
 					if (contactsToStore.add("_" + name + "_" + number)) // if
 																		// this
 																		// element
@@ -246,37 +253,38 @@ public class ContactUtils {
 																		// returns
 																		// true
 					{
-						contactinfos
-								.add(new ContactInfo(id, null, name, number));
+						contactinfos.add(new ContactInfo(id, null, name, number));
 					}
 				}
 			}
-		} finally {
-			if (phones != null) {
+		}
+		finally
+		{
+			if (phones != null)
+			{
 				phones.close();
 
 			}
 		}
 
 		/*
-		 * We will catch exceptions here since we do not know which devices
-		 * support this URI.
+		 * We will catch exceptions here since we do not know which devices support this URI.
 		 */
 		Cursor cursorSim = null;
-		try {
+		try
+		{
 			Uri simUri = Uri.parse("content://icc/adn");
-			cursorSim = ctx.getContentResolver().query(simUri, null, null,
-					null, null);
+			cursorSim = ctx.getContentResolver().query(simUri, null, null, null, null);
 
-			while (cursorSim.moveToNext()) {
-				try {
-					String id = cursorSim.getString(cursorSim
-							.getColumnIndex("_id"));
-					String name = cursorSim.getString(cursorSim
-							.getColumnIndex("name"));
-					String number = cursorSim.getString(cursorSim
-							.getColumnIndex("number"));
-					if ((name != null) && (number != null)) {
+			while (cursorSim.moveToNext())
+			{
+				try
+				{
+					String id = cursorSim.getString(cursorSim.getColumnIndex("_id"));
+					String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
+					String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
+					if ((name != null) && (number != null))
+					{
 						if (contactsToStore.add("_" + name + "_" + number)) // if
 																			// this
 																			// element
@@ -288,20 +296,24 @@ public class ContactUtils {
 																			// returns
 																			// true
 						{
-							contactinfos.add(new ContactInfo(id, null, name,
-									number));
+							contactinfos.add(new ContactInfo(id, null, name, number));
 						}
 					}
-				} catch (Exception e) {
-					Log.w("ContactUtils",
-							"Expection while adding sim contacts", e);
+				}
+				catch (Exception e)
+				{
+					Log.w("ContactUtils", "Expection while adding sim contacts", e);
 				}
 			}
-		} catch (Exception e) {
-			Log.w("ContactUtils", "Expection while querying for sim contacts",
-					e);
-		} finally {
-			if (cursorSim != null) {
+		}
+		catch (Exception e)
+		{
+			Log.w("ContactUtils", "Expection while querying for sim contacts", e);
+		}
+		finally
+		{
+			if (cursorSim != null)
+			{
 				cursorSim.close();
 			}
 		}
@@ -309,212 +321,208 @@ public class ContactUtils {
 		return contactinfos;
 	}
 
-	public static int updateHikeStatus(Context ctx, String msisdn,
-			boolean onhike) {
+	public static int updateHikeStatus(Context ctx, String msisdn, boolean onhike)
+	{
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		return db.updateHikeContact(msisdn, onhike);
 	}
 
 	/**
-	 * Used to get the recent contacts where we get the recency from the android
-	 * contacts table. This method also returns a string which can be used as
-	 * the argument to a SELECT IN query
+	 * Used to get the recent contacts where we get the recency from the android contacts table. This method also returns a string which can be used as the argument to a SELECT IN
+	 * query
 	 * 
 	 * @param context
 	 * @param limit
 	 * @return
 	 */
-	public static Pair<String, Map<String, Long>> getRecentNumbers(
-			Context context, int limit) {
+	public static Pair<String, Map<String, Long>> getRecentNumbers(Context context, int limit)
+	{
 		Cursor c = null;
-		try {
-			String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED
-					+ " DESC LIMIT " + limit : null;
-			c = context.getContentResolver().query(Phone.CONTENT_URI,
-					new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
-					null, null, sortBy);
+		try
+		{
+			String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED + " DESC LIMIT " + limit : null;
+			c = context.getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED }, null, null, sortBy);
 
 			Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
 
 			StringBuilder sb = null;
 
-			if (c != null && c.getCount() > 0) {
+			if (c != null && c.getCount() > 0)
+			{
 				int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-				int lastTimeContactedIdx = c
-						.getColumnIndex(Phone.LAST_TIME_CONTACTED);
+				int lastTimeContactedIdx = c.getColumnIndex(Phone.LAST_TIME_CONTACTED);
 
 				sb = new StringBuilder("(");
-				while (c.moveToNext()) {
+				while (c.moveToNext())
+				{
 					String number = c.getString(numberColIdx);
 
-					if (TextUtils.isEmpty(number)) {
+					if (TextUtils.isEmpty(number))
+					{
 						continue;
 					}
 
 					long lastTimeContacted = c.getLong(lastTimeContactedIdx);
 
 					/*
-					 * Checking if we already have this number and whether the
-					 * last time contacted was sooner than the newer value.
+					 * Checking if we already have this number and whether the last time contacted was sooner than the newer value.
 					 */
-					if (recentlyContactedNumbers.containsKey(number)
-							&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
+					if (recentlyContactedNumbers.containsKey(number) && recentlyContactedNumbers.get(number) > lastTimeContacted)
+					{
 						continue;
 					}
-					recentlyContactedNumbers.put(number,
-							c.getLong(lastTimeContactedIdx));
+					recentlyContactedNumbers.put(number, c.getLong(lastTimeContactedIdx));
 
 					number = DatabaseUtils.sqlEscapeString(number);
 					sb.append(number + ",");
 				}
 				sb.replace(sb.length() - 1, sb.length(), ")");
-			} else {
+			}
+			else
+			{
 				sb = new StringBuilder("()");
 			}
 
-			return new Pair<String, Map<String, Long>>(sb.toString(),
-					recentlyContactedNumbers);
-		} finally {
-			if (c != null) {
+			return new Pair<String, Map<String, Long>>(sb.toString(), recentlyContactedNumbers);
+		}
+		finally
+		{
+			if (c != null)
+			{
 				c.close();
 			}
 		}
 	}
 
 	/**
-	 * This method will give us the user's most contacted contacts. We also try
-	 * to get the whatsapp contacts if the user has them synced and then sort
-	 * those based on times contacts.
+	 * This method will give us the user's most contacted contacts. We also try to get the greenblue contacts if the user has them synced and then sort those based on times
+	 * contacts.
 	 */
-	public static Pair<String, Map<String, Integer>> getMostContactedContacts(
-			Context context, int limit) {
-		Cursor whatsappContactsCursor = null;
+	public static Pair<String, Map<String, Integer>> getMostContactedContacts(Context context, int limit)
+	{
+		Cursor greenblueContactsCursor = null;
 		Cursor phoneContactsCursor = null;
 		Cursor otherContactsCursor = null;
 
-		try {
+		try
+		{
 			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
 
-			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE
-					+ "= 'com.whatsapp'";
-			whatsappContactsCursor = context.getContentResolver().query(
-					ContactsContract.RawContacts.CONTENT_URI, projection,
-					selection, null, null);
+			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE + "= 'com.whatsapp'";
+			greenblueContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
 
-			int id = whatsappContactsCursor
-					.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+			int id = greenblueContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
 
-			StringBuilder whatsappContactIds = null;
+			StringBuilder greenblueContactIds = null;
 
-			if (whatsappContactsCursor.getCount() > 0) {
-				whatsappContactIds = new StringBuilder("(");
+			if (greenblueContactsCursor.getCount() > 0)
+			{
+				greenblueContactIds = new StringBuilder("(");
 
-				while (whatsappContactsCursor.moveToNext()) {
-					whatsappContactIds.append(whatsappContactsCursor.getInt(id)
-							+ ",");
+				while (greenblueContactsCursor.moveToNext())
+				{
+					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
 				}
-				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","),
-						whatsappContactIds.length(), ")");
+				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
 			}
 
-			String[] newProjection = new String[] { Phone.NUMBER,
-					Phone.TIMES_CONTACTED };
-			String newSelection = whatsappContactIds != null ? (Phone.CONTACT_ID
-					+ " IN " + whatsappContactIds.toString())
-					: null;
+			String[] newProjection = new String[] { Phone.NUMBER, Phone.TIMES_CONTACTED };
+			String newSelection = greenblueContactIds != null ? (Phone.CONTACT_ID + " IN " + greenblueContactIds.toString()) : null;
 
-			phoneContactsCursor = context.getContentResolver().query(
-					Phone.CONTENT_URI, newProjection, newSelection, null,
-					Phone.TIMES_CONTACTED + " DESC LIMIT " + limit);
+			phoneContactsCursor = context.getContentResolver().query(Phone.CONTENT_URI, newProjection, newSelection, null, Phone.TIMES_CONTACTED + " DESC LIMIT " + limit);
 
 			Map<String, Integer> mostContactedNumbers = new HashMap<String, Integer>();
 			StringBuilder sb = null;
 
-			if (phoneContactsCursor.getCount() > 0) {
+			if (phoneContactsCursor.getCount() > 0)
+			{
 				sb = new StringBuilder("(");
 
-				extractContactInfo(phoneContactsCursor, sb,
-						mostContactedNumbers, true);
+				extractContactInfo(phoneContactsCursor, sb, mostContactedNumbers, true);
 
 			}
 			/*
-			 * This number is required when the user does not have enough
-			 * whatsapp contacts.
+			 * This number is required when the user does not have enough greenblue contacts.
 			 */
 			int otherContactsRequired = limit - mostContactedNumbers.size();
 
-			if (otherContactsRequired > 0) {
-				if (whatsappContactIds != null) {
-					newSelection = Phone.CONTACT_ID + " NOT IN "
-							+ whatsappContactIds.toString();
-				} else {
+			if (otherContactsRequired > 0)
+			{
+				if (greenblueContactIds != null)
+				{
+					newSelection = Phone.CONTACT_ID + " NOT IN " + greenblueContactIds.toString();
+				}
+				else
+				{
 					newSelection = null;
 				}
 
-				otherContactsCursor = context.getContentResolver().query(
-						Phone.CONTENT_URI,
-						newProjection,
-						newSelection,
-						null,
-						Phone.TIMES_CONTACTED + " DESC LIMIT "
-								+ otherContactsRequired);
+				otherContactsCursor = context.getContentResolver().query(Phone.CONTENT_URI, newProjection, newSelection, null,
+						Phone.TIMES_CONTACTED + " DESC LIMIT " + otherContactsRequired);
 
-				if (otherContactsCursor.getCount() > 0) {
-					if (sb == null) {
+				if (otherContactsCursor.getCount() > 0)
+				{
+					if (sb == null)
+					{
 						sb = new StringBuilder("(");
 					}
-					extractContactInfo(otherContactsCursor, sb,
-							mostContactedNumbers, false);
+					extractContactInfo(otherContactsCursor, sb, mostContactedNumbers, false);
 				}
 			}
 
-			if (mostContactedNumbers.isEmpty()) {
+			if (mostContactedNumbers.isEmpty())
+			{
 				sb = new StringBuilder("()");
-			} else {
+			}
+			else
+			{
 				sb.replace(sb.length() - 1, sb.length(), ")");
 			}
 
-			return new Pair<String, Map<String, Integer>>(sb.toString(),
-					mostContactedNumbers);
+			return new Pair<String, Map<String, Integer>>(sb.toString(), mostContactedNumbers);
 
-		} finally {
-			if (whatsappContactsCursor != null) {
-				whatsappContactsCursor.close();
+		}
+		finally
+		{
+			if (greenblueContactsCursor != null)
+			{
+				greenblueContactsCursor.close();
 			}
-			if (phoneContactsCursor != null) {
+			if (phoneContactsCursor != null)
+			{
 				phoneContactsCursor.close();
 			}
-			if (otherContactsCursor != null) {
+			if (otherContactsCursor != null)
+			{
 				otherContactsCursor.close();
 			}
 		}
 	}
 
-	private static void extractContactInfo(Cursor c, StringBuilder sb,
-			Map<String, Integer> numbers, boolean whatsappContacts) {
+	private static void extractContactInfo(Cursor c, StringBuilder sb, Map<String, Integer> numbers, boolean greenblueContacts)
+	{
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
 		int timesContactedIdx = c.getColumnIndex(Phone.TIMES_CONTACTED);
 
-		while (c.moveToNext()) {
+		while (c.moveToNext())
+		{
 			String number = c.getString(numberColIdx);
 
-			if (TextUtils.isEmpty(number)) {
+			if (TextUtils.isEmpty(number))
+			{
 				continue;
 			}
 
 			/*
-			 * We apply a multiplier of 2 for whatsapp contacts to give them a
-			 * greater weight.
+			 * We apply a multiplier of 2 for greenblue contacts to give them a greater weight.
 			 */
-			int lastTimeContacted = whatsappContacts ? 2 * c
-					.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
+			int lastTimeContacted = greenblueContacts ? 2 * c.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
 
 			/*
-			 * Checking if we already have this number and whether the last time
-			 * contacted was sooner than the newer value.
+			 * Checking if we already have this number and whether the last time contacted was sooner than the newer value.
 			 */
-			if (numbers.containsKey(number)
-					&& numbers.get(number) > lastTimeContacted) {
+			if (numbers.containsKey(number) && numbers.get(number) > lastTimeContacted)
+			{
 				continue;
 			}
 			numbers.put(number, lastTimeContacted);
@@ -524,69 +532,73 @@ public class ContactUtils {
 		}
 	}
 
-	public static void setWhatsappStatus(Context context, List<ContactInfo> contactinfos) {
-		Cursor whatsappContactsCursor = null;
+	public static void setGreenBlueStatus(Context context, List<ContactInfo> contactinfos)
+	{
+		Cursor greenblueContactsCursor = null;
 		Cursor phoneContactsCursor = null;
-		try {
+		try
+		{
 			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
 
-			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE
-					+ "= 'com.whatsapp'";
-			whatsappContactsCursor = context.getContentResolver().query(
-					ContactsContract.RawContacts.CONTENT_URI, projection,
-					selection, null, null);
+			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE + "= 'com.whatsapp'";
+			greenblueContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
 
-			int id = whatsappContactsCursor
-					.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+			int id = greenblueContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
 
-			StringBuilder whatsappContactIds = null;
-			if (whatsappContactsCursor.getCount() > 0) {
-				whatsappContactIds = new StringBuilder("(");
+			StringBuilder greenblueContactIds = null;
+			if (greenblueContactsCursor.getCount() > 0)
+			{
+				greenblueContactIds = new StringBuilder("(");
 
-				while (whatsappContactsCursor.moveToNext()) {
-					whatsappContactIds.append(whatsappContactsCursor.getInt(id)
-							+ ",");
+				while (greenblueContactsCursor.moveToNext())
+				{
+					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
 				}
-				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","),
-						whatsappContactIds.length(), ")");
+				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
 			}
-			
-			if (whatsappContactIds != null) {
-				String[] newProjection = new String[] { Phone.NUMBER,
-						Phone.DISPLAY_NAME };
-				String newSelection = (Phone.CONTACT_ID + " IN " + whatsappContactIds
-						.toString());
 
-				phoneContactsCursor = context.getContentResolver().query(
-						Phone.CONTENT_URI, newProjection, newSelection, null,
-						Phone.NUMBER + " DESC");
+			if (greenblueContactIds != null)
+			{
+				String[] newProjection = new String[] { Phone.NUMBER, Phone.DISPLAY_NAME };
+				String newSelection = (Phone.CONTACT_ID + " IN " + greenblueContactIds.toString());
 
-				if(phoneContactsCursor.getCount() > 0){
-					setWhatsappContacs(phoneContactsCursor, contactinfos);
+				phoneContactsCursor = context.getContentResolver().query(Phone.CONTENT_URI, newProjection, newSelection, null, Phone.NUMBER + " DESC");
+
+				if (phoneContactsCursor.getCount() > 0)
+				{
+					setGreenBlueContacs(phoneContactsCursor, contactinfos);
 				}
 			}
 
-		} finally {
-			if (whatsappContactsCursor != null) {
-				whatsappContactsCursor.close();
+		}
+		finally
+		{
+			if (greenblueContactsCursor != null)
+			{
+				greenblueContactsCursor.close();
 			}
-			if (phoneContactsCursor != null) {
+			if (phoneContactsCursor != null)
+			{
 				phoneContactsCursor.close();
 			}
 		}
 	}
-	
-	private static void setWhatsappContacs(Cursor c, List<ContactInfo> contactinfos) {
+
+	private static void setGreenBlueContacs(Cursor c, List<ContactInfo> contactinfos)
+	{
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-		HashSet<String> whatsappContacts = new HashSet<String>(c.getCount());
-		while (c.moveToNext()) {
+		HashSet<String> greenBlueContacts = new HashSet<String>(c.getCount());
+		while (c.moveToNext())
+		{
 			String number = c.getString(numberColIdx);
-			whatsappContacts.add(number);
+			greenBlueContacts.add(number);
 		}
-		
-		for (ContactInfo contact : contactinfos) {
-			if(whatsappContacts.contains(contact.getPhoneNum())){
-				contact.setOnWhatsapp(true);
+
+		for (ContactInfo contact : contactinfos)
+		{
+			if (greenBlueContacts.contains(contact.getPhoneNum()))
+			{
+				contact.setOnGreenBlue(true);
 			}
 		}
 	}

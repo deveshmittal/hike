@@ -3,11 +3,10 @@ package com.bsb.hike.utils.customClasses;
 import java.lang.ref.WeakReference;
 
 /**
- * @author : GK
- *  This class is made to override equals and hashcode functions, as reference class does not override them
- *  and hence weakreferences cannot be used in hash based datastructures.
+ * @author : GK This class is made to override equals and hashcode functions, as reference class does not override them and hence weakreferences cannot be used in hash based
+ *         datastructures.
  * */
- 
+
 public class MyWeakReference<T> extends WeakReference<T>
 {
 
