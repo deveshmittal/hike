@@ -125,7 +125,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 				address = hikeFile.getAddress();
 				
 				if(address == null)
-					address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
+					address = Utils.getAddressFromLatLng(latitude, longitude, context);
 
 				if(TextUtils.isEmpty(hikeFile.getThumbnailString()))
 				{
