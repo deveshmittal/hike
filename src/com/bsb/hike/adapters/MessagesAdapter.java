@@ -434,7 +434,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else if (fss.getFTState() != FTState.PAUSING)
+					else
 					{
 						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
 						FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
@@ -461,7 +461,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else if (fss.getFTState() != FTState.PAUSING)
+					else
 					{
 						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
 						FileTransferManager.getInstance(context).downloadFile(file, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage, true);
