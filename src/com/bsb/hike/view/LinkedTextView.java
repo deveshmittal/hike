@@ -10,37 +10,41 @@ import android.view.MotionEvent;
 import android.widget.TextView;
 
 /**
- * @author Rishabh Added this class to fix a bug where linkified textview's
- *         parents are not clickable.
- *         http://stackoverflow.com/questions/7236840/
+ * @author Rishabh Added this class to fix a bug where linkified textview's parents are not clickable. http://stackoverflow.com/questions/7236840/
  *         android-textview-linkify-intercepts-with-parent-view-gestures
  * 
  */
-public class LinkedTextView extends CustomFontTextView {
+public class LinkedTextView extends CustomFontTextView
+{
 
-	public LinkedTextView(Context context, AttributeSet attrs, int defStyle) {
+	public LinkedTextView(Context context, AttributeSet attrs, int defStyle)
+	{
 		super(context, attrs, defStyle);
 	}
 
-	public LinkedTextView(Context context, AttributeSet attrs) {
+	public LinkedTextView(Context context, AttributeSet attrs)
+	{
 		super(context, attrs);
 	}
 
-	public LinkedTextView(Context context) {
+	public LinkedTextView(Context context)
+	{
 		super(context);
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
+	public boolean onTouchEvent(MotionEvent event)
+	{
 		TextView widget = (TextView) this;
 		Object text = widget.getText();
-		if (text instanceof Spannable) {
+		if (text instanceof Spannable)
+		{
 			Spannable buffer = (Spannable) text;
 
 			int action = event.getAction();
 
-			if (action == MotionEvent.ACTION_UP
-					|| action == MotionEvent.ACTION_DOWN) {
+			if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN)
+			{
 				int x = (int) event.getX();
 				int y = (int) event.getY();
 
@@ -54,16 +58,17 @@ public class LinkedTextView extends CustomFontTextView {
 				int line = layout.getLineForVertical(y);
 				int off = layout.getOffsetForHorizontal(line, x);
 
-				ClickableSpan[] link = buffer.getSpans(off, off,
-						ClickableSpan.class);
+				ClickableSpan[] link = buffer.getSpans(off, off, ClickableSpan.class);
 
-				if (link.length != 0) {
-					if (action == MotionEvent.ACTION_UP) {
+				if (link.length != 0)
+				{
+					if (action == MotionEvent.ACTION_UP)
+					{
 						link[0].onClick(widget);
-					} else if (action == MotionEvent.ACTION_DOWN) {
-						Selection.setSelection(buffer,
-								buffer.getSpanStart(link[0]),
-								buffer.getSpanEnd(link[0]));
+					}
+					else if (action == MotionEvent.ACTION_DOWN)
+					{
+						Selection.setSelection(buffer, buffer.getSpanStart(link[0]), buffer.getSpanEnd(link[0]));
 					}
 					return true;
 				}

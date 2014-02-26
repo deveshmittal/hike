@@ -24,29 +24,32 @@ import android.net.Uri;
 /**
  * The interface of all images used in gallery.
  */
-public interface IImage {
+public interface IImage
+{
 	static final int THUMBNAIL_TARGET_SIZE = 320;
+
 	static final int MINI_THUMB_TARGET_SIZE = 96;
+
 	static final int UNCONSTRAINED = -1;
 
 	/** Get the image list which contains this image. */
 	public abstract IImageList getContainer();
 
 	/** Get the bitmap for the full size image. */
-	public abstract Bitmap fullSizeBitmap(int minSideLength,
-			int maxNumberOfPixels);
+	public abstract Bitmap fullSizeBitmap(int minSideLength, int maxNumberOfPixels);
 
-	public abstract Bitmap fullSizeBitmap(int minSideLength,
-			int maxNumberOfPixels, boolean rotateAsNeeded);
+	public abstract Bitmap fullSizeBitmap(int minSideLength, int maxNumberOfPixels, boolean rotateAsNeeded);
 
-	public abstract Bitmap fullSizeBitmap(int minSideLength,
-			int maxNumberOfPixels, boolean rotateAsNeeded, boolean useNative);
+	public abstract Bitmap fullSizeBitmap(int minSideLength, int maxNumberOfPixels, boolean rotateAsNeeded, boolean useNative);
 
 	public abstract int getDegreesRotated();
 
 	public static final boolean ROTATE_AS_NEEDED = true;
+
 	public static final boolean NO_ROTATE = false;
+
 	public static final boolean USE_NATIVE = true;
+
 	public static final boolean NO_NATIVE = false;
 
 	/** Get the input stream associated with a given full size image. */

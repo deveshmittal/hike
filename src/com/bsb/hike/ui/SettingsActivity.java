@@ -21,15 +21,17 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
-public class SettingsActivity extends HikeAppStateBaseFragmentActivity
-		implements OnItemClickListener {
+public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
+{
 
-	private enum ViewType {
+	private enum ViewType
+	{
 		SETTINGS, VERSION
 	};
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
 
@@ -41,7 +43,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		items.add(getString(R.string.privacy));
 		items.add(getString(R.string.help));
 		items.add(null);
-		
+
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.notifications_hintext));
@@ -58,48 +60,52 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		itemIcons.add(R.drawable.ic_privacy_settings);
 		itemIcons.add(R.drawable.ic_help_settings);
 
-		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this,
-				R.layout.setting_item, R.id.item, items) {
+		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this, R.layout.setting_item, R.id.item, items)
+		{
 
 			@Override
-			public int getItemViewType(int position) {
-				if (getItem(position) == null) {
+			public int getItemViewType(int position)
+			{
+				if (getItem(position) == null)
+				{
 					return ViewType.VERSION.ordinal();
-				} else {
+				}
+				else
+				{
 					return ViewType.SETTINGS.ordinal();
 				}
 			}
 
 			@Override
-			public int getViewTypeCount() {
+			public int getViewTypeCount()
+			{
 				return ViewType.values().length;
 			}
 
 			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
 				ViewType viewType = ViewType.values()[getItemViewType(position)];
-				if (convertView == null) {
-					switch (viewType) {
+				if (convertView == null)
+				{
+					switch (viewType)
+					{
 					case SETTINGS:
-						convertView = getLayoutInflater().inflate(
-								R.layout.setting_item, null);
+						convertView = getLayoutInflater().inflate(R.layout.setting_item, null);
 						break;
 
 					case VERSION:
-						convertView = getLayoutInflater().inflate(
-								R.layout.app_version_item, parent, false);
+						convertView = getLayoutInflater().inflate(R.layout.app_version_item, parent, false);
 						break;
 					}
 				}
 
-				switch (viewType) {
+				switch (viewType)
+				{
 				case SETTINGS:
-					TextView header = (TextView) convertView
-							.findViewById(R.id.item);
-					TextView summary = (TextView) convertView
-							.findViewById(R.id.summary);
-					ImageView iconImage = (ImageView) convertView
-							.findViewById(R.id.icon);
+					TextView header = (TextView) convertView.findViewById(R.id.item);
+					TextView summary = (TextView) convertView.findViewById(R.id.summary);
+					ImageView iconImage = (ImageView) convertView.findViewById(R.id.icon);
 
 					header.setText(getItem(position));
 					summary.setText(itemsSummary.get(position));
@@ -107,14 +113,13 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 					break;
 
 				case VERSION:
-					TextView appVersion = (TextView) convertView
-							.findViewById(R.id.app_version);
-					try {
-						appVersion.setText(getString(
-								R.string.app_version,
-								getPackageManager().getPackageInfo(
-										getPackageName(), 0).versionName));
-					} catch (NameNotFoundException e) {
+					TextView appVersion = (TextView) convertView.findViewById(R.id.app_version);
+					try
+					{
+						appVersion.setText(getString(R.string.app_version, getPackageManager().getPackageInfo(getPackageName(), 0).versionName));
+					}
+					catch (NameNotFoundException e)
+					{
 						appVersion.setText("");
 					}
 					break;
@@ -131,23 +136,24 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 		setupActionBar();
 	}
 
-	private void setupActionBar() {
+	private void setupActionBar()
+	{
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
-		View actionBarView = LayoutInflater.from(this).inflate(
-				R.layout.compose_action_bar, null);
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(R.string.settings);
-		backContainer.setOnClickListener(new OnClickListener() {
+		backContainer.setOnClickListener(new OnClickListener()
+		{
 
 			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(SettingsActivity.this,
-						HomeActivity.class);
+			public void onClick(View v)
+			{
+				Intent intent = new Intent(SettingsActivity.this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}
@@ -157,27 +163,25 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view,
-			int position, long id) {
+	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+	{
 		Intent intent = null;
-		switch (position) {
+		switch (position)
+		{
 		case 0:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF,
-					R.xml.account_preferences);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 
 		case 1:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF,
-					R.xml.notification_preferences);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.notification_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
 			break;
 		case 2:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF,
-					R.xml.auto_download_preferences);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.auto_download_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
 			break;
 		case 3:
@@ -187,8 +191,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			break;
 		case 4:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF,
-					R.xml.privacy_preferences);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
 			break;
 		case 5:
@@ -197,7 +200,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
 			break;
 		}
-		if (intent != null) {
+		if (intent != null)
+		{
 			startActivity(intent);
 		}
 	}

@@ -1,5 +1,5 @@
 package com.bsb.hike.models;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -7,25 +7,28 @@ import java.io.Serializable;
 
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
-
 public class StickerCategory implements Serializable
 {
 
 	public StickerCategoryId categoryId;
+
 	public boolean updateAvailable;
+
 	private boolean reachedEnd = false;
 
-	public StickerCategory(StickerCategoryId categoryId, boolean updateAvailable) {
+	public StickerCategory(StickerCategoryId categoryId, boolean updateAvailable)
+	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
 	}
 
-	public StickerCategory(StickerCategoryId categoryId, boolean updateAvailable,boolean hasreachedEnd) {
+	public StickerCategory(StickerCategoryId categoryId, boolean updateAvailable, boolean hasreachedEnd)
+	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
 		this.reachedEnd = hasreachedEnd;
 	}
-	
+
 	// this is mostly used for recents stickers only
 	public StickerCategory(StickerCategoryId category)
 	{
@@ -35,30 +38,31 @@ public class StickerCategory implements Serializable
 
 	public StickerCategory()
 	{
-		
+
 	}
-	
+
 	public void setReachedEnd(boolean reachedEnd)
 	{
 		this.reachedEnd = reachedEnd;
 	}
-	
+
 	public boolean hasReachedEnd()
 	{
 		return reachedEnd;
 	}
-	
+
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((categoryId == null) ? 0 : categoryId.hashCode());
+		result = prime * result + ((categoryId == null) ? 0 : categoryId.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj)
+	{
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -66,15 +70,18 @@ public class StickerCategory implements Serializable
 		if (getClass() != obj.getClass())
 			return false;
 		StickerCategory other = (StickerCategory) obj;
-		if (categoryId == null) {
+		if (categoryId == null)
+		{
 			if (other.categoryId != null)
 				return false;
-		} else if (!categoryId.equals(other.categoryId)) {
+		}
+		else if (!categoryId.equals(other.categoryId))
+		{
 			return false;
 		}
 		return true;
 	}
-	
+
 	public void serializeObj(ObjectOutputStream out)
 	{
 		try
@@ -89,11 +96,12 @@ public class StickerCategory implements Serializable
 			e.printStackTrace();
 		}
 	}
+
 	public void deSerializeObj(ObjectInputStream in)
 	{
 		try
 		{
-			categoryId = (StickerCategoryId)in.readObject();
+			categoryId = (StickerCategoryId) in.readObject();
 			updateAvailable = in.readBoolean();
 			reachedEnd = in.readBoolean();
 		}
@@ -102,9 +110,9 @@ public class StickerCategory implements Serializable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch(ClassNotFoundException e)
+		catch (ClassNotFoundException e)
 		{
-			
+
 		}
 	}
 }

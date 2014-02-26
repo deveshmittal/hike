@@ -12,20 +12,23 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 
-public class UpgradeIntentService extends IntentService {
+public class UpgradeIntentService extends IntentService
+{
 
 	private static final String TAG = "UpgradeIntentService";
+
 	private SharedPreferences prefs;
+
 	Context context;
 
 	@Override
-	protected void onHandleIntent(Intent dbIntent) {
+	protected void onHandleIntent(Intent dbIntent)
+	{
 		makeRoundedThumbsForUserDb();
 
 		initialiseSharedMediaAndFileThumbnailTable();
 		context = this;
-		prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				0);
+		prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		// setting the preferences to 2 to indicate we're done with the
 		// migration !
@@ -38,23 +41,24 @@ public class UpgradeIntentService extends IntentService {
 		// fire the pubsub event to let the HomeActivity class know that the
 		// avatar
 		// upgrade is done and it can stop the spinner
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE,
-				null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE, null);
 	}
 
-	public UpgradeIntentService() {
+	public UpgradeIntentService()
+	{
 
 		super(TAG);
 
 	}
 
-	private void makeRoundedThumbsForUserDb() {
+	private void makeRoundedThumbsForUserDb()
+	{
 		HikeUserDatabase.getInstance().makeOlderAvatarsRounded();
 	}
 
-	private void initialiseSharedMediaAndFileThumbnailTable() {
-		HikeConversationsDatabase.getInstance()
-				.initialiseSharedMediaAndFileThumbnailTable();
+	private void initialiseSharedMediaAndFileThumbnailTable()
+	{
+		HikeConversationsDatabase.getInstance().initialiseSharedMediaAndFileThumbnailTable();
 	}
 
 }

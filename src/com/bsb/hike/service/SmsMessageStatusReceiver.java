@@ -11,17 +11,20 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeMqttPersistence;
 
-public class SmsMessageStatusReceiver extends BroadcastReceiver {
+public class SmsMessageStatusReceiver extends BroadcastReceiver
+{
 
 	@Override
-	public void onReceive(Context context, Intent intent) {
+	public void onReceive(Context context, Intent intent)
+	{
 		long msgId = intent.getLongExtra(HikeConstants.Extras.SMS_ID, -1);
-		switch (getResultCode()) {
+		switch (getResultCode())
+		{
 		case Activity.RESULT_OK:
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.SERVER_RECEIVED_MSG, msgId);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 
-			if (msgId != -1) {
+			if (msgId != -1)
+			{
 				HikeMqttPersistence.getInstance().removeMessage(msgId);
 			}
 			break;

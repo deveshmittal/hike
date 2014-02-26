@@ -9,19 +9,21 @@ import android.view.View;
 
 import com.bsb.hike.utils.Utils;
 
-public class CircularProgress extends View {
+public class CircularProgress extends View
+{
 	private RectF progressContainer;
+
 	private Paint outerBoundary;
+
 	private Paint actualProgress;
 
 	private int progressAngle;
 
-	public CircularProgress(Context context, AttributeSet attrs, int defStyle) {
+	public CircularProgress(Context context, AttributeSet attrs, int defStyle)
+	{
 		super(context, attrs, defStyle);
 
-		progressContainer = new RectF(3 * Utils.densityMultiplier,
-				3 * Utils.densityMultiplier, 18 * Utils.densityMultiplier,
-				18 * Utils.densityMultiplier);
+		progressContainer = new RectF(3 * Utils.densityMultiplier, 3 * Utils.densityMultiplier, 18 * Utils.densityMultiplier, 18 * Utils.densityMultiplier);
 
 		outerBoundary = new Paint();
 		outerBoundary.setColor(0xFFAAAAAA);
@@ -34,29 +36,33 @@ public class CircularProgress extends View {
 		actualProgress.setAntiAlias(true);
 	}
 
-	public void setProgressColor(int color) {
+	public void setProgressColor(int color)
+	{
 		outerBoundary.setColor(color);
 		actualProgress.setColor(color);
 
 		invalidate();
 	}
 
-	public CircularProgress(Context context, AttributeSet attrs) {
+	public CircularProgress(Context context, AttributeSet attrs)
+	{
 		this(context, attrs, 0);
 	}
 
-	public CircularProgress(Context context) {
+	public CircularProgress(Context context)
+	{
 		this(context, null, 0);
 	}
 
 	@Override
-	protected void onDraw(Canvas canvas) {
+	protected void onDraw(Canvas canvas)
+	{
 		canvas.drawArc(progressContainer, 0, 360, true, outerBoundary);
-		canvas.drawArc(progressContainer, 270, progressAngle, true,
-				actualProgress);
+		canvas.drawArc(progressContainer, 270, progressAngle, true, actualProgress);
 	}
 
-	public void setProgressAngle(int progress) {
+	public void setProgressAngle(int progress)
+	{
 		progressAngle = (int) ((360 * progress) / 100);
 	}
 }
