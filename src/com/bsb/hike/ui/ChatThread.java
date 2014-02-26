@@ -2078,10 +2078,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 
 	/* returns TRUE iff the last message was received and unread */
-	private boolean isLastMsgReceivedAndUnread()
-	{
-		int count = (mAdapter != null && mConversation != null) ? mAdapter.getCount() : 0;
-		ConvMessage lastMsg = count > 0 ? mAdapter.getItem(count - 1) : null;
+	private boolean isLastMsgReceivedAndUnread() {
+		if(mAdapter == null || mConversation == null) {
+			return false;
+		}
+
+		ConvMessage lastMsg = null;
+		for(int i = messages.size() - 1; i >= 0; i--) {
+			ConvMessage msg = messages.get(i);
+			if(msg.getTypingNotification() != null) {
+				continue;
+			}
+			lastMsg = msg;
+			break;
+		}
 		if (lastMsg == null)
 		{
 			return false;
@@ -4122,7 +4132,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (recorder != null)
 		{
-			recorder.stop();
+			/*
+			 * Catching RuntimeException here to prevent the app from crashing when
+			 * the the media recorder is immediately stopped after starting.
+			 */
+			try
+			{
+				recorder.stop();
+			}
+			catch (RuntimeException e)
+			{
+			}
 			recorder.reset();
 			recorder.release();
 			recorder = null;
@@ -5143,7 +5163,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		emoticonViewPager.setAdapter(emoticonsAdapter);
 		int actualPageNum = pageNum;
-		if (pageNum == 0)
+		if (emoticonType == EmoticonType.STICKERS && pageNum == 0)
 		{
 			// if recent list is empty, then skip to first category
 			if (StickerManager.getInstance().getRecentStickerList().size() == 0)

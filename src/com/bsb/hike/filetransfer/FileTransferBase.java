@@ -31,6 +31,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected static String NETWORK_ERROR_2 = "Unable to resolve host";
 
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
+	
+	protected static String ETAG = "Etag";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
 

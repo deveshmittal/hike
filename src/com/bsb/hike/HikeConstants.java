@@ -298,6 +298,14 @@ public class HikeConstants
 	public static final String SMS = "sms";
 
 	public static final String UI_EVENT = "uiEvent";
+	
+	public static final String CRC_EVENT = "crc";
+	
+	public static final String MD5_HASH = "md5";
+	
+	public static final String FILE_SIZE = "fs";
+	
+	public static final String DOWNLOAD = "dwnld";
 
 	public static final String LOGEVENT_TAG = "mob";
 
