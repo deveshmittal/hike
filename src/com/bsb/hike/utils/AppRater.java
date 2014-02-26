@@ -13,17 +13,20 @@ import android.util.Log;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 
-public class AppRater {
+public class AppRater
+{
 
 	private final static int[] LAUNCHES_UNTIL_PROMPT = { 5, 10, 25, 50, 100 };
+
 	private static boolean showingDialog = false;
 
-	public static void appLaunched(Context mContext) {
+	public static void appLaunched(Context mContext)
+	{
 		showingDialog = false;
 
-		SharedPreferences prefs = mContext.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (prefs.getBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER, false)) {
+		SharedPreferences prefs = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (prefs.getBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER, false))
+		{
 			return;
 		}
 
@@ -34,32 +37,36 @@ public class AppRater {
 		editor.putInt(HikeMessengerApp.APP_LAUNCHES, launchCount);
 		editor.commit();
 
-		for (int launch : LAUNCHES_UNTIL_PROMPT) {
-			if (launch == launchCount) {
+		for (int launch : LAUNCHES_UNTIL_PROMPT)
+		{
+			if (launch == launchCount)
+			{
 				showRateDialog(mContext, prefs.edit());
 			}
 		}
 	}
 
-	private static void showRateDialog(final Context mContext,
-			final SharedPreferences.Editor editor) {
+	private static void showRateDialog(final Context mContext, final SharedPreferences.Editor editor)
+	{
 		Builder builder = new Builder(mContext);
 
 		builder.setTitle(R.string.app_rate_title);
 		builder.setMessage(R.string.app_rate_content);
 
-		builder.setPositiveButton(R.string.rate_now, new OnClickListener() {
+		builder.setPositiveButton(R.string.rate_now, new OnClickListener()
+		{
 
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri
-						.parse("market://details?id="
-								+ mContext.getPackageName()));
-				marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
-						| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-				try {
+			public void onClick(DialogInterface dialog, int which)
+			{
+				Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + mContext.getPackageName()));
+				marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+				try
+				{
 					mContext.startActivity(marketIntent);
-				} catch (ActivityNotFoundException e) {
+				}
+				catch (ActivityNotFoundException e)
+				{
 					Log.e("AppRater", "Unable to open market");
 				}
 				dialog.dismiss();
@@ -68,31 +75,34 @@ public class AppRater {
 			}
 		});
 
-		builder.setNeutralButton(R.string.ask_me_later, new OnClickListener() {
+		builder.setNeutralButton(R.string.ask_me_later, new OnClickListener()
+		{
 
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(DialogInterface dialog, int which)
+			{
 				dialog.dismiss();
 			}
 		});
 
-		builder.setNegativeButton(R.string.no_thanks_rate,
-				new OnClickListener() {
+		builder.setNegativeButton(R.string.no_thanks_rate, new OnClickListener()
+		{
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-						editor.putBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER,
-								true);
-						editor.commit();
-					}
-				});
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.dismiss();
+				editor.putBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER, true);
+				editor.commit();
+			}
+		});
 
 		showingDialog = true;
 		builder.show();
 	}
 
-	public static boolean showingDialog() {
+	public static boolean showingDialog()
+	{
 		return showingDialog;
 	}
 }

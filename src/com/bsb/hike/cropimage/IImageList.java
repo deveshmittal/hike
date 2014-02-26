@@ -46,7 +46,8 @@ import android.os.Parcelable;
 /**
  * The interface of all image collections used in gallery.
  */
-public interface IImageList extends Parcelable {
+public interface IImageList extends Parcelable
+{
 	public HashMap<String, String> getBucketIds();
 
 	public void deactivate();

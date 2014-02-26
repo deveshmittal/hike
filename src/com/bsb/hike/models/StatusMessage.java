@@ -14,24 +14,36 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.EmoticonConstants;
 
-public class StatusMessage {
+public class StatusMessage
+{
 
-	public static enum StatusMessageType {
+	public static enum StatusMessageType
+	{
 		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS, USER_ACCEPTED_FRIEND_REQUEST, PROTIP, JOINED_HIKE
 	}
 
 	private long id;
+
 	private String mappedId;
+
 	private String msisdn;
+
 	private String name;
+
 	private String text;
+
 	private StatusMessageType statusMessageType;
+
 	private long timeStamp;
+
 	private int moodId;
+
 	private int timeOfDay;
+
 	private Protip protip;
 
-	public StatusMessage(JSONObject statusMessageJson) throws JSONException {
+	public StatusMessage(JSONObject statusMessageJson) throws JSONException
+	{
 		this.msisdn = statusMessageJson.getString(HikeConstants.FROM);
 
 		this.timeStamp = statusMessageJson.getLong(HikeConstants.TIMESTAMP);
@@ -43,10 +55,13 @@ public class StatusMessage {
 
 		this.mappedId = data.getString(HikeConstants.STATUS_ID);
 
-		if (data.optBoolean(HikeConstants.PROFILE)) {
+		if (data.optBoolean(HikeConstants.PROFILE))
+		{
 			this.statusMessageType = StatusMessageType.PROFILE_PIC;
 			this.text = "";
-		} else if (data.has(HikeConstants.STATUS_MESSAGE)) {
+		}
+		else if (data.has(HikeConstants.STATUS_MESSAGE))
+		{
 			this.statusMessageType = StatusMessageType.TEXT;
 			this.text = data.optString(HikeConstants.STATUS_MESSAGE);
 		}
@@ -54,15 +69,13 @@ public class StatusMessage {
 		this.timeOfDay = data.optInt(HikeConstants.TIME_OF_DAY);
 	}
 
-	public StatusMessage(long id, String mappedId, String msisdn, String name,
-			String text, StatusMessageType statusMessageType, long timeStamp) {
-		this(id, mappedId, msisdn, name, text, statusMessageType, timeStamp,
-				-1, 0);
+	public StatusMessage(long id, String mappedId, String msisdn, String name, String text, StatusMessageType statusMessageType, long timeStamp)
+	{
+		this(id, mappedId, msisdn, name, text, statusMessageType, timeStamp, -1, 0);
 	}
 
-	public StatusMessage(long id, String mappedId, String msisdn, String name,
-			String text, StatusMessageType statusMessageType, long timeStamp,
-			int moodId, int timeOfDay) {
+	public StatusMessage(long id, String mappedId, String msisdn, String name, String text, StatusMessageType statusMessageType, long timeStamp, int moodId, int timeOfDay)
+	{
 		this.id = id;
 		this.mappedId = mappedId;
 		this.msisdn = msisdn;
@@ -74,7 +87,8 @@ public class StatusMessage {
 		this.timeOfDay = timeOfDay;
 	}
 
-	public StatusMessage(Protip protip) {
+	public StatusMessage(Protip protip)
+	{
 		this.protip = protip;
 		this.mappedId = protip.getMappedId();
 		this.name = HikeConstants.PROTIP_STATUS_NAME;
@@ -83,76 +97,98 @@ public class StatusMessage {
 		this.statusMessageType = StatusMessageType.PROTIP;
 	}
 
-	public void setId(long id) {
+	public void setId(long id)
+	{
 		this.id = id;
 	}
 
-	public long getId() {
+	public long getId()
+	{
 		return id;
 	}
 
-	public String getMappedId() {
+	public String getMappedId()
+	{
 		return mappedId;
 	}
 
-	public String getMsisdn() {
+	public String getMsisdn()
+	{
 		return msisdn;
 	}
 
-	public void setName(String name) {
+	public void setName(String name)
+	{
 		this.name = name;
 	}
 
-	public String getName() {
+	public String getName()
+	{
 		return name;
 	}
 
-	public String getNotNullName() {
+	public String getNotNullName()
+	{
 		return TextUtils.isEmpty(name) ? msisdn : name;
 	}
 
-	public String getText() {
+	public String getText()
+	{
 		return text;
 	}
 
-	public StatusMessageType getStatusMessageType() {
+	public StatusMessageType getStatusMessageType()
+	{
 		return statusMessageType;
 	}
 
-	public void setTimeStamp(long timeStamp) {
+	public void setTimeStamp(long timeStamp)
+	{
 		this.timeStamp = timeStamp;
 	}
 
-	public long getTimeStamp() {
+	public long getTimeStamp()
+	{
 		return timeStamp;
 	}
 
-	public boolean hasMood() {
+	public boolean hasMood()
+	{
 		return (EmoticonConstants.moodMapping.containsKey(moodId));
 	}
 
-	public int getMoodId() {
+	public int getMoodId()
+	{
 		return moodId;
 	}
 
-	public int getTimeOfDay() {
+	public int getTimeOfDay()
+	{
 		return timeOfDay;
 	}
 
-	public Protip getProtip() {
+	public Protip getProtip()
+	{
 		return protip;
 	}
 
-	public String getTimestampFormatted(boolean pretty, Context context) {
+	public String getTimestampFormatted(boolean pretty, Context context)
+	{
 		Date date = new Date(timeStamp * 1000);
-		if (pretty) {
+		if (pretty)
+		{
 			PrettyTime p = new PrettyTime();
 			return p.format(date);
-		} else {
+		}
+		else
+		{
 			String format;
-			if (android.text.format.DateFormat.is24HourFormat(context)) {
+			if (android.text.format.DateFormat.is24HourFormat(context))
+			{
 				format = "d MMM ''yy 'AT' HH:mm";
-			} else {
+			}
+			else
+			{
 				format = "d MMM ''yy 'AT' h:mm aaa";
 			}
 			DateFormat df = new SimpleDateFormat(format);

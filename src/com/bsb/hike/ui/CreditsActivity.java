@@ -21,18 +21,21 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
-public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
-		Listener {
+public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements Listener
+{
 	private SharedPreferences settings;
+
 	private TextView creditsMax;
+
 	private TextView creditsCurrent;
+
 	private ProgressBar creditsBar;
 
-	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.INVITEE_NUM_CHANGED };
+	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.INVITEE_NUM_CHANGED };
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -42,7 +45,8 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
-	private void initalizeViews(Bundle savedInstanceState) {
+	private void initalizeViews(Bundle savedInstanceState)
+	{
 		setContentView(R.layout.credits);
 
 		Editor editor = settings.edit();
@@ -63,17 +67,16 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(mainString);
 		int index = mainString.indexOf(replaceString);
-		if (index != -1) {
-			ssb.setSpan(new ImageSpan(this, R.drawable.ic_sms_user), index,
-					index + replaceString.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (index != -1)
+		{
+			ssb.setSpan(new ImageSpan(this, R.drawable.ic_sms_user), index, index + replaceString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		freeSmsTip.setText(ssb);
 	}
 
-	public void onInviteClick(View v) {
-		Utils.logEvent(CreditsActivity.this,
-				HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+	public void onInviteClick(View v)
+	{
+		Utils.logEvent(CreditsActivity.this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
 		Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_CREDIT);
 		Intent intent = new Intent(CreditsActivity.this, HikeListActivity.class);
 		intent.putExtra(HikeConstants.Extras.FROM_CREDITS_SCREEN, true);
@@ -81,58 +84,61 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	@Override
-	protected void onDestroy() {
+	protected void onDestroy()
+	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
+	public void onEventReceived(String type, Object object)
+	{
 		/*
-		 * Here we check if we are already showing the twitter webview. If we
-		 * are, we dont do any other UI changes.
+		 * Here we check if we are already showing the twitter webview. If we are, we dont do any other UI changes.
 		 */
-		if ((HikePubSub.SMS_CREDIT_CHANGED.equals(type) || HikePubSub.INVITEE_NUM_CHANGED
-				.equals(type))) {
-			runOnUiThread(new Runnable() {
+		if ((HikePubSub.SMS_CREDIT_CHANGED.equals(type) || HikePubSub.INVITEE_NUM_CHANGED.equals(type)))
+		{
+			runOnUiThread(new Runnable()
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					updateCredits();
 				}
 			});
 		}
 	}
 
-	private void updateCredits() {
+	private void updateCredits()
+	{
 		int currentCredits = settings.getInt(HikeMessengerApp.SMS_SETTING, 0);
-		int totalCredits = Integer.parseInt(settings.getString(
-				HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
+		int totalCredits = Integer.parseInt(settings.getString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 
-		creditsMax.setText(Integer.toString(currentCredits) + "/"
-				+ Integer.toString(totalCredits));
+		creditsMax.setText(Integer.toString(currentCredits) + "/" + Integer.toString(totalCredits));
 		creditsCurrent.setText(Integer.toString(currentCredits));
 
 		creditsBar.setMax(totalCredits);
 		creditsBar.setProgress(currentCredits);
 	}
 
-	private void setupActionBar() {
+	private void setupActionBar()
+	{
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
-		View actionBarView = LayoutInflater.from(this).inflate(
-				R.layout.compose_action_bar, null);
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(R.string.free_sms_txt);
-		backContainer.setOnClickListener(new View.OnClickListener() {
+		backContainer.setOnClickListener(new View.OnClickListener()
+		{
 
 			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(CreditsActivity.this,
-						HomeActivity.class);
+			public void onClick(View v)
+			{
+				Intent intent = new Intent(CreditsActivity.this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}

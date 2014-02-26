@@ -7,22 +7,27 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.http.entity.ByteArrayEntity;
 
-public class GzipByteArrayEntity extends ByteArrayEntity {
-	public GzipByteArrayEntity(final byte[] data, final String encoding)
-			throws UnsupportedEncodingException {
+public class GzipByteArrayEntity extends ByteArrayEntity
+{
+	public GzipByteArrayEntity(final byte[] data, final String encoding) throws UnsupportedEncodingException
+	{
 		super(gzip(data, encoding));
 		setContentType("application/json");
 		setContentEncoding("gzip");
 	}
 
-	public static byte[] gzip(byte[] data, String encoding) {
+	public static byte[] gzip(byte[] data, String encoding)
+	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		GZIPOutputStream zos;
-		try {
+		try
+		{
 			zos = new GZIPOutputStream(bos);
 			zos.write(data);
 			zos.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
