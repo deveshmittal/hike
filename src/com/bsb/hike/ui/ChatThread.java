@@ -3090,15 +3090,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 
-			// Smooth scroll by the minimum distance in the opposite direction,
-			// to fix the bug where the list does not scroll at all.
-			mConversationsView.smoothScrollBy(-1, 1);
-			int itemsToScroll = messages.size() - (mConversationsView.getFirstVisiblePosition() + mConversationsView.getChildCount());
-			if (itemsToScroll > 3)
-			{
-				mConversationsView.setSelection(messages.size() - 3);
-			}
-			mConversationsView.smoothScrollToPosition(messages.size() - 1);
+			mConversationsView.setSelection(messages.size() - 1);
 		}
 	}
 
@@ -5219,19 +5211,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		sendMessage(convMessage);
-
-		/*
-		 * Added to make sure we scroll to the end when we add the poke message.
-		 */
-		new Handler().postDelayed(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				mConversationsView.smoothScrollBy(-1, 1);
-				mConversationsView.smoothScrollToPosition(mAdapter.getCount() - 1);
-			}
-		}, 10);
 
 		boolean vibrate = false;
 		if (mConversation != null)
