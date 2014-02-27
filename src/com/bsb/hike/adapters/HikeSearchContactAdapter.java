@@ -287,7 +287,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<Pair<AtomicBoolean, C
 	@Override
 	public boolean isEnabled(int position)
 	{
-		if (getItem(position) == null)
+		if (position < getCount() && getItem(position) == null)
 		{
 			return getNumber(inputNumber.getText().toString()).matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
