@@ -2078,15 +2078,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 
 	/* returns TRUE iff the last message was received and unread */
-	private boolean isLastMsgReceivedAndUnread() {
-		if(mAdapter == null || mConversation == null) {
+	private boolean isLastMsgReceivedAndUnread()
+	{
+		if (mAdapter == null || mConversation == null)
+		{
 			return false;
 		}
 
 		ConvMessage lastMsg = null;
-		for(int i = messages.size() - 1; i >= 0; i--) {
+		for (int i = messages.size() - 1; i >= 0; i--)
+		{
 			ConvMessage msg = messages.get(i);
-			if(msg.getTypingNotification() != null) {
+			if (msg.getTypingNotification() != null)
+			{
 				continue;
 			}
 			lastMsg = msg;
@@ -4125,8 +4129,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (recorder != null)
 		{
 			/*
-			 * Catching RuntimeException here to prevent the app from crashing when
-			 * the the media recorder is immediately stopped after starting.
+			 * Catching RuntimeException here to prevent the app from crashing when the the media recorder is immediately stopped after starting.
 			 */
 			try
 			{
