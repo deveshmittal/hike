@@ -896,6 +896,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			boolean isMuted = ((GroupConversation) mConversation).isMuted();
 
 			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
+
+			optionsList.add(new OverFlowMenuItem(getString(R.string.clear_conversation), 5));
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_conversation), 3));
@@ -974,6 +976,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(ChatThread.this, mConversation);
 					break;
+				case 5:
+					clearConversation();
 				}
 
 			}
@@ -1014,6 +1018,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return onKeyUp(keyCode, event);
 			}
 		});
+	}
+
+	private void clearConversation()
+	{
+		mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
+		messages.clear();
+		mAdapter.notifyDataSetChanged();
 	}
 
 	private void blockUser()

@@ -751,5 +751,6 @@
 	<string name="device">Device</string>
 	<string name="valentine_nudge_header">Share the Love!</string>
 	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
-	<string name="valentine_nudge_button">Awesome</string>	
+	<string name="valentine_nudge_button">Awesome</string>
+	<string name="clear_conversation">Clear Conversation</string>	
 </resources>

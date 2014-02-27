@@ -80,7 +80,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
-
+		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
 	}
 
 	@Override
@@ -384,7 +384,12 @@ public class DbConversationListener implements Listener
 			mConversationDb.deleteProtip(mappedId);
 			sendDismissTipLogEvent(mappedId, url);
 		}
-
+		else if (HikePubSub.CLEAR_CONVERSATION.equals(type))
+		{
+			Pair<String, Long> values = (Pair<String, Long>) object;
+			Long convId = values.second;
+			mConversationDb.clearConversation(convId);
+		}
 	}
 
 	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline, int numMessages)
