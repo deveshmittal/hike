@@ -428,7 +428,7 @@
     </style>
     
     <style name="OverflowMenu">
-        <item name="android:src">@drawable/ic_overflow</item>
+        <item name="android:src">@drawable/ic_overflow_home</item>
         <item name="android:background">@drawable/bg_overflow_menu_selector</item>
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">match_parent</item>
