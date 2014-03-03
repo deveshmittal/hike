@@ -180,6 +180,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -5710,6 +5711,60 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			switch (item.getItemId())
 			{
+			case R.id.delete_msgs:
+				final ActionMode tempActionMode = mode;
+				final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
+				if(mAdapter.getSelectedCount() == 1){
+					deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
+					deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
+				} else{
+					deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, mAdapter.getSelectedCount()));
+				}
+				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+				{
+
+					@Override
+					public void onClick(View v)
+					{
+						Collections.sort(selectedMessagesIds);
+						ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
+						for (int i = convMsgs.length - 1; i >= 0; i--)
+						{
+							convMsgs[i] = mAdapter.getItem(selectedMessagesIds.get(i));
+							removeMessage(convMsgs[i]);
+							if (convMsgs[i].isFileTransferMessage())
+							{
+								if (convMsgs[i].isFileTransferMessage())
+								{
+									// @GM cancelTask has been changed
+									HikeFile hikeFile = convMsgs[i].getMetadata().getHikeFiles().get(0);
+									File file = hikeFile.getFile();
+									FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMsgs[i].getMsgID(), file, convMsgs[i].isSent());
+									mAdapter.notifyDataSetChanged();
+								}
+							}
+						}
+						tempActionMode.finish();
+						deleteConfirmDialog.dismiss();
+					}
+				};
+				
+				View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
+				{
+
+					@Override
+					public void onClick(View v)
+					{
+						tempActionMode.finish();
+						deleteConfirmDialog.dismiss();
+					}
+				};
+
+				deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+				deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
+				deleteConfirmDialog.show();
+				return true;
 			case R.id.copy_msgs:
 				Collections.sort(selectedMessagesIds);
 				ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
