@@ -644,6 +644,9 @@ public class HikeConstants
 
 	// Picasa URI prefix for creating convMessage
 	public static final String PICASA_PREFIX = "picasaUri:";
+	
+	// Gmail URI prefix for all devices
+	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 
