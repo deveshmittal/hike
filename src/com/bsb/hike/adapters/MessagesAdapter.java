@@ -2284,6 +2284,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		}
 		Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
+		/*
+		 * if action mode is on clicking on an item should select this item
+		 */
+		if (isActionModeOn)
+		{
+			v.performLongClick();
+			return;
+		}
+
 		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
 				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
 		{

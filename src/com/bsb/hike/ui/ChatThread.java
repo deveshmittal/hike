@@ -190,7 +190,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener
 {
 
 	private enum DialogShowing
@@ -1083,6 +1083,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		boolean isMsgSelected = mAdapter.isSelected(position);
 		ConvMessage message = mAdapter.getItem(position);
 		return showMessageContextMenu(message, isMsgSelected);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+	{
+		onItemLongClick(adapterView, view, position, id);
+		return;
 	}
 
 	public boolean showMessageContextMenu(final ConvMessage message, final boolean isMsgSelected)
@@ -5646,6 +5653,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mOptionsList.put(R.id.copy_msgs, true);
 			mOptionsList.put(R.id.cancel_upload_msg, false);
 			mOptionsList.put(R.id.cancel_download_msg, false);
+			// this onItemClick should be unregistered when
+			mConversationsView.setOnItemClickListener(ChatThread.this);
 			return true;
 		}
 
@@ -5653,6 +5662,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		public void onDestroyActionMode(ActionMode mode)
 		{
 			setActionModeOn(false);
+			// removing the on item click listener
+			mConversationsView.setOnItemClickListener(null);
 			mAdapter.removeSelection();
 			mOptionsList.clear();
 			mActionMode = null;
