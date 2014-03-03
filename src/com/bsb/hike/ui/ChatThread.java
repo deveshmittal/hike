@@ -1318,14 +1318,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
-
-				if (Utils.isPicasaUri(filePath))
+				
+				if(filePath == null)
 				{
-					FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 				}
 				else
 				{
-					initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+					if (Utils.isPicasaUri(filePath))
+					{
+						FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+					}
+					else
+					{
+						initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+					}
 				}
 
 				// Making sure the file does not get forwarded again on
