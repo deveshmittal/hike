@@ -5623,6 +5623,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	};
 
+	private void setActionModeOn(boolean isOn)
+	{
+		mAdapter.setActionMode(isOn);
+		mAdapter.notifyDataSetChanged();
+	}
+
 	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback()
 	{
 		private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
@@ -5630,6 +5636,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu)
 		{
+			setActionModeOn(true);
 			mode.getMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
 			selectedNonTextMsgs = 0;
 			selectedNonForwadableMsgs = 0;
@@ -5645,6 +5652,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void onDestroyActionMode(ActionMode mode)
 		{
+			setActionModeOn(false);
 			mAdapter.removeSelection();
 			mOptionsList.clear();
 			mActionMode = null;

@@ -220,6 +220,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private Set<Integer> mSelectedItemsIds;
 
+	private boolean isActionModeOn = false;
+
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -1508,8 +1510,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Listeners
 			holder.overlayBg.setTag(R.string.One, convMessage);
 			holder.overlayBg.setTag(R.string.Two, holder.ftAction);
-			holder.overlayBg.setOnClickListener(buttonClick);
-
+			if (!isActionModeOn)
+			{
+				holder.overlayBg.setEnabled(true);
+				holder.overlayBg.setOnClickListener(buttonClick);
+			}
+			else{
+				holder.overlayBg.setEnabled(false);
+			}
+			
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Message status and time stamp
 			if (convMessage.isSent())
 			{
@@ -1599,7 +1608,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 
 			holder.container.setTag(convMessage);
-			holder.container.setOnClickListener(this);
+			if (!isActionModeOn)
+			{
+				holder.container.setEnabled(true);
+				holder.container.setOnClickListener(this);
+			}
+			else{
+				holder.container.setEnabled(false);
+			}
+			
 
 			boolean showTip = false;
 			boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
@@ -2593,7 +2610,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
-		container.setOnClickListener(this);
+		if (!isActionModeOn)
+		{
+			container.setEnabled(true);
+			container.setOnClickListener(this);
+		}
+		else{
+			container.setEnabled(false);
+		}
 		container.setOnLongClickListener(this);
 
 		/*
