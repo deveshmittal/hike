@@ -7,9 +7,13 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -5701,6 +5705,36 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item)
 		{
+			final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
+			final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
+
+			switch (item.getItemId())
+			{
+			case R.id.copy_msgs:
+				Collections.sort(selectedMessagesIds);
+				ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
+				String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
+				for (int i = 1; i < convMsgs.length; i++)
+				{
+					msgStr += "\n" + mAdapter.getItem(selectedMessagesIds.get(i)).getMessage();
+				}
+				ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+				clipboard.setText(msgStr);
+				break;
+			case R.id.cancel_upload_msg:
+			case R.id.cancel_download_msg:
+				ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				File file = hikeFile.getFile();
+				FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+				mAdapter.notifyDataSetChanged();
+				break;
+			default:
+				mode.finish();
+				return false;
+			}
+			mode.finish();
+			return true;
 		}
 
 		@Override
