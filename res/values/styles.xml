@@ -335,6 +335,7 @@
         <item name="actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
     	<item name="android:windowAnimationStyle">@style/ActivityAnimation</item>
+        <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
     </style>
     
     <style name="ChatThreadTheme" parent="AppTheme">
