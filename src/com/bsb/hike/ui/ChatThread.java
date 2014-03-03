@@ -351,6 +351,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ActionMode mActionMode;
 
+	private int selectedNonTextMsgs = 0;
+
+	private int selectedNonForwadableMsgs = 0;
+
+	private int selectedCancelableMsgs = 0;
+
 	@Override
 	protected void onPause()
 	{
@@ -1107,13 +1113,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (message.isFileTransferMessage())
 		{
+			// File transfer message is a non text message
+			selectedNonTextMsg(isMsgSelected);
+
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			if (!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded())
-			{
-				optionsList.add(getString(R.string.forward));
-			}
-			// TODO : This should also be handled according to state
-			// @GM Completed the above mentioned TODO
 			File file = hikeFile.getFile();
 			FileSavedState fss;
 			if (message.isSent())
@@ -1124,56 +1127,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				fss = FileTransferManager.getInstance(getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
 			}
-			if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING)
+			if (!(!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded()))
 			{
-				optionsList.add(message.isSent() ? getString(R.string.cancel_upload) : getString(R.string.cancel_download));
+				/*
+				 * This message is not downloaded or uplpaded yet. this can't be forwarded
+				 */
+				selectedNonForwadableMsg(isMsgSelected);
+				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING))
+				{
+					/*
+					 * File Transfer is in progress. this can be canceled.
+					 */
+					selectedCancelableMsg(isMsgSelected);
+				}
 			}
 		}
 		else if (message.getMetadata() == null || !message.getMetadata().isPokeMessage())
 		{
-			optionsList.add(getString(R.string.forward));
-			if (!message.isStickerMessage())
+			if (message.isStickerMessage())
 			{
-				optionsList.add(getString(R.string.copy));
+				// Sticker message is a non text message.
+				selectedNonTextMsg(isMsgSelected);
 			}
 		}
 
-		optionsList.add(getString(R.string.delete));
-
-		final String[] options = new String[optionsList.size()];
-		optionsList.toArray(options);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this, R.layout.alert_item, R.id.item, options);
-
-		builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				String option = options[which];
-				if (getString(R.string.forward).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.forward);
-				}
-				else if (getString(R.string.cancel_download).equals(option) || getString(R.string.cancel_upload).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.cancel_file_transfer);
-				}
-				else if (getString(R.string.copy).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.copy);
-				}
-				else if (getString(R.string.delete).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.delete);
-				}
-			}
-		});
-
-		AlertDialog alertDialog = builder.show();
-		alertDialog.getListView().setDivider(getResources().getDrawable(R.drawable.ic_thread_divider_profile));
+		mActionMode.invalidate();
 		return true;
 	}
 
@@ -5653,6 +5631,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		public boolean onCreateActionMode(ActionMode mode, Menu menu)
 		{
 			mode.getMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
+			selectedNonTextMsgs = 0;
+			selectedNonForwadableMsgs = 0;
+			selectedCancelableMsgs = 0;
 			mOptionsList.put(R.id.delete_msgs, true);
 			mOptionsList.put(R.id.forward_msgs, true);
 			mOptionsList.put(R.id.copy_msgs, true);
@@ -5677,6 +5658,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu)
 		{
+			if (selectedNonTextMsgs == 0)
+			{
+				mOptionsList.put(R.id.copy_msgs, true);
+			}
+			else
+			{
+				mOptionsList.put(R.id.copy_msgs, false);
+			}
+			if (selectedNonForwadableMsgs > 0)
+			{
+				mOptionsList.put(R.id.forward_msgs, false);
+			}
+			else
+			{
+				mOptionsList.put(R.id.forward_msgs, true);
+			}
+			if (selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1)
+			{
+				Iterator<Integer> it = mAdapter.getSelectedIds().iterator();
+				ConvMessage currentSelectedMsg = mAdapter.getItem(it.next());
+				mOptionsList.put(currentSelectedMsg.isSent() ? R.id.cancel_upload_msg : R.id.cancel_download_msg, true);
+			}
+			else
+			{
+				mOptionsList.put(R.id.cancel_upload_msg, false);
+				mOptionsList.put(R.id.cancel_download_msg, false);
+			}
+
 			for (int i = 0; i < menu.size(); i++)
 			{
 				MenuItem item = menu.getItem(i);
@@ -5692,4 +5701,40 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return true;
 		}
 	};
+
+	public void selectedNonTextMsg(boolean isMsgSelected)
+	{
+		if (isMsgSelected)
+		{
+			selectedNonTextMsgs++;
+		}
+		else
+		{
+			selectedNonTextMsgs--;
+		}
+	}
+
+	public void selectedNonForwadableMsg(boolean isMsgSelected)
+	{
+		if (isMsgSelected)
+		{
+			selectedNonForwadableMsgs++;
+		}
+		else
+		{
+			selectedNonForwadableMsgs--;
+		}
+	}
+
+	public void selectedCancelableMsg(boolean isMsgSelected)
+	{
+		if (isMsgSelected)
+		{
+			selectedCancelableMsgs++;
+		}
+		else
+		{
+			selectedCancelableMsgs--;
+		}
+	}
 }
