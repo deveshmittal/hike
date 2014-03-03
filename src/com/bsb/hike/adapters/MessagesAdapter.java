@@ -2494,7 +2494,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public boolean onLongClick(View view)
 	{
-		return chatThread.showMessageContextMenu((ConvMessage) view.getTag());
+		return false;
 	}
 
 	@Override

@@ -126,6 +126,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
@@ -347,6 +348,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean showingChatThemePicker;
 
 	private ImageView backgroundImage;
+
+	private ActionMode mActionMode;
 
 	@Override
 	protected void onPause()
@@ -1081,7 +1084,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return false;
 		}
 
-		ArrayList<String> optionsList = new ArrayList<String>();
+		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
+
+		if (hasCheckedItems && mActionMode == null)
+		{
+			// there are some selected items, start the actionMode
+			mActionMode = this.startActionMode(mActionModeCallback);
+		}
+		else if (!hasCheckedItems && mActionMode != null)
+		{
+			// there no selected items, finish the actionMode
+			mActionMode.finish();
+			return true;
+		}
+
+		if (mActionMode != null)
+		{
+			mActionMode.setTitle(String.valueOf(mAdapter.getSelectedCount()));
+		}
 
 		if (message.isFileTransferMessage())
 		{
@@ -5620,6 +5640,53 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					});
 				}
 			}
+		}
+	};
+
+	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback()
+	{
+		private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu)
+		{
+			mode.getMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
+			mOptionsList.put(R.id.delete_msgs, true);
+			mOptionsList.put(R.id.forward_msgs, true);
+			mOptionsList.put(R.id.copy_msgs, true);
+			mOptionsList.put(R.id.cancel_upload_msg, false);
+			mOptionsList.put(R.id.cancel_download_msg, false);
+			return true;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode)
+		{
+			mOptionsList.clear();
+			mActionMode = null;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+		{
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+		{
+			for (int i = 0; i < menu.size(); i++)
+			{
+				MenuItem item = menu.getItem(i);
+				if (mOptionsList.get(item.getItemId()))
+				{
+					item.setVisible(true);
+				}
+				else
+				{
+					item.setVisible(false);
+				}
+			}
+			return true;
 		}
 	};
 }
