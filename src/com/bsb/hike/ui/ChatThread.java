@@ -1073,11 +1073,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
+		mAdapter.toggleSelection(position);
+		boolean isMsgSelected = mAdapter.isSelected(position);
 		ConvMessage message = mAdapter.getItem(position);
-		return showMessageContextMenu(message);
+		return showMessageContextMenu(message, isMsgSelected);
 	}
 
-	public boolean showMessageContextMenu(final ConvMessage message)
+	public boolean showMessageContextMenu(final ConvMessage message, final boolean isMsgSelected)
 	{
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
@@ -5662,6 +5664,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void onDestroyActionMode(ActionMode mode)
 		{
+			mAdapter.removeSelection();
 			mOptionsList.clear();
 			mActionMode = null;
 		}

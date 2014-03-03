@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.json.JSONArray;
 
@@ -216,6 +218,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean isListFlinging;
 
+	private Set<Integer> mSelectedItemsIds;
+
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -229,6 +233,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
 		this.chatTheme = ChatTheme.DEFAULT;
+		this.mSelectedItemsIds = new HashSet<Integer>();
 		setLastSentMessagePosition();
 	}
 
@@ -3121,5 +3126,50 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public IconLoader getIconImageLoader()
 	{
 		return iconLoader;
+	}
+
+	public void toggleSelection(int position)
+	{
+		selectView(position, !isSelected(position));
+	}
+
+	public void removeSelection()
+	{
+		mSelectedItemsIds.clear();
+		notifyDataSetChanged();
+	}
+
+	public void selectView(int position, boolean value)
+	{
+		if (value)
+		{
+			mSelectedItemsIds.add(position);
+		}
+		else
+		{
+			mSelectedItemsIds.remove(position);
+		}
+
+		notifyDataSetChanged();
+	}
+
+	public int getSelectedCount()
+	{
+		return mSelectedItemsIds.size();
+	}
+
+	public Set<Integer> getSelectedIds()
+	{
+		return mSelectedItemsIds;
+	}
+
+	public boolean isSelected(int position)
+	{
+		return mSelectedItemsIds.contains(position);
+	}
+
+	public void setActionMode(boolean isOn)
+	{
+		isActionModeOn = isOn;
 	}
 }
