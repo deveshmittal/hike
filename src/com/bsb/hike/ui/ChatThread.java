@@ -1156,13 +1156,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
-		else if (message.getMetadata() == null || !message.getMetadata().isPokeMessage())
+		else if (message.getMetadata()!=null && message.getMetadata().isPokeMessage())
 		{
-			if (message.isStickerMessage())
-			{
-				// Sticker message is a non text message.
-				selectedNonTextMsg(isMsgSelected);
-			}
+			// Poke message can only be deleted
+			selectedNonTextMsg(isMsgSelected);
+			selectedNonForwadableMsg(isMsgSelected);
+		}
+		else if (message.isStickerMessage())
+		{
+			// Sticker message is a non text message.
+			selectedNonTextMsg(isMsgSelected);
 		}
 
 		mActionMode.invalidate();
