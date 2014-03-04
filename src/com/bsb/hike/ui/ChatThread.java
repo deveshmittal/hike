@@ -1346,48 +1346,91 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.FILE_PATH);
 			}
-			else if (intent.hasExtra(HikeConstants.Extras.LATITUDE))
-			{
-				String fileKey = null;
-				double latitude = intent.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
-				double longitude = intent.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
-				int zoomLevel = intent.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
 
-				initialiseLocationTransfer(latitude, longitude, zoomLevel);
-				// Making sure the file does not get forwarded again on
-				// orientation change.
-				intent.removeExtra(HikeConstants.Extras.LATITUDE);
-			}
-			else if (intent.hasExtra(HikeConstants.Extras.CONTACT_METADATA))
+			else if (intent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 			{
+				String jsonString = intent.getStringExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 				try
 				{
-					JSONObject contactJson = new JSONObject(intent.getStringExtra(HikeConstants.Extras.CONTACT_METADATA));
-					HikeFile hikeFile = new HikeFile(contactJson);
-					showContactDetails(Utils.getContactDataFromHikeFile(hikeFile), hikeFile.getDisplayName(), contactJson, false);
+					JSONArray multipleMsgFwdArray = new JSONArray(jsonString);
+					int msgCount = multipleMsgFwdArray.length();
+					for (int i = 0; i < msgCount; i++)
+					{
+						JSONObject msgExtrasJson = (JSONObject) multipleMsgFwdArray.get(i);
+						if (msgExtrasJson.has(HikeConstants.Extras.MSG))
+						{
+							String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
+							ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, msg, isConversationOnHike());
+							sendMessage(convMessage);
+						}
+						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
+						{
+							String fileKey = null;
+							String filePath = msgExtrasJson.getString(HikeConstants.Extras.FILE_PATH);
+							String fileType = msgExtrasJson.getString(HikeConstants.Extras.FILE_TYPE);
+
+							boolean isRecording = false;
+							long recordingDuration = -1;
+							if (msgExtrasJson.has(HikeConstants.Extras.RECORDING_TIME))
+							{
+								recordingDuration = msgExtrasJson.getLong(HikeConstants.Extras.RECORDING_TIME);
+								isRecording = true;
+								fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
+							}
+
+							HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
+
+							if (Utils.isPicasaUri(filePath))
+							{
+								FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+							}
+							else
+							{
+								initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+							}
+						}
+						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE) && msgExtrasJson.has(HikeConstants.Extras.ZOOM_LEVEL))
+						{
+							String fileKey = null;
+							double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
+							double longitude = msgExtrasJson.getDouble(HikeConstants.Extras.LONGITUDE);
+							int zoomLevel = msgExtrasJson.getInt(HikeConstants.Extras.ZOOM_LEVEL);
+							initialiseLocationTransfer(latitude, longitude, zoomLevel);
+						}
+						else if (msgExtrasJson.has(HikeConstants.Extras.CONTACT_METADATA))
+						{
+							try
+							{
+								JSONObject contactJson = new JSONObject(msgExtrasJson.getString(HikeConstants.Extras.CONTACT_METADATA));
+								HikeFile hikeFile = new HikeFile(contactJson);
+								initialiseContactTransfer(contactJson);
+							}
+							catch (JSONException e)
+							{
+								e.printStackTrace();
+							}
+						}
+						else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
+						{
+							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
+							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
+							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
+							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
+							sendSticker(sticker);
+							// add this sticker to recents
+							StickerManager.getInstance().addRecentSticker(sticker);
+						}
+						/*
+						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
+						 */
+					}
 				}
 				catch (JSONException e)
 				{
-					e.printStackTrace();
+					Log.e(getClass().getSimpleName(), "Invalid JSON Array", e);
 				}
+				intent.removeExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 			}
-			else if (intent.hasExtra(StickerManager.FWD_CATEGORY_ID))
-			{
-				String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
-				String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
-				int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
-				Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
-				sendSticker(sticker);
-				// add this sticker to recents
-				StickerManager.getInstance().addRecentSticker(sticker);
-				/*
-				 * Making sure the sticker is not forwarded again on orientation change
-				 */
-				intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
-			}
-			/*
-			 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
-			 */
 			else
 			{
 				String message = getSharedPreferences(HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(mContactNumber, "");
@@ -5708,7 +5751,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
 			final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
-
+			ConvMessage[] convMsgs;
 			switch (item.getItemId())
 			{
 			case R.id.delete_msgs:
@@ -5765,9 +5808,79 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
 				deleteConfirmDialog.show();
 				return true;
+			case R.id.forward_msgs:
+				Collections.sort(selectedMessagesIds);
+				convMsgs = new ConvMessage[selectedMessagesIds.size()];
+
+				Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
+				Intent intent = new Intent(ChatThread.this, ComposeActivity.class);
+				String msg;
+				intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+				JSONArray multipleMsgArray = new JSONArray();
+				try
+				{
+					for (int i = 0; i < convMsgs.length; i++)
+					{
+						ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
+						
+						JSONObject multiMsgFwdObject = new JSONObject();
+						if (message.isFileTransferMessage())
+						{
+							HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+							if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+							{
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+							}
+							else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+							{
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
+							}
+							else
+							{
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+								if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+								{
+									multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+								}
+							}
+						}
+						else if (message.isStickerMessage())
+						{
+							Sticker sticker = message.getMetadata().getSticker();
+							/*
+							 * If the category is an unknown one, we have the id saved in the json.
+							 */
+							String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ? message.getMetadata().getUnknownStickerCategory() : sticker
+									.getCategory().categoryId.name();
+							multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+							multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
+							multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
+						}
+						else
+						{
+							msg = message.getMessage();
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, msg);
+						}
+						multipleMsgArray.put(multiMsgFwdObject);
+					}
+				}
+				catch (JSONException e)
+				{
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+				intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+				intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
+				intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
+				startActivity(intent);
+
+				break;
 			case R.id.copy_msgs:
 				Collections.sort(selectedMessagesIds);
-				ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
+				convMsgs = new ConvMessage[selectedMessagesIds.size()];
 				String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
 				for (int i = 1; i < convMsgs.length; i++)
 				{
