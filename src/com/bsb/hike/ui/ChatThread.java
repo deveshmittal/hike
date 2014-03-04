@@ -354,8 +354,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ImageView backgroundImage;
 
-	private ActionMode mActionMode;
-
 	private int selectedNonTextMsgs = 0;
 
 	private int selectedNonForwadableMsgs = 0;
@@ -363,6 +361,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int selectedCancelableMsgs = 0;
 
 	private boolean onTouchActionDownCalled = false;
+	
+	private boolean isActionModeOn = false;
+	
+	private TextView mActionModeTitle;
+	
+	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
 
 	@Override
 	protected void onPause()
@@ -815,7 +819,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
-		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
+		getSupportMenuInflater().inflate( isActionModeOn?R.menu.multi_select_chat_menu:R.menu.chat_thread_menu, menu);
 		mMenu = menu;
 		return true;
 	}
@@ -826,6 +830,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation == null || showingChatThemePicker)
 		{
 			return super.onPrepareOptionsMenu(menu);
+		}
+		if(isActionModeOn)
+		{
+			return onPrepareActionMode(menu);
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -857,6 +865,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				return false;
 			}
+		}
+		
+		if(isActionModeOn){
+			return onActionModeItemClicked(item);
 		}
 
 		switch (item.getItemId())
@@ -1108,21 +1120,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
 
-		if (hasCheckedItems && mActionMode == null)
+		if (hasCheckedItems && !isActionModeOn)
 		{
 			// there are some selected items, start the actionMode
-			mActionMode = this.startActionMode(mActionModeCallback);
+			setupActionModeActionBar();
 		}
-		else if (!hasCheckedItems && mActionMode != null)
+		else if (!hasCheckedItems && isActionModeOn)
 		{
 			// there no selected items, finish the actionMode
-			mActionMode.finish();
+			destroyActionMode();
 			return true;
 		}
 
-		if (mActionMode != null)
+		if (isActionModeOn)
 		{
-			mActionMode.setTitle(String.valueOf(mAdapter.getSelectedCount()));
+			setActionModeTitle(mAdapter.getSelectedCount());
 		}
 
 		if (message.isFileTransferMessage())
@@ -1168,7 +1180,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			selectedNonTextMsg(isMsgSelected);
 		}
 
-		mActionMode.invalidate();
+		invalidateOptionsMenu();
 		return true;
 	}
 
@@ -5373,7 +5385,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onDoubleTap(MotionEvent e)
 		{
-			if (mActionMode != null)
+			if (isActionModeOn)
 			{
 				return false;
 			}
@@ -5712,248 +5724,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setActionModeOn(boolean isOn)
 	{
+		isActionModeOn = isOn;
 		mAdapter.setActionMode(isOn);
 		mAdapter.notifyDataSetChanged();
 	}
-
-	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback()
-	{
-		private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
-
-		@Override
-		public boolean onCreateActionMode(ActionMode mode, Menu menu)
-		{
-			setActionModeOn(true);
-			mode.getMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
-			selectedNonTextMsgs = 0;
-			selectedNonForwadableMsgs = 0;
-			selectedCancelableMsgs = 0;
-			mOptionsList.put(R.id.delete_msgs, true);
-			mOptionsList.put(R.id.forward_msgs, true);
-			mOptionsList.put(R.id.copy_msgs, true);
-			mOptionsList.put(R.id.cancel_upload_msg, false);
-			mOptionsList.put(R.id.cancel_download_msg, false);
-			// this onItemClick should be unregistered when
-			mConversationsView.setOnItemClickListener(ChatThread.this);
-			return true;
-		}
-
-		@Override
-		public void onDestroyActionMode(ActionMode mode)
-		{
-			setActionModeOn(false);
-			// removing the on item click listener
-			mConversationsView.setOnItemClickListener(null);
-			mAdapter.removeSelection();
-			mOptionsList.clear();
-			mActionMode = null;
-		}
-
-		@Override
-		public boolean onActionItemClicked(ActionMode mode, MenuItem item)
-		{
-			final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
-			final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
-			ConvMessage[] convMsgs;
-			switch (item.getItemId())
-			{
-			case R.id.delete_msgs:
-				final ActionMode tempActionMode = mode;
-				final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
-				if(mAdapter.getSelectedCount() == 1){
-					deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
-					deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
-				} else{
-					deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
-					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, mAdapter.getSelectedCount()));
-				}
-				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-				{
-
-					@Override
-					public void onClick(View v)
-					{
-						Collections.sort(selectedMessagesIds);
-						ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
-						for (int i = convMsgs.length - 1; i >= 0; i--)
-						{
-							convMsgs[i] = mAdapter.getItem(selectedMessagesIds.get(i));
-							removeMessage(convMsgs[i]);
-							if (convMsgs[i].isFileTransferMessage())
-							{
-								if (convMsgs[i].isFileTransferMessage())
-								{
-									// @GM cancelTask has been changed
-									HikeFile hikeFile = convMsgs[i].getMetadata().getHikeFiles().get(0);
-									File file = hikeFile.getFile();
-									FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMsgs[i].getMsgID(), file, convMsgs[i].isSent());
-									mAdapter.notifyDataSetChanged();
-								}
-							}
-						}
-						tempActionMode.finish();
-						deleteConfirmDialog.dismiss();
-					}
-				};
-				
-				View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
-				{
-
-					@Override
-					public void onClick(View v)
-					{
-						tempActionMode.finish();
-						deleteConfirmDialog.dismiss();
-					}
-				};
-
-				deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-				deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
-				deleteConfirmDialog.show();
-				return true;
-			case R.id.forward_msgs:
-				Collections.sort(selectedMessagesIds);
-				convMsgs = new ConvMessage[selectedMessagesIds.size()];
-
-				Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
-				Intent intent = new Intent(ChatThread.this, ComposeActivity.class);
-				String msg;
-				intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
-				JSONArray multipleMsgArray = new JSONArray();
-				try
-				{
-					for (int i = 0; i < convMsgs.length; i++)
-					{
-						ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
-						
-						JSONObject multiMsgFwdObject = new JSONObject();
-						if (message.isFileTransferMessage())
-						{
-							HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
-							if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
-							{
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
-							}
-							else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-							{
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
-							}
-							else
-							{
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
-								if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-								{
-									multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
-								}
-							}
-						}
-						else if (message.isStickerMessage())
-						{
-							Sticker sticker = message.getMetadata().getSticker();
-							/*
-							 * If the category is an unknown one, we have the id saved in the json.
-							 */
-							String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ? message.getMetadata().getUnknownStickerCategory() : sticker
-									.getCategory().categoryId.name();
-							multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
-							multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
-							multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
-						}
-						else
-						{
-							msg = message.getMessage();
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, msg);
-						}
-						multipleMsgArray.put(multiMsgFwdObject);
-					}
-				}
-				catch (JSONException e)
-				{
-					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-				}
-				intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
-				intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
-				intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
-				startActivity(intent);
-
-				break;
-			case R.id.copy_msgs:
-				Collections.sort(selectedMessagesIds);
-				convMsgs = new ConvMessage[selectedMessagesIds.size()];
-				String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
-				for (int i = 1; i < convMsgs.length; i++)
-				{
-					msgStr += "\n" + mAdapter.getItem(selectedMessagesIds.get(i)).getMessage();
-				}
-				ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-				clipboard.setText(msgStr);
-				break;
-			case R.id.cancel_upload_msg:
-			case R.id.cancel_download_msg:
-				ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
-				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				File file = hikeFile.getFile();
-				FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
-				mAdapter.notifyDataSetChanged();
-				break;
-			default:
-				mode.finish();
-				return false;
-			}
-			mode.finish();
-			return true;
-		}
-
-		@Override
-		public boolean onPrepareActionMode(ActionMode mode, Menu menu)
-		{
-			if (selectedNonTextMsgs == 0)
-			{
-				mOptionsList.put(R.id.copy_msgs, true);
-			}
-			else
-			{
-				mOptionsList.put(R.id.copy_msgs, false);
-			}
-			if (selectedNonForwadableMsgs > 0)
-			{
-				mOptionsList.put(R.id.forward_msgs, false);
-			}
-			else
-			{
-				mOptionsList.put(R.id.forward_msgs, true);
-			}
-			if (selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1)
-			{
-				Iterator<Integer> it = mAdapter.getSelectedIds().iterator();
-				ConvMessage currentSelectedMsg = mAdapter.getItem(it.next());
-				mOptionsList.put(currentSelectedMsg.isSent() ? R.id.cancel_upload_msg : R.id.cancel_download_msg, true);
-			}
-			else
-			{
-				mOptionsList.put(R.id.cancel_upload_msg, false);
-				mOptionsList.put(R.id.cancel_download_msg, false);
-			}
-
-			for (int i = 0; i < menu.size(); i++)
-			{
-				MenuItem item = menu.getItem(i);
-				if (mOptionsList.get(item.getItemId()))
-				{
-					item.setVisible(true);
-				}
-				else
-				{
-					item.setVisible(false);
-				}
-			}
-			return true;
-		}
-	};
 
 	public void selectedNonTextMsg(boolean isMsgSelected)
 	{
@@ -5990,4 +5764,271 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			selectedCancelableMsgs--;
 		}
 	}
+	
+	private void setupActionModeActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.action_mode_action_bar, null);
+
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		mActionModeTitle = (TextView) actionBarView.findViewById(R.id.title);
+		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				destroyActionMode();
+			}
+		});
+		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+
+		initializeActionMode();
+	}
+	
+	private void setActionModeTitle(int count)
+	{
+		if(mActionModeTitle != null)
+		{
+			mActionModeTitle.setText(getString(R.string.selected_count, count));
+		}
+	}
+	
+	public boolean onPrepareActionMode(Menu menu)
+	{
+		if (selectedNonTextMsgs == 0)
+		{
+			mOptionsList.put(R.id.copy_msgs, true);
+		}
+		else
+		{
+			mOptionsList.put(R.id.copy_msgs, false);
+		}
+		if (selectedNonForwadableMsgs > 0)
+		{
+			mOptionsList.put(R.id.forward_msgs, false);
+		}
+		else
+		{
+			mOptionsList.put(R.id.forward_msgs, true);
+		}
+		if (selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1)
+		{
+			Iterator<Integer> it = mAdapter.getSelectedIds().iterator();
+			ConvMessage currentSelectedMsg = mAdapter.getItem(it.next());
+			mOptionsList.put(currentSelectedMsg.isSent() ? R.id.cancel_upload_msg : R.id.cancel_download_msg, true);
+		}
+		else
+		{
+			mOptionsList.put(R.id.cancel_upload_msg, false);
+			mOptionsList.put(R.id.cancel_download_msg, false);
+		}
+
+		for (int i = 0; i < menu.size(); i++)
+		{
+			MenuItem item = menu.getItem(i);
+			if (mOptionsList.get(item.getItemId()))
+			{
+				item.setVisible(true);
+			}
+			else
+			{
+				item.setVisible(false);
+			}
+		}
+		return true;
+	}
+
+	public boolean initializeActionMode()
+	{
+		setActionModeOn(true);
+		selectedNonTextMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedCancelableMsgs = 0;
+		mOptionsList.put(R.id.delete_msgs, true);
+		mOptionsList.put(R.id.forward_msgs, true);
+		mOptionsList.put(R.id.copy_msgs, true);
+		mOptionsList.put(R.id.cancel_upload_msg, false);
+		mOptionsList.put(R.id.cancel_download_msg, false);
+		// this onItemClick should be unregistered when
+		mConversationsView.setOnItemClickListener(ChatThread.this);
+		return true;
+	}
+	
+	private void destroyActionMode(){
+		setActionModeOn(false);
+		// removing the on item click listener
+		mConversationsView.setOnItemClickListener(null);
+		mAdapter.removeSelection();
+		mOptionsList.clear();
+		setupActionBar(false);
+		invalidateOptionsMenu();
+	}
+	
+	public boolean onActionModeItemClicked(MenuItem item)
+	{
+		final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
+		final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
+		ConvMessage[] convMsgs;
+		switch (item.getItemId())
+		{
+		case R.id.delete_msgs:
+			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
+			if(mAdapter.getSelectedCount() == 1){
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
+				deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
+			} else{
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
+				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, mAdapter.getSelectedCount()));
+			}
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					Collections.sort(selectedMessagesIds);
+					ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
+					for (int i = convMsgs.length - 1; i >= 0; i--)
+					{
+						convMsgs[i] = mAdapter.getItem(selectedMessagesIds.get(i));
+						removeMessage(convMsgs[i]);
+						if (convMsgs[i].isFileTransferMessage())
+						{
+							if (convMsgs[i].isFileTransferMessage())
+							{
+								// @GM cancelTask has been changed
+								HikeFile hikeFile = convMsgs[i].getMetadata().getHikeFiles().get(0);
+								File file = hikeFile.getFile();
+								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMsgs[i].getMsgID(), file, convMsgs[i].isSent());
+								mAdapter.notifyDataSetChanged();
+							}
+						}
+					}
+					destroyActionMode();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+			
+			View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					destroyActionMode();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+
+			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
+			deleteConfirmDialog.show();
+			return true;
+		case R.id.forward_msgs:
+			Collections.sort(selectedMessagesIds);
+			convMsgs = new ConvMessage[selectedMessagesIds.size()];
+
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
+			Intent intent = new Intent(ChatThread.this, ComposeActivity.class);
+			String msg;
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+			JSONArray multipleMsgArray = new JSONArray();
+			try
+			{
+				for (int i = 0; i < convMsgs.length; i++)
+				{
+					ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
+					
+					JSONObject multiMsgFwdObject = new JSONObject();
+					if (message.isFileTransferMessage())
+					{
+						HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+						if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+						}
+						else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
+						}
+						else
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+							if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+							{
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+							}
+						}
+					}
+					else if (message.isStickerMessage())
+					{
+						Sticker sticker = message.getMetadata().getSticker();
+						/*
+						 * If the category is an unknown one, we have the id saved in the json.
+						 */
+						String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ? message.getMetadata().getUnknownStickerCategory() : sticker
+								.getCategory().categoryId.name();
+						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
+						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
+					}
+					else
+					{
+						msg = message.getMessage();
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, msg);
+					}
+					multipleMsgArray.put(multiMsgFwdObject);
+				}
+			}
+			catch (JSONException e)
+			{
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
+			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
+			startActivity(intent);
+
+			break;
+		case R.id.copy_msgs:
+			Collections.sort(selectedMessagesIds);
+			convMsgs = new ConvMessage[selectedMessagesIds.size()];
+			String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
+			for (int i = 1; i < convMsgs.length; i++)
+			{
+				msgStr += "\n" + mAdapter.getItem(selectedMessagesIds.get(i)).getMessage();
+			}
+			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+			clipboard.setText(msgStr);
+			break;
+		case R.id.cancel_upload_msg:
+		case R.id.cancel_download_msg:
+			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+			mAdapter.notifyDataSetChanged();
+			break;
+		default:
+			destroyActionMode();
+			return false;
+		}
+		destroyActionMode();
+		return true;
+	}
+
 }
