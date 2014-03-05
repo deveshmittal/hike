@@ -371,7 +371,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.STATUS_MESSAGE;
 		}
-		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO || convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.PARTICIPANT_INFO;
 		}
@@ -1894,6 +1894,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						: R.drawable.ic_change_theme_custom);
 
 				((ViewGroup) holder.container).addView(mainMessage);
+			}
+			else if (convMessage.getUnreadCount() > 0)
+			{
+				TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
+				participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
+				((ViewGroup) holder.container).addView(participantInfo);
 			}
 			return v;
 		}

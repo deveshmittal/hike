@@ -1569,6 +1569,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
 		}
+		
+		if(mConversation.getUnreadCount() > 0)
+		{
+			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
+			messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		mConversationsView.setAdapter(mAdapter);
