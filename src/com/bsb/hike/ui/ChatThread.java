@@ -929,6 +929,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_conversation), 3));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
+		
+		optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 5));
 
 		dismissPopupWindow();
 
@@ -1001,6 +1003,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 4:
 					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(ChatThread.this, mConversation);
+					break;
+				case 5:
+					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
 					break;
 				}
 
