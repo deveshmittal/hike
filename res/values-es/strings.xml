@@ -174,7 +174,7 @@
 	<string name="social_unlinking">Desvinculando cuenta...</string>
 	<string name="contact_selected_already">Este número ya está en el grupo.</string>
 	<string name="share_file_message">¡Hola! Acabo de enviarte un archivo por hike: %1$s</string>
-	<string name="max_file_size">Tamaño máx. del archivo: 25 MB</string>
+	<string name="max_file_size">Tamaño máx. del archivo: 100 MB</string>
 	<string name="unable_to_read">Error al leer el archivo</string>
 	<string name="share_location">Compartir ubicación</string>
 	<string name="group_mute">Conversación silenciada</string>

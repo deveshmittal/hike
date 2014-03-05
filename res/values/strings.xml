@@ -175,7 +175,7 @@
 	<string name="social_unlinking">Unlinking account...</string>
 	<string name="contact_selected_already">This number is already in the group.</string>
 	<string name="share_file_message">Hey! I just sent you a file through hike: %1$s</string>
-	<string name="max_file_size">Max file size can be 25 MB</string>
+	<string name="max_file_size">Max file size can be 100 MB</string>
 	<string name="unable_to_read">Unable to read file</string>
 	<string name="share_location">Select Location</string>
 	<string name="group_mute">This conversation is muted.</string>

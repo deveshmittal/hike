@@ -174,7 +174,7 @@
 	<string name="social_unlinking">Отвязка аккаунта...</string>
 	<string name="contact_selected_already">Этот номер уже есть в группе.</string>
 	<string name="share_file_message">Я только что отправил тебе файл через hike: %1$s</string>
-	<string name="max_file_size">Макс. размер файла: 25 МБ</string>
+	<string name="max_file_size">Макс. размер файла: 100 МБ</string>
 	<string name="unable_to_read">Невозможно прочесть файл</string>
 	<string name="share_location">Расположение</string>
 	<string name="group_mute">Разговор без уведомлений</string>
