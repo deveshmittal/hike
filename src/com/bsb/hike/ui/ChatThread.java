@@ -1326,18 +1326,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
 				}
 
-				HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
-
-				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
-
-				if (Utils.isPicasaUri(filePath))
-				{
-					FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
-				}
-				else
-				{
-					initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
-				}
+				initiateFileTransferFromIntentData(fileType, filePath, isRecording, recordingDuration);
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
@@ -1402,6 +1391,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Log.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
 			closeContextMenu();
 		}
+	}
+
+	private void initiateFileTransferFromIntentData(String fileType, String filePath)
+	{
+		initiateFileTransferFromIntentData(fileType, filePath, false, -1);
+	}
+
+	private void initiateFileTransferFromIntentData(String fileType, String filePath, boolean isRecording, long recordingDuration)
+	{
+		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
+
+		Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
+
+		if (Utils.isPicasaUri(filePath))
+		{
+			FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+		}
+		else
+		{
+			initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+		}
+
 	}
 
 	private void inviteUser()
