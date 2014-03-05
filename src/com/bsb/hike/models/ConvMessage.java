@@ -61,6 +61,7 @@ public class ConvMessage
 
 	private boolean shouldShowPush = true;
 
+	private int unreadCount = 0;
 	// private boolean showResumeButton = true;
 
 	public boolean isInvite()
@@ -179,6 +180,12 @@ public class ConvMessage
 		}
 	}
 
+	public ConvMessage(int unreadCount, long timestamp)
+	{
+		this.unreadCount = unreadCount;
+		this.mTimestamp = timestamp;
+	}
+	
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -655,6 +662,11 @@ public class ConvMessage
 	public long getMappedMsgID()
 	{
 		return mappedMsgId;
+	}
+	
+	public int getUnreadCount()
+	{
+		return unreadCount;
 	}
 
 	public static State stateValue(int val)

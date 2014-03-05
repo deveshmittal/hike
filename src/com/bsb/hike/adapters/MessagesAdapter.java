@@ -167,6 +167,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ImageView audRecIC;
 
 		TextView fileType;
+		
+		TextView fileSize;
 
 		TextView recDuration;
 
@@ -378,7 +380,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.STATUS_MESSAGE;
 		}
-		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO || convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.PARTICIPANT_INFO;
 		}
@@ -405,7 +407,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return ViewType.values().length;
 	}
 
-	View.OnClickListener buttonClick = new OnClickListener()
+	View.OnClickListener fileClick = new OnClickListener()
 	{
 
 		@Override
@@ -431,7 +433,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Log.d("Upload- button pressed", fss.getFTState().toString());
 
 					// If the file is complete or has not started yet overlay should not be in action
-					if (fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED)
+					if (fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
 						return;
 
 					if (fss.getFTState() == FTState.IN_PROGRESS)
@@ -439,7 +441,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-
 					else
 					{
 						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
@@ -459,7 +460,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Log.d("Download- button pressed", fss.getFTState().toString());
 
 					// If the file is complete or has not started yet overlay should not be in action
-					if (fss.getFTState() == FTState.COMPLETED)
+					if (fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
 						return;
 
 					if (fss.getFTState() == FTState.IN_PROGRESS)
@@ -467,7 +468,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-
 					else
 					{
 						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
@@ -582,6 +582,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				// holder.fileIcon = (ImageView) v.findViewById(R.id.file_ic);
 				holder.fileType = (TextView) v.findViewById(R.id.file_type);
+				holder.fileSize = (TextView) v.findViewById(R.id.file_size);
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
 				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
@@ -1316,24 +1317,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							holder.ftAction.setImageResource(R.drawable.ic_download_file);
 							holder.ftAction.setVisibility(View.VISIBLE);
 						}
-						if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-							holder.fileType.setText(R.string.recording);
-						else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO)
-							holder.fileType.setText(R.string.audio);
-						else if (hikeFile.getHikeFileType() == HikeFileType.VIDEO)
-							holder.fileType.setText(R.string.video);
-						else if (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
-							holder.fileType.setText(R.string.photo);
-						else
-							holder.fileType.setText("File");
-						holder.fileType.setVisibility(View.VISIBLE);
-						// holder.fileThumb.setScaleType(ScaleType.CENTER);
 					}
 					break;
 				case INITIALIZED:
-					holder.wating.setVisibility(View.VISIBLE);
-					holder.ftAction.setBackgroundResource(0);
-					holder.ftAction.setVisibility(View.INVISIBLE);
 					break;
 				case IN_PROGRESS:
 					holder.ftAction.setBackgroundResource(0);
@@ -1391,8 +1377,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 						break;
 					case INITIALIZED:
-						setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
-						holder.fileType.setVisibility(View.VISIBLE);
+						showTransferInitialization(holder, hikeFile);
+//						setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
+//						holder.fileType.setVisibility(View.VISIBLE);
 						break;
 					case ERROR:
 						Log.d(getClass().getSimpleName(), "error display");
@@ -1401,39 +1388,41 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// break;
 					case PAUSING:
 					case PAUSED:
-						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
-						int progUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("");
-						else
-							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
-						holder.barProgress.stopAnimation();
-						holder.barProgress.setProgress(progress + progUpdate);
-						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setVisibility(View.VISIBLE);
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+//						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+//						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
+//						int progUpdate = 0;
+//						if (fss.getTotalSize() > 0)
+//							progUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
+//						if (fss.getTotalSize() <= 0)
+//							holder.dataTransferred.setText("");
+//						else
+//							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+//						holder.barProgress.stopAnimation();
+//						holder.barProgress.setProgress(progress + progUpdate);
+//						holder.dataTransferred.setVisibility(View.VISIBLE);
+//						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					case IN_PROGRESS:
-						int currentProgress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						int currentChunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
-						int progressUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progressUpdate = (int) ((currentChunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("");
-						else
-						{
-							if (fss.getTransferredSize() == 0)
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-							else
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
-
-							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
-						}
-						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setVisibility(View.VISIBLE);
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+//						int currentProgress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+//						int currentChunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
+//						int progressUpdate = 0;
+//						if (fss.getTotalSize() > 0)
+//							progressUpdate = (int) ((currentChunkSize * 100) / fss.getTotalSize());
+//						if (fss.getTotalSize() <= 0)
+//							holder.dataTransferred.setText("");
+//						else
+//						{
+//							if (fss.getTransferredSize() == 0)
+//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+//							else
+//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+//
+//							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
+//						}
+//						holder.dataTransferred.setVisibility(View.VISIBLE);
+//						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					default:
 					}
@@ -1445,47 +1434,51 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					switch (fss.getFTState())
 					{
 					case INITIALIZED:
-						setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
-						holder.fileType.setVisibility(View.VISIBLE);
+						showTransferInitialization(holder, hikeFile);
+//						setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
+//						holder.fileType.setVisibility(View.VISIBLE);
 						break;
 					case PAUSING:
 					case PAUSED:
 					case ERROR:
-						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
-						int progUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("");
-						else
-							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
-						holder.barProgress.stopAnimation();
-						holder.barProgress.setProgress(progress + progUpdate);
-						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setVisibility(View.VISIBLE);
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+//						int progress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+//						int chunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
+//						int progUpdate = 0;
+//						if (fss.getTotalSize() > 0)
+//							progUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
+//						if (fss.getTotalSize() <= 0)
+//							holder.dataTransferred.setText("");
+//						else
+//							holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+//						holder.barProgress.stopAnimation();
+//						holder.barProgress.setProgress(progress + progUpdate);
+//						holder.dataTransferred.setVisibility(View.VISIBLE);
+//						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					case IN_PROGRESS:
-						int currentProgress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
-						int currentChunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
-						int progressUpdate = 0;
-						if (fss.getTotalSize() > 0)
-							progressUpdate = (int) ((currentChunkSize * 100) / fss.getTotalSize());
-						if (fss.getTotalSize() <= 0)
-							holder.dataTransferred.setText("");
-						else
-						{
-							if (fss.getTransferredSize() == 0)
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
-							else
-								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
-
-							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
-						}
-						holder.dataTransferred.setVisibility(View.VISIBLE);
-						holder.barProgress.setVisibility(View.VISIBLE);
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+//						int currentProgress = FileTransferManager.getInstance(context).getFTProgress(convMessage.getMsgID(), file, convMessage.isSent());
+//						int currentChunkSize = FileTransferManager.getInstance(context).getChunkSize(convMessage.getMsgID());
+//						int progressUpdate = 0;
+//						if (fss.getTotalSize() > 0)
+//							progressUpdate = (int) ((currentChunkSize * 100) / fss.getTotalSize());
+//						if (fss.getTotalSize() <= 0)
+//							holder.dataTransferred.setText("");
+//						else
+//						{
+//							if (fss.getTransferredSize() == 0)
+//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize() + currentChunkSize) + "/" + dataDisplay(fss.getTotalSize()));
+//							else
+//								holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+//
+//							holder.barProgress.setAnimatedProgress(currentProgress, currentProgress + progressUpdate, 6000, convMessage.getMsgID());
+//						}
+//						holder.dataTransferred.setVisibility(View.VISIBLE);
+//						holder.barProgress.setVisibility(View.VISIBLE);
 						break;
 					case NOT_STARTED:
+						showFileDetails(holder, hikeFile);
 					case CANCELLED:
 					case COMPLETED:
 					default:
@@ -1513,7 +1506,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (!isActionModeOn)
 			{
 				holder.overlayBg.setEnabled(true);
-				holder.overlayBg.setOnClickListener(buttonClick);
+				holder.overlayBg.setOnClickListener(fileClick);
 			}
 			else{
 				holder.overlayBg.setEnabled(false);
@@ -1917,6 +1910,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			}
+			else if (convMessage.getUnreadCount() > 0)
+			{
+				TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
+				participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
+				((ViewGroup) holder.container).addView(participantInfo);
+			}
 			return v;
 		}
 
@@ -1977,7 +1976,58 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else
 			return (Integer.toString(bytes) + " B");
 	}
-
+	
+	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile)
+	{
+		showFileDetails(holder, hikeFile);
+		holder.wating.setVisibility(View.VISIBLE);
+		holder.ftAction.setBackgroundResource(0);
+		holder.ftAction.setVisibility(View.INVISIBLE);
+	}
+	
+	private void showFileDetails(ViewHolder holder, HikeFile hikeFile)
+	{
+		if(holder.fileType != null)
+		{
+			setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
+			holder.fileType.setVisibility(View.VISIBLE);
+		}
+		if(holder.fileSize != null && hikeFile.getFileSize() > 0)
+		{
+			holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+			holder.fileSize.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	private void showTransferProgress(ViewHolder holder, FileSavedState fss, long msgId, HikeFile hikeFile, boolean isSent)
+	{
+		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
+		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
+		int progressUpdate = 0;
+		if (fss.getTotalSize() > 0)
+			progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
+		
+		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
+		{
+			showTransferInitialization(holder, hikeFile);
+			holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
+		}
+		else
+		{
+			if (fss.getTransferredSize() == 0)
+			{
+				showFileDetails(holder, hikeFile);
+			}
+			else
+			{
+				holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+				holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
+				holder.dataTransferred.setVisibility(View.VISIBLE);
+				holder.barProgress.setVisibility(View.VISIBLE);
+			}
+		}
+	}
+	
 	private void setFileTypeText(TextView fileType, HikeFileType hikeFileType)
 	{
 		if (hikeFileType == HikeFileType.AUDIO_RECORDING)

@@ -174,7 +174,7 @@
 	<string name="social_unlinking">Désassociation du compte</string>
 	<string name="contact_selected_already">Ce numéro figure déjà dans le groupe.</string>
 	<string name="share_file_message">Je viens de t\'envoyer un fichier par hike : %1$s</string>
-	<string name="max_file_size">Volume max. du fichier : 25 Mo</string>
+	<string name="max_file_size">Volume max. du fichier : 100 Mo</string>
 	<string name="unable_to_read">Lect. fichier impossible</string>
 	<string name="share_location">Partage localisation</string>
 	<string name="group_mute">Conversation en sourdine.</string>
