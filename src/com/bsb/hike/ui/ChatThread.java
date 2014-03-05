@@ -3679,6 +3679,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					startActivityForResult(pickIntent, requestCode);
 					return;
 				}
+				else if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE)
+				{
+					Intent intent = new Intent(ChatThread.this, GalleryActivity.class);
+					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					startActivity(intent);
+					return;
+				}
 				Intent chooserIntent;
 				if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE)
 				{
