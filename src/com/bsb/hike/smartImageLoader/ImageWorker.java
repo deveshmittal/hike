@@ -56,6 +56,8 @@ public abstract class ImageWorker
 
 	private Bitmap mLoadingBitmap;
 
+	private boolean dontSetBackground = false;
+
 	private boolean mFadeInBitmap = true;
 
 	private AtomicBoolean mExitTasksEarly = new AtomicBoolean(false);
@@ -153,6 +155,16 @@ public abstract class ImageWorker
 		{
 			imageView.setImageDrawable(null);
 		}
+	}
+
+	/**
+	 * Flag which denotes whether the background was already set and should not be set by this worker.
+	 * 
+	 * @param b
+	 */
+	public void setDontSetBackground(boolean b)
+	{
+		this.dontSetBackground = b;
 	}
 
 	/**
@@ -442,8 +454,11 @@ public abstract class ImageWorker
 			{
 				// Transition drawable with a transparent drawable and the final drawable
 				final TransitionDrawable td = new TransitionDrawable(new Drawable[] { new ColorDrawable(android.R.color.transparent), drawable });
-				// Set background to loading bitmap
-				imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+				if (!dontSetBackground)
+				{
+					// Set background to loading bitmap
+					imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+				}
 
 				imageView.setImageDrawable(td);
 				td.startTransition(FADE_IN_TIME);
