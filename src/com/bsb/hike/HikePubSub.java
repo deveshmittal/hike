@@ -295,6 +295,8 @@ public class HikePubSub implements Runnable
 
 	public static final String CHAT_BACKGROUND_CHANGED = "chatBackgroundChanged";
 
+	public static final String CLEAR_CONVERSATION = "clearConversation";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

@@ -757,4 +757,6 @@
 	<string name="confirm_delete_msgs">Are you sure you want to delete these %1$s messages.</string>
 	<string name="selected_count">%1$s selected</string>
 	<string name="chat_bg_ftue_tip">Placeholder</string>
+	<string name="clear_conversation">Clear Conversation</string>
+	<string name="gallery_num_selected">%1$d selected</string>
 </resources>

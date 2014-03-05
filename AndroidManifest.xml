@@ -166,10 +166,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="audio/*" />
             </intent-filter>
+            <intent-filter>
+                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+                 <category android:name="android.intent.category.DEFAULT" />
+                 <data android:mimeType="image/*" />
+             </intent-filter>
         </activity>
         <activity
             android:name="com.bsb.hike.ui.SocialNetInviteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity android:name=".ui.GalleryActivity" >
+        </activity>
+        <activity android:name=".ui.GallerySelectionViewer" >
         </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >
