@@ -1932,6 +1932,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.messageContainer.setBackgroundResource(chatTheme.bubbleResId());
 			}
 		}
+		if(isActionModeOn && isSelected(position))
+		{
+			setSelected(v);
+		} else{
+			setUnSelected(v);
+		}
 		return v;
 	}
 
@@ -3199,5 +3205,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void setActionMode(boolean isOn)
 	{
 		isActionModeOn = isOn;
+	}
+	
+	public void setSelected(View v)
+	{
+		if(v.findViewById(R.id.selected_top_line) != null)
+		{
+			v.findViewById(R.id.selected_top_line).setVisibility(View.VISIBLE);
+			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(R.color.selected_msg_item_bg));
+			v.findViewById(R.id.selected_bottom_line).setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void setUnSelected(View v)
+	{
+		if(v.findViewById(R.id.selected_top_line) != null)
+		{
+			v.findViewById(R.id.selected_top_line).setVisibility(View.INVISIBLE);
+			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+			v.findViewById(R.id.selected_bottom_line).setVisibility(View.INVISIBLE);
+		}
 	}
 }
