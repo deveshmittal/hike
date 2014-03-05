@@ -747,7 +747,6 @@
 	<string name="recent_empty_string">Recently used stickers will show up here.</string>
 	<string name="merry_christmas_msg">Celebrate the month\nof love! We have a\ngift for you...</string>	
 	<string name="open_it_up">Open Gift</string>	
-	<string name="chat_bg_ftue_tip">Check out the special \'I Love You\' Theme!</string>
 	<string name="device">Device</string>
 	<string name="valentine_nudge_header">Share the Love!</string>
 	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
@@ -757,4 +756,5 @@
 	<string name="confirm_delete_msg">Are you sure you want to delete this message.</string>
 	<string name="confirm_delete_msgs">Are you sure you want to delete these %1$s messages.</string>
 	<string name="selected_count">%1$s selected</string>
+	<string name="chat_bg_ftue_tip">Placeholder</string>
 </resources>
