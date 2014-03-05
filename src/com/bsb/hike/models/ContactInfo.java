@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.models.utils.JSONSerializable;
+import com.bsb.hike.utils.LastSeenComparator;
 import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
@@ -308,77 +309,11 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		json.put("phone_no", this.phoneNum);
 		json.put("name", this.name);
 		json.put("id", this.id);
+		
 		return json;
 	}
 
-	public static Comparator<ContactInfo> lastSeenTimeComparator = new Comparator<ContactInfo>()
-	{
-
-		@Override
-		public int compare(ContactInfo lhs, ContactInfo rhs)
-		{
-			FavoriteType lhsFavoriteType = lhs.getFavoriteType();
-			FavoriteType rhsFavoriteType = rhs.getFavoriteType();
-
-			if (lhsFavoriteType != rhsFavoriteType)
-			{
-				if (lhsFavoriteType == FavoriteType.REQUEST_RECEIVED)
-				{
-					return -1;
-				}
-				else if (rhsFavoriteType == FavoriteType.REQUEST_RECEIVED)
-				{
-					return 1;
-				}
-			}
-
-			if (hasLastSeenValue(lhsFavoriteType))
-			{
-				if (!hasLastSeenValue(rhsFavoriteType))
-				{
-					if (lhs.getOffline() == 0)
-					{
-						return -1;
-					}
-				}
-				int value = compareOfflineValues(lhs.getOffline(), rhs.getOffline());
-				if (value != 0)
-				{
-					return value;
-				}
-			}
-			else if (hasLastSeenValue(rhsFavoriteType) && !hasLastSeenValue(lhsFavoriteType))
-			{
-				if (rhs.getOffline() == 0)
-				{
-					return 1;
-				}
-			}
-
-			return lhs.compareTo(rhs);
-		}
-
-		private boolean hasLastSeenValue(FavoriteType favoriteType)
-		{
-			return favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED;
-		}
-
-		private int compareOfflineValues(int lhs, int rhs)
-		{
-			if (lhs != rhs)
-			{
-				if (lhs == 0)
-				{
-					return -1;
-				}
-				else if (rhs == 0)
-				{
-					return 1;
-				}
-			}
-			return 0;
-		}
-	};
+	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator();
 
 	@Override
 	public int compareTo(ContactInfo rhs)

@@ -3640,4 +3640,15 @@ public class Utils
 			return new RecyclingBitmapDrawable(mResources, bitmap);
 		}
 	}
+
+	public static int getNumColumnsForGallery(Resources resources, int sizeOfImage)
+	{
+		return (int) (resources.getDisplayMetrics().widthPixels / sizeOfImage);
+	}
+
+	public static int getActualSizeForGallery(Resources resources, int sizeOfImage, int numColumns)
+	{
+		int remainder = resources.getDisplayMetrics().widthPixels - (numColumns * sizeOfImage);
+		return (int) (sizeOfImage + (int) (remainder / numColumns));
+	}
 }

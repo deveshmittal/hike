@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/album_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dialog_header_bg"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:id="@+id/selected"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/album_image"
+        android:layout_alignLeft="@id/album_image"
+        android:layout_alignRight="@id/album_image"
+        android:layout_alignTop="@id/album_image"
+        android:background="@color/action_bar_item_pressed"
+        android:visibility="gone" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/album_title"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_alignParentBottom="true"
+        android:background="#A0000000"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:text="Test"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+</RelativeLayout>

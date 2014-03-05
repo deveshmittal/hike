@@ -896,6 +896,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			boolean isMuted = ((GroupConversation) mConversation).isMuted();
 
 			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
+
+			optionsList.add(new OverFlowMenuItem(getString(R.string.clear_conversation), 5));
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_conversation), 3));
@@ -974,6 +976,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(ChatThread.this, mConversation);
 					break;
+				case 5:
+					clearConversation();
 				}
 
 			}
@@ -1014,6 +1018,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return onKeyUp(keyCode, event);
 			}
 		});
+	}
+
+	private void clearConversation()
+	{
+		mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
+		messages.clear();
+		mAdapter.notifyDataSetChanged();
 	}
 
 	private void blockUser()
@@ -1314,10 +1325,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isRecording = true;
 					fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
 				}
-
-				HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
-
-				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
 				
 				if(filePath == null)
 				{
@@ -1325,14 +1332,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else
 				{
-					if (Utils.isPicasaUri(filePath))
-					{
-						FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
-					}
-					else
-					{
-						initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
-					}
+					initiateFileTransferFromIntentData(fileType, filePath, isRecording, recordingDuration);
 				}
 
 				// Making sure the file does not get forwarded again on
@@ -1378,6 +1378,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				 */
 				intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 			}
+			else if (intent.hasExtra(HikeConstants.Extras.FILE_PATHS))
+			{
+				ArrayList<String> filePaths = intent.getStringArrayListExtra(HikeConstants.Extras.FILE_PATHS);
+				String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
+				for (String filePath : filePaths)
+				{
+					initiateFileTransferFromIntentData(fileType, filePath);
+				}
+			}
 			/*
 			 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 			 */
@@ -1398,6 +1407,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Log.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
 			closeContextMenu();
 		}
+	}
+
+	private void initiateFileTransferFromIntentData(String fileType, String filePath)
+	{
+		initiateFileTransferFromIntentData(fileType, filePath, false, -1);
+	}
+
+	private void initiateFileTransferFromIntentData(String fileType, String filePath, boolean isRecording, long recordingDuration)
+	{
+		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
+
+		Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
+
+		if (Utils.isPicasaUri(filePath))
+		{
+			FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+		}
+		else
+		{
+			initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+		}
+
 	}
 
 	private void inviteUser()
@@ -2091,15 +2122,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 
 	/* returns TRUE iff the last message was received and unread */
-	private boolean isLastMsgReceivedAndUnread() {
-		if(mAdapter == null || mConversation == null) {
+	private boolean isLastMsgReceivedAndUnread()
+	{
+		if (mAdapter == null || mConversation == null)
+		{
 			return false;
 		}
 
 		ConvMessage lastMsg = null;
-		for(int i = messages.size() - 1; i >= 0; i--) {
+		for (int i = messages.size() - 1; i >= 0; i--)
+		{
 			ConvMessage msg = messages.get(i);
-			if(msg.getTypingNotification() != null) {
+			if (msg.getTypingNotification() != null)
+			{
 				continue;
 			}
 			lastMsg = msg;
@@ -3103,15 +3138,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 
-			// Smooth scroll by the minimum distance in the opposite direction,
-			// to fix the bug where the list does not scroll at all.
-			mConversationsView.smoothScrollBy(-1, 1);
-			int itemsToScroll = messages.size() - (mConversationsView.getFirstVisiblePosition() + mConversationsView.getChildCount());
-			if (itemsToScroll > 3)
-			{
-				mConversationsView.setSelection(messages.size() - 3);
-			}
-			mConversationsView.smoothScrollToPosition(messages.size() - 1);
+			mConversationsView.setSelection(messages.size() - 1);
 		}
 	}
 
@@ -3665,6 +3692,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					startActivityForResult(pickIntent, requestCode);
 					return;
 				}
+				else if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE)
+				{
+					Intent intent = new Intent(ChatThread.this, GalleryActivity.class);
+					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					startActivity(intent);
+					return;
+				}
 				Intent chooserIntent;
 				if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE)
 				{
@@ -4146,8 +4180,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (recorder != null)
 		{
 			/*
-			 * Catching RuntimeException here to prevent the app from crashing when
-			 * the the media recorder is immediately stopped after starting.
+			 * Catching RuntimeException here to prevent the app from crashing when the the media recorder is immediately stopped after starting.
 			 */
 			try
 			{
@@ -5232,19 +5265,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		sendMessage(convMessage);
-
-		/*
-		 * Added to make sure we scroll to the end when we add the poke message.
-		 */
-		new Handler().postDelayed(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				mConversationsView.smoothScrollBy(-1, 1);
-				mConversationsView.smoothScrollToPosition(mAdapter.getCount() - 1);
-			}
-		}, 10);
 
 		boolean vibrate = false;
 		if (mConversation != null)

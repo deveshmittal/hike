@@ -1253,7 +1253,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 				 */
-				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata))
+				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata) || Utils.isGroupConversation(msisdn))
 				{
 					ConvMessage message = new ConvMessage(messageString, msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 							c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));
@@ -1539,6 +1539,29 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			deleteMessageFromConversation(convMessage.getMsisdn(), convMessage.getConversation().getConvId());
 		}
+	}
+
+	public void clearConversation(long convId)
+	{
+		Long[] args = new Long[] { convId };
+		/*
+		 * Clearing the messages table.
+		 */
+		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.CONV_ID + "= ?", args);
+
+		/*
+		 * Next we have to clear the conversation table.
+		 */
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.MESSAGE, "");
+		contentValues.put(DBConstants.MESSAGE_METADATA, "");
+		contentValues.put(DBConstants.GROUP_PARTICIPANT, "");
+		contentValues.put(DBConstants.IS_STATUS_MSG, false);
+		contentValues.put(DBConstants.MESSAGE_ID, 0);
+		contentValues.put(DBConstants.MAPPED_MSG_ID, 0);
+		contentValues.put(DBConstants.MSG_STATUS, State.RECEIVED_READ.ordinal());
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { Long.toString(convId) });
 	}
 
 	private void deleteMessageFromConversation(String msisdn, long convId)

@@ -548,8 +548,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			if (isNetworkAvailable())
 			{
 				acquireWakeLock(connectionTimeoutSec);
-				IMqttToken t = mqtt.connect(op);
-				t.setActionCallback(getConnectListener());
+				mqtt.connect(op,null,getConnectListener());
 			}
 			else
 			{
