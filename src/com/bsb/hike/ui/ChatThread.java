@@ -1371,6 +1371,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				 */
 				intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 			}
+			else if (intent.hasExtra(HikeConstants.Extras.FILE_PATHS))
+			{
+				ArrayList<String> filePaths = intent.getStringArrayListExtra(HikeConstants.Extras.FILE_PATHS);
+				String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
+				for (String filePath : filePaths)
+				{
+					initiateFileTransferFromIntentData(fileType, filePath);
+				}
+			}
 			/*
 			 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 			 */

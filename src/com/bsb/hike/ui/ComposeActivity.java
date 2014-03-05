@@ -51,6 +51,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -100,7 +101,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		// was passed to add group participants.
 		existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
-		if (Intent.ACTION_SEND.equals(getIntent().getAction()) || Intent.ACTION_SENDTO.equals(getIntent().getAction()))
+		if (Intent.ACTION_SEND.equals(getIntent().getAction()) || Intent.ACTION_SENDTO.equals(getIntent().getAction())
+				|| Intent.ACTION_SEND_MULTIPLE.equals(getIntent().getAction()))
 		{
 			isForwardingMessage = true;
 		}
@@ -550,7 +552,40 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			String type = presentIntent.getType();
 
-			if ("text/plain".equals(type) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+			if (Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
+			{
+				if (type != null)
+				{
+					ArrayList<Uri> imageUris = presentIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+					if (imageUris != null)
+					{
+						ArrayList<String> filePathArray = new ArrayList<String>(imageUris.size());
+						for (Uri fileUri : imageUris)
+						{
+							Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+							String fileUriStart = "file:";
+							String fileUriString = fileUri.toString();
+
+							if (fileUriString.startsWith(fileUriStart))
+							{
+								File selectedFile = new File(URI.create(fileUriString));
+								/*
+								 * Done to fix the issue in a few Sony devices.
+								 */
+								filePathArray.add(selectedFile.getAbsolutePath());
+							}
+							else
+							{
+								filePathArray.add(Utils.getRealPathFromUri(fileUri, this));
+							}
+						}
+
+						intent.putExtra(HikeConstants.Extras.FILE_PATHS, filePathArray);
+						intent.putExtra(HikeConstants.Extras.FILE_TYPE, HikeFileType.toString(HikeFileType.IMAGE));
+					}
+				}
+			}
+			else if ("text/plain".equals(type) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
 			{
 				String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
 				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
