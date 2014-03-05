@@ -2,9 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="8dp"
-    android:paddingLeft="@dimen/chat_bubble_edge_spacing"
-	android:paddingRight="@dimen/chat_bubble_edge_spacing">
+    android:paddingBottom="2dp">
 
 	<LinearLayout
 		android:layout_marginBottom="5dp"
@@ -13,7 +11,9 @@
 		android:layout_height="wrap_content"
 		android:id="@+id/day_container"
 		android:gravity="center_vertical"
-		android:layout_marginTop="10dp">
+		android:layout_marginTop="10dp"
+		android:paddingLeft="@dimen/chat_bubble_edge_spacing"
+		android:paddingRight="@dimen/chat_bubble_edge_spacing">
 
 		<View
 		    android:id="@+id/day_left"
@@ -51,13 +51,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/transparent"
-    android:orientation="vertical" />
+    android:orientation="vertical" 
+	android:paddingLeft="@dimen/chat_bubble_edge_spacing"
+	android:paddingRight="@dimen/chat_bubble_edge_spacing"/>
 
+	 <RelativeLayout
+        android:id="@+id/message_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="2dp"
+        android:layout_below="@id/day_container">
+
+        <View
+            android:id="@+id/selected_top_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/selected_msg_item_bg_lines"
+            android:visibility="invisible" />
+        
 	<RelativeLayout
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"
-	    android:layout_below="@id/day_container" >
+	    android:paddingTop="2dp"
+		android:paddingLeft="@dimen/chat_bubble_edge_spacing"
+		android:paddingRight="@dimen/chat_bubble_edge_spacing">
 
 	    <RelativeLayout
 	        android:id="@+id/avatar_container"
@@ -424,5 +442,14 @@
             android:visibility="invisible" />
 	    
 	</RelativeLayout>
+	</RelativeLayout>
+	
+	 <View
+        android:id="@+id/selected_bottom_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/selected_msg_item_bg_lines"
+        android:visibility="invisible" />
 
 </RelativeLayout>

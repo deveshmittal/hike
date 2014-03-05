@@ -591,7 +591,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			}
-			else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID))
+			else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
+					|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 			{
 				intent.putExtras(presentIntent);
 			}

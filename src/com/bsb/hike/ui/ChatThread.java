@@ -7,9 +7,13 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -126,6 +130,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
@@ -175,6 +180,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -189,7 +195,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener
 {
 
 	private enum DialogShowing
@@ -347,6 +353,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean showingChatThemePicker;
 
 	private ImageView backgroundImage;
+
+	private int selectedNonTextMsgs = 0;
+
+	private int selectedNonForwadableMsgs = 0;
+
+	private int selectedCancelableMsgs = 0;
+
+	private boolean onTouchActionDownCalled = false;
+	
+	private boolean isActionModeOn = false;
+	
+	private TextView mActionModeTitle;
+	
+	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
 
 	@Override
 	protected void onPause()
@@ -799,7 +819,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
-		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
+		getSupportMenuInflater().inflate( isActionModeOn?R.menu.multi_select_chat_menu:R.menu.chat_thread_menu, menu);
 		mMenu = menu;
 		return true;
 	}
@@ -810,6 +830,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation == null || showingChatThemePicker)
 		{
 			return super.onPrepareOptionsMenu(menu);
+		}
+		if(isActionModeOn)
+		{
+			return onPrepareActionMode(menu);
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -841,6 +865,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				return false;
 			}
+		}
+		
+		if(isActionModeOn){
+			return onActionModeItemClicked(item);
 		}
 
 		switch (item.getItemId())
@@ -889,6 +917,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!(mConversation instanceof GroupConversation))
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+			
+			optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
 		}
 
 		if (mConversation instanceof GroupConversation)
@@ -903,6 +933,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_conversation), 3));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
+		
 
 		dismissPopupWindow();
 
@@ -978,6 +1009,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 5:
 					clearConversation();
+					break;
+				case 6:
+					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
+					break;
 				}
 
 			}
@@ -1081,28 +1116,51 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
+		mAdapter.toggleSelection(position);
+		boolean isMsgSelected = mAdapter.isSelected(position);
 		ConvMessage message = mAdapter.getItem(position);
-		return showMessageContextMenu(message);
+		return showMessageContextMenu(message, isMsgSelected);
 	}
 
-	public boolean showMessageContextMenu(final ConvMessage message)
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+	{
+		onItemLongClick(adapterView, view, position, id);
+		return;
+	}
+
+	public boolean showMessageContextMenu(final ConvMessage message, final boolean isMsgSelected)
 	{
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
 			return false;
 		}
 
-		ArrayList<String> optionsList = new ArrayList<String>();
+		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
+
+		if (hasCheckedItems && !isActionModeOn)
+		{
+			// there are some selected items, start the actionMode
+			setupActionModeActionBar();
+		}
+		else if (!hasCheckedItems && isActionModeOn)
+		{
+			// there no selected items, finish the actionMode
+			destroyActionMode();
+			return true;
+		}
+
+		if (isActionModeOn)
+		{
+			setActionModeTitle(mAdapter.getSelectedCount());
+		}
 
 		if (message.isFileTransferMessage())
 		{
+			// File transfer message is a non text message
+			selectedNonTextMsg(isMsgSelected);
+
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			if (!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded())
-			{
-				optionsList.add(getString(R.string.forward));
-			}
-			// TODO : This should also be handled according to state
-			// @GM Completed the above mentioned TODO
 			File file = hikeFile.getFile();
 			FileSavedState fss;
 			if (message.isSent())
@@ -1113,56 +1171,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				fss = FileTransferManager.getInstance(getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
 			}
-			if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING)
+			if (!(!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded()))
 			{
-				optionsList.add(message.isSent() ? getString(R.string.cancel_upload) : getString(R.string.cancel_download));
+				/*
+				 * This message is not downloaded or uplpaded yet. this can't be forwarded
+				 */
+				selectedNonForwadableMsg(isMsgSelected);
+				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING))
+				{
+					/*
+					 * File Transfer is in progress. this can be canceled.
+					 */
+					selectedCancelableMsg(isMsgSelected);
+				}
 			}
 		}
-		else if (message.getMetadata() == null || !message.getMetadata().isPokeMessage())
+		else if (message.getMetadata()!=null && message.getMetadata().isPokeMessage())
 		{
-			optionsList.add(getString(R.string.forward));
-			if (!message.isStickerMessage())
-			{
-				optionsList.add(getString(R.string.copy));
-			}
+			// Poke message can only be deleted
+			selectedNonTextMsg(isMsgSelected);
+			selectedNonForwadableMsg(isMsgSelected);
+		}
+		else if (message.isStickerMessage())
+		{
+			// Sticker message is a non text message.
+			selectedNonTextMsg(isMsgSelected);
 		}
 
-		optionsList.add(getString(R.string.delete));
-
-		final String[] options = new String[optionsList.size()];
-		optionsList.toArray(options);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this, R.layout.alert_item, R.id.item, options);
-
-		builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				String option = options[which];
-				if (getString(R.string.forward).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.forward);
-				}
-				else if (getString(R.string.cancel_download).equals(option) || getString(R.string.cancel_upload).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.cancel_file_transfer);
-				}
-				else if (getString(R.string.copy).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.copy);
-				}
-				else if (getString(R.string.delete).equals(option))
-				{
-					performContextBasedOperationOnMessage(message, R.id.delete);
-				}
-			}
-		});
-
-		AlertDialog alertDialog = builder.show();
-		alertDialog.getListView().setDivider(getResources().getDrawable(R.drawable.ic_thread_divider_profile));
+		invalidateOptionsMenu();
 		return true;
 	}
 
@@ -1332,44 +1368,90 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.FILE_PATH);
 			}
-			else if (intent.hasExtra(HikeConstants.Extras.LATITUDE))
-			{
-				String fileKey = null;
-				double latitude = intent.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
-				double longitude = intent.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
-				int zoomLevel = intent.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
 
-				initialiseLocationTransfer(latitude, longitude, zoomLevel);
-				// Making sure the file does not get forwarded again on
-				// orientation change.
-				intent.removeExtra(HikeConstants.Extras.LATITUDE);
-			}
-			else if (intent.hasExtra(HikeConstants.Extras.CONTACT_METADATA))
+			else if (intent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 			{
+				String jsonString = intent.getStringExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 				try
 				{
-					JSONObject contactJson = new JSONObject(intent.getStringExtra(HikeConstants.Extras.CONTACT_METADATA));
-					HikeFile hikeFile = new HikeFile(contactJson);
-					showContactDetails(Utils.getContactDataFromHikeFile(hikeFile), hikeFile.getDisplayName(), contactJson, false);
+					JSONArray multipleMsgFwdArray = new JSONArray(jsonString);
+					int msgCount = multipleMsgFwdArray.length();
+					for (int i = 0; i < msgCount; i++)
+					{
+						JSONObject msgExtrasJson = (JSONObject) multipleMsgFwdArray.get(i);
+						if (msgExtrasJson.has(HikeConstants.Extras.MSG))
+						{
+							String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
+							ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, msg, isConversationOnHike());
+							sendMessage(convMessage);
+						}
+						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
+						{
+							String fileKey = null;
+							String filePath = msgExtrasJson.getString(HikeConstants.Extras.FILE_PATH);
+							String fileType = msgExtrasJson.getString(HikeConstants.Extras.FILE_TYPE);
+
+							boolean isRecording = false;
+							long recordingDuration = -1;
+							if (msgExtrasJson.has(HikeConstants.Extras.RECORDING_TIME))
+							{
+								recordingDuration = msgExtrasJson.getLong(HikeConstants.Extras.RECORDING_TIME);
+								isRecording = true;
+								fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
+							}
+
+							HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
+
+							if (Utils.isPicasaUri(filePath))
+							{
+								FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+							}
+							else
+							{
+								initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+							}
+						}
+						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE) && msgExtrasJson.has(HikeConstants.Extras.ZOOM_LEVEL))
+						{
+							String fileKey = null;
+							double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
+							double longitude = msgExtrasJson.getDouble(HikeConstants.Extras.LONGITUDE);
+							int zoomLevel = msgExtrasJson.getInt(HikeConstants.Extras.ZOOM_LEVEL);
+							initialiseLocationTransfer(latitude, longitude, zoomLevel);
+						}
+						else if (msgExtrasJson.has(HikeConstants.Extras.CONTACT_METADATA))
+						{
+							try
+							{
+								JSONObject contactJson = new JSONObject(msgExtrasJson.getString(HikeConstants.Extras.CONTACT_METADATA));
+								HikeFile hikeFile = new HikeFile(contactJson);
+								initialiseContactTransfer(contactJson);
+							}
+							catch (JSONException e)
+							{
+								e.printStackTrace();
+							}
+						}
+						else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
+						{
+							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
+							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
+							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
+							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
+							sendSticker(sticker);
+							// add this sticker to recents
+							StickerManager.getInstance().addRecentSticker(sticker);
+						}
+						/*
+						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
+						 */
+					}
 				}
 				catch (JSONException e)
 				{
-					e.printStackTrace();
+					Log.e(getClass().getSimpleName(), "Invalid JSON Array", e);
 				}
-			}
-			else if (intent.hasExtra(StickerManager.FWD_CATEGORY_ID))
-			{
-				String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
-				String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
-				int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
-				Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
-				sendSticker(sticker);
-				// add this sticker to recents
-				StickerManager.getInstance().addRecentSticker(sticker);
-				/*
-				 * Making sure the sticker is not forwarded again on orientation change
-				 */
-				intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
+				intent.removeExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 			}
 			else if (intent.hasExtra(HikeConstants.Extras.FILE_PATHS))
 			{
@@ -3739,9 +3821,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(true);
 		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 184));
+		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 276));
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), 0, -(int) (1 * Utils.densityMultiplier));
+		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -(int) (282 * Utils.densityMultiplier), -(int) (1 * Utils.densityMultiplier));
 	}
 
 	private class AudioActivityInfo
@@ -5301,6 +5383,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
+		switch (event.getAction())
+		{
+		/*
+		 * This is to handle the case. when user long taps on a clickable item in chatthread. and even if longclick event is consumed. ACTION_UP event is triggered which eventually
+		 * triggers onitemclick for the view which is not desired.
+		 */
+		case MotionEvent.ACTION_DOWN:
+		{
+			onTouchActionDownCalled = true;
+			break;
+		}
+		case MotionEvent.ACTION_UP:
+		{
+			if (!onTouchActionDownCalled)
+			{
+				/*
+				 * This is the case when ACTION_UP is called without calling ACTION_DOWN first. in this case we should not consider ACTION_UP as click event and just let it pass.
+				 */
+				return true;
+			}
+			onTouchActionDownCalled = false;
+		}
+		}
 		return gestureDetector.onTouchEvent(event);
 	}
 
@@ -5310,6 +5415,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onDoubleTap(MotionEvent e)
 		{
+			if (isActionModeOn)
+			{
+				return false;
+			}
 			if (mConversation instanceof GroupConversation)
 			{
 				if (!((GroupConversation) mConversation).getIsGroupAlive())
@@ -5642,4 +5751,314 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 	};
+
+	private void setActionModeOn(boolean isOn)
+	{
+		isActionModeOn = isOn;
+		mAdapter.setActionMode(isOn);
+		mAdapter.notifyDataSetChanged();
+	}
+
+	public void selectedNonTextMsg(boolean isMsgSelected)
+	{
+		if (isMsgSelected)
+		{
+			selectedNonTextMsgs++;
+		}
+		else
+		{
+			selectedNonTextMsgs--;
+		}
+	}
+
+	public void selectedNonForwadableMsg(boolean isMsgSelected)
+	{
+		if (isMsgSelected)
+		{
+			selectedNonForwadableMsgs++;
+		}
+		else
+		{
+			selectedNonForwadableMsgs--;
+		}
+	}
+
+	public void selectedCancelableMsg(boolean isMsgSelected)
+	{
+		if (isMsgSelected)
+		{
+			selectedCancelableMsgs++;
+		}
+		else
+		{
+			selectedCancelableMsgs--;
+		}
+	}
+	
+	private void setupActionModeActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.action_mode_action_bar, null);
+
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		mActionModeTitle = (TextView) actionBarView.findViewById(R.id.title);
+		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				destroyActionMode();
+			}
+		});
+		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+
+		initializeActionMode();
+	}
+	
+	private void setActionModeTitle(int count)
+	{
+		if(mActionModeTitle != null)
+		{
+			mActionModeTitle.setText(getString(R.string.selected_count, count));
+		}
+	}
+	
+	public boolean onPrepareActionMode(Menu menu)
+	{
+		if (selectedNonTextMsgs == 0)
+		{
+			mOptionsList.put(R.id.copy_msgs, true);
+		}
+		else
+		{
+			mOptionsList.put(R.id.copy_msgs, false);
+		}
+		if (selectedNonForwadableMsgs > 0)
+		{
+			mOptionsList.put(R.id.forward_msgs, false);
+		}
+		else
+		{
+			mOptionsList.put(R.id.forward_msgs, true);
+		}
+		if (selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1)
+		{
+			Iterator<Integer> it = mAdapter.getSelectedIds().iterator();
+			ConvMessage currentSelectedMsg = mAdapter.getItem(it.next());
+			mOptionsList.put(currentSelectedMsg.isSent() ? R.id.cancel_upload_msg : R.id.cancel_download_msg, true);
+		}
+		else
+		{
+			mOptionsList.put(R.id.cancel_upload_msg, false);
+			mOptionsList.put(R.id.cancel_download_msg, false);
+		}
+
+		for (int i = 0; i < menu.size(); i++)
+		{
+			MenuItem item = menu.getItem(i);
+			if (mOptionsList.get(item.getItemId()))
+			{
+				item.setVisible(true);
+			}
+			else
+			{
+				item.setVisible(false);
+			}
+		}
+		return true;
+	}
+
+	public boolean initializeActionMode()
+	{
+		setActionModeOn(true);
+		selectedNonTextMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedCancelableMsgs = 0;
+		mOptionsList.put(R.id.delete_msgs, true);
+		mOptionsList.put(R.id.forward_msgs, true);
+		mOptionsList.put(R.id.copy_msgs, true);
+		mOptionsList.put(R.id.cancel_upload_msg, false);
+		mOptionsList.put(R.id.cancel_download_msg, false);
+		// this onItemClick should be unregistered when
+		mConversationsView.setOnItemClickListener(ChatThread.this);
+		return true;
+	}
+	
+	private void destroyActionMode(){
+		setActionModeOn(false);
+		// removing the on item click listener
+		mConversationsView.setOnItemClickListener(null);
+		mAdapter.removeSelection();
+		mOptionsList.clear();
+		setupActionBar(false);
+		invalidateOptionsMenu();
+	}
+	
+	public boolean onActionModeItemClicked(MenuItem item)
+	{
+		final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
+		final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
+		ConvMessage[] convMsgs;
+		switch (item.getItemId())
+		{
+		case R.id.delete_msgs:
+			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
+			if(mAdapter.getSelectedCount() == 1){
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
+				deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
+			} else{
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
+				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, mAdapter.getSelectedCount()));
+			}
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					Collections.sort(selectedMessagesIds);
+					ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
+					for (int i = convMsgs.length - 1; i >= 0; i--)
+					{
+						convMsgs[i] = mAdapter.getItem(selectedMessagesIds.get(i));
+						removeMessage(convMsgs[i]);
+						if (convMsgs[i].isFileTransferMessage())
+						{
+							if (convMsgs[i].isFileTransferMessage())
+							{
+								// @GM cancelTask has been changed
+								HikeFile hikeFile = convMsgs[i].getMetadata().getHikeFiles().get(0);
+								File file = hikeFile.getFile();
+								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMsgs[i].getMsgID(), file, convMsgs[i].isSent());
+								mAdapter.notifyDataSetChanged();
+							}
+						}
+					}
+					destroyActionMode();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+			
+			View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					destroyActionMode();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+
+			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
+			deleteConfirmDialog.show();
+			return true;
+		case R.id.forward_msgs:
+			Collections.sort(selectedMessagesIds);
+			convMsgs = new ConvMessage[selectedMessagesIds.size()];
+
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
+			Intent intent = new Intent(ChatThread.this, ComposeActivity.class);
+			String msg;
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+			JSONArray multipleMsgArray = new JSONArray();
+			try
+			{
+				for (int i = 0; i < convMsgs.length; i++)
+				{
+					ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
+					
+					JSONObject multiMsgFwdObject = new JSONObject();
+					if (message.isFileTransferMessage())
+					{
+						HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+						if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+						}
+						else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
+						}
+						else
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+							if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+							{
+								multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+							}
+						}
+					}
+					else if (message.isStickerMessage())
+					{
+						Sticker sticker = message.getMetadata().getSticker();
+						/*
+						 * If the category is an unknown one, we have the id saved in the json.
+						 */
+						String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ? message.getMetadata().getUnknownStickerCategory() : sticker
+								.getCategory().categoryId.name();
+						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
+						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
+					}
+					else
+					{
+						msg = message.getMessage();
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, msg);
+					}
+					multipleMsgArray.put(multiMsgFwdObject);
+				}
+			}
+			catch (JSONException e)
+			{
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
+			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
+			startActivity(intent);
+
+			break;
+		case R.id.copy_msgs:
+			Collections.sort(selectedMessagesIds);
+			convMsgs = new ConvMessage[selectedMessagesIds.size()];
+			String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
+			for (int i = 1; i < convMsgs.length; i++)
+			{
+				msgStr += "\n" + mAdapter.getItem(selectedMessagesIds.get(i)).getMessage();
+			}
+			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+			clipboard.setText(msgStr);
+			break;
+		case R.id.cancel_upload_msg:
+		case R.id.cancel_download_msg:
+			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+			mAdapter.notifyDataSetChanged();
+			break;
+		default:
+			destroyActionMode();
+			return false;
+		}
+		destroyActionMode();
+		return true;
+	}
+
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/delete_msgs"
+        android:icon="@drawable/actionbar_ic_delete"
+        android:showAsAction="always"
+        android:title="@string/delete"/>
+    <item
+        android:id="@+id/forward_msgs"
+        android:icon="@drawable/actionbar_ic_forward"
+        android:showAsAction="always"
+        android:title="@string/forward"/>
+    <item
+        android:id="@+id/copy_msgs"
+        android:icon="@drawable/actionbar_ic_copy"
+        android:showAsAction="ifRoom"
+        android:title="@string/copy"
+        android:visible="false"/>
+    <item
+        android:id="@+id/cancel_upload_msg"
+        android:showAsAction="never"
+        android:title="@string/cancel_upload"
+        android:visible="false"/>
+    <item
+        android:id="@+id/cancel_download_msg"
+        android:showAsAction="never"
+        android:title="@string/cancel_download"
+        android:visible="false"/>
+
+</menu>

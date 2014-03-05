@@ -20,7 +20,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -61,14 +60,12 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
-import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
-import com.bsb.hike.utils.ChatBgFtue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -125,10 +122,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private Drawable myProfileImage;
 
-	private SnowFallView snowFallView;
-
-	private ContactInfo chatThemeFTUEContact;
-
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES };
@@ -173,7 +166,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void initialiseHomeScreen(Bundle savedInstanceState)
 	{
 
-		setContentView(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue : R.layout.home);
+		setContentView(R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
 
@@ -187,20 +180,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false))
-		{
-			Utils.blockOrientationChange(HomeActivity.this);
-			// if chat bg ftue is not shown show this on the highest priority
-			dialogShowing = DialogShowing.CHAT_BG_FTUE;
-			findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
-			getSupportActionBar().hide();
-		}
-		else
-		{
-			// check the preferences and show update
-			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
-			showUpdatePopup(updateType);
-		}
+		// check the preferences and show update
+		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
+		showUpdatePopup(updateType);
 
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
@@ -251,79 +233,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
-		if ((!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false)) && snowFallView == null)
-		{
-			(new Handler()).postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
-				}
-			}, 300);
-		}
-
-	}
-
-	public void setChatThemeFTUEContact(ContactInfo contactInfo)
-	{
-		this.chatThemeFTUEContact = contactInfo;
-	}
-
-	public ContactInfo getChatThemeFTUEContact()
-	{
-		return this.chatThemeFTUEContact;
-	}
-
-	public void OnChatBgFtueOverlayClick(View v)
-	{
-		return;
-	}
-
-	public void onChatBgOpenItUpClick(View v)
-	{
-		boolean newUser = getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
-		ContactInfo contactInfo = HikeUserDatabase.getInstance().getChatThemeFTUEContact(HomeActivity.this, newUser);
-		setChatThemeFTUEContact(contactInfo);
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))
-		{
-			ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
-		}
-		else
-		{
-			/*
-			 * Users who have already seen previous FTUE will be taken directly to chatthread
-			 */
-			onChatBgGiveItASpinClick(v);
-		}
-	}
-
-	public void onChatBgGiveItASpinClick(View v)
-	{
-		(new Handler()).postDelayed(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				/*
-				 * This handler is to fix the issue When user taps on give it spin button there is a delay in opening chatthread. And There is also a delay in showing actionbar
-				 * when we call actionbar show() method.
-				 */
-
-				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
-				getSupportActionBar().show();
-			}
-		}, 2000);
-
-		Utils.unblockOrientationChange(HomeActivity.this);
-		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView, !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false));
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
-		editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, true);
-		editor.commit();
-		return;
 	}
 
 	@Override

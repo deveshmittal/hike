@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.json.JSONArray;
 
@@ -216,6 +218,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean isListFlinging;
 
+	private Set<Integer> mSelectedItemsIds;
+
+	private boolean isActionModeOn = false;
+
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -229,6 +235,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
 		this.chatTheme = ChatTheme.DEFAULT;
+		this.mSelectedItemsIds = new HashSet<Integer>();
 		setLastSentMessagePosition();
 	}
 
@@ -1503,8 +1510,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Listeners
 			holder.overlayBg.setTag(R.string.One, convMessage);
 			holder.overlayBg.setTag(R.string.Two, holder.ftAction);
-			holder.overlayBg.setOnClickListener(buttonClick);
-
+			if (!isActionModeOn)
+			{
+				holder.overlayBg.setEnabled(true);
+				holder.overlayBg.setOnClickListener(buttonClick);
+			}
+			else{
+				holder.overlayBg.setEnabled(false);
+			}
+			
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Message status and time stamp
 			if (convMessage.isSent())
 			{
@@ -1594,7 +1608,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 
 			holder.container.setTag(convMessage);
-			holder.container.setOnClickListener(this);
+			if (!isActionModeOn)
+			{
+				holder.container.setEnabled(true);
+				holder.container.setOnClickListener(this);
+			}
+			else{
+				holder.container.setEnabled(false);
+			}
+			
 
 			boolean showTip = false;
 			boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
@@ -1909,6 +1931,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				holder.messageContainer.setBackgroundResource(chatTheme.bubbleResId());
 			}
+		}
+		if(isActionModeOn && isSelected(position))
+		{
+			setSelected(v);
+		} else{
+			setUnSelected(v);
 		}
 		return v;
 	}
@@ -2262,6 +2290,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		}
 		Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
+		/*
+		 * if action mode is on clicking on an item should select this item
+		 */
+		if (isActionModeOn)
+		{
+			v.performLongClick();
+			return;
+		}
+
 		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
 				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
 		{
@@ -2494,7 +2531,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public boolean onLongClick(View view)
 	{
-		return chatThread.showMessageContextMenu((ConvMessage) view.getTag());
+		return false;
 	}
 
 	@Override
@@ -2589,6 +2626,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
+		container.setEnabled(false);
+		
 		container.setOnLongClickListener(this);
 
 		/*
@@ -3121,5 +3160,70 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public IconLoader getIconImageLoader()
 	{
 		return iconLoader;
+	}
+
+	public void toggleSelection(int position)
+	{
+		selectView(position, !isSelected(position));
+	}
+
+	public void removeSelection()
+	{
+		mSelectedItemsIds.clear();
+		notifyDataSetChanged();
+	}
+
+	public void selectView(int position, boolean value)
+	{
+		if (value)
+		{
+			mSelectedItemsIds.add(position);
+		}
+		else
+		{
+			mSelectedItemsIds.remove(position);
+		}
+
+		notifyDataSetChanged();
+	}
+
+	public int getSelectedCount()
+	{
+		return mSelectedItemsIds.size();
+	}
+
+	public Set<Integer> getSelectedIds()
+	{
+		return mSelectedItemsIds;
+	}
+
+	public boolean isSelected(int position)
+	{
+		return mSelectedItemsIds.contains(position);
+	}
+
+	public void setActionMode(boolean isOn)
+	{
+		isActionModeOn = isOn;
+	}
+	
+	public void setSelected(View v)
+	{
+		if(v.findViewById(R.id.selected_top_line) != null)
+		{
+			v.findViewById(R.id.selected_top_line).setVisibility(View.VISIBLE);
+			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(R.color.selected_msg_item_bg));
+			v.findViewById(R.id.selected_bottom_line).setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void setUnSelected(View v)
+	{
+		if(v.findViewById(R.id.selected_top_line) != null)
+		{
+			v.findViewById(R.id.selected_top_line).setVisibility(View.INVISIBLE);
+			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+			v.findViewById(R.id.selected_bottom_line).setVisibility(View.INVISIBLE);
+		}
 	}
 }

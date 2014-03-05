@@ -1026,6 +1026,8 @@ public class HikeConstants
 		
 		public static final String BLOKING_TASK_TYPE = "blockingTaskType";
 
+		public static final String MULTIPLE_MSG_OBJECT = "multipleMsgObject";
+
 		public static final String SELECTED_BUCKET = "selectedBucket";
 
 		public static final String GALLERY_SELECTIONS = "gallerySelections";

@@ -335,6 +335,7 @@
         <item name="actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
     	<item name="android:windowAnimationStyle">@style/ActivityAnimation</item>
+        <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
     </style>
     
     <style name="ChatThreadTheme" parent="AppTheme">
@@ -427,7 +428,7 @@
     </style>
     
     <style name="OverflowMenu">
-        <item name="android:src">@drawable/ic_overflow</item>
+        <item name="android:src">@drawable/ic_overflow_home</item>
         <item name="android:background">@drawable/bg_overflow_menu_selector</item>
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">match_parent</item>

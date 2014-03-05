@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp" >
+
+    <LinearLayout
+        android:id="@+id/close_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_overflow_menu_selector"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingRight="5dp" >
+
+        <ImageView
+            android:id="@+id/close_action_mode"
+            android:layout_width="17.5dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="9dp"
+            android:src="@drawable/actionbar_title_tick" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/title"
+            style="@style/ActionBarText.Shadow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/close_action_mode"
+            android:text="@string/selected_count" />
+    </LinearLayout>
+
+</RelativeLayout>
