@@ -917,6 +917,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!(mConversation instanceof GroupConversation))
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+			
+			optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
 		}
 
 		if (mConversation instanceof GroupConversation)
@@ -932,7 +934,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 		
-		optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
 
 		dismissPopupWindow();
 
