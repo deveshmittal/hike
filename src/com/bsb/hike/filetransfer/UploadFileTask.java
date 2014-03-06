@@ -249,7 +249,7 @@ public class UploadFileTask extends FileTransferBase
 	 */
 	private void initFileUpload() throws FileTransferCancelledException, Exception
 	{
-		_state = FTState.IN_PROGRESS;
+		//_state = FTState.IN_PROGRESS;
 		msgId = ((ConvMessage) userContext).getMsgID();
 		// fileTaskMap.put(msgId, futureTask);
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
@@ -440,6 +440,7 @@ public class UploadFileTask extends FileTransferBase
 				JSONObject fileJSON = response.getJSONObject(HikeConstants.DATA_2);
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
+				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 				String md5Hash = fileJSON.optString("md5_original");
 				Log.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
 				if (md5Hash != null)
@@ -465,6 +466,7 @@ public class UploadFileTask extends FileTransferBase
 
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 			hikeFile.setFileKey(fileKey);
+			hikeFile.setFileSize(fileSize);
 			hikeFile.setFileTypeString(fileType);
 
 			filesArray.put(hikeFile.serialize());
@@ -883,8 +885,11 @@ public class UploadFileTask extends FileTransferBase
 		else
 			chunkSize = networkType.getMinChunkSize();
 
-		if (chunkSize > (int) length)
-			chunkSize = (int) length;
+//		if (chunkSize > (int) length)
+//			chunkSize = (int) length;
+		
+		while(chunkSize > length)
+			chunkSize/=2;
 
 		try
 		{
@@ -1093,9 +1098,9 @@ public class UploadFileTask extends FileTransferBase
 		{
 			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 		}
-		else if (result != FTResult.SUCCESS && result != FTResult.PAUSED && result != FTResult.CANCELLED)
+		else if (result != FTResult.PAUSED)
 		{
-			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
+			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
 					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
 
 			handler.post(new Runnable()

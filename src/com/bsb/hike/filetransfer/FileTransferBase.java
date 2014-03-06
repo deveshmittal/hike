@@ -42,7 +42,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected int reconnectTime = 0;
 
-	protected int MAX_RECONNECT_TIME = 30; // in seconds
+	protected int MAX_RECONNECT_TIME = 20; // in seconds
 
 	protected Handler handler;
 
@@ -56,6 +56,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected File mFile;
 
 	protected String fileKey; // this is used for download from server , and in upload too
+	
+	protected int fileSize;
 
 	protected File stateFile; // this represents state file in which file state will be saved
 

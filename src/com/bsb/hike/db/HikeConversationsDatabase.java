@@ -1064,7 +1064,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE }, DBConstants.MSISDN + "=?",
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT }, DBConstants.MSISDN + "=?",
 					new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
@@ -1074,6 +1074,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
 			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
+			int unreadCount = c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
 
 			if (Utils.isGroupConversation(msisdn))
 			{
@@ -1101,6 +1102,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			List<ConvMessage> messages = getConversationThread(msisdn, convid, limit, conv, -1);
 			conv.setMessages(messages);
+			conv.setUnreadCount(unreadCount);
 
 			return conv;
 		}

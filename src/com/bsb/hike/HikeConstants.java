@@ -543,7 +543,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 25 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
@@ -644,6 +644,9 @@ public class HikeConstants
 
 	// Picasa URI prefix for creating convMessage
 	public static final String PICASA_PREFIX = "picasaUri:";
+	
+	// Gmail URI prefix for all devices
+	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 

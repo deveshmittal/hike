@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ProgressBar;
 
 import com.bsb.hike.utils.Utils;
@@ -95,7 +96,7 @@ public class CustomProgressBar extends ProgressBar
 			{
 				animation = ObjectAnimator.ofInt(this, "progress", this.start, this.target);
 				animation.setDuration(this.duration); // 0.5 second
-				animation.setInterpolator(new DecelerateInterpolator());
+				animation.setInterpolator(new LinearInterpolator());
 				if (android.os.Build.VERSION.SDK_INT >= 18)
 					animation.setAutoCancel(true);
 				animation.start();

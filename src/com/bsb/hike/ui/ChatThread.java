@@ -1361,8 +1361,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isRecording = true;
 					fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
 				}
-
-				initiateFileTransferFromIntentData(fileType, filePath, isRecording, recordingDuration);
+				
+				if(filePath == null)
+				{
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				}
+				else
+				{
+					initiateFileTransferFromIntentData(fileType, filePath, isRecording, recordingDuration);
+				}
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
@@ -1674,6 +1681,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!mConversation.isOnhike() && !Utils.isContactInternational(mContactNumber))
 		{
 			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
+		}
+		
+		if(mConversation.getUnreadCount() > 0)
+		{
+			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
+			messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
 		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
