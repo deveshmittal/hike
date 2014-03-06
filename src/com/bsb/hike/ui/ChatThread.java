@@ -361,11 +361,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int selectedCancelableMsgs = 0;
 
 	private boolean onTouchActionDownCalled = false;
-	
+
 	private boolean isActionModeOn = false;
-	
+
 	private TextView mActionModeTitle;
-	
+
 	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
 
 	@Override
@@ -819,7 +819,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
-		getSupportMenuInflater().inflate( isActionModeOn?R.menu.multi_select_chat_menu:R.menu.chat_thread_menu, menu);
+		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
 		mMenu = menu;
 		return true;
 	}
@@ -831,7 +831,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return super.onPrepareOptionsMenu(menu);
 		}
-		if(isActionModeOn)
+		if (isActionModeOn)
 		{
 			return onPrepareActionMode(menu);
 		}
@@ -866,8 +866,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return false;
 			}
 		}
-		
-		if(isActionModeOn){
+
+		if (isActionModeOn)
+		{
 			return onActionModeItemClicked(item);
 		}
 
@@ -917,7 +918,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!(mConversation instanceof GroupConversation))
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
-			
+
 			optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
 		}
 
@@ -933,7 +934,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_conversation), 3));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
-		
 
 		dismissPopupWindow();
 
@@ -1186,7 +1186,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
-		else if (message.getMetadata()!=null && message.getMetadata().isPokeMessage())
+		else if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
 		{
 			// Poke message can only be deleted
 			selectedNonTextMsg(isMsgSelected);
@@ -1361,8 +1361,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isRecording = true;
 					fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
 				}
-				
-				if(filePath == null)
+
+				if (filePath == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 				}
@@ -1418,7 +1418,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
 							}
 						}
-						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE) && msgExtrasJson.has(HikeConstants.Extras.ZOOM_LEVEL))
+						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
+								&& msgExtrasJson.has(HikeConstants.Extras.ZOOM_LEVEL))
 						{
 							String fileKey = null;
 							double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
@@ -1683,8 +1684,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
 		}
-		
-		if(mConversation.getUnreadCount() > 0)
+
+		if (mConversation.getUnreadCount() > 0)
 		{
 			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
 			messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
@@ -5808,7 +5809,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			selectedCancelableMsgs--;
 		}
 	}
-	
+
 	private void setupActionModeActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -5838,15 +5839,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		initializeActionMode();
 	}
-	
+
 	private void setActionModeTitle(int count)
 	{
-		if(mActionModeTitle != null)
+		if (mActionModeTitle != null)
 		{
 			mActionModeTitle.setText(getString(R.string.selected_count, count));
 		}
 	}
-	
+
 	public boolean onPrepareActionMode(Menu menu)
 	{
 		if (selectedNonTextMsgs == 0)
@@ -5907,8 +5908,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mConversationsView.setOnItemClickListener(ChatThread.this);
 		return true;
 	}
-	
-	private void destroyActionMode(){
+
+	private void destroyActionMode()
+	{
 		setActionModeOn(false);
 		// removing the on item click listener
 		mConversationsView.setOnItemClickListener(null);
@@ -5917,7 +5919,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		setupActionBar(false);
 		invalidateOptionsMenu();
 	}
-	
+
 	public boolean onActionModeItemClicked(MenuItem item)
 	{
 		final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
@@ -5927,10 +5929,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		case R.id.delete_msgs:
 			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
-			if(mAdapter.getSelectedCount() == 1){
+			if (mAdapter.getSelectedCount() == 1)
+			{
 				deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
 				deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
-			} else{
+			}
+			else
+			{
 				deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
 				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, mAdapter.getSelectedCount()));
 			}
@@ -5962,7 +5967,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					deleteConfirmDialog.dismiss();
 				}
 			};
-			
+
 			View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
 			{
 
@@ -5992,7 +5997,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				for (int i = 0; i < convMsgs.length; i++)
 				{
 					ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
-					
+
 					JSONObject multiMsgFwdObject = new JSONObject();
 					if (message.isFileTransferMessage())
 					{
