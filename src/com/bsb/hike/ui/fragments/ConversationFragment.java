@@ -538,6 +538,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			final ConvMessage finalMessage = message;
 
+			if(finalMessage.getMsgID() <=  conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+			{
+				return;
+			}
 			if (getActivity() == null)
 			{
 				return;
