@@ -579,7 +579,9 @@ public class UploadFileTask extends FileTransferBase
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
 
 		int start = mStart;
-		int end = start + chunkSize;
+		int end = (int) length;
+		if (end > (start + chunkSize))
+			end = start + chunkSize;
 		end--;
 
 		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
