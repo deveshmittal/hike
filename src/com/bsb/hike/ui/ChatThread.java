@@ -1468,6 +1468,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					initiateFileTransferFromIntentData(fileType, filePath);
 				}
+				intent.removeExtra(HikeConstants.Extras.FILE_PATHS);
 			}
 			/*
 			 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
