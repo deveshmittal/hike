@@ -1126,10 +1126,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		mAdapter.toggleSelection(position);
-		boolean isMsgSelected = mAdapter.isSelected(position);
-		ConvMessage message = mAdapter.getItem(position);
-		return showMessageContextMenu(message, isMsgSelected);
+		return showMessageContextMenu(position);
 	}
 
 	@Override
@@ -1139,13 +1136,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return;
 	}
 
-	public boolean showMessageContextMenu(final ConvMessage message, final boolean isMsgSelected)
+	public boolean showMessageContextMenu(int position)
 	{
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
 			return false;
 		}
-
+		mAdapter.toggleSelection(position);
+		boolean isMsgSelected = mAdapter.isSelected(position);
+		
 		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
 
 		if (hasCheckedItems && !isActionModeOn)
