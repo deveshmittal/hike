@@ -1138,7 +1138,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public boolean showMessageContextMenu(int position)
 	{
-		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
+		ConvMessage message = mAdapter.getItem(position);
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO 
+				|| message.getTypingNotification() != null || message.isSmsToggle())
 		{
 			return false;
 		}
