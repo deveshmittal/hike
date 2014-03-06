@@ -627,6 +627,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				});
 			}
+			isActionModeOn = savedInstanceState.getBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, false);
+			if (isActionModeOn)
+			{
+				ArrayList<Integer> selectedPositions = savedInstanceState.getIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS);
+				mAdapter.setPositionsSelected(selectedPositions);
+				selectedNonForwadableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS);
+				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
+				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
+				setupActionModeActionBar();
+			}
 		}
 
 		/* registering localbroadcast manager */
@@ -4781,6 +4791,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		outState.putLong(HikeConstants.Extras.RECORDER_START_TIME, updateRecordingDuration != null ? updateRecordingDuration.getStartTime() : 0);
 		outState.putLong(HikeConstants.Extras.RECORDED_TIME, recordedTime);
 		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
+		if(isActionModeOn){
+			outState.putBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, true);
+			outState.putIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS, new ArrayList<Integer>(mAdapter.getSelectedIds()));
+			outState.putInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS, selectedNonForwadableMsgs);
+			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
+			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
+		}
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
 		{
 			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, true);
@@ -5894,9 +5911,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean initializeActionMode()
 	{
 		setActionModeOn(true);
-		selectedNonTextMsgs = 0;
-		selectedNonForwadableMsgs = 0;
-		selectedCancelableMsgs = 0;
 		mOptionsList.put(R.id.delete_msgs, true);
 		mOptionsList.put(R.id.forward_msgs, true);
 		mOptionsList.put(R.id.copy_msgs, true);
@@ -5904,10 +5918,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mOptionsList.put(R.id.cancel_download_msg, false);
 		// this onItemClick should be unregistered when
 		mConversationsView.setOnItemClickListener(ChatThread.this);
+		if(mAdapter.getSelectedCount()>0){
+			setActionModeTitle(mAdapter.getSelectedCount());
+		}
 		return true;
 	}
 	
 	private void destroyActionMode(){
+		selectedNonTextMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedCancelableMsgs = 0;
 		setActionModeOn(false);
 		// removing the on item click listener
 		mConversationsView.setOnItemClickListener(null);

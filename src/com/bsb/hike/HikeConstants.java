@@ -1036,6 +1036,16 @@ public class HikeConstants
 		public static final String GALLERY_SELECTIONS = "gallerySelections";
 
 		public static final String FILE_PATHS = "filePaths";
+
+		public static final String IS_ACTION_MODE_ON = "isActionModeOn";
+		
+		public static final String SELECTED_POSITIONS = "selectedPositions";
+
+		public static final String SELECTED_NON_FORWARDABLE_MSGS = "selectedNonForwadableMsgs";
+		
+		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
+		
+		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
 	}
 
 	public static final class LogEvent

@@ -3235,6 +3235,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		notifyDataSetChanged();
 	}
+	
+	public void setPositionsSelected(ArrayList<Integer> selectedPositions)
+	{
+		mSelectedItemsIds.addAll(selectedPositions);
+		notifyDataSetChanged();
+	}
 
 	public int getSelectedCount()
 	{
