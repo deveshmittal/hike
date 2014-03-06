@@ -2626,7 +2626,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
-		container.setEnabled(false);
 		
 		container.setOnLongClickListener(this);
 
