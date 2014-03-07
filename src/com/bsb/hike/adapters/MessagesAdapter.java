@@ -98,7 +98,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
 	};
 
 	private class ViewHolder
@@ -360,7 +360,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.getTypingNotification() != null)
+		if (convMessage.getUnreadCount() > 0)
+		{
+			type = ViewType.UNREAD_COUNT;
+		}
+		else if (convMessage.getTypingNotification() != null)
 		{
 			type = ViewType.RECEIVE;
 		}
@@ -380,7 +384,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.STATUS_MESSAGE;
 		}
-		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO || convMessage.getUnreadCount() > 0)
+		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			type = ViewType.PARTICIPANT_INFO;
 		}
@@ -498,6 +502,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 			case LAST_READ:
 				v = inflater.inflate(R.layout.last_read_line, null);
+				break;
+			case UNREAD_COUNT:
+				v = inflater.inflate(R.layout.message_item_receive, null);
+				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
+				holder.dayTextView = (TextView) v.findViewById(R.id.day);
+				holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
+				v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
 				break;
 			case STATUS_MESSAGE:
 				v = inflater.inflate(R.layout.in_thread_status_update, null);
@@ -1910,12 +1923,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			}
-			else if (convMessage.getUnreadCount() > 0)
-			{
-				TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
-				participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
-				((ViewGroup) holder.container).addView(participantInfo);
-			}
+			return v;
+		}
+		else if (viewType == ViewType.UNREAD_COUNT)
+		{
+			holder.container.setVisibility(View.VISIBLE);
+			int layoutRes = chatTheme.systemMessageLayoutId();
+			TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
+			participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
+			((ViewGroup) holder.container).removeAllViews();
+			((ViewGroup) holder.container).addView(participantInfo);
 			return v;
 		}
 

@@ -1099,8 +1099,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv = new Conversation(msisdn, convid, name, onhike);
 
 			}
-
-			List<ConvMessage> messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			
+			List<ConvMessage> messages;
+			if(unreadCount > limit)
+			{
+				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+			}
+			else
+			{
+				messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			}
 			conv.setMessages(messages);
 			conv.setUnreadCount(unreadCount);
 

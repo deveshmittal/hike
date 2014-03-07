@@ -1686,7 +1686,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(mConversation.getUnreadCount() > 0)
 		{
 			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
-			messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+			if ((messages.size() - mConversation.getUnreadCount()) > 0)
+			{
+				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+			}
+			else
+			{
+				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+			}
 		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
@@ -1730,8 +1737,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mBottomView.setVisibility(View.VISIBLE);
 		}
 
+		if(mConversation.getUnreadCount() > 0)
+		{
+			mConversationsView.setSelection(messages.size() - mConversation.getUnreadCount() - 1);
+		}
 		// Scroll to the bottom if we just opened a new conversation
-		if (!wasOrientationChanged)
+		else if (!wasOrientationChanged)
 		{
 			mConversationsView.setSelection(messages.size() - 1);
 		}
@@ -2255,16 +2266,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (ids != null)
 			{
-				int lastReadIndex = messages.size() - ids.length();
-				// Scroll to the last unread message
-				if (lastReadIndex == 0)
-				{
-					mConversationsView.setSelection(lastReadIndex);
-				}
-				else
-				{
-					mConversationsView.setSelection(lastReadIndex - 1);
-				}
+//				int lastReadIndex = messages.size() - ids.length();
+//				// Scroll to the last unread message
+//				if (lastReadIndex == 0)
+//				{
+//					mConversationsView.setSelection(lastReadIndex);
+//				}
+//				else
+//				{
+//					mConversationsView.setSelection(lastReadIndex - 1);
+//				}
 
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
