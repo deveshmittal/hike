@@ -58,22 +58,15 @@
 	 <RelativeLayout
         android:id="@+id/message_container"
         android:layout_width="match_parent"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:layout_height="wrap_content"
-        android:paddingBottom="2dp"
         android:layout_below="@id/day_container">
-
-        <View
-            android:id="@+id/selected_top_line"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/selected_msg_item_bg_lines"
-            android:visibility="invisible" />
         
 	<RelativeLayout
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"
-	    android:paddingTop="2dp"
 		android:paddingLeft="@dimen/chat_bubble_edge_spacing"
 		android:paddingRight="@dimen/chat_bubble_edge_spacing">
 
@@ -444,12 +437,13 @@
 	</RelativeLayout>
 	</RelativeLayout>
 	
-	 <View
-        android:id="@+id/selected_bottom_line"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/selected_msg_item_bg_lines"
-        android:visibility="invisible" />
-
+	<View
+        android:id="@+id/selected_state_overlay"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+        android:layout_alignTop="@id/message_container"
+        android:layout_alignBottom="@id/message_container"
+        android:background="@color/action_bar_item_pressed"
+        android:visibility="gone"/>
+	
 </RelativeLayout>

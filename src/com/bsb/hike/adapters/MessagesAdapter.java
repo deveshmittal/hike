@@ -181,6 +181,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View dayRight;
 
 		ImageView pokeCustom;
+
+		View selectedStateOverlay;
 	}
 
 	private Conversation conversation;
@@ -541,6 +543,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay); 
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null)
@@ -565,6 +568,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 				holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -588,6 +592,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 			case RECEIVE:
 				if (v == null)
 				{
@@ -622,7 +627,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
 
 				holder.container.setVisibility(View.GONE);
-
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
 			case SMS_TOGGLE:
 				v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
@@ -1933,9 +1938,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		if(isActionModeOn && isSelected(position))
 		{
-			setSelected(v);
+			holder.selectedStateOverlay.setVisibility(View.VISIBLE);
 		} else{
-			setUnSelected(v);
+			holder.selectedStateOverlay.setVisibility(View.GONE);
 		}
 		return v;
 	}
@@ -3260,25 +3265,5 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void setActionMode(boolean isOn)
 	{
 		isActionModeOn = isOn;
-	}
-	
-	public void setSelected(View v)
-	{
-		if(v.findViewById(R.id.selected_top_line) != null)
-		{
-			v.findViewById(R.id.selected_top_line).setVisibility(View.VISIBLE);
-			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(R.color.selected_msg_item_bg));
-			v.findViewById(R.id.selected_bottom_line).setVisibility(View.VISIBLE);
-		}
-	}
-	
-	public void setUnSelected(View v)
-	{
-		if(v.findViewById(R.id.selected_top_line) != null)
-		{
-			v.findViewById(R.id.selected_top_line).setVisibility(View.INVISIBLE);
-			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
-			v.findViewById(R.id.selected_bottom_line).setVisibility(View.INVISIBLE);
-		}
 	}
 }
