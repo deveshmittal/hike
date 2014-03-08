@@ -950,45 +950,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
 		
-
-		dismissPopupWindow();
-
-		attachmentWindow = new PopupWindow(this);
-
-		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, chatLayout, false);
-
-		attachmentWindow.setContentView(parentView);
-
-		ListView overFlowListView = (ListView) parentView.findViewById(R.id.overflow_menu_list);
-		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this, R.layout.over_flow_menu_item, R.id.item_title, optionsList)
-		{
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
-			{
-				if (convertView == null)
-				{
-					convertView = getLayoutInflater().inflate(R.layout.over_flow_menu_item, parent, false);
-				}
-
-				OverFlowMenuItem item = getItem(position);
-
-				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
-				itemTextView.setText(item.getName());
-
-				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-
-				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
-				freeSmsCount.setVisibility(View.GONE);
-
-				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
-				newGamesIndicator.setVisibility(View.GONE);
-
-				return convertView;
-			}
-		});
-
-		overFlowListView.setOnItemClickListener(new OnItemClickListener()
+		OnItemClickListener onItemClickListener = new OnItemClickListener()
 		{
 
 			@Override
@@ -1032,43 +994,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 			}
-		});
+		};
 
-		attachmentWindow.setOnDismissListener(new OnDismissListener()
-		{
-
-			@Override
-			public void onDismiss()
-			{
-				attachmentWindow = null;
-			}
-		});
-
-		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		attachmentWindow.setOutsideTouchable(true);
-		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth(getResources().getDimensionPixelSize(R.dimen.overflow_menu_width));
-		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		/*
-		 * In some devices Activity crashes and a BadTokenException is thrown by showAsDropDown method. Still need to find out exact repro of the bug.
-		 */
-		try
-		{
-			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
-		}
-		catch (BadTokenException e)
-		{
-			Log.e(getClass().getSimpleName(), "Excepetion in HomeActivity Overflow popup", e);
-		}
-		attachmentWindow.getContentView().setFocusableInTouchMode(true);
-		attachmentWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
-		{
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event)
-			{
-				return onKeyUp(keyCode, event);
-			}
-		});
+		setupPopupWindow(optionsList, onItemClickListener);
 	}
 
 	private void clearConversation()
@@ -6095,6 +6023,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(message.isSent() ? R.string.cancel_upload : R.string.cancel_download), 0));
 
+		OnItemClickListener onItemClickListener = new OnItemClickListener()
+		{
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				dismissPopupWindow();
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
+
+				switch (item.getKey())
+				{
+				case 0:
+					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+					File file = hikeFile.getFile();
+					FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+					mAdapter.notifyDataSetChanged();
+					destroyActionMode();
+					break;
+				}
+			}
+		};
+
+		setupPopupWindow(optionsList, onItemClickListener);
+	}
+
+	private void setupPopupWindow(ArrayList<OverFlowMenuItem> optionsList, OnItemClickListener onItemClickListener)
+	{
+		
 		dismissPopupWindow();
 
 		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, chatLayout, false);
@@ -6128,33 +6084,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 
-		overFlowListView.setOnItemClickListener(new OnItemClickListener()
-		{
-
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
-			{
-				dismissPopupWindow();
-				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
-
-				switch (item.getKey())
-				{
-				case 0:
-					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-					File file = hikeFile.getFile();
-					FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
-					mAdapter.notifyDataSetChanged();
-					destroyActionMode();
-					break;
-				}
-			}
-		});
-
-		setupPopupWindow(parentView);
-	}
-
-	private void setupPopupWindow(View parentView)
-	{
+		overFlowListView.setOnItemClickListener(onItemClickListener);
+		
 		attachmentWindow = new PopupWindow(this);
 
 		attachmentWindow.setContentView(parentView);
