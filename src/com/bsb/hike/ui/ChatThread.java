@@ -5983,19 +5983,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			};
 			
-			View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					destroyActionMode();
-					deleteConfirmDialog.dismiss();
-				}
-			};
-
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
