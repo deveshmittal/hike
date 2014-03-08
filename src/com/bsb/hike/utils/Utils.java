@@ -1533,7 +1533,7 @@ public class Utils
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
 	{
-		if (convMessage == null || convMessage.getTypingNotification() != null)
+		if (convMessage == null || convMessage.getTypingNotification() != null || convMessage.getUnreadCount() != -1)
 		{
 			return false;
 		}
