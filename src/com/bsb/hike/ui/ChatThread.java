@@ -5834,6 +5834,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private void setupActionModeActionBar()
 	{
+		if (attachmentWindow != null && attachmentWindow.isShowing())
+		{
+			dismissPopupWindow();
+			attachmentWindow = null;
+		}
+		
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
