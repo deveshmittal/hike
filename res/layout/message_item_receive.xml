@@ -106,7 +106,7 @@
 	        android:layout_toRightOf="@id/avatar_container"
 	        android:gravity="left" >
 	        
-	        <LinearLayout
+	        <RelativeLayout
 	            android:id="@+id/receive_message_container"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
@@ -114,7 +114,12 @@
 	            android:gravity="center_vertical"
 	            android:orientation="vertical"
 	            android:paddingRight="4dp">
-
+	            
+			<LinearLayout
+			    android:id="@+id/receive_message_inner_container"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content" >
+	            
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
 	                    android:layout_width="wrap_content"
@@ -363,6 +368,19 @@
                     android:layout_marginLeft="9dp" />
 
 	        </LinearLayout>
+	        
+			<com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+      	        android:text="00:00"
+                android:textColor="#4ea9e7"
+                android:textSize="12sp"
+                android:layout_marginLeft="5dp"
+                android:layout_below="@id/receive_message_inner_container"
+                android:layout_alignLeft="@id/receive_message_inner_container" />
+			
+	        </RelativeLayout>
 	        <ImageView
 	             android:id="@+id/poke_receive_custom"
 	             android:layout_width="wrap_content"

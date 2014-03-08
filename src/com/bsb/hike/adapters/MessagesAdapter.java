@@ -175,6 +175,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ProgressBar wating;
 
 		ProgressBar recProgress;
+		
+		TextView messageTime;
+		
+		ImageView messageStatus;
 
 		View dayLeft;
 
@@ -578,6 +582,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 				holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
+				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
+				holder.messageStatus = (ImageView) v.findViewById(R.id.message_status);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -633,6 +639,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.typing = (ImageView) v.findViewById(R.id.typing);
 
 				holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
+				
+				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
 
 				holder.container.setVisibility(View.GONE);
 
@@ -953,7 +961,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
 			}
 
-			if (!convMessage.isSent())
+			if (!convMessage.isSent() )
 			{
 				if (firstMessageFromParticipant)
 				{
@@ -966,7 +974,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
 			}
-			setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+			if(isDefaultTheme && !convMessage.isStickerMessage())
+			{
+				setNewSDR(position, holder.messageTime, holder.messageStatus);
+			}
+			else
+			{
+				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);	
+			}
 		}
 		else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
 		{
@@ -2266,6 +2281,33 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				return;
 			}
 			tv.setVisibility(View.GONE);
+		}
+	}
+	
+	private void setNewSDR(int position, TextView time, ImageView status)
+	{
+		ConvMessage current = getItem(position);
+		
+		time.setText(current.getTimestampFormatted(false, context));
+		time.setVisibility(View.VISIBLE);
+		if(current.isSent())
+		{
+			switch (current.getState())
+			{
+			case SENT_UNCONFIRMED:
+				status.setImageResource(R.drawable.ic_clock);
+				break;
+			case SENT_CONFIRMED:
+				status.setImageResource(R.drawable.ic_tick);
+				break;
+			case SENT_DELIVERED:
+				status.setImageResource(R.drawable.ic_double_tick);
+				break;
+			case SENT_DELIVERED_READ:
+				status.setImageResource(R.drawable.ic_double_tick_r);
+				break;
+			}
+			status.setVisibility(View.VISIBLE);
 		}
 	}
 
