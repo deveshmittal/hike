@@ -657,6 +657,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
+		if(isActionModeOn)
+		{
+			destroyActionMode();
+			return;
+		}
+		
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
 			dismissPopupWindow();
