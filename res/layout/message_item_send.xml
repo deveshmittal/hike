@@ -382,7 +382,6 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/message_container"
         android:layout_alignBottom="@id/message_container"
-        android:background="@color/action_bar_item_pressed"
         android:visibility="gone"/>
 
 </RelativeLayout>

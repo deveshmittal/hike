@@ -1936,10 +1936,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.messageContainer.setBackgroundResource(chatTheme.bubbleResId());
 			}
 		}
-		if(isActionModeOn && isSelected(position))
+		if(isActionModeOn)
 		{
+			/*
+			 * This is an transparent overlay over all the message which will
+			 * listen click events while action mode is on.
+			 */
 			holder.selectedStateOverlay.setVisibility(View.VISIBLE);
-		} else{
+			holder.selectedStateOverlay.setOnClickListener(selectedStateOverlayClickListener);
+			holder.selectedStateOverlay.setOnLongClickListener(this);
+
+			if(isSelected(position))
+			{
+				/*
+				 * If a message has been selected then background of selected state overlay will change
+				 * to selected state color. otherwise this overlay will be transparent
+				 */
+				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.action_bar_item_pressed));
+			} 
+			else
+			{
+				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+			}
+		}
+		else
+		{
 			holder.selectedStateOverlay.setVisibility(View.GONE);
 		}
 		return v;
@@ -2335,6 +2356,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		return getCount() == 0;
 	}
+	
+	/*
+	 * if action mode is on clicking on an item will invoke this listener
+	 */
+	View.OnClickListener selectedStateOverlayClickListener = new OnClickListener()
+	{
+		
+		@Override
+		public void onClick(View v)
+		{
+			v.performLongClick();
+			return;
+		}
+	};
 
 	@Override
 	public void onClick(View v)
@@ -2345,14 +2380,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		}
 		Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
-		/*
-		 * if action mode is on clicking on an item should select this item
-		 */
-		if (isActionModeOn)
-		{
-			v.performLongClick();
-			return;
-		}
 
 		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
 				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
