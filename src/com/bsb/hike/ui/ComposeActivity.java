@@ -149,9 +149,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				if (selectedContactSet.isEmpty())
 				{
-					Intent intent = new Intent(ComposeActivity.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 				else
 				{
