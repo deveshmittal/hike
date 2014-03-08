@@ -5896,14 +5896,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1)
 		{
-			Iterator<Integer> it = mAdapter.getSelectedIds().iterator();
-			ConvMessage currentSelectedMsg = mAdapter.getItem(it.next());
-			mOptionsList.put(currentSelectedMsg.isSent() ? R.id.cancel_upload_msg : R.id.cancel_download_msg, true);
+			mOptionsList.put(R.id.action_mode_overflow_menu, true);
 		}
 		else
 		{
-			mOptionsList.put(R.id.cancel_upload_msg, false);
-			mOptionsList.put(R.id.cancel_download_msg, false);
+			mOptionsList.put(R.id.action_mode_overflow_menu, false);
 		}
 
 		for (int i = 0; i < menu.size(); i++)
@@ -5927,8 +5924,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mOptionsList.put(R.id.delete_msgs, true);
 		mOptionsList.put(R.id.forward_msgs, true);
 		mOptionsList.put(R.id.copy_msgs, true);
-		mOptionsList.put(R.id.cancel_upload_msg, false);
-		mOptionsList.put(R.id.cancel_download_msg, false);
+		mOptionsList.put(R.id.action_mode_overflow_menu, false);
 		// this onItemClick should be unregistered when
 		mConversationsView.setOnItemClickListener(ChatThread.this);
 		if(mAdapter.getSelectedCount()>0){
@@ -6068,7 +6064,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
 
-			break;
+			destroyActionMode();
+			return true;
 		case R.id.copy_msgs:
 			Collections.sort(selectedMessagesIds);
 			convMsgs = new ConvMessage[selectedMessagesIds.size()];
@@ -6080,21 +6077,123 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			clipboard.setText(msgStr);
 			Toast.makeText(ChatThread.this, R.string.copied, Toast.LENGTH_SHORT).show();
-			break;
-		case R.id.cancel_upload_msg:
-		case R.id.cancel_download_msg:
+			destroyActionMode();
+			return true;
+		case R.id.action_mode_overflow_menu:
 			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
-			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			File file = hikeFile.getFile();
-			FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
-			mAdapter.notifyDataSetChanged();
-			break;
+			showActionModeOverflow(message);
+			return true;
 		default:
 			destroyActionMode();
 			return false;
 		}
-		destroyActionMode();
-		return true;
+	}
+
+	private void showActionModeOverflow(final ConvMessage message)
+	{
+		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
+
+		optionsList.add(new OverFlowMenuItem(getString(message.isSent() ? R.string.cancel_upload : R.string.cancel_download), 0));
+
+		dismissPopupWindow();
+
+		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, chatLayout, false);
+
+		ListView overFlowListView = (ListView) parentView.findViewById(R.id.overflow_menu_list);
+		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this, R.layout.over_flow_menu_item, R.id.item_title, optionsList)
+		{
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
+				if (convertView == null)
+				{
+					convertView = getLayoutInflater().inflate(R.layout.over_flow_menu_item, parent, false);
+				}
+
+				OverFlowMenuItem item = getItem(position);
+
+				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
+				itemTextView.setText(item.getName());
+
+				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+
+				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
+				freeSmsCount.setVisibility(View.GONE);
+
+				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
+				newGamesIndicator.setVisibility(View.GONE);
+
+				return convertView;
+			}
+		});
+
+		overFlowListView.setOnItemClickListener(new OnItemClickListener()
+		{
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				dismissPopupWindow();
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
+
+				switch (item.getKey())
+				{
+				case 0:
+					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+					File file = hikeFile.getFile();
+					FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+					mAdapter.notifyDataSetChanged();
+					destroyActionMode();
+					break;
+				}
+			}
+		});
+
+		setupPopupWindow(parentView);
+	}
+
+	private void setupPopupWindow(View parentView)
+	{
+		attachmentWindow = new PopupWindow(this);
+
+		attachmentWindow.setContentView(parentView);
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener()
+		{
+
+			@Override
+			public void onDismiss()
+			{
+				attachmentWindow = null;
+			}
+		});
+
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(getResources().getDimensionPixelSize(R.dimen.overflow_menu_width));
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		/*
+		 * In some devices Activity crashes and a BadTokenException is thrown by showAsDropDown method. Still need to find out exact repro of the bug.
+		 */
+		try
+		{
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
+		}
+		catch (BadTokenException e)
+		{
+			Log.e(getClass().getSimpleName(), "Excepetion in Action Mode Overflow popup", e);
+		}
+		attachmentWindow.getContentView().setFocusableInTouchMode(true);
+		attachmentWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
+		{
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event)
+			{
+				return onKeyUp(keyCode, event);
+			}
+		});
 	}
 
 }
