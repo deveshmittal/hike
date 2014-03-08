@@ -759,4 +759,5 @@
 	<string name="chat_bg_ftue_tip">Placeholder</string>
 	<string name="clear_conversation">Clear Conversation</string>
 	<string name="gallery_num_selected">%1$d selected</string>
+	<string name="copied">Copied</string>
 </resources>

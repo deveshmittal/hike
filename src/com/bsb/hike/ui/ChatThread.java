@@ -6078,6 +6078,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			clipboard.setText(msgStr);
+			Toast.makeText(ChatThread.this, R.string.copied, Toast.LENGTH_SHORT).show();
 			break;
 		case R.id.cancel_upload_msg:
 		case R.id.cancel_download_msg:
