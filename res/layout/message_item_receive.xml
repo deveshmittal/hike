@@ -443,6 +443,7 @@
 		android:layout_height="wrap_content"
         android:layout_alignTop="@id/message_container"
         android:layout_alignBottom="@id/message_container"
+        android:hapticFeedbackEnabled="false"
         android:visibility="gone"/>
 	
 </RelativeLayout>
