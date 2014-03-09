@@ -1001,9 +1001,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void clearConversation()
 	{
-		mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
-		messages.clear();
-		mAdapter.notifyDataSetChanged();
+		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(ChatThread.this);
+		clearConfirmDialog.setHeader(R.string.clear_conversation);
+		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
+				messages.clear();
+				mAdapter.notifyDataSetChanged();
+				clearConfirmDialog.dismiss();
+			}
+		};
+		
+		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+		clearConfirmDialog.setCancelButton(R.string.cancel);
+		clearConfirmDialog.show();
 	}
 
 	private void blockUser()
