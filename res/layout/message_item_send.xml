@@ -90,14 +90,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/msg_status_indicator"
-                android:background="@drawable/ic_bubble_green_selector"
-                android:gravity="center_vertical"
-                android:orientation="horizontal" >
+                android:background="@drawable/ic_bubble_green_selector" >
 
                 <LinearLayout
                     android:id="@+id/sent_message_inner_container"
                     android:layout_width="wrap_content"
-                	android:layout_height="wrap_content" >
+                	android:layout_height="wrap_content"
+                	android:minWidth="88dp"
+                	android:gravity="center_vertical"
+                	android:orientation="horizontal" >
                 <RelativeLayout 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
