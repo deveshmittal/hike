@@ -1559,6 +1559,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.IS_STATUS_MSG, false);
 		contentValues.put(DBConstants.MESSAGE_ID, 0);
 		contentValues.put(DBConstants.MAPPED_MSG_ID, 0);
+		contentValues.put(DBConstants.UNREAD_COUNT, 0);
 		contentValues.put(DBConstants.MSG_STATUS, State.RECEIVED_READ.ordinal());
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { Long.toString(convId) });
