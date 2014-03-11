@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="30dp" 
-    android:paddingBottom="2dp">
+    android:paddingBottom="2dp"
+    android:descendantFocusability="blocksDescendants">
 
     <LinearLayout
 		android:layout_marginBottom="5dp"
@@ -51,16 +52,10 @@
         android:id="@+id/message_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="2dp"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
         android:layout_below="@id/day_container">
 
-        <View
-            android:id="@+id/selected_top_line"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/selected_msg_item_bg_lines"
-            android:visibility="visible" />
-    
     <RelativeLayout
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
@@ -405,12 +400,13 @@
     </RelativeLayout>
     </RelativeLayout>
 
-    <View
-        android:id="@+id/selected_bottom_line"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/selected_msg_item_bg_lines"
-        android:visibility="visible" />
+	<View
+        android:id="@+id/selected_state_overlay"
+		android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/message_container"
+        android:layout_alignBottom="@id/message_container"
+        android:hapticFeedbackEnabled="false"
+        android:visibility="gone"/>
 
 </RelativeLayout>

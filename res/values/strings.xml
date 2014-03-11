@@ -759,4 +759,8 @@
 	<string name="chat_bg_ftue_tip">Placeholder</string>
 	<string name="clear_conversation">Clear Conversation</string>
 	<string name="gallery_num_selected">%1$d selected</string>
+	<string name="copied">Copied</string>
+	<string name="share_with">Share with %1$s?</string>
+	<string name="forward_to">Forward to %1$s?</string>
+	<string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation.</string>
 </resources>

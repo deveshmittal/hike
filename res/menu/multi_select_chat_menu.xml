@@ -6,26 +6,25 @@
         android:icon="@drawable/actionbar_ic_delete"
         android:showAsAction="always"
         android:title="@string/delete"/>
+    
+    <item
+        android:id="@+id/copy_msgs"
+        android:icon="@drawable/actionbar_ic_copy"
+        android:showAsAction="always"
+        android:title="@string/copy"
+        android:visible="false"/>
+    
     <item
         android:id="@+id/forward_msgs"
         android:icon="@drawable/actionbar_ic_forward"
         android:showAsAction="always"
         android:title="@string/forward"/>
-    <item
-        android:id="@+id/copy_msgs"
-        android:icon="@drawable/actionbar_ic_copy"
-        android:showAsAction="ifRoom"
-        android:title="@string/copy"
-        android:visible="false"/>
-    <item
-        android:id="@+id/cancel_upload_msg"
-        android:showAsAction="never"
-        android:title="@string/cancel_upload"
-        android:visible="false"/>
-    <item
-        android:id="@+id/cancel_download_msg"
-        android:showAsAction="never"
-        android:title="@string/cancel_download"
+    
+   <item
+        android:id="@+id/action_mode_overflow_menu"
+        android:icon="@drawable/ic_overflow"
+        android:showAsAction="always"
+        android:title="@string/other"
         android:visible="false"/>
 
 </menu>
