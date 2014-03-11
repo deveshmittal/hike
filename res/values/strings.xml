@@ -763,4 +763,6 @@
 	<string name="share_with">Share with %1$s?</string>
 	<string name="forward_to">Forward to %1$s?</string>
 	<string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation.</string>
+	<string name="num_unread_messages">%1$s new messages</string>
+	<string name="one_unread_message">1 new message</string>
 </resources>
