@@ -13,6 +13,9 @@
         android:layout_height="1dp"
         android:layout_gravity="right" />
     
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
     <LinearLayout
         android:id="@+id/home_screen"
         android:layout_width="match_parent"
@@ -30,4 +33,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
+    
+    <com.bsb.hike.view.CustomFontTextView
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
+        android:text="No Internet Connection"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:background="#ee5953"
+        android:visibility="gone" />
+    </RelativeLayout>
 </FrameLayout>
