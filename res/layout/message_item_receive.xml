@@ -59,8 +59,8 @@
 	 <RelativeLayout
         android:id="@+id/message_container"
         android:layout_width="match_parent"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="1dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/day_container">
         
