@@ -105,14 +105,15 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/ic_bubble_white_selector"
-	            android:gravity="center_vertical"
-	            android:orientation="vertical"
-	            android:paddingRight="4dp">
+	            android:gravity="center_vertical" >
 	            
 			<LinearLayout
 			    android:id="@+id/receive_message_inner_container"
 	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content" >
+	            android:layout_height="wrap_content"
+	            android:gravity="center_vertical"
+	            android:orientation="vertical"
+	            android:paddingRight="4dp" >
 	            
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
