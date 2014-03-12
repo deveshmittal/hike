@@ -3221,8 +3221,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				return;
 			}
-
-			mConversationsView.setSelection(messages.size() - 1);
+			else
+			{
+				mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+			}
+			/*
+			 * Resetting the transcript mode once the list has scrolled to the bottom.
+			 */
+			mHandler.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
+				}
+			});
 		}
 	}
 
