@@ -133,6 +133,19 @@
 
                 <include layout="@layout/new_message_indicator" />
             </RelativeLayout>
+            
+            <RelativeLayout
+                android:id="@+id/scroll_bottom_indicator"
+                android:layout_width="35dp"
+                android:layout_height="34dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="12dp"
+                android:layout_marginRight="16dp"
+                android:visibility="gone" >
+
+                <include layout="@layout/new_message_indicator" />
+            </RelativeLayout>
 
         </RelativeLayout>
 
