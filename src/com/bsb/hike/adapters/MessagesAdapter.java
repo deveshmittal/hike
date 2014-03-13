@@ -2349,20 +2349,41 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		time.setVisibility(View.VISIBLE);
 		if(message.isSent())
 		{
-			switch (message.getState())
+			if(message.isFileTransferMessage())
 			{
-			case SENT_UNCONFIRMED:
-				status.setImageResource(R.drawable.ic_clock);
-				break;
-			case SENT_CONFIRMED:
-				status.setImageResource(R.drawable.ic_tick);
-				break;
-			case SENT_DELIVERED:
-				status.setImageResource(R.drawable.ic_double_tick);
-				break;
-			case SENT_DELIVERED_READ:
-				status.setImageResource(R.drawable.ic_double_tick_r);
-				break;
+				switch (message.getState())
+				{
+				case SENT_UNCONFIRMED:
+					status.setImageResource(R.drawable.ic_clock_white);
+					break;
+				case SENT_CONFIRMED:
+					status.setImageResource(R.drawable.ic_tick_white);
+					break;
+				case SENT_DELIVERED:
+					status.setImageResource(R.drawable.ic_double_tick_white);
+					break;
+				case SENT_DELIVERED_READ:
+					status.setImageResource(R.drawable.ic_double_tick_r_white);
+					break;
+				}
+			}
+			else
+			{
+				switch (message.getState())
+				{
+				case SENT_UNCONFIRMED:
+					status.setImageResource(R.drawable.ic_clock);
+					break;
+				case SENT_CONFIRMED:
+					status.setImageResource(R.drawable.ic_tick);
+					break;
+				case SENT_DELIVERED:
+					status.setImageResource(R.drawable.ic_double_tick);
+					break;
+				case SENT_DELIVERED_READ:
+					status.setImageResource(R.drawable.ic_double_tick_r);
+					break;
+				}
 			}
 			status.setVisibility(View.VISIBLE);
 		}
