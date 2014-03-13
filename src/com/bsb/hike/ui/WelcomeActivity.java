@@ -6,6 +6,10 @@ import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -22,17 +26,20 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.ui.fragments.WelcomeTutorialFragment;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
+import com.viewpagerindicator.IconPageIndicator;
+import com.viewpagerindicator.IconPagerAdapter;
 
-public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupTask.OnSignupTaskProgressUpdate
+public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements SignupTask.OnSignupTaskProgressUpdate
 {
 	private Button mAcceptButton;
 
 	private ViewGroup loadingLayout;
 
-	private Button tcText;
+	private View tcText;
 
 	private ViewGroup tcContinueLayout;
 
@@ -46,6 +53,8 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 
 	private boolean isMicromaxDevice;
 
+	private ViewPager mPager;
+
 	@Override
 	public void onCreate(Bundle savedState)
 	{
@@ -57,7 +66,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
-		tcText = (Button) findViewById(R.id.terms_and_conditions);
+		tcText = findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
 		hikeLogoContainer = findViewById(R.id.hike_logo_container);
 		micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
@@ -123,6 +132,12 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 				startActivity(intent);
 			}
 		});
+
+		mPager = (ViewPager) findViewById(R.id.tutorial_pager);
+		mPager.setAdapter(new TutorialFragmentAdapter(getSupportFragmentManager()));
+
+		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
+		mIndicator.setViewPager(mPager);
 	}
 
 	public void onHikeIconClicked(View v)
@@ -268,5 +283,34 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 			mTask = null;
 		}
 		super.onBackPressed();
+	}
+
+	class TutorialFragmentAdapter extends FragmentPagerAdapter implements IconPagerAdapter
+	{
+		private int mCount = 3;
+
+		public TutorialFragmentAdapter(FragmentManager fm)
+		{
+			super(fm);
+		}
+
+		@Override
+		public Fragment getItem(int position)
+		{
+			return new WelcomeTutorialFragment(position);
+		}
+
+		@Override
+		public int getCount()
+		{
+			return mCount;
+		}
+
+		@Override
+		public int getIconResId(int index)
+		{
+			return R.drawable.welcome_tutorial_icon_indecator;
+		}
+
 	}
 }

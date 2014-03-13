@@ -765,4 +765,9 @@
 	<string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation.</string>
 	<string name="num_unread_messages">%1$s new messages</string>
 	<string name="one_unread_message">1 new message</string>
+	<string name="terms">Terms</string>
+	<string name="tutorial1_header_title">Keep close friends close with\nHike messenger.</string>
+	<string name="tutorial2_header_title">Tonnes of fun, beautiful\nstickers!</string>
+	<string name="tutorial3_header_title">Make conversations\ncolourful.</string>
+	<string name="get_started">GET STARTED</string>
 </resources>
