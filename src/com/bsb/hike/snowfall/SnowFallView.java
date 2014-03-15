@@ -28,8 +28,6 @@ public class SnowFallView extends View
 
 	private final Drawable snow_flake_large;
 
-	private final Drawable snow_flake_trans;
-
 	public SnowFallView(Context context)
 	{
 		super(context);
@@ -41,9 +39,6 @@ public class SnowFallView extends View
 
 		snow_flake_large = context.getResources().getDrawable(R.drawable.snow_flake_large);
 		snow_flake_large.setBounds(0, 0, snow_flake_large.getIntrinsicWidth(), snow_flake_large.getIntrinsicHeight());
-
-		snow_flake_trans = context.getResources().getDrawable(R.drawable.snow_flake_trans);
-		snow_flake_trans.setBounds(0, 0, snow_flake_trans.getIntrinsicWidth(), snow_flake_trans.getIntrinsicHeight());
 	}
 
 	@Override
@@ -53,7 +48,7 @@ public class SnowFallView extends View
 		Random random = new Random();
 		Interpolator interpolator = new LinearInterpolator();
 
-		snow_flake_count = Math.max(width, height) / 8;
+		snow_flake_count = Math.max(width, height) / 5;
 		coords = new int[snow_flake_count][];
 		drawables.clear();
 		int durationMultiplier = (int) (6 / Utils.densityMultiplier);
@@ -65,10 +60,10 @@ public class SnowFallView extends View
 			animation.initialize(10, 10, 10, 10);
 			animation.setInterpolator(interpolator);
 
-			int startYDisp = (int) (45 * Utils.densityMultiplier);
-			coords[i] = new int[] { random.nextInt(width), -startYDisp };
-			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, snow_flake_trans, animation));
-			animation.setStartOffset(random.nextInt(8 * height));
+			int startYDisp = (int) (25 * Utils.densityMultiplier);
+			coords[i] = new int[] { random.nextInt(width - startYDisp), -startYDisp };
+			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, animation));
+			animation.setStartOffset(random.nextInt(10 * height));
 			animation.setFillBefore(false);
 
 			animation.startNow();
