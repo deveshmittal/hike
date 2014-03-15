@@ -173,7 +173,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void initialiseHomeScreen(Bundle savedInstanceState)
 	{
 
-		setContentView(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue : R.layout.home);
+		setContentView(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue
+				: R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
 
@@ -186,9 +188,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 			}
 		}
-
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false))
-		{
+		
+		if(!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)){
 			Utils.blockOrientationChange(HomeActivity.this);
 			// if chat bg ftue is not shown show this on the highest priority
 			dialogShowing = DialogShowing.CHAT_BG_FTUE;
@@ -251,7 +253,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
-		if ((!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false)) && snowFallView == null)
+		if ((!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)) && snowFallView == null)
 		{
 			(new Handler()).postDelayed(new Runnable()
 			{
@@ -280,23 +282,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		return;
 	}
-
-	public void onChatBgOpenItUpClick(View v)
-	{
-		boolean newUser = getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
-		ContactInfo contactInfo = HikeUserDatabase.getInstance().getChatThemeFTUEContact(HomeActivity.this, newUser);
-		setChatThemeFTUEContact(contactInfo);
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))
-		{
-			ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
-		}
-		else
-		{
-			/*
-			 * Users who have already seen previous FTUE will be taken directly to chatthread
-			 */
-			onChatBgGiveItASpinClick(v);
-		}
+	
+	public void onChatBgOpenItUpClick(View v){
+		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
 	}
 
 	public void onChatBgGiveItASpinClick(View v)
@@ -316,13 +304,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				getSupportActionBar().show();
 			}
 		}, 2000);
-
-		Utils.unblockOrientationChange(HomeActivity.this);
-		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView, !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false));
+		
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
-		editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, true);
 		editor.commit();
+		Utils.unblockOrientationChange(HomeActivity.this);
+		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
 		return;
 	}
 
@@ -678,6 +665,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
+		if((!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))&&snowFallView==null){
+			(new Handler()).postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+				}
+			}, 300);
+		}
+		
 	}
 
 	@Override

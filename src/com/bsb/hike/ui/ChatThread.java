@@ -3482,37 +3482,37 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showValentineNudgeTip()
 	{
-		if (prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, false))
-		{
-			return;
-		}
-
-		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.valentine_nudge_dialog);
-		dialog.setCancelable(false);
-
-		View container = dialog.findViewById(R.id.container);
-
-		Drawable bg = new RoundedRepeatingDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_valentine_dialog), getResources().getDimension(
-				R.dimen.preview_corner_radius));
-		container.setBackgroundDrawable(bg);
-
-		Button done = (Button) dialog.findViewById(R.id.ok_btn);
-		done.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View view)
-			{
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, true);
-				editor.commit();
-
-				dialog.dismiss();
-			}
-		});
-
-		dialog.show();
+//		if (prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, false))
+//		{
+//			return;
+//		}
+//
+//		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+//		dialog.setContentView(R.layout.valentine_nudge_dialog);
+//		dialog.setCancelable(false);
+//
+//		View container = dialog.findViewById(R.id.container);
+//
+//		Drawable bg = new RoundedRepeatingDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_valentine_dialog), getResources().getDimension(
+//				R.dimen.preview_corner_radius));
+//		container.setBackgroundDrawable(bg);
+//
+//		Button done = (Button) dialog.findViewById(R.id.ok_btn);
+//		done.setOnClickListener(new OnClickListener()
+//		{
+//
+//			@Override
+//			public void onClick(View view)
+//			{
+//				Editor editor = prefs.edit();
+//				editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, true);
+//				editor.commit();
+//
+//				dialog.dismiss();
+//			}
+//		});
+//
+//		dialog.show();
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState)
