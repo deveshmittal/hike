@@ -2,7 +2,7 @@
 
  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tip_container"
-    android:layout_width="208dp"
+    android:layout_width="192dp"
     android:layout_height="67dp"
     android:background="@drawable/bg_sticker_ftue"
     android:orientation="horizontal"
@@ -24,7 +24,6 @@
         android:layout_weight="10"
         android:layout_gravity="center_vertical"
         android:paddingLeft="8dp"
-        android:paddingRight="16dp"
         android:shadowColor="#4D000000"
         android:shadowDy="0.6"
         android:shadowRadius="0.6"
