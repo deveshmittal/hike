@@ -82,7 +82,6 @@
         </activity>
 
         <activity
-            android:theme="@style/NoTitleBar"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan|stateAlwaysVisible"

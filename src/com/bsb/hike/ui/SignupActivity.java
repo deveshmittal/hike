@@ -3,9 +3,11 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.json.JSONException;
@@ -39,6 +41,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
@@ -57,6 +60,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -161,6 +165,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private CountDownTimer countDownTimer;
 
 	private boolean showingNumberConfimationDialog;
+	
+	TextView mActionBarTitle;
+	
+	View nextBtn;
+	
+	 private ArrayList<String> countriesArray = new ArrayList<String>();
+	 private HashMap<String, String> countriesMap = new HashMap<String, String>();
+	 private HashMap<String, String> codesMap = new HashMap<String, String>();
+	 private HashMap<String, String> languageMap = new HashMap<String, String>();
 
 	private class ActivityState
 	{
@@ -225,6 +238,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			mActivityState = new ActivityState();
 		}
 
+		setupActionBar();
 		if (savedInstanceState != null)
 		{
 			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
@@ -278,7 +292,46 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
 	}
+	
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		actionBar.setIcon(R.drawable.hike_logo_top_bar);
+		
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.signup_activity_action_bar, null);
+		
+		mActionBarTitle = (TextView) actionBarView.findViewById(R.id.title);
+		nextBtn = actionBarView.findViewById(R.id.next_btn);
 
+		nextBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				submitClicked();
+			}
+		});
+		actionBar.setCustomView(actionBarView);
+	}
+
+	private void setupActionBarTitle(){
+		int displayedChild = viewFlipper.getDisplayedChild();
+		if (displayedChild == NUMBER)
+		{
+			mActionBarTitle.setText(R.string.phone_num);
+		}
+		else if (displayedChild == PIN)
+		{
+			mActionBarTitle.setText(R.string.enter_pin);
+		}
+		else
+		{
+			mActionBarTitle.setText(R.string.enter_num);
+		}
+	}
+	
 	@Override
 	public void onFinish(boolean success)
 	{
@@ -428,7 +481,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void startLoading()
 	{
 		loadingLayout.setVisibility(View.VISIBLE);
-		submitBtn.setVisibility(View.GONE);
+		nextBtn.setEnabled(false);
 		if (invalidNum != null)
 		{
 			invalidNum.setVisibility(View.GONE);
@@ -479,7 +532,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX))
 			{
 				loadingLayout.setVisibility(View.GONE);
-				submitBtn.setVisibility(View.VISIBLE);
+				nextBtn.setEnabled(true);
 				invalidNum.setVisibility(View.VISIBLE);
 			}
 			else
@@ -587,10 +640,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
 		tryAgainBtn = (Button) layout.findViewById(R.id.btn_try_again);
-		submitBtn = (Button) findViewById(R.id.btn_continue);
-
 		loadingLayout.setVisibility(View.GONE);
-		submitBtn.setVisibility(View.VISIBLE);
+		nextBtn.setEnabled(true);
+		setupActionBarTitle();
 	}
 
 	private void prepareLayoutForFetchingNumber()
@@ -941,7 +993,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void resetViewFlipper()
 	{
 		tryAgainBtn.setVisibility(View.GONE);
-		submitBtn.setVisibility(View.VISIBLE);
+		nextBtn.setEnabled(true);
 		viewFlipper.setVisibility(View.VISIBLE);
 		removeAnimation();
 		viewFlipper.setDisplayedChild(NUMBER);
@@ -957,7 +1009,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private void showErrorMsg()
 	{
-		submitBtn.setVisibility(View.GONE);
+		nextBtn.setEnabled(false);
 		tryAgainBtn.setVisibility(View.VISIBLE);
 		loadingLayout.setVisibility(View.GONE);
 	}
@@ -1085,7 +1137,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				infoTxt.setText(R.string.wrong_pin_signup);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
-				submitBtn.setVisibility(View.VISIBLE);
+				nextBtn.setEnabled(true);
 				if (tapHereText != null)
 				{
 					tapHereText.setVisibility(View.VISIBLE);
@@ -1658,4 +1710,5 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			});
 		}
 	}
+	
 }
