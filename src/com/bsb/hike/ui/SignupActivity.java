@@ -44,6 +44,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -102,8 +103,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private ViewGroup nameLayout;
 
-	private TextView header;
-
 	private TextView infoTxt;
 
 	private TextView loadingText;
@@ -114,11 +113,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private Button tapHereText;
 
-	private Button submitBtn;
-
 	private TextView invalidNum;
 
-	private Button countryPicker;
+	private EditText countryPicker;
 
 	private Button callmeBtn;
 
@@ -211,7 +208,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 
-		header = (TextView) findViewById(R.id.header);
 		viewFlipper = (ViewFlipper) findViewById(R.id.signup_viewflipper);
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
@@ -396,11 +392,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	public void onClick(View v)
 	{
-		if (v.getId() == submitBtn.getId())
-		{
-			submitClicked();
-		}
-		else if (v.getId() == tryAgainBtn.getId())
+		if (v.getId() == tryAgainBtn.getId())
 		{
 			restartTask();
 			/*
@@ -636,10 +628,11 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
 		tapHereText = (Button) layout.findViewById(R.id.wrong_num);
 		invalidNum = (TextView) layout.findViewById(R.id.invalid_num);
-		countryPicker = (Button) layout.findViewById(R.id.country_picker);
+		countryPicker = (EditText)layout.findViewById(R.id.country_picker);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
 		tryAgainBtn = (Button) layout.findViewById(R.id.btn_try_again);
+		
 		loadingLayout.setVisibility(View.GONE);
 		nextBtn.setEnabled(true);
 		setupActionBarTitle();
@@ -649,8 +642,23 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		initializeViews(numLayout);
 
-		header.setText(R.string.phone);
-
+	    countryPicker.setOnFocusChangeListener(new OnFocusChangeListener()
+	    {
+	    	@Override
+		    public void onFocusChange(View arg0, boolean isFocus)
+		  	{
+	    	    if(isFocus)
+	    		{
+	    			findViewById(R.id.country_code_view_group).setBackgroundResource(R.drawable.bg_phone_num_selected);
+	    		}
+				else
+				{
+					findViewById(R.id.country_code_view_group).setBackgroundResource(R.drawable.bg_phone_num_unselected);
+				}
+				
+			}
+		});
+		
 		countryPicker.setEnabled(true);
 
 		String prevCode = accountPrefs.getString(HikeMessengerApp.TEMP_COUNTRY_CODE, "");
@@ -678,7 +686,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		formatCountryPickerText(countryPicker.getText().toString());
 
-		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.enter_num_signup);
+		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
 		loadingText.setText(R.string.verifying_num_signup);
 	}
@@ -735,8 +743,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void prepareLayoutForGettingPin(long timeLeft)
 	{
 		initializeViews(pinLayout);
-
-		header.setText(R.string.verify);
 
 		callmeBtn.setVisibility(View.VISIBLE);
 
@@ -831,8 +837,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			Utils.hideSoftKeyboard(this, enterEditText);
 		}
-
-		header.setText(R.string.profile_title);
 
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		if (TextUtils.isEmpty(msisdn))
