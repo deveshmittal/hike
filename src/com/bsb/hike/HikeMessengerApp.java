@@ -43,6 +43,7 @@ import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -668,6 +669,11 @@ public class HikeMessengerApp extends Application implements Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		initHikeLruCache(getApplicationContext());
+
+		/*
+		 * Setting the last seen preference for the friends comparator.
+		 */
+		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 	}
 
 	private static HikeLruCache cache;

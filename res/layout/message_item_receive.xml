@@ -208,7 +208,7 @@
                                 android:textStyle="bold"
                                 android:visibility="gone" />
 
-                            <!-- <com.bsb.hike.view.CustomFontTextView
+                            <com.bsb.hike.view.CustomFontTextView
                                 android:id="@+id/file_size"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -216,7 +216,7 @@
                                 android:gravity="left"
                                 android:textColor="@color/white"
                                 android:textSize="10dp"
-                                android:visibility="gone" /> -->
+                                android:visibility="gone" />
 
                             <com.bsb.hike.view.CustomFontTextView
                                 android:id="@+id/data_transferred"

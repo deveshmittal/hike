@@ -117,6 +117,8 @@ public class HikeFile
 	private Drawable thumbnail;
 
 	private String fileKey;
+	
+	private int fileSize;
 
 	private HikeFileType hikeFileType;
 
@@ -152,6 +154,7 @@ public class HikeFile
 		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
+		this.fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
 		this.longitude = fileJSON.optDouble(HikeConstants.LONGITUDE);
 		this.zoomLevel = fileJSON.optInt(HikeConstants.ZOOM_LEVEL, HikeConstants.DEFAULT_ZOOM_LEVEL);
@@ -214,8 +217,12 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.CONTENT_TYPE, fileTypeString);
 			fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
-			fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
+			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
+			if(sourceFilePath != null)
+			{
+				fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
+			}
 			if (recordingDuration != -1)
 			{
 				fileJSON.put(HikeConstants.PLAYTIME, recordingDuration);
@@ -291,6 +298,16 @@ public class HikeFile
 	public String getFileKey()
 	{
 		return fileKey;
+	}
+	
+	public void setFileSize(int fileSize)
+	{
+		this.fileSize = fileSize;
+	}
+	
+	public int getFileSize()
+	{
+		return fileSize;
 	}
 
 	public HikeFileType getHikeFileType()

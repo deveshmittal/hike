@@ -202,7 +202,7 @@ public class DownloadFileTask extends FileTransferBase
 					byte data[] = new byte[chunkSize];
 					// while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					int numRead = 0;
-					while (_state == FTState.IN_PROGRESS)
+					do
 					{
 						int byteRead = 0;
 						if (numRead == -1)
@@ -257,6 +257,7 @@ public class DownloadFileTask extends FileTransferBase
 						// showButton();
 						sendProgress();
 					}
+					while (_state == FTState.IN_PROGRESS);
 
 					switch (_state)
 					{
@@ -438,7 +439,7 @@ public class DownloadFileTask extends FileTransferBase
 					HikeMessengerApp.getPubSub().publish(HikePubSub.PUSH_FILE_DOWNLOADED, (ConvMessage) userContext);
 			}
 		}
-		else if (result != FTResult.PAUSED && result != FTResult.CANCELLED) // if no PAUSE and no SUCCESS
+		else if (result != FTResult.PAUSED) // if no PAUSE
 		{
 			final int errorStringId = result == FTResult.FILE_TOO_LARGE ? R.string.not_enough_space : result == FTResult.CANCELLED ? R.string.download_cancelled
 					: (result == FTResult.FILE_EXPIRED || result == FTResult.SERVER_ERROR) ? R.string.file_expire

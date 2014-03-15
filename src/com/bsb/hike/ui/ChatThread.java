@@ -1318,14 +1318,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
-
-				if (Utils.isPicasaUri(filePath))
+				
+				if(filePath == null)
 				{
-					FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 				}
 				else
 				{
-					initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+					if (Utils.isPicasaUri(filePath))
+					{
+						FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, mContactNumber, mConversation.isOnhike());
+					}
+					else
+					{
+						initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+					}
 				}
 
 				// Making sure the file does not get forwarded again on
@@ -2078,15 +2085,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 
 	/* returns TRUE iff the last message was received and unread */
-	private boolean isLastMsgReceivedAndUnread() {
-		if(mAdapter == null || mConversation == null) {
+	private boolean isLastMsgReceivedAndUnread()
+	{
+		if (mAdapter == null || mConversation == null)
+		{
 			return false;
 		}
 
 		ConvMessage lastMsg = null;
-		for(int i = messages.size() - 1; i >= 0; i--) {
+		for (int i = messages.size() - 1; i >= 0; i--)
+		{
 			ConvMessage msg = messages.get(i);
-			if(msg.getTypingNotification() != null) {
+			if (msg.getTypingNotification() != null)
+			{
 				continue;
 			}
 			lastMsg = msg;
@@ -4133,8 +4144,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (recorder != null)
 		{
 			/*
-			 * Catching RuntimeException here to prevent the app from crashing when
-			 * the the media recorder is immediately stopped after starting.
+			 * Catching RuntimeException here to prevent the app from crashing when the the media recorder is immediately stopped after starting.
 			 */
 			try
 			{
