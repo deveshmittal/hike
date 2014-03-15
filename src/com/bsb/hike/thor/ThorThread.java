@@ -9,6 +9,7 @@ import java.security.NoSuchProviderException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -16,15 +17,23 @@ import java.util.Map.Entry;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sqldroid.SQLDroidDriver;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 public class ThorThread implements Runnable
 {
+	public static final String THOR = "thor";
+
 	private static final String OLD_BACKUP = "/mnt/sdcard/WhatsApp/Databases/msgstore.db.crypt";
 
 	private static final String NEW_BACKUP = "/mnt/sdcard/WhatsApp/Databases/msgstore.db.crypt5";
@@ -39,7 +48,7 @@ public class ThorThread implements Runnable
 
 	private Context ctx;
 
-	protected ThorThread(Context context)
+	public ThorThread(Context context)
 	{
 		ctx = context;
 	}
@@ -75,7 +84,7 @@ public class ThorThread implements Runnable
 						successDecrypt = false;
 				}
 			}
-			else 
+			else
 			{
 				// old format backup file exists
 				successDecrypt = Decrypt.decrypt(inputFile, outputFile);
@@ -97,16 +106,19 @@ public class ThorThread implements Runnable
 					{
 						DbUtils.calculateScore(freq, con, key, oldts);
 					}
+					Intent i = new Intent(HikeMessengerApp.THOR_DETAILS_SENT);
+					i.putExtra(THOR, getThorBytes(freq).toString());
+					LocalBroadcastManager.getInstance(ctx).sendBroadcast(i);
 				}
 			}
 		}
 		catch (ClassNotFoundException e)
 		{
-			Log.e(TAG,"Exception",e);
+			Log.e(TAG, "Exception", e);
 		}
 		catch (SQLException e)
 		{
-			Log.e(TAG,"SQLException",e);
+			Log.e(TAG, "SQLException", e);
 		}
 		finally
 		{
@@ -122,8 +134,33 @@ public class ThorThread implements Runnable
 			}
 			catch (SQLException e)
 			{
-				Log.e(TAG,"SQLException in closing connection",e);
+				Log.e(TAG, "SQLException in closing connection", e);
 			}
 		}
+	}
+
+	private JSONObject getThorBytes(HashMap<String, Integer> freq)
+	{
+		if (freq == null)
+			return null;
+
+		JSONObject obj = new JSONObject();
+		for (Entry<String, Integer> kv : freq.entrySet())
+		{
+			String k = kv.getKey();
+			if (k != null)
+			{
+				int idx = k.indexOf("@");
+				String ph = k.substring(0, idx);
+				try
+				{
+					obj.put(ph, kv.getValue());
+				}
+				catch (JSONException e)
+				{
+				}
+			}
+		}
+		return obj;
 	}
 }
