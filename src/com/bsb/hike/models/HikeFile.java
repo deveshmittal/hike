@@ -121,7 +121,7 @@ public class HikeFile
 	private Drawable thumbnail;
 
 	private String fileKey;
-	
+
 	private int fileSize;
 
 	private HikeFileType hikeFileType;
@@ -223,7 +223,7 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
-			if(sourceFilePath != null)
+			if (sourceFilePath != null)
 			{
 				fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
 			}
@@ -303,12 +303,12 @@ public class HikeFile
 	{
 		return fileKey;
 	}
-	
+
 	public void setFileSize(int fileSize)
 	{
 		this.fileSize = fileSize;
 	}
-	
+
 	public int getFileSize()
 	{
 		return fileSize;
