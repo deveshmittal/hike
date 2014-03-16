@@ -223,4 +223,5 @@
     <color name="valenting_nudge_button_pressed">#26000000</color>
     <color name="selected_msg_item_bg">#1A0f8fe1</color>
     <color name="selected_msg_item_bg_lines">#0f8fe1</color>
+    <color name="file_message_item_bg">#a2aab0</color>
 </resources>

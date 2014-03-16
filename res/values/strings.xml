@@ -773,4 +773,6 @@
     <string name="sd_card">SD Card</string>
     <string name="multi_file_creation">Placeholder creation</string>
     <string name="file">File</string>
+    <string name="file_msg_received">Sent you a file</string>
+    <string name="file_msg_sent">File</string>
 </resources>

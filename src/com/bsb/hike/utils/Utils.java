@@ -557,6 +557,11 @@ public class Utils
 
 	public static String getFinalFileName(HikeFileType type)
 	{
+		return getFinalFileName(type, null);
+	}
+
+	public static String getFinalFileName(HikeFileType type, String orgName)
+	{
 		String orgFileName = "";
 		// String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
 		// .format(new Date());
@@ -573,6 +578,9 @@ public class Utils
 		case AUDIO:
 		case AUDIO_RECORDING:
 			orgFileName = "AUD_" + timeStamp + ".m4a";
+			break;
+		case OTHER:
+			orgFileName = timeStamp + orgName;
 		}
 		return orgFileName;
 	}

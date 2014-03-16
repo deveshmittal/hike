@@ -42,6 +42,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.MimeTypeMap;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -181,6 +182,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View dayRight;
 
 		ImageView pokeCustom;
+
+		TextView fileExtension;
 	}
 
 	private Conversation conversation;
@@ -541,6 +544,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
+				holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null)
@@ -586,6 +590,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
 				holder.recProgress = (ProgressBar) v.findViewById(R.id.audio_rec_progress);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
+				holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 			case RECEIVE:
@@ -1118,10 +1123,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.loadingThumb.setVisibility(View.VISIBLE);
 				}
 			}
-			else if (hikeFileType == HikeFileType.UNKNOWN)
+			else if (hikeFileType == HikeFileType.OTHER)
 			{
-				holder.fileThumb.setBackgroundResource(R.drawable.ic_unknown_file);
+				createMediaThumb(holder.fileThumb);
 				holder.fileThumb.setVisibility(View.VISIBLE);
+				holder.fileExtension.setVisibility(View.VISIBLE);
+				holder.fileExtension.setText(MimeTypeMap.getFileExtensionFromUrl(hikeFile.getFile().getAbsolutePath()).toUpperCase());
 			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail Dimensions
@@ -1130,7 +1137,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 
 			}
-			else if ((!showThumbnail) && (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO))
+			else if ((!showThumbnail) && (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER))
 			{
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
@@ -1166,11 +1173,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				// Utils.setupFormattedTime(holder.recDuration, hikeFile.getRecordingDuration());
 				// holder.recDuration.setVisibility(View.VISIBLE);
-			}
-			else if (hikeFileType == HikeFileType.UNKNOWN)
-			{
-				holder.messageTextView.setText(context.getString(R.string.unknown_msg));
-				holder.messageTextView.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.CONTACT)
 			{
@@ -2067,11 +2069,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		// TODO Auto-generated method stub
 		Log.d(getClass().getSimpleName(), "creating default thumb. . . ");
-		int pixels = (int) (119 * Utils.densityMultiplier);
+		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
 		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		fileThumb.setBackgroundColor(0xffa2aab0);
+		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
 		fileThumb.setImageResource(0);
 	}
 
@@ -2441,11 +2443,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				File receivedFile = hikeFile.getFile();
-				if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN)
-				{
-					Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-					return;
-				}
 				if (((hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || hikeFile.wasFileDownloaded()))
 				{
 					openFile(hikeFile, convMessage, v);
@@ -2547,10 +2544,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				voiceMessagePlayer.playMessage(hikeFile);
 			}
 			return;
-		}
-		else if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN || receivedFile == null)
-		{
-			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT);
 		}
 		else
 		{

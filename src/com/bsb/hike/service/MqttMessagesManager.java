@@ -437,7 +437,7 @@ public class MqttMessagesManager
 					JSONObject fileJson = fileArray.getJSONObject(i);
 					Log.d(getClass().getSimpleName(), "Previous json: " + fileJson);
 					if (hikeFile.getHikeFileType() != HikeFileType.CONTACT && hikeFile.getHikeFileType() != HikeFileType.LOCATION) // dont change name for contact or location
-						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType()));
+						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType(), hikeFile.getFileName()));
 					Log.d(getClass().getSimpleName(), "New json: " + fileJson);
 				}
 				/*

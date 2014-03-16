@@ -10,6 +10,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -21,7 +22,7 @@ public class HikeFile
 {
 	public static enum HikeFileType
 	{
-		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, CONTACT, AUDIO_RECORDING, UNKNOWN;
+		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, CONTACT, AUDIO_RECORDING, OTHER;
 
 		public static HikeFileType fromString(String fileTypeString)
 		{
@@ -30,27 +31,30 @@ public class HikeFile
 
 		public static HikeFileType fromString(String fileTypeString, boolean isRecording)
 		{
-			if (fileTypeString.startsWith("video"))
+			if (!TextUtils.isEmpty(fileTypeString))
 			{
-				return HikeFileType.VIDEO;
+				if (fileTypeString.startsWith("video"))
+				{
+					return HikeFileType.VIDEO;
+				}
+				else if (fileTypeString.startsWith("audio"))
+				{
+					return isRecording ? HikeFileType.AUDIO_RECORDING : HikeFileType.AUDIO;
+				}
+				else if (fileTypeString.startsWith(HikeConstants.LOCATION_CONTENT_TYPE))
+				{
+					return HikeFileType.LOCATION;
+				}
+				else if (fileTypeString.startsWith("image"))
+				{
+					return HikeFileType.IMAGE;
+				}
+				else if (fileTypeString.startsWith(HikeConstants.CONTACT_CONTENT_TYPE))
+				{
+					return HikeFileType.CONTACT;
+				}
 			}
-			else if (fileTypeString.startsWith("audio"))
-			{
-				return isRecording ? HikeFileType.AUDIO_RECORDING : HikeFileType.AUDIO;
-			}
-			else if (fileTypeString.startsWith(HikeConstants.LOCATION_CONTENT_TYPE))
-			{
-				return HikeFileType.LOCATION;
-			}
-			else if (fileTypeString.startsWith("image"))
-			{
-				return HikeFileType.IMAGE;
-			}
-			else if (fileTypeString.startsWith(HikeConstants.CONTACT_CONTENT_TYPE))
-			{
-				return HikeFileType.CONTACT;
-			}
-			return HikeFileType.UNKNOWN;
+			return HikeFileType.OTHER;
 		}
 
 		public static String toString(HikeFileType hikeFileType)
@@ -104,7 +108,7 @@ public class HikeFile
 			{
 				return isSent ? context.getString(R.string.audio_recording_msg_sent) : context.getString(R.string.audio_recording_msg_received);
 			}
-			return context.getString(R.string.unknown_msg);
+			return isSent ? context.getString(R.string.file_msg_sent) : context.getString(R.string.file_msg_received);
 		}
 	}
 
