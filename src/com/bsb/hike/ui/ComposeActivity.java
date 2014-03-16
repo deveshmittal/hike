@@ -52,6 +52,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -148,9 +149,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				if (selectedContactSet.isEmpty())
 				{
-					Intent intent = new Intent(ComposeActivity.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 				else
 				{
@@ -535,9 +534,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 		else
 		{
-			Intent presentIntent = getIntent();
-
-			ContactInfo contactInfo;
+			final ContactInfo contactInfo;
 			if (pair.second != null)
 			{
 				contactInfo = pair.second;
@@ -547,85 +544,117 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 				String msisdn = getNormalisedMsisdn();
 				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
 			}
-			Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
-			intent.setClass(this, ChatThread.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			String type = presentIntent.getType();
+			
+			final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
+			if(isSharingFile)
+			{
+				forwardConfirmDialog.setHeader(R.string.share);
+				forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getName()));
+			} 
+			else
+			{
+				forwardConfirmDialog.setHeader(R.string.forward);
+				forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getName()));
+			}
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			{
 
-			if (Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
-			{
-				if (type != null)
+				@Override
+				public void onClick(View v)
 				{
-					ArrayList<Uri> imageUris = presentIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-					if (imageUris != null)
-					{
-						ArrayList<String> filePathArray = new ArrayList<String>(imageUris.size());
-						for (Uri fileUri : imageUris)
-						{
-							Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
-							String fileUriStart = "file:";
-							String fileUriString = fileUri.toString();
-
-							if (fileUriString.startsWith(fileUriStart))
-							{
-								File selectedFile = new File(URI.create(fileUriString));
-								/*
-								 * Done to fix the issue in a few Sony devices.
-								 */
-								filePathArray.add(selectedFile.getAbsolutePath());
-							}
-							else
-							{
-								filePathArray.add(Utils.getRealPathFromUri(fileUri, this));
-							}
-						}
-
-						intent.putExtra(HikeConstants.Extras.FILE_PATHS, filePathArray);
-						intent.putExtra(HikeConstants.Extras.FILE_TYPE, HikeFileType.toString(HikeFileType.IMAGE));
-					}
+					forwardConfirmDialog.dismiss();
+					forwardMessageTo(contactInfo);
 				}
-			}
-			else if ("text/plain".equals(type) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
-			{
-				String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
-				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
-				intent.putExtra(HikeConstants.Extras.MSG, msg);
-			}
-			else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
-					|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
-			{
-				intent.putExtras(presentIntent);
-			}
-			else if (type != null && (type.startsWith("image") || type.startsWith("audio") || type.startsWith("video")))
-			{
-				Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-				Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
-				fileUri = Utils.makePicasaUri(fileUri);
-				String fileUriStart = "file:";
-				String fileUriString = fileUri.toString();
-				String filePath;
-				if (Utils.isPicasaUri(fileUriString))
-				{
-					filePath = fileUriString;
-				}
-				else if (fileUriString.startsWith(fileUriStart))
-				{
-					File selectedFile = new File(URI.create(fileUriString));
-					/*
-					 * Done to fix the issue in a few Sony devices.
-					 */
-					filePath = selectedFile.getAbsolutePath();
-				}
-				else
-				{
-					filePath = Utils.getRealPathFromUri(fileUri, this);
-				}
-				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
-				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
-			}
-			startActivity(intent);
-			finish();
+			};
+			
+			forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+			forwardConfirmDialog.setCancelButton(R.string.cancel);
+			forwardConfirmDialog.show();
 		}
+	}
+
+	private void forwardMessageTo(ContactInfo contactInfo)
+	{
+		Intent presentIntent = getIntent();
+
+		Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
+		intent.setClass(this, ChatThread.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		String type = presentIntent.getType();
+
+		if (Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
+		{
+			if (type != null)
+			{
+				ArrayList<Uri> imageUris = presentIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+				if (imageUris != null)
+				{
+					ArrayList<String> filePathArray = new ArrayList<String>(imageUris.size());
+					for (Uri fileUri : imageUris)
+					{
+						Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+						String fileUriStart = "file:";
+						String fileUriString = fileUri.toString();
+
+						if (fileUriString.startsWith(fileUriStart))
+						{
+							File selectedFile = new File(URI.create(fileUriString));
+							/*
+							 * Done to fix the issue in a few Sony devices.
+							 */
+							filePathArray.add(selectedFile.getAbsolutePath());
+						}
+						else
+						{
+							filePathArray.add(Utils.getRealPathFromUri(fileUri, this));
+						}
+					}
+
+					intent.putExtra(HikeConstants.Extras.FILE_PATHS, filePathArray);
+					intent.putExtra(HikeConstants.Extras.FILE_TYPE, HikeFileType.toString(HikeFileType.IMAGE));
+				}
+			}
+		}
+		else if ("text/plain".equals(type) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+		{
+			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+			Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
+		}
+		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
+				|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
+		{
+			intent.putExtras(presentIntent);
+		}
+		else if (type != null && (type.startsWith("image") || type.startsWith("audio") || type.startsWith("video")))
+		{
+			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+			Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+			fileUri = Utils.makePicasaUri(fileUri);
+			String fileUriStart = "file:";
+			String fileUriString = fileUri.toString();
+			String filePath;
+			if (Utils.isPicasaUri(fileUriString))
+			{
+				filePath = fileUriString;
+			}
+			else if (fileUriString.startsWith(fileUriStart))
+			{
+				File selectedFile = new File(URI.create(fileUriString));
+				/*
+				 * Done to fix the issue in a few Sony devices.
+				 */
+				filePath = selectedFile.getAbsolutePath();
+			}
+			else
+			{
+				filePath = Utils.getRealPathFromUri(fileUri, this);
+			}
+			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
+			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
+		}
+		startActivity(intent);
+		finish();
 	}
 
 	private String getNormalisedMsisdn()

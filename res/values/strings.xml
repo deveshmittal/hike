@@ -775,4 +775,8 @@
     <string name="file">File</string>
     <string name="file_msg_received">Sent you a file</string>
     <string name="file_msg_sent">File</string>
+	<string name="copied">Copied</string>
+	<string name="share_with">Share with %1$s?</string>
+	<string name="forward_to">Forward to %1$s?</string>
+	<string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation.</string>
 </resources>

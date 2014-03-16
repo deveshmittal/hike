@@ -797,4 +797,8 @@ public class ConvMessage
 	{
 		this.shouldShowPush = shouldShowPush;
 	}
+	
+	public boolean isSmsToggle(){
+		return msgID == ConvMessage.SMS_TOGGLE_ID;
+	}
 }

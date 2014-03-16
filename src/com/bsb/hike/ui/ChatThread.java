@@ -9,7 +9,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -626,6 +625,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				});
 			}
+			isActionModeOn = savedInstanceState.getBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, false);
+			if (isActionModeOn)
+			{
+				ArrayList<Integer> selectedPositions = savedInstanceState.getIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS);
+				mAdapter.setPositionsSelected(selectedPositions);
+				selectedNonForwadableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS);
+				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
+				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
+				setupActionModeActionBar();
+			}
 		}
 
 		/* registering localbroadcast manager */
@@ -646,6 +655,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
+		if(isActionModeOn)
+		{
+			destroyActionMode();
+			return;
+		}
+		
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
 			dismissPopupWindow();
@@ -971,7 +986,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 
-		overFlowListView.setOnItemClickListener(new OnItemClickListener()
+		OnItemClickListener onItemClickListener = new OnItemClickListener()
 		{
 
 			@Override
@@ -1015,50 +1030,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 			}
-		});
+		};
 
-		attachmentWindow.setOnDismissListener(new OnDismissListener()
-		{
-
-			@Override
-			public void onDismiss()
-			{
-				attachmentWindow = null;
-			}
-		});
-
-		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		attachmentWindow.setOutsideTouchable(true);
-		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth(getResources().getDimensionPixelSize(R.dimen.overflow_menu_width));
-		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		/*
-		 * In some devices Activity crashes and a BadTokenException is thrown by showAsDropDown method. Still need to find out exact repro of the bug.
-		 */
-		try
-		{
-			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
-		}
-		catch (BadTokenException e)
-		{
-			Log.e(getClass().getSimpleName(), "Excepetion in HomeActivity Overflow popup", e);
-		}
-		attachmentWindow.getContentView().setFocusableInTouchMode(true);
-		attachmentWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
-		{
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event)
-			{
-				return onKeyUp(keyCode, event);
-			}
-		});
+		setupPopupWindow(optionsList, onItemClickListener);
 	}
 
 	private void clearConversation()
 	{
-		mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
-		messages.clear();
-		mAdapter.notifyDataSetChanged();
+		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(ChatThread.this);
+		clearConfirmDialog.setHeader(R.string.clear_conversation);
+		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
+				messages.clear();
+				mAdapter.notifyDataSetChanged();
+				clearConfirmDialog.dismiss();
+			}
+		};
+		
+		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+		clearConfirmDialog.setCancelButton(R.string.cancel);
+		clearConfirmDialog.show();
 	}
 
 	private void blockUser()
@@ -1115,10 +1112,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		mAdapter.toggleSelection(position);
-		boolean isMsgSelected = mAdapter.isSelected(position);
-		ConvMessage message = mAdapter.getItem(position);
-		return showMessageContextMenu(message, isMsgSelected);
+		return showMessageContextMenu(position);
 	}
 
 	@Override
@@ -1128,13 +1122,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return;
 	}
 
-	public boolean showMessageContextMenu(final ConvMessage message, final boolean isMsgSelected)
+	public boolean showMessageContextMenu(int position)
 	{
-		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
+		ConvMessage message = mAdapter.getItem(position);
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO 
+				|| message.getTypingNotification() != null || message.isSmsToggle())
 		{
 			return false;
 		}
-
+		mAdapter.toggleSelection(position);
+		boolean isMsgSelected = mAdapter.isSelected(position);
+		
 		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
 
 		if (hasCheckedItems && !isActionModeOn)
@@ -1687,7 +1685,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation.getUnreadCount() > 0)
 		{
 			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
-			messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+			if ((messages.size() - mConversation.getUnreadCount()) > 0)
+			{
+				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+			}
+			else
+			{
+				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+			}
 		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
@@ -1731,8 +1736,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mBottomView.setVisibility(View.VISIBLE);
 		}
 
+		if(mConversation.getUnreadCount() > 0)
+		{
+			mConversationsView.setSelection(messages.size() - mConversation.getUnreadCount() - 1);
+		}
 		// Scroll to the bottom if we just opened a new conversation
-		if (!wasOrientationChanged)
+		else if (!wasOrientationChanged)
 		{
 			mConversationsView.setSelection(messages.size() - 1);
 		}
@@ -2256,16 +2265,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (ids != null)
 			{
-				int lastReadIndex = messages.size() - ids.length();
-				// Scroll to the last unread message
-				if (lastReadIndex == 0)
-				{
-					mConversationsView.setSelection(lastReadIndex);
-				}
-				else
-				{
-					mConversationsView.setSelection(lastReadIndex - 1);
-				}
+//				int lastReadIndex = messages.size() - ids.length();
+//				// Scroll to the last unread message
+//				if (lastReadIndex == 0)
+//				{
+//					mConversationsView.setSelection(lastReadIndex);
+//				}
+//				else
+//				{
+//					mConversationsView.setSelection(lastReadIndex - 1);
+//				}
 
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
@@ -4817,6 +4826,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		outState.putLong(HikeConstants.Extras.RECORDER_START_TIME, updateRecordingDuration != null ? updateRecordingDuration.getStartTime() : 0);
 		outState.putLong(HikeConstants.Extras.RECORDED_TIME, recordedTime);
 		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
+		if(isActionModeOn){
+			outState.putBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, true);
+			outState.putIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS, new ArrayList<Integer>(mAdapter.getSelectedIds()));
+			outState.putInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS, selectedNonForwadableMsgs);
+			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
+			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
+		}
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
 		{
 			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, true);
@@ -5846,6 +5862,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setupActionModeActionBar()
 	{
+		if (attachmentWindow != null && attachmentWindow.isShowing())
+		{
+			dismissPopupWindow();
+			attachmentWindow = null;
+		}
+		
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
@@ -5902,14 +5924,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (selectedCancelableMsgs == 1 && mAdapter.getSelectedCount() == 1)
 		{
-			Iterator<Integer> it = mAdapter.getSelectedIds().iterator();
-			ConvMessage currentSelectedMsg = mAdapter.getItem(it.next());
-			mOptionsList.put(currentSelectedMsg.isSent() ? R.id.cancel_upload_msg : R.id.cancel_download_msg, true);
+			mOptionsList.put(R.id.action_mode_overflow_menu, true);
 		}
 		else
 		{
-			mOptionsList.put(R.id.cancel_upload_msg, false);
-			mOptionsList.put(R.id.cancel_download_msg, false);
+			mOptionsList.put(R.id.action_mode_overflow_menu, false);
 		}
 
 		for (int i = 0; i < menu.size(); i++)
@@ -5930,21 +5949,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean initializeActionMode()
 	{
 		setActionModeOn(true);
-		selectedNonTextMsgs = 0;
-		selectedNonForwadableMsgs = 0;
-		selectedCancelableMsgs = 0;
 		mOptionsList.put(R.id.delete_msgs, true);
 		mOptionsList.put(R.id.forward_msgs, true);
 		mOptionsList.put(R.id.copy_msgs, true);
-		mOptionsList.put(R.id.cancel_upload_msg, false);
-		mOptionsList.put(R.id.cancel_download_msg, false);
+		mOptionsList.put(R.id.action_mode_overflow_menu, false);
 		// this onItemClick should be unregistered when
 		mConversationsView.setOnItemClickListener(ChatThread.this);
+		if(mAdapter.getSelectedCount()>0){
+			setActionModeTitle(mAdapter.getSelectedCount());
+		}
 		return true;
 	}
 
 	private void destroyActionMode()
 	{
+		selectedNonTextMsgs = 0;
+		selectedNonForwadableMsgs = 0;
+		selectedCancelableMsgs = 0;
 		setActionModeOn(false);
 		// removing the on item click listener
 		mConversationsView.setOnItemClickListener(null);
@@ -6002,19 +6023,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			};
 
-			View.OnClickListener dialogCancelClickListener = new View.OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					destroyActionMode();
-					deleteConfirmDialog.dismiss();
-				}
-			};
-
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
-			deleteConfirmDialog.setCancelButton(R.string.cancel, dialogCancelClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
@@ -6086,7 +6096,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
 
-			break;
+			destroyActionMode();
+			return true;
 		case R.id.copy_msgs:
 			Collections.sort(selectedMessagesIds);
 			convMsgs = new ConvMessage[selectedMessagesIds.size()];
@@ -6097,21 +6108,127 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			clipboard.setText(msgStr);
-			break;
-		case R.id.cancel_upload_msg:
-		case R.id.cancel_download_msg:
+			Toast.makeText(ChatThread.this, R.string.copied, Toast.LENGTH_SHORT).show();
+			destroyActionMode();
+			return true;
+		case R.id.action_mode_overflow_menu:
 			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
-			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			File file = hikeFile.getFile();
-			FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
-			mAdapter.notifyDataSetChanged();
-			break;
+			showActionModeOverflow(message);
+			return true;
 		default:
 			destroyActionMode();
 			return false;
 		}
-		destroyActionMode();
-		return true;
+	}
+
+	private void showActionModeOverflow(final ConvMessage message)
+	{
+		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
+
+		optionsList.add(new OverFlowMenuItem(getString(message.isSent() ? R.string.cancel_upload : R.string.cancel_download), 0));
+
+		OnItemClickListener onItemClickListener = new OnItemClickListener()
+		{
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				dismissPopupWindow();
+				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
+
+				switch (item.getKey())
+				{
+				case 0:
+					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+					File file = hikeFile.getFile();
+					FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+					mAdapter.notifyDataSetChanged();
+					destroyActionMode();
+					break;
+				}
+			}
+		};
+
+		setupPopupWindow(optionsList, onItemClickListener);
+	}
+
+	private void setupPopupWindow(ArrayList<OverFlowMenuItem> optionsList, OnItemClickListener onItemClickListener)
+	{
+		
+		dismissPopupWindow();
+
+		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, chatLayout, false);
+
+		ListView overFlowListView = (ListView) parentView.findViewById(R.id.overflow_menu_list);
+		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this, R.layout.over_flow_menu_item, R.id.item_title, optionsList)
+		{
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
+				if (convertView == null)
+				{
+					convertView = getLayoutInflater().inflate(R.layout.over_flow_menu_item, parent, false);
+				}
+
+				OverFlowMenuItem item = getItem(position);
+
+				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
+				itemTextView.setText(item.getName());
+
+				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+
+				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
+				freeSmsCount.setVisibility(View.GONE);
+
+				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
+				newGamesIndicator.setVisibility(View.GONE);
+
+				return convertView;
+			}
+		});
+
+		overFlowListView.setOnItemClickListener(onItemClickListener);
+		
+		attachmentWindow = new PopupWindow(this);
+
+		attachmentWindow.setContentView(parentView);
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener()
+		{
+
+			@Override
+			public void onDismiss()
+			{
+				attachmentWindow = null;
+			}
+		});
+
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(getResources().getDimensionPixelSize(R.dimen.overflow_menu_width));
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		/*
+		 * In some devices Activity crashes and a BadTokenException is thrown by showAsDropDown method. Still need to find out exact repro of the bug.
+		 */
+		try
+		{
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
+		}
+		catch (BadTokenException e)
+		{
+			Log.e(getClass().getSimpleName(), "Excepetion in Action Mode Overflow popup", e);
+		}
+		attachmentWindow.getContentView().setFocusableInTouchMode(true);
+		attachmentWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
+		{
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event)
+			{
+				return onKeyUp(keyCode, event);
+			}
+		});
 	}
 
 }

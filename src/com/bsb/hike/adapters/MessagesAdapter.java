@@ -99,7 +99,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
 	};
 
 	private class ViewHolder
@@ -176,6 +176,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ProgressBar wating;
 
 		ProgressBar recProgress;
+		
+		TextView messageTime;
+		
+		ImageView messageStatus;
+		
+		TextView ftMessageTime;
+		
+		ImageView ftMessageStatus;
 
 		View dayLeft;
 
@@ -184,6 +192,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ImageView pokeCustom;
 
 		TextView fileExtension;
+
+		View selectedStateOverlay;
 	}
 
 	private Conversation conversation;
@@ -363,7 +373,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.getTypingNotification() != null)
+		if (convMessage.getUnreadCount() > 0)
+		{
+			type = ViewType.UNREAD_COUNT;
+		}
+		else if (convMessage.getTypingNotification() != null)
 		{
 			type = ViewType.RECEIVE;
 		}
@@ -383,7 +397,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.STATUS_MESSAGE;
 		}
-		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO || convMessage.getUnreadCount() > 0)
+		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			type = ViewType.PARTICIPANT_INFO;
 		}
@@ -502,6 +516,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			case LAST_READ:
 				v = inflater.inflate(R.layout.last_read_line, null);
 				break;
+			case UNREAD_COUNT:
+				v = inflater.inflate(R.layout.message_item_receive, null);
+				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
+				holder.dayTextView = (TextView) v.findViewById(R.id.day);
+				holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
+				holder.dayLeft = v.findViewById(R.id.day_left);
+				holder.dayRight = v.findViewById(R.id.day_right);
+				v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
+				break;
 			case STATUS_MESSAGE:
 				v = inflater.inflate(R.layout.in_thread_status_update, null);
 
@@ -545,6 +568,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
 				holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay); 
+				holder.ftMessageTime = (TextView) v.findViewById(R.id.ft_message_time);
+				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.ft_message_status);
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null)
@@ -569,6 +595,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 				holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
+				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
+				holder.messageStatus = (ImageView) v.findViewById(R.id.message_status);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -584,7 +613,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
 				holder.barProgress = (CustomProgressBar) v.findViewById(R.id.pbTransfer);
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
-				// holder.fileIcon = (ImageView) v.findViewById(R.id.file_ic);
 				holder.fileType = (TextView) v.findViewById(R.id.file_type);
 				holder.fileSize = (TextView) v.findViewById(R.id.file_size);
 				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
@@ -593,6 +621,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				holder.ftMessageTime = (TextView) v.findViewById(R.id.ft_message_time);
 			case RECEIVE:
 				if (v == null)
 				{
@@ -625,9 +655,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.typing = (ImageView) v.findViewById(R.id.typing);
 
 				holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
+				
+				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
 
 				holder.container.setVisibility(View.GONE);
-
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
 			case SMS_TOGGLE:
 				v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
@@ -945,7 +977,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
 			}
 
-			if (!convMessage.isSent())
+			if (!convMessage.isSent() )
 			{
 				if (firstMessageFromParticipant)
 				{
@@ -958,7 +990,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
 			}
-			setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+			if(isDefaultTheme && !convMessage.isStickerMessage())
+			{
+				setNewSDR(position, holder.messageTime, holder.messageStatus);
+			}
+			else
+			{
+				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);	
+			}
 		}
 		else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
 		{
@@ -1281,7 +1320,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					holder.overlayBg.getLayoutParams().height = (int) (40 * Utils.densityMultiplier);
+					if(fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+					{
+						holder.overlayBg.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
+						holder.overlayBg.setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						holder.overlayBg.getLayoutParams().height = (int) (40 * Utils.densityMultiplier);
+					}
 					switch (fss.getFTState())
 					{
 					case NOT_STARTED:
@@ -1298,7 +1345,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						holder.overlayBg.setVisibility(View.VISIBLE);
 						break;
 					default:
-						holder.overlayBg.setVisibility(View.GONE);
+						break;
 					}
 				}
 			}
@@ -1519,7 +1566,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
-					setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+					{
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus);
+					}
+					else
+					{
+						setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+					}
 				}
 				else
 				{
@@ -1546,7 +1600,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
-				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+				if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+				{
+					if(fss.getFTState() == FTState.COMPLETED)
+					{
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus);
+					}
+				}
+				else
+				{
+					setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+				}
 			}
 		} // End of File Transfer Message
 		else if (viewType == ViewType.STATUS_MESSAGE)
@@ -1912,12 +1976,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				((ViewGroup) holder.container).addView(mainMessage);
 			}
-			else if (convMessage.getUnreadCount() > 0)
-			{
-				TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
-				participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
-				((ViewGroup) holder.container).addView(participantInfo);
-			}
+			return v;
+		}
+		else if (viewType == ViewType.UNREAD_COUNT)
+		{
+			holder.container.setVisibility(View.VISIBLE);
+			int layoutRes = chatTheme.systemMessageLayoutId();
+			TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
+			participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
+			((ViewGroup) holder.container).removeAllViews();
+			((ViewGroup) holder.container).addView(participantInfo);
 			return v;
 		}
 
@@ -1933,11 +2001,32 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.messageContainer.setBackgroundResource(chatTheme.bubbleResId());
 			}
 		}
-		if(isActionModeOn && isSelected(position))
+		if(isActionModeOn)
 		{
-			setSelected(v);
-		} else{
-			setUnSelected(v);
+			/*
+			 * This is an transparent overlay over all the message which will
+			 * listen click events while action mode is on.
+			 */
+			holder.selectedStateOverlay.setVisibility(View.VISIBLE);
+			holder.selectedStateOverlay.setOnClickListener(selectedStateOverlayClickListener);
+			holder.selectedStateOverlay.setOnLongClickListener(this);
+
+			if(isSelected(position))
+			{
+				/*
+				 * If a message has been selected then background of selected state overlay will change
+				 * to selected state color. otherwise this overlay will be transparent
+				 */
+				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.action_bar_item_pressed));
+			} 
+			else
+			{
+				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+			}
+		}
+		else
+		{
+			holder.selectedStateOverlay.setVisibility(View.GONE);
 		}
 		return v;
 	}
@@ -2253,6 +2342,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			tv.setVisibility(View.GONE);
 		}
 	}
+	
+	private void setNewSDR(int position, TextView time, ImageView status)
+	{
+		ConvMessage message = getItem(position);
+		
+		time.setText(message.getTimestampFormatted(false, context));
+		time.setVisibility(View.VISIBLE);
+		if(message.isSent())
+		{
+			if(message.isFileTransferMessage())
+			{
+				switch (message.getState())
+				{
+				case SENT_UNCONFIRMED:
+					status.setImageResource(R.drawable.ic_clock_white);
+					break;
+				case SENT_CONFIRMED:
+					status.setImageResource(R.drawable.ic_tick_white);
+					break;
+				case SENT_DELIVERED:
+					status.setImageResource(R.drawable.ic_double_tick_white);
+					break;
+				case SENT_DELIVERED_READ:
+					status.setImageResource(R.drawable.ic_double_tick_r_white);
+					break;
+				}
+			}
+			else
+			{
+				switch (message.getState())
+				{
+				case SENT_UNCONFIRMED:
+					status.setImageResource(R.drawable.ic_clock);
+					break;
+				case SENT_CONFIRMED:
+					status.setImageResource(R.drawable.ic_tick);
+					break;
+				case SENT_DELIVERED:
+					status.setImageResource(R.drawable.ic_double_tick);
+					break;
+				case SENT_DELIVERED_READ:
+					status.setImageResource(R.drawable.ic_double_tick_r);
+					break;
+				}
+			}
+			status.setVisibility(View.VISIBLE);
+		}
+	}
 
 	private void setReadByForGroup(ConvMessage convMessage, TextView tv)
 	{
@@ -2332,6 +2469,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		return getCount() == 0;
 	}
+	
+	/*
+	 * if action mode is on clicking on an item will invoke this listener
+	 */
+	View.OnClickListener selectedStateOverlayClickListener = new OnClickListener()
+	{
+		
+		@Override
+		public void onClick(View v)
+		{
+			v.performLongClick();
+			return;
+		}
+	};
 
 	@Override
 	public void onClick(View v)
@@ -2342,14 +2493,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		}
 		Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
-		/*
-		 * if action mode is on clicking on an item should select this item
-		 */
-		if (isActionModeOn)
-		{
-			v.performLongClick();
-			return;
-		}
 
 		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
 				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
@@ -2669,7 +2812,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
-		container.setEnabled(false);
 		
 		container.setOnLongClickListener(this);
 
@@ -3229,6 +3371,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		notifyDataSetChanged();
 	}
+	
+	public void setPositionsSelected(ArrayList<Integer> selectedPositions)
+	{
+		mSelectedItemsIds.addAll(selectedPositions);
+		notifyDataSetChanged();
+	}
 
 	public int getSelectedCount()
 	{
@@ -3248,25 +3396,5 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void setActionMode(boolean isOn)
 	{
 		isActionModeOn = isOn;
-	}
-	
-	public void setSelected(View v)
-	{
-		if(v.findViewById(R.id.selected_top_line) != null)
-		{
-			v.findViewById(R.id.selected_top_line).setVisibility(View.VISIBLE);
-			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(R.color.selected_msg_item_bg));
-			v.findViewById(R.id.selected_bottom_line).setVisibility(View.VISIBLE);
-		}
-	}
-	
-	public void setUnSelected(View v)
-	{
-		if(v.findViewById(R.id.selected_top_line) != null)
-		{
-			v.findViewById(R.id.selected_top_line).setVisibility(View.INVISIBLE);
-			v.findViewById(R.id.message_container).setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
-			v.findViewById(R.id.selected_bottom_line).setVisibility(View.INVISIBLE);
-		}
 	}
 }

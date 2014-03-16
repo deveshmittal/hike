@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="30dp" 
-    android:paddingBottom="2dp">
+    android:paddingBottom="2dp"
+    android:descendantFocusability="blocksDescendants">
 
     <LinearLayout
 		android:layout_marginBottom="5dp"
@@ -51,16 +52,10 @@
         android:id="@+id/message_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="2dp"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
         android:layout_below="@id/day_container">
 
-        <View
-            android:id="@+id/selected_top_line"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/selected_msg_item_bg_lines"
-            android:visibility="visible" />
-    
     <RelativeLayout
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
@@ -85,20 +80,20 @@
                 android:src="@drawable/ic_download_failed"
                 android:visibility="invisible" />
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/sent_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/msg_status_indicator"
-                android:background="@drawable/ic_bubble_green_selector"
-                android:gravity="center_vertical"
-                android:orientation="horizontal" >
+                android:background="@drawable/ic_bubble_green_selector" >
 
-                <!-- 
-	                @GM
-	                changed the file thumbnail view with the following relative view
-	                that contains thumbnail + the realtion view of the overlay
-	            -->
+                <LinearLayout
+                    android:id="@+id/sent_message_inner_container"
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                	android:minWidth="88dp"
+                	android:gravity="center_vertical"
+                	android:orientation="horizontal" >
                 <RelativeLayout 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
@@ -146,6 +141,25 @@
                         android:background="#6E000000"
                         android:padding="4dp"
                         android:visibility="gone" >
+                        
+                        <ImageView
+			                android:id="@+id/ft_message_status"
+			                android:layout_width="wrap_content"
+			                android:layout_height="wrap_content"
+			                android:layout_alignParentRight="true"
+                           	android:layout_centerVertical="true"
+			                android:layout_marginLeft="2dp"
+			                android:visibility="gone" />
+				            
+			            <com.bsb.hike.view.CustomFontTextView
+			                android:id="@+id/ft_message_time"
+			                android:layout_width="wrap_content"
+			                android:layout_height="wrap_content"
+			      	        android:text="00:00"
+			                android:textColor="@color/white"
+			                android:textSize="12sp"
+			                android:layout_centerVertical="true"
+			                android:layout_toLeftOf="@id/ft_message_status" />
                         
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -327,6 +341,30 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/message_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginLeft="2dp"
+                android:layout_below="@id/sent_message_inner_container"
+                android:layout_alignRight="@id/sent_message_inner_container"
+                android:visibility="gone" />
+            
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+      	        android:text="00:00"
+                android:textColor="#4ea9e7"
+                android:textSize="12sp"
+                android:layout_marginLeft="5dp"
+                android:layout_below="@id/sent_message_inner_container"
+                android:layout_toLeftOf="@id/message_status" />
+            
+            </RelativeLayout>
+            
+            <ImageView
                 android:id="@+id/poke_sent_custom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -371,7 +409,7 @@
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/msg_info"
             android:layout_width="wrap_content"
-            android:layout_height="16dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@id/bubble_container"
             android:layout_marginRight="15dp"
@@ -397,12 +435,13 @@
     </RelativeLayout>
     </RelativeLayout>
 
-    <View
-        android:id="@+id/selected_bottom_line"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/selected_msg_item_bg_lines"
-        android:visibility="visible" />
+	<View
+        android:id="@+id/selected_state_overlay"
+		android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/message_container"
+        android:layout_alignBottom="@id/message_container"
+        android:hapticFeedbackEnabled="false"
+        android:visibility="gone"/>
 
 </RelativeLayout>

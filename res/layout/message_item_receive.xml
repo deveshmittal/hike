@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="2dp">
+    android:paddingBottom="2dp"
+    android:descendantFocusability="blocksDescendants">
 
 	<LinearLayout
 		android:layout_marginBottom="5dp"
@@ -58,22 +59,15 @@
 	 <RelativeLayout
         android:id="@+id/message_container"
         android:layout_width="match_parent"
+        android:paddingTop="2dp"
+        android:paddingBottom="1dp"
         android:layout_height="wrap_content"
-        android:paddingBottom="2dp"
         android:layout_below="@id/day_container">
-
-        <View
-            android:id="@+id/selected_top_line"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/selected_msg_item_bg_lines"
-            android:visibility="invisible" />
         
 	<RelativeLayout
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"
-	    android:paddingTop="2dp"
 		android:paddingLeft="@dimen/chat_bubble_edge_spacing"
 		android:paddingRight="@dimen/chat_bubble_edge_spacing">
 
@@ -106,15 +100,22 @@
 	        android:layout_toRightOf="@id/avatar_container"
 	        android:gravity="left" >
 	        
-	        <LinearLayout
+	        <RelativeLayout
 	            android:id="@+id/receive_message_container"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/ic_bubble_white_selector"
 	            android:gravity="center_vertical"
+	            android:paddingRight="4dp" >
+	            
+			<LinearLayout
+			    android:id="@+id/receive_message_inner_container"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:gravity="center_vertical"
 	            android:orientation="vertical"
-	            android:paddingRight="4dp">
-
+	            android:minWidth="48dp" >
+	            
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
 	                    android:layout_width="wrap_content"
@@ -184,6 +185,16 @@
                         android:background="#6E000000"
                         android:padding="4dp"
                         android:visibility="gone" >
+                            
+			            <com.bsb.hike.view.CustomFontTextView
+			                android:id="@+id/ft_message_time"
+			                android:layout_width="wrap_content"
+			                android:layout_height="wrap_content"
+			                android:layout_alignParentRight="true"
+			                android:layout_centerVertical="true"
+			      	        android:text="00:00"
+			                android:textColor="@color/white"
+			                android:textSize="12sp" />
                          
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -235,6 +246,7 @@
                                 android:background="#00000000"
                                 android:gravity="left"
                                 android:textColor="@color/white"
+                                android:layout_marginTop="-2dp"
                                 android:textSize="10dp"
                                 android:textStyle="bold"
                                 android:visibility="gone" />
@@ -246,6 +258,7 @@
                                 android:background="#00000000"
                                 android:gravity="left"
                                 android:textColor="@color/white"
+                                android:layout_marginTop="-2dp"
                                 android:textSize="10dp"
                                 android:visibility="gone" />
 
@@ -374,6 +387,18 @@
                     android:layout_marginLeft="9dp" />
 
 	        </LinearLayout>
+	        
+			<com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+      	        android:text="00:00"
+                android:textColor="#4ea9e7"
+                android:textSize="12sp"
+                android:layout_below="@id/receive_message_inner_container"
+                android:layout_alignRight="@id/receive_message_inner_container" />
+			
+	        </RelativeLayout>
 	        <ImageView
 	             android:id="@+id/poke_receive_custom"
 	             android:layout_width="wrap_content"
@@ -457,12 +482,13 @@
 	</RelativeLayout>
 	</RelativeLayout>
 	
-	 <View
-        android:id="@+id/selected_bottom_line"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/selected_msg_item_bg_lines"
-        android:visibility="invisible" />
-
+	<View
+        android:id="@+id/selected_state_overlay"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+        android:layout_alignTop="@id/message_container"
+        android:layout_alignBottom="@id/message_container"
+        android:hapticFeedbackEnabled="false"
+        android:visibility="gone"/>
+	
 </RelativeLayout>
