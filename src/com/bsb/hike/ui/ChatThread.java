@@ -363,7 +363,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean isActionModeOn = false;
 
 	private TextView mActionModeTitle;
-
+	
+	private View unreadMessageIndicator;
+	
+	private int unreadMessageCount = 0;
+	
+	private View fastScrollIndicator;
+	
+	int currentFirstVisibleItem = Integer.MAX_VALUE;
+	
 	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
 
 	@Override
@@ -525,7 +533,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
-
+		unreadMessageIndicator = findViewById(R.id.new_message_indicator);
+		unreadMessageIndicator.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mConversationsView.setSelection(messages.size() - unreadMessageCount - 1);
+				hideUnreadCountIndicator();
+			} 
+		});
+		
+		fastScrollIndicator = findViewById(R.id.scroll_bottom_indicator);
+		fastScrollIndicator.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mConversationsView.setSelection(messages.size() - 1);
+				hideFastScrollIndicator();
+			}
+		});
+		
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different than the sen button we have), we send the message.
 		 */
@@ -641,7 +670,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
 		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
-
 	}
 
 	private void clearTempData()
@@ -3234,6 +3262,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
 			{
+				if(convMessage.getTypingNotification() ==null)
+				{
+					showUnreadCountIndicator();
+				}
 				return;
 			}
 			else
@@ -3254,6 +3286,46 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	private void showUnreadCountIndicator()
+	{
+		unreadMessageCount++;
+		// fast scroll indicator and unread message should not show
+		// simultaneously.
+		fastScrollIndicator.setVisibility(View.GONE);
+		unreadMessageIndicator.setVisibility(View.VISIBLE);
+		TextView indicatorText = (TextView)findViewById(R.id.indicator_text);
+		indicatorText.setVisibility(View.VISIBLE);
+		if(unreadMessageCount==1)
+		{
+			indicatorText.setText(getResources().getString(R.string.one_unread_message));
+		}
+		else
+		{
+			indicatorText.setText(getResources().getString(R.string.num_unread_messages, unreadMessageCount));
+		}
+	}
+	
+	private void hideUnreadCountIndicator()
+	{
+		unreadMessageCount = 0;
+		unreadMessageIndicator.setVisibility(View.GONE);
+	}
+
+	private void showFastScrollIndicator()
+	{
+		if(unreadMessageIndicator.getVisibility() == View.GONE){
+			fastScrollIndicator.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	private void hideFastScrollIndicator()
+	{
+		if(fastScrollIndicator != null)
+		{
+			fastScrollIndicator.setVisibility(View.GONE);
+		}
+	}
+	
 	private void removeMessage(ConvMessage convMessage)
 	{
 		boolean lastMessage = convMessage.equals(messages.get(messages.size() - 1));
@@ -5541,6 +5613,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			loadingMoreMessages = false;
 		}
+		
+		if(unreadMessageIndicator.getVisibility() == View.VISIBLE && mConversationsView.getLastVisiblePosition() > messages.size() - unreadMessageCount-2)
+		{
+			hideUnreadCountIndicator();
+		}
+		
+		if(view.getLastVisiblePosition() < messages.size()-6)
+		{
+			if(currentFirstVisibleItem < firstVisibleItem)
+			{
+				showFastScrollIndicator();
+			}
+			else if (currentFirstVisibleItem > firstVisibleItem)
+			{
+				hideFastScrollIndicator();
+			}
+		}
+		else
+		{
+			hideFastScrollIndicator();
+		}
+		currentFirstVisibleItem = firstVisibleItem;
 	}
 
 	@Override
@@ -5548,6 +5642,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		Log.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
 		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		if(fastScrollIndicator.getVisibility() ==View.VISIBLE)
+		{
+			if(view.getLastVisiblePosition() >= messages.size()-6)
+			{
+				hideFastScrollIndicator();
+			}
+			else if( scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+			{
+				mHandler.postDelayed(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						hideFastScrollIndicator();
+					}
+				}, 2000);
+			}
+		}
 	}
 
 	private List<AccountData> getAccountList()
