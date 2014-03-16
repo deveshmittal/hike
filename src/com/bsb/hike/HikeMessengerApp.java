@@ -305,6 +305,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeWhatsapp";
 
+	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
