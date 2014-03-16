@@ -1,7 +1,9 @@
 package com.bsb.hike.thor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -73,13 +75,7 @@ public class ThorThread implements Runnable
 					String email = Utils.getEmail(ctx);
 					Log.d(TAG, "User email : " + email);
 					if (email != null)
-					{
-						final long t1 = System.currentTimeMillis();
 						successDecrypt = Decrypt.decrypt5(inputFile, outputFile, email);
-						final long t2 = System.currentTimeMillis();
-						Log.d(TAG, "Decrypt processing Done in time : " + (t2 - t1));
-
-					}
 					else
 						successDecrypt = false;
 				}
@@ -106,8 +102,9 @@ public class ThorThread implements Runnable
 					{
 						DbUtils.calculateScore(freq, con, key, oldts);
 					}
+					print(freq);
 					Intent i = new Intent(HikeMessengerApp.THOR_DETAILS_SENT);
-					i.putExtra(THOR, getThorBytes(freq).toString());
+					i.putExtra(THOR, getThorBytes(freq));
 					LocalBroadcastManager.getInstance(ctx).sendBroadcast(i);
 				}
 			}
@@ -136,31 +133,83 @@ public class ThorThread implements Runnable
 			{
 				Log.e(TAG, "SQLException in closing connection", e);
 			}
+			catch(Exception e)
+			{
+				// do not handle
+			}
 		}
 	}
 
-	private JSONObject getThorBytes(HashMap<String, Integer> freq)
+	private byte[] getThorBytes(HashMap<String, Integer> freq)
 	{
 		if (freq == null)
 			return null;
 
-		JSONObject obj = new JSONObject();
-		for (Entry<String, Integer> kv : freq.entrySet())
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		ObjectOutputStream out = null;
+		try
 		{
-			String k = kv.getKey();
-			if (k != null)
+			out = new ObjectOutputStream(bout);
+			out.writeInt(freq.size()); // represents number of key value pairs
+			for (Entry<String, Integer> kv : freq.entrySet())
 			{
-				int idx = k.indexOf("@");
-				String ph = k.substring(0, idx);
-				try
+				String k = kv.getKey();
+				if (k != null)
 				{
-					obj.put(ph, kv.getValue());
-				}
-				catch (JSONException e)
-				{
+					int idx = k.indexOf("@");
+					String ph = k.substring(0, idx);
+					try
+					{
+						out.writeUTF(ph);
+						out.writeInt(kv.getValue());
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
-		return obj;
+		catch (IOException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if (out != null)
+				{
+					out.close();
+				}
+			}
+			catch (IOException ex)
+			{
+				// ignore close exception
+			}
+			try
+			{
+				bout.close();
+			}
+			catch (IOException ex)
+			{
+				// ignore close exception
+			}
+		}
+		return bout.toByteArray();
+	}
+	
+	private void print(HashMap<String, Integer> freq)
+	{
+		StringBuilder b = new StringBuilder();
+		b.append("\n");
+		for(Entry<String,Integer> e : freq.entrySet())
+		{
+			b.append(e.getKey() + " : " + e.getValue());
+			b.append("\n");
+		}
+		Log.d(TAG,b.toString());
 	}
 }

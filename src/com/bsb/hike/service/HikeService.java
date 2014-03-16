@@ -326,7 +326,7 @@ public class HikeService extends Service
 
 	private void runThor()
 	{
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
+		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
 		{
 			Thread thor = new Thread(new ThorThread(getApplicationContext()));
 			thor.start();
@@ -337,7 +337,6 @@ public class HikeService extends Service
 	public void onDestroy()
 	{
 		super.onDestroy();
-
 		Log.i("HikeService", "onDestroy.  Shutting down service");
 		mMqttManager.destroyMqtt();
 		this.mMqttManager = null;
@@ -391,6 +390,7 @@ public class HikeService extends Service
 			unregisterReceiver(postGreenBlueDetails);
 			postGreenBlueDetails = null;
 		}
+		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mLocalBroadcastReceiver);
 	}
 
 	public void unregisterDataChangeReceivers()
@@ -842,12 +842,13 @@ public class HikeService extends Service
 		{
 			if (intent.getAction().equals(StickerManager.RECENTS_UPDATED))
 			{
-				String b = intent.getStringExtra(ThorThread.THOR);
+				byte [] b = intent.getByteArrayExtra(ThorThread.THOR);
 				if (b != null)
 				{
 					try
 					{
-						JSONObject obj = new JSONObject(b);
+						JSONObject obj = new JSONObject();
+						obj.put(ThorThread.THOR, b);
 						HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()
 						{
 							public void onSuccess(JSONObject response)
@@ -865,6 +866,7 @@ public class HikeService extends Service
 						});
 						hikeHttpRequest.setJSONData(obj);
 
+						Log.d("PostInfo","Executing thor request...");
 						HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 						Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 					}
