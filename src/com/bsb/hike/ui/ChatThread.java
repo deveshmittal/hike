@@ -130,7 +130,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
@@ -3667,6 +3666,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			optionsList.add(getString(R.string.contact));
 		}
+		optionsList.add(getString(R.string.file));
 
 		final ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
 		optionImagesList.add(R.drawable.ic_attach_camera);
@@ -3681,6 +3681,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			optionImagesList.add(R.drawable.ic_attach_contact);
 		}
+		optionImagesList.add(R.drawable.ic_attach_contact);
 
 		dismissPopupWindow();
 
@@ -3774,6 +3775,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					requestCode = HikeConstants.SHARE_CONTACT_CODE;
 					break;
 
+				case 6:
+					requestCode = HikeConstants.SHARE_FILE_CODE;
+					break;
+
 				case 1:
 				default:
 					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
@@ -3804,6 +3809,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					startActivity(intent);
 					return;
 				}
+				else if (requestCode == HikeConstants.SHARE_FILE_CODE)
+				{
+					Intent intent = new Intent(ChatThread.this, FileSelectActivity.class);
+					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					startActivity(intent);
+					return;
+				}
+
 				Intent chooserIntent;
 				if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE)
 				{

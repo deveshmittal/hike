@@ -180,6 +180,8 @@
         </activity>
         <activity android:name=".ui.GallerySelectionViewer" >
         </activity>
+        <activity android:name=".ui.FileSelectActivity" >
+        </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

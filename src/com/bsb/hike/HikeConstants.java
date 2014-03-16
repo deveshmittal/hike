@@ -557,6 +557,8 @@ public class HikeConstants
 
 	public static final int SHARE_CONTACT_CODE = 1193;
 
+	public static final int SHARE_FILE_CODE = 1194;
+
 	public static final int FACEBOOK_REQUEST_CODE = 64206;
 
 	public static final int MAX_DURATION_RECORDING_SEC = 360;
