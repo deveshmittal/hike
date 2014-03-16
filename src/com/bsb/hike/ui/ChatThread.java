@@ -2670,6 +2670,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			final ConvMessage convMessage = (ConvMessage) object;
 			selectedFile = null;
+			/*
+			 * Making sure this convmessage belongs to the conversation.
+			 */
+			if (!convMessage.getMsisdn().equals(mContactNumber))
+			{
+				return;
+			}
 
 			runOnUiThread(new Runnable()
 			{
@@ -3793,6 +3800,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					Intent intent = new Intent(ChatThread.this, GalleryActivity.class);
 					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 					startActivity(intent);
 					return;
 				}

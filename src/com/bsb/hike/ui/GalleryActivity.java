@@ -31,7 +31,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.models.GalleryItem;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -279,6 +278,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent = new Intent(this, GalleryActivity.class);
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.ON_HIKE, true));
 			startActivity(intent);
 		}
 		else

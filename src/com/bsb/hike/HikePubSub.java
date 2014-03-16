@@ -297,6 +297,8 @@ public class HikePubSub implements Runnable
 
 	public static final String CLEAR_CONVERSATION = "clearConversation";
 
+	public static final String MULTI_FILE_TASK_FINISHED = "multiFileTaskFinished";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
