@@ -1560,6 +1560,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		/*
 		 * Next we have to clear the conversation table.
 		 */
+		clearLastConversationMessage(convId);
+	}
+
+	private void clearLastConversationMessage(long convId)
+	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MESSAGE, "");
 		contentValues.put(DBConstants.MESSAGE_METADATA, "");
@@ -1611,11 +1616,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				/*
-				 * This conversation is empty.
-				 */
-				mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
-				conversationEmpty = true;
+				if (Utils.isGroupConversation(msisdn))
+				{
+					/*
+					 * If we have removed the last message of a group, we should do the same operations we do when clearing a conversation.
+					 */
+					clearLastConversationMessage(convId);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, msisdn);
+					return;
+				}
+				else
+				{
+					/*
+					 * This conversation is empty.
+					 */
+					mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+					conversationEmpty = true;
+				}
 			}
 			ConvMessage newLastMessage = conversationEmpty ? null : getLastMessageForConversation(msisdn);
 
