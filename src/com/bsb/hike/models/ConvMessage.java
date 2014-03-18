@@ -61,7 +61,7 @@ public class ConvMessage
 
 	private boolean shouldShowPush = true;
 
-	private int unreadCount = 0;
+	private int unreadCount = -1;
 	// private boolean showResumeButton = true;
 
 	public boolean isInvite()
@@ -796,5 +796,9 @@ public class ConvMessage
 	public void setShouldShowPush(boolean shouldShowPush)
 	{
 		this.shouldShowPush = shouldShowPush;
+	}
+	
+	public boolean isSmsToggle(){
+		return msgID == ConvMessage.SMS_TOGGLE_ID;
 	}
 }

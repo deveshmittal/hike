@@ -1099,8 +1099,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv = new Conversation(msisdn, convid, name, onhike);
 
 			}
-
-			List<ConvMessage> messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			
+			List<ConvMessage> messages;
+			if(unreadCount > limit)
+			{
+				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+			}
+			else
+			{
+				messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			}
 			conv.setMessages(messages);
 			conv.setUnreadCount(unreadCount);
 
@@ -1559,6 +1567,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.IS_STATUS_MSG, false);
 		contentValues.put(DBConstants.MESSAGE_ID, 0);
 		contentValues.put(DBConstants.MAPPED_MSG_ID, 0);
+		contentValues.put(DBConstants.UNREAD_COUNT, 0);
 		contentValues.put(DBConstants.MSG_STATUS, State.RECEIVED_READ.ordinal());
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { Long.toString(convId) });

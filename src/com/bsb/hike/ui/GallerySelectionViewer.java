@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -23,15 +24,18 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
-public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener
+public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
 {
 	private GalleryAdapter adapter;
 
@@ -43,11 +47,22 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private ArrayList<GalleryItem> galleryGridItems;
 
+	private InitiateMultiFileTransferTask fileTransferTask;
+
+	private ProgressDialog progressDialog;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery_selection_viewer);
+
+		Object object = getLastCustomNonConfigurationInstance();
+
+		if (object instanceof InitiateMultiFileTransferTask)
+		{
+			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
+		}
 
 		galleryItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
 
@@ -79,6 +94,21 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		setSelection(0);
 		setupActionBar();
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+
+		if (progressDialog != null)
+		{
+			progressDialog.dismiss();
+			progressDialog = null;
+		}
+		super.onDestroy();
 	}
 
 	private void setupActionBar()
@@ -118,16 +148,30 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				{
 					filePaths.add(galleryItem.getFilePath());
 				}
-				Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.putStringArrayListExtra(HikeConstants.Extras.FILE_PATHS, filePaths);
-				intent.putExtra(HikeConstants.Extras.FILE_TYPE, HikeFileType.toString(HikeFileType.IMAGE));
-				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
-				startActivity(intent);
+				String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+				boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+
+				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), filePaths, HikeFileType.toString(HikeFileType.IMAGE), msisdn, onHike);
+				Utils.executeAsyncTask(fileTransferTask);
+
+				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 			}
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		if (fileTransferTask != null)
+		{
+			return fileTransferTask;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	@Override
@@ -224,6 +268,36 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 			((ViewPager) container).addView(page);
 			return page;
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		super.onEventReceived(type, object);
+
+		if (HikePubSub.MULTI_FILE_TASK_FINISHED.equals(type))
+		{
+			fileTransferTask = null;
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Intent intent = new Intent(GallerySelectionViewer.this, ChatThread.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+					startActivity(intent);
+
+					if (progressDialog != null)
+					{
+						progressDialog.dismiss();
+						progressDialog = null;
+					}
+				}
+			});
 		}
 	}
 }

@@ -557,6 +557,8 @@ public class HikeConstants
 
 	public static final int SHARE_CONTACT_CODE = 1193;
 
+	public static final int SHARE_FILE_CODE = 1194;
+
 	public static final int FACEBOOK_REQUEST_CODE = 64206;
 
 	public static final int MAX_DURATION_RECORDING_SEC = 360;
@@ -1036,6 +1038,16 @@ public class HikeConstants
 		public static final String GALLERY_SELECTIONS = "gallerySelections";
 
 		public static final String FILE_PATHS = "filePaths";
+
+		public static final String IS_ACTION_MODE_ON = "isActionModeOn";
+		
+		public static final String SELECTED_POSITIONS = "selectedPositions";
+
+		public static final String SELECTED_NON_FORWARDABLE_MSGS = "selectedNonForwadableMsgs";
+		
+		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
+		
+		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
 	}
 
 	public static final class LogEvent
