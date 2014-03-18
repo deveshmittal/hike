@@ -17,6 +17,7 @@ import org.sqldroid.SQLDroidDriver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -51,9 +52,9 @@ public class ThorThread implements Runnable
 		boolean successDecrypt = true;
 		File outputFile = new File(DB_FILE);
 		// create temp if doesnot exist
-		if(!outputFile.getParentFile().exists())
+		if (!outputFile.getParentFile().exists())
 			outputFile.getParentFile().mkdirs();
-		
+
 		Connection con = null;
 		try
 		{
@@ -98,7 +99,9 @@ public class ThorThread implements Runnable
 					}
 					print(freq);
 					Intent i = new Intent(HikeMessengerApp.THOR_DETAILS_SENT);
-					i.putExtra(THOR, getThorBytes(freq));
+					byte[] b = getThorBytes(freq);
+					String data = Base64.encodeToString(b, Base64.DEFAULT);
+					i.putExtra(THOR, data);
 					LocalBroadcastManager.getInstance(ctx).sendBroadcast(i);
 				}
 			}
@@ -127,7 +130,7 @@ public class ThorThread implements Runnable
 			{
 				Log.e(TAG, "SQLException in closing connection", e);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				// do not handle
 			}
@@ -194,16 +197,16 @@ public class ThorThread implements Runnable
 		}
 		return bout.toByteArray();
 	}
-	
+
 	private void print(HashMap<String, Integer> freq)
 	{
 		StringBuilder b = new StringBuilder();
 		b.append("\n");
-		for(Entry<String,Integer> e : freq.entrySet())
+		for (Entry<String, Integer> e : freq.entrySet())
 		{
 			b.append(e.getKey() + " : " + e.getValue());
 			b.append("\n");
 		}
-		Log.d(TAG,b.toString());
+		Log.d(TAG, b.toString());
 	}
 }
