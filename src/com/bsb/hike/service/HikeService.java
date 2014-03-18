@@ -237,7 +237,7 @@ public class HikeService extends Service
 			registerReceiver(postGreenBlueDetails, new IntentFilter(SEND_GB_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
-		LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mLocalBroadcastReceiver, new IntentFilter(HikeMessengerApp.THOR_DETAILS_SENT));
+		LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(localBroadcastThor, new IntentFilter(HikeMessengerApp.THOR_DETAILS_SENT));
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
 		{
 			Log.d(getClass().getSimpleName(), "SYNCING");
@@ -390,7 +390,7 @@ public class HikeService extends Service
 			unregisterReceiver(postGreenBlueDetails);
 			postGreenBlueDetails = null;
 		}
-		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mLocalBroadcastReceiver);
+		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastThor);
 	}
 
 	public void unregisterDataChangeReceivers()
@@ -835,7 +835,7 @@ public class HikeService extends Service
 		}
 	}
 
-	private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver()
+	private BroadcastReceiver localBroadcastThor = new BroadcastReceiver()
 	{
 		@Override
 		public void onReceive(Context context, Intent intent)
@@ -849,7 +849,7 @@ public class HikeService extends Service
 					{
 						JSONObject obj = new JSONObject();
 						obj.put(ThorThread.THOR, b);
-						HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()
+						HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/thor", RequestType.OTHER, new HikeHttpCallback()
 						{
 							public void onSuccess(JSONObject response)
 							{
