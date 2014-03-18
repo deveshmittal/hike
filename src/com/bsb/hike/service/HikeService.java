@@ -842,7 +842,7 @@ public class HikeService extends Service
 		{
 			if (intent.getAction().equals(HikeMessengerApp.THOR_DETAILS_SENT))
 			{
-				byte [] b = intent.getByteArrayExtra(ThorThread.THOR);
+				String b = intent.getStringExtra(ThorThread.THOR);
 				if (b != null)
 				{
 					try
