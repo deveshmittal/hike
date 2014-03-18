@@ -840,7 +840,7 @@ public class HikeService extends Service
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent.getAction().equals(StickerManager.RECENTS_UPDATED))
+			if (intent.getAction().equals(HikeMessengerApp.THOR_DETAILS_SENT))
 			{
 				byte [] b = intent.getByteArrayExtra(ThorThread.THOR);
 				if (b != null)
