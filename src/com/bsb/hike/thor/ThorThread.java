@@ -4,33 +4,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
-import javax.crypto.NoSuchPaddingException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.sqldroid.SQLDroidDriver;
-
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.Utils;
 
 public class ThorThread implements Runnable
 {
@@ -60,6 +50,10 @@ public class ThorThread implements Runnable
 	{
 		boolean successDecrypt = true;
 		File outputFile = new File(DB_FILE);
+		// create temp if doesnot exist
+		if(!outputFile.getParentFile().exists())
+			outputFile.getParentFile().mkdirs();
+		
 		Connection con = null;
 		try
 		{
