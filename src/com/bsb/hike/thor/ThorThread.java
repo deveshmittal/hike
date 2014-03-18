@@ -40,7 +40,7 @@ public class ThorThread implements Runnable
 
 	private static final String NEW_BACKUP = "/mnt/sdcard/WhatsApp/Databases/msgstore.db.crypt5";
 
-	private static final String DB_FILE = "/mnt/sdcard/WhatsApp/Databases/msgstore.db";
+	private static final String DB_FILE = "/mnt/temp/msgstore.db";
 
 	private static final String TEMP_DB_FILE = DB_FILE + "-journal";
 

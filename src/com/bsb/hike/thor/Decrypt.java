@@ -27,6 +27,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.KeyParameter;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.bsb.hike.thor.crypt.AESEngine;
@@ -35,7 +36,7 @@ import com.bsb.hike.thor.crypt.BufferedBlockCipher2par;
 public class Decrypt
 {
 	private static final String TAG = "Decrypt";
-	
+
 	private static final byte[] KEY = { 0x34, 0x6a, 0x23, 0x65, 0x2a, 0x46, 0x39, 0x2b, 0x4d, 0x73, 0x25, 0x7c, 0x67, 0x31, 0x7e, 0x35, 0x2e, 0x33, 0x72, 0x48, 0x21, 0x77, 0x65,
 			0x2c };
 
@@ -74,7 +75,8 @@ public class Decrypt
 			fOut.close();
 			try
 			{
-				// if this throws some exception, its ok as decryption is already done
+				// if this throws some exception, its ok as decryption is
+				// already done
 				cIn.close();
 			}
 			catch (Exception e)
@@ -125,51 +127,32 @@ public class Decrypt
 		try
 		{
 			InputStream in = new BufferedInputStream(new FileInputStream(input));
-			byte[] inputbytes = new byte[(int) input.length()];
-			in.read(inputbytes);
-			in.close();
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(output));
+			byte[] inputbytes = new byte[8192];
+			byte[] outputbytes = new byte[8192];
 			BufferedBlockCipher2par cipher = getCipher(false);
-			byte[] outputbytes = new byte[cipher.getOutputSize(inputbytes.length)];
-			int outputLen = cipher.processBytes(inputbytes, 0, inputbytes.length, outputbytes, 0);
-			try
+			int n;
+			while ((n = in.read(inputbytes)) != -1)
 			{
-				outputLen += cipher.doFinal(outputbytes, outputLen);
+				cipher.processBytes(inputbytes, 0, n, outputbytes, 0);
+				out.write(outputbytes, 0, n);
 			}
-			catch (InvalidCipherTextException e)
-			{
-				throw new IOException("Can't decrypt file: " + e.getLocalizedMessage());
-			}
-			for (int i = outputLen - 16; i < outputLen; ++i)
-			{
-				byte b = outputbytes[i];
-				if (b == EOF_MARKER)
-				{
-					outputLen = i;
-					break;
-				}
-			}
-			byte[] finalBytes = new byte[outputLen];
-			System.arraycopy(outputbytes, 0, finalBytes, 0, outputLen);
-			OutputStream out = null;
-			FileOutputStream ff = new FileOutputStream("/mnt/sdcard/WhatsApp/msgstore_encryption.db");
-			out = new BufferedOutputStream(ff);
-			out.write(finalBytes);
-			ff.close();
+			in.close();
 			out.flush();
 			out.close();
 			successDecrypt = true;
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e(TAG,"Exception in Decrypt",e);
+			Log.e(TAG, "Exception in Decrypt", e);
 		}
 		catch (IOException e)
 		{
-			Log.e(TAG,"Exception in Decrypt",e);
+			Log.e(TAG, "Exception in Decrypt", e);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			Log.e(TAG,"Exception in Decrypt",e);
+			Log.e(TAG, "Exception in Decrypt", e);
 		}
 		return successDecrypt;
 	}

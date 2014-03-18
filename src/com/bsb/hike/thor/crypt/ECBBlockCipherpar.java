@@ -30,7 +30,7 @@ public class ECBBlockCipherpar implements Runnable
 	public void run()
 	{
 		// TODO Auto-generated method stub
-		while (s[3] > 0 && s[2] > 16)
+		while (s[3] > 0 && s[2] > 0)
 		{
 			cipher.processBlock(in, s[0], out, s[1]);
 			s[2] -= (blockSize);

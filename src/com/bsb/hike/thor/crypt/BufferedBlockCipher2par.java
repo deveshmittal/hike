@@ -34,39 +34,29 @@ public class BufferedBlockCipher2par extends BufferedBlockCipher
 			}
 		}
 		int resultLen = 0;
-		int gapLen = buf.length - bufOff;
-		if (len > gapLen)
+		if (len > 0)
 		{
-			System.arraycopy(in, inOff, buf, bufOff, gapLen);
-			resultLen += cipher.processBlock(buf, 0, out, outOff);
-			bufOff = 0;
-			len -= gapLen;
-			inOff += gapLen;
 			int pcnt = Runtime.getRuntime().availableProcessors();
-			
-			int num, i, num_threads = (pcnt*2)+1;
-			
-			int[][] s = new int[num_threads][5];
-			
+			int num, i, numThreads = (pcnt * 2) + 1;
+			int[][] s = new int[numThreads][5];
+
 			ExecutorService exec = Executors.newCachedThreadPool();
-			CountDownLatch latch = new CountDownLatch(num_threads);
-			num = ((len - blockSize) / blockSize) / num_threads;
+			CountDownLatch latch = new CountDownLatch(numThreads);
+			num = (len / blockSize) / numThreads;
 			int add = num * blockSize;
 			s[0][0] = inOff;
 			s[0][1] = outOff + resultLen;
 			s[0][2] = len;
 			s[0][3] = num;
-			for (i = 1; i < num_threads; ++i)
+			for (i = 1; i < numThreads; ++i)
 			{
 				s[i][0] = s[i - 1][0] + add;
 				s[i][1] = s[i - 1][1] + add;
 				s[i][2] = s[i - 1][2] - add;
 				s[i][3] = num;
 			}
-			for (i = 0; i < num_threads; ++i)
-			{
+			for (i = 0; i < numThreads; ++i)
 				exec.execute(new ECBBlockCipherpar(latch, cipher, in, out, s[i]));
-			}
 			exec.shutdown();
 			try
 			{
@@ -77,22 +67,16 @@ public class BufferedBlockCipher2par extends BufferedBlockCipher
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			inOff = s[num_threads-1][0];
-			resultLen = s[num_threads-1][1] - outOff;
-			len = s[num_threads-1][2];
+			inOff = s[numThreads - 1][0];
+			resultLen = s[numThreads - 1][1] - outOff;
+			len = s[numThreads - 1][2];
 		}
-		while (len > buf.length)
+		while (len > 0)
 		{
-			resultLen += cipher.processBlock(in, inOff, out, outOff + resultLen);
+			cipher.processBlock(in, inOff, out, outOff + resultLen);
 			len -= blockSize;
 			inOff += blockSize;
-		}
-		System.arraycopy(in, inOff, buf, bufOff, len);
-		bufOff += len;
-		if (bufOff == buf.length)
-		{
-			resultLen += cipher.processBlock(buf, 0, out, outOff + resultLen);
-			bufOff = 0;
+			resultLen += blockSize;
 		}
 		return resultLen;
 	}
