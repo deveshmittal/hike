@@ -46,6 +46,7 @@ public class Decrypt
 
 	private static final byte[] ENCRYPTION_KEY = hexStringToByteArray("8d4b155cc9ff81e5cbf6fa7819366a3ec621a656416cd793");
 
+	@SuppressLint("NewApi")
 	public static boolean decrypt5(File inputFile, File outputFile, String email)
 	{
 		boolean successDecrypt = false;
