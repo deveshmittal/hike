@@ -136,7 +136,8 @@ public class DbUtils
 			while (msg.next())
 			{
 				int count = msg.getInt("cc");
-				freq.put(key_remote_jid, count);
+				if(count > 0)
+					freq.put(key_remote_jid, count);
 			}
 		}
 		catch (SQLException e)
