@@ -38,6 +38,7 @@
                 android:src="@drawable/ic_country" />
 
             <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/selected_country_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="12dp"

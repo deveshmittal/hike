@@ -784,6 +784,8 @@ public class HikeConstants
 	public static final int LED_LIGHTS_OFF_MS = 1000;
 	
 	public static final int JOINED_HIKE_STATUS_ID = -1;
+	
+	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
 	public static final class Extras
 	{
@@ -1046,6 +1048,8 @@ public class HikeConstants
 		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
 		
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
+
+		public static final String SELECTED_COUNTRY = "selectedCountry";
 	}
 
 	public static final class LogEvent

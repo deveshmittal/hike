@@ -1,11 +1,15 @@
 package com.bsb.hike.ui;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -25,7 +29,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -33,11 +36,12 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -50,12 +54,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -116,6 +118,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private TextView invalidNum;
 
 	private EditText countryPicker;
+	
+	private TextView selectedCountryName;
 
 	private Button callmeBtn;
 
@@ -141,13 +145,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private final int NUMBER = 0;
 
-	private String[] countryNamesAndCodes;
-
-	private String[] countryISOAndCodes;
-
 	private String countryCode;
 
-	private final String defaultCountryCode = "IN +91";
+	private final String defaultCountryName = "India";
 
 	private boolean showingSecondLoadingTxt = false;
 
@@ -629,6 +629,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		tapHereText = (Button) layout.findViewById(R.id.wrong_num);
 		invalidNum = (TextView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (EditText)layout.findViewById(R.id.country_picker);
+		selectedCountryName = (TextView)layout.findViewById(R.id.selected_country_name);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
 		tryAgainBtn = (Button) layout.findViewById(R.id.btn_try_again);
@@ -660,84 +661,19 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		});
 		
 		countryPicker.setEnabled(true);
-
-		String prevCode = accountPrefs.getString(HikeMessengerApp.TEMP_COUNTRY_CODE, "");
-		countryNamesAndCodes = getResources().getStringArray(R.array.country_names_and_codes);
-		countryISOAndCodes = getResources().getStringArray(R.array.country_iso_and_codes);
-
-		if (TextUtils.isEmpty(countryCode))
-		{
-			TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			String countryIso = TextUtils.isEmpty(prevCode) ? manager.getNetworkCountryIso().toUpperCase() : prevCode;
-			for (String s : countryISOAndCodes)
-			{
-				if (!TextUtils.isEmpty(countryIso) && s.contains(countryIso))
-				{
-					Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
-					countryCode = s;
-					break;
-				}
-			}
-			countryPicker.setText(TextUtils.isEmpty(countryCode) ? defaultCountryCode : countryCode);
-		}
-		else
-		{
-			countryPicker.setText(countryCode);
-		}
-		formatCountryPickerText(countryPicker.getText().toString());
-
+		
+		setupCountryCodeData();
+		
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
 		loadingText.setText(R.string.verifying_num_signup);
 	}
 
-	private void formatCountryPickerText(String code)
-	{
-		if (countryPicker == null)
-		{
-			return;
-		}
-		SpannableStringBuilder ssb = new SpannableStringBuilder(code);
-		ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, code.indexOf("+"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		countryPicker.setText(ssb);
-		countryCode = code;
-	}
-
 	public void onCountryPickerClick(View v)
 	{
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
-
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.select_dialog_item, android.R.id.text1, countryNamesAndCodes)
-		{
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
-			{
-				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(android.R.id.text1);
-
-				String text = tv.getText().toString();
-				SpannableStringBuilder spannable = new SpannableStringBuilder(text);
-				spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.country_code)), text.indexOf("+"), text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				tv.setText(spannable);
-
-				return v;
-			}
-		};
-
-		builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				formatCountryPickerText(countryISOAndCodes[which]);
-			}
-		});
-
-		AlertDialog dialog = builder.create();
-		dialog.getListView().setFastScrollEnabled(true);
-		dialog.show();
+		Intent intent = new Intent(this, CountrySelectActivity.class);
+	    this.startActivityForResult(intent, HikeConstants.SELECT_COUNTRY_REQUEST_CODE);
 	}
 
 	private void prepareLayoutForGettingPin(long timeLeft)
@@ -1651,6 +1587,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
 			setProfileImage();
 			break;
+		case HikeConstants.SELECT_COUNTRY_REQUEST_CODE:	
+			if (resultCode == RESULT_OK) {
+				String countryName = data.getStringExtra(HikeConstants.Extras.SELECTED_COUNTRY);
+				selectCountry(countryName);
+			}
+			break;
 		}
 	}
 
@@ -1714,5 +1656,48 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			});
 		}
 	}
-	
+	private void setupCountryCodeData(){
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(getResources().getAssets().open("countries.txt")));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] args = line.split(";");
+				countriesArray.add(0, args[1]);
+				countriesMap.put(args[1], args[2]);
+				codesMap.put(args[2], args[1]);
+				languageMap.put(args[0], args[1]);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Collections.sort(countriesArray, new Comparator<String>() {
+			@Override
+			public int compare(String lhs, String rhs) {
+				return lhs.compareTo(rhs);
+			}
+		});
+
+		String prevCode = accountPrefs.getString(HikeMessengerApp.TEMP_COUNTRY_CODE, "");
+		if (TextUtils.isEmpty(countryCode))
+		{
+			TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			String countryIso = TextUtils.isEmpty(prevCode) ? manager.getNetworkCountryIso().toUpperCase() : prevCode;
+			String countryName = languageMap.get(countryIso);
+			if(countryName == null || selectCountry(countryName)){
+				selectCountry(defaultCountryName);
+			}
+		}
+	}
+	private boolean selectCountry(String countryName)
+	{
+		int index = countriesArray.indexOf(countryName);
+		if (index != -1) {
+			countryCode = countriesMap.get(countryName);
+			countryPicker.setText(countryCode);
+			selectedCountryName.setText(countryName);
+		}
+		return !countryCode.isEmpty();
+	}
+
 }

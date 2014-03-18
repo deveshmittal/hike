@@ -771,4 +771,5 @@
 	<string name="tutorial3_header_title">Make conversations\ncolourful.</string>
 	<string name="get_started">GET STARTED</string>
 	<string name="whats_your_number">Hi! What\'s your number?</string>
+	<string name="select_country">Select Country</string>
 </resources>
