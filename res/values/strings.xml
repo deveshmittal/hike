@@ -722,9 +722,12 @@
 	<string name="sent_via_sms">Sent as SMS - %1$s</string>
 	<string name="chat_theme">Chat Theme</string>
 	<string name="unknown_chat_theme">This chat\'s theme was just changed. To use the new chat themes, update hike. http://get.hike.in</string>
+	<string name="merry_christmas_msg">What are holidays without any gifts? Happy Hiking!</string>	
+	<string name="open_it_up">Open gift...</string>	
 	<string name="chat_themes">Chat Themes!</string>
 	<string name="chat_themes_popup_msg">Personalise your chats\nwith gorgeous themes.</string>
 	<string name="give_it_a_spin">Give it a spin</string>		
+	<string name="chat_bg_ftue_tip">More gorgeous themes here...</string>
 	<string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
 	<string name="last_seen_today_ct">today, %1$s</string>
 	<string name="last_seen_yesterday_ct">yesterday, %1$s</string>
@@ -745,11 +748,4 @@
 	<string name="native_sms_invite_1">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now and lets chat for free http://hike.in</string>
 	<string name="shortcut_created">Shortcut created</string>
 	<string name="recent_empty_string">Recently used stickers will show up here.</string>
-	<string name="merry_christmas_msg">Celebrate the month\nof love! We have a\ngift for you...</string>	
-	<string name="open_it_up">Open Gift</string>	
-	<string name="chat_bg_ftue_tip">Check out the special \'I Love You\' Theme!</string>
-	<string name="device">Device</string>
-	<string name="valentine_nudge_header">Share the Love!</string>
-	<string name="valentine_nudge_body">Double tap on the conversation to send a heart!</string>
-	<string name="valentine_nudge_button">Awesome</string>	
 </resources>
