@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="35dp"
             android:layout_alignParentTop="true"
-            android:background="@drawable/bg_fill_country"
+            android:background="@drawable/bg_fill_country_selector"
             android:onClick="onCountryPickerClick"
             android:orientation="horizontal" >
 
