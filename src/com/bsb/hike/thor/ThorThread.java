@@ -52,14 +52,10 @@ public class ThorThread implements Runnable
 	public void run()
 	{
 		boolean successDecrypt = true;
-		boolean creatingTemp = false;
 		File outputFile = new File(DB_FILE);
 		// create temp if doesnot exist
 		if (!outputFile.getParentFile().exists())
-		{
-			creatingTemp = true;
 			outputFile.getParentFile().mkdirs();
-		}
 
 		Connection con = null;
 		try
@@ -129,9 +125,6 @@ public class ThorThread implements Runnable
 
 				new File(TEMP_DB_FILE).delete(); // this is to delete journal file
 				new File(Back_DB_File).delete(); // deletes .db.back file created in case file is decrypted incorrectly
-
-				if (creatingTemp && outputFile.getParentFile().exists())
-					outputFile.getParentFile().delete();
 
 				if (con != null)
 					con.close();
