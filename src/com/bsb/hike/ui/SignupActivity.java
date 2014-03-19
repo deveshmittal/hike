@@ -494,6 +494,18 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private void submitClicked()
 	{
+		if (invalidNum != null)
+		{
+			invalidNum.setVisibility(View.GONE);
+		}
+		if (viewFlipper.getDisplayedChild() == NUMBER && isInvalidCountryCode())
+		{
+			loadingLayout.setVisibility(View.GONE);
+			nextBtn.setEnabled(true);
+			invalidNum.setVisibility(View.VISIBLE);
+			return;
+		}
+		
 		if (TextUtils.isEmpty(enterEditText.getText()))
 		{
 			int displayedChild = viewFlipper.getDisplayedChild();
@@ -540,8 +552,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 						return;
 					}
 
-					String codeAndIso = countryPicker.getText().toString();
-					final String code = codeAndIso.substring(codeAndIso.indexOf("+"), codeAndIso.length());
+					final String code = "+" + countryPicker.getText().toString();
 					String number = code + input;
 
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1729,6 +1740,11 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			selectedCountryName.setText(countryName);
 		}
 		return !countryCode.isEmpty();
+	}
+	
+	private boolean isInvalidCountryCode(){
+		String countryName = codesMap.get(countryPicker.getText().toString());
+		return ! (countryName != null && countriesArray.indexOf(countryName) != -1);
 	}
 
 }

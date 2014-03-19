@@ -162,10 +162,17 @@
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/invalid_num"
-        style="@style/SignupButton.Text.Info"
-        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="21dp"
         android:text="@string/invalid_num_signup"
-        android:textSize="14sp"
-        android:visibility="invisible" />
+        android:textSize="12sp"
+        android:textColor="#f16c67"
+        android:textStyle="bold|italic"
+	    android:shadowColor="#fbdedd"
+	    android:shadowDy="0.5"
+	    android:shadowRadius="0.5"
+	    android:visibility="invisible"/>
 
 </LinearLayout>
