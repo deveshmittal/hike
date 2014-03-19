@@ -5,10 +5,6 @@ import java.net.URL;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.utils.Utils;
 
 public class SocialIconLoader extends ImageWorker
 {
@@ -18,7 +14,7 @@ public class SocialIconLoader extends ImageWorker
 	private int mImageWidth;
 
 	private int mImageHeight;
-	
+
 	private Context context;
 
 	/**
@@ -45,7 +41,7 @@ public class SocialIconLoader extends ImageWorker
 	 */
 	public SocialIconLoader(Context ctx, int imageSize)
 	{
-		this(ctx,imageSize,imageSize);
+		this(ctx, imageSize, imageSize);
 	}
 
 	public void setImageSize(int width, int height)

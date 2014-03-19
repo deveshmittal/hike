@@ -9,40 +9,46 @@ import android.widget.ImageView;
 
 import com.bsb.hike.R;
 
-public class IconCheckBoxPreference extends CheckBoxPreference {
+public class IconCheckBoxPreference extends CheckBoxPreference
+{
 	private Drawable mIcon;
+
 	private ImageView imageView;
 
-	public IconCheckBoxPreference(final Context context,
-			final AttributeSet attrs, final int defStyle) {
+	public IconCheckBoxPreference(final Context context, final AttributeSet attrs, final int defStyle)
+	{
 		super(context, attrs, defStyle);
 		setIcon(context, attrs);
 	}
 
-	private void setIcon(Context context, AttributeSet attrs) {
+	private void setIcon(Context context, AttributeSet attrs)
+	{
 		String iconName = attrs.getAttributeValue(null, "icon");
 
-		if(iconName != null)
+		if (iconName != null)
 		{
-			int id = context.getResources().getIdentifier(iconName, "drawable",context.getPackageName());
+			int id = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
 			this.mIcon = context.getResources().getDrawable(id);
 		}
 	}
 
-	public IconCheckBoxPreference(Context context) {
+	public IconCheckBoxPreference(Context context)
+	{
 		super(context);
 	}
 
-	public IconCheckBoxPreference(final Context context,
-			final AttributeSet attrs) {
+	public IconCheckBoxPreference(final Context context, final AttributeSet attrs)
+	{
 		super(context, attrs);
 		setIcon(context, attrs);
 	}
 
-	protected void onBindView(final View view) {
+	protected void onBindView(final View view)
+	{
 		super.onBindView(view);
 		imageView = (ImageView) view.findViewById(R.id.icon);
-		if ((imageView != null) && (this.mIcon != null)) {
+		if ((imageView != null) && (this.mIcon != null))
+		{
 			imageView.setImageDrawable(this.mIcon);
 			imageView.setVisibility(View.VISIBLE);
 			imageView.setSelected(isChecked());
@@ -50,8 +56,10 @@ public class IconCheckBoxPreference extends CheckBoxPreference {
 	}
 
 	@Override
-	protected void notifyChanged() {
-		if (imageView != null) {
+	protected void notifyChanged()
+	{
+		if (imageView != null)
+		{
 			imageView.setSelected(isChecked());
 		}
 		super.notifyChanged();

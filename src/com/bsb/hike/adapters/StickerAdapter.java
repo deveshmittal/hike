@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
@@ -38,7 +36,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -357,15 +354,16 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		spo.getStickerListView().setOnScrollListener(new OnScrollListener()
 		{
 			private int previousFirstVisibleItem;
+
 			private long previousEventTime;
+
 			private int velocity;
 
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState)
 			{
 				/*
-				 * Only set flinging true if the list is actually flinging and the velocity
-				 * is greater than 10.
+				 * Only set flinging true if the list is actually flinging and the velocity is greater than 10.
 				 */
 				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > 10);
 			}
@@ -373,14 +371,15 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 			{
-		        if (previousFirstVisibleItem != firstVisibleItem){
-		            long currTime = System.currentTimeMillis();
-		            long timeToScrollOneElement = currTime - previousEventTime;
-		            velocity = (int) (((double)1/timeToScrollOneElement)*1000);
+				if (previousFirstVisibleItem != firstVisibleItem)
+				{
+					long currTime = System.currentTimeMillis();
+					long timeToScrollOneElement = currTime - previousEventTime;
+					velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
 
-		            previousFirstVisibleItem = firstVisibleItem;
-		            previousEventTime = currTime;
-		        }
+					previousFirstVisibleItem = firstVisibleItem;
+					previousEventTime = currTime;
+				}
 
 				int currentIdx = ((ChatThread) activity).getCurrentPage();
 				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
@@ -428,8 +427,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		return stickerCategoryList.get(index).updateAvailable;
 	}
-	
-	public void unregisterListeners(){
+
+	public void unregisterListeners()
+	{
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
