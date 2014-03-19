@@ -662,18 +662,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
-		if((!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))&&snowFallView==null){
-			(new Handler()).postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
-				}
-			}, 300);
-		}
 		
 	}
 
