@@ -89,7 +89,7 @@ public class DbUtils
 		ResultSet msg = null;
 		try
 		{
-			String query = "SELECT key_remote_jid FROM chat_list WHERE key_remote_jid LIKE '91%' ";
+			String query = "SELECT key_remote_jid FROM chat_list";
 			pt = con.prepareStatement(query);
 			msg = pt.executeQuery();
 			convs = new LinkedList<String>();
