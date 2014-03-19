@@ -61,7 +61,6 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
-import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
@@ -124,8 +123,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private TextView topBarIndicator;
 
 	private Drawable myProfileImage;
-
-	private SnowFallView snowFallView;
 
 	private ContactInfo chatThemeFTUEContact;
 
@@ -253,7 +250,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
-		if ((!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)) && snowFallView == null)
+		if (!(accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false)))
 		{
 			(new Handler()).postDelayed(new Runnable()
 			{
@@ -261,7 +258,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
+					ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
 				}
 			}, 300);
 		}
@@ -284,7 +281,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	}
 	
 	public void onChatBgOpenItUpClick(View v){
-		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
+		ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v);
 	}
 
 	public void onChatBgGiveItASpinClick(View v)
@@ -309,7 +306,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
 		editor.commit();
 		Utils.unblockOrientationChange(HomeActivity.this);
-		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView);
+		ChatBgFtue.onChatBgGiveItASpinClick(this, v);
 		return;
 	}
 
