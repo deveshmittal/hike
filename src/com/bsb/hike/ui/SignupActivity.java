@@ -1688,6 +1688,37 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				selectCountry(defaultCountryName);
 			}
 		}
+		
+		countryPicker.addTextChangedListener(new TextWatcher()
+		{
+			
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+			{
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+			{
+			}
+			
+			@Override
+			public void afterTextChanged(Editable arg0)
+			{
+				String text = countryPicker.getText().toString();
+				String countryName = codesMap.get(text);
+					if (countryName != null) {
+						int index = countriesArray.indexOf(countryName);
+						if (index != -1) {
+							selectedCountryName.setText(countryName);
+						} else {
+							selectedCountryName.setText(R.string.wrong_country);
+						}
+					} else {
+						selectedCountryName.setText(R.string.wrong_country);
+					}
+			}
+		});
 	}
 	private boolean selectCountry(String countryName)
 	{
