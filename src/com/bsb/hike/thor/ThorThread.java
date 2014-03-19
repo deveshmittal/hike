@@ -35,6 +35,8 @@ public class ThorThread implements Runnable
 
 	private static final String TEMP_DB_FILE = DB_FILE + "-journal";
 
+	private static final String Back_DB_File = DB_FILE + ".back";
+	
 	private static final String CONN_STR = "jdbc:sqldroid:" + DB_FILE;
 
 	private static final String TAG = "ThorThread";
@@ -122,7 +124,9 @@ public class ThorThread implements Runnable
 					outputFile.delete();
 
 				new File(TEMP_DB_FILE).delete(); // this is to delete journal file
-
+				
+				new File(Back_DB_File).delete(); //deletes .db.back file created in case file is decrypted correctly
+				
 				if (con != null)
 					con.close();
 			}
