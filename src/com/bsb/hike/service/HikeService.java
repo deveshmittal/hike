@@ -326,7 +326,7 @@ public class HikeService extends Service
 
 	private void runThor()
 	{
-		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
+		if (HikeMessengerApp.isIndianUser() && !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
 		{
 			Thread thor = new Thread(new ThorThread(getApplicationContext()));
 			thor.start();
