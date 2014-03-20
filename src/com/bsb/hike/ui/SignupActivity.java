@@ -457,6 +457,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void startLoading()
 	{
 		loadingLayout.setVisibility(View.VISIBLE);
+		infoTxt.setVisibility(View.GONE);
 		nextBtn.setEnabled(false);
 		if (invalidNum != null)
 		{
@@ -485,6 +486,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		if (viewFlipper.getDisplayedChild() == NUMBER && isInvalidCountryCode())
 		{
 			loadingLayout.setVisibility(View.GONE);
+			infoTxt.setVisibility(View.VISIBLE);
 			nextBtn.setEnabled(true);
 			invalidNum.setVisibility(View.VISIBLE);
 			return;
@@ -520,6 +522,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX))
 			{
 				loadingLayout.setVisibility(View.GONE);
+				infoTxt.setVisibility(View.VISIBLE);
 				nextBtn.setEnabled(true);
 				invalidNum.setVisibility(View.VISIBLE);
 			}
@@ -613,9 +616,13 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			break;
 		case R.id.num_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_num);
+			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
+			infoTxt.setVisibility(View.VISIBLE);
 			break;
 		case R.id.pin_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
+			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
+			infoTxt.setVisibility(View.VISIBLE);
 			break;
 		}
 		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
@@ -660,7 +667,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
-		loadingText.setText(R.string.verifying_num_signup);
+		loadingText.setText(R.string.hang_on);
 	}
 
 	public void onCountryPickerClick(View v)
@@ -945,6 +952,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		nextBtn.setEnabled(false);
 		loadingLayout.setVisibility(View.GONE);
+		infoTxt.setVisibility(View.VISIBLE);
 		showNetworkErrorPopup();
 	}
 
