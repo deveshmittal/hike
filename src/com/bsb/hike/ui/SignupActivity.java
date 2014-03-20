@@ -1084,23 +1084,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				prepareLayoutForGettingName(null, false);
 			}
 			break;
-		case PULLING_PIN:
-			if (viewFlipper.getDisplayedChild() == NUMBER)
-			{
-				mHandler.postDelayed(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						if (viewFlipper != null && viewFlipper.getDisplayedChild() == NUMBER)
-						{
-							showingSecondLoadingTxt = true;
-							loadingText.setText(R.string.almost_there_signup);
-						}
-					}
-				}, HikeConstants.PIN_CAPTURE_TIME / 2);
-			}
-			break;
 		case PIN:
 			viewFlipper.setDisplayedChild(PIN);
 

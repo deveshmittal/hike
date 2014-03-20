@@ -499,9 +499,6 @@ public class HikeConstants
 	/* the max amount of time we allow the service to run in case of no activity */
 	public static final int DISCONNECT_TIME = 10 * 60;
 
-	/* the max amount of time we wait for the PIN */
-	public static final int PIN_CAPTURE_TIME = 60 * 1000;
-
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
 
 	/*
