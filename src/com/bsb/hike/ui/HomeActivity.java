@@ -1177,6 +1177,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if(networkErrorPopUp == null)
 			return;
 		Log.d(getClass().getSimpleName(),"visiblity for: " + HikeMessengerApp.networkError);
+		//networkErrorPopUp.clearAnimation();
 		if(HikeMessengerApp.networkError)
 		{
 			networkErrorPopUp.setText(R.string.no_internet_connection);
