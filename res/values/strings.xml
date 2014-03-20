@@ -773,4 +773,5 @@
 	<string name="whats_your_number">Hi! What\'s your number?</string>
 	<string name="select_country">Select Country</string>
 	<string name="wrong_country">Invalid country code</string>
+	<string name="no_internet_msg">Looks like there’s no internet\nconnection! Try fixing it and\nproceed.</string>
 </resources>

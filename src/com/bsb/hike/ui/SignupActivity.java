@@ -131,8 +131,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private TextView femaleText;
 
-	private Button tryAgainBtn;
-
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
@@ -164,6 +162,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private boolean showingNumberConfimationDialog;
 	
 	TextView mActionBarTitle;
+	
+	private Dialog errorDialog;
 	
 	View nextBtn;
 	
@@ -392,23 +392,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	public void onClick(View v)
 	{
-		if (v.getId() == tryAgainBtn.getId())
-		{
-			restartTask();
-			/*
-			 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
-			 */
-			this.mHandler.postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					submitClicked();
-				}
-			}, 100);
-		}
-		else if (tapHereText != null && v.getId() == tapHereText.getId())
+		if (tapHereText != null && v.getId() == tapHereText.getId())
 		{
 			if (countDownTimer != null)
 			{
@@ -643,7 +627,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		selectedCountryName = (TextView)layout.findViewById(R.id.selected_country_name);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
-		tryAgainBtn = (Button) layout.findViewById(R.id.btn_try_again);
 		
 		loadingLayout.setVisibility(View.GONE);
 		nextBtn.setEnabled(true);
@@ -943,7 +926,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private void resetViewFlipper()
 	{
-		tryAgainBtn.setVisibility(View.GONE);
+		errorDialog = null;
 		nextBtn.setEnabled(true);
 		viewFlipper.setVisibility(View.VISIBLE);
 		removeAnimation();
@@ -961,10 +944,41 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void showErrorMsg()
 	{
 		nextBtn.setEnabled(false);
-		tryAgainBtn.setVisibility(View.VISIBLE);
 		loadingLayout.setVisibility(View.GONE);
+		showNetworkErrorPopup();
 	}
 
+	private void showNetworkErrorPopup()
+	{
+		errorDialog = new Dialog(this, R.style.Theme_CustomDialog);
+		errorDialog.setContentView(R.layout.no_internet_pop_up);
+		errorDialog.setCancelable(false);
+		Button btnOk = (Button) errorDialog.findViewById(R.id.btn_ok);
+		btnOk.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				errorDialog.dismiss();
+				restartTask();
+				/*
+				 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
+				 */
+				SignupActivity.this.mHandler.postDelayed(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						submitClicked();
+					}
+				}, 100);
+			}
+		});
+		errorDialog.show();
+	}
+	
 	private void setListeners()
 	{
 		enterEditText.setOnEditorActionListener(this);
@@ -986,7 +1000,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, tryAgainBtn.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		outState.putBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT, showingSecondLoadingTxt);
