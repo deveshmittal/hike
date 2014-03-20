@@ -85,7 +85,7 @@
                 style="@style/FreeSmsHeaders"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="10dp"
                 android:layout_toRightOf="@id/free_sms_icon"
                 android:text="@string/free_sms_left" />
 
@@ -99,15 +99,6 @@
                 android:textSize="36sp"
                 android:textStyle="italic" />
             
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/free_sms_subtxt"
-                style="@style/FreeSmsSubtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/credits_num"
-                android:layout_below="@id/free_sms_txt"
-                android:layout_toRightOf="@id/free_sms_icon"
-                android:text="@string/sms_renew" />
 
             <RelativeLayout
                 android:id="@+id/sms_progress_container"
