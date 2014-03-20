@@ -167,6 +167,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	View nextBtn;
 	
+	private TextView invalidPin;
+	
 	 private ArrayList<String> countriesArray = new ArrayList<String>();
 	 private HashMap<String, String> countriesMap = new HashMap<String, String>();
 	 private HashMap<String, String> codesMap = new HashMap<String, String>();
@@ -622,7 +624,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		case R.id.pin_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
 			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
+			invalidPin = (TextView) layout.findViewById(R.id.invalid_pin);
 			infoTxt.setVisibility(View.VISIBLE);
+			invalidPin.setVisibility(View.INVISIBLE);
 			break;
 		}
 		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
@@ -1108,7 +1112,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					countDownTimer.cancel();
 				}
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
-				infoTxt.setText(R.string.wrong_pin_signup);
+				invalidPin.setVisibility(View.VISIBLE);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
 				nextBtn.setEnabled(true);
