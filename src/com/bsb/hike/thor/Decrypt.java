@@ -82,7 +82,6 @@ public class Decrypt
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "Exception in closing CipherInputStream", e);
 			}
 			successDecrypt = true;
 		}
@@ -145,15 +144,12 @@ public class Decrypt
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e(TAG, "Exception in Decrypt", e);
 		}
 		catch (IOException e)
 		{
-			Log.e(TAG, "Exception in Decrypt", e);
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in Decrypt", e);
 		}
 		return successDecrypt;
 	}
