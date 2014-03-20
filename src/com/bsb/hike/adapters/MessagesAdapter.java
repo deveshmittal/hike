@@ -178,11 +178,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		
 		TextView messageTime;
 		
-		ImageView messageStatus;
-		
 		TextView ftMessageTime;
 		
+		TextView extMessageTime;
+		
+		ImageView messageStatus;
+		
 		ImageView ftMessageStatus;
+		
+		ImageView extMessageStatus;
+		
+		View extMessageTimeStatus;
 
 		View dayLeft;
 
@@ -565,8 +571,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.audRecIC = (ImageView) v.findViewById(R.id.audio_rec_ic);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay); 
-				holder.ftMessageTime = (TextView) v.findViewById(R.id.ft_message_time);
-				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.ft_message_status);
+				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
+				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null)
@@ -593,6 +599,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
 				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
 				holder.messageStatus = (ImageView) v.findViewById(R.id.message_status);
+				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
+				holder.extMessageStatus = (ImageView) v.findViewById(R.id.message_status_ext);
+				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
 
@@ -617,7 +626,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				holder.ftMessageTime = (TextView) v.findViewById(R.id.ft_message_time);
+				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
 			case RECEIVE:
 				if (v == null)
 				{
@@ -652,6 +661,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
 				
 				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
+				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
 
 				holder.container.setVisibility(View.GONE);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
@@ -985,9 +995,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
 			}
-			if(isDefaultTheme && !convMessage.isStickerMessage())
+			if(isDefaultTheme)
 			{
-				setNewSDR(position, holder.messageTime, holder.messageStatus);
+				if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
+				{
+					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
+				}
+				else
+				{
+					setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
+				}
 			}
 			else
 			{
@@ -1566,7 +1583,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
 					}
 					else
 					{
@@ -1602,7 +1619,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					if(fss.getFTState() == FTState.COMPLETED)
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
 					}
 				}
 				else
@@ -2341,7 +2358,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 	
-	private void setNewSDR(int position, TextView time, ImageView status)
+	private void setNewSDR(int position, TextView time, ImageView status, boolean isText, View extMessageTimeStatus, TextView messageInfo)
 	{
 		ConvMessage message = getItem(position);
 		
@@ -2349,7 +2366,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		time.setVisibility(View.VISIBLE);
 		if(message.isSent())
 		{
-			if(message.isFileTransferMessage())
+			if(!isText)
 			{
 				switch (message.getState())
 				{
@@ -2386,6 +2403,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 			status.setVisibility(View.VISIBLE);
+		}
+		
+		if(extMessageTimeStatus != null)
+			extMessageTimeStatus.setVisibility(View.VISIBLE);
+		
+		if((message.getState() != null) && (position == lastSentMessagePosition) && isGroupChat)
+		{
+			if(message.getState() == State.SENT_DELIVERED_READ)
+			{
+				messageInfo.setVisibility(View.VISIBLE);
+				messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
+				setReadByForGroup(message, messageInfo);
+			}
 		}
 	}
 

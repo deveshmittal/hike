@@ -113,8 +113,7 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:gravity="center_vertical"
-	            android:orientation="vertical"
-	            android:minWidth="48dp" >
+	            android:orientation="vertical" >
 	            
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
@@ -174,7 +173,7 @@
                         android:visibility="gone" >
                             
 			            <com.bsb.hike.view.CustomFontTextView
-			                android:id="@+id/ft_message_time"
+			                android:id="@+id/message_time_ft"
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			                android:layout_alignParentRight="true"
@@ -319,7 +318,7 @@
 	                    android:visibility="gone" />
                 </RelativeLayout>
 
-	                <com.bsb.hike.view.CustomFontTextView
+	                <com.bsb.hike.view.CustomReceiveMessageTextView
 	                    android:id="@+id/message_receive"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
@@ -382,7 +381,7 @@
       	        android:text="00:00"
                 android:textColor="#4ea9e7"
                 android:textSize="12sp"
-                android:layout_below="@id/receive_message_inner_container"
+                android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/receive_message_inner_container" />
 			
 	        </RelativeLayout>
@@ -451,6 +450,19 @@
 	        </RelativeLayout>
 
 	    </RelativeLayout>
+	            
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/message_time_ext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/bubble_container"
+            android:layout_alignLeft="@id/bubble_container"
+            android:layout_marginLeft="7dp"
+  	        android:text="00:00"
+  	        android:background="@drawable/bg_msg_time_status"
+  	        android:textColor="@color/white"
+            android:textSize="12sp" />
+           
 
 	    <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/msg_info"
