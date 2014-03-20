@@ -113,8 +113,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private EditText enterEditText;
 
-	private Button tapHereText;
-
 	private TextView invalidNum;
 
 	private EditText countryPicker;
@@ -394,15 +392,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	public void onClick(View v)
 	{
-		if (tapHereText != null && v.getId() == tapHereText.getId())
-		{
-			if (countDownTimer != null)
-			{
-				countDownTimer.cancel();
-			}
-			mTask.addUserInput("");
-		}
-		else if (callmeBtn != null && v.getId() == callmeBtn.getId())
+		if (callmeBtn != null && v.getId() == callmeBtn.getId())
 		{
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call", RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback()
 			{
@@ -464,10 +454,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		if (invalidNum != null)
 		{
 			invalidNum.setVisibility(View.GONE);
-		}
-		if (tapHereText != null)
-		{
-			tapHereText.setVisibility(View.GONE);
 		}
 		if (countryPicker != null)
 		{
@@ -632,7 +618,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
 		loadingText = (TextView) layout.findViewById(R.id.txt_loading);
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
-		tapHereText = (Button) layout.findViewById(R.id.wrong_num);
 		invalidNum = (TextView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (EditText)layout.findViewById(R.id.country_picker);
 		selectedCountryName = (TextView)layout.findViewById(R.id.selected_country_name);
@@ -689,7 +674,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		enterEditText.setText("");
 		infoTxt.setText(R.string.enter_pin_signup);
-		tapHereText.setOnClickListener(this);
 
 		String tapHere = getString(R.string.tap_here_signup);
 		String tapHereString = getString(R.string.wrong_num_signup);
@@ -699,8 +683,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			ssb.setSpan(new ForegroundColorSpan(0xff6edcff), tapHereString.indexOf(tapHere), tapHereString.indexOf(tapHere) + tapHere.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
-
-		tapHereText.setText(ssb);
 
 		if (timeLeft > 0)
 		{
@@ -1099,10 +1081,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
 				nextBtn.setEnabled(true);
-				if (tapHereText != null)
-				{
-					tapHereText.setVisibility(View.VISIBLE);
-				}
 				enterEditText.setText("");
 			}
 			// Manual entry for pin

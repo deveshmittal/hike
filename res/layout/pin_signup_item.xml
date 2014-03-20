@@ -104,13 +104,4 @@
         </LinearLayout>
 
     </RelativeLayout>
-
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/wrong_num"
-        style="@style/SignupButton.Text.Info"
-        android:layout_marginTop="10dp"
-        android:background="@null"
-        android:text="@string/wrong_num_signup"
-        android:textSize="14sp" />
-
 </LinearLayout>
