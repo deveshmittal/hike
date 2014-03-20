@@ -709,8 +709,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					long secondsUntilFinished = millisUntilFinished / 1000;
 					int minutes = (int) (secondsUntilFinished / 60);
 					int seconds = (int) (secondsUntilFinished % 60);
-					String text = String.format("%1$02d:%2$02d", minutes, seconds);
-					callmeBtn.setText(text);
+					String text = "("+String.format( "%1$02d:%2$02d", minutes, seconds)+" )";
+					callmeBtn.setText(getResources().getString(R.string.call_me_for_the_pin, text));
 					mActivityState.timeLeft = millisUntilFinished;
 					callmeBtn.setEnabled(false);
 				}
@@ -718,7 +718,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				@Override
 				public void onFinish()
 				{
-					callmeBtn.setText(R.string.call_me_signup);
+					callmeBtn.setText(getResources().getString(R.string.call_me_for_the_pin, ""));
 					callmeBtn.setEnabled(true);
 					mActivityState.timeLeft = 0;
 				}
@@ -727,9 +727,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		else
 		{
-			callmeBtn.setText(R.string.call_me_signup);
+			callmeBtn.setText(getResources().getString(R.string.call_me_for_the_pin, ""));
 			callmeBtn.setEnabled(true);
 		}
+		loadingText.setText(R.string.verifying);
 	}
 
 	private void prepareLayoutForGettingName(Bundle savedInstanceState, boolean addressBookScanningDone)

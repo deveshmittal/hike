@@ -284,7 +284,6 @@
 	<string name="next_signup">Next</string>	
 	<string name="verifying_num_signup">Verifying your number...</string>	
 	<string name="invalid_num_signup">That\'s an invalid phone number. Try again.</string>	
-	<string name="enter_pin_signup">Thanks! Did you not get the SMS PIN?\nTap \'Call Me\' below to get it.</string>
 	<string name="call_me_signup">Call Me</string>	
 	<string name="verify_pin_signup">Verifying pin..</string>
 	<string name="wrong_num_signup">Entered a wrong number? Tap here</string>
@@ -775,4 +774,7 @@
 	<string name="wrong_country">Invalid country code</string>
 	<string name="no_internet_msg">Looks like there’s no internet\nconnection! Try fixing it and\nproceed.</string>
 	<string name="hang_on">Hang on...</string>
+	<string name="enter_pin_signup">We sent you a 4 digit SMS PIN. Enter it.</string>
+	<string name="call_me_for_the_pin">Call me for the pin %1$s</string>
+	<string name="verifying">Verifying...</string>
 </resources>
