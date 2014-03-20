@@ -123,6 +123,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View marginView;
 
 		TextView participantNameFT;
+		
+		TextView participantNameFTUnsaved;
 
 		View loadingThumb;
 
@@ -547,6 +549,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
+				holder.participantNameFTUnsaved = (TextView) v.findViewById(R.id.participant_name_ft_unsaved);
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
 				holder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 				if (holder.messageTextView == null)
@@ -736,19 +739,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if (metadata != null && metadata.isPokeMessage())
 			{
-
-				if (!convMessage.isSent())
-				{
-					if (firstMessageFromParticipant)
-					{
-						holder.participantNameFT.setVisibility(View.VISIBLE);
-						holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-					}
-					else
-					{
-						holder.participantNameFT.setVisibility(View.GONE);
-					}
-				}
+				setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				
 				if (isDefaultTheme)
 				{
 					holder.poke.setVisibility(View.VISIBLE);
@@ -879,35 +871,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				CharSequence markedUp = convMessage.getMessage();
 				// Fix for bug where if a participant leaves the group chat, the
 				// participant's name is never shown
-				if(holder.participantNameFT != null)
-				{
-					holder.participantNameFT.setClickable(false);
-				}
-				if (!convMessage.isSent())
-				{
-					if (firstMessageFromParticipant)
-					{
-						holder.participantNameFT.setVisibility(View.VISIBLE);
-						String number = null;
-						String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
-						if(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
-						{
-							number = convMessage.getGroupParticipantMsisdn();
-						}
-						
-						if (number != null)
-						{
-							holder.participantNameFT.setText(name + " " + number);
-							holder.participantNameFT.setTag(convMessage);
-							holder.participantNameFT.setOnClickListener(contactClick);
-							holder.participantNameFT.setClickable(true);
-						}
-						else
-						{
-						holder.participantNameFT.setText(name);
-						}
-					}
-				}
+				setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
 				holder.messageTextView.setText(markedUp);
@@ -1227,18 +1192,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// {
 			// holder.marginView.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE : View.GONE);
 			// }
-			if (!convMessage.isSent())
-			{
-				if (firstMessageFromParticipant)
-				{
-					holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-					holder.participantNameFT.setVisibility(View.VISIBLE);
-				}
-				else
-				{
-					holder.participantNameFT.setVisibility(View.GONE);
-				}
-			}
+			setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+			
+//			if (!convMessage.isSent())
+//			{
+//				if (firstMessageFromParticipant)
+//				{
+//					holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+//					holder.participantNameFT.setVisibility(View.VISIBLE);
+//				}
+//				else
+//				{
+//					holder.participantNameFT.setVisibility(View.GONE);
+//				}
+//			}
 			holder.messageContainer.setTag(convMessage);
 			holder.messageContainer.setOnClickListener(this);
 			holder.messageContainer.setOnLongClickListener(this);
@@ -1984,6 +1951,40 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 	
+	private void setGroupParticipantName(ConvMessage convMessage, TextView participantNameFT, TextView participantNameFTUnsaved, boolean firstMessageFromParticipant)
+	{
+		if(participantNameFT != null)
+		{
+			participantNameFT.setClickable(false);
+		}
+		if (!convMessage.isSent())
+		{
+			if (firstMessageFromParticipant)
+			{
+				participantNameFT.setVisibility(View.VISIBLE);
+				String number = null;
+				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
+				if(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				{
+					number = convMessage.getGroupParticipantMsisdn();
+				}
+				
+				if (number != null)
+				{
+					participantNameFT.setText(number);
+					participantNameFTUnsaved.setText("| "+ name + " >>");
+					participantNameFTUnsaved.setVisibility(View.VISIBLE);
+					participantNameFT.setTag(convMessage);
+					participantNameFT.setOnClickListener(contactClick);
+					participantNameFT.setClickable(true);
+				}
+				else
+				{
+					participantNameFT.setText(name);
+				}
+			}
+		}
+	}
 	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile)
 	{
 		showFileDetails(holder, hikeFile);
