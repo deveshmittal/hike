@@ -118,7 +118,7 @@ public class ThorThread implements Runnable
 			try
 			{
 				if (outputFile.exists())
-					// outputFile.delete();
+					outputFile.delete();
 
 				new File(TEMP_DB_FILE).delete(); // this is to delete journal file
 				new File(Back_DB_File).delete(); // deletes .db.back file created in case file is decrypted incorrectly
