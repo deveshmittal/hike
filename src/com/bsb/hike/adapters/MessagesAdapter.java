@@ -995,21 +995,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
 			}
-			if(isDefaultTheme)
+			
+			if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
 			{
-				if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
-				{
-					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
-				}
-				else
-				{
-					setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
-				}
+				setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
 			}
 			else
 			{
-				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);	
+				setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
 			}
+//			if(isDefaultTheme)
+//			{
+//				if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
+//				{
+//					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
+//				}
+//				else
+//				{
+//					setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
+//				}
+//			}
+//			else
+//			{
+//				setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);	
+//			}
 		}
 		else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
 		{
@@ -1581,14 +1590,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
-					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
 					{
 						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
 					}
 					else
 					{
-						setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+						setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
 					}
+//					else
+//					{
+//						setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+//					}
 				}
 				else
 				{
@@ -1615,7 +1628,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
-				if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+				if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
 				{
 					if(fss.getFTState() == FTState.COMPLETED)
 					{
@@ -1624,7 +1637,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+					setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
 				}
 			}
 		} // End of File Transfer Message
