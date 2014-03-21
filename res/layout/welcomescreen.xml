@@ -56,7 +56,9 @@
 
         <LinearLayout
             android:id="@+id/loading_layout"
-            style="@style/SignupButton"
+            android:layout_width="192dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
             android:background="@drawable/signup_btn_loading"
             android:gravity="center"
             android:orientation="horizontal"
@@ -71,11 +73,18 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_loading"
-                style="@style/SignupButton.Text.Bold.Loading"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:paddingLeft="10dp"
                 android:layout_marginLeft="3dp"
                 android:singleLine="true"
+                android:shadowColor="@color/black"
+            	android:shadowDy="0.7"
+            	android:shadowRadius="0.7"
+            	android:textColor="@drawable/signup_btn_text"
+            	android:textSize="14sp"
+            	android:textStyle="bold|italic"
                 android:text="@string/pulling_digits_signup" />
         </LinearLayout>
 
