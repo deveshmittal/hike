@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -43,8 +44,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private ViewGroup tcContinueLayout;
 
-	private Button tryAgainBtn;
-
 	private View hiLogoView;
 
 	private View hikeLogoContainer;
@@ -52,6 +51,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private boolean isMicromaxDevice;
 
 	private ViewPager mPager;
+	
+	private Dialog errorDialog;
 
 	@Override
 	public void onCreate(Bundle savedState)
@@ -69,7 +70,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		hikeLogoContainer = findViewById(R.id.hike_logo_container);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
-		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 
 		String model = Build.MODEL;
 		String manufacturer = Build.MANUFACTURER;
@@ -213,7 +213,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, tryAgainBtn.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog!=null);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -227,11 +227,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			mAcceptButton.setVisibility(View.GONE);
 			SignupTask.startTask(this);
 		}
-		else if (v.getId() == tryAgainBtn.getId())
-		{
-			tryAgainBtn.setVisibility(View.GONE);
-			onClick(mAcceptButton);
-		}
 	}
 
 	@Override
@@ -242,7 +237,9 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	private void showError()
 	{
 		Log.d("WelcomeActivity", "showError");
-		tryAgainBtn.setVisibility(View.VISIBLE);
+		loadingLayout.setVisibility(View.GONE);
+		mAcceptButton.setVisibility(View.VISIBLE);
+		showNetworkErrorPopup();
 	}
 
 	@Override
@@ -307,4 +304,24 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 
 	}
+	
+	private void showNetworkErrorPopup()
+	{
+		errorDialog = new Dialog(this, R.style.Theme_CustomDialog);
+		errorDialog.setContentView(R.layout.no_internet_pop_up);
+		errorDialog.setCancelable(false);
+		Button btnOk = (Button) errorDialog.findViewById(R.id.btn_ok);
+		btnOk.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				mAcceptButton.performClick();
+				errorDialog.dismiss();
+			}
+		});
+		errorDialog.show();
+	}
+
 }

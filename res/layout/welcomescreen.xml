@@ -88,15 +88,6 @@
                 android:text="@string/pulling_digits_signup" />
         </LinearLayout>
 
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/btn_try_again"
-            style="@style/SignupButton.Text.Bold.Button"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_network_error"
-            android:onClick="onClick"
-            android:text="@string/network_error"
-            android:textSize="14sp"
-            android:visibility="gone" />
     </RelativeLayout>
 
     <ImageView
