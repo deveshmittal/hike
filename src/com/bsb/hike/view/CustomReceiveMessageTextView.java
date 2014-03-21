@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class CustomReceiveMessageTextView extends CustomFontTextView
 {
-	String TAG = "CustomMessageTextView";
+	String TAG = "CustomReceiveMessageTextView";
 
 	public int maxWidth;
 
@@ -48,7 +48,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 
 			linesMaxWidth = lastLineWidth = (int) Math.ceil(lastLine);
 
-			Log.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
+			//Log.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
 
 			for (int n = 0; n < lines; ++n)
 			{
@@ -58,7 +58,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 				{
 					lineWidth = layout.getLineWidth(n);
 					lineLeft = layout.getLineLeft(n);
-					Log.d(TAG, "LINE NO. " + n + ", Width: " + lineWidth + ", Left: " + lineLeft);
+					//Log.d(TAG, "LINE NO. " + n + ", Width: " + lineWidth + ", Left: " + lineLeft);
 				}
 				catch (Exception e)
 				{
@@ -72,9 +72,9 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = (layout.getLineTop(1) - layout.getLineTop(0)) * (lines);
-				Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				linesMaxWidth = Math.max(linesMaxWidth, (int) ((50 * Utils.densityMultiplier) + lastLineWidth));
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
@@ -82,9 +82,9 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = (layout.getLineTop(1) - layout.getLineTop(0)) * (lines + 1);
-				Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 		}

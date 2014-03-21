@@ -1255,9 +1255,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay Visibility
 			// Tap overlay will be there only in case of image and video.
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT) && (holder.fileThumb.getVisibility() == View.VISIBLE))
+			if ((hikeFile.getHikeFileType() != HikeFileType.CONTACT) && (holder.fileThumb.getVisibility() == View.VISIBLE))
 			{
-				if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+				if(hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+				{
+					if(!convMessage.isSent() || !TextUtils.isEmpty(hikeFile.getFileKey()))
+					{
+						holder.overlayBg.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
+						holder.overlayBg.setVisibility(View.VISIBLE);
+					}
+				}
+				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 				{
 					if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 					{
@@ -1555,7 +1563,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
 				}
-				if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
+				if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+				{
+					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
+				}
+				else if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
 					if(fss.getFTState() == FTState.COMPLETED)
 					{
