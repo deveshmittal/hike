@@ -18,8 +18,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -257,10 +259,18 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		GalleryImageLoader galleryImageLoader;
 
+		int viewerHeight;
+
+		int viewerWidth;
+
 		public GalleryPagerAdapter()
 		{
 			layoutInflater = LayoutInflater.from(GallerySelectionViewer.this);
 			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this);
+
+			viewerWidth = getResources().getDisplayMetrics().widthPixels;
+			viewerHeight = getResources().getDisplayMetrics().heightPixels - getResources().getDimensionPixelSize(R.dimen.st__action_bar_default_height)
+					- getResources().getDimensionPixelSize(R.dimen.notification_bar_height) - getResources().getDimensionPixelSize(R.dimen.gallery_selected_grid_height);
 		}
 
 		@Override
@@ -282,21 +292,78 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 
 		@Override
+		public int getItemPosition(Object object)
+		{
+			return POSITION_NONE;
+		}
+
+		@Override
 		public Object instantiateItem(ViewGroup container, int position)
 		{
 			View page = layoutInflater.inflate(R.layout.gallery_preview_item, container, false);
 
 			GalleryItem galleryItem = galleryItems.get(position);
 
+			ImageButton removeImage = (ImageButton) page.findViewById(R.id.remove_selection);
+
 			ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 			galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 
 			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView, false, true);
 
+			setupButtonSpacing(galleryImageView, removeImage);
+
+			removeImage.setTag(position);
+			removeImage.setOnClickListener(removeSelectionClickListener);
+
 			((ViewPager) container).addView(page);
 			return page;
 		}
+
+		private void setupButtonSpacing(ImageView galleryImageView, ImageButton removeImage)
+		{
+
+			int drawableHeight = galleryImageView.getDrawable().getIntrinsicHeight();
+			int drawableWidth = galleryImageView.getDrawable().getIntrinsicWidth();
+
+			int imageWidth;
+			int imageHeight;
+
+			if (viewerHeight / drawableHeight <= viewerWidth / drawableWidth)
+			{
+				imageWidth = drawableWidth * viewerHeight / drawableHeight;
+				imageHeight = viewerHeight;
+			}
+			else
+			{
+				imageHeight = drawableHeight * viewerWidth / drawableWidth;
+				imageWidth = viewerWidth;
+			}
+
+			int buttonSize = removeImage.getDrawable().getIntrinsicHeight() + (2 * getResources().getDimensionPixelSize(R.dimen.remove_selection_padding));
+
+			LayoutParams layoutParams = (LayoutParams) removeImage.getLayoutParams();
+			layoutParams.leftMargin = imageWidth - buttonSize;
+			layoutParams.bottomMargin = (imageHeight - buttonSize) / 2;
+		}
 	}
+
+	OnClickListener removeSelectionClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			int postion = (Integer) v.getTag();
+			galleryItems.remove(postion);
+			galleryGridItems.remove(postion + 1);
+
+			gridAdapter.notifyDataSetChanged();
+			pagerAdapter.notifyDataSetChanged();
+
+			GallerySelectionViewer.this.selectedPager.setCurrentItem(postion == 0 ? 0 : postion - 1);
+		}
+	};
 
 	@Override
 	public void onEventReceived(String type, Object object)
