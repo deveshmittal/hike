@@ -99,6 +99,28 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	}
 
 	@Override
+	public void onBackPressed()
+	{
+		startAddMoreGalleryIntent();
+		super.onBackPressed();
+	}
+
+	private void startAddMoreGalleryIntent()
+	{
+
+		Intent intent = new Intent(this, GalleryActivity.class);
+
+		intent.putParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS, galleryItems);
+		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
+		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
+
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		startActivity(intent);
+	}
+
+	@Override
 	protected void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
@@ -192,7 +214,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		GalleryItem galleryItem = galleryGridItems.get(position);
 		if (galleryItem == null)
 		{
-			finish();
+			startAddMoreGalleryIntent();
 		}
 		else
 		{

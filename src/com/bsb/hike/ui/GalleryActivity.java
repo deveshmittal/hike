@@ -96,6 +96,13 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 				{
 					selectedGalleryItems.put(galleryItem.getId(), galleryItem);
 				}
+
+				if (!multiSelectMode)
+				{
+					multiSelectMode = true;
+					setupMultiSelectActionBar();
+				}
+				setMultiSelectTitle();
 			}
 		}
 		else
@@ -147,7 +154,10 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			gridView.setOnItemLongClickListener(this);
 		}
 
-		setupActionBar(albumTitle);
+		if (!multiSelectMode)
+		{
+			setupActionBar(albumTitle);
+		}
 	}
 
 	@Override
