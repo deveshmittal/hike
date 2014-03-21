@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,6 +136,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	private ImageView profilePicCamIcon;
 
+	private TextView genderDesctribeText;
+	
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
@@ -835,6 +838,11 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		femaleText = (TextView) genderLayout.findViewById(R.id.female);
 		maleText = (TextView) genderLayout.findViewById(R.id.male);
+		genderDesctribeText = (TextView) genderLayout.findViewById(R.id.describe_txt);
+		if(mActivityState.isFemale == null )
+		{
+			genderDesctribeText.setText("");
+		}
 		nextBtnContainer.setVisibility(View.VISIBLE);
 	}
 	private void prepareLayoutForScanning(Bundle savedInstanceState)
@@ -868,10 +876,30 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		femaleText.setSelected(mActivityState.isFemale);
 		maleText.setSelected(!mActivityState.isFemale);
 		
+		setGenderDescribeRandomText(mActivityState.isFemale);
+		
 		if (mTask != null)
 		{
 			mTask.addGender(mActivityState.isFemale);
 		}
+	}
+
+	private void setGenderDescribeRandomText(boolean isFemale)
+	{
+		int size = 0;
+		int describeStringRes;
+		Random random = new Random();
+		if(isFemale)
+		{
+			size = HikeConstants.FEMALE_SELECTED_STRINGS.length;
+			describeStringRes  = HikeConstants.FEMALE_SELECTED_STRINGS[random.nextInt(size)];
+		}
+		else
+		{
+			size = HikeConstants.MALE_SELECTED_STRINGS.length;
+			describeStringRes  = HikeConstants.MALE_SELECTED_STRINGS[random.nextInt(size)];
+		}
+		genderDesctribeText.setText(describeStringRes);
 	}
 
 	public void onBirthdayClick(View v)

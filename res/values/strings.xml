@@ -788,4 +788,11 @@
 	<string name="start_adding">Start adding friends</string>
 	<string name="how_young_are_you">How young are you?</string>
 	<string name="your_name">Your name</string>
+	<string name="male_selected_string_1">male string 1</string>
+	<string name="male_selected_string_2">male string 2</string>
+	<string name="male_selected_string_3">male string 3</string>
+	<string name="female_selected_string_1">female string 1</string>
+	<string name="female_selected_string_2">female string 2</string>
+	<string name="female_selected_string_3">female string 3</string>
+	
 </resources>
