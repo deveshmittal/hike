@@ -132,14 +132,4 @@
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/ic_micromax"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/hike_logo_container"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/micromax_margin"
-        android:src="@drawable/micromax_logo"
-        android:visibility="gone" />
-
 </RelativeLayout>

@@ -49,8 +49,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private View hikeLogoContainer;
 
-	private ImageView micromaxImage;
-
 	private boolean isMicromaxDevice;
 
 	private ViewPager mPager;
@@ -69,7 +67,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		tcText = findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
 		hikeLogoContainer = findViewById(R.id.hike_logo_container);
-		micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
@@ -98,7 +95,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 			hikeLogoContainer.setVisibility(View.VISIBLE);
 			tcContinueLayout.setVisibility(View.VISIBLE);
-			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
 			hiLogoView.setVisibility(View.GONE);
 		}
 		else
@@ -201,7 +197,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 					public void onAnimationEnd(Animation animation)
 					{
 						hikeLogoContainer.setVisibility(View.VISIBLE);
-						micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
 					}
 				});
 				tcContinueLayout.startAnimation(fadeInAnimation);
@@ -234,7 +229,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 		else if (v.getId() == tryAgainBtn.getId())
 		{
-			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
 			tryAgainBtn.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
@@ -297,7 +291,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		@Override
 		public Fragment getItem(int position)
 		{
-			return new WelcomeTutorialFragment(position);
+			return new WelcomeTutorialFragment(position, isMicromaxDevice);
 		}
 
 		@Override
