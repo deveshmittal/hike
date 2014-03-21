@@ -891,7 +891,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mConversation instanceof GroupConversation)
 		{
-			if (!((GroupConversation) mConversation).getIsGroupAlive())
+			if (!isActionModeOn && !((GroupConversation) mConversation).getIsGroupAlive())
 			{
 				return false;
 			}
