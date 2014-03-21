@@ -331,20 +331,20 @@
                 android:layout_alignRight="@id/sent_message_inner_container"
                 android:layout_marginRight="5dp"
                 android:orientation="horizontal"
-                android:gravity="center" >
+                android:gravity="center_vertical|right" >
                 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/message_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="#4ea9e7"
+                android:textColor="@color/black_40"
                 android:textSize="12sp" />
             
             <ImageView
                 android:id="@+id/message_status"
                 android:layout_width="wrap_content"
-                android:layout_height="11dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
                 android:visibility="gone" />
             

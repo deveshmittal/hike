@@ -379,7 +379,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="#4ea9e7"
+                android:textColor="@color/black_40"
                 android:textSize="12sp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/receive_message_inner_container" />

@@ -12,6 +12,7 @@
     <color name="transparent_white">#8000</color>
     <color name="transparent_black">#B000</color>
     <color name="transparent_black_darker">#DA00</color>
+    <color name="black_40">#66000000</color>
     <color name="offwhite">#F7F7F4</color>
     <color name="signup_blue">#57b2ee</color>
     <color name="disabled">#DDF7F7F4</color>
