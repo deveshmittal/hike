@@ -229,7 +229,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		closeContainer.setOnClickListener(new OnClickListener()
 		{
-			
+
 			@Override
 			public void onClick(View v)
 			{

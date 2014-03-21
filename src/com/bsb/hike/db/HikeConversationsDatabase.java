@@ -1064,8 +1064,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT }, DBConstants.MSISDN + "=?",
-					new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT },
+					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
 				Log.d(getClass().getSimpleName(), "Could not find db entry");
@@ -1099,9 +1099,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv = new Conversation(msisdn, convid, name, onhike);
 
 			}
-			
+
 			List<ConvMessage> messages;
-			if(unreadCount > limit)
+			if (unreadCount > limit)
 			{
 				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
 			}
