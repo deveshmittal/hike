@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -17,19 +18,16 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 {
 	private Context context;
 
-	private ArrayList<String> filePaths;
-
-	private String fileType;
+	private ArrayList<Pair<String, String>> fileDetails;
 
 	private String msisdn;
 
 	private boolean onHike;
 
-	public InitiateMultiFileTransferTask(Context context, ArrayList<String> filePaths, String fileType, String msisdn, boolean onHike)
+	public InitiateMultiFileTransferTask(Context context, ArrayList<Pair<String, String>> fileDetails, String msisdn, boolean onHike)
 	{
 		this.context = context.getApplicationContext();
-		this.filePaths = filePaths;
-		this.fileType = fileType;
+		this.fileDetails = fileDetails;
 		this.msisdn = msisdn;
 		this.onHike = onHike;
 	}
@@ -37,9 +35,9 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 	@Override
 	protected Void doInBackground(Void... params)
 	{
-		for (String filePath : filePaths)
+		for (Pair<String, String> fileDetail : fileDetails)
 		{
-			initiateFileTransferFromIntentData(filePath, fileType);
+			initiateFileTransferFromIntentData(fileDetail.first, fileDetail.second);
 		}
 		return null;
 	}
