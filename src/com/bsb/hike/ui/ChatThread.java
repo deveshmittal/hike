@@ -3894,6 +3894,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					Intent intent = new Intent(ChatThread.this, FileSelectActivity.class);
 					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 					startActivity(intent);
 					return;
 				}

@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,28 +21,38 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.FileImageLoader;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
-public class FileSelectActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener
+public class FileSelectActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, HikePubSub.Listener
 {
 
 	public static abstract interface DocumentSelectActivityDelegate
@@ -64,6 +77,16 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	private long sizeLimit = 1024 * 1024 * 1024;
 
 	public DocumentSelectActivityDelegate delegate;
+
+	private boolean multiSelectMode;
+
+	private Map<String, ListItem> selectedFileMap;
+
+	private String currentTitle;
+
+	private InitiateMultiFileTransferTask fileTransferTask;
+
+	private ProgressDialog progressDialog;
 
 	private class ListItem
 	{
@@ -129,6 +152,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private TextView title;
 
+	private TextView multiSelectTitle;
+
 	@Override
 	public void onDestroy()
 	{
@@ -143,6 +168,12 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			Log.e(getClass().getSimpleName(), "Exception while unregistering receiver", e);
 		}
+		if (progressDialog != null)
+		{
+			progressDialog.dismiss();
+			progressDialog = null;
+		}
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
 		super.onDestroy();
 	}
 
@@ -168,6 +199,16 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 
 		setContentView(R.layout.file_select_layout);
+
+		Object object = getLastCustomNonConfigurationInstance();
+
+		if (object instanceof InitiateMultiFileTransferTask)
+		{
+			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
+		}
+
+		selectedFileMap = new HashMap<String, ListItem>();
+
 		listAdapter = new ListAdapter(this);
 		emptyView = (TextView) findViewById(R.id.search_empty_view);
 		listView = (ListView) findViewById(R.id.file_list);
@@ -180,52 +221,121 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				ListItem item = items.get(i);
 				File file = item.file;
-				if (file.isDirectory())
+				if (multiSelectMode)
 				{
-					HistoryEntry he = new HistoryEntry();
-					he.scrollItem = listView.getFirstVisiblePosition();
-					he.scrollOffset = listView.getChildAt(0).getTop();
-					he.dir = currentDir;
-					he.title = title.getText().toString();
-					if (!listFiles(file))
+					if (!file.isDirectory())
 					{
-						return;
+						if (selectedFileMap.containsKey(item.title))
+						{
+							selectedFileMap.remove(item.title);
+							if (selectedFileMap.isEmpty())
+							{
+								setupActionBar(currentTitle);
+								multiSelectMode = false;
+							}
+							else
+							{
+								setMultiSelectTitle();
+							}
+						}
+						else
+						{
+							selectedFileMap.put(item.title, item);
+							setMultiSelectTitle();
+						}
+						listAdapter.notifyDataSetChanged();
 					}
-					history.add(he);
-					setTitle(item.title);
-					listView.setSelection(0);
 				}
 				else
 				{
-					if (!file.canRead())
+					if (file.isDirectory())
 					{
-						showErrorBox(getString(R.string.access_error));
-						return;
-					}
-					if (sizeLimit != 0)
-					{
-						if (file.length() > sizeLimit)
+						HistoryEntry he = new HistoryEntry();
+						he.scrollItem = listView.getFirstVisiblePosition();
+						he.scrollOffset = listView.getChildAt(0).getTop();
+						he.dir = currentDir;
+						he.title = title.getText().toString();
+						if (!listFiles(file))
 						{
-							showErrorBox(getString(R.string.file_upload_limit, formatFileSize(sizeLimit)));
 							return;
 						}
+						history.add(he);
+						setTitle(item.title);
+						listView.setSelection(0);
 					}
-					if (file.length() == 0)
+					else
 					{
-						return;
+						if (!file.canRead())
+						{
+							showErrorBox(getString(R.string.access_error));
+							return;
+						}
+						if (sizeLimit != 0)
+						{
+							if (file.length() > sizeLimit)
+							{
+								showErrorBox(getString(R.string.file_upload_limit, formatFileSize(sizeLimit)));
+								return;
+							}
+						}
+						if (file.length() == 0)
+						{
+							return;
+						}
+						Intent intent = new Intent(FileSelectActivity.this, ChatThread.class);
+						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.MSISDN));
+						intent.putExtra(HikeConstants.Extras.FILE_PATH, file.getAbsolutePath());
+						intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.mimeType);
+						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
 					}
-					Intent intent = new Intent(FileSelectActivity.this, ChatThread.class);
-					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.MSISDN));
-					intent.putExtra(HikeConstants.Extras.FILE_PATH, file.getAbsolutePath());
-					intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.mimeType);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
 				}
 			}
 		});
 
+		listView.setOnItemLongClickListener(new OnItemLongClickListener()
+		{
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				ListItem listItem = items.get(position);
+
+				if (listItem.file.isDirectory())
+				{
+					return false;
+				}
+
+				if (!multiSelectMode)
+				{
+					multiSelectMode = true;
+					setupMultiSelectActionBar();
+				}
+
+				selectedFileMap.put(listItem.title, listItem);
+
+				listAdapter.notifyDataSetChanged();
+
+				setMultiSelectTitle();
+
+				return true;
+			}
+
+		});
+
 		listRoots();
 		setupActionBar(getString(R.string.select_file));
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+	}
+
+	private void setMultiSelectTitle()
+	{
+		if (multiSelectTitle == null)
+		{
+			return;
+		}
+		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedFileMap.size()));
 	}
 
 	private void setupActionBar(String titleString)
@@ -239,6 +349,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
 		setTitle(titleString);
+		currentTitle = titleString;
 
 		backContainer.setOnClickListener(new OnClickListener()
 		{
@@ -251,6 +362,77 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void setupMultiSelectActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
+
+		Button sendBtn = (Button) actionBarView.findViewById(R.id.save);
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
+
+		multiSelectTitle = (TextView) actionBarView.findViewById(R.id.title);
+		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
+
+		sendBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(selectedFileMap.size());
+				for (Entry<String, ListItem> fileDetailEntry : selectedFileMap.entrySet())
+				{
+					ListItem listItem = fileDetailEntry.getValue();
+
+					String filePath = listItem.file.getAbsolutePath();
+					String fileType = listItem.mimeType;
+
+					fileDetails.add(new Pair<String, String>(filePath, fileType));
+				}
+				String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+				boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+
+				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+				Utils.executeAsyncTask(fileTransferTask);
+
+				progressDialog = ProgressDialog.show(FileSelectActivity.this, null, getResources().getString(R.string.multi_file_creation));
+			}
+		});
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				onBackPressed();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+		sendBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+	}
+
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		if (fileTransferTask != null)
+		{
+			return fileTransferTask;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	private void setTitle(String titleString)
@@ -267,7 +449,15 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public void onBackPressed()
 	{
-		if (history.size() > 0)
+		if (multiSelectMode)
+		{
+			selectedFileMap.clear();
+			listAdapter.notifyDataSetChanged();
+
+			setupActionBar(currentTitle);
+			multiSelectMode = false;
+		}
+		else if (history.size() > 0)
 		{
 			HistoryEntry he = history.remove(history.size() - 1);
 			setTitle(he.title);
@@ -486,8 +676,6 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private class ListAdapter extends BaseAdapter
 	{
-		private Context mContext;
-
 		private LayoutInflater inflater;
 
 		private FileImageLoader fileImageLoader;
@@ -496,7 +684,6 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		public ListAdapter(Context context)
 		{
-			mContext = context;
 			inflater = LayoutInflater.from(context);
 			int size = getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
 			fileImageLoader = new FileImageLoader(size, size);
@@ -556,6 +743,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 					v.findViewById(R.id.file_item_info).setVisibility(View.GONE);
 				}
 			}
+			View selectorView = v.findViewById(R.id.selector_view);
+
 			TextView typeTextView = (TextView) v.findViewById(R.id.file_item_type);
 			((TextView) v.findViewById(R.id.file_item_title)).setText(item.title);
 
@@ -583,6 +772,9 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				imageView.setVisibility(View.GONE);
 				typeTextView.setVisibility(View.VISIBLE);
 			}
+
+			selectorView.setSelected(selectedFileMap.containsKey(item.title));
+
 			return v;
 		}
 	}
@@ -604,6 +796,36 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		else
 		{
 			return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		super.onEventReceived(type, object);
+
+		if (HikePubSub.MULTI_FILE_TASK_FINISHED.equals(type))
+		{
+			fileTransferTask = null;
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Intent intent = new Intent(FileSelectActivity.this, ChatThread.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+					startActivity(intent);
+
+					if (progressDialog != null)
+					{
+						progressDialog.dismiss();
+						progressDialog = null;
+					}
+				}
+			});
 		}
 	}
 }
