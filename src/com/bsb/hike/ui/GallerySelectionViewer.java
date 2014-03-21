@@ -37,7 +37,9 @@ import com.bsb.hike.utils.Utils;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
 {
-	private GalleryAdapter adapter;
+	private GalleryAdapter gridAdapter;
+
+	private GalleryPagerAdapter pagerAdapter;
 
 	private GridView selectedGrid;
 
@@ -81,14 +83,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		int numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
 		int actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
 
-		adapter = new GalleryAdapter(this, galleryGridItems, true, actualSize, null);
+		gridAdapter = new GalleryAdapter(this, galleryGridItems, true, actualSize, null, true);
 
 		selectedGrid.setNumColumns(numColumns);
-		selectedGrid.setAdapter(adapter);
+		selectedGrid.setAdapter(gridAdapter);
 		selectedGrid.setOnScrollListener(this);
 		selectedGrid.setOnItemClickListener(this);
 
-		GalleryPagerAdapter pagerAdapter = new GalleryPagerAdapter();
+		pagerAdapter = new GalleryPagerAdapter();
 		selectedPager.setAdapter(pagerAdapter);
 		selectedPager.setOnPageChangeListener(this);
 
@@ -205,7 +207,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		gridAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 	}
 
 	@Override
@@ -240,7 +242,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private void setSelection(int position)
 	{
-		adapter.setSelectedItemPosition(position);
+		gridAdapter.setSelectedItemPosition(position + 1);
 
 		selectedPager.setCurrentItem(position);
 		selectedGrid.smoothScrollToPosition(position);
