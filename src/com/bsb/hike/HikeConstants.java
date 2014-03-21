@@ -1048,6 +1048,8 @@ public class HikeConstants
 		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
 		
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
+
+		public static final String MANUAL_SYNC = "manualSync";
 	}
 
 	public static final class LogEvent

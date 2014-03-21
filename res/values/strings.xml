@@ -781,4 +781,8 @@
 	<string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation.</string>
 	<string name="num_unread_messages">%1$s new messages</string>
 	<string name="one_unread_message">1 new message</string>
+	<string name="sync_contacts">Sync contacts</string>
+	<string name="sync_contacts_hinttext">Tap to start a manual sync of contacts</string>
+	<string name="contacts_synced">Contacts synced</string>
+	<string name="contacts_sync_started">"Contacts sync started"</string>	
 </resources>
