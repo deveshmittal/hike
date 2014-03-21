@@ -9,9 +9,8 @@
         android:id="@+id/gallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawSelectorOnTop="true"
         android:horizontalSpacing="@dimen/gallery_grid_spacing"
-        android:listSelector="@drawable/gallery_item_selector"
+        android:listSelector="@android:color/transparent"
         android:numColumns="2"
         android:verticalSpacing="@dimen/gallery_grid_spacing" />
 

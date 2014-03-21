@@ -10,10 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/gallery_selected_grid_height"
         android:layout_alignParentBottom="true"
+        android:listSelector="@android:color/transparent"
         android:horizontalSpacing="@dimen/gallery_grid_spacing"
-        android:listSelector="@drawable/gallery_item_selector"
-        android:verticalSpacing="@dimen/gallery_grid_spacing"
-        android:drawSelectorOnTop="true" />
+        android:verticalSpacing="@dimen/gallery_grid_spacing" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/selection_pager"
