@@ -61,7 +61,7 @@ public class ConvMessage
 
 	private boolean shouldShowPush = true;
 
-	private int unreadCount = 0;
+	private int unreadCount = -1;
 	// private boolean showResumeButton = true;
 
 	public boolean isInvite()

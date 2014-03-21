@@ -31,7 +31,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.models.GalleryItem;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -75,8 +74,18 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		String selection = null;
 		String[] args = null;
 
-		GalleryItem selectedBucket = getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET);
-		msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+		Bundle data;
+		if (savedInstanceState != null)
+		{
+			data = savedInstanceState;
+		}
+		else
+		{
+			data = getIntent().getExtras();
+		}
+
+		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
+		msisdn = data.getString(HikeConstants.Extras.MSISDN);
 
 		if (selectedBucket != null)
 		{
@@ -90,13 +99,20 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			/*
 			 * Adding the previously selected items.
 			 */
-			List<GalleryItem> prevSelectedItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
+			List<GalleryItem> prevSelectedItems = data.getParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS);
 			if (prevSelectedItems != null && !prevSelectedItems.isEmpty())
 			{
 				for (GalleryItem galleryItem : prevSelectedItems)
 				{
 					selectedGalleryItems.put(galleryItem.getId(), galleryItem);
 				}
+
+				if (!multiSelectMode)
+				{
+					multiSelectMode = true;
+					setupMultiSelectActionBar();
+				}
+				setMultiSelectTitle();
 			}
 		}
 		else
@@ -136,7 +152,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		int numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
 		int actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
 
-		adapter = new GalleryAdapter(this, galleryItemList, isInsideAlbum, actualSize, selectedGalleryItems);
+		adapter = new GalleryAdapter(this, galleryItemList, isInsideAlbum, actualSize, selectedGalleryItems, false);
 
 		gridView.setNumColumns(numColumns);
 		gridView.setAdapter(adapter);
@@ -148,7 +164,19 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			gridView.setOnItemLongClickListener(this);
 		}
 
-		setupActionBar(albumTitle);
+		if (!multiSelectMode)
+		{
+			setupActionBar(albumTitle);
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putAll(getIntent().getExtras());
+		outState.putParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS, new ArrayList<GalleryItem>(selectedGalleryItems.values()));
+
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -220,7 +248,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		closeContainer.setOnClickListener(new OnClickListener()
 		{
-			
+
 			@Override
 			public void onClick(View v)
 			{
@@ -242,6 +270,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		intent.setClass(this, GallerySelectionViewer.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 
 		startActivity(intent);
@@ -279,6 +308,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent = new Intent(this, GalleryActivity.class);
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.ON_HIKE, true));
 			startActivity(intent);
 		}
 		else

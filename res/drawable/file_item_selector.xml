@@ -2,6 +2,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:drawable="@color/action_bar_item_pressed" android:state_pressed="true"/>
-    <item android:drawable="@drawable/gallery_item_selected" android:state_selected="true"/>
+    <item android:drawable="@drawable/file_selected" android:state_selected="true"/>
 
 </selector>

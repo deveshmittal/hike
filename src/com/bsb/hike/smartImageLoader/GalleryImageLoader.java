@@ -30,7 +30,7 @@ public class GalleryImageLoader extends ImageWorker
 	@Override
 	protected Bitmap processBitmapOnUiThread(String data)
 	{
-		return null;
+		return processBitmap(data);
 	}
 
 }

@@ -299,6 +299,12 @@ public class HikePubSub implements Runnable
 	
 	public static final String UPDATE_NETWORK_STATE = "updateNetworkState";
 
+	public static final String MULTI_FILE_TASK_FINISHED = "multiFileTaskFinished";
+
+	public static final String CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE = "conversationClearedByDeletingLastMessage";
+
+	public static final String CONTACT_SYNCED = "contactSynced";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

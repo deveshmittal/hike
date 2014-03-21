@@ -148,7 +148,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE };
 
 	private ConversationsAdapter mAdapter;
 
@@ -538,9 +538,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			final ConvMessage finalMessage = message;
 
-			if(conv.getMessages().size() > 0)
+			if (conv.getMessages().size() > 0)
 			{
-				if(finalMessage.getMsgID() <=  conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+				if (finalMessage.getMsgID() <= conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
 				{
 					return;
 				}
@@ -870,40 +870,49 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			Pair<String, Long> values = (Pair<String, Long>) object;
 
 			String msisdn = values.first;
-
-			final Conversation conversation = mConversationsByMSISDN.get(msisdn);
-
-			if (conversation == null)
-			{
-				return;
-			}
-
-			/*
-			 * Clearing all current messages.
-			 */
-			List<ConvMessage> messages = conversation.getMessages();
-
-			ConvMessage convMessage = null;
-			if (!messages.isEmpty())
-			{
-				convMessage = messages.get(0);
-			}
-
-			messages.clear();
-
-			/*
-			 * Adding a blank message
-			 */
-			ConvMessage newMessage = new ConvMessage("", msisdn, convMessage != null ? convMessage.getTimestamp() : 0, State.RECEIVED_READ);
-			messages.add(newMessage);
-
-			if (getActivity() == null)
-			{
-				return;
-			}
-
-			getActivity().runOnUiThread(this);
+			clearConversation(msisdn);
 		}
+		else if (HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE.equals(type))
+		{
+			String msisdn = (String) object;
+			clearConversation(msisdn);
+		}
+	}
+
+	private void clearConversation(String msisdn)
+	{
+		final Conversation conversation = mConversationsByMSISDN.get(msisdn);
+
+		if (conversation == null)
+		{
+			return;
+		}
+
+		/*
+		 * Clearing all current messages.
+		 */
+		List<ConvMessage> messages = conversation.getMessages();
+
+		ConvMessage convMessage = null;
+		if (!messages.isEmpty())
+		{
+			convMessage = messages.get(0);
+		}
+
+		messages.clear();
+
+		/*
+		 * Adding a blank message
+		 */
+		ConvMessage newMessage = new ConvMessage("", msisdn, convMessage != null ? convMessage.getTimestamp() : 0, State.RECEIVED_READ);
+		messages.add(newMessage);
+
+		if (getActivity() == null)
+		{
+			return;
+		}
+
+		getActivity().runOnUiThread(this);
 	}
 
 	private ConvMessage findMessageById(long msgId)

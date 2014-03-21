@@ -437,7 +437,7 @@ public class MqttMessagesManager
 					JSONObject fileJson = fileArray.getJSONObject(i);
 					Log.d(getClass().getSimpleName(), "Previous json: " + fileJson);
 					if (hikeFile.getHikeFileType() != HikeFileType.CONTACT && hikeFile.getHikeFileType() != HikeFileType.LOCATION) // dont change name for contact or location
-						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType()));
+						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType(), hikeFile.getFileName()));
 					Log.d(getClass().getSimpleName(), "New json: " + fileJson);
 				}
 				/*
@@ -1415,6 +1415,15 @@ public class MqttMessagesManager
 
 				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 			}
+		}
+		else if (HikeConstants.MqttMessageTypes.GROUP_OWNER_CHANGE.equals(type))
+		{
+			String groupId = jsonObj.getString(HikeConstants.TO);
+
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			String msisdn = data.getString(HikeConstants.MSISDN);
+
+			convDb.changeGroupOwner(groupId, msisdn);
 		}
 	}
 

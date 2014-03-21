@@ -167,6 +167,19 @@
 	                    android:layout_gravity="center"
 	                    android:visibility="gone" />
                     
+	                <com.bsb.hike.view.CustomFontTextView
+	                    android:id="@+id/file_extension"
+	                    android:layout_width="@dimen/file_message_item_size"
+	                    android:layout_height="@dimen/file_message_item_size"
+	                    android:layout_gravity="center"
+	                    android:gravity="center"
+	                    android:singleLine="true"
+	                    android:text="PNG"
+	                    android:textColor="@color/white"
+	                    android:textSize="24sp"
+	                    android:textStyle="bold"
+	                    android:visibility="gone" />
+
                     <ImageView
                         android:id="@+id/file_ic"
                         android:layout_width="47dp"
