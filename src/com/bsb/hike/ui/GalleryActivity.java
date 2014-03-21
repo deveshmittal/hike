@@ -74,8 +74,18 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		String selection = null;
 		String[] args = null;
 
-		GalleryItem selectedBucket = getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET);
-		msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+		Bundle data;
+		if (savedInstanceState != null)
+		{
+			data = savedInstanceState;
+		}
+		else
+		{
+			data = getIntent().getExtras();
+		}
+
+		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
+		msisdn = data.getString(HikeConstants.Extras.MSISDN);
 
 		if (selectedBucket != null)
 		{
@@ -89,7 +99,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			/*
 			 * Adding the previously selected items.
 			 */
-			List<GalleryItem> prevSelectedItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
+			List<GalleryItem> prevSelectedItems = data.getParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS);
 			if (prevSelectedItems != null && !prevSelectedItems.isEmpty())
 			{
 				for (GalleryItem galleryItem : prevSelectedItems)
@@ -158,6 +168,15 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 			setupActionBar(albumTitle);
 		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putAll(getIntent().getExtras());
+		outState.putParcelableArrayList(HikeConstants.Extras.GALLERY_SELECTIONS, new ArrayList<GalleryItem>(selectedGalleryItems.values()));
+
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
