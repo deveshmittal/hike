@@ -624,7 +624,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
 		
-		loadingLayout.setVisibility(View.GONE);
+		if(loadingLayout != null)
+		{
+			loadingLayout.setVisibility(View.GONE);
+		}
 		nextBtn.setEnabled(true);
 		setupActionBarTitle();
 	}
@@ -938,7 +941,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void showErrorMsg()
 	{
 		nextBtn.setEnabled(false);
-		loadingLayout.setVisibility(View.GONE);
+		if(loadingLayout != null)
+		{
+			loadingLayout.setVisibility(View.GONE);
+		}
 		infoTxt.setVisibility(View.VISIBLE);
 		showNetworkErrorPopup();
 	}
@@ -982,7 +988,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event)
 			{
-				return loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
+				return loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
 			}
 		});
 	}
@@ -994,7 +1000,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		Session.saveSession(session, outState);
 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout!=null&&loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
