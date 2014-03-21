@@ -25,7 +25,8 @@
 
         <com.bsb.hike.view.CustomFontEditText
             android:id="@+id/et_enter_name"
-            style="@style/NameInput" />
+            style="@style/NameInput"
+            android:hint="@string/your_name" />
 
         <com.bsb.hike.view.CustomFontEditText
             android:id="@+id/birthday"
@@ -33,7 +34,7 @@
             android:layout_marginTop="22dp"
             android:clickable="true"
             android:drawableLeft="@drawable/ic_birthday_common"
-            android:hint="@string/birthday"
+            android:hint="@string/how_young_are_you"
             android:inputType="number"
             android:maxLength="2" />
 

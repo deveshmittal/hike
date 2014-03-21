@@ -784,4 +784,8 @@
 	<string name="scanning_your_contacts">You are all set!\nScanning your contacts...</string>
 	<string name="about_you">About you</string>
 	<string name="tell_us_more">Tell us more</string>
+	<string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
+	<string name="start_adding">Start adding friends</string>
+	<string name="how_young_are_you">How young are you?</string>
+	<string name="your_name">Your name</string>
 </resources>
