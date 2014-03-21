@@ -503,6 +503,8 @@ public class HikeConstants
 	public static final int PIN_CAPTURE_TIME = 60 * 1000;
 
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
+	
+	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
 	/*
 	 * the amount to wait before showing the PIN screen on non sim devices.
@@ -543,7 +545,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 100 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
