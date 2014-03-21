@@ -69,7 +69,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				linesMaxWidth = Math.max(linesMaxWidth, (int) Math.ceil(lineWidth));
 			}
 
-			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > (100 * Utils.densityMultiplier))
+			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > (180 * Utils.densityMultiplier))
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
