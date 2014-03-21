@@ -778,4 +778,7 @@
 	<string name="call_me_for_the_pin">Call me for the pin %1$s</string>
 	<string name="wrong_pin">Sorry, that\'s a wrong PIN!</string>
 	<string name="verifying">Verifying...</string>
+	<string name="pick_one">Pick One...</string>
+	<string name="i_am_a_boy">I am a boy</string>
+	<string name="i_am_a_girl">I am a girl</string>
 </resources>

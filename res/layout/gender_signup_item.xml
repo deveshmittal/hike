@@ -2,34 +2,70 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/gender_layout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingLeft="6dp" >
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
     <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/male"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:drawableLeft="@drawable/ic_male_selector"
-        android:drawablePadding="7dp"
-        android:gravity="center_vertical"
-        android:onClick="onGenderClick"
-        android:text="@string/male"
-        android:textColor="@drawable/male_text_selector" />
+        android:id="@+id/txt_img1"
+        android:layout_width="match_parent"
+        android:layout_height="127dp"
+        android:gravity="center"
+        android:text="@string/pick_one"
+        android:textColor="@color/phone_entering_header"
+        android:textSize="24sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="288dp" >
+
+        <View
+            android:id="@+id/seprator_bar"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="#d9dbdc"
+            android:layout_centerInParent="true" />
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/male"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignEnd="@id/seprator_bar"
+            android:layout_alignParentStart="true"
+            android:paddingTop="74dp"
+            android:clickable="true"
+            android:drawableTop="@drawable/ic_male_selector"
+            android:drawablePadding="19dp"
+            android:gravity="center_horizontal"
+            android:onClick="onGenderClick"
+            android:text="@string/i_am_a_boy"
+            android:textSize="20dp"
+            android:textColor="@drawable/male_text_selector" />
+        
+         
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/female"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignStart="@id/seprator_bar"
+            android:layout_alignParentEnd="true"
+            android:paddingTop="74dp"
+            android:clickable="true"
+            android:drawableTop="@drawable/ic_female_selector"
+            android:drawablePadding="19dp"
+            android:onClick="onGenderClick"
+            android:gravity="center_horizontal"
+            android:text="@string/i_am_a_girl"
+            android:textSize="20dp"
+            android:textColor="@drawable/female_text_selector" />
+    </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/female"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:drawableLeft="@drawable/ic_female_selector"
-        android:drawablePadding="7dp"
-        android:gravity="center_vertical"
-        android:onClick="onGenderClick"
-        android:text="@string/female"
-        android:textColor="@drawable/female_text_selector" />
-
+        android:id="@+id/describe_txt"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:text="@string/feeling_lazy"
+        android:gravity="center"
+        android:textColor="#566167"
+        android:textSize="15dp" />
+    
 </LinearLayout>

@@ -185,8 +185,9 @@
 	<color name="downloading_sticker">#a4a4a0</color>
 	<color name="timestamp">#adaca9</color>
 	<color name="signup_hint">#d0d0cf</color>
-	<color name="male_selected">#15b5ff</color>
-	<color name="female_selected">#ff5874</color>
+	<color name="male_selected">#00b3ff</color>
+	<color name="male_unselected">#babec0</color>
+	<color name="female_selected">#f7525a</color>
 	<color name="signup_disabled">#40ffffff</color>
 	<color name="free_sms_btn">#1891e1</color>
 	<color name="indian_bg">#9ce5bb</color>
