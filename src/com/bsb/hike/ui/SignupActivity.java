@@ -736,7 +736,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		initializeViews(nameLayout);
 
-		setupNameViewForGender();
 		if (mActivityState.birthday != null)
 		{
 			onDateSetListener.onDateSet(null, mActivityState.birthday.year, mActivityState.birthday.month - 1, mActivityState.birthday.day);
@@ -812,31 +811,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			}
 			mActivityState.isFemale = false;
 		}
-		setupNameViewForGender();
-	}
-
-	private void setupNameViewForGender()
-	{
-		if (mActivityState.isFemale)
-		{
-			femaleText.setSelected(true);
-			maleText.setSelected(false);
-
-			enterEditText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_name_female, 0, 0, 0);
-			birthdayText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_birthday_female, 0, 0, 0);
-		}
-		else
-		{
-			femaleText.setSelected(false);
-			maleText.setSelected(true);
-
-			enterEditText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_name_male, 0, 0, 0);
-			birthdayText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_birthday_male, 0, 0, 0);
-		}
-		if (mTask != null)
-		{
-			mTask.addGender(mActivityState.isFemale);
-		}
+		mTask.addGender(mActivityState.isFemale);
 	}
 
 	public void onBirthdayClick(View v)
@@ -1276,8 +1251,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 							String gender = (String) user.getProperty("gender");
 
 							mActivityState.isFemale = "female".equalsIgnoreCase(gender);
-							setupNameViewForGender();
-
 						}
 						catch (Exception e)
 						{
