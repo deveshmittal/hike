@@ -1349,6 +1349,8 @@ public class HikeConstants
 		public static final String MULTI_INVITE = "mi";
 
 		public static final String CHAT_BACKGROUD = "cbg";
+
+		public static final String GROUP_OWNER_CHANGE = "goc";
 	}
 
 	public static final class SMSNative

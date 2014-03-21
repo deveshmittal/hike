@@ -3026,4 +3026,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.endTransaction();
 		}
 	}
+
+	public void changeGroupOwner(String groupId, String msisdn)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.GROUP_OWNER, msisdn);
+
+		mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
+	}
 }
