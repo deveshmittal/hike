@@ -91,23 +91,9 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		}
 
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SPLASH_SEEN, false))
-		{
-			hikeLogoContainer.setVisibility(View.VISIBLE);
-			tcContinueLayout.setVisibility(View.VISIBLE);
-			hiLogoView.setVisibility(View.GONE);
-		}
-		else
-		{
-			(new Handler()).postDelayed(new Runnable()
-			{
-				public void run()
-				{
-					startAnimations();
-				}
-
-			}, (long) 1.5 * 1000);
-		}
+		hikeLogoContainer.setVisibility(View.VISIBLE);
+		tcContinueLayout.setVisibility(View.VISIBLE);
+		hiLogoView.setVisibility(View.GONE);
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{
 			showError();
@@ -155,58 +141,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		editor.commit();
 
 		Toast.makeText(WelcomeActivity.this, AccountUtils.base, Toast.LENGTH_SHORT).show();
-	}
-
-	private void startAnimations()
-	{
-
-		Animation slideUpAlphaout = AnimationUtils.loadAnimation(this, R.anim.welcome_alpha_out);
-		Animation slideUpAlphaIn = AnimationUtils.loadAnimation(this, R.anim.welcome_alpha_in);
-		slideUpAlphaout.setAnimationListener(new Animation.AnimationListener()
-		{
-
-			@Override
-			public void onAnimationStart(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				hiLogoView.setVisibility(View.INVISIBLE);
-				Animation fadeInAnimation = AnimationUtils.loadAnimation(WelcomeActivity.this, R.anim.fade_in_animation);
-				fadeInAnimation.setAnimationListener(new Animation.AnimationListener()
-				{
-					@Override
-					public void onAnimationStart(Animation animation)
-					{
-						tcContinueLayout.setVisibility(View.VISIBLE);
-					}
-
-					@Override
-					public void onAnimationRepeat(Animation animation)
-					{
-					}
-
-					@Override
-					public void onAnimationEnd(Animation animation)
-					{
-						hikeLogoContainer.setVisibility(View.VISIBLE);
-					}
-				});
-				tcContinueLayout.startAnimation(fadeInAnimation);
-				SharedPreferences.Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putBoolean(HikeMessengerApp.SPLASH_SEEN, true);
-				editor.commit();
-			}
-		});
-		hikeLogoContainer.startAnimation(slideUpAlphaIn);
-		hiLogoView.startAnimation(slideUpAlphaout);
 	}
 
 	@Override
