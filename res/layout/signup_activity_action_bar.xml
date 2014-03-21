@@ -23,6 +23,7 @@
         android:text="Phone Number" />
     
     <LinearLayout
+        android:id="@+id/next_btn_container"
         android:layout_width="61dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"

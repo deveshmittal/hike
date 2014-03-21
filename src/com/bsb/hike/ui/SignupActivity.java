@@ -173,6 +173,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	View nextBtn;
 	
+	View nextBtnContainer;
+	
 	private TextView invalidPin;
 	
 	 private ArrayList<String> countriesArray = new ArrayList<String>();
@@ -309,6 +311,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		
 		mActionBarTitle = (TextView) actionBarView.findViewById(R.id.title);
 		nextBtn = actionBarView.findViewById(R.id.next_btn);
+		nextBtnContainer = actionBarView.findViewById(R.id.next_btn_container);
 
 		nextBtn.setOnClickListener(new OnClickListener()
 		{
@@ -813,6 +816,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			fbBtn.setEnabled(false);
 			fbBtn.setText(R.string.connected);
 		}
+		nextBtnContainer.setVisibility(View.VISIBLE);
 	}
 	
 	
@@ -820,6 +824,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		femaleText = (TextView) genderLayout.findViewById(R.id.female);
 		maleText = (TextView) genderLayout.findViewById(R.id.male);
+		nextBtnContainer.setVisibility(View.VISIBLE);
 	}
 	private void prepareLayoutForScanning(Bundle savedInstanceState)
 	{
