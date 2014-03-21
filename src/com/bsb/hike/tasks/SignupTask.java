@@ -72,7 +72,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PIN, ERROR, PROFILE_IMAGE, GENDER
+		MSISDN, ADDRESSBOOK, NAME, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS
 	};
 
 	public class StateValue
@@ -446,6 +446,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				name = this.data;
 				
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				AccountUtils.setProfile(name, birthdate, isFemale);
 			}
 			catch (InterruptedException e)

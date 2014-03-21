@@ -107,6 +107,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	private ViewGroup genderLayout;
 
+	private ViewGroup scanningContactsLayout;
+
 	private TextView infoTxt;
 
 	private TextView loadingText;
@@ -137,6 +139,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private boolean msisdnErrorDuringSignup = false;
 
+	private final int SCANNING_CONTACTS = 4;
+	
 	private final int GENDER = 3;
 	
 	private final int NAME = 2;
@@ -217,6 +221,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		genderLayout = (ViewGroup) findViewById(R.id.gender_layout);
+		scanningContactsLayout = (ViewGroup) findViewById(R.id.scanning_contacts_layout);
 
 		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof ActivityState)
@@ -816,6 +821,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		femaleText = (TextView) genderLayout.findViewById(R.id.female);
 		maleText = (TextView) genderLayout.findViewById(R.id.male);
 	}
+	private void prepareLayoutForScanning(Bundle savedInstanceState)
+	{
+		infoTxt = (TextView) scanningContactsLayout.findViewById(R.id.txt_img1);
+		loadingText = (TextView) scanningContactsLayout.findViewById(R.id.txt_loading);
+		loadingLayout = (ViewGroup) scanningContactsLayout.findViewById(R.id.loading_layout);
+		nextBtnContainer.setVisibility(View.GONE);
+		setupActionBarTitle();
+	}
 	
 	public void onGenderClick(View v)
 	{
@@ -1116,6 +1129,13 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			{
 				prepareLayoutForGender(null);
 				viewFlipper.setDisplayedChild(GENDER);
+			}
+			break;
+		case SCANNING_CONTACTS:
+			if (TextUtils.isEmpty(value))
+			{
+				viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
+				prepareLayoutForScanning(null);
 			}
 			break;	
 		case PROFILE_IMAGE:
