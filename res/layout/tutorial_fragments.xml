@@ -23,13 +23,6 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
 
-        <ImageView
-            android:id="@+id/tutorial_hike_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:src="@drawable/ic_tutorial_hike_logo"
-            android:visibility="gone" />
     </RelativeLayout>
 
 </LinearLayout>
