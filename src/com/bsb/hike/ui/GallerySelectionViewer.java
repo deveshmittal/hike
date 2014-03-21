@@ -286,7 +286,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 			galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 
-			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView);
+			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView, false, true);
 
 			((ViewPager) container).addView(page);
 			return page;
