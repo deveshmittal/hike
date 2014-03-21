@@ -616,8 +616,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		case R.id.name_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
 			birthdayText = (TextView) layout.findViewById(R.id.birthday);
-			maleText = (TextView) layout.findViewById(R.id.male);
-			femaleText = (TextView) layout.findViewById(R.id.female);
 			break;
 		case R.id.num_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_num);
@@ -812,6 +810,13 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 	}
 	
+	
+	private void prepareLayoutForGender(Bundle savedInstanceState)
+	{
+		femaleText = (TextView) genderLayout.findViewById(R.id.female);
+		maleText = (TextView) genderLayout.findViewById(R.id.male);
+	}
+	
 	public void onGenderClick(View v)
 	{
 		if (v.getId() == R.id.female)
@@ -830,7 +835,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			}
 			mActivityState.isFemale = false;
 		}
-		mTask.addGender(mActivityState.isFemale);
+		
+		femaleText.setSelected(mActivityState.isFemale);
+		maleText.setSelected(!mActivityState.isFemale);
+		
+		if (mTask != null)
+		{
+			mTask.addGender(mActivityState.isFemale);
+		}
 	}
 
 	public void onBirthdayClick(View v)
@@ -1102,6 +1114,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		case GENDER:
 			if (TextUtils.isEmpty(value))
 			{
+				prepareLayoutForGender(null);
 				viewFlipper.setDisplayedChild(GENDER);
 			}
 			break;	
