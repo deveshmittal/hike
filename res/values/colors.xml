@@ -186,8 +186,9 @@
 	<color name="downloading_sticker">#a4a4a0</color>
 	<color name="timestamp">#adaca9</color>
 	<color name="signup_hint">#d0d0cf</color>
-	<color name="male_selected">#15b5ff</color>
-	<color name="female_selected">#ff5874</color>
+	<color name="male_selected">#00b3ff</color>
+	<color name="male_unselected">#babec0</color>
+	<color name="female_selected">#f7525a</color>
 	<color name="signup_disabled">#40ffffff</color>
 	<color name="free_sms_btn">#1891e1</color>
 	<color name="indian_bg">#9ce5bb</color>
@@ -226,5 +227,8 @@
     <color name="selected_msg_item_bg_lines">#0f8fe1</color>
     <color name="file_message_item_bg">#a2aab0</color>
     <color name="transparent">#00000000</color>
+    <color name="next_btn_disabled">#a1c9f0</color>
+    <color name="phone_entering_header">#535e6d</color>
+    <color name="selected_country">#566167</color>
     <color name="red_no_network">#ffee5953</color>
 </resources>
