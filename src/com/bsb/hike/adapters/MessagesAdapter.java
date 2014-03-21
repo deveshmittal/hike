@@ -65,6 +65,7 @@ import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -122,6 +123,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View marginView;
 
 		TextView participantNameFT;
+		
+		TextView participantNameFTUnsaved;
 
 		View loadingThumb;
 
@@ -433,79 +436,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return ViewType.values().length;
 	}
 
-	View.OnClickListener fileClick = new OnClickListener()
-	{
-
-		@Override
-		public void onClick(View v)
-		{
-			ConvMessage convMessage = (ConvMessage) v.getTag(R.string.One);
-			switch (v.getId())
-			{
-			case R.id.overlayBg:
-
-				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-				File file = hikeFile.getFile();
-
-				if (convMessage.isSent())
-				{
-					FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
-
-					View overlay = (View) v;
-					overlay.setClickable(false);
-					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
-					// convMessage.setResumeButtonVisibility(false);
-
-					Log.d("Upload- button pressed", fss.getFTState().toString());
-
-					// If the file is complete or has not started yet overlay should not be in action
-					if (fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
-						return;
-
-					if (fss.getFTState() == FTState.IN_PROGRESS)
-					{
-						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
-						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
-					}
-					else
-					{
-						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
-						FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
-					}
-
-				}
-				else
-				{
-					FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
-
-					View overlay = (View) v;
-					overlay.setClickable(false);
-					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
-					// convMessage.setResumeButtonVisibility(false);
-
-					Log.d("Download- button pressed", fss.getFTState().toString());
-
-					// If the file is complete or has not started yet overlay should not be in action
-					if (fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
-						return;
-
-					if (fss.getFTState() == FTState.IN_PROGRESS)
-					{
-						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
-						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
-					}
-					else
-					{
-						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
-						FileTransferManager.getInstance(context).downloadFile(file, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage, true);
-					}
-				}
-				notifyDataSetChanged();
-			}
-
-		}
-	};
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
@@ -643,6 +573,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
+				holder.participantNameFTUnsaved = (TextView) v.findViewById(R.id.participant_name_ft_unsaved);
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
 				holder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 				if (holder.messageTextView == null)
@@ -834,19 +765,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if (metadata != null && metadata.isPokeMessage())
 			{
-
-				if (!convMessage.isSent())
-				{
-					if (firstMessageFromParticipant)
-					{
-						holder.participantNameFT.setVisibility(View.VISIBLE);
-						holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-					}
-					else
-					{
-						holder.participantNameFT.setVisibility(View.GONE);
-					}
-				}
+				setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				
 //				if (isDefaultTheme)
 //				{
 //					holder.poke.setVisibility(View.VISIBLE);
@@ -978,14 +898,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				CharSequence markedUp = convMessage.getMessage();
 				// Fix for bug where if a participant leaves the group chat, the
 				// participant's name is never shown
-				if (!convMessage.isSent())
-				{
-					if (firstMessageFromParticipant)
-					{
-						holder.participantNameFT.setVisibility(View.VISIBLE);
-						holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-					}
-				}
+				setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
 				holder.messageTextView.setText(markedUp);
@@ -1321,18 +1235,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// {
 			// holder.marginView.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE : View.GONE);
 			// }
-			if (!convMessage.isSent())
-			{
-				if (firstMessageFromParticipant)
-				{
-					holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-					holder.participantNameFT.setVisibility(View.VISIBLE);
-				}
-				else
-				{
-					holder.participantNameFT.setVisibility(View.GONE);
-				}
-			}
+			setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+			
+//			if (!convMessage.isSent())
+//			{
+//				if (firstMessageFromParticipant)
+//				{
+//					holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+//					holder.participantNameFT.setVisibility(View.VISIBLE);
+//				}
+//				else
+//				{
+//					holder.participantNameFT.setVisibility(View.GONE);
+//				}
+//			}
 			holder.messageContainer.setTag(convMessage);
 			holder.messageContainer.setOnClickListener(this);
 			holder.messageContainer.setOnLongClickListener(this);
@@ -2107,6 +2023,40 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 	
+	private void setGroupParticipantName(ConvMessage convMessage, TextView participantNameFT, TextView participantNameFTUnsaved, boolean firstMessageFromParticipant)
+	{
+		if(participantNameFT != null)
+		{
+			participantNameFT.setClickable(false);
+		}
+		if (!convMessage.isSent())
+		{
+			if (firstMessageFromParticipant)
+			{
+				participantNameFT.setVisibility(View.VISIBLE);
+				String number = null;
+				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
+				if(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				{
+					number = convMessage.getGroupParticipantMsisdn();
+				}
+				
+				if (number != null)
+				{
+					participantNameFT.setText(number);
+					participantNameFTUnsaved.setText("| "+ name + " >>");
+					participantNameFTUnsaved.setVisibility(View.VISIBLE);
+					participantNameFT.setTag(convMessage);
+					participantNameFT.setOnClickListener(contactClick);
+					participantNameFT.setClickable(true);
+				}
+				else
+				{
+					participantNameFT.setText(name);
+				}
+			}
+		}
+	}
 	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile)
 	{
 		showFileDetails(holder, hikeFile);
@@ -2205,6 +2155,91 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.setImageResource(0);
 	}
 
+	View.OnClickListener fileClick = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			ConvMessage convMessage = (ConvMessage) v.getTag(R.string.One);
+			switch (v.getId())
+			{
+			case R.id.overlayBg:
+
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+				File file = hikeFile.getFile();
+
+				if (convMessage.isSent())
+				{
+					FileSavedState fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
+
+					View overlay = (View) v;
+					overlay.setClickable(false);
+					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
+					// convMessage.setResumeButtonVisibility(false);
+
+					Log.d("Upload- button pressed", fss.getFTState().toString());
+
+					// If the file is complete or has not started yet overlay should not be in action
+					if (fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
+						return;
+
+					if (fss.getFTState() == FTState.IN_PROGRESS)
+					{
+						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
+						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
+					}
+					else
+					{
+						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
+						FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
+					}
+
+				}
+				else
+				{
+					FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+
+					View overlay = (View) v;
+					overlay.setClickable(false);
+					ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
+					// convMessage.setResumeButtonVisibility(false);
+
+					Log.d("Download- button pressed", fss.getFTState().toString());
+
+					// If the file is complete or has not started yet overlay should not be in action
+					if (fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
+						return;
+
+					if (fss.getFTState() == FTState.IN_PROGRESS)
+					{
+						resumeButton.setImageResource(R.drawable.ic_pause_ftr_disabled);
+						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
+					}
+					else
+					{
+						resumeButton.setImageResource(R.drawable.ic_resume_ftr_disabled);
+						FileTransferManager.getInstance(context).downloadFile(file, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage, true);
+					}
+				}
+				notifyDataSetChanged();
+			}
+
+		}
+	};
+	
+	View.OnClickListener contactClick = new OnClickListener()
+	{	
+		@Override
+		public void onClick(View v)
+		{
+			ConvMessage message = (ConvMessage) v.getTag();
+			List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+			items.add(new ContactInfoData(DataType.PHONE_NUMBER, message.getGroupParticipantMsisdn(), "Mobile"));
+			String name = ((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn());
+			chatThread.showContactDetails(items, name, null, true);
+		}
+	};
 	private void setFileButtonResource(ImageView button, ConvMessage convMessage, HikeFile hikeFile)
 	{
 		// TODO : handle according to filestate

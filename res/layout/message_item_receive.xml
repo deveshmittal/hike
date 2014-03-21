@@ -115,6 +115,14 @@
 	            android:gravity="center_vertical"
 	            android:orientation="vertical" >
 	            
+			    <LinearLayout
+			        android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:orientation="horizontal"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="3dp" >
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
 	                    android:layout_width="wrap_content"
@@ -124,10 +132,18 @@
 	                    android:textColor="@color/chat_color"
 	                    android:textSize="14sp"
 	                    android:textStyle="bold"
+	                    android:visibility="gone" />
+	            <com.bsb.hike.view.CustomFontTextView
+	                    android:id="@+id/participant_name_ft_unsaved"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:gravity="left"
+	                    android:text="Thanks lksad"
+	                    android:textColor="#66000000"
+	                    android:textSize="14sp"
 	                    android:visibility="gone"
-	                    android:layout_marginLeft="5dp"
-	                    android:layout_marginRight="5dp"
-	                    android:layout_marginBottom="3dp" />
+	                    android:layout_marginLeft="5dp" />
+	            </LinearLayout>
 	            
 	            <LinearLayout
 	                android:layout_width="wrap_content"
