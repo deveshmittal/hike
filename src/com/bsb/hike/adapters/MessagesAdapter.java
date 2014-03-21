@@ -193,6 +193,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ImageView intMessageStatus;
 		
 		View extMessageTimeStatus;
+		
+		View intMessageTimeStatus;
 
 		View dayLeft;
 
@@ -608,6 +610,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
 				holder.intMessageStatus = (ImageView) v.findViewById(R.id.message_status_int);
 				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
+				holder.intMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_int);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
 
@@ -1603,7 +1606,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					else
 					{
-						setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, null, holder.messageInfo);
+						setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, holder.intMessageTimeStatus, holder.messageInfo);
 					}
 //					else
 //					{
@@ -1644,7 +1647,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, null, holder.messageInfo);
+					setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, holder.intMessageTimeStatus, holder.messageInfo);
 				}
 			}
 		} // End of File Transfer Message

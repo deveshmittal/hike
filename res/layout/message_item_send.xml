@@ -351,10 +351,12 @@
             </LinearLayout>
             
             <LinearLayout
+                android:id="@+id/message_time_status_int"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/sent_message_inner_container"
                 android:layout_alignRight="@id/sent_message_inner_container"
+                android:layout_marginTop="3dp"
                 android:layout_marginRight="5dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|right" >
