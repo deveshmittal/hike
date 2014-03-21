@@ -384,6 +384,17 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/receive_message_inner_container" />
 			
+			<com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_time_int"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+      	        android:text="00:00"
+                android:textColor="@color/black_40"
+                android:textSize="12sp"
+                android:layout_below="@id/receive_message_inner_container"
+                android:layout_alignRight="@id/receive_message_inner_container"
+                android:visibility="gone" />
+			
 	        </RelativeLayout>
 	        <ImageView
 	             android:id="@+id/poke_receive_custom"

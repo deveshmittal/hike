@@ -182,11 +182,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		
 		TextView extMessageTime;
 		
+		TextView intMessageTime;
+		
 		ImageView messageStatus;
 		
 		ImageView ftMessageStatus;
 		
 		ImageView extMessageStatus;
+		
+		ImageView intMessageStatus;
 		
 		View extMessageTimeStatus;
 
@@ -601,6 +605,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.messageStatus = (ImageView) v.findViewById(R.id.message_status);
 				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
 				holder.extMessageStatus = (ImageView) v.findViewById(R.id.message_status_ext);
+				holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
+				holder.intMessageStatus = (ImageView) v.findViewById(R.id.message_status_int);
 				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				break;
@@ -662,6 +668,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				
 				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
 				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
+				holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
 
 				holder.container.setVisibility(View.GONE);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
@@ -1596,7 +1603,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					else
 					{
-						setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
+						setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, null, holder.messageInfo);
 					}
 //					else
 //					{
@@ -1637,7 +1644,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
+					setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, null, holder.messageInfo);
 				}
 			}
 		} // End of File Transfer Message
