@@ -500,6 +500,8 @@ public class HikeConstants
 	public static final int DISCONNECT_TIME = 10 * 60;
 
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
+	
+	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
 	/*
 	 * the amount to wait before showing the PIN screen on non sim devices.
@@ -540,7 +542,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 100 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
@@ -553,6 +555,8 @@ public class HikeConstants
 	public static final int SHARE_LOCATION_CODE = 1192;
 
 	public static final int SHARE_CONTACT_CODE = 1193;
+
+	public static final int SHARE_FILE_CODE = 1194;
 
 	public static final int FACEBOOK_REQUEST_CODE = 64206;
 
@@ -1047,6 +1051,8 @@ public class HikeConstants
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
 
 		public static final String SELECTED_COUNTRY = "selectedCountry";
+
+		public static final String MANUAL_SYNC = "manualSync";
 	}
 
 	public static final class LogEvent
@@ -1348,6 +1354,8 @@ public class HikeConstants
 		public static final String MULTI_INVITE = "mi";
 
 		public static final String CHAT_BACKGROUD = "cbg";
+
+		public static final String GROUP_OWNER_CHANGE = "goc";
 	}
 
 	public static final class SMSNative

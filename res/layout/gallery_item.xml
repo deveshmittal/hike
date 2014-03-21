@@ -18,8 +18,8 @@
         android:layout_alignLeft="@id/album_image"
         android:layout_alignRight="@id/album_image"
         android:layout_alignTop="@id/album_image"
-        android:background="@color/action_bar_item_pressed"
-        android:visibility="gone" />
+        android:background="@drawable/gallery_item_selector"
+        android:visibility="visible" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/album_title"

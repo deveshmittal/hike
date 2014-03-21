@@ -100,15 +100,29 @@
 	        android:layout_toRightOf="@id/avatar_container"
 	        android:gravity="left" >
 	        
-	        <LinearLayout
+	        <RelativeLayout
 	            android:id="@+id/receive_message_container"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/ic_bubble_white_selector"
 	            android:gravity="center_vertical"
-	            android:orientation="vertical"
-	            android:paddingRight="4dp">
-
+	            android:paddingRight="4dp" >
+	            
+			<LinearLayout
+			    android:id="@+id/receive_message_inner_container"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:gravity="center_vertical"
+	            android:orientation="vertical" >
+	            
+			    <LinearLayout
+			        android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:orientation="horizontal"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="3dp" >
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
 	                    android:layout_width="wrap_content"
@@ -118,10 +132,18 @@
 	                    android:textColor="@color/chat_color"
 	                    android:textSize="14sp"
 	                    android:textStyle="bold"
+	                    android:visibility="gone" />
+	            <com.bsb.hike.view.CustomFontTextView
+	                    android:id="@+id/participant_name_ft_unsaved"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:gravity="left"
+	                    android:text="Thanks lksad"
+	                    android:textColor="#66000000"
+	                    android:textSize="14sp"
 	                    android:visibility="gone"
-	                    android:layout_marginLeft="5dp"
-	                    android:layout_marginRight="5dp"
-	                    android:layout_marginBottom="3dp" />
+	                    android:layout_marginLeft="5dp" />
+	            </LinearLayout>
 	            
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -145,6 +167,19 @@
 	                    android:layout_gravity="center"
 	                    android:visibility="gone" />
                     
+	                <com.bsb.hike.view.CustomFontTextView
+	                    android:id="@+id/file_extension"
+	                    android:layout_width="@dimen/file_message_item_size"
+	                    android:layout_height="@dimen/file_message_item_size"
+	                    android:layout_gravity="center"
+	                    android:gravity="center"
+	                    android:singleLine="true"
+	                    android:text="PNG"
+	                    android:textColor="@color/white"
+	                    android:textSize="24sp"
+	                    android:textStyle="bold"
+	                    android:visibility="gone" />
+
                     <ImageView
                         android:id="@+id/file_ic"
                         android:layout_width="47dp"
@@ -165,6 +200,16 @@
                         android:background="#6E000000"
                         android:padding="4dp"
                         android:visibility="gone" >
+                            
+			            <com.bsb.hike.view.CustomFontTextView
+			                android:id="@+id/message_time_ft"
+			                android:layout_width="wrap_content"
+			                android:layout_height="wrap_content"
+			                android:layout_alignParentRight="true"
+			                android:layout_centerVertical="true"
+			      	        android:text="00:00"
+			                android:textColor="@color/white"
+			                android:textSize="12sp" />
                          
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -216,6 +261,7 @@
                                 android:background="#00000000"
                                 android:gravity="left"
                                 android:textColor="@color/white"
+                                android:layout_marginTop="-2dp"
                                 android:textSize="10dp"
                                 android:textStyle="bold"
                                 android:visibility="gone" />
@@ -227,6 +273,7 @@
                                 android:background="#00000000"
                                 android:gravity="left"
                                 android:textColor="@color/white"
+                                android:layout_marginTop="-2dp"
                                 android:textSize="10dp"
                                 android:visibility="gone" />
 
@@ -300,7 +347,7 @@
 	                    android:visibility="gone" />
                 </RelativeLayout>
 
-	                <com.bsb.hike.view.CustomFontTextView
+	                <com.bsb.hike.view.CustomReceiveMessageTextView
 	                    android:id="@+id/message_receive"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
@@ -355,11 +402,37 @@
                     android:layout_marginLeft="9dp" />
 
 	        </LinearLayout>
+	        
+			<com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+      	        android:text="00:00"
+                android:textColor="@color/black_40"
+                android:textSize="12sp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignRight="@id/receive_message_inner_container" />
+			
+			<com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_time_int"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+      	        android:text="00:00"
+                android:textColor="@color/black_40"
+                android:textSize="12sp"
+                android:layout_marginTop="3dp"
+                android:layout_below="@id/receive_message_inner_container"
+                android:layout_alignRight="@id/receive_message_inner_container"
+                android:visibility="gone" />
+			
+	        </RelativeLayout>
 	        <ImageView
 	             android:id="@+id/poke_receive_custom"
 	             android:layout_width="wrap_content"
 	             android:layout_height="wrap_content"
 	             android:gravity="center_vertical"
+	             android:layout_marginTop="5dp"
+	             android:layout_marginLeft="6dp"
 	             android:src="@drawable/ic_nudge_receive_custom"
 	             android:visibility="gone" />
 	        
@@ -420,6 +493,20 @@
 	        </RelativeLayout>
 
 	    </RelativeLayout>
+	            
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/message_time_ext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/bubble_container"
+            android:layout_alignLeft="@id/bubble_container"
+            android:layout_marginLeft="6dp"
+  	        android:text="00:00"
+  	        android:background="@drawable/bg_msg_time_status"
+  	        android:textColor="@color/white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+           
 
 	    <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/msg_info"

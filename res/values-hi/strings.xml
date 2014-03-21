@@ -135,12 +135,9 @@
 	<string name="free_sms_left">SMS पर हाइक</string>
 	<string name="normal_update">संदेश के शानदार नए तरीकों को ढूंढ़ने के लिए hike  के नए संस्करण में अपडेट करें</string>
 	<string name="critical_update">हाइक का इस्तेमाल जारी रखने के लिए, अपडेट जरूरी है।</string>
-	<string name="normal_update_head">अपडेट उपलब्ध</string>
-	<string name="critical_update_head">महत्वपूर्ण अपडेट</string>
 	<string name="quit">छोड़ें</string>
 	<string name="update_app">अपडेट</string>
 	<string name="delete_confirmation">क्या आप वाकई अपना खाता स्थायी रूप से डिलीट करना चाहते हैं?</string>
-	<string name="unlink_confirmation">क्या आप वाकई अपना खाता इस फोन से अनलिंक करना चाहते हैं?</string>
 	<string name="unlink">अनलिंक</string>
 	<string name="no_favorite">आपके पसंदीदा नहीं हैं। \nजोड़ने हेतु नीचे प्लस टैप करें</string>
 	<string name="plus">प्लस</string>
@@ -199,7 +196,6 @@
 	<string name="sms_subtext">SMS से दोस्त निमंत्रित करें</string>
 	<string name="email_subtext">ईमेल द्वारा आमंत्रण</string>
 	<string name="other_subtext">आमंत्रण युआरएल पाएं</string>
-	<string name="email_subject">हाइक। मस्ती, जीवन के लिए मुफ्त मैसेजिंग</string>
 	<string name="facebook_msg">मैंने शानदार मुफ्त मैसेजिंग एप हाइक इस्तेमाल करना शुरू किया।आप हाइक पर दोस्तों को और जो हाइक पर न भी हो मुफ्त संदेश भेज सकते हैं ! मैसेजिंग इतना आसान कभी नहीं था। मुझे मुफ्त मैसेजिंग शुरू करने हेतु http://get.hike.in/%1$s से इस एप को डाउनलोड करें।</string>
 	<string name="gps_disabled">अपने लोकेशन की बेहतर सटीकता के लिए जीपीएस चालू करें।</string>
 	<string name="twitter_post_success">आपकी टाइमलाइन पर पोस्ट किया गया।</string>
@@ -220,8 +216,6 @@
 	<string name="auto_download_video_title">वीडियो</string>
 	<string name="auto_download_audio_title">ऑडियो</string>
 	<string name="delete_account">खाता डिलीट करें</string>
-	<string name="delete_account_msg">अपने खाते को स्थायी रूप से डिलीट करे</string>
-	<string name="unlink_account">खाता अनलिंक करें</string>
 	<string name="unlink_account_msg">इस फोन से अपना खाता अनलिंक करें</string>
 	<string name="privacy">गोपनीयता</string>
 	<string name="notifications">अधिसूचना</string>
@@ -361,7 +355,6 @@
 	<string name="waiting_for_accept">आपका दोस्ती अनुरोध स्वीकारने के लिए %1$sके लिए प्रतीक्षा </string>
 	<string name="status_update">स्टेटस अपडेट</string>
 	<string name="remove_friend">हटाएं</string>
-	<string name="no_status">ऐसा लगता है आपने अभी तक कोई स्टेट्स अपडेट पोस्ट नहीं किया</string>
 	<string name="update_status">अपडेट स्टेटस</string>
 	<string name="free_sms_txt">मुफ्त SMS</string>
 	<string name="on_dnd">डीएनडी पर</string>
@@ -374,7 +367,6 @@
 	<string name="unmute_group">अनम्यूट समूह</string>
 	<string name="account">खाता</string>
 	<string name="deleting_account">डिलीटिंग अकाउंट</string>
-	<string name="unlinking_account">अनलिंकिंग अकाउंट</string>
 	<string name="enter_num">कृपया अपना फोन नम्बर दर्ज करें</string>
 	<string name="enter_pin">कृपया पिन दर्ज करें</string>
 	<string name="enter_name">कृपया अपना नाम दर्ज करें</string>
@@ -550,8 +542,6 @@
 	<string name="recents">हालिया</string>
 	<string name="contacts">संपर्क</string>
 	<string name="friend_request_sent">मित्र अनुरोध भेजा गया</string>
-	<string name="new_chat">नई चैट शुरू करें</string>
-	<string name="new_update">नया अपडेट पोस्ट करें</string>
 	<string name="chats">चैट</string>
 	<string name="updates">अपडेट</string>
 	<string name="sent">भेजा गया, %1$s</string>
@@ -561,7 +551,6 @@
 	<string name="read_by_names_number">%1$s और %2$d अन्य द्वारा पढ़ी गई</string>
 	<string name="read_by_everyone">प्रत्येक व्यक्ति के  द्वारा पढ़ी गई</string>
 	<string name="attach">संलग्न करें</string>
-	<string name="new_chat">नई चैट</string>
 	<string name="sent_friend_request">मित्र अनुरोध भेजा गया</string>
 	<string name="xyz_posted_update">%1$s ने अपडेट पोस्ट किया है</string>
 	<string name="sent_you_friend_request">ने आपको मित्र अनुरोध भेजा है</string>
@@ -634,7 +623,6 @@
 	<string name="x_regular_sms">%1$d x नियमित SMS</string>
 	<string name="last_seen_yesterday_group_participant">बीता कल</string>
 	<string name="invite_friends_hike">hike पर दोस्तों को आमंत्रित करें</string>
-	<string name="create_group">समूह बनाएँ</string>
 	<string name="hike_contacts">HIKE संपर्क</string>
 	<string name="sms_contacts">SMS संपर्क</string>
 	<string name="invite_subtext">आपके ज़रिए hike में शामिल होने वाले हर दोस्त के लिए अतिरिक्त SMS कमाएँ।</string>
@@ -711,12 +699,9 @@
 	<string name="sent_via_sms">एसएमएस के रूप में भेजा गया - %1$s</string>
 	<string name="chat_theme">चैट थीम</string>
 	<string name="unknown_chat_theme">ओफ़ ओह! एक अद्भुत नया चैट थीम आपका इंतज़ार कर रहा है। परंतु आप अभी तक hike के पुराने संस्करण पर हैं :(.अभी अपडेट करें http://hike.in</string>
-	<string name="merry_christmas_msg">क्रिसमस जादुई है! और प्यारे क्या हमारे पास तुम्हारे लिए कोई सरप्राइज़ है ...</string>	
-	<string name="open_it_up">इसे खोलें</string>	
 	<string name="chat_themes">चैट थीम!</string>
 	<string name="chat_themes_popup_msg">शानदार थीम से अपनी चैट\nनिजीकृत करें।</string>
 	<string name="give_it_a_spin">इसे आज़माएँ</string>		
-	<string name="chat_bg_ftue_tip">और यहाँ और बहुत सारे थीम हैं....</string>
 	<string name="last_seen_today_ct">आज, %1$s</string>
 	<string name="last_seen_yesterday_ct">कल, %1$s</string>
 	<string name="last_seen_more_ct">%1$s</string>

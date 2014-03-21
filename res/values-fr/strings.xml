@@ -63,7 +63,6 @@
 	<string name="group_chat">Tchat groupé</string>
 	<string name="add_to_contacts">Ajouter aux contacts</string>
 	<string name="new_message">Nouveau message</string>
-	<string name="new_group">Nouveau groupe</string>
 	<string name="add_group">Ajouter au gr.</string>
 	<string name="invite_share_message">J\'utilise hike, super appli gratuite de messagerie ! Télécharge-la sur http://get.hike.in/%1$s et envoie des messages gratuits !</string>
 	<string name="max_sms">5 contacts SMS maxi par groupe.</string>
@@ -134,12 +133,9 @@
 	<string name="free_sms_left">hike vers SMS</string>
 	<string name="normal_update">Mettez hike à jour pour découvrir des façons inédites d\'envoyer des messages</string>
 	<string name="critical_update">Mise à jour requise pour continuer d\'utiliser hike</string>
-	<string name="normal_update_head">Mise à j. disponible</string>
-	<string name="critical_update_head">Mise à j. importante</string>
 	<string name="quit">Quitter</string>
 	<string name="update_app">Mise à j.</string>
 	<string name="delete_confirmation">Veux-tu supprimer définitivement ton compte ?</string>
-	<string name="unlink_confirmation">Veux-tu désassocier ton compte de ce téléphone ?</string>
 	<string name="unlink">Désassoc.</string>
 	<string name="no_favorite">Tu n\'as pas de favoris.\nTouche + pour en ajouter.</string>
 	<string name="plus">+</string>
@@ -198,7 +194,6 @@
 	<string name="sms_subtext">Inviter des amis par SMS</string>
 	<string name="email_subtext">Inviter par e-mail</string>
 	<string name="other_subtext">Recevoir URL d\'invit.</string>
-	<string name="email_subject">hike. Une messagerie fun et gratuite !</string>
 	<string name="facebook_msg">J\'utilise hike, super appli gratuite de messagerie. Écris gratuitement à tes amis hike et aux autres aussi ! Jamais la messagerie n\'a été aussi simple. Télécharge l\'appli sur http://get.hike.in/%1$s et écris gratuitement tes premiers messages !</string>
 	<string name="gps_disabled">Pour te localiser avec précision, active le GPS.</string>
 	<string name="twitter_post_success">Publié sur ton journal !</string>
@@ -219,9 +214,6 @@
 	<string name="auto_download_video_title">Vidéo</string>
 	<string name="auto_download_audio_title">Audio</string>
 	<string name="delete_account">Supprimer le compte</string>
-	<string name="delete_account_msg">Supprimer définitivement ton compte</string>
-	<string name="unlink_account">Désassocier compte</string>
-	<string name="unlink_account_msg">Désassocie ton compte de ce téléphone</string>
 	<string name="privacy">Vie privée</string>
 	<string name="notifications">Alertes</string>
 	<string name="favorites">Favoris</string>
@@ -359,7 +351,6 @@
 	<string name="waiting_for_accept">Demande d\'ami à %1$s en attente</string>
 	<string name="status_update">Mise à jour du statut</string>
 	<string name="remove_friend">Supprimer</string>
-	<string name="no_status">Tu n\'as pas encore mis à jour ton statut.</string>
 	<string name="update_status">Statut mise à jour</string>
 	<string name="free_sms_txt">SMS gratuit</string>
 	<string name="on_dnd">sur DND</string>
@@ -372,7 +363,6 @@
 	<string name="unmute_group">Annul. sourdine</string>
 	<string name="account">Compte</string>
 	<string name="deleting_account">Suppression compte</string>
-	<string name="unlinking_account">Désassociation compte</string>
 	<string name="enter_num">Indique ton numéro de téléphone</string>
 	<string name="enter_pin">Indiquer le code PIN</string>
 	<string name="enter_name">Entre ton nom</string>
@@ -553,7 +543,6 @@
 	<string name="read_by_names_number">Lu par %1$s et %2$d autre(s)</string>
 	<string name="read_by_everyone">Lu par tout le monde</string>
 	<string name="attach">Joindre</string>
-	<string name="new_chat">Nouv. tchat</string>
 	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">A envoyé une demande d\'ami</string>
 	<string name="xyz_posted_update">%1$s a publié une mise à jour</string>
@@ -626,7 +615,6 @@
 	<string name="x_regular_sms">%1$d x SMS normaux</string>
 	<string name="last_seen_yesterday_group_participant">Hier</string>
 	<string name="invite_friends_hike">Invite des amis dans hike</string>
-	<string name="create_group">Créer un groupe</string>
 	<string name="hike_contacts">CONTACTS HIKE</string>
 	<string name="sms_contacts">CONTACTS SMS</string>
 	<string name="invite_subtext">Gagne des SMS supplémentaires pour chaque ami qui rejoint hike grâce à toi.</string>
@@ -703,12 +691,9 @@
 	<string name="sent_via_sms">Envoyé comme SMS - %1$s</string>
 	<string name="chat_theme">Thème de tchat</string>
 	<string name="unknown_chat_theme">Oh oh ! Un super thème de tchat t\'attend, mais tu utilises encore l\'ancienne version de hike :(. Fais la mise à jour maintenant http://hike.in</string>
-	<string name="merry_christmas_msg">Noël, c\'est magique ! Et on a une belle surprise pour toi !</string>	
-	<string name="open_it_up">Ouvre-la</string>	
 	<string name="chat_themes">Des thèmes de tchat !</string>
 	<string name="chat_themes_popup_msg">Personnalise tes tchats avec de superbes thèmes.</string>
 	<string name="give_it_a_spin">Essaie-les donc</string>		
-	<string name="chat_bg_ftue_tip">Et beaucoup d\'autres thèmes ici...</string>
 	<string name="last_seen_today_ct">aujourd\'hui, à %1$s</string>
 	<string name="last_seen_yesterday_ct">hier, à %1$s</string>
 	<string name="last_seen_more_ct">%1$s</string>

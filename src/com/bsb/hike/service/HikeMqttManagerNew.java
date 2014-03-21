@@ -2,6 +2,8 @@ package com.bsb.hike.service;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -32,6 +34,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -128,7 +131,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE; // this is the time for which conn will remain open w/o messages
 
-	private short connectionTimeoutSec = 60;
+	private static short connectionTimeoutSec = 60;
+	
+	private static long connectionLostTime;
+	
+	private Timer myTimer;
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -503,7 +510,53 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			Log.e(TAG, "Exception in MQTT connect handler: " + e.getMessage());
 		}
 	}
+	
+	private void scheduleNetworkErrorTimer()
+	{
+		if(HikeMessengerApp.networkError == true)
+			return;
+		if(isAirplaneModeOn(context))
+		{
+			HikeMessengerApp.networkError = true;
+			updateNetworkState();
+			return;
+		}
+		myTimer = new Timer();
+		myTimer.schedule( new TimerTask()
+		{
+			
+			@Override
+			public void run()
+			{
+				HikeMessengerApp.networkError = true;
+				updateNetworkState();
+			}
+		}, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
+	}
+	
+	private void cancelNetworkErrorTimer()
+	{
+		if(myTimer != null)
+		{
+			myTimer.cancel();
+		}
+		if(HikeMessengerApp.networkError == false)
+			return;
+		connectionLostTime = 0;
+		HikeMessengerApp.networkError = false;
+		updateNetworkState();
+	}
 
+	private void updateNetworkState()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
+	}
+	
+	private static boolean isAirplaneModeOn(Context context)
+	{
+		return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+	}
+	
 	// this should and will run only on MQTT thread so no need to synchronize it explicitly
 	private void connect()
 	{
@@ -676,6 +729,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 					Log.d(TAG, "Client Connected ....");
+					cancelNetworkErrorTimer();
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
@@ -708,6 +762,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					if (ex != null)
 						Log.e(TAG, "Exception : " + ex.getReasonCode());
 					ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
+					scheduleNetworkErrorTimer();
 					if (value != null)
 					{
 						Log.e(TAG, "Connection failed : " + value.getMessage());
@@ -785,6 +840,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				public void connectionLost(Throwable arg0)
 				{
 					Log.w(TAG, "Connection Lost : " + arg0.getMessage());
+					scheduleNetworkErrorTimer();
 					connectOnMqttThread();
 				}
 			};

@@ -579,7 +579,9 @@ public class UploadFileTask extends FileTransferBase
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
 
 		int start = mStart;
-		int end = start + chunkSize;
+		int end = (int) length;
+		if (end > (start + chunkSize))
+			end = start + chunkSize;
 		end--;
 
 		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
@@ -876,20 +878,20 @@ public class UploadFileTask extends FileTransferBase
 
 	private void setChunkSize(long length)
 	{
-		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
-		// int chunkSize = networkType.getMinChunkSize()*2;
-		if (Utils.densityMultiplier > 1)
-			chunkSize = networkType.getMaxChunkSize();
-		else if (Utils.densityMultiplier == 1)
-			chunkSize = networkType.getMinChunkSize() * 2;
-		else
-			chunkSize = networkType.getMinChunkSize();
+//		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+//		if (Utils.densityMultiplier > 1)
+//			chunkSize = networkType.getMaxChunkSize();
+//		else if (Utils.densityMultiplier == 1)
+//			chunkSize = networkType.getMinChunkSize() * 2;
+//		else
+//			chunkSize = networkType.getMinChunkSize();
+		chunkSize = NetworkType.WIFI.getMaxChunkSize();
 
-//		if (chunkSize > (int) length)
-//			chunkSize = (int) length;
+		if (chunkSize > (int) length)
+			chunkSize = (int) length;
 		
-		while(chunkSize > length)
-			chunkSize/=2;
+//		while(chunkSize > length)
+//			chunkSize/=2;
 
 		try
 		{

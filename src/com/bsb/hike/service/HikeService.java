@@ -48,11 +48,11 @@ import com.google.android.gcm.GCMRegistrar;
 
 public class HikeService extends Service
 {
-
 	public class ContactsChanged implements Runnable
 	{
-
 		private Context context;
+
+		boolean manualSync;
 
 		public ContactsChanged(Context ctx)
 		{
@@ -64,6 +64,10 @@ public class HikeService extends Service
 		{
 			Log.d("ContactsChanged", "calling syncUpdates");
 			ContactUtils.syncUpdates(this.context);
+			if (manualSync)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, null);
+			}
 		}
 	}
 
@@ -134,7 +138,7 @@ public class HikeService extends Service
 
 	private Handler mContactsChangedHandler;
 
-	private Runnable mContactsChanged;
+	private ContactsChanged mContactsChanged;
 
 	private Looper mContactHandlerLooper;
 
@@ -423,6 +427,7 @@ public class HikeService extends Service
 
 	private class ContactListChangeIntentReceiver extends ContentObserver
 	{
+		boolean manualSync;
 
 		public ContactListChangeIntentReceiver(Handler handler)
 		{
@@ -434,10 +439,14 @@ public class HikeService extends Service
 		{
 			Log.d(getClass().getSimpleName(), "Contact content observer called");
 
+			mContactsChanged.manualSync = manualSync;
+
 			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
 			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
 			// Schedule the next manual sync to happed 24 hours from now.
 			scheduleNextManualContactSync();
+
+			manualSync = false;
 		}
 	}
 
@@ -477,6 +486,8 @@ public class HikeService extends Service
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
+			contactsReceived.manualSync = intent.getBooleanExtra(HikeConstants.Extras.MANUAL_SYNC, false);
+
 			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
 		}
 	}
