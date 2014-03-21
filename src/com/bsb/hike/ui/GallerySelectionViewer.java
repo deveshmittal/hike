@@ -72,8 +72,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		 * Added one for the extra null item.
 		 */
 		galleryGridItems = new ArrayList<GalleryItem>(galleryItems.size() + 1);
-		galleryGridItems.addAll(galleryItems);
+		/*
+		 * Adding an empty item which will be used to add more images.
+		 */
 		galleryGridItems.add(null);
+		galleryGridItems.addAll(galleryItems);
 
 		selectedGrid = (GridView) findViewById(R.id.selection_grid);
 		selectedPager = (ViewPager) findViewById(R.id.selection_pager);
@@ -220,7 +223,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 		else
 		{
-			setSelection(position);
+			setSelection(position - 1);
 		}
 	}
 
@@ -245,7 +248,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		gridAdapter.setSelectedItemPosition(position + 1);
 
 		selectedPager.setCurrentItem(position);
-		selectedGrid.smoothScrollToPosition(position);
+		selectedGrid.smoothScrollToPosition(position + 1);
 	}
 
 	private class GalleryPagerAdapter extends PagerAdapter
