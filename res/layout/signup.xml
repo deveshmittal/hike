@@ -14,6 +14,8 @@
         <include layout="@layout/pin_signup_item" />
 
         <include layout="@layout/name_signup_item" />
+        
+        <include layout="@layout/gender_signup_item" />
     </com.bsb.hike.view.MyViewFlipper>
 
 </RelativeLayout>

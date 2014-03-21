@@ -72,7 +72,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PIN, ERROR, PROFILE_IMAGE
+		MSISDN, ADDRESSBOOK, NAME, PIN, ERROR, PROFILE_IMAGE, GENDER
 	};
 
 	public class StateValue
@@ -431,6 +431,21 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				name = this.data;
+				
+				this.data = null;
+				if (this.data == null)
+				{
+					/*
+					 * publishing this will cause the the Activity to ask the user for a name and signal us
+					 */
+					publishProgress(new StateValue(State.GENDER, ""));
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+				name = this.data;
+				
 				AccountUtils.setProfile(name, birthdate, isFemale);
 			}
 			catch (InterruptedException e)

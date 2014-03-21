@@ -104,6 +104,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private ViewGroup pinLayout;
 
 	private ViewGroup nameLayout;
+	
+	private ViewGroup genderLayout;
 
 	private TextView infoTxt;
 
@@ -135,6 +137,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private boolean msisdnErrorDuringSignup = false;
 
+	private final int GENDER = 3;
+	
 	private final int NAME = 2;
 
 	private final int PIN = 1;
@@ -192,7 +196,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		public boolean fbConnected = false;
 
-		public boolean isFemale = false;
+		public Boolean isFemale = null;
 
 		public Birthday birthday = null;
 	}
@@ -212,6 +216,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
+		genderLayout = (ViewGroup) findViewById(R.id.gender_layout);
 
 		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof ActivityState)
@@ -480,7 +485,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			return;
 		}
 		
-		if (TextUtils.isEmpty(enterEditText.getText()))
+		if (enterEditText !=null && TextUtils.isEmpty(enterEditText.getText()))
 		{
 			int displayedChild = viewFlipper.getDisplayedChild();
 			int stringRes;
@@ -501,7 +506,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			toast.show();
 			return;
 		}
-		if (viewFlipper.getDisplayedChild() != NUMBER)
+		if (viewFlipper.getDisplayedChild() == PIN)
 		{
 			startLoading();
 		}
@@ -513,6 +518,18 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				infoTxt.setVisibility(View.VISIBLE);
 				nextBtn.setEnabled(true);
 				invalidNum.setVisibility(View.VISIBLE);
+			}
+			else if(viewFlipper.getDisplayedChild() == GENDER)
+			{
+				if(mActivityState.isFemale != null)
+				{
+					mTask.addUserInput(mActivityState.isFemale.toString());
+				}
+				else{
+					Toast toast = Toast.makeText(this, "please select your gender", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+				}
 			}
 			else
 			{
@@ -614,6 +631,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			infoTxt.setVisibility(View.VISIBLE);
 			invalidPin.setVisibility(View.INVISIBLE);
 			break;
+		case R.id.gender_layout:
+			break;	
 		}
 		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
 		loadingText = (TextView) layout.findViewById(R.id.txt_loading);
@@ -792,12 +811,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			fbBtn.setText(R.string.connected);
 		}
 	}
-
+	
 	public void onGenderClick(View v)
 	{
 		if (v.getId() == R.id.female)
 		{
-			if (mActivityState.isFemale)
+			if (mActivityState.isFemale !=null && mActivityState.isFemale)
 			{
 				return;
 			}
@@ -805,7 +824,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		else
 		{
-			if (!mActivityState.isFemale)
+			if (mActivityState.isFemale !=null && !mActivityState.isFemale)
 			{
 				return;
 			}
@@ -920,7 +939,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			loadingLayout.setVisibility(View.GONE);
 		}
-		infoTxt.setVisibility(View.VISIBLE);
+		if(infoTxt!=null)
+		{
+			infoTxt.setVisibility(View.VISIBLE);
+		}
 		showNetworkErrorPopup();
 	}
 
@@ -1077,6 +1099,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				prepareLayoutForGettingName(null, true);
 			}
 			break;
+		case GENDER:
+			if (TextUtils.isEmpty(value))
+			{
+				viewFlipper.setDisplayedChild(GENDER);
+			}
+			break;	
 		case PROFILE_IMAGE:
 			if (SignupTask.START_UPLOAD_PROFILE.equals(value))
 			{

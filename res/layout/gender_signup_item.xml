@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gender_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingLeft="6dp" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/male"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:drawableLeft="@drawable/ic_male_selector"
+        android:drawablePadding="7dp"
+        android:gravity="center_vertical"
+        android:onClick="onGenderClick"
+        android:text="@string/male"
+        android:textColor="@drawable/male_text_selector" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/female"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:drawableLeft="@drawable/ic_female_selector"
+        android:drawablePadding="7dp"
+        android:gravity="center_vertical"
+        android:onClick="onGenderClick"
+        android:text="@string/female"
+        android:textColor="@drawable/female_text_selector" />
+
+</LinearLayout>
