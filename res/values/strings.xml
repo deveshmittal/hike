@@ -782,4 +782,6 @@
 	<string name="i_am_a_boy">I am a boy</string>
 	<string name="i_am_a_girl">I am a girl</string>
 	<string name="scanning_your_contacts">You are all set!\nScanning your contacts...</string>
+	<string name="about_you">About you</string>
+	<string name="tell_us_more">Tell us more</string>
 </resources>

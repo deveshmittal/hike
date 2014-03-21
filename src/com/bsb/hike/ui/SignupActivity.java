@@ -335,9 +335,17 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			mActionBarTitle.setText(R.string.enter_pin);
 		}
-		else
+		else if (displayedChild == NAME)
 		{
-			mActionBarTitle.setText(R.string.enter_num);
+			mActionBarTitle.setText(R.string.about_you);
+		}
+		else if (displayedChild == GENDER)
+		{
+			mActionBarTitle.setText(R.string.tell_us_more);
+		}
+		else if (displayedChild == SCANNING_CONTACTS)
+		{
+			mActionBarTitle.setText("");
 		}
 	}
 	
