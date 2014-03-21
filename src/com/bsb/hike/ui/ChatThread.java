@@ -1648,13 +1648,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(mConversation.getUnreadCount() > 0)
 		{
 			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
+			long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
 			if ((messages.size() - mConversation.getUnreadCount()) > 0)
 			{
-				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
 			}
 			else
 			{
-				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
 			}
 		}
 

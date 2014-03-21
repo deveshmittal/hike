@@ -461,7 +461,8 @@
   	        android:text="00:00"
   	        android:background="@drawable/bg_msg_time_status"
   	        android:textColor="@color/white"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
            
 
 	    <com.bsb.hike.view.CustomFontTextView
