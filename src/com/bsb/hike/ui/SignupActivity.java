@@ -132,6 +132,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private TextView maleText;
 
 	private TextView femaleText;
+	
+	private ImageView profilePicCamIcon;
 
 	private Handler mHandler;
 
@@ -632,6 +634,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		case R.id.name_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
 			birthdayText = (TextView) layout.findViewById(R.id.birthday);
+			profilePicCamIcon = (ImageView) layout.findViewById(R.id.profile_cam);
 			break;
 		case R.id.num_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_num);
@@ -1663,7 +1666,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		mActivityState.profileBitmap = Utils.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
-
+		profilePicCamIcon.setImageResource(R.drawable.ic_signup_editphoto);
+		
 		tempBitmap.recycle();
 		tempBitmap = null;
 	}
