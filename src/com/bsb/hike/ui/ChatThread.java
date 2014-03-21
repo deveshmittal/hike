@@ -5576,7 +5576,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		case MotionEvent.ACTION_UP:
 		{
-			if (!onTouchActionDownCalled)
+			if (isActionModeOn && !onTouchActionDownCalled)
 			{
 				/*
 				 * This is the case when ACTION_UP is called without calling ACTION_DOWN first. in this case we should not consider ACTION_UP as click event and just let it pass.
