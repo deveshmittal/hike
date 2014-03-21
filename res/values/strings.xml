@@ -62,7 +62,6 @@
 	<string name="group_chat">Group Chat</string>
 	<string name="add_to_contacts">Add to Contacts</string>
 	<string name="new_message">New Message</string>
-	<string name="new_group">New Group</string>
 	<string name="add_group">Add to Group</string>
 	<string name="invite_share_message">I\'m using hike, an awesome new free messaging app! Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
 	<string name="max_sms">Max 5 SMS contacts in a group.</string>
@@ -117,7 +116,6 @@
 	<string name="home">Home</string>
 	<string name="free_messaging_txt">Free Messaging</string>
 	<string name="rewards">Rewards</string>
-	<string name="games">Games</string>
 	<string name="help">Help</string>
 	<string name="rewards_info">Invite friends, earn rewards.\nFor every friend who joins you get:</string>
 	<string name="credit_to_balance">Rs.10 credited\nto your balance</string>
@@ -447,7 +445,6 @@
 	<string name="add_hike_friend">View friends</string>
 	<string name="file_expire">This file no longer exists.</string>
 	<string name="friends_on_hike_tut_info">Tap on the button to see friends on hike</string>
-	<string name="twitter_msg">I\'m using @hikeapp 2.0 with status updates &amp; moods. Its like BBM but much, much better! Get hike at http://get.hike.in #gethike</string>
 	<string name="facebook_description">I started using hike, a simple, beautiful messaging app that\'s absolutely free.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
 	<string name="invite_message">Hi! Get hike 2.0. Free messaging worldwide. Now with Status Updates and Moods :) - http://get.hike.in/</string>
 	<string name="error_setting_profile">Error setting your profile image.</string>
@@ -491,7 +488,6 @@
 	<string name="tutorial_sticker_info">Express yourself better\nwith new hike stickers.</string>
 	<string name="tutorial_friends_header">Welcome to hike</string>
 	<string name="tutorial_friends_info">Now share status updates\nwith your circle of friends.</string>
-	<string name="native_sms_invite_1">Hey, I just got the new hike messenger! It is faster, simpler and has amazing new stickers! Download it now at http://hike.in/</string>
 	<string name="native_sms_invite_2">Download the new hike messenger, chat with everyone but show your Last Seen only to the friends you choose! Get it now at http://hike.in/</string>
 	<string name="chat">Chat</string>
 	<string name="group">Group</string>
@@ -563,7 +559,6 @@
 	<string name="read_by_names_number">Read by %1$s and %2$d others</string>
 	<string name="read_by_everyone">Read by everyone</string>
 	<string name="attach">Attach</string>
-	<string name="new_chat">New Chat</string>
 	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">Sent a friend request</string>
 	<string name="xyz_posted_update">%1$s posted an update</string>
@@ -674,8 +669,6 @@
 	<string name="ftue_grid_string">Start a conversation with one\nof your friends.</string>
 	<string name="remind">Remind</string>
 	<string name="invited">...Invited</string>
-	<string name="not_show_call_alert_msg">Do not show this again</string>
-	<string name="view_profile">View Profile</string>
 	<string name="ok">OK</string>
 	<string name="not_show_call_alert_msg">Do not show again</string>
 	<string name="view_profile">View Profile</string>
