@@ -385,6 +385,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:gravity="center_vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="6dp"
                 android:visibility="gone" />
 
             <LinearLayout
@@ -427,7 +429,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
           	android:layout_below="@id/bubble_container"
-            android:layout_marginRight="7dp"
+            android:layout_marginRight="6dp"
             android:background="@drawable/bg_msg_time_status"
             android:orientation="horizontal"
             android:gravity="center" >

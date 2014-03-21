@@ -847,13 +847,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						holder.participantNameFT.setVisibility(View.GONE);
 					}
 				}
-				if (isDefaultTheme)
-				{
-					holder.poke.setVisibility(View.VISIBLE);
-					holder.messageContainer.setVisibility(View.VISIBLE);
-					setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
-				}
-				else if (!chatTheme.isAnimated())
+//				if (isDefaultTheme)
+//				{
+//					holder.poke.setVisibility(View.VISIBLE);
+//					holder.messageContainer.setVisibility(View.VISIBLE);
+//					setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
+//				}
+//				else
+				if (!chatTheme.isAnimated())
 				{
 					holder.pokeCustom.setVisibility(View.VISIBLE);
 					holder.messageContainer.setVisibility(View.GONE);

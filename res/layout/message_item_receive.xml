@@ -402,6 +402,8 @@
 	             android:layout_width="wrap_content"
 	             android:layout_height="wrap_content"
 	             android:gravity="center_vertical"
+	             android:layout_marginTop="5dp"
+	             android:layout_marginLeft="6dp"
 	             android:src="@drawable/ic_nudge_receive_custom"
 	             android:visibility="gone" />
 	        
@@ -469,7 +471,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/bubble_container"
             android:layout_alignLeft="@id/bubble_container"
-            android:layout_marginLeft="7dp"
+            android:layout_marginLeft="6dp"
   	        android:text="00:00"
   	        android:background="@drawable/bg_msg_time_status"
   	        android:textColor="@color/white"
