@@ -550,18 +550,22 @@
 	</style>
 	
 	<style name="NameInput">
-	    <item name="android:layout_width">match_parent</item>
-	    <item name="android:layout_height">48dp</item>
-	    <item name="android:background">@null</item>
-	    <item name="android:drawablePadding">8dp</item>
-	    <item name="android:paddingLeft">8dp</item>
-	    <item name="android:paddingRight">8dp</item>
+	    <item name="android:layout_width">288dp</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:background">@drawable/bg_country_picker_selector</item>
+	    <item name="android:drawablePadding">16dp</item>
+	    <item name="android:drawableLeft">@drawable/ic_name_common</item>
+	    <item name="android:hint">@string/name</item>
+	    <item name="android:imeOptions">actionDone</item>
+	    <item name="android:inputType">textCapWords</item>
+	    <item name="android:maxLength">@integer/max_length_name</item>
 	    <item name="android:singleLine">true</item>
-	    <item name="android:textColor">@color/list_item_header</item>
-	    <item name="android:textColorHint">@color/signup_hint</item>
-	    <item name="android:textSize">15sp</item>
+	    <item name="android:textSize">18sp</item>
+	    <item name="android:textColor">#566167</item>
+	    <item name="android:textColorHint">#babec0</item>
+	    <item name="android:layout_gravity">center_horizontal</item>
 	</style>
-
+		        
 	<style name="FTUEButtons">
 	    <item name="android:layout_width">0dp</item>
 	    <item name="android:layout_height">match_parent</item>
