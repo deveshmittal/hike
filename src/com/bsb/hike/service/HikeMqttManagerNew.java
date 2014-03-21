@@ -518,7 +518,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		if(isAirplaneModeOn(context))
 		{
 			HikeMessengerApp.networkError = true;
-			updateNetworkState();
+			updateNetworkState(false);
 			return;
 		}
 		myTimer = new Timer();
@@ -529,7 +529,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			public void run()
 			{
 				HikeMessengerApp.networkError = true;
-				updateNetworkState();
+				updateNetworkState(false);
 			}
 		}, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
 	}
@@ -544,12 +544,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			return;
 		connectionLostTime = 0;
 		HikeMessengerApp.networkError = false;
-		updateNetworkState();
+		updateNetworkState(true);
 	}
 
-	private void updateNetworkState()
+	private void updateNetworkState(boolean connected)
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, connected);
 	}
 	
 	private static boolean isAirplaneModeOn(Context context)

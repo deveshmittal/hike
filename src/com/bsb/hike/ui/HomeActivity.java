@@ -1110,6 +1110,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					animateNShowNetworkError();
 				}
 			});
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			boolean connected = (Boolean) object;
+			if (connected)
+			{
+				Utils.sendAppState(this);
+			}
 		}
 		else if (HikePubSub.CONTACT_SYNCED.equals(type))
 		{
