@@ -241,6 +241,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		intent.setClass(this, GallerySelectionViewer.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
 		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
 
 		startActivity(intent);
