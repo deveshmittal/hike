@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,8 +19,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -37,7 +40,9 @@ import com.bsb.hike.utils.Utils;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
 {
-	private GalleryAdapter adapter;
+	private GalleryAdapter gridAdapter;
+
+	private GalleryPagerAdapter pagerAdapter;
 
 	private GridView selectedGrid;
 
@@ -70,8 +75,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		 * Added one for the extra null item.
 		 */
 		galleryGridItems = new ArrayList<GalleryItem>(galleryItems.size() + 1);
-		galleryGridItems.addAll(galleryItems);
+		/*
+		 * Adding an empty item which will be used to add more images.
+		 */
 		galleryGridItems.add(null);
+		galleryGridItems.addAll(galleryItems);
 
 		selectedGrid = (GridView) findViewById(R.id.selection_grid);
 		selectedPager = (ViewPager) findViewById(R.id.selection_pager);
@@ -81,14 +89,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		int numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
 		int actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
 
-		adapter = new GalleryAdapter(this, galleryGridItems, true, actualSize, null);
+		gridAdapter = new GalleryAdapter(this, galleryGridItems, true, actualSize, null, true);
 
 		selectedGrid.setNumColumns(numColumns);
-		selectedGrid.setAdapter(adapter);
+		selectedGrid.setAdapter(gridAdapter);
 		selectedGrid.setOnScrollListener(this);
 		selectedGrid.setOnItemClickListener(this);
 
-		GalleryPagerAdapter pagerAdapter = new GalleryPagerAdapter();
+		pagerAdapter = new GalleryPagerAdapter();
 		selectedPager.setAdapter(pagerAdapter);
 		selectedPager.setOnPageChangeListener(this);
 
@@ -96,6 +104,28 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		setupActionBar();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		startAddMoreGalleryIntent();
+		super.onBackPressed();
+	}
+
+	private void startAddMoreGalleryIntent()
+	{
+
+		Intent intent = new Intent(this, GalleryActivity.class);
+
+		intent.putParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS, galleryItems);
+		intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, getIntent().getParcelableExtra(HikeConstants.Extras.SELECTED_BUCKET));
+		intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
+
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		startActivity(intent);
 	}
 
 	@Override
@@ -143,15 +173,15 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			@Override
 			public void onClick(View v)
 			{
-				ArrayList<String> filePaths = new ArrayList<String>(galleryItems.size());
+				ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
 				for (GalleryItem galleryItem : galleryItems)
 				{
-					filePaths.add(galleryItem.getFilePath());
+					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
 				}
 				String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 
-				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), filePaths, HikeFileType.toString(HikeFileType.IMAGE), msisdn, onHike);
+				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
 				Utils.executeAsyncTask(fileTransferTask);
 
 				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
@@ -183,7 +213,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		gridAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 	}
 
 	@Override
@@ -192,11 +222,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		GalleryItem galleryItem = galleryGridItems.get(position);
 		if (galleryItem == null)
 		{
-			finish();
+			startAddMoreGalleryIntent();
 		}
 		else
 		{
-			setSelection(position);
+			setSelection(position - 1);
 		}
 	}
 
@@ -218,10 +248,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private void setSelection(int position)
 	{
-		adapter.setSelectedItemPosition(position);
+		gridAdapter.setSelectedItemPosition(position + 1);
 
 		selectedPager.setCurrentItem(position);
-		selectedGrid.smoothScrollToPosition(position);
+		selectedGrid.smoothScrollToPosition(position + 1);
 	}
 
 	private class GalleryPagerAdapter extends PagerAdapter
@@ -230,10 +260,18 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		GalleryImageLoader galleryImageLoader;
 
+		int viewerHeight;
+
+		int viewerWidth;
+
 		public GalleryPagerAdapter()
 		{
 			layoutInflater = LayoutInflater.from(GallerySelectionViewer.this);
 			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this);
+
+			viewerWidth = getResources().getDisplayMetrics().widthPixels;
+			viewerHeight = getResources().getDisplayMetrics().heightPixels - getResources().getDimensionPixelSize(R.dimen.st__action_bar_default_height)
+					- getResources().getDimensionPixelSize(R.dimen.notification_bar_height) - getResources().getDimensionPixelSize(R.dimen.gallery_selected_grid_height);
 		}
 
 		@Override
@@ -255,21 +293,78 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 
 		@Override
+		public int getItemPosition(Object object)
+		{
+			return POSITION_NONE;
+		}
+
+		@Override
 		public Object instantiateItem(ViewGroup container, int position)
 		{
 			View page = layoutInflater.inflate(R.layout.gallery_preview_item, container, false);
 
 			GalleryItem galleryItem = galleryItems.get(position);
 
+			ImageButton removeImage = (ImageButton) page.findViewById(R.id.remove_selection);
+
 			ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 			galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 
-			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView);
+			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView, false, true);
+
+			setupButtonSpacing(galleryImageView, removeImage);
+
+			removeImage.setTag(position);
+			removeImage.setOnClickListener(removeSelectionClickListener);
 
 			((ViewPager) container).addView(page);
 			return page;
 		}
+
+		private void setupButtonSpacing(ImageView galleryImageView, ImageButton removeImage)
+		{
+
+			int drawableHeight = galleryImageView.getDrawable().getIntrinsicHeight();
+			int drawableWidth = galleryImageView.getDrawable().getIntrinsicWidth();
+
+			int imageWidth;
+			int imageHeight;
+
+			if (viewerHeight / drawableHeight <= viewerWidth / drawableWidth)
+			{
+				imageWidth = drawableWidth * viewerHeight / drawableHeight;
+				imageHeight = viewerHeight;
+			}
+			else
+			{
+				imageHeight = drawableHeight * viewerWidth / drawableWidth;
+				imageWidth = viewerWidth;
+			}
+
+			int buttonSize = removeImage.getDrawable().getIntrinsicHeight() + (2 * getResources().getDimensionPixelSize(R.dimen.remove_selection_padding));
+
+			LayoutParams layoutParams = (LayoutParams) removeImage.getLayoutParams();
+			layoutParams.leftMargin = imageWidth - buttonSize;
+			layoutParams.bottomMargin = (imageHeight - buttonSize) / 2;
+		}
 	}
+
+	OnClickListener removeSelectionClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			int postion = (Integer) v.getTag();
+			galleryItems.remove(postion);
+			galleryGridItems.remove(postion + 1);
+
+			gridAdapter.notifyDataSetChanged();
+			pagerAdapter.notifyDataSetChanged();
+
+			GallerySelectionViewer.this.selectedPager.setCurrentItem(postion == 0 ? 0 : postion - 1);
+		}
+	};
 
 	@Override
 	public void onEventReceived(String type, Object object)

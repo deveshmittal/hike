@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
 
-    android:versionCode="321"
+    android:versionCode="322"
     android:installLocation="auto"
-    android:versionName="2.8.4.1">
+    android:versionName="2.8.4.2">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
         
@@ -82,7 +82,6 @@
         </activity>
 
         <activity
-            android:theme="@style/NoTitleBar"
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan|stateAlwaysVisible"
@@ -179,6 +178,8 @@
         <activity android:name=".ui.GalleryActivity" >
         </activity>
         <activity android:name=".ui.GallerySelectionViewer" >
+        </activity>
+        <activity android:name=".ui.CountrySelectActivity" >
         </activity>
         <activity android:name=".ui.FileSelectActivity" >
         </activity>

@@ -72,7 +72,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE
+		MSISDN, ADDRESSBOOK, NAME, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS
 	};
 
 	public class StateValue
@@ -265,45 +265,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				editor.putString(HikeMessengerApp.MSISDN_ENTERED, unauthedMSISDN);
 				editor.commit();
 
-				/*
-				 * If the device is a kit kat device, we won't be able to pull in SMS so no point waiting for 1 minute. If the device can't pull in SMS no point waiting for the
-				 * PIN.
-				 */
-				if (!Utils.hasKitKat() && canPullInSms)
-				{
-
-					publishProgress(new StateValue(State.PULLING_PIN, null));
-
-					synchronized (this)
-					{
-						/* wait until we get an SMS from the server */
-						try
-						{
-							this.wait(HikeConstants.PIN_CAPTURE_TIME);
-						}
-						catch (InterruptedException e)
-						{
-							Log.e("SignupTask", "Task was interrupted", e);
-						}
-					}
-
-					this.context.getApplicationContext().unregisterReceiver(receiver);
-					receiver = null;
-				}
-				else
-				{
-					synchronized (this)
-					{
-						try
-						{
-							this.wait(HikeConstants.NON_SIM_WAIT_TIME);
-						}
-						catch (InterruptedException e)
-						{
-							Log.e("SignupTask", "Task was interrupted", e);
-						}
-					}
-				}
 				accountInfo = null;
 				do
 				{
@@ -470,6 +431,22 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				name = this.data;
+				
+				this.data = null;
+				if (this.data == null)
+				{
+					/*
+					 * publishing this will cause the the Activity to ask the user for a name and signal us
+					 */
+					publishProgress(new StateValue(State.GENDER, ""));
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+				name = this.data;
+				
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				AccountUtils.setProfile(name, birthdate, isFemale);
 			}
 			catch (InterruptedException e)

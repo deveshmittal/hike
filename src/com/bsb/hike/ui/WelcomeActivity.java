@@ -1,11 +1,16 @@
 package com.bsb.hike.ui;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -22,29 +27,32 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.ui.fragments.WelcomeTutorialFragment;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
+import com.viewpagerindicator.IconPageIndicator;
+import com.viewpagerindicator.IconPagerAdapter;
 
-public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupTask.OnSignupTaskProgressUpdate
+public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements SignupTask.OnSignupTaskProgressUpdate
 {
 	private Button mAcceptButton;
 
 	private ViewGroup loadingLayout;
 
-	private Button tcText;
+	private View tcText;
 
 	private ViewGroup tcContinueLayout;
-
-	private Button tryAgainBtn;
 
 	private View hiLogoView;
 
 	private View hikeLogoContainer;
 
-	private ImageView micromaxImage;
-
 	private boolean isMicromaxDevice;
+
+	private ViewPager mPager;
+	
+	private Dialog errorDialog;
 
 	@Override
 	public void onCreate(Bundle savedState)
@@ -57,13 +65,11 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
-		tcText = (Button) findViewById(R.id.terms_and_conditions);
+		tcText = findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
 		hikeLogoContainer = findViewById(R.id.hike_logo_container);
-		micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
-		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 
 		String model = Build.MODEL;
 		String manufacturer = Build.MANUFACTURER;
@@ -85,24 +91,9 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 			}
 		}
 
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SPLASH_SEEN, false))
-		{
-			hikeLogoContainer.setVisibility(View.VISIBLE);
-			tcContinueLayout.setVisibility(View.VISIBLE);
-			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
-			hiLogoView.setVisibility(View.GONE);
-		}
-		else
-		{
-			(new Handler()).postDelayed(new Runnable()
-			{
-				public void run()
-				{
-					startAnimations();
-				}
-
-			}, (long) 1.5 * 1000);
-		}
+		hikeLogoContainer.setVisibility(View.VISIBLE);
+		tcContinueLayout.setVisibility(View.VISIBLE);
+		hiLogoView.setVisibility(View.GONE);
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{
 			showError();
@@ -123,6 +114,12 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 				startActivity(intent);
 			}
 		});
+
+		mPager = (ViewPager) findViewById(R.id.tutorial_pager);
+		mPager.setAdapter(new TutorialFragmentAdapter(getSupportFragmentManager()));
+
+		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
+		mIndicator.setViewPager(mPager);
 	}
 
 	public void onHikeIconClicked(View v)
@@ -146,64 +143,11 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 		Toast.makeText(WelcomeActivity.this, AccountUtils.base, Toast.LENGTH_SHORT).show();
 	}
 
-	private void startAnimations()
-	{
-
-		Animation slideUpAlphaout = AnimationUtils.loadAnimation(this, R.anim.welcome_alpha_out);
-		Animation slideUpAlphaIn = AnimationUtils.loadAnimation(this, R.anim.welcome_alpha_in);
-		slideUpAlphaout.setAnimationListener(new Animation.AnimationListener()
-		{
-
-			@Override
-			public void onAnimationStart(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				hiLogoView.setVisibility(View.INVISIBLE);
-				Animation fadeInAnimation = AnimationUtils.loadAnimation(WelcomeActivity.this, R.anim.fade_in_animation);
-				fadeInAnimation.setAnimationListener(new Animation.AnimationListener()
-				{
-					@Override
-					public void onAnimationStart(Animation animation)
-					{
-						tcContinueLayout.setVisibility(View.VISIBLE);
-					}
-
-					@Override
-					public void onAnimationRepeat(Animation animation)
-					{
-					}
-
-					@Override
-					public void onAnimationEnd(Animation animation)
-					{
-						hikeLogoContainer.setVisibility(View.VISIBLE);
-						micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
-					}
-				});
-				tcContinueLayout.startAnimation(fadeInAnimation);
-				SharedPreferences.Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-				editor.putBoolean(HikeMessengerApp.SPLASH_SEEN, true);
-				editor.commit();
-			}
-		});
-		hikeLogoContainer.startAnimation(slideUpAlphaIn);
-		hiLogoView.startAnimation(slideUpAlphaout);
-	}
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, tryAgainBtn.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog!=null);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -217,12 +161,6 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 			mAcceptButton.setVisibility(View.GONE);
 			SignupTask.startTask(this);
 		}
-		else if (v.getId() == tryAgainBtn.getId())
-		{
-			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
-			tryAgainBtn.setVisibility(View.GONE);
-			onClick(mAcceptButton);
-		}
 	}
 
 	@Override
@@ -233,7 +171,9 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 	private void showError()
 	{
 		Log.d("WelcomeActivity", "showError");
-		tryAgainBtn.setVisibility(View.VISIBLE);
+		loadingLayout.setVisibility(View.GONE);
+		mAcceptButton.setVisibility(View.VISIBLE);
+		showNetworkErrorPopup();
 	}
 
 	@Override
@@ -269,4 +209,53 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements SignupT
 		}
 		super.onBackPressed();
 	}
+
+	class TutorialFragmentAdapter extends FragmentPagerAdapter implements IconPagerAdapter
+	{
+		private int mCount = 3;
+
+		public TutorialFragmentAdapter(FragmentManager fm)
+		{
+			super(fm);
+		}
+
+		@Override
+		public Fragment getItem(int position)
+		{
+			return new WelcomeTutorialFragment(position, isMicromaxDevice);
+		}
+
+		@Override
+		public int getCount()
+		{
+			return mCount;
+		}
+
+		@Override
+		public int getIconResId(int index)
+		{
+			return R.drawable.welcome_tutorial_icon_indecator;
+		}
+
+	}
+	
+	private void showNetworkErrorPopup()
+	{
+		errorDialog = new Dialog(this, R.style.Theme_CustomDialog);
+		errorDialog.setContentView(R.layout.no_internet_pop_up);
+		errorDialog.setCancelable(false);
+		Button btnOk = (Button) errorDialog.findViewById(R.id.btn_ok);
+		btnOk.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				mAcceptButton.performClick();
+				errorDialog.dismiss();
+			}
+		});
+		errorDialog.show();
+	}
+
 }

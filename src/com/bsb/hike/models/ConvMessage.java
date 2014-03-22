@@ -180,10 +180,11 @@ public class ConvMessage
 		}
 	}
 
-	public ConvMessage(int unreadCount, long timestamp)
+	public ConvMessage(int unreadCount, long timestamp, long msgId)
 	{
 		this.unreadCount = unreadCount;
 		this.mTimestamp = timestamp;
+		this.msgID = msgId;
 	}
 	
 	public ConvMessage(TypingNotification typingNotification)

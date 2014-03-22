@@ -35,12 +35,15 @@ import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.BadTokenException;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -60,6 +63,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
@@ -102,6 +106,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private View parentLayout;
 
+	private TextView networkErrorPopUp;
+
 	private Dialog dialog;
 
 	private SharedPreferences accountPrefs;
@@ -124,7 +130,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
-			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES };
+			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -169,6 +175,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		setContentView(R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
+
+		networkErrorPopUp = (TextView) findViewById(R.id.network_error);
 
 		if (savedInstanceState != null)
 		{
@@ -579,6 +587,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onResume()
 	{
 		super.onResume();
+		checkNShowNetworkError();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 	}
 
@@ -1090,6 +1099,36 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
+		else if (HikePubSub.UPDATE_NETWORK_STATE.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					animateNShowNetworkError();
+				}
+			});
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			boolean connected = (Boolean) object;
+			if (connected)
+			{
+				Utils.sendAppState(this);
+			}
+		}
+		else if (HikePubSub.CONTACT_SYNCED.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
 	}
 
 	Runnable refreshTabIcon = new Runnable()
@@ -1151,6 +1190,53 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 		return super.onKeyUp(keyCode, event);
+	}
+
+	private void checkNShowNetworkError()
+	{
+		if (networkErrorPopUp == null)
+			return;
+		Log.d(getClass().getSimpleName(), "visiblity for: " + HikeMessengerApp.networkError);
+		// networkErrorPopUp.clearAnimation();
+		if (HikeMessengerApp.networkError)
+		{
+			networkErrorPopUp.setText(R.string.no_internet_connection);
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.red_no_network));
+			networkErrorPopUp.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			networkErrorPopUp.setVisibility(View.GONE);
+		}
+	}
+
+	private void animateNShowNetworkError()
+	{
+		if (networkErrorPopUp == null)
+			return;
+		Log.d(getClass().getSimpleName(), "animation for: " + HikeMessengerApp.networkError);
+		if (HikeMessengerApp.networkError)
+		{
+			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up_noalpha);
+			alphaIn.setDuration(400);
+			networkErrorPopUp.setText(R.string.no_internet_connection);
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.red_no_network));
+			networkErrorPopUp.setAnimation(alphaIn);
+			networkErrorPopUp.setVisibility(View.VISIBLE);
+			alphaIn.start();
+		}
+		else if (networkErrorPopUp.getVisibility() == View.VISIBLE)
+		{
+			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down_noalpha);
+			alphaIn.setStartOffset(1000);
+			alphaIn.setDuration(400);
+			networkErrorPopUp.setText(R.string.connected);
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.green));
+			networkErrorPopUp.setVisibility(View.GONE);
+			networkErrorPopUp.setAnimation(alphaIn);
+			alphaIn.start();
+		}
+		checkNShowNetworkError();
 	}
 
 	private void showOverFlowMenu()

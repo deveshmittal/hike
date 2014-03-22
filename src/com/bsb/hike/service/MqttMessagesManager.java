@@ -1416,6 +1416,15 @@ public class MqttMessagesManager
 				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 			}
 		}
+		else if (HikeConstants.MqttMessageTypes.GROUP_OWNER_CHANGE.equals(type))
+		{
+			String groupId = jsonObj.getString(HikeConstants.TO);
+
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			String msisdn = data.getString(HikeConstants.MSISDN);
+
+			convDb.changeGroupOwner(groupId, msisdn);
+		}
 	}
 
 	private void handleSendNativeInviteKey(boolean sendNativeInvite, boolean showFreeSmsPopup, String header, String body, Editor editor)

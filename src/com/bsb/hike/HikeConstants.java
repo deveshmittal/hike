@@ -499,10 +499,9 @@ public class HikeConstants
 	/* the max amount of time we allow the service to run in case of no activity */
 	public static final int DISCONNECT_TIME = 10 * 60;
 
-	/* the max amount of time we wait for the PIN */
-	public static final int PIN_CAPTURE_TIME = 60 * 1000;
-
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
+	
+	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
 	/*
 	 * the amount to wait before showing the PIN screen on non sim devices.
@@ -543,7 +542,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 100 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
@@ -786,6 +785,8 @@ public class HikeConstants
 	public static final int LED_LIGHTS_OFF_MS = 1000;
 	
 	public static final int JOINED_HIKE_STATUS_ID = -1;
+	
+	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
 	public static final class Extras
 	{
@@ -1048,6 +1049,10 @@ public class HikeConstants
 		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
 		
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
+
+		public static final String SELECTED_COUNTRY = "selectedCountry";
+
+		public static final String MANUAL_SYNC = "manualSync";
 	}
 
 	public static final class LogEvent
@@ -1349,6 +1354,8 @@ public class HikeConstants
 		public static final String MULTI_INVITE = "mi";
 
 		public static final String CHAT_BACKGROUD = "cbg";
+
+		public static final String GROUP_OWNER_CHANGE = "goc";
 	}
 
 	public static final class SMSNative
@@ -1404,5 +1411,9 @@ public class HikeConstants
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
+	
+	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3 };
+	
+	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3 };
 
 }

@@ -36,13 +36,16 @@ public class GalleryAdapter extends BaseAdapter
 
 	private int selectedItemPostion = -1;
 
-	public GalleryAdapter(Context context, List<GalleryItem> galleryItems, boolean isInsideAlbum, int sizeOfImage, Map<Long, GalleryItem> selectedItems)
+	private boolean selectedScreen = false;
+
+	public GalleryAdapter(Context context, List<GalleryItem> galleryItems, boolean isInsideAlbum, int sizeOfImage, Map<Long, GalleryItem> selectedItems, boolean selectedScreen)
 	{
 		this.layoutInflater = LayoutInflater.from(context);
 		this.galleryItemList = galleryItems;
 		this.isInsideAlbum = isInsideAlbum;
 		this.sizeOfImage = sizeOfImage;
 		this.selectedGalleryItems = selectedItems;
+		this.selectedScreen = selectedScreen;
 
 		this.galleryImageLoader = new GalleryImageLoader(context);
 		this.galleryImageLoader.setDontSetBackground(true);
@@ -87,6 +90,8 @@ public class GalleryAdapter extends BaseAdapter
 			holder.galleryThumb = (ImageView) convertView.findViewById(R.id.album_image);
 			holder.selected = convertView.findViewById(R.id.selected);
 
+			holder.selected.setBackgroundResource(selectedScreen ? R.drawable.gallery_item_selected_selector : R.drawable.gallery_item_selector);
+
 			LayoutParams layoutParams = new LayoutParams(sizeOfImage, sizeOfImage);
 			holder.galleryThumb.setLayoutParams(layoutParams);
 
@@ -120,11 +125,11 @@ public class GalleryAdapter extends BaseAdapter
 
 		if ((selectedGalleryItems != null && selectedGalleryItems.containsKey(galleryItem.getId())) || selectedItemPostion == position)
 		{
-			holder.selected.setVisibility(View.VISIBLE);
+			holder.selected.setSelected(true);
 		}
 		else
 		{
-			holder.selected.setVisibility(View.GONE);
+			holder.selected.setSelected(false);
 		}
 
 		return convertView;

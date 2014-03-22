@@ -303,7 +303,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.SHOWN_UNDELIVERED_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
 
 	private EmoticonType emoticonType;
 
@@ -891,7 +891,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mConversation instanceof GroupConversation)
 		{
-			if (!((GroupConversation) mConversation).getIsGroupAlive())
+			if (!isActionModeOn && !((GroupConversation) mConversation).getIsGroupAlive())
 			{
 				return false;
 			}
@@ -1713,13 +1713,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation.getUnreadCount() > 0)
 		{
 			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
+			long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
 			if ((messages.size() - mConversation.getUnreadCount()) > 0)
 			{
-				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
 			}
 			else
 			{
-				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp));
+				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
 			}
 		}
 
@@ -1801,11 +1802,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation instanceof GroupConversation)
 		{
 			myInfo = new GroupParticipant(Utils.getUserContactInfo(prefs));
-			toggleConversationMuteViewVisibility(((GroupConversation) mConversation).isMuted());
+			if(((GroupConversation) mConversation).isMuted())
+			{
+				toggleConversationMuteViewVisibility(true);
+			}
+			else
+			{
+				toggleConversationMuteViewVisibility(false);
+				checkNShowNetworkError();
+			}
 		}
 		else
 		{
 			toggleConversationMuteViewVisibility(false);
+			checkNShowNetworkError();
 		}
 
 		if ((mConversation instanceof GroupConversation) && !((GroupConversation) mConversation).getIsGroupAlive())
@@ -2743,6 +2753,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		else if (HikePubSub.UPDATE_NETWORK_STATE.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (mConversation instanceof GroupConversation)
+					{
+						if(!((GroupConversation) mConversation).isMuted())
+						{
+							checkNShowNetworkError();
+						}
+					}
+					else
+						checkNShowNetworkError();
+				}
+			});
+		}
 		else if (HikePubSub.BLOCK_USER.equals(type) || HikePubSub.UNBLOCK_USER.equalsIgnoreCase(type))
 		{
 			String msisdn = (String) object;
@@ -3437,6 +3466,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		findViewById(R.id.conversation_mute).setBackgroundColor(
 				getResources().getColor(mAdapter.isDefaultTheme() ? R.color.updates_text : R.color.chat_thread_indicator_bg_custom_theme));
 	}
+	
+	private void checkNShowNetworkError()
+	{
+		TextView networkErrorPopUp = (TextView) findViewById(R.id.network_error_chat);
+		if(HikeMessengerApp.networkError)
+		{
+			networkErrorPopUp.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			networkErrorPopUp.setVisibility(View.GONE);
+		}
+	}
 
 	private void showThemePicker(ChatTheme preSelectedTheme)
 	{
@@ -3894,6 +3936,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					Intent intent = new Intent(ChatThread.this, FileSelectActivity.class);
 					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 					startActivity(intent);
 					return;
 				}
@@ -5533,7 +5576,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		case MotionEvent.ACTION_UP:
 		{
-			if (!onTouchActionDownCalled)
+			if (isActionModeOn && !onTouchActionDownCalled)
 			{
 				/*
 				 * This is the case when ACTION_UP is called without calling ACTION_DOWN first. in this case we should not consider ACTION_UP as click event and just let it pass.
