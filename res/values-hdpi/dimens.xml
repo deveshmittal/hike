@@ -14,4 +14,5 @@
     <dimen name="hike_logo_margin">90dp</dimen>
     <dimen name="version_item_marginTop">75dp</dimen>
     <dimen name="gallery_cover_item_size">150dp</dimen>
+    <dimen name="signup_header_height">106dp</dimen>
 </resources>

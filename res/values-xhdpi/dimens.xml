@@ -8,4 +8,5 @@
     <dimen name="top_btn_padding">3dp</dimen>
     <dimen name="tutorial_button_margin">25dp</dimen>
     <dimen name="version_item_marginTop">120dp</dimen>
+    <dimen name="signup_header_height">127dp</dimen>
 </resources>
