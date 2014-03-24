@@ -15,4 +15,5 @@
     <dimen name="version_item_marginTop">75dp</dimen>
     <dimen name="gallery_cover_item_size">150dp</dimen>
     <dimen name="signup_header_height">106dp</dimen>
+    <dimen name="signup_gender_padding_top">63dp</dimen>
 </resources>

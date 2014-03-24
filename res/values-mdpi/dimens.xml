@@ -2,4 +2,5 @@
 <resources>
     <dimen name="icon_picture_size">65dp</dimen>
     <dimen name="signup_header_height">96dp</dimen>
+    <dimen name="signup_gender_padding_top">56dp</dimen>
 </resources>

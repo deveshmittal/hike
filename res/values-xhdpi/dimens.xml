@@ -9,4 +9,5 @@
     <dimen name="tutorial_button_margin">25dp</dimen>
     <dimen name="version_item_marginTop">120dp</dimen>
     <dimen name="signup_header_height">127dp</dimen>
+    <dimen name="signup_gender_padding_top">74dp</dimen>
 </resources>
