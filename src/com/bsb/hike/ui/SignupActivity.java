@@ -1812,7 +1812,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			countryPicker.setText(countryCode);
 			selectedCountryName.setText(countryName);
 		}
-		return !countryCode.isEmpty();
+		return !TextUtils.isEmpty(countryCode);
 	}
 	
 	private boolean isInvalidCountryCode(){
