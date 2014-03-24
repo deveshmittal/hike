@@ -928,11 +928,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			
 			if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
 			{
-				setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
+				setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 			}
 			else
 			{
-				setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
+				setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 			}
 //			if(isDefaultTheme)
 //			{
@@ -1529,11 +1529,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					}
 					else
 					{
-						setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, holder.intMessageTimeStatus, holder.messageInfo);
+						setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, holder.intMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					}
 //					else
 //					{
@@ -1567,18 +1567,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 				{
-					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
+					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
 				else if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
 					if(fss.getFTState() == FTState.COMPLETED)
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					}
 				}
 				else
 				{
-					setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, holder.intMessageTimeStatus, holder.messageInfo);
+					setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, true, holder.intMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
 			}
 		} // End of File Transfer Message
@@ -2431,7 +2431,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 	
-	private void setNewSDR(int position, TextView time, ImageView status, boolean isText, View extMessageTimeStatus, TextView messageInfo)
+	private void setNewSDR(int position, TextView time, ImageView status, boolean isText, View extMessageTimeStatus, TextView messageInfo, View container, ImageView sending)
 	{
 		ConvMessage message = getItem(position);
 		
@@ -2481,13 +2481,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if(extMessageTimeStatus != null)
 			extMessageTimeStatus.setVisibility(View.VISIBLE);
 		
-		if((message.getState() != null) && (position == lastSentMessagePosition) && isGroupChat)
+		if((message.getState() != null) && (position == lastSentMessagePosition))
 		{
-			if(message.getState() == State.SENT_DELIVERED_READ)
+			messageInfo.setText("");
+			messageInfo.setVisibility(View.VISIBLE);
+			if(message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
 			{
-				messageInfo.setVisibility(View.VISIBLE);
+				//messageInfo.setVisibility(View.VISIBLE);
 				messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 				setReadByForGroup(message, messageInfo);
+			}
+			else if(message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
+			{
+				if (!message.isSMS())
+				{
+					scheduleUndeliveredText(messageInfo, container, sending, message.getTimestamp());
+				}
 			}
 		}
 	}

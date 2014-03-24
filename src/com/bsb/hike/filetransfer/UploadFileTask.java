@@ -606,6 +606,7 @@ public class UploadFileTask extends FileTransferBase
 
 			if (end == (length - 1) && responseString != null)
 			{
+				Log.d(getClass().getSimpleName(),"response: " + responseString);
 				responseJson = new JSONObject(responseString);
 				incrementBytesTransferred(chunkSize);
 				resetAndUpdate = true; // To update UI
