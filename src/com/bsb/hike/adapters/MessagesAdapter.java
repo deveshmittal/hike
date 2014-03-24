@@ -1527,7 +1527,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
-					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
+					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+							|| (hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
 					{
 						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					}
@@ -1569,7 +1570,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
-				else if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+				else if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+						 || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
 				{
 					if(fss.getFTState() == FTState.COMPLETED)
 					{
@@ -2455,6 +2457,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				case SENT_DELIVERED_READ:
 					status.setImageResource(R.drawable.ic_double_tick_r_white);
 					break;
+				default:
+					break;
 				}
 			}
 			else
@@ -2472,6 +2476,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					break;
 				case SENT_DELIVERED_READ:
 					status.setImageResource(R.drawable.ic_double_tick_r);
+					break;
+				default:
 					break;
 				}
 			}
