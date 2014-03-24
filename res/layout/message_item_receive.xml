@@ -210,7 +210,8 @@
 			                android:layout_centerVertical="true"
 			      	        android:text="00:00"
 			                android:textColor="@color/white_80"
-			                android:textSize="12sp" />
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
                          
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -412,7 +413,8 @@
                 android:textColor="@color/black_40"
                 android:textSize="12sp"
                 android:layout_alignParentBottom="true"
-                android:layout_alignRight="@id/receive_message_inner_container" />
+                android:layout_alignRight="@id/receive_message_inner_container"
+                android:textStyle="italic" />
 			
 			<com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/message_time_int"
@@ -424,7 +426,8 @@
                 android:layout_marginTop="3dp"
                 android:layout_below="@id/receive_message_inner_container"
                 android:layout_alignRight="@id/receive_message_inner_container"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:textStyle="italic"  />
 			
 	        </RelativeLayout>
 	        <ImageView
@@ -509,7 +512,8 @@
   	        android:background="@drawable/bg_msg_time_status"
   	        android:textColor="@color/white_80"
             android:textSize="12sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:textStyle="italic" />
            
 
 	    <com.bsb.hike.view.CustomFontTextView

@@ -158,7 +158,8 @@
 			                android:textColor="@color/white_80"
 			                android:textSize="12sp"
 			                android:layout_centerVertical="true"
-			                android:layout_toLeftOf="@id/message_status_ft" />
+			                android:layout_toLeftOf="@id/message_status_ft"
+			                android:textStyle="italic" />
                         
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -354,7 +355,8 @@
                 android:layout_height="wrap_content"
       	        android:text="00:00"
                 android:textColor="@color/black_40"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textStyle="italic" />
             
             <ImageView
                 android:id="@+id/message_status"
@@ -382,7 +384,8 @@
                 android:layout_height="wrap_content"
       	        android:text="00:00"
                 android:textColor="@color/black_40"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textStyle="italic" />
             
             <ImageView
                 android:id="@+id/message_status_int"
@@ -458,7 +461,8 @@
                 android:layout_height="wrap_content"
       	        android:text="00:00"
       	        android:textColor="@color/white_80"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textStyle="italic" />
             
             <ImageView
                 android:id="@+id/message_status_ext"
