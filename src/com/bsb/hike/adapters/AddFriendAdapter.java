@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,15 +20,15 @@ import com.bsb.hike.models.ContactInfo;
 
 public class AddFriendAdapter extends SectionedBaseAdapter implements
 		OnItemClickListener {
-	private List<ContactInfo> contacts;
+	private HashMap<Integer, List<ContactInfo>> sectionsData;
 	private Set<String> selectedFriends;
 	private Context context;
 	private ListView listView;
 
 	public AddFriendAdapter(Context context, int resource,
-			List<ContactInfo> contacts, ListView listView) {
+			HashMap<Integer, List<ContactInfo>> sectionsData, ListView listView) {
 		this.context = context;
-		this.contacts = contacts;
+		this.sectionsData = sectionsData;
 		selectedFriends = new HashSet<String>();
 		this.listView = listView;
 		listView.setOnItemClickListener(this);
@@ -36,7 +37,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 	@Override
 	public Object getItem(int section, int position)
 	{
-		return null;
+		return sectionsData.get(section).get(position );
 	}
 
 	@Override
@@ -48,13 +49,13 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 	@Override
 	public int getSectionCount()
 	{
-		return 1;
+		return sectionsData.size();
 	}
 
 	@Override
 	public int getCountForSection(int section)
 	{
-		return contacts.size();
+		return sectionsData.get(section).size();
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 			convertView.setTag(holder);
 		}
 		ViewHolder holder = (ViewHolder) convertView.getTag();
-		ContactInfo contact = contacts.get(position);
+		ContactInfo contact = (ContactInfo) getItem(section,position);
 		holder.name.setText(contact.getName());
 		if (selectedFriends.contains(contact.getMsisdn())) {
 			holder.checkbox.setSelected(true);
@@ -149,7 +150,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 	public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 			long arg3) {
 		// TODO Auto-generated method stub
-		ContactInfo contact = contacts.get(position - listView.getHeaderViewsCount());
+		ContactInfo contact = (ContactInfo) getItem(getSectionForPosition(position), getPositionInSectionForPosition(position)-listView.getHeaderViewsCount());
 		String msidn = contact.getMsisdn();
 		if (selectedFriends.contains(msidn)) {
 			selectedFriends.remove(msidn);
