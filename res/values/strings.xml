@@ -812,5 +812,6 @@
 	<string name="contacts_on_hike_section">Contacts on hike</string>
 	<string name="recommended_contacts_section">Recommended contacts</string>
 	<string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of 20Rs. for each friend who joins.</string>
-	<string name="start_inviting_friends">Start inviting friends</string>	
+	<string name="start_inviting_friends">Start inviting friends</string>
+	<string name="add_count_btn">Add(%1$s)</string>
 </resources>

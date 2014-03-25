@@ -152,6 +152,15 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		return selectedFriends;
 	}
 
+	public void unSelectAllFriends() {
+		selectedFriends.clear();
+		notifyDataSetChanged();
+	}
+
+	public int getSelectedFriendsCount() {
+		return selectedFriends.size();
+	}
+
 	public void unSelectItem(String msidn)
 	{
 		selectedFriends.remove(msidn);
