@@ -3703,4 +3703,29 @@ public class Utils
 		int remainder = resources.getDisplayMetrics().widthPixels - (numColumns * sizeOfImage);
 		return (int) (sizeOfImage + (int) (remainder / numColumns));
 	}
+
+	public static void makeNoMediaFile(File root)
+	{
+		if (root == null)
+		{
+			return;
+		}
+
+		if (!root.exists())
+		{
+			root.mkdirs();
+		}
+		File file = new File(root, ".nomedia");
+		if (!file.exists())
+		{
+			try
+			{
+				file.createNewFile();
+			}
+			catch (IOException e)
+			{
+				Log.d("NoMedia", "failed to make nomedia file");
+			}
+		}
+	}
 }

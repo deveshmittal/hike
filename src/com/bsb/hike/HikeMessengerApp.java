@@ -697,45 +697,25 @@ public class HikeMessengerApp extends Application implements Listener
 		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
 
 		File folder = new File(root + HikeConstants.PROFILE_ROOT);
-		makeNoMediaFile(folder);
+		Utils.makeNoMediaFile(folder);
 
 		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
-		makeNoMediaFile(folder);
+		Utils.makeNoMediaFile(folder);
 
 		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
-		makeNoMediaFile(folder);
+		Utils.makeNoMediaFile(folder);
 		
 		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
-		makeNoMediaFile(folder);
+		Utils.makeNoMediaFile(folder);
 		
 		folder = new File(root + HikeConstants.AUDIO_ROOT + HikeConstants.SENT_ROOT);
-		makeNoMediaFile(folder);
+		Utils.makeNoMediaFile(folder);
 		
 		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT + HikeConstants.SENT_ROOT);
-		makeNoMediaFile(folder);
+		Utils.makeNoMediaFile(folder);
 		
 		folder = new File(root + HikeConstants.OTHER_ROOT + HikeConstants.SENT_ROOT);
-		makeNoMediaFile(folder);
-	}
-
-	private void makeNoMediaFile(File root)
-	{
-		if (!root.exists())
-		{
-			root.mkdirs();
-		}
-		File file = new File(root, ".nomedia");
-		if (!file.exists())
-		{
-			try
-			{
-				file.createNewFile();
-			}
-			catch (IOException e)
-			{
-				Log.d(getClass().getSimpleName(), "failed to make nomedia file");
-			}
-		}
+		Utils.makeNoMediaFile(folder);
 	}
 
 	public static HikePubSub getPubSub()
