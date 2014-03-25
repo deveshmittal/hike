@@ -809,5 +809,6 @@
 	<string name="contacts_synced">Contacts synced</string>
 	<string name="contacts_sync_started">"Contacts sync started"</string>
 	<string name="add_friends_listview_header">"You have got 15 contacts \n on hike. Nice!"</string>
-	<string name="contacts_on_hike_section">Contacts on hike</string>	
+	<string name="contacts_on_hike_section">Contacts on hike</string>
+	<string name="recommended_contacts_section">Recommended contacts</string>	
 </resources>

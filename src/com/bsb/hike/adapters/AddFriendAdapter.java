@@ -120,7 +120,17 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 			convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
 		}
 		TextView textView = (TextView) convertView.findViewById(R.id.settings_section_text);
-		textView.setText(R.string.contacts_on_hike_section);
+		switch (section)
+		{
+		case 0:
+			textView.setText(getSectionCount()==1? R.string.contacts_on_hike_section : R.string.recommended_contacts_section);
+			break;
+		case 1:
+			textView.setText(R.string.contacts_on_hike_section);
+			break;
+		default:
+			break;
+		}
 		return convertView;
 	}
 	
