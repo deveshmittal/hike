@@ -19,8 +19,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
 
-public class AddFriendAdapter extends SectionedBaseAdapter implements
-		OnItemClickListener {
+public class AddFriendAdapter extends SectionedBaseAdapter {
 	private HashMap<Integer, List<ContactInfo>> sectionsData;
 	private Set<String> selectedFriends;
 	private Context context;
@@ -37,7 +36,6 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
-		listView.setOnItemClickListener(this);
 	}
 
 	@Override
@@ -154,18 +152,13 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 		return selectedFriends;
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-			long arg3) {
-		// TODO Auto-generated method stub
-		ContactInfo contact = (ContactInfo) getItem(getSectionForPosition(position), getPositionInSectionForPosition(position)-listView.getHeaderViewsCount());
-		String msidn = contact.getMsisdn();
-		if (selectedFriends.contains(msidn)) {
-			selectedFriends.remove(msidn);
-		} else {
-			selectedFriends.add(msidn);
-		}
-		// need to confirm what is convention here -- gauravKhanna
-		notifyDataSetChanged();
+	public void unSelectItem(String msidn)
+	{
+		selectedFriends.remove(msidn);
+	}
+
+	public void selectItem(String msidn)
+	{
+		selectedFriends.add(msidn);
 	}
 }

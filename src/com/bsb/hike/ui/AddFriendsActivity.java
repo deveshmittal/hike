@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -21,8 +23,9 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.Utils;
 
-public class AddFriendsActivity extends HikeAppStateBaseActivity {
+public class AddFriendsActivity extends HikeAppStateBaseActivity implements OnItemClickListener {
 	private ListView listview;
+	private AddFriendAdapter mAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +37,12 @@ public class AddFriendsActivity extends HikeAppStateBaseActivity {
 	}
 
 	private void init() {
-		AddFriendAdapter adapter = createAdapter();
+		mAdapter = createAdapter();
 		View header = LayoutInflater.from(this).inflate(
 				R.layout.addfriends_listview_header, null);
 		listview.addHeaderView(header);
-		listview.setAdapter(adapter);
+		listview.setAdapter(mAdapter);
+		listview.setOnItemClickListener(this);
 	}
 
 	private AddFriendAdapter createAdapter()
@@ -68,6 +72,20 @@ public class AddFriendsActivity extends HikeAppStateBaseActivity {
 
 	private void initializeViewComponents() {
 		listview = (ListView) findViewById(R.id.addfriend_listview);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+			long arg3) {
+		// TODO Auto-generated method stub
+		ContactInfo contact = (ContactInfo) mAdapter.getItem(mAdapter.getSectionForPosition(position), mAdapter.getPositionInSectionForPosition(position)-listview.getHeaderViewsCount());
+		String msisdn = contact.getMsisdn();
+		if (mAdapter.getSelectedFriends().contains(msisdn)) {
+			mAdapter.unSelectItem(msisdn);
+		} else {
+			mAdapter.selectItem(msisdn);
+		}
+		mAdapter.notifyDataSetChanged();
 	}
 
 }
