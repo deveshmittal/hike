@@ -317,7 +317,8 @@ public class HikeService extends Service
 				e.printStackTrace();
 			}
 		}
-		runThor();
+		if (Utils.hasGingerbread())
+			runThor();
 		// return START_NOT_STICKY - we want this Service to be left running
 		// unless explicitly stopped, and it's process is killed, we want it to
 		// be restarted
