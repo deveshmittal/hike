@@ -562,27 +562,67 @@ public class Utils
 
 	public static String getFinalFileName(HikeFileType type, String orgName)
 	{
-		String orgFileName = "";
+		StringBuilder orgFileName = new StringBuilder();
 		// String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
 		// .format(new Date());
 		String timeStamp = Long.toString(System.currentTimeMillis());
-		switch (type)
+		if (TextUtils.isEmpty(orgName))
 		{
-		case PROFILE:
-		case IMAGE:
-			orgFileName = "IMG_" + timeStamp + ".jpg";
-			break;
-		case VIDEO:
-			orgFileName = "MOV_" + timeStamp + ".mp4";
-			break;
-		case AUDIO:
-		case AUDIO_RECORDING:
-			orgFileName = "AUD_" + timeStamp + ".m4a";
-			break;
-		case OTHER:
-			orgFileName = timeStamp + orgName;
+			switch (type)
+			{
+			case PROFILE:
+			case IMAGE:
+				orgFileName.append("IMG_" + timeStamp + ".jpg");
+				break;
+			case VIDEO:
+				orgFileName.append("MOV_" + timeStamp + ".mp4");
+				break;
+			case AUDIO:
+			case AUDIO_RECORDING:
+				orgFileName.append("AUD_" + timeStamp + ".m4a");
+				break;
+			case OTHER:
+				orgFileName.append("FILE_" + timeStamp);
+			}
 		}
-		return orgFileName;
+		else
+		{
+			int lastDotIndex = orgName.lastIndexOf(".");
+
+			String actualName;
+			String extension = getFileExtension(orgName);
+
+			if (lastDotIndex != -1 && lastDotIndex != orgName.length() - 1)
+			{
+				actualName = new String(orgName.substring(0, lastDotIndex));
+			}
+			else
+			{
+				actualName = orgName;
+			}
+
+			orgFileName.append(actualName + "_" + timeStamp);
+
+			if (!TextUtils.isEmpty(extension))
+			{
+				orgFileName.append("." + extension);
+			}
+		}
+		return orgFileName.toString();
+	}
+
+	public static String getFileExtension(String fileName)
+	{
+		int lastDotIndex = fileName.lastIndexOf(".");
+
+		String extension = "";
+
+		if (lastDotIndex != -1 && lastDotIndex != fileName.length() - 1)
+		{
+			extension = new String(fileName.substring(lastDotIndex + 1));
+		}
+
+		return extension;
 	}
 
 	public static String getFileParent(HikeFileType type, boolean isSent)
