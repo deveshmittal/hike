@@ -3336,7 +3336,7 @@ public class Utils
 			Log.w("LE", "Invalid json");
 		}
 	}
-	
+
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3350,7 +3350,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-			
+
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
