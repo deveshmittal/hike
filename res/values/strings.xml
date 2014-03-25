@@ -722,9 +722,9 @@
 	<string name="sent_via_sms">Sent as SMS - %1$s</string>
 	<string name="chat_theme">Chat Theme</string>
 	<string name="unknown_chat_theme">This chat\'s theme was just changed. To use the new chat themes, update hike. http://get.hike.in</string>
-	<string name="merry_christmas_msg">What are holidays without any gifts? Happy Hiking!</string>	
-	<string name="open_it_up">Open gift...</string>	
-	<string name="chat_themes">Chat Themes!</string>
+	<string name="merry_christmas_msg">We\'ve got a gift\nfor you!</string>	
+	<string name="open_it_up">Open gift</string>	
+	<string name="chat_themes">Chat Themes</string>
 	<string name="chat_themes_popup_msg">Personalise your chats\nwith gorgeous themes.</string>
 	<string name="give_it_a_spin">Give it a spin</string>		
 	<string name="chat_bg_ftue_tip">More gorgeous themes here...</string>

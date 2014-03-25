@@ -307,12 +307,12 @@
             android:layout_height="56dp"
             android:layout_gravity="center_horizontal"
             android:src="@drawable/chat_bg_ftue_card_chris_tree"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="30dp"/>
         
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/merry_chris_msg_text"
             android:layout_width="match_parent"
-            android:layout_height="95dp"
+            android:layout_height="81dp"
             android:gravity="center_horizontal"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"

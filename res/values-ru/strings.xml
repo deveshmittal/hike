@@ -736,9 +736,9 @@
 	<string name="native_sms_invite_1">Привет! У меня появилось новое приложение-чат — hike! Еще удобнее, быстрее и с классными стикерами. Скачай его прямо сейчас с http://hike.in — и будем общаться бесплатно!</string>
 	<string name="shortcut_created">Создан ярлык</string>
 	<string name="recent_empty_string">Здесь будут отображаться недавно использованные стикеры</string>
-	<string name="merry_christmas_msg">Отпразднуйте месяц\nлюбви! У нас для вас\nподарок!...</string>	
+	<string name="merry_christmas_msg">У нас есть подарок для вас!</string>	
 	<string name="open_it_up">Открыть подарок</string>	
-	<string name="chat_bg_ftue_tip">Оцените нашу особую тему \"I Love You\"!</string>
+	<string name="chat_bg_ftue_tip">Более великолепные темы здесь...</string>
 	<string name="device">Device</string>
 	<string name="valentine_nudge_header">Поделитесь любовью!</string>
 	<string name="valentine_nudge_body">Нажмите дважды чат, чтобы отправить сердце!</string>

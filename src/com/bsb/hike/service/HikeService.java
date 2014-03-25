@@ -326,7 +326,7 @@ public class HikeService extends Service
 
 	private void runThor()
 	{
-		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
+		if (HikeMessengerApp.isIndianUser() && !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
 		{
 			Thread thor = new Thread(new ThorThread(getApplicationContext()));
 			thor.start();
@@ -803,7 +803,6 @@ public class HikeService extends Service
 		{
 			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false))
 			{
-				Log.d("PostInfo", "info details sent");
 				return;
 			}
 
@@ -815,7 +814,6 @@ public class HikeService extends Service
 			{
 				public void onSuccess(JSONObject response)
 				{
-					Log.d("PostInfo", "info sent successfully");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, true);
 					editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, 0);
@@ -824,7 +822,6 @@ public class HikeService extends Service
 
 				public void onFailure()
 				{
-					Log.d("PostInfo", "info could not be sent");
 					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, sendGreenBlueDetailsToServer);
 				}
 			});
@@ -853,7 +850,6 @@ public class HikeService extends Service
 						{
 							public void onSuccess(JSONObject response)
 							{
-								Log.d("PostInfo", "Thor info sent successfully");
 								Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 								editor.putBoolean(HikeMessengerApp.THOR_DETAILS_SENT, true);
 								editor.commit();
@@ -861,12 +857,9 @@ public class HikeService extends Service
 
 							public void onFailure()
 							{
-								Log.d("PostInfo", "Thor info could not be sent");
 							}
 						});
 						hikeHttpRequest.setJSONData(obj);
-
-						Log.d("PostInfo","Executing thor request...");
 						HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 						Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 					}

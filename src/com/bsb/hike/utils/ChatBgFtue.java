@@ -19,78 +19,34 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 
 public class ChatBgFtue
 {
-	public static SnowFallView startAndSetSnowFallView(final Activity activity)
+	public static void startAndSetSnowFallView(final Activity activity)
 	{
 		if (activity == null)
 		{
-			return null;
+			return;
 		}
 		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.VISIBLE);
 		Handler animHandler = new Handler();
 		AlphaAnimation alphaAnim = new AlphaAnimation(0.2f, 1f);
 		alphaAnim.setFillAfter(true);
 
-		if (((int) Utils.densityMultiplier * 100) >= 100)
+		alphaAnim.setDuration(1800);
+		activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
+		animHandler.postDelayed(new Runnable()
 		{
-			alphaAnim.setDuration(1400);
-			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
-			FrameLayout layout = (FrameLayout) activity.findViewById(R.id.parent_layout);
-			final SnowFallView snowFallView = new SnowFallView(activity);
-			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			snowFallView.setVisibility(View.GONE);
-			layout.addView(snowFallView, 3);
 
-			animHandler.postDelayed(new Runnable()
+			@Override
+			public void run()
 			{
+				setGiftFallAnim(activity);
 
-				@Override
-				public void run()
-				{
-					setGiftFallAnim(activity);
-
-				}
-			}, 2800);
-
-			animHandler.postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					snowFallView.setVisibility(View.VISIBLE);
-					AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 1f);
-					AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
-					alphaAnim.setInterpolator(accInterpolator);
-					// alphaAnim.setStartOffset(600);
-					alphaAnim.setDuration(600);
-					alphaAnim.setFillAfter(true);
-					snowFallView.startAnimation(alphaAnim);
-				}
-			}, 1200);
-			return snowFallView;
-		}
-		else
-		{
-			alphaAnim.setDuration(1800);
-			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
-			animHandler.postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					setGiftFallAnim(activity);
-
-				}
-			}, 2000);
-			return null;
-		}
+			}
+		}, 2000);
 
 	}
 
@@ -177,7 +133,7 @@ public class ChatBgFtue
 		}, 2000);
 	}
 
-	public static void onChatBgOpenItUpClick(final HomeActivity activity, View v, final SnowFallView snowFallView)
+	public static void onChatBgOpenItUpClick(final HomeActivity activity, View v)
 	{
 		activity.findViewById(R.id.gift_card).clearAnimation();
 		activity.findViewById(R.id.open_it_up_text).setClickable(false);
@@ -234,13 +190,13 @@ public class ChatBgFtue
 			@Override
 			public void run()
 			{
-				giftBoxUnpacking(activity, snowFallView);
+				giftBoxUnpacking(activity);
 			}
 		}, 1066);
 
 	}
 
-	private static void giftBoxUnpacking(final HomeActivity activity, final SnowFallView snowFallView)
+	private static void giftBoxUnpacking(final HomeActivity activity)
 	{
 		activity.findViewById(R.id.box_flip_side_ribbon).clearAnimation();
 		activity.findViewById(R.id.gift_box_layout).clearAnimation();
@@ -297,7 +253,7 @@ public class ChatBgFtue
 				activity.findViewById(R.id.fs_right_knot2).setVisibility(View.GONE);
 				activity.findViewById(R.id.fs_right_knot22).setVisibility(View.GONE);
 				activity.findViewById(R.id.box_flip_side_moving_ribbons).setVisibility(View.VISIBLE);
-				ribbonMovingAnim(activity, snowFallView);
+				ribbonMovingAnim(activity);
 				activity.findViewById(R.id.fs_middle_dot).clearAnimation();
 				activity.findViewById(R.id.fs_middle_dot).setVisibility(View.GONE);
 			}
@@ -305,7 +261,7 @@ public class ChatBgFtue
 
 	}
 
-	public static void ribbonMovingAnim(final HomeActivity activity, final SnowFallView snowFallView)
+	public static void ribbonMovingAnim(final HomeActivity activity)
 	{
 		int animDuration = 1500;
 
@@ -374,12 +330,12 @@ public class ChatBgFtue
 			@Override
 			public void run()
 			{
-				giftBoxUnfolding(activity, snowFallView);
+				giftBoxUnfolding(activity);
 			}
 		}, 400);
 	}
 
-	private static void giftBoxUnfolding(final HomeActivity activity, SnowFallView snowFallView)
+	private static void giftBoxUnfolding(final HomeActivity activity)
 	{
 		int animDuration = 467;
 
@@ -435,10 +391,10 @@ public class ChatBgFtue
 		activity.findViewById(R.id.box_bottom_fold).startAnimation(boxBottomFoldAnimSet);
 
 		// chat theme popup comes out
-		startChatThemesPopupAnimation(activity, animDuration, snowFallView);
+		startChatThemesPopupAnimation(activity, animDuration);
 	}
 
-	public static void startChatThemesPopupAnimation(final HomeActivity activity, int animDuration, final SnowFallView snowFallView)
+	public static void startChatThemesPopupAnimation(final HomeActivity activity, int animDuration)
 	{
 		Handler animHandler = new Handler();
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.VISIBLE);
@@ -495,56 +451,18 @@ public class ChatBgFtue
 			@Override
 			public void run()
 			{
-				AlphaAnimation aa7 = new AlphaAnimation(1, 0);
-				aa7.setDuration(400);
-				if (snowFallView != null)
-				{
-					snowFallView.startAnimation(aa7);
-				}
-			}
-		}, animDuration);
-
-		animHandler.postDelayed(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				if (snowFallView != null)
-				{
-					snowFallView.clearAnimation();
-					snowFallView.setVisibility(View.GONE);
-				}
-			}
-		}, animDuration + 400);
-
-		animHandler.postDelayed(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
 				activity.findViewById(R.id.give_it_a_spin_text).setVisibility(View.VISIBLE);
 				AlphaAnimation aa6 = new AlphaAnimation(0, 1);
 				aa6.setFillAfter(true);
 				aa6.setDuration(500);
 				aa6.setStartOffset(1000);
 				activity.findViewById(R.id.give_it_a_spin_text).startAnimation(aa6);
-				if (snowFallView != null)
-				{
-					snowFallView.clearAnimation();
-					snowFallView.setVisibility(View.GONE);
-				}
 			}
 		}, animDuration);
 
 	}
 
-	public static void onChatBgGiveItASpinClick(final HomeActivity activity, View v, SnowFallView snowFallView){
-		if(snowFallView!= null){
-			snowFallView.clearAnimation();
-			snowFallView.setVisibility(View.GONE);
-		}
+	public static void onChatBgGiveItASpinClick(final HomeActivity activity, View v){
 		activity.findViewById(R.id.chat_theme_popup).clearAnimation();
 		activity.findViewById(R.id.chat_theme_popup).setVisibility(View.GONE);
 		activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();
