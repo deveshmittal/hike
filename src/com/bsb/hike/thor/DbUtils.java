@@ -38,10 +38,10 @@ public class DbUtils
 	{
 		DatabaseMetaData md = con.getMetaData();
 		ResultSet rs = md.getTables(null, null, "%", null);
-		Log.d("TABLES", "Printing tables .....");
+		//Log.d("TABLES", "Printing tables .....");
 		while (rs.next())
 		{
-			Log.d("TABLES", rs.getString(3));
+			//Log.d("TABLES", rs.getString(3));
 		}
 	}
 
@@ -123,7 +123,7 @@ public class DbUtils
 			catch (SQLException e)
 			{
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		if (pt != null)
 			try
@@ -133,7 +133,7 @@ public class DbUtils
 			catch (SQLException e)
 			{
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 	}
 }

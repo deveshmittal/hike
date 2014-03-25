@@ -65,7 +65,7 @@ public class BufferedBlockCipher2par extends BufferedBlockCipher
 			catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			inOff = s[numThreads - 1][0];
 			resultLen = s[numThreads - 1][1] - outOff;

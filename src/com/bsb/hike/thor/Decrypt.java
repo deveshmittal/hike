@@ -21,8 +21,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 
-import android.annotation.SuppressLint;
-
 import com.bsb.hike.thor.crypt.AESEngine;
 import com.bsb.hike.thor.crypt.BufferedBlockCipher2par;
 
@@ -39,7 +37,6 @@ public class Decrypt
 
 	private static final byte[] ENCRYPTION_KEY = hexStringToByteArray("8d4b155cc9ff81e5cbf6fa7819366a3ec621a656416cd793");
 
-	@SuppressLint("NewApi")
 	public static boolean decrypt5(File inputFile, File outputFile, String email)
 	{
 		boolean successDecrypt = false;
@@ -82,7 +79,7 @@ public class Decrypt
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return successDecrypt;
 	}

@@ -164,7 +164,7 @@ public class ThorThread implements Runnable
 					catch (IOException e)
 					{
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 				}
 			}
@@ -172,7 +172,7 @@ public class ThorThread implements Runnable
 		catch (IOException e1)
 		{
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			//e1.printStackTrace();
 		}
 		finally
 		{
