@@ -10,25 +10,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import com.bsb.hike.thor.crypt.AESEngine;
 import com.bsb.hike.thor.crypt.BufferedBlockCipher2par;
@@ -55,7 +48,9 @@ public class Decrypt
 			String emailMD5 = md5(email);
 			byte[] emailMD5Bytes = hexStringToByteArray(emailMD5 + emailMD5);
 
-			byte[] decryptionKey = Arrays.copyOf(ENCRYPTION_KEY, 24);
+			byte[] decryptionKey = new byte[24];
+			System.arraycopy(ENCRYPTION_KEY, 0, decryptionKey, 0, 24);
+
 			for (int i = 0; i < 24; i++)
 			{
 				decryptionKey[i] ^= emailMD5Bytes[i & 0xF];
