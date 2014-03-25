@@ -44,6 +44,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:padding="5dp"
-        android:src="@drawable/select_all_checkbox" />
+        android:src="@drawable/ftue_addfriends_checkbox_selector" />
 
 </LinearLayout>

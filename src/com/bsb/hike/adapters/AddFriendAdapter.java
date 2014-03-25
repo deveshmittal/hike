@@ -78,9 +78,9 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 		ContactInfo contact = contacts.get(position);
 		holder.name.setText(contact.getName());
 		if (selectedFriends.contains(contact.getMsisdn())) {
-			holder.checkbox.setImageResource(R.drawable.select_all_checkbox);
+			holder.checkbox.setSelected(true);
 		} else {
-			holder.checkbox.setImageResource(-1);
+			holder.checkbox.setSelected(false);
 		}
 
 		return convertView;
