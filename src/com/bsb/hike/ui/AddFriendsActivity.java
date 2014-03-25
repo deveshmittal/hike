@@ -47,11 +47,4 @@ public class AddFriendsActivity extends HikeAppStateBaseActivity {
 		listview = (ListView) findViewById(R.id.addfriend_listview);
 	}
 
-	public void onClickAddFriendButton(View v) {
-		View popUp = findViewById(R.id.addfriend_popup);
-		popUp.startAnimation(AnimationUtils.loadAnimation(this,
-				R.anim.fade_out_animation));
-		popUp.setVisibility(View.GONE);
-	}
-
 }

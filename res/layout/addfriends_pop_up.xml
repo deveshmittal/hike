@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/addfriend_popup"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:visibility="gone" >
 
     <View
         android:layout_width="match_parent"
@@ -64,7 +65,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="19dp"
             android:background="@drawable/signup_button"
-            android:onClick="onClick"
+            android:onClick="onClickAddFriendButton"
             android:shadowColor="@color/black"
             android:shadowDy="0.7"
             android:shadowRadius="0.7"

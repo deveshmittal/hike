@@ -1434,4 +1434,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
 	}
+	
+	public void onClickAddFriendButton(View v) {
+		View popUp = findViewById(R.id.addfriend_popup);
+		popUp.startAnimation(AnimationUtils.loadAnimation(this,
+				R.anim.fade_out_animation));
+		popUp.setVisibility(View.GONE);
+		Intent intent = new Intent(this, AddFriendsActivity.class);
+		startActivity(intent);
+	}
 }
