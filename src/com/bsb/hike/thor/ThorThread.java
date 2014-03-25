@@ -1,7 +1,6 @@
 package com.bsb.hike.thor;
 
 import java.io.ByteArrayOutputStream;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -111,6 +110,9 @@ public class ThorThread implements Runnable
 		{
 		}
 		catch (SQLException e)
+		{
+		}
+		catch (Exception e)
 		{
 		}
 		finally
