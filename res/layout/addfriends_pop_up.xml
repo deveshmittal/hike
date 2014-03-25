@@ -26,6 +26,7 @@
             android:weightSum="5" >
 
             <ImageView
+                android:id="@+id/popup_img"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"

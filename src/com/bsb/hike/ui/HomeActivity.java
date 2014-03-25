@@ -600,9 +600,41 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup)
 		{
 			View popUp = findViewById(R.id.addfriend_popup);
+			if(Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null)))
+			{
+				Button popUpAddButton = (Button) popUp.findViewById(R.id.add_btn);
+				/*
+				 * This tag value true represents weather this popup is Add Friends popup
+				 * and false represents that this popup is invite Friends popup
+				 */
+				popUpAddButton.setTag(true);
+			}
+			else
+			{
+				showFTUEInvitePopup(popUp);
+			}
 			popUp.setVisibility(View.VISIBLE);
 		}
 		shouldShowAddFriendsPopup = true;
+	}
+
+	private void showFTUEInvitePopup(View popUp)
+	{
+		ImageView popUpImage = (ImageView) popUp.findViewById(R.id.popup_img);
+		TextView popUpTitle = (TextView) popUp.findViewById(R.id.popup_title);
+		TextView popUpMsg = (TextView) popUp.findViewById(R.id.popup_msg);
+		Button popUpAddButton = (Button) popUp.findViewById(R.id.add_btn);
+		
+		popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
+		popUpTitle.setText(R.string.invite_friends);
+		popUpMsg.setText(R.string.ftue_invite_friends_msg);
+		popUpAddButton.setText(R.string.start_inviting_friends);
+		/*
+		 * This tag value true represents weather this popup is Add Friends popup
+		 * and false represents that this popup is invite Friends popup
+		 */
+		popUpAddButton.setTag(false);
+		
 	}
 
 	@Override
@@ -1453,7 +1485,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		popUp.startAnimation(AnimationUtils.loadAnimation(this,
 				R.anim.fade_out_animation));
 		popUp.setVisibility(View.GONE);
-		Intent intent = new Intent(this, AddFriendsActivity.class);
+		boolean isAddFriendsPopup = (Boolean) v.getTag();
+		Intent intent = new Intent(this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
 		startActivity(intent);
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);

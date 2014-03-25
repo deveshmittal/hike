@@ -3701,4 +3701,28 @@ public class Utils
 		}
 	}
 
+	/*
+	 *  When Active Contacts >= 3 show the 'Add Friends' pop-up
+ 	 *	When Activate Contacts <3 show the 'Invite Friends' pop-up
+	 */
+	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
+	{
+		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		{
+			return false;
+		}
+		try
+		{
+			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
+			if (serverRecommendedArray.length() > 2)
+			{
+				return true;
+			}
+			return false;
+		}
+		catch (JSONException e)
+		{
+			return false;
+		}
+	}
 }
