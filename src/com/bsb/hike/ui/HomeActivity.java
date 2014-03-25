@@ -127,6 +127,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private TextView topBarIndicator;
 
 	private Drawable myProfileImage;
+	
+	private boolean shouldShowAddFriendsPopup = true;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -163,7 +165,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
-
+		
+		shouldShowAddFriendsPopup = false;
+		
 		if (!showingProgress)
 		{
 			initialiseHomeScreen(savedInstanceState);
@@ -590,6 +594,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onResume();
 		checkNShowNetworkError();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+		/*
+		 * We only show addfriends popup on second resume and also not on orientation changes
+		 */
+		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup)
+		{
+			View popUp = findViewById(R.id.addfriend_popup);
+			popUp.setVisibility(View.VISIBLE);
+		}
+		shouldShowAddFriendsPopup = true;
 	}
 
 	@Override
@@ -1442,5 +1455,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		popUp.setVisibility(View.GONE);
 		Intent intent = new Intent(this, AddFriendsActivity.class);
 		startActivity(intent);
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
+		editor.commit();
 	}
 }

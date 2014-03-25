@@ -310,6 +310,8 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
 
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
+	
+	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
