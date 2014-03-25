@@ -37,9 +37,9 @@ public class BufferedBlockCipher2par extends BufferedBlockCipher
 		if (len > 0)
 		{
 			int pcnt = Runtime.getRuntime().availableProcessors();
-			int num, i, numThreads = (pcnt * 2) + 1;
+			int num, i, numThreads = pcnt;
+			
 			int[][] s = new int[numThreads][5];
-
 			ExecutorService exec = Executors.newCachedThreadPool();
 			CountDownLatch latch = new CountDownLatch(numThreads);
 			num = (len / blockSize) / numThreads;
