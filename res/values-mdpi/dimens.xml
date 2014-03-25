@@ -3,4 +3,6 @@
     <dimen name="icon_picture_size">65dp</dimen>
     <dimen name="signup_header_height">96dp</dimen>
     <dimen name="signup_gender_padding_top">56dp</dimen>
+    <dimen name="signup_profile_pic_dimen">76dp</dimen>
+    <dimen name="signup_profile_pic_icon_dimen">24dp</dimen>
 </resources>
