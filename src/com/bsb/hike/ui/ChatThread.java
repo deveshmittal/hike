@@ -1457,7 +1457,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							try
 							{
 								JSONObject contactJson = new JSONObject(msgExtrasJson.getString(HikeConstants.Extras.CONTACT_METADATA));
-								HikeFile hikeFile = new HikeFile(contactJson);
 								initialiseContactTransfer(contactJson);
 							}
 							catch (JSONException e)
