@@ -763,7 +763,7 @@
     <string name="external_storage">External Storage</string>
     <string name="system_root">System Root</string>
     <string name="sd_card">SD Card</string>
-    <string name="multi_file_creation">Placeholder creation</string>
+    <string name="multi_file_creation">Attaching files...</string>
     <string name="file">File</string>
     <string name="file_msg_received">Sent you a file</string>
     <string name="file_msg_sent">File</string>
