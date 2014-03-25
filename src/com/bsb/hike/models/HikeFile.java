@@ -150,7 +150,9 @@ public class HikeFile
 
 	private JSONArray events;
 
-	public HikeFile(JSONObject fileJSON)
+	private boolean isSent;
+
+	public HikeFile(JSONObject fileJSON, boolean isSent)
 	{
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
@@ -175,11 +177,12 @@ public class HikeFile
 		this.events = fileJSON.optJSONArray(HikeConstants.EVENTS);
 		this.recordingDuration = fileJSON.optLong(HikeConstants.PLAYTIME, -1);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
+		this.isSent = isSent;
 		// this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
 		// .getOutputMediaFile(hikeFileType, fileName);
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, boolean isSent)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
@@ -187,9 +190,10 @@ public class HikeFile
 		this.thumbnailString = thumbnailString;
 		this.thumbnail = new BitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
+		this.isSent = isSent;
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, boolean isSent)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
@@ -198,9 +202,10 @@ public class HikeFile
 		this.thumbnail = new BitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
+		this.isSent = isSent;
 	}
 
-	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail)
+	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail, boolean isSent)
 	{
 		this.fileName = HikeConstants.LOCATION_FILE_NAME;
 		this.latitude = latitude;
@@ -211,6 +216,7 @@ public class HikeFile
 		this.address = address;
 		this.thumbnailString = thumbnailString;
 		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.isSent = isSent;
 	}
 
 	public JSONObject serialize()
@@ -296,7 +302,7 @@ public class HikeFile
 	{
 		this.fileKey = fileKey;
 		if (file == null)
-			this.file = Utils.getOutputMediaFile(hikeFileType, fileName);
+			this.file = Utils.getOutputMediaFile(hikeFileType, fileName, isSent);
 	}
 
 	public String getFileKey()
@@ -356,7 +362,7 @@ public class HikeFile
 		}
 		if (file == null)
 		{
-			File file = Utils.getOutputMediaFile(hikeFileType, fileName);
+			File file = Utils.getOutputMediaFile(hikeFileType, fileName, isSent);
 			return file == null ? false : file.exists();
 		}
 		return file.exists();
@@ -370,7 +376,7 @@ public class HikeFile
 		}
 		if (file == null)
 		{
-			file = Utils.getOutputMediaFile(hikeFileType, fileName);
+			file = Utils.getOutputMediaFile(hikeFileType, fileName, isSent);
 		}
 		return file.getPath();
 	}
@@ -379,7 +385,7 @@ public class HikeFile
 	{
 		if (file == null)
 		{
-			file = Utils.getOutputMediaFile(hikeFileType, fileName);
+			file = Utils.getOutputMediaFile(hikeFileType, fileName, isSent);
 		}
 		return file;
 	}

@@ -675,6 +675,8 @@ public class HikeConstants
 
 	public static final String OTHER_ROOT = "/hike Others";
 
+	public static final String SENT_ROOT = "/sent";
+
 	public static final String STICKERS_ROOT = "/stickers";
 
 	public static final String LARGE_STICKER_ROOT = "/large";

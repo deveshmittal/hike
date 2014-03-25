@@ -696,11 +696,26 @@ public class HikeMessengerApp extends Application implements Listener
 	{
 		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
 
-		File profileRoot = new File(root + HikeConstants.PROFILE_ROOT);
-		makeNoMediaFile(profileRoot);
+		File folder = new File(root + HikeConstants.PROFILE_ROOT);
+		makeNoMediaFile(folder);
 
-		File recordingRoot = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
-		makeNoMediaFile(recordingRoot);
+		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
+		makeNoMediaFile(folder);
+
+		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
+		makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
+		makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.AUDIO_ROOT + HikeConstants.SENT_ROOT);
+		makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT + HikeConstants.SENT_ROOT);
+		makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.OTHER_ROOT + HikeConstants.SENT_ROOT);
+		makeNoMediaFile(folder);
 	}
 
 	private void makeNoMediaFile(File root)

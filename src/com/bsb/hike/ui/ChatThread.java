@@ -3866,7 +3866,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
 					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, true);
 
 					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 					/*
@@ -4267,7 +4267,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 			recorder.setMaxDuration(HikeConstants.MAX_DURATION_RECORDING_SEC * 1000);
 			recorder.setMaxFileSize(HikeConstants.MAX_FILE_SIZE);
-			selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO_RECORDING, null);
+			selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO_RECORDING, null, true);
 			recorder.setOutputFile(selectedFile.getPath());
 		}
 		recorder.setOnErrorListener(new OnErrorListener()

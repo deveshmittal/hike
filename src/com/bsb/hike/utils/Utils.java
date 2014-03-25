@@ -491,12 +491,12 @@ public class Utils
 	}
 
 	/** Create a File for saving an image or video */
-	public static File getOutputMediaFile(HikeFileType type, String orgFileName)
+	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
 	{
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
-		String path = getFileParent(type);
+		String path = getFileParent(type, isSent);
 		if (path == null)
 		{
 			return null;
@@ -585,7 +585,7 @@ public class Utils
 		return orgFileName;
 	}
 
-	public static String getFileParent(HikeFileType type)
+	public static String getFileParent(HikeFileType type, boolean isSent)
 	{
 		StringBuilder path = new StringBuilder(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
 		switch (type)
@@ -608,6 +608,10 @@ public class Utils
 		default:
 			path.append(HikeConstants.OTHER_ROOT);
 			break;
+		}
+		if (isSent)
+		{
+			path.append(HikeConstants.SENT_ROOT);
 		}
 		return path.toString();
 	}

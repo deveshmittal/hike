@@ -395,7 +395,7 @@ public class ConvMessage
 	{
 		if (metadata != null)
 		{
-			this.metadata = new MessageMetadata(metadata);
+			this.metadata = new MessageMetadata(metadata, mIsSent);
 
 			isFileTransferMessage = this.metadata.getHikeFiles() != null;
 

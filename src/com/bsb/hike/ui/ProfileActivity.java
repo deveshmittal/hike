@@ -1199,7 +1199,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{
 					isPicasaImage = true;
-					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null).getAbsolutePath();
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false).getAbsolutePath();
 				}
 				else
 				{
@@ -1302,7 +1302,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				return;
 			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null); // create a file to save the image
+			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false); // create a file to save the image
 			if (selectedFileIcon != null)
 			{
 				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
