@@ -61,6 +61,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
@@ -3659,4 +3660,45 @@ public class Utils
 		int remainder = resources.getDisplayMetrics().widthPixels - (numColumns * sizeOfImage);
 		return (int) (sizeOfImage + (int) (remainder / numColumns));
 	}
+	
+	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
+	{
+		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		{
+			return null;
+		}
+		try
+		{
+			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
+			if (serverRecommendedArray.length() == 0)
+			{
+				return null;
+			}
+
+			StringBuilder sb = new StringBuilder("(");
+			int i = 0;
+			for (i = 0; i < serverRecommendedArray.length(); i++)
+			{
+				String msisdn = serverRecommendedArray.optString(i);
+				if (!myMsisdn.equals(msisdn))
+				{
+					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				}
+			}
+			/*
+			 * Making sure the string exists.
+			 */
+			if (sb.lastIndexOf(",") == -1)
+			{
+				return null;
+			}
+			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+			return sb.toString();
+		}
+		catch (JSONException e)
+		{
+			return null;
+		}
+	}
+
 }
