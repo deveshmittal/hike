@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.smartImageLoader.IconLoader;
 
 public class AddFriendAdapter extends SectionedBaseAdapter implements
 		OnItemClickListener {
@@ -24,6 +25,9 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 	private Set<String> selectedFriends;
 	private Context context;
 	private ListView listView;
+	private IconLoader iconloader;
+	private int mIconImageSize;
+
 
 	public AddFriendAdapter(Context context, int resource,
 			HashMap<Integer, List<ContactInfo>> sectionsData, ListView listView) {
@@ -31,6 +35,8 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 		this.sectionsData = sectionsData;
 		selectedFriends = new HashSet<String>();
 		this.listView = listView;
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		this.iconloader = new IconLoader(context, mIconImageSize);
 		listView.setOnItemClickListener(this);
 	}
 
@@ -78,6 +84,8 @@ public class AddFriendAdapter extends SectionedBaseAdapter implements
 		ViewHolder holder = (ViewHolder) convertView.getTag();
 		ContactInfo contact = (ContactInfo) getItem(section,position);
 		holder.name.setText(contact.getName());
+		holder.status.setText(contact.getMsisdn());
+		iconloader.loadImage(contact.getMsisdn(), true, holder.userImage, true);
 		if (selectedFriends.contains(contact.getMsisdn())) {
 			holder.checkbox.setSelected(true);
 		} else {
