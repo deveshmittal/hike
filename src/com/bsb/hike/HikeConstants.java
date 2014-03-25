@@ -500,16 +500,11 @@ public class HikeConstants
 	public static final int DISCONNECT_TIME = 10 * 60;
 
 	/* the max amount of time we wait for the PIN */
-	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+	public static final int PIN_CAPTURE_TIME = 10 * 1000;
 
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
 	
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
-
-	/*
-	 * the amount to wait before showing the PIN screen on non sim devices.
-	 */
-	public static final int NON_SIM_WAIT_TIME = 30 * 1000;
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 

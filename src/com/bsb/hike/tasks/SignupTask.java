@@ -271,7 +271,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				 */
 				if (!Utils.hasKitKat() && canPullInSms)
 				{
-
 					publishProgress(new StateValue(State.PULLING_PIN, null));
 
 					synchronized (this)
@@ -290,20 +289,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					this.context.getApplicationContext().unregisterReceiver(receiver);
 					receiver = null;
 				}
-				else
-				{
-					synchronized (this)
-					{
-						try
-						{
-							this.wait(HikeConstants.NON_SIM_WAIT_TIME);
-						}
-						catch (InterruptedException e)
-						{
-							Log.e("SignupTask", "Task was interrupted", e);
-						}
-					}
-				}
+				
 				accountInfo = null;
 				do
 				{
