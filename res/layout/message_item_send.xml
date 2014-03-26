@@ -313,7 +313,8 @@
                     android:gravity="left"
                     android:text="This is the message a much"
                     android:textColor="@color/chat_color"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:visibility="gone" />
                 
                 <com.bsb.hike.view.CustomSendMessageTextView
                     android:id="@+id/message_send"

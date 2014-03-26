@@ -1798,24 +1798,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/* clear any toast notifications */
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mgr.cancel((int) mConversation.getConvId());
-
+		
+		if(checkNetworkError())
+		{
+			showNetworkError(true);
+		}
+		else
+		{
+			showNetworkError(false);
+		}
+		
 		if (mConversation instanceof GroupConversation)
 		{
 			myInfo = new GroupParticipant(Utils.getUserContactInfo(prefs));
-			if(((GroupConversation) mConversation).isMuted())
+			if(!checkNetworkError())
 			{
-				toggleConversationMuteViewVisibility(true);
+				toggleConversationMuteViewVisibility(((GroupConversation) mConversation).isMuted());
 			}
 			else
 			{
 				toggleConversationMuteViewVisibility(false);
-				checkNShowNetworkError();
 			}
+			
 		}
 		else
 		{
 			toggleConversationMuteViewVisibility(false);
-			checkNShowNetworkError();
 		}
 
 		if ((mConversation instanceof GroupConversation) && !((GroupConversation) mConversation).getIsGroupAlive())
@@ -2748,7 +2756,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					toggleConversationMuteViewVisibility(isMuted);
+					if(!checkNetworkError())
+					{
+						toggleConversationMuteViewVisibility(isMuted);
+					}
 					invalidateOptionsMenu();
 				}
 			});
@@ -2760,15 +2771,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					if (mConversation instanceof GroupConversation)
+					if(checkNetworkError())
 					{
-						if(!((GroupConversation) mConversation).isMuted())
+						showNetworkError(true);
+						if (mConversation instanceof GroupConversation)
 						{
-							checkNShowNetworkError();
+							toggleConversationMuteViewVisibility(false);
 						}
 					}
 					else
-						checkNShowNetworkError();
+					{
+						showNetworkError(false);
+						if (mConversation instanceof GroupConversation)
+						{
+							toggleConversationMuteViewVisibility(((GroupConversation) mConversation).isMuted());
+						}
+					}
 				}
 			});
 		}
@@ -3467,17 +3485,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				getResources().getColor(mAdapter.isDefaultTheme() ? R.color.updates_text : R.color.chat_thread_indicator_bg_custom_theme));
 	}
 	
-	private void checkNShowNetworkError()
+	private boolean checkNetworkError()
 	{
-		TextView networkErrorPopUp = (TextView) findViewById(R.id.network_error_chat);
-		if(HikeMessengerApp.networkError)
-		{
-			networkErrorPopUp.setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			networkErrorPopUp.setVisibility(View.GONE);
-		}
+		return HikeMessengerApp.networkError;
+	}
+	
+	private void showNetworkError(boolean isNetError)
+	{
+		findViewById(R.id.network_error_chat).setVisibility(isNetError ? View.VISIBLE : View.GONE);
 	}
 
 	private void showThemePicker(ChatTheme preSelectedTheme)
