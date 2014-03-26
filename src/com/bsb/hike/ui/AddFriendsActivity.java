@@ -116,8 +116,8 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 			long arg3) {
-		// TODO Auto-generated method stub
-		ContactInfo contact = (ContactInfo) mAdapter.getItem(mAdapter.getSectionForPosition(position), mAdapter.getPositionInSectionForPosition(position)-listview.getHeaderViewsCount());
+		position = position-listview.getHeaderViewsCount();
+		ContactInfo contact = (ContactInfo) mAdapter.getItem(mAdapter.getSectionForPosition(position), mAdapter.getPositionInSectionForPosition(position));
 		String msisdn = contact.getMsisdn();
 		if (mAdapter.getSelectedFriends().contains(msisdn)) {
 			mAdapter.unSelectItem(msisdn);
