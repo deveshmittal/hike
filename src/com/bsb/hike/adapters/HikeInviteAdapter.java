@@ -23,7 +23,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
 
-public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, ContactInfo>> implements TextWatcher
+public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatcher
 {
 
 	private List<Pair<AtomicBoolean, ContactInfo>> completeList;
@@ -39,11 +39,13 @@ public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, Cont
 	private IconLoader iconLoader;
 
 	private int mIconImageSize;
+	
+	private Activity activity;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId, List<Pair<AtomicBoolean, ContactInfo>> completeList, boolean showingBLockedList)
 	{
 
-		super(activity, viewItemId, completeList);
+		//super(activity, viewItemId, completeList);
 		mIconImageSize = activity.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.activity = activity;
 		this.filteredList = completeList;
@@ -65,9 +67,9 @@ public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, Cont
 	}
 
 	@Override
-	protected View getItemView(int position, View convertView, ViewGroup parent)
+	public View getItemView(int section, int position, View convertView, ViewGroup parent)
 	{
-		Pair<AtomicBoolean, ContactInfo> pair = getItem(position);
+		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) getItem(section,position);
 
 		AtomicBoolean isChecked = null;
 		ContactInfo contactInfo = null;
@@ -93,7 +95,7 @@ public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, Cont
 			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
 		}
 		else
-			imageView.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_avatar1_rounded));
+			imageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_avatar1_rounded));
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
@@ -127,12 +129,6 @@ public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, Cont
 			v.setTag(contactInfo);
 		}
 		return v;
-	}
-
-	@Override
-	public String getTitle()
-	{
-		return activity.getResources().getString(R.string.invite);
 	}
 
 	@Override
@@ -199,12 +195,12 @@ public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, Cont
 		{
 			filteredList = (ArrayList<Pair<AtomicBoolean, ContactInfo>>) results.values;
 			notifyDataSetChanged();
-			clear();
-			for (Pair<AtomicBoolean, ContactInfo> pair : filteredList)
-			{
-				add(pair);
-			}
-			notifyDataSetInvalidated();
+			//filteredList.clear();
+			//for (Pair<AtomicBoolean, ContactInfo> pair : filteredList)
+			//{
+			//	filteredList.add(pair);
+			//}
+			//notifyDataSetInvalidated();
 		}
 	}
 
@@ -227,10 +223,75 @@ public class HikeInviteAdapter extends HikeArrayAdapter<Pair<AtomicBoolean, Cont
 	@Override
 	public boolean isEnabled(int position)
 	{
-		if (filteredList.get(position) == null)
+		if (filteredList.get(getPositionInSectionForPosition(position)) == null)
 		{
 			return filterString.matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
 		return super.isEnabled(position);
 	}
+
+	@Override
+	public int getItemViewType(int section, int position)
+	{
+		return 0;
+	}
+
+	@Override
+	public int getItemViewTypeCount()
+	{
+		return 1;
+	}
+
+	@Override
+	public Object getItem(int section, int position)
+	{
+		// TODO Auto-generated method stub
+		return filteredList.get(position);
+	}
+
+	@Override
+	public long getItemId(int section, int position)
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getSectionCount()
+	{
+		// TODO Auto-generated method stub
+		return 1;
+	}
+
+	@Override
+	public int getCountForSection(int section)
+	{
+		// TODO Auto-generated method stub
+		return filteredList.size();
+	}
+
+	@Override
+	public View getSectionHeaderView(int section, View convertView, ViewGroup parent)
+	{
+		if (convertView == null)
+		{
+			LayoutInflater li = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = li.inflate(R.layout.settings_section_layout, parent, false);
+			convertView.setBackgroundColor(activity.getResources().getColor(R.color.white));
+		}
+		TextView textView = (TextView) convertView.findViewById(R.id.settings_section_text);
+		switch (section)
+		{
+		case 0:
+			textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.recommended_contacts_section);
+			break;
+		case 1:
+			textView.setText(R.string.contacts_on_hike_section);
+			break;
+		default:
+			break;
+		}
+		return convertView;
+	}
+	
 }
