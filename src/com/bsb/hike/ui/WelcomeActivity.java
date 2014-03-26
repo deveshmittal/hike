@@ -218,7 +218,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		@Override
 		public Fragment getItem(int position)
 		{
-			return new WelcomeTutorialFragment(position, isMicromaxDevice);
+			return WelcomeTutorialFragment.newInstance(position, isMicromaxDevice);
 		}
 
 		@Override
