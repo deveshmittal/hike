@@ -661,6 +661,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
 				editor.commit();
 				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+				ftueAddFriendWindow.dismiss();
 				getSupportActionBar().show();
 			}
 		});
