@@ -549,7 +549,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			}
 			else
 			{
-				String extension = MimeTypeMap.getFileExtensionFromUrl(file.getAbsolutePath());
+				String extension = Utils.getFileExtension(file.getName());
 				item.extension = TextUtils.isEmpty(extension) ? "?" : extension;
 				item.subtitle = formatFileSize(file.length());
 				item.mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(item.extension);
