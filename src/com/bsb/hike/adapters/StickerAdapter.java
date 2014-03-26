@@ -1,6 +1,7 @@
 package com.bsb.hike.adapters;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -323,7 +324,14 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 				if (categoryDir.exists())
 				{
-					String[] stickerIds = categoryDir.list();
+					String[] stickerIds = categoryDir.list(new FilenameFilter()
+					{
+						@Override
+						public boolean accept(File file, String fileName)
+						{
+							return !".nomedia".equalsIgnoreCase(fileName);
+						}
+					});
 					for (String stickerId : stickerIds)
 					{
 						stickersList.add(new Sticker(category, stickerId));
