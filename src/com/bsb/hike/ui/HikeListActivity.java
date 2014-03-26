@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -78,6 +79,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	private TextView title;
 
 	private ImageView backIcon;
+	
+	List<Pair<AtomicBoolean, ContactInfo>> firstSectionList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -316,7 +319,9 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
 			ViewGroup selectAllContainer = (ViewGroup) findViewById(R.id.select_all_container);
-
+			
+			firstSectionList = new ArrayList<Pair<AtomicBoolean,ContactInfo>>();
+			
 			switch (type)
 			{
 			case BLOCK:
@@ -366,10 +371,19 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						selectAllCB.setChecked(!selectAllCB.isChecked());
 					}
 				});
+				
+				getRecommendedInvitesList(contactList, firstSectionList);
 				break;
 			}
 
-			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, contactList, type == Type.BLOCK);
+			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean,ContactInfo>>>();
+			contactList.removeAll(firstSectionList);
+			if(!(type == Type.INVITE && firstSectionList.isEmpty()))
+			{
+				completeSectionsData.put(0,firstSectionList);
+			}
+			completeSectionsData.put(completeSectionsData.size(),contactList);
+			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, completeSectionsData, type == Type.BLOCK);
 			input.addTextChangedListener(adapter);
 
 			listView.setAdapter(adapter);
@@ -501,6 +515,15 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		else
 		{
 			init();
+		}
+	}
+
+	private void getRecommendedInvitesList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
+	{
+		List<ContactInfo> recommendedContactList = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(6);
+		for (ContactInfo info : recommendedContactList)
+		{
+			firstSectionList.add(new Pair(new AtomicBoolean(false), info));
 		}
 	}
 

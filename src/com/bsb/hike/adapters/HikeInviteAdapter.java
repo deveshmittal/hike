@@ -1,7 +1,10 @@
 package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
@@ -25,10 +28,9 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 
 public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatcher
 {
+	private HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData;
 
-	private List<Pair<AtomicBoolean, ContactInfo>> completeList;
-
-	private List<Pair<AtomicBoolean, ContactInfo>> filteredList;
+	private HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> filteredSectionsData;
 
 	private ContactFilter filter;
 
@@ -42,15 +44,15 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 	
 	private Activity activity;
 
-	public HikeInviteAdapter(Activity activity, int viewItemId, List<Pair<AtomicBoolean, ContactInfo>> completeList, boolean showingBLockedList)
+	public HikeInviteAdapter(Activity activity, int viewItemId, HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData, boolean showingBLockedList)
 	{
 
 		//super(activity, viewItemId, completeList);
 		mIconImageSize = activity.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.activity = activity;
-		this.filteredList = completeList;
-		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(completeList.size());
-		this.completeList.addAll(completeList);
+		this.filteredSectionsData = completeSectionsData;
+		this.completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>(completeSectionsData.size());
+		this.completeSectionsData = (HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>) completeSectionsData.clone();
 		this.filter = new ContactFilter();
 		this.showingBlockedList = showingBLockedList;
 		iconLoader = new IconLoader(activity, mIconImageSize);
@@ -113,7 +115,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		{
 			numView.setText(showingBlockedList ? R.string.tap_here_block : R.string.tap_here_invite);
 		}
-		numView.setVisibility(isEnabled(position) ? View.VISIBLE : View.INVISIBLE);
+		numView.setVisibility(isEnabled(section, position) ? View.VISIBLE : View.INVISIBLE);
 
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
 		checkBox.setVisibility(pair != null ? View.VISIBLE : View.GONE);
@@ -160,31 +162,38 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			if (!TextUtils.isEmpty(textToBeFiltered))
 			{
 
-				List<Pair<AtomicBoolean, ContactInfo>> filteredContacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
-
-				for (Pair<AtomicBoolean, ContactInfo> info : HikeInviteAdapter.this.completeList)
+				HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> filteredSectionsContacts = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>();
+				
+				Set<Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>>> entrySet  = HikeInviteAdapter.this.completeSectionsData.entrySet();
+				for(Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : entrySet)
 				{
-					if (info != null)
+					int section = entry.getKey();
+					List<Pair<AtomicBoolean, ContactInfo>> filteredContacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+					for (Pair<AtomicBoolean, ContactInfo> info : entry.getValue())
 					{
-						ContactInfo contactInfo = info.second;
-						if (contactInfo.getName().toLowerCase().contains(textToBeFiltered) || contactInfo.getMsisdn().contains(textToBeFiltered))
+						if (info != null)
 						{
-							filteredContacts.add(info);
+							ContactInfo contactInfo = info.second;
+							if (contactInfo.getName().toLowerCase().contains(textToBeFiltered) || contactInfo.getMsisdn().contains(textToBeFiltered))
+							{
+								filteredContacts.add(info);
+							}
 						}
 					}
+					if (shouldShowExtraElement(textToBeFiltered))
+					{
+						filteredContacts.add(null);
+					}
+					filteredSectionsContacts.put(section,filteredContacts);
 				}
-				if (shouldShowExtraElement(textToBeFiltered))
-				{
-					filteredContacts.add(null);
-				}
-				results.count = filteredContacts.size();
-				results.values = filteredContacts;
+				results.count = filteredSectionsContacts.size();
+				results.values = filteredSectionsContacts;
 
 			}
 			else
 			{
-				results.count = HikeInviteAdapter.this.completeList.size();
-				results.values = HikeInviteAdapter.this.completeList;
+				results.count = HikeInviteAdapter.this.completeSectionsData.size();
+				results.values = HikeInviteAdapter.this.completeSectionsData;
 			}
 			return results;
 		}
@@ -193,14 +202,8 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		@Override
 		protected void publishResults(CharSequence constraint, FilterResults results)
 		{
-			filteredList = (ArrayList<Pair<AtomicBoolean, ContactInfo>>) results.values;
+			filteredSectionsData = (HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>) results.values;
 			notifyDataSetChanged();
-			//filteredList.clear();
-			//for (Pair<AtomicBoolean, ContactInfo> pair : filteredList)
-			//{
-			//	filteredList.add(pair);
-			//}
-			//notifyDataSetInvalidated();
 		}
 	}
 
@@ -220,10 +223,9 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		return false;
 	}
 
-	@Override
-	public boolean isEnabled(int position)
+	public boolean isEnabled(int section, int position)
 	{
-		if (filteredList.get(getPositionInSectionForPosition(position)) == null)
+		if (getItem(section, position) == null)
 		{
 			return filterString.matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
@@ -246,7 +248,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 	public Object getItem(int section, int position)
 	{
 		// TODO Auto-generated method stub
-		return filteredList.get(position);
+		return filteredSectionsData.get(section).get(position);
 	}
 
 	@Override
@@ -260,14 +262,14 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 	public int getSectionCount()
 	{
 		// TODO Auto-generated method stub
-		return 1;
+		return filteredSectionsData.size();
 	}
 
 	@Override
 	public int getCountForSection(int section)
 	{
 		// TODO Auto-generated method stub
-		return filteredList.size();
+		return filteredSectionsData.get(section).size();
 	}
 
 	@Override
