@@ -362,6 +362,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			gridAdapter.notifyDataSetChanged();
 			pagerAdapter.notifyDataSetChanged();
 
+			if(galleryItems.isEmpty())
+			{
+				startAddMoreGalleryIntent();
+			}
+
 			GallerySelectionViewer.this.selectedPager.setCurrentItem(postion == 0 ? 0 : postion - 1);
 		}
 	};
