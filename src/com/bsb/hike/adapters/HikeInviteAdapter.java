@@ -84,7 +84,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		View v = convertView;
 		if (v == null)
 		{
-			v = inflater.inflate(R.layout.compose_list_item, parent, false);
+			v = inflater.inflate(R.layout.hike_list_item, parent, false);
 		}
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		if (pair != null)
@@ -114,7 +114,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
 		checkBox.setVisibility(pair != null ? View.VISIBLE : View.GONE);
-		checkBox.setButtonDrawable(showingBlockedList ? R.drawable.block_button : R.drawable.compose_checkbox);
+		checkBox.setButtonDrawable(showingBlockedList ? R.drawable.block_button : R.drawable.hike_list_item_checkbox);
 
 		if (pair != null)
 		{

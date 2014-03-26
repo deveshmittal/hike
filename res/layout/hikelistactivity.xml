@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat"
+    android:background="@color/white"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -72,8 +72,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/select_all_container"
-        android:layout_below="@id/input_number_container"
+        android:layout_below="@id/input_number"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_marginLeft="8dp"
+    	android:layout_marginRight="8dp"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -105,9 +107,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1px"
-            android:background="@color/offwhite"
+            android:background="@color/white"
             android:cacheColorHint="#00000000"
-            android:divider="@drawable/ic_thread_divider_profile"
+            android:divider="#e7e8e9"
             android:dividerHeight="1dp"
             android:fadingEdge="none"
             android:fadingEdgeLength="2dp"
