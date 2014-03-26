@@ -499,7 +499,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
 				holder.mediaAction = (ImageView) v.findViewById(R.id.btn_media_action);
 				holder.image = (ImageView) v.findViewById(R.id.msg_status_indicator);
-
+				holder.messageTextView = (TextView) v.findViewById(R.id.message_send_ft);
+				v.findViewById(R.id.message_send).setVisibility(View.GONE);
 				holder.ftAction = (ImageView) v.findViewById(R.id.ft_action_button);
 				holder.overlayBg = (View) v.findViewById(R.id.overlayBg);
 				holder.dataTransferred = (TextView) v.findViewById(R.id.data_transferred);
@@ -526,8 +527,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
 				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_sent_custom);
 				holder.messageContainer = v.findViewById(R.id.sent_message_container);
-
-				holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
+				if(holder.messageTextView == null)
+				{
+					holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
+				}
 
 				holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
 
