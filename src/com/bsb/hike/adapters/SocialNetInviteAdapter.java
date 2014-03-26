@@ -77,7 +77,6 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 			convertView = l_Inflater.inflate(R.layout.invite_list_item, null);
 			holder = new ViewHolder();
 			holder.txt_itemName = (TextView) convertView.findViewById(R.id.name);
-			convertView.findViewById(R.id.avatar_frame).setVisibility(View.GONE);
 			// holder.txt_itemDescription = (TextView)
 			// convertView.findViewById(R.id.itemDescription);
 			holder.itemImage = (ImageView) convertView.findViewById(R.id.contact_image);
