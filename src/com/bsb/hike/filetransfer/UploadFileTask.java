@@ -565,12 +565,18 @@ public class UploadFileTask extends FileTransferBase
 			Log.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
 		}
+		long length = sourceFile.length();
+		if(mStart >= length)
+		{
+			mStart = 0;
+			X_SESSION_ID = UUID.randomUUID().toString();
+		}
 		// @GM setting transferred bytes if there are any
 		setBytesTransferred(mStart);
 		mUrl = new URL(AccountUtils.fileTransferUploadBase + "/user/pft/");
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
-		long length = sourceFile.length();
+		
 
 		// /// New Logic Test 1
 
@@ -592,6 +598,7 @@ public class UploadFileTask extends FileTransferBase
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 
+			Log.d(getClass().getSimpleName(),"bytes " + start + "-" + end + "/" + length + "/" + chunkSize);
 			boolean resetAndUpdate = false;
 			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
 			if (bytesRead == -1)
@@ -606,6 +613,7 @@ public class UploadFileTask extends FileTransferBase
 
 			if (end == (length - 1) && responseString != null)
 			{
+				Log.d(getClass().getSimpleName(),"response: " + responseString);
 				responseJson = new JSONObject(responseString);
 				incrementBytesTransferred(chunkSize);
 				resetAndUpdate = true; // To update UI
