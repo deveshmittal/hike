@@ -20,7 +20,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -36,12 +35,15 @@ import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.BadTokenException;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -61,14 +63,13 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
-import com.bsb.hike.snowfall.SnowFallView;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
-import com.bsb.hike.utils.ChatBgFtue;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -105,6 +106,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private View parentLayout;
 
+	private TextView networkErrorPopUp;
+
 	private Dialog dialog;
 
 	private SharedPreferences accountPrefs;
@@ -125,13 +128,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private Drawable myProfileImage;
 
-	private SnowFallView snowFallView;
-
-	private ContactInfo chatThemeFTUEContact;
-
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
-			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES };
+			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -173,9 +172,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void initialiseHomeScreen(Bundle savedInstanceState)
 	{
 
-		setContentView(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false) ? R.layout.home_chat_bg_ftue : R.layout.home);
+		setContentView(R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
+
+		networkErrorPopUp = (TextView) findViewById(R.id.network_error);
 
 		if (savedInstanceState != null)
 		{
@@ -187,20 +188,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false))
-		{
-			Utils.blockOrientationChange(HomeActivity.this);
-			// if chat bg ftue is not shown show this on the highest priority
-			dialogShowing = DialogShowing.CHAT_BG_FTUE;
-			findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
-			getSupportActionBar().hide();
-		}
-		else
-		{
-			// check the preferences and show update
-			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
-			showUpdatePopup(updateType);
-		}
+		// check the preferences and show update
+		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
+		showUpdatePopup(updateType);
 
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
@@ -251,79 +241,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
-		if ((!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, false)) && snowFallView == null)
-		{
-			(new Handler()).postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					snowFallView = ChatBgFtue.startAndSetSnowFallView(HomeActivity.this);
-				}
-			}, 300);
-		}
-
-	}
-
-	public void setChatThemeFTUEContact(ContactInfo contactInfo)
-	{
-		this.chatThemeFTUEContact = contactInfo;
-	}
-
-	public ContactInfo getChatThemeFTUEContact()
-	{
-		return this.chatThemeFTUEContact;
-	}
-
-	public void OnChatBgFtueOverlayClick(View v)
-	{
-		return;
-	}
-
-	public void onChatBgOpenItUpClick(View v)
-	{
-		boolean newUser = getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
-		ContactInfo contactInfo = HikeUserDatabase.getInstance().getChatThemeFTUEContact(HomeActivity.this, newUser);
-		setChatThemeFTUEContact(contactInfo);
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false))
-		{
-			ChatBgFtue.onChatBgOpenItUpClick(HomeActivity.this, v, snowFallView);
-		}
-		else
-		{
-			/*
-			 * Users who have already seen previous FTUE will be taken directly to chatthread
-			 */
-			onChatBgGiveItASpinClick(v);
-		}
-	}
-
-	public void onChatBgGiveItASpinClick(View v)
-	{
-		(new Handler()).postDelayed(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				/*
-				 * This handler is to fix the issue When user taps on give it spin button there is a delay in opening chatthread. And There is also a delay in showing actionbar
-				 * when we call actionbar show() method.
-				 */
-
-				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
-				getSupportActionBar().show();
-			}
-		}, 2000);
-
-		Utils.unblockOrientationChange(HomeActivity.this);
-		ChatBgFtue.onChatBgGiveItASpinClick(this, v, snowFallView, !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, false));
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_FTUE, true);
-		editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_FTUE, true);
-		editor.commit();
-		return;
 	}
 
 	@Override
@@ -670,6 +587,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onResume()
 	{
 		super.onResume();
+		checkNShowNetworkError();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 	}
 
@@ -1181,6 +1099,36 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
+		else if (HikePubSub.UPDATE_NETWORK_STATE.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					animateNShowNetworkError();
+				}
+			});
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			boolean connected = (Boolean) object;
+			if (connected)
+			{
+				Utils.sendAppState(this);
+			}
+		}
+		else if (HikePubSub.CONTACT_SYNCED.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
 	}
 
 	Runnable refreshTabIcon = new Runnable()
@@ -1242,6 +1190,53 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 		return super.onKeyUp(keyCode, event);
+	}
+
+	private void checkNShowNetworkError()
+	{
+		if (networkErrorPopUp == null)
+			return;
+		Log.d(getClass().getSimpleName(), "visiblity for: " + HikeMessengerApp.networkError);
+		// networkErrorPopUp.clearAnimation();
+		if (HikeMessengerApp.networkError)
+		{
+			networkErrorPopUp.setText(R.string.no_internet_connection);
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.red_no_network));
+			networkErrorPopUp.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			networkErrorPopUp.setVisibility(View.GONE);
+		}
+	}
+
+	private void animateNShowNetworkError()
+	{
+		if (networkErrorPopUp == null)
+			return;
+		Log.d(getClass().getSimpleName(), "animation for: " + HikeMessengerApp.networkError);
+		if (HikeMessengerApp.networkError)
+		{
+			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up_noalpha);
+			alphaIn.setDuration(400);
+			networkErrorPopUp.setText(R.string.no_internet_connection);
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.red_no_network));
+			networkErrorPopUp.setAnimation(alphaIn);
+			networkErrorPopUp.setVisibility(View.VISIBLE);
+			alphaIn.start();
+		}
+		else if (networkErrorPopUp.getVisibility() == View.VISIBLE)
+		{
+			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down_noalpha);
+			alphaIn.setStartOffset(1000);
+			alphaIn.setDuration(400);
+			networkErrorPopUp.setText(R.string.connected);
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.green));
+			networkErrorPopUp.setVisibility(View.GONE);
+			networkErrorPopUp.setAnimation(alphaIn);
+			alphaIn.start();
+		}
+		checkNShowNetworkError();
 	}
 
 	private void showOverFlowMenu()

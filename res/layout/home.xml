@@ -13,19 +13,16 @@
         android:layout_height="1dp"
         android:layout_gravity="right" />
     
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+     
     <LinearLayout
         android:id="@+id/home_screen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >
-        <ImageView 
-            android:id="@+id/action_bar_img"
-            android:layout_width= "match_parent"
-            android:layout_height="48dp"
-            android:visibility="gone"
-            android:scaleType="fitXY"
-            android:src="@drawable/action_bar_img" />
-
+        
         <com.viewpagerindicator.TabPageIndicator
             android:id="@+id/titles"
             android:layout_width="match_parent"
@@ -37,4 +34,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
+       
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/network_error"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:layout_alignParentBottom="true"
+        android:textSize="13sp"
+        android:textColor="@color/white"
+        android:gravity="center"/>
+    </RelativeLayout>
 </FrameLayout>

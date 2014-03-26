@@ -29,6 +29,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
@@ -672,6 +673,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+
+				ContactInfo.lastSeenTimeComparator.lastSeenPref = isChecked;
 			}
 			catch (JSONException e)
 			{

@@ -1064,8 +1064,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE }, DBConstants.MSISDN + "=?",
-					new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT },
+					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
 				Log.d(getClass().getSimpleName(), "Could not find db entry");
@@ -1074,6 +1074,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
 			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
+			int unreadCount = c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
 
 			if (Utils.isGroupConversation(msisdn))
 			{
@@ -1099,8 +1100,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			}
 
-			List<ConvMessage> messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			List<ConvMessage> messages;
+			if (unreadCount > limit)
+			{
+				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+			}
+			else
+			{
+				messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			}
 			conv.setMessages(messages);
+			conv.setUnreadCount(unreadCount);
 
 			return conv;
 		}
@@ -1251,7 +1261,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 				 */
-				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata))
+				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata) || Utils.isGroupConversation(msisdn))
 				{
 					ConvMessage message = new ConvMessage(messageString, msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 							c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));
@@ -1539,6 +1549,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public void clearConversation(long convId)
+	{
+		Long[] args = new Long[] { convId };
+		/*
+		 * Clearing the messages table.
+		 */
+		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.CONV_ID + "= ?", args);
+
+		/*
+		 * Next we have to clear the conversation table.
+		 */
+		clearLastConversationMessage(convId);
+	}
+
+	private void clearLastConversationMessage(long convId)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.MESSAGE, "");
+		contentValues.put(DBConstants.MESSAGE_METADATA, "");
+		contentValues.put(DBConstants.GROUP_PARTICIPANT, "");
+		contentValues.put(DBConstants.IS_STATUS_MSG, false);
+		contentValues.put(DBConstants.MESSAGE_ID, 0);
+		contentValues.put(DBConstants.MAPPED_MSG_ID, 0);
+		contentValues.put(DBConstants.UNREAD_COUNT, 0);
+		contentValues.put(DBConstants.MSG_STATUS, State.RECEIVED_READ.ordinal());
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { Long.toString(convId) });
+	}
+
 	private void deleteMessageFromConversation(String msisdn, long convId)
 	{
 		/*
@@ -1577,11 +1616,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				/*
-				 * This conversation is empty.
-				 */
-				mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
-				conversationEmpty = true;
+				if (Utils.isGroupConversation(msisdn))
+				{
+					/*
+					 * If we have removed the last message of a group, we should do the same operations we do when clearing a conversation.
+					 */
+					clearLastConversationMessage(convId);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, msisdn);
+					return;
+				}
+				else
+				{
+					/*
+					 * This conversation is empty.
+					 */
+					mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+					conversationEmpty = true;
+				}
 			}
 			ConvMessage newLastMessage = conversationEmpty ? null : getLastMessageForConversation(msisdn);
 
@@ -2974,5 +3025,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 		}
+	}
+
+	public void changeGroupOwner(String groupId, String msisdn)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.GROUP_OWNER, msisdn);
+
+		mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
 	}
 }

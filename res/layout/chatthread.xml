@@ -77,6 +77,18 @@
                 android:textSize="14sp"
                 android:visibility="gone" />
             
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/network_error_chat"
+                android:layout_width="match_parent"
+                android:layout_height="28dp"
+                android:background="@color/updates_text"
+                android:gravity="center"
+                android:paddingLeft="18dp"
+                android:text="@string/no_internet_connection"
+                android:textColor="@color/actionbar_text"
+                android:textSize="14sp"
+                android:visibility="gone" />
+            
             <LinearLayout
                 android:id="@+id/chat_bg_ftue_tip"
                 android:layout_width="wrap_content"
@@ -120,6 +132,32 @@
 
                 <include layout="@layout/tool_tip" />
             </LinearLayout>
+            
+            <RelativeLayout
+                android:id="@+id/new_message_indicator"
+                android:layout_width="148dp"
+                android:layout_height="34dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="12dp"
+                android:layout_marginRight="16dp"
+                android:visibility="gone" >
+
+                <include layout="@layout/new_message_indicator" />
+            </RelativeLayout>
+            
+            <RelativeLayout
+                android:id="@+id/scroll_bottom_indicator"
+                android:layout_width="35dp"
+                android:layout_height="34dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="12dp"
+                android:layout_marginRight="16dp"
+                android:visibility="gone" >
+
+                <include layout="@layout/new_message_indicator" />
+            </RelativeLayout>
 
         </RelativeLayout>
 

@@ -557,6 +557,11 @@ public class Utils
 
 	public static String getFinalFileName(HikeFileType type)
 	{
+		return getFinalFileName(type, null);
+	}
+
+	public static String getFinalFileName(HikeFileType type, String orgName)
+	{
 		String orgFileName = "";
 		// String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
 		// .format(new Date());
@@ -573,6 +578,9 @@ public class Utils
 		case AUDIO:
 		case AUDIO_RECORDING:
 			orgFileName = "AUD_" + timeStamp + ".m4a";
+			break;
+		case OTHER:
+			orgFileName = timeStamp + orgName;
 		}
 		return orgFileName;
 	}
@@ -1533,7 +1541,7 @@ public class Utils
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
 	{
-		if (convMessage == null || convMessage.getTypingNotification() != null)
+		if (convMessage == null || convMessage.getTypingNotification() != null || convMessage.getUnreadCount() != -1)
 		{
 			return false;
 		}
@@ -2049,8 +2057,8 @@ public class Utils
 
 	public static boolean isPicasaUri(String picasaUriString)
 	{
-		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START) || picasaUriString
-				.toString().startsWith("http"));
+		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START)
+				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX));
 	}
 
 	public static Uri makePicasaUri(Uri uri)
@@ -3639,5 +3647,16 @@ public class Utils
 			// which will recycle automagically
 			return new RecyclingBitmapDrawable(mResources, bitmap);
 		}
+	}
+
+	public static int getNumColumnsForGallery(Resources resources, int sizeOfImage)
+	{
+		return (int) (resources.getDisplayMetrics().widthPixels / sizeOfImage);
+	}
+
+	public static int getActualSizeForGallery(Resources resources, int sizeOfImage, int numColumns)
+	{
+		int remainder = resources.getDisplayMetrics().widthPixels - (numColumns * sizeOfImage);
+		return (int) (sizeOfImage + (int) (remainder / numColumns));
 	}
 }
