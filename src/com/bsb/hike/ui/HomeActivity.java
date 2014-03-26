@@ -127,6 +127,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private TextView topBarIndicator;
 
 	private Drawable myProfileImage;
+	
+	private boolean shouldShowAddFriendsPopup = true;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -162,7 +164,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
-
+		
+		shouldShowAddFriendsPopup = false;
+		
 		if (!showingProgress)
 		{
 			initialiseHomeScreen(savedInstanceState);
@@ -589,6 +593,47 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onResume();
 		checkNShowNetworkError();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+		/*
+		 * We only show addfriends popup on second resume and also not on orientation changes
+		 */
+		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup)
+		{
+			View popUp = findViewById(R.id.addfriend_popup);
+			if(Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null)))
+			{
+				Button popUpAddButton = (Button) popUp.findViewById(R.id.add_btn);
+				/*
+				 * This tag value true represents weather this popup is Add Friends popup
+				 * and false represents that this popup is invite Friends popup
+				 */
+				popUpAddButton.setTag(true);
+			}
+			else
+			{
+				showFTUEInvitePopup(popUp);
+			}
+			popUp.setVisibility(View.VISIBLE);
+		}
+		shouldShowAddFriendsPopup = true;
+	}
+
+	private void showFTUEInvitePopup(View popUp)
+	{
+		ImageView popUpImage = (ImageView) popUp.findViewById(R.id.popup_img);
+		TextView popUpTitle = (TextView) popUp.findViewById(R.id.popup_title);
+		TextView popUpMsg = (TextView) popUp.findViewById(R.id.popup_msg);
+		Button popUpAddButton = (Button) popUp.findViewById(R.id.add_btn);
+		
+		popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
+		popUpTitle.setText(R.string.invite_friends);
+		popUpMsg.setText(R.string.ftue_invite_friends_msg);
+		popUpAddButton.setText(R.string.start_inviting_friends);
+		/*
+		 * This tag value true represents weather this popup is Add Friends popup
+		 * and false represents that this popup is invite Friends popup
+		 */
+		popUpAddButton.setTag(false);
+		
 	}
 
 	@Override
@@ -1440,5 +1485,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
+	}
+	
+	public void onClickAddFriendButton(View v) {
+		View popUp = findViewById(R.id.addfriend_popup);
+		popUp.startAnimation(AnimationUtils.loadAnimation(this,
+				R.anim.fade_out_animation));
+		popUp.setVisibility(View.GONE);
+		boolean isAddFriendsPopup = (Boolean) v.getTag();
+		Intent intent = new Intent(this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
+		startActivity(intent);
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
+		editor.commit();
 	}
 }

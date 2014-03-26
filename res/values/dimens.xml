@@ -109,5 +109,6 @@
 	<dimen name="file_thumbnail_size">150dp</dimen>
 	<dimen name="notification_bar_height">25dp</dimen>
 	<dimen name="gallery_selected_grid_height">150dp</dimen>
-	<dimen name="remove_selection_padding">10dp</dimen>	
+	<dimen name="remove_selection_padding">10dp</dimen>
+	<dimen name="hike_list_item_avtar">36dp</dimen>	
 </resources>

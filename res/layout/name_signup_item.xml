@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/name_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal" >
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:weightSum="520" >
 
     <RelativeLayout
         android:id="@+id/avatar_border"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="0dp"
+        android:layout_weight="@integer/profile_signup_weight1"
+        android:gravity="center" >
 
         <include layout="@layout/signup_profile_pic" />
     </RelativeLayout>
-    
-    <LinearLayout
+
+    <RelativeLayout
         android:id="@+id/input_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/avatar_border"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical"
+        android:layout_height="0dp"
+        android:layout_weight="@integer/profile_signup_weight2"
+        android:gravity="center_horizontal"
         android:paddingLeft="7dp"
         android:paddingRight="7dp" >
 
@@ -31,38 +34,42 @@
         <com.bsb.hike.view.CustomFontEditText
             android:id="@+id/birthday"
             style="@style/NameInput"
-            android:layout_marginTop="22dp"
             android:clickable="true"
+            android:layout_alignParentBottom="true"
             android:drawableLeft="@drawable/ic_birthday_common"
             android:hint="@string/how_young_are_you"
             android:inputType="number"
             android:maxLength="2" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@integer/profile_signup_weight3"
+        android:gravity="bottom|center_horizontal"
+        android:orientation="vertical" >
+
+		<com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/txt_other"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feeling_lazy"
+            android:textColor="#566167"
+            android:textSize="15sp" />
+        
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/connect_fb"
+            style="@style/SignupButton.Text.Bold.Button"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="38dp"
+            android:background="@drawable/connect_fb_btn"
+            android:onClick="onFacebookConnectClick"
+            android:text="@string/connect_fb"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/connect_fb"
-        style="@style/SignupButton.Text.Bold.Button"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="38dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/connect_fb_btn"
-        android:onClick="onFacebookConnectClick"
-        android:text="@string/connect_fb"
-        android:textSize="15sp"
-        android:textStyle="bold" />
-
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/txt_other"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/connect_fb"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="150dp"
-        android:text="@string/feeling_lazy"
-        android:textColor="#566167"
-        android:textSize="15dp" />
-
-</RelativeLayout>
+</LinearLayout>

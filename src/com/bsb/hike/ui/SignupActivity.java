@@ -695,7 +695,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		countryPicker.setEnabled(true);
 		
 		setupCountryCodeData();
-		
+		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		String number = manager.getLine1Number();
+		if(number !=null)
+		{
+			enterEditText.setText(number);
+		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
 		loadingText.setText(R.string.hang_on);
@@ -1137,6 +1142,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName(null, false);
 			}
+			break;
+		case PULLING_PIN:
 			break;
 		case PIN:
 			viewFlipper.setDisplayedChild(PIN);
@@ -1812,7 +1819,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			countryPicker.setText(countryCode);
 			selectedCountryName.setText(countryName);
 		}
-		return !countryCode.isEmpty();
+		return !TextUtils.isEmpty(countryCode);
 	}
 	
 	private boolean isInvalidCountryCode(){

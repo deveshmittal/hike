@@ -61,6 +61,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
@@ -3726,6 +3727,71 @@ public class Utils
 			{
 				Log.d("NoMedia", "failed to make nomedia file");
 			}
+		}
+	}
+	
+	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
+	{
+		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		{
+			return null;
+		}
+		try
+		{
+			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
+			if (serverRecommendedArray.length() == 0)
+			{
+				return null;
+			}
+
+			StringBuilder sb = new StringBuilder("(");
+			int i = 0;
+			for (i = 0; i < serverRecommendedArray.length(); i++)
+			{
+				String msisdn = serverRecommendedArray.optString(i);
+				if (!myMsisdn.equals(msisdn))
+				{
+					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				}
+			}
+			/*
+			 * Making sure the string exists.
+			 */
+			if (sb.lastIndexOf(",") == -1)
+			{
+				return null;
+			}
+			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+			return sb.toString();
+		}
+		catch (JSONException e)
+		{
+			return null;
+		}
+	}
+
+	/*
+	 *  When Active Contacts >= 3 show the 'Add Friends' pop-up
+ 	 *	When Activate Contacts <3 show the 'Invite Friends' pop-up
+	 */
+	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
+	{
+		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		{
+			return false;
+		}
+		try
+		{
+			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
+			if (serverRecommendedArray.length() > 2)
+			{
+				return true;
+			}
+			return false;
+		}
+		catch (JSONException e)
+		{
+			return false;
 		}
 	}
 }
