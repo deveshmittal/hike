@@ -128,6 +128,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private Drawable myProfileImage;
 	
+	private PopupWindow ftueAddFriendWindow;
+	
 	private boolean shouldShowAddFriendsPopup = true;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
@@ -597,44 +599,100 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * We only show addfriends popup on second resume and also not on orientation changes
 		 */
-		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup)
+		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
-			View popUp = findViewById(R.id.addfriend_popup);
 			if(Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null)))
 			{
-				Button popUpAddButton = (Button) popUp.findViewById(R.id.add_btn);
-				/*
-				 * This tag value true represents weather this popup is Add Friends popup
-				 * and false represents that this popup is invite Friends popup
-				 */
-				popUpAddButton.setTag(true);
+				showFTUEAddFtriendsPopup(true);
 			}
 			else
 			{
-				showFTUEInvitePopup(popUp);
+				showFTUEAddFtriendsPopup(false);
 			}
-			popUp.setVisibility(View.VISIBLE);
 		}
 		shouldShowAddFriendsPopup = true;
 	}
 
-	private void showFTUEInvitePopup(View popUp)
+	private void showFTUEAddFtriendsPopup(boolean isAddFriendsPopup)
 	{
-		ImageView popUpImage = (ImageView) popUp.findViewById(R.id.popup_img);
-		TextView popUpTitle = (TextView) popUp.findViewById(R.id.popup_title);
-		TextView popUpMsg = (TextView) popUp.findViewById(R.id.popup_msg);
-		Button popUpAddButton = (Button) popUp.findViewById(R.id.add_btn);
+		ftueAddFriendWindow = new PopupWindow(this);
+
+		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
+
+		View parentView = getLayoutInflater().inflate(R.layout.addfriends_pop_up, homeScreen, false);
+
+		ImageView popUpImage = (ImageView) parentView.findViewById(R.id.popup_img);
+		TextView popUpTitle = (TextView) parentView.findViewById(R.id.popup_title);
+		TextView popUpMsg = (TextView) parentView.findViewById(R.id.popup_msg);
+		Button popUpAddButton = (Button) parentView.findViewById(R.id.add_btn);
 		
-		popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
-		popUpTitle.setText(R.string.invite_friends);
-		popUpMsg.setText(R.string.ftue_invite_friends_msg);
-		popUpAddButton.setText(R.string.start_inviting_friends);
-		/*
-		 * This tag value true represents weather this popup is Add Friends popup
-		 * and false represents that this popup is invite Friends popup
-		 */
-		popUpAddButton.setTag(false);
+		if(isAddFriendsPopup)
+		{
+			popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
+			popUpTitle.setText(R.string.friends_on_hike_tut);
+			popUpMsg.setText(R.string.add_friend_popup_msg);
+			popUpAddButton.setText(R.string.start_adding);
+			/*
+			 * This tag value true represents weather this popup is Add Friends popup
+			 * and false represents that this popup is invite Friends popup
+			 */
+			popUpAddButton.setTag(true);
+		}
+		else
+		{
+			popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
+			popUpTitle.setText(R.string.invite_friends);
+			popUpMsg.setText(R.string.ftue_invite_friends_msg);
+			popUpAddButton.setText(R.string.start_inviting_friends);
+			popUpAddButton.setTag(false);
+		}
 		
+		popUpAddButton.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				boolean isAddFriendsPopup = (Boolean) v.getTag();
+				Intent intent = new Intent(HomeActivity.this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
+				startActivity(intent);
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
+				editor.commit();
+				findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+				getSupportActionBar().show();
+			}
+		});
+
+		ftueAddFriendWindow.setContentView(parentView);
+		ftueAddFriendWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+		ftueAddFriendWindow.setOutsideTouchable(true);
+		ftueAddFriendWindow.setFocusable(true);
+		ftueAddFriendWindow.setWidth(LayoutParams.MATCH_PARENT);
+		int popUpHeight = getResources().getDisplayMetrics().heightPixels - getResources().getDimensionPixelSize(R.dimen.notification_bar_height); 
+		ftueAddFriendWindow.setHeight(popUpHeight);
+		try
+		{
+			ftueAddFriendWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
+		}
+		catch (BadTokenException e)
+		{
+			Log.e(getClass().getSimpleName(), "Excepetion in HomeActivity FTUE popup", e);
+		}
+		
+		ftueAddFriendWindow.getContentView().setFocusableInTouchMode(true);
+		ftueAddFriendWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
+		{
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event)
+			{
+				return onKeyUp(keyCode, event);
+			}
+		});
+		
+		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
+		findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
+		getSupportActionBar().hide();
 	}
 
 	@Override
@@ -1473,18 +1531,5 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
-	}
-	
-	public void onClickAddFriendButton(View v) {
-		View popUp = findViewById(R.id.addfriend_popup);
-		popUp.startAnimation(AnimationUtils.loadAnimation(this,
-				R.anim.fade_out_animation));
-		popUp.setVisibility(View.GONE);
-		boolean isAddFriendsPopup = (Boolean) v.getTag();
-		Intent intent = new Intent(this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
-		startActivity(intent);
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-		editor.commit();
 	}
 }
