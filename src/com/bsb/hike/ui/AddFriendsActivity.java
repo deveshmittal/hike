@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 	private ListView listview;
 	private AddFriendAdapter mAdapter;
 	private TextView nextBtn;
+	private int hikeContactsCount = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +44,13 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private void init() {
 		mAdapter = createAdapter();
+		listview.setOnItemClickListener(this);
 		View header = LayoutInflater.from(this).inflate(
 				R.layout.addfriends_listview_header, null);
+		TextView headerTextView = (TextView) header.findViewById(R.id.header_txt);
+		headerTextView.setText(getResources().getString(R.string.add_friends_listview_header, hikeContactsCount));
 		listview.addHeaderView(header);
 		listview.setAdapter(mAdapter);
-		listview.setOnItemClickListener(this);
 		setupActionBar();
 	}
 
@@ -69,6 +73,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		List<ContactInfo> hikeContacts = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false);
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
+		hikeContactsCount = hikeContacts.size();
 		Collections.sort(hikeContacts);
 		sectionsData.put(sectionsData.size(), hikeContacts);
 		
