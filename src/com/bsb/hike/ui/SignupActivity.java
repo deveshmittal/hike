@@ -268,12 +268,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				{
 					loadingText.setText(R.string.almost_there_signup);
 				}
+				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
 			case PIN:
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
+				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
 			case NAME:
 				prepareLayoutForGettingName(savedInstanceState, false);
+				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -284,7 +287,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			{
 				showErrorMsg();
 			}
-			enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 		}
 		else
 		{
@@ -1053,15 +1055,18 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	private void setListeners()
 	{
-		enterEditText.setOnEditorActionListener(this);
-		enterEditText.setOnKeyListener(new OnKeyListener()
+		if(enterEditText != null)
 		{
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event)
+			enterEditText.setOnEditorActionListener(this);
+			enterEditText.setOnKeyListener(new OnKeyListener()
 			{
-				return loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
-			}
-		});
+				@Override
+				public boolean onKey(View v, int keyCode, KeyEvent event)
+				{
+					return loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -1073,7 +1078,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout!=null&&loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
-		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
+		if(enterEditText!=null)
+		{
+			outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
+		}
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		outState.putBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT, showingSecondLoadingTxt);
 		if (viewFlipper.getDisplayedChild() == NUMBER)
@@ -1237,7 +1245,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event)
 	{
 		if ((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && !TextUtils.isEmpty(enterEditText.getText().toString().trim())
-				&& loadingLayout.getVisibility() != View.VISIBLE)
+				&& loadingLayout != null && loadingLayout.getVisibility() != View.VISIBLE)
 		{
 			if (viewFlipper.getDisplayedChild() == NAME)
 			{
