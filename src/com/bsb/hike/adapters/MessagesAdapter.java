@@ -2260,8 +2260,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			final ConvMessage message = (ConvMessage) v.getTag();
 			ArrayList<String> optionsList = new ArrayList<String>();
+			String number = null;
+			String name = ((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn());
 			if(((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
 			{
+				number = message.getGroupParticipantMsisdn();
 				optionsList.add("Add to contacts");
 			}
 			optionsList.add("Message contact");
@@ -2272,6 +2275,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(chatThread, R.layout.alert_item, R.id.item, options);
 
+			if(number != null)
+			{
+				builder.setTitle(number + " (" + name + ")");
+			}
+			else
+			{
+				builder.setTitle(name);
+			}
+			
 			builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
 			{
 				@Override
