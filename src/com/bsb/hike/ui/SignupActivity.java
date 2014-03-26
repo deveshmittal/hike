@@ -278,6 +278,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				prepareLayoutForGettingName(savedInstanceState, false);
 				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
+			case GENDER:
+				prepareLayoutForGender(savedInstanceState);
+				break;
+			case SCANNING_CONTACTS:
+				prepareLayoutForScanning(savedInstanceState);
+				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
 			{
