@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.json.JSONArray;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -43,10 +44,12 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ListAdapter;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -122,6 +125,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ImageView mediaAction;
 
 		View marginView;
+		
+		View participantDetails;
 
 		TextView participantNameFT;
 		
@@ -579,7 +584,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					v = inflater.inflate(R.layout.message_item_receive, parent, false);
 				}
-
+				holder.participantDetails = (View) v.findViewById(R.id.participant_details);
 				holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
 				holder.participantNameFTUnsaved = (TextView) v.findViewById(R.id.participant_name_ft_unsaved);
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
@@ -773,7 +778,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if (metadata != null && metadata.isPokeMessage())
 			{
-				setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.participantDetails, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
 				
 //				if (isDefaultTheme)
 //				{
@@ -906,7 +911,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				CharSequence markedUp = convMessage.getMessage();
 				// Fix for bug where if a participant leaves the group chat, the
 				// participant's name is never shown
-				setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.participantDetails, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
 				
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
@@ -1240,7 +1245,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// {
 			// holder.marginView.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE : View.GONE);
 			// }
-			setGroupParticipantName(convMessage, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+			setGroupParticipantName(convMessage, holder.participantDetails, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
 			
 //			if (!convMessage.isSent())
 //			{
@@ -2042,7 +2047,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 	
-	private void setGroupParticipantName(ConvMessage convMessage, TextView participantNameFT, TextView participantNameFTUnsaved, boolean firstMessageFromParticipant)
+	private void setGroupParticipantName(ConvMessage convMessage,View participantDetails, TextView participantNameFT, TextView participantNameFTUnsaved, boolean firstMessageFromParticipant)
 	{
 		if(participantNameFT != null)
 		{
@@ -2052,7 +2057,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if (firstMessageFromParticipant)
 			{
-				participantNameFT.setVisibility(View.VISIBLE);
 				String number = null;
 				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
 				if(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
@@ -2065,14 +2069,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					participantNameFT.setText(number);
 					participantNameFTUnsaved.setText("| "+ name + " >>");
 					participantNameFTUnsaved.setVisibility(View.VISIBLE);
-					participantNameFT.setTag(convMessage);
-					participantNameFT.setOnClickListener(contactClick);
 					participantNameFT.setClickable(true);
 				}
 				else
 				{
 					participantNameFT.setText(name);
 				}
+				participantDetails.setTag(convMessage);
+				participantDetails.setOnClickListener(contactClick);
+				participantDetails.setVisibility(View.VISIBLE);
+				participantNameFT.setVisibility(View.VISIBLE);
 			}
 		}
 	}
@@ -2252,11 +2258,49 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void onClick(View v)
 		{
-			ConvMessage message = (ConvMessage) v.getTag();
-			List<ContactInfoData> items = new ArrayList<ContactInfoData>();
-			items.add(new ContactInfoData(DataType.PHONE_NUMBER, message.getGroupParticipantMsisdn(), "Mobile"));
-			String name = ((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn());
-			chatThread.showContactDetails(items, name, null, true);
+			final ConvMessage message = (ConvMessage) v.getTag();
+			ArrayList<String> optionsList = new ArrayList<String>();
+			if(((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+			{
+				optionsList.add("Add to contacts");
+			}
+			optionsList.add("Message contact");
+			final String[] options = new String[optionsList.size()];
+			optionsList.toArray(options);
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(chatThread);
+
+			ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(chatThread, R.layout.alert_item, R.id.item, options);
+
+			builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which)
+				{
+					String option = options[which];
+					if (("Add to contacts").equals(option))
+					{
+						List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+						items.add(new ContactInfoData(DataType.PHONE_NUMBER, message.getGroupParticipantMsisdn(), "Mobile"));
+						String name = ((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn());
+						Utils.addToContacts(items, name, context);
+					}
+					else if (("Message contact").equals(option))
+					{	
+						Intent intent = new Intent();
+						// If the contact info was made using a group conversation, then the
+						// Group ID is in the contact ID
+						intent.putExtra(HikeConstants.Extras.MSISDN, message.getGroupParticipantMsisdn());
+						intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+						intent.setClass(context, ChatThread.class);
+						context.startActivity(intent);	
+					}
+				}
+			});
+
+			AlertDialog alertDialog = builder.show();
+			alertDialog.getListView().setDivider(context.getResources().getDrawable(R.drawable.ic_thread_divider_profile));
+			//chatThread.showContactDetails(items, name, null, true);
 		}
 	};
 	private void setFileButtonResource(ImageView button, ConvMessage convMessage, HikeFile hikeFile)

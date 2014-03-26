@@ -4843,7 +4843,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		clearTempData();
 		if (filePath == null)
 		{
-			Toast.makeText(getApplicationContext(), R.string.upload_failed, Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		File file = new File(filePath);
