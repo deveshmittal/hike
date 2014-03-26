@@ -849,6 +849,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setupThemePicker(null);
 			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP,
 					false)) {
+				closeChatBgFtueTip();
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
 				editor.commit();
