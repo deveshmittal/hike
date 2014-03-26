@@ -392,22 +392,25 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	public void selectAllToggled(boolean isChecked)
 	{
-		List<Pair<AtomicBoolean, ContactInfo>> contactList = adapter.getCompleteList();
+		HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> contactListMap = adapter.getCompleteList();
 
-		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
+		for(Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : contactListMap.entrySet())
 		{
-			pair.first.set(isChecked);
-			String msisdn = pair.second.getMsisdn();
-			if (isChecked)
+			for (Pair<AtomicBoolean, ContactInfo> pair : entry.getValue())
 			{
-				selectedContacts.add(msisdn);
-			}
-			else
-			{
-				selectedContacts.remove(msisdn);
+				pair.first.set(isChecked);
+				String msisdn = pair.second.getMsisdn();
+				if (isChecked)
+				{
+					selectedContacts.add(msisdn);
+				}
+				else
+				{
+					selectedContacts.remove(msisdn);
+				}
 			}
 		}
-		adapter.selectAllToggled();
+		adapter.notifyDataSetChanged();
 		setupActionBarElements();
 	}
 

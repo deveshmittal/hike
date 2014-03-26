@@ -58,14 +58,9 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		iconLoader = new IconLoader(activity, mIconImageSize);
 	}
 
-	public void selectAllToggled()
+	public HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> getCompleteList()
 	{
-		filter.filter(filterString);
-	}
-
-	public List<Pair<AtomicBoolean, ContactInfo>> getCompleteList()
-	{
-		return completeList;
+		return completeSectionsData;
 	}
 
 	@Override
