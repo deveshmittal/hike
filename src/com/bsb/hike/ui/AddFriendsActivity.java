@@ -124,11 +124,10 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 			long arg3) {
 		position = position-listview.getHeaderViewsCount();
 		ContactInfo contact = (ContactInfo) mAdapter.getItem(mAdapter.getSectionForPosition(position), mAdapter.getPositionInSectionForPosition(position));
-		String msisdn = contact.getMsisdn();
-		if (mAdapter.getSelectedFriends().contains(msisdn)) {
-			mAdapter.unSelectItem(msisdn);
+		if (mAdapter.getSelectedFriends().contains(contact)) {
+			mAdapter.unSelectItem(contact);
 		} else {
-			mAdapter.selectItem(msisdn);
+			mAdapter.selectItem(contact);
 		}
 		
 		if(mAdapter.getSelectedFriendsCount()>0)

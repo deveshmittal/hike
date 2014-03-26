@@ -22,7 +22,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 
 public class AddFriendAdapter extends SectionedBaseAdapter {
 	private HashMap<Integer, List<ContactInfo>> sectionsData;
-	private Set<String> selectedFriends;
+	private Set<ContactInfo> selectedFriends;
 	private Context context;
 	private ListView listView;
 	private IconLoader iconloader;
@@ -33,7 +33,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 			HashMap<Integer, List<ContactInfo>> sectionsData, ListView listView) {
 		this.context = context;
 		this.sectionsData = sectionsData;
-		selectedFriends = new HashSet<String>();
+		selectedFriends = new HashSet<ContactInfo>();
 		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
@@ -85,7 +85,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		holder.name.setText(contact.getName());
 		holder.status.setText(contact.getMsisdn());
 		iconloader.loadImage(contact.getMsisdn(), true, holder.userImage, true);
-		if (selectedFriends.contains(contact.getMsisdn())) {
+		if (selectedFriends.contains(contact)) {
 			holder.checkbox.setChecked(true);
 		} else {
 			holder.checkbox.setChecked(false);
@@ -149,7 +149,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		CheckBox checkbox;
 	}
 
-	public Set<String> getSelectedFriends() {
+	public Set<ContactInfo> getSelectedFriends() {
 		return selectedFriends;
 	}
 
@@ -162,13 +162,13 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		return selectedFriends.size();
 	}
 
-	public void unSelectItem(String msidn)
+	public void unSelectItem(ContactInfo contactInfo)
 	{
-		selectedFriends.remove(msidn);
+		selectedFriends.remove(contactInfo);
 	}
 
-	public void selectItem(String msidn)
+	public void selectItem(ContactInfo contactInfo)
 	{
-		selectedFriends.add(msidn);
+		selectedFriends.add(contactInfo);
 	}
 }
