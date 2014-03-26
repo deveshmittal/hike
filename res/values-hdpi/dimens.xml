@@ -18,4 +18,9 @@
     <dimen name="signup_gender_padding_top">63dp</dimen>
     <dimen name="signup_profile_pic_dimen">86dp</dimen>
     <dimen name="signup_profile_pic_icon_dimen">28dp</dimen>
+    <dimen name="addfriend_popup_content_height">124dp</dimen>
+	<dimen name="addfriend_popup_content_margin_top">20dp</dimen>
+	<dimen name="addfriend_popup_title_padding_right">10dp</dimen>
+	<dimen name="addfriend_popup_title_margin_bottom">6dp</dimen>
+	<dimen name="addfriend_popup_btn_margin_bottom">15dp</dimen>
 </resources>

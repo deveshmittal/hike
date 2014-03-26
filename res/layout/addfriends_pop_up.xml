@@ -19,8 +19,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="128dp"
-            android:layout_marginTop="35dp"
+            android:layout_height="@dimen/addfriend_popup_content_height"
+            android:layout_marginTop="@dimen/addfriend_popup_content_margin_top"
             android:orientation="horizontal"
             android:weightSum="5" >
 
@@ -37,13 +37,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:orientation="vertical"
-                android:paddingRight="32dp" >
+                android:paddingRight="@dimen/addfriend_popup_title_padding_right" >
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/popup_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="@dimen/addfriend_popup_title_margin_bottom"
                     android:text="@string/friends_on_hike_tut"
                     android:textColor="#33312e"
                     android:textSize="18sp" />
@@ -60,10 +60,12 @@
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/add_btn"
-            android:layout_width="313dp"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="19dp"
+            android:layout_marginBottom="@dimen/addfriend_popup_btn_margin_bottom"
             android:background="@drawable/signup_button"
             android:shadowColor="@color/black"
             android:shadowDy="0.7"
