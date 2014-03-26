@@ -133,8 +133,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private static short connectionTimeoutSec = 60;
 	
-	private static long connectionLostTime;
-	
 	private Timer myTimer;
 
 	/*
@@ -245,6 +243,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		{
 			try
 			{
+				cancelNetworkErrorTimer();
 				switch (msg.what)
 				{
 				case HikeService.MSG_APP_PUBLISH:
@@ -515,12 +514,16 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		if(HikeMessengerApp.networkError == true)
 			return;
+		
 		if(isAirplaneModeOn(context))
 		{
 			HikeMessengerApp.networkError = true;
-			updateNetworkState();
+			updateNetworkState(false);
 			return;
 		}
+		if(myTimer != null)
+			return;
+		
 		myTimer = new Timer();
 		myTimer.schedule( new TimerTask()
 		{
@@ -528,8 +531,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			@Override
 			public void run()
 			{
-				HikeMessengerApp.networkError = true;
-				updateNetworkState();
+				if(!isConnected())
+				{
+					HikeMessengerApp.networkError = true;
+					updateNetworkState(false);
+				}
 			}
 		}, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
 	}
@@ -539,17 +545,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		if(myTimer != null)
 		{
 			myTimer.cancel();
+			myTimer.purge();
+			myTimer = null;
 		}
 		if(HikeMessengerApp.networkError == false)
 			return;
-		connectionLostTime = 0;
 		HikeMessengerApp.networkError = false;
-		updateNetworkState();
+		updateNetworkState(true);
 	}
 
-	private void updateNetworkState()
+	private void updateNetworkState(boolean connected)
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, connected);
 	}
 	
 	private static boolean isAirplaneModeOn(Context context)
@@ -902,6 +909,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					try
 					{
+						cancelNetworkErrorTimer();
 						HikePacket packet = (HikePacket) arg0.getUserContext();
 						if (packet != null)
 						{

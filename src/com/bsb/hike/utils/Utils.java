@@ -492,12 +492,12 @@ public class Utils
 	}
 
 	/** Create a File for saving an image or video */
-	public static File getOutputMediaFile(HikeFileType type, String orgFileName)
+	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
 	{
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
-		String path = getFileParent(type);
+		String path = getFileParent(type, isSent);
 		if (path == null)
 		{
 			return null;
@@ -563,30 +563,70 @@ public class Utils
 
 	public static String getFinalFileName(HikeFileType type, String orgName)
 	{
-		String orgFileName = "";
+		StringBuilder orgFileName = new StringBuilder();
 		// String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
 		// .format(new Date());
 		String timeStamp = Long.toString(System.currentTimeMillis());
-		switch (type)
+		if (TextUtils.isEmpty(orgName))
 		{
-		case PROFILE:
-		case IMAGE:
-			orgFileName = "IMG_" + timeStamp + ".jpg";
-			break;
-		case VIDEO:
-			orgFileName = "MOV_" + timeStamp + ".mp4";
-			break;
-		case AUDIO:
-		case AUDIO_RECORDING:
-			orgFileName = "AUD_" + timeStamp + ".m4a";
-			break;
-		case OTHER:
-			orgFileName = timeStamp + orgName;
+			switch (type)
+			{
+			case PROFILE:
+			case IMAGE:
+				orgFileName.append("IMG_" + timeStamp + ".jpg");
+				break;
+			case VIDEO:
+				orgFileName.append("MOV_" + timeStamp + ".mp4");
+				break;
+			case AUDIO:
+			case AUDIO_RECORDING:
+				orgFileName.append("AUD_" + timeStamp + ".m4a");
+				break;
+			case OTHER:
+				orgFileName.append("FILE_" + timeStamp);
+			}
 		}
-		return orgFileName;
+		else
+		{
+			int lastDotIndex = orgName.lastIndexOf(".");
+
+			String actualName;
+			String extension = getFileExtension(orgName);
+
+			if (lastDotIndex != -1 && lastDotIndex != orgName.length() - 1)
+			{
+				actualName = new String(orgName.substring(0, lastDotIndex));
+			}
+			else
+			{
+				actualName = orgName;
+			}
+
+			orgFileName.append(actualName + "_" + timeStamp);
+
+			if (!TextUtils.isEmpty(extension))
+			{
+				orgFileName.append("." + extension);
+			}
+		}
+		return orgFileName.toString();
 	}
 
-	public static String getFileParent(HikeFileType type)
+	public static String getFileExtension(String fileName)
+	{
+		int lastDotIndex = fileName.lastIndexOf(".");
+
+		String extension = "";
+
+		if (lastDotIndex != -1 && lastDotIndex != fileName.length() - 1)
+		{
+			extension = new String(fileName.substring(lastDotIndex + 1));
+		}
+
+		return extension;
+	}
+
+	public static String getFileParent(HikeFileType type, boolean isSent)
 	{
 		StringBuilder path = new StringBuilder(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
 		switch (type)
@@ -609,6 +649,10 @@ public class Utils
 		default:
 			path.append(HikeConstants.OTHER_ROOT);
 			break;
+		}
+		if (isSent)
+		{
+			path.append(HikeConstants.SENT_ROOT);
 		}
 		return path.toString();
 	}
@@ -3333,7 +3377,7 @@ public class Utils
 			Log.w("LE", "Invalid json");
 		}
 	}
-	
+
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3347,7 +3391,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-			
+
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
@@ -3659,6 +3703,31 @@ public class Utils
 	{
 		int remainder = resources.getDisplayMetrics().widthPixels - (numColumns * sizeOfImage);
 		return (int) (sizeOfImage + (int) (remainder / numColumns));
+	}
+
+	public static void makeNoMediaFile(File root)
+	{
+		if (root == null)
+		{
+			return;
+		}
+
+		if (!root.exists())
+		{
+			root.mkdirs();
+		}
+		File file = new File(root, ".nomedia");
+		if (!file.exists())
+		{
+			try
+			{
+				file.createNewFile();
+			}
+			catch (IOException e)
+			{
+				Log.d("NoMedia", "failed to make nomedia file");
+			}
+		}
 	}
 	
 	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)

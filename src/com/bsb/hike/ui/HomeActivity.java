@@ -106,7 +106,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private boolean deviceDetailsSent;
 
 	private View parentLayout;
-	
+
 	private TextView networkErrorPopUp;
 
 	private Dialog dialog;
@@ -135,8 +135,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
-				HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED };
-
+			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -183,7 +182,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		setContentView(R.layout.home);
 
 		parentLayout = findViewById(R.id.parent_layout);
-		
+
 		networkErrorPopUp = (TextView) findViewById(R.id.network_error);
 
 		if (savedInstanceState != null)
@@ -1225,6 +1224,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					animateNShowNetworkError();
 				}
 			});
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			boolean connected = (Boolean) object;
+			if (connected)
+			{
+				Utils.sendAppState(this);
+			}
 		}
 		else if (HikePubSub.CONTACT_SYNCED.equals(type))
 		{
@@ -1294,14 +1301,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		return super.onKeyUp(keyCode, event);
 	}
-	
+
 	private void checkNShowNetworkError()
 	{
-		if(networkErrorPopUp == null)
+		if (networkErrorPopUp == null)
 			return;
-		Log.d(getClass().getSimpleName(),"visiblity for: " + HikeMessengerApp.networkError);
-		//networkErrorPopUp.clearAnimation();
-		if(HikeMessengerApp.networkError)
+		Log.d(getClass().getSimpleName(), "visiblity for: " + HikeMessengerApp.networkError);
+		// networkErrorPopUp.clearAnimation();
+		if (HikeMessengerApp.networkError)
 		{
 			networkErrorPopUp.setText(R.string.no_internet_connection);
 			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.red_no_network));
@@ -1312,13 +1319,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			networkErrorPopUp.setVisibility(View.GONE);
 		}
 	}
-	
+
 	private void animateNShowNetworkError()
 	{
-		if(networkErrorPopUp == null)
+		if (networkErrorPopUp == null)
 			return;
-		Log.d(getClass().getSimpleName(),"animation for: " + HikeMessengerApp.networkError);
-		if(HikeMessengerApp.networkError)
+		Log.d(getClass().getSimpleName(), "animation for: " + HikeMessengerApp.networkError);
+		if (HikeMessengerApp.networkError)
 		{
 			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up_noalpha);
 			alphaIn.setDuration(400);
@@ -1328,7 +1335,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			networkErrorPopUp.setVisibility(View.VISIBLE);
 			alphaIn.start();
 		}
-		else if(networkErrorPopUp.getVisibility() == View.VISIBLE)
+		else if (networkErrorPopUp.getVisibility() == View.VISIBLE)
 		{
 			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down_noalpha);
 			alphaIn.setStartOffset(1000);

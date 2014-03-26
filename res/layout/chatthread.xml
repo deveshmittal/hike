@@ -64,18 +64,6 @@
                 android:textColor="@color/actionbar_text"
                 android:textSize="14sp"
                 android:visibility="invisible" />
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/conversation_mute"
-                android:layout_width="match_parent"
-                android:layout_height="35dp"
-                android:background="@color/updates_text"
-                android:gravity="center"
-                android:paddingLeft="18dp"
-                android:text="@string/group_mute"
-                android:textColor="@color/actionbar_text"
-                android:textSize="14sp"
-                android:visibility="gone" />
             
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/network_error_chat"
@@ -88,6 +76,19 @@
                 android:textColor="@color/actionbar_text"
                 android:textSize="14sp"
                 android:visibility="gone" />
+            
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/conversation_mute"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:background="@color/updates_text"
+                android:gravity="center"
+                android:paddingLeft="18dp"
+                android:text="@string/group_mute"
+                android:textColor="@color/actionbar_text"
+                android:textSize="14sp"
+                android:visibility="gone"
+                android:layout_below="@id/network_error_chat" />
             
             <LinearLayout
                 android:id="@+id/chat_bg_ftue_tip"
