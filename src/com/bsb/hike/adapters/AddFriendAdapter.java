@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -67,16 +68,16 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 	{
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(
-					R.layout.addfriend_listview_tuple, null);
+					R.layout.hike_list_item, null);
 			ViewHolder holder = new ViewHolder();
 			holder.userImage = (ImageView) convertView
-					.findViewById(R.id.addfriend_user_image);
+					.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView
-					.findViewById(R.id.addfriend_user_name);
+					.findViewById(R.id.name);
 			holder.status = (TextView) convertView
-					.findViewById(R.id.addfriend_user_status);
-			holder.checkbox = (ImageView) convertView
-					.findViewById(R.id.add_friend_check_box);
+					.findViewById(R.id.number);
+			holder.checkbox = (CheckBox) convertView
+					.findViewById(R.id.checkbox);
 			convertView.setTag(holder);
 		}
 		ViewHolder holder = (ViewHolder) convertView.getTag();
@@ -85,9 +86,9 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		holder.status.setText(contact.getMsisdn());
 		iconloader.loadImage(contact.getMsisdn(), true, holder.userImage, true);
 		if (selectedFriends.contains(contact.getMsisdn())) {
-			holder.checkbox.setSelected(true);
+			holder.checkbox.setChecked(true);
 		} else {
-			holder.checkbox.setSelected(false);
+			holder.checkbox.setChecked(false);
 		}
 
 		return convertView;
@@ -145,7 +146,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		ImageView userImage;
 		TextView name;
 		TextView status;
-		ImageView checkbox;
+		CheckBox checkbox;
 	}
 
 	public Set<String> getSelectedFriends() {

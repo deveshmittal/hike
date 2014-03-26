@@ -11,7 +11,7 @@
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_marginRight="15dp"
-        android:button="@drawable/ftue_addfriends_checkbox_selector"
+        android:button="@drawable/hike_list_item_checkbox"
         android:clickable="false"
         android:focusable="false" />
 
