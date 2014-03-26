@@ -1051,6 +1051,8 @@ public class HikeConstants
 		public static final String SELECTED_COUNTRY = "selectedCountry";
 
 		public static final String MANUAL_SYNC = "manualSync";
+
+		public static final String IS_FTUT_ADD_FRIEND_POPUP_SHOWING = "isFtueAddFriendPopup";
 	}
 
 	public static final class LogEvent

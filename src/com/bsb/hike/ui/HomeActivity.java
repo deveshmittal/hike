@@ -264,6 +264,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
+		if (ftueAddFriendWindow != null && ftueAddFriendWindow.isShowing())
+			ftueAddFriendWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
 		super.onDestroy();
 	}
@@ -605,20 +607,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
-			if(Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null)))
-			{
-				showFTUEAddFtriendsPopup(true);
-			}
-			else
-			{
-				showFTUEAddFtriendsPopup(false);
-			}
+			showFTUEAddFtriendsPopup();
 		}
 		shouldShowAddFriendsPopup = true;
 	}
 
-	private void showFTUEAddFtriendsPopup(boolean isAddFriendsPopup)
+	private void showFTUEAddFtriendsPopup()
 	{
+		boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null));
+
 		ftueAddFriendWindow = new PopupWindow(this);
 
 		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
@@ -722,6 +719,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
 		}
 		outState.putBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING, overFlowWindow != null && overFlowWindow.isShowing());
+		outState.putBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING, ftueAddFriendWindow != null && ftueAddFriendWindow.isShowing());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -1521,6 +1519,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					showOverFlowMenu();
 				}
 			});
+		
+		if (savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING))
+		{
+			findViewById(R.id.overflow_anchor).post(new Runnable()
+			{
+				public void run()
+				{
+					showFTUEAddFtriendsPopup();
+				}
+			});
+		}
 
 		super.onRestoreInstanceState(savedInstanceState);
 	}
