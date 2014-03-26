@@ -3774,36 +3774,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		final boolean canShareContacts = mConversation.isOnhike();
 
-		ArrayList<String> optionsList = new ArrayList<String>();
+		final ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
-		optionsList.add(getString(R.string.camera));
-		optionsList.add(getString(R.string.photo));
-		optionsList.add(getString(R.string.video));
-		optionsList.add(getString(R.string.audio));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.camera), 0, R.drawable.ic_attach_camera));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.photo), 1, R.drawable.ic_attach_pic));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.audio), 3, R.drawable.ic_attach_music));
 		if (canShareLocation)
 		{
-			optionsList.add(getString(R.string.location));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.location), 4, R.drawable.ic_attach_location));
 		}
 		if (canShareContacts)
 		{
-			optionsList.add(getString(R.string.contact));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.contact), 5, R.drawable.ic_attach_contact));
 		}
-		optionsList.add(getString(R.string.file));
-
-		final ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
-		optionImagesList.add(R.drawable.ic_attach_camera);
-		optionImagesList.add(R.drawable.ic_attach_pic);
-		optionImagesList.add(R.drawable.ic_attach_video);
-		optionImagesList.add(R.drawable.ic_attach_music);
-		if (canShareLocation)
-		{
-			optionImagesList.add(R.drawable.ic_attach_location);
-		}
-		if (canShareContacts)
-		{
-			optionImagesList.add(R.drawable.ic_attach_contact);
-		}
-		optionImagesList.add(R.drawable.ic_attach_contact);
+		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_contact));
 
 		dismissPopupWindow();
 
@@ -3814,7 +3799,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		attachmentWindow.setContentView(parentView);
 
 		GridView attachmentsGridView = (GridView) parentView.findViewById(R.id.attachment_grid);
-		attachmentsGridView.setAdapter(new ArrayAdapter<String>(this, R.layout.attachment_item, R.id.text, optionsList)
+		attachmentsGridView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this, R.layout.attachment_item, R.id.text, optionsList)
 		{
 
 			@Override
@@ -3824,12 +3809,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					convertView = getLayoutInflater().inflate(R.layout.attachment_item, parent, false);
 				}
+				OverFlowMenuItem menuItem = getItem(position);
 
 				ImageView attachmentImageView = (ImageView) convertView.findViewById(R.id.attachment_icon);
 				TextView attachmentTextView = (TextView) convertView.findViewById(R.id.text);
 
-				attachmentImageView.setImageResource(optionImagesList.get(position));
-				attachmentTextView.setText(getItem(position));
+				attachmentImageView.setImageResource(menuItem.getIconRes());
+				attachmentTextView.setText(menuItem.getName());
 
 				return convertView;
 			}
@@ -3841,9 +3827,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 			{
-				Log.d(getClass().getSimpleName(), "Onclick: " + position);
-
 				dismissPopupWindow();
+
+				OverFlowMenuItem item = optionsList.get(position);
+				int itemKey = item.getKey();
 
 				int requestCode;
 				Intent pickIntent = new Intent();
@@ -3851,7 +3838,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				/*
 				 * If we're not doing a location/contact transfer, we need an external storage
 				 */
-				if (position != 4 && position != 5)
+				if (itemKey != 4 && itemKey != 5)
 				{
 					if (externalStorageState == ExternalStorageState.NONE)
 					{
@@ -3860,7 +3847,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}
 
-				switch (position)
+				switch (itemKey)
 				{
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
@@ -3874,8 +3861,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Editor editor = prefs.edit();
 					editor.putString(HikeMessengerApp.FILE_PATH, selectedFile.getAbsolutePath());
 					editor.commit();
-
 					break;
+
 				case 2:
 					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
 					pickIntent.setType("video/*");
@@ -3885,58 +3872,35 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				case 3:
 					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
-					break;
-
-				case 4:
-					if (canShareLocation)
-					{
-						requestCode = HikeConstants.SHARE_LOCATION_CODE;
-						break;
-					}
-				case 5:
-					requestCode = HikeConstants.SHARE_CONTACT_CODE;
-					break;
-
-				case 6:
-					requestCode = HikeConstants.SHARE_FILE_CODE;
-					break;
-
-				case 1:
-				default:
-					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
-					pickIntent.setType("image/*");
-					break;
-				}
-				if (requestCode == HikeConstants.SHARE_LOCATION_CODE)
-				{
-					startActivityForResult(new Intent(ChatThread.this, ShareLocation.class), requestCode);
-					return;
-				}
-				else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE)
-				{
 					showAudioDialog();
 					return;
-				}
-				else if (requestCode == HikeConstants.SHARE_CONTACT_CODE)
-				{
+
+				case 4:
+					requestCode = HikeConstants.SHARE_LOCATION_CODE;
+					startActivityForResult(new Intent(ChatThread.this, ShareLocation.class), requestCode);
+					return;
+				
+				case 5:
+					requestCode = HikeConstants.SHARE_CONTACT_CODE;
 					pickIntent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
 					startActivityForResult(pickIntent, requestCode);
 					return;
-				}
-				else if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE)
-				{
-					Intent intent = new Intent(ChatThread.this, GalleryActivity.class);
-					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
-					intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
-					startActivity(intent);
-					return;
-				}
-				else if (requestCode == HikeConstants.SHARE_FILE_CODE)
-				{
+
+				case 6:
+					requestCode = HikeConstants.SHARE_FILE_CODE;
 					Intent intent = new Intent(ChatThread.this, FileSelectActivity.class);
 					intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
 					intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 					startActivity(intent);
+					return;
+
+				case 1:
+				default:
+					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
+					Intent imageIntent = new Intent(ChatThread.this, GalleryActivity.class);
+					imageIntent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+					imageIntent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
+					startActivity(imageIntent);
 					return;
 				}
 
