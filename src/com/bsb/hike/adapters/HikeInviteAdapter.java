@@ -280,10 +280,17 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		switch (section)
 		{
 		case 0:
-			textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.recommended_contacts_section);
+			if(!showingBlockedList)
+			{
+				textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.recommended_contacts_section);
+			}
+			else
+			{
+				textView.setText(R.string.blocked_contacts);
+			}
 			break;
 		case 1:
-			textView.setText(R.string.contacts_on_hike_section);
+			textView.setText(R.string.all_contacts);
 			break;
 		default:
 			break;

@@ -815,4 +815,5 @@
 	<string name="start_inviting_friends">Start inviting friends</string>
 	<string name="add_count_btn">Add(%1$s)</string>
 	<string name="all_contacts">All contacts</string>
+	<string name="blocked_contacts">Blocked contacts</string>
 </resources>
