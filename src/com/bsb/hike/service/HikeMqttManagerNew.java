@@ -243,6 +243,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		{
 			try
 			{
+				cancelNetworkErrorTimer();
 				switch (msg.what)
 				{
 				case HikeService.MSG_APP_PUBLISH:
@@ -908,6 +909,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					try
 					{
+						cancelNetworkErrorTimer();
 						HikePacket packet = (HikePacket) arg0.getUserContext();
 						if (packet != null)
 						{

@@ -565,12 +565,18 @@ public class UploadFileTask extends FileTransferBase
 			Log.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
 		}
+		long length = sourceFile.length();
+		if(mStart >= length)
+		{
+			mStart = 0;
+			X_SESSION_ID = UUID.randomUUID().toString();
+		}
 		// @GM setting transferred bytes if there are any
 		setBytesTransferred(mStart);
 		mUrl = new URL(AccountUtils.fileTransferUploadBase + "/user/pft/");
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
-		long length = sourceFile.length();
+		
 
 		// /// New Logic Test 1
 
