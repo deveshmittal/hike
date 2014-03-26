@@ -91,7 +91,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, 
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP 
 	}
 
 	private ViewPager viewPager;
@@ -195,12 +195,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
-		// check the preferences and show update
-		updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
-		showUpdatePopup(updateType);
-
-		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
-
+		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false)){
+			//if chat bg ftue is not shown show this on the highest priority
+			dialogShowing = DialogShowing.ADD_FRIEND_FTUE_POPUP;
+		} else {
+			// check the preferences and show update
+			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
+					HikeConstants.NO_UPDATE);
+			showUpdatePopup(updateType);
+		}
+		
 		initialiseViewPager();
 		initialiseTabs();
 
