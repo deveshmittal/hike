@@ -592,6 +592,7 @@ public class UploadFileTask extends FileTransferBase
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 
+			Log.d(getClass().getSimpleName(),"bytes " + start + "-" + end + "/" + length + "/" + chunkSize);
 			boolean resetAndUpdate = false;
 			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
 			if (bytesRead == -1)

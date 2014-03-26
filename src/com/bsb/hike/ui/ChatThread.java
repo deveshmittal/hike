@@ -1710,7 +1710,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
 		}
 
-		if (mConversation.getUnreadCount() > 0)
+		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0)
 		{
 			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
 			long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
