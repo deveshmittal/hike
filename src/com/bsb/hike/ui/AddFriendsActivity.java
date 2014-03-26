@@ -4,21 +4,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.AddFriendAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -107,18 +111,34 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				if(mAdapter.getSelectedFriendsCount()>0)
 				{
-					
+					sendFriendRequest(mAdapter.getSelectedFriends());
 				}
-				else
-				{
-					finish();
-				}
+				finish();
 			}
 		});
 		actionBar.setCustomView(actionBarView);
 	}
 
-	
+	private void sendFriendRequest(Set<ContactInfo> contacts)
+	{
+		for (ContactInfo contactInfo : contacts)
+		{
+			FavoriteType favoriteType;
+			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+			{
+				favoriteType = FavoriteType.FRIEND;
+			}
+			else
+			{
+				favoriteType = FavoriteType.REQUEST_SENT;
+				Toast.makeText(this, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
+			}
+
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);					
+		}
+	}
+
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 			long arg3) {
