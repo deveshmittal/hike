@@ -606,7 +606,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * We only show addfriends popup on second resume and also not on orientation changes
 		 */
-		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
+		if(accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
 			showFTUEAddFtriendsPopup();
 		}

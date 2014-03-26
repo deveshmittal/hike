@@ -1212,7 +1212,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					@Override
 					public void run()
 					{
-						loadingText.setText(R.string.setting_profile);
+						if(loadingText !=null)
+						{
+							loadingText.setText(R.string.setting_profile);
+						}
 					}
 				}, 500);
 			}
@@ -1224,7 +1227,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					@Override
 					public void run()
 					{
-						loadingText.setText(R.string.getting_in_signup);
+						if(loadingText !=null)
+						{
+							loadingText.setText(R.string.getting_in_signup);
+						}
 					}
 				}, 500);
 			}
