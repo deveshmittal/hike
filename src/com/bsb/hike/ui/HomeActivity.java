@@ -91,7 +91,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, CHAT_BG_FTUE
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, 
 	}
 
 	private ViewPager viewPager;
@@ -1207,11 +1207,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event)
 	{
-		Log.d(getClass().getSimpleName(), "Key Event is triggered");
-		if (dialogShowing == DialogShowing.CHAT_BG_FTUE)
-		{
-			return super.onKeyUp(keyCode, event);
-		}
 		if (Build.VERSION.SDK_INT <= 10 || (Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this).hasPermanentMenuKey()))
 		{
 			if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU)
