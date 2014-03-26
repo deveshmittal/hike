@@ -325,21 +325,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			switch (type)
 			{
 			case BLOCK:
-				/*
-				 * This would be true when we have pre checked items.
-				 */
-				for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList)
-				{
-					boolean checked = contactItem.first.get();
-					if (checked)
-					{
-						selectedContacts.add(contactItem.second.getMsisdn());
-					}
-					else
-					{
-						break;
-					}
-				}
+				getBlockedContactsList(contactList, firstSectionList); 
 				selectAllContainer.setVisibility(View.GONE);
 				break;
 			case INVITE:
@@ -518,6 +504,26 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		else
 		{
 			init();
+		}
+	}
+	
+	private void getBlockedContactsList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
+	{
+		/*
+		 * This would be true when we have pre checked items.
+		 */
+		for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList)
+		{
+			boolean checked = contactItem.first.get();
+			if (checked)
+			{
+				firstSectionList.add(contactItem);
+				selectedContacts.add(contactItem.second.getMsisdn());
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 
