@@ -3794,4 +3794,16 @@ public class Utils
 			return false;
 		}
 	}
+
+	public static void startChatThread(Context context, ContactInfo contactInfo)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		if (contactInfo.getName() != null)
+		{
+			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		context.startActivity(intent);
+	}
 }
