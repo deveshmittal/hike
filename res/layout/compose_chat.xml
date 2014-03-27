@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <com.bsb.hike.view.TagEditText
+        android:id="@+id/composeChatNewGroupTagET"
+        style="@android:style/TextAppearance.Large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/compose_chat_content_margin"
+        android:layout_marginRight="@dimen/compose_chat_content_margin"
+        android:background="@drawable/bg_country_search_bar"
+        android:hint="@string/compose_chat_editText_hint"
+        android:maxLines="2"
+        android:padding="15dp"
+        android:visibility="gone" >
+    </com.bsb.hike.view.TagEditText>
+
+    <com.bsb.hike.view.PinnedSectionListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/compose_chat_content_margin"
+        android:layout_marginRight="@dimen/compose_chat_content_margin"
+        android:divider="@color/light_gray_hike"
+        android:dividerHeight="1dp" >
+    </com.bsb.hike.view.PinnedSectionListView>
+
+</LinearLayout>

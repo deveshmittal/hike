@@ -232,4 +232,6 @@
     <color name="phone_entering_header">#535e6d</color>
     <color name="selected_country">#566167</color>
     <color name="red_no_network">#ffee5953</color>
+    <color name="blue_hike">#0f8fe1</color>
+    <color name="light_gray_hike">#e7e8e9</color>
 </resources>

@@ -3732,7 +3732,7 @@ public class Utils
 			}
 		}
 	}
-	
+
 	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
 	{
 		if (TextUtils.isEmpty(serverRecommendedArrayString))
@@ -3774,8 +3774,7 @@ public class Utils
 	}
 
 	/*
-	 *  When Active Contacts >= 3 show the 'Add Friends' pop-up
- 	 *	When Activate Contacts <3 show the 'Invite Friends' pop-up
+	 * When Active Contacts >= 3 show the 'Add Friends' pop-up When Activate Contacts <3 show the 'Invite Friends' pop-up
 	 */
 	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
 	{
@@ -3798,7 +3797,7 @@ public class Utils
 		}
 	}
 
-		public static String getEmail(Context context)
+	public static String getEmail(Context context)
 	{
 		String email = null;
 		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
@@ -3812,5 +3811,17 @@ public class Utils
 			}
 		}
 		return email;
+	}
+
+	public static void startChatThread(Context context, ContactInfo contactInfo)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		if (contactInfo.getName() != null)
+		{
+			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		context.startActivity(intent);
 	}
 }
