@@ -608,12 +608,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				@Override
 				public void onSuccess(IMqttToken arg0)
 				{
+					Log.d(TAG, "Disconnect successfull");
 					handleDisconnect(reconnect);
 				}
 
 				@Override
 				public void onFailure(IMqttToken arg0, Throwable arg1)
 				{
+					Log.d(TAG, "Disconnect unsuccessfull");
 					// dont care about failure and move on as you have to connect anyways
 					handleDisconnect(reconnect);
 				}
@@ -623,12 +625,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		catch (MqttException e)
 		{
 			// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
-			e.printStackTrace();
+			Log.e(TAG, "Disconnect unsuccessfull",e);
 			handleDisconnect(reconnect);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			Log.e(TAG, "Disconnect unsuccessfull",e);
 			handleDisconnect(reconnect);
 		}
 	}
@@ -642,7 +644,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			Log.e(TAG, "MQTT close exception",e);
 		}
 		mqtt = null;
 		op = null;
@@ -1034,6 +1036,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
 			Log.d(TAG, "Connection check happened from GCM");
+			boolean reconnect = intent.getBooleanExtra("reconnect", false);
+			if(reconnect)
+			{
+				Log.d(TAG, "Calling explicit disconnect after server GCM push");
+				disconnectOnMqttThread(true);
+				return;
+			}
 			connectOnMqttThread();
 		}
 	}
