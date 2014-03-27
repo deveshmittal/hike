@@ -642,6 +642,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			popUpAddButton.setTag(false);
 		}
 		
+		findViewById(R.id.popup_black_overlay).setOnClickListener(null);
 		popUpAddButton.setOnClickListener(new OnClickListener()
 		{
 			
