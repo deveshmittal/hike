@@ -210,9 +210,8 @@
 			                android:layout_alignParentRight="true"
 			                android:layout_centerVertical="true"
 			      	        android:text="00:00"
-			                android:textColor="@color/white_80"
-			                android:textSize="12sp"
-			                android:textStyle="italic" />
+			                android:textColor="@color/white_60"
+			                android:textSize="12sp" />
                          
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -411,24 +410,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_40"
+                android:textColor="@color/black_70"
                 android:textSize="12sp"
                 android:layout_alignParentBottom="true"
-                android:layout_alignRight="@id/receive_message_inner_container"
-                android:textStyle="italic" />
+                android:layout_alignRight="@id/receive_message_inner_container" />
 			
 			<com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/message_time_int"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_40"
+                android:textColor="@color/black_70"
                 android:textSize="12sp"
                 android:layout_marginTop="3dp"
                 android:layout_below="@id/receive_message_inner_container"
                 android:layout_alignRight="@id/receive_message_inner_container"
-                android:visibility="gone"
-                android:textStyle="italic"  />
+                android:visibility="gone" />
 			
 	        </RelativeLayout>
 	        <ImageView
@@ -511,10 +508,9 @@
             android:paddingRight="5dp"
   	        android:text="00:00"
   	        android:background="@drawable/bg_msg_time_status"
-  	        android:textColor="@color/white_80"
+  	        android:textColor="@color/white_60"
             android:textSize="12sp"
-            android:visibility="gone"
-            android:textStyle="italic" />
+            android:visibility="gone" />
            
 
 	    <com.bsb.hike.view.CustomFontTextView

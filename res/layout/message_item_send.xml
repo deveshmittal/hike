@@ -155,11 +155,10 @@
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			      	        android:text="00:00"
-			                android:textColor="@color/white_80"
+			                android:textColor="@color/white_60"
 			                android:textSize="12sp"
 			                android:layout_centerVertical="true"
-			                android:layout_toLeftOf="@id/message_status_ft"
-			                android:textStyle="italic" />
+			                android:layout_toLeftOf="@id/message_status_ft" />
                         
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -368,9 +367,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_40"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+                android:textColor="@color/black_70"
+                android:textSize="12sp" />
             
             <ImageView
                 android:id="@+id/message_status"
@@ -397,9 +395,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_40"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+                android:textColor="@color/black_70"
+                android:textSize="12sp" />
             
             <ImageView
                 android:id="@+id/message_status_int"
@@ -474,9 +471,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-      	        android:textColor="@color/white_80"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+      	        android:textColor="@color/white_60"
+                android:textSize="12sp" />
             
             <ImageView
                 android:id="@+id/message_status_ext"
