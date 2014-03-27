@@ -52,10 +52,5 @@
         android:gravity="center"/>
     </RelativeLayout>
     
-    <View
-        android:id="@+id/overflow_anchor"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_gravity="top|left" />
-    
+    <include layout="@layout/addfriends_pop_up"/>
 </FrameLayout>

@@ -129,7 +129,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private Drawable myProfileImage;
 	
-	private PopupWindow ftueAddFriendWindow;
+	private View ftueAddFriendWindow;
 	
 	private boolean shouldShowAddFriendsPopup = true;
 
@@ -168,7 +168,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
 		
-		shouldShowAddFriendsPopup = false;
+		shouldShowAddFriendsPopup = savedInstanceState!=null?savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING):false;
 		
 		if (!showingProgress)
 		{
@@ -264,8 +264,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
-		if (ftueAddFriendWindow != null && ftueAddFriendWindow.isShowing())
-			ftueAddFriendWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
 		super.onDestroy();
 	}
@@ -616,16 +614,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null));
 
-		ftueAddFriendWindow = new PopupWindow(this);
+		ftueAddFriendWindow = findViewById(R.id.addfriend_popup);
 
-		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
-
-		View parentView = getLayoutInflater().inflate(R.layout.addfriends_pop_up, homeScreen, false);
-
-		ImageView popUpImage = (ImageView) parentView.findViewById(R.id.popup_img);
-		TextView popUpTitle = (TextView) parentView.findViewById(R.id.popup_title);
-		TextView popUpMsg = (TextView) parentView.findViewById(R.id.popup_msg);
-		Button popUpAddButton = (Button) parentView.findViewById(R.id.add_btn);
+		ImageView popUpImage = (ImageView) findViewById(R.id.popup_img);
+		TextView popUpTitle = (TextView) findViewById(R.id.popup_title);
+		TextView popUpMsg = (TextView) findViewById(R.id.popup_msg);
+		Button popUpAddButton = (Button) findViewById(R.id.add_btn);
 		
 		if(isAddFriendsPopup)
 		{
@@ -670,36 +664,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						findViewById(R.id.action_bar_img).setVisibility(View.GONE);
 					}
 				}, 500);
-				ftueAddFriendWindow.dismiss();
+				ftueAddFriendWindow.setVisibility(View.GONE);
 			}
 		});
 
-		ftueAddFriendWindow.setContentView(parentView);
-		ftueAddFriendWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		ftueAddFriendWindow.setOutsideTouchable(true);
-		ftueAddFriendWindow.setFocusable(true);
-		ftueAddFriendWindow.setWidth(LayoutParams.MATCH_PARENT);
-		int popUpHeight = getResources().getDisplayMetrics().heightPixels - getResources().getDimensionPixelSize(R.dimen.notification_bar_height); 
-		ftueAddFriendWindow.setHeight(popUpHeight);
-		try
-		{
-			ftueAddFriendWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
-		}
-		catch (BadTokenException e)
-		{
-			Log.e(getClass().getSimpleName(), "Excepetion in HomeActivity FTUE popup", e);
-		}
-		
-		ftueAddFriendWindow.getContentView().setFocusableInTouchMode(true);
-		ftueAddFriendWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
-		{
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event)
-			{
-				return onKeyUp(keyCode, event);
-			}
-		});
-		
+		ftueAddFriendWindow.setVisibility(View.VISIBLE);
 		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
 		findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
 		getSupportActionBar().hide();
@@ -728,7 +697,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
 		}
 		outState.putBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING, overFlowWindow != null && overFlowWindow.isShowing());
-		outState.putBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING, ftueAddFriendWindow != null && ftueAddFriendWindow.isShowing());
+		outState.putBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING, ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -1537,17 +1506,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		
-		if (savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING))
-		{
-			findViewById(R.id.overflow_anchor).post(new Runnable()
-			{
-				public void run()
-				{
-					showFTUEAddFtriendsPopup();
-				}
-			});
-		}
-
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
@@ -1562,4 +1520,5 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
 	}
+	
 }
