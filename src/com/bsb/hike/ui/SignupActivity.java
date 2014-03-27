@@ -180,6 +180,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	View nextBtnContainer;
 	
+	View selectedCountryPicker;
+	
 	private TextView invalidPin;
 	
 	 private ArrayList<String> countriesArray = new ArrayList<String>();
@@ -492,6 +494,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		if (countryPicker != null)
 		{
 			countryPicker.setEnabled(false);
+			selectedCountryPicker.setEnabled(false);
 		}
 		if (callmeBtn != null)
 		{
@@ -668,6 +671,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		invalidNum = (TextView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (EditText)layout.findViewById(R.id.country_picker);
 		selectedCountryName = (TextView)layout.findViewById(R.id.selected_country_name);
+		selectedCountryPicker = layout.findViewById(R.id.selected_country);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
 		
@@ -701,6 +705,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		});
 		
 		countryPicker.setEnabled(true);
+		selectedCountryPicker.setEnabled(true);
 		
 		setupCountryCodeData();
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
