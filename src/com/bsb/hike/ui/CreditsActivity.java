@@ -4,12 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -25,11 +21,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 {
 	private SharedPreferences settings;
 
-	private TextView creditsMax;
-
 	private TextView creditsCurrent;
-
-	private ProgressBar creditsBar;
 
 	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.INVITEE_NUM_CHANGED };
 
@@ -53,25 +45,10 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
 
-		creditsMax = (TextView) findViewById(R.id.credits_full_txt);
 		creditsCurrent = (TextView) findViewById(R.id.credits_num);
-		creditsBar = (ProgressBar) findViewById(R.id.credits_progress);
 
 		updateCredits();
 		setupActionBar();
-
-		TextView freeSmsTip = (TextView) findViewById(R.id.free_sms_tip);
-
-		String mainString = getString(R.string.free_sms_use_tip);
-		String replaceString = getString(R.string.green_bubble_abbr);
-
-		SpannableStringBuilder ssb = new SpannableStringBuilder(mainString);
-		int index = mainString.indexOf(replaceString);
-		if (index != -1)
-		{
-			ssb.setSpan(new ImageSpan(this, R.drawable.ic_sms_user), index, index + replaceString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-		freeSmsTip.setText(ssb);
 	}
 
 	public void onInviteClick(View v)
@@ -80,6 +57,12 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_CREDIT);
 		Intent intent = new Intent(CreditsActivity.this, HikeListActivity.class);
 		intent.putExtra(HikeConstants.Extras.FROM_CREDITS_SCREEN, true);
+		startActivity(intent);
+	}
+
+	public void onStartHikingClick(View v)
+	{
+		Intent intent = new Intent(this, ComposeActivity.class);
 		startActivity(intent);
 	}
 
@@ -112,13 +95,8 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 	private void updateCredits()
 	{
 		int currentCredits = settings.getInt(HikeMessengerApp.SMS_SETTING, 0);
-		int totalCredits = Integer.parseInt(settings.getString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 
-		creditsMax.setText(Integer.toString(currentCredits) + "/" + Integer.toString(totalCredits));
 		creditsCurrent.setText(Integer.toString(currentCredits));
-
-		creditsBar.setMax(totalCredits);
-		creditsBar.setProgress(currentCredits);
 	}
 
 	private void setupActionBar()
