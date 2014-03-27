@@ -1418,10 +1418,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 
 				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
-				int totalCredits = Integer.parseInt(accountPrefs.getString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
-				freeSmsCount.setText(currentCredits + "/" + totalCredits);
+				freeSmsCount.setText(Integer.toString(currentCredits));
 				if (item.getKey() == 1)
 				{
 					freeSmsCount.setVisibility(View.VISIBLE);
