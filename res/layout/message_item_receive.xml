@@ -116,13 +116,11 @@
 	            android:orientation="vertical" >
 	            
 			    <LinearLayout
+			        android:id="@+id/participant_details"
 			        android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="left"
-                    android:orientation="horizontal"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginBottom="3dp" >
+                    android:gravity="left|bottom"
+                    android:orientation="horizontal" >
 	            <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/participant_name_ft"
 	                    android:layout_width="wrap_content"
@@ -131,6 +129,8 @@
 	                    android:text="Thanks lksad"
 	                    android:textColor="@color/chat_color"
 	                    android:textSize="14sp"
+	                    android:layout_marginLeft="5dp"
+                    	android:layout_marginBottom="3dp"
 	                    android:textStyle="bold"
 	                    android:visibility="gone" />
 	            <com.bsb.hike.view.CustomFontTextView
@@ -141,8 +141,10 @@
 	                    android:text="Thanks lksad"
 	                    android:textColor="#66000000"
 	                    android:textSize="14sp"
-	                    android:visibility="gone"
-	                    android:layout_marginLeft="5dp" />
+	                    android:layout_marginLeft="5dp"
+	                    android:layout_marginRight="5dp"
+                    	android:layout_marginBottom="3dp"
+	                    android:visibility="gone" />
 	            </LinearLayout>
 	            
 	            <LinearLayout
@@ -208,8 +210,9 @@
 			                android:layout_alignParentRight="true"
 			                android:layout_centerVertical="true"
 			      	        android:text="00:00"
-			                android:textColor="@color/white"
-			                android:textSize="12sp" />
+			                android:textColor="@color/white_80"
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
                          
                         <ProgressBar
 				            android:id="@+id/initializing"
@@ -411,7 +414,8 @@
                 android:textColor="@color/black_40"
                 android:textSize="12sp"
                 android:layout_alignParentBottom="true"
-                android:layout_alignRight="@id/receive_message_inner_container" />
+                android:layout_alignRight="@id/receive_message_inner_container"
+                android:textStyle="italic" />
 			
 			<com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/message_time_int"
@@ -423,7 +427,8 @@
                 android:layout_marginTop="3dp"
                 android:layout_below="@id/receive_message_inner_container"
                 android:layout_alignRight="@id/receive_message_inner_container"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:textStyle="italic"  />
 			
 	        </RelativeLayout>
 	        <ImageView
@@ -433,6 +438,7 @@
 	             android:gravity="center_vertical"
 	             android:layout_marginTop="5dp"
 	             android:layout_marginLeft="6dp"
+	             android:paddingBottom="4dp"
 	             android:src="@drawable/ic_nudge_receive_custom"
 	             android:visibility="gone" />
 	        
@@ -501,11 +507,14 @@
             android:layout_below="@id/bubble_container"
             android:layout_alignLeft="@id/bubble_container"
             android:layout_marginLeft="6dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
   	        android:text="00:00"
   	        android:background="@drawable/bg_msg_time_status"
-  	        android:textColor="@color/white"
+  	        android:textColor="@color/white_80"
             android:textSize="12sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:textStyle="italic" />
            
 
 	    <com.bsb.hike.view.CustomFontTextView

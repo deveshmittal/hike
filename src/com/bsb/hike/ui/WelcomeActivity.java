@@ -44,8 +44,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private ViewGroup tcContinueLayout;
 
-	private View hiLogoView;
-
 	private View hikeLogoContainer;
 
 	private boolean isMicromaxDevice;
@@ -66,7 +64,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = findViewById(R.id.terms_and_conditions);
-		hiLogoView = findViewById(R.id.ic_hi_logo);
 		hikeLogoContainer = findViewById(R.id.hike_logo_container);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
@@ -93,7 +90,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		hikeLogoContainer.setVisibility(View.VISIBLE);
 		tcContinueLayout.setVisibility(View.VISIBLE);
-		hiLogoView.setVisibility(View.GONE);
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{
 			showError();
@@ -222,7 +218,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		@Override
 		public Fragment getItem(int position)
 		{
-			return new WelcomeTutorialFragment(position, isMicromaxDevice);
+			return WelcomeTutorialFragment.newInstance(position, isMicromaxDevice);
 		}
 
 		@Override

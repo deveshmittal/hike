@@ -2,12 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="754" >
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/tutorial_title"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="0dp"
+        android:layout_weight="240"
         android:gravity="center"
         android:text="@string/tutorial1_header_title"
         android:textColor="#8d939c"
@@ -17,7 +19,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="418"
         android:orientation="vertical" >
         
         <ImageView

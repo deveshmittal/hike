@@ -288,6 +288,10 @@ public class HikeService extends Service
 			sm.resetReachedEndForDefaultStickers();
 		}
 
+		if (!settings.getBoolean(StickerManager.ADD_NO_MEDIA_FILE_FOR_STICKERS, false))
+		{
+			sm.addNoMediaFilesToStickerDirectories();
+		}
 		/*
 		 * Adding these preferences since they are used in the load more stickers logic.
 		 */

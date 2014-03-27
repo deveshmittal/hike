@@ -9,7 +9,7 @@
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img1"
         android:layout_width="match_parent"
-        android:layout_height="127dp"
+        android:layout_height="@dimen/signup_header_height"
         android:gravity="center"
         android:text="@string/whats_your_number"
         android:textColor="@color/phone_entering_header"
@@ -18,7 +18,7 @@
         <LinearLayout
             android:id="@+id/loading_layout"
             android:layout_width="match_parent"
-        	android:layout_height="127dp"
+        	android:layout_height="@dimen/signup_header_height"
         	android:gravity="center"
         	android:orientation="horizontal"
             android:visibility="gone" >
@@ -32,7 +32,7 @@
             <com.bsb.hike.view.CustomFontTextView
 		        android:id="@+id/txt_loading"
 		        android:layout_width="wrap_content"
-		        android:layout_height="127dp"
+		        android:layout_height="@dimen/signup_header_height"
 		        android:paddingLeft="15dp"
 		        android:gravity="center"
 		        android:text="@string/hang_on"

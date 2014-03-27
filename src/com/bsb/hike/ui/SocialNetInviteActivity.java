@@ -127,7 +127,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		input = (EditText) findViewById(R.id.input_number);
 
-		findViewById(R.id.input_number_container).setVisibility(View.GONE);
+		findViewById(R.id.input_number).setVisibility(View.GONE);
 		findViewById(R.id.contact_list).setVisibility(View.GONE);
 		findViewById(R.id.progress_container).setVisibility(View.VISIBLE);
 		if (isFacebook)
@@ -320,7 +320,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			input.addTextChangedListener(adapter);
 			listView.setAdapter(adapter);
 			listView.setOnScrollListener(scrollListener);
-			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
+			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
@@ -372,7 +372,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			listView.setOnScrollListener(scrollListener);
 
 			adapter.notifyDataSetChanged();
-			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
+			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 

@@ -310,6 +310,8 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
 
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
+	
+	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -696,31 +698,26 @@ public class HikeMessengerApp extends Application implements Listener
 	{
 		String root = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT;
 
-		File profileRoot = new File(root + HikeConstants.PROFILE_ROOT);
-		makeNoMediaFile(profileRoot);
+		File folder = new File(root + HikeConstants.PROFILE_ROOT);
+		Utils.makeNoMediaFile(folder);
 
-		File recordingRoot = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
-		makeNoMediaFile(recordingRoot);
-	}
+		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT);
+		Utils.makeNoMediaFile(folder);
 
-	private void makeNoMediaFile(File root)
-	{
-		if (!root.exists())
-		{
-			root.mkdirs();
-		}
-		File file = new File(root, ".nomedia");
-		if (!file.exists())
-		{
-			try
-			{
-				file.createNewFile();
-			}
-			catch (IOException e)
-			{
-				Log.d(getClass().getSimpleName(), "failed to make nomedia file");
-			}
-		}
+		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
+		Utils.makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
+		Utils.makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.AUDIO_ROOT + HikeConstants.SENT_ROOT);
+		Utils.makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT + HikeConstants.SENT_ROOT);
+		Utils.makeNoMediaFile(folder);
+		
+		folder = new File(root + HikeConstants.OTHER_ROOT + HikeConstants.SENT_ROOT);
+		Utils.makeNoMediaFile(folder);
 	}
 
 	public static HikePubSub getPubSub()
