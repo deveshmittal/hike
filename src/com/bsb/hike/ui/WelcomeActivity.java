@@ -238,17 +238,17 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 			case 0:
 				tutorialHeader.setText(R.string.tutorial1_header_title);
-				tutorialImage.setBackgroundResource(R.drawable.tutorial1_img);
+				tutorialImage.setImageResource(R.drawable.tutorial1_img);
 				micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
 				break;
 			case 1:
 				tutorialHeader.setText(R.string.tutorial2_header_title);
-				tutorialImage.setBackgroundResource(R.drawable.tutorial2_img);
+				tutorialImage.setImageResource(R.drawable.tutorial2_img);
 				micromaxImage.setVisibility(View.GONE);
 				break;
 			case 2:
 				tutorialHeader.setText(R.string.tutorial3_header_title);
-				tutorialImage.setBackgroundResource(R.drawable.tutorial3_img);
+				tutorialImage.setImageResource(R.drawable.tutorial3_img);
 				micromaxImage.setVisibility(View.GONE);
 				break;
 			}
