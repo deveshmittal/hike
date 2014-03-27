@@ -2,39 +2,25 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat"
+    android:background="@color/white"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/input_number_container"
+    <com.bsb.hike.view.CustomFontEditText
+        android:id="@+id/input_number"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_height="46dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/bg_country_search_bar"
+        android:drawableLeft="@drawable/ic_search_dark_grey"
+        android:drawablePadding="9dp"
         android:gravity="center_vertical"
-        android:minHeight="48dp"
-        android:orientation="horizontal" >
-
-        <com.bsb.hike.view.CustomFontEditText
-            android:id="@+id/input_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:drawableLeft="@drawable/ic_search_grey"
-            android:drawablePadding="7dp"
-            android:gravity="center_vertical"
-            android:hint="@string/search_hint"
-            android:imeOptions="actionNone"
-            android:minHeight="48dp"
-            android:paddingBottom="5dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="18dp"
-            android:paddingTop="5dp"
-            android:singleLine="true"
-            android:textColor="@color/lightblack"
-            android:textColorHint="#cdcdc8"
-            android:textSize="16sp"
-            android:visibility="visible" />
-    </LinearLayout>
+        android:hint="@string/search_hint"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="8dp"
+        android:layout_marginLeft="8dp"
+    	android:layout_marginRight="8dp"
+        android:singleLine="true" />
 
     <RelativeLayout
         android:id="@+id/select_all_container"
@@ -72,8 +58,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/select_all_container"
-        android:layout_below="@id/input_number_container"
+        android:layout_below="@id/input_number"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_marginLeft="8dp"
+    	android:layout_marginRight="8dp"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -100,14 +88,14 @@
             android:background="@drawable/ic_thread_divider_profile"
             android:visibility="gone" />
 
-        <ListView
+        <com.bsb.hike.adapters.PinnedHeaderListView
             android:id="@+id/contact_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1px"
-            android:background="@color/offwhite"
+            android:background="@color/white"
             android:cacheColorHint="#00000000"
-            android:divider="@drawable/ic_thread_divider_profile"
+            android:divider="#e7e8e9"
             android:dividerHeight="1dp"
             android:fadingEdge="none"
             android:fadingEdgeLength="2dp"

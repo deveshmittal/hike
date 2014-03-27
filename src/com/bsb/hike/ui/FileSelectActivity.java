@@ -45,7 +45,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.FileImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -549,7 +548,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			}
 			else
 			{
-				String extension = MimeTypeMap.getFileExtensionFromUrl(file.getAbsolutePath());
+				String extension = Utils.getFileExtension(file.getName());
 				item.extension = TextUtils.isEmpty(extension) ? "?" : extension;
 				item.subtitle = formatFileSize(file.length());
 				item.mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(item.extension);

@@ -225,7 +225,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private JSONObject getFileTransferMetadataForLocation(double latitude, double longitude, int zoomLevel, String address, String thumbnailString) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null).serialize());
+		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 

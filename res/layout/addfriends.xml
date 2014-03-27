@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@color/white" >
 
-    <ListView
+    <com.bsb.hike.adapters.PinnedHeaderListView
         android:headerDividersEnabled="false"
-        android:layout_margin="15dp"
         android:id="@+id/addfriend_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@color/transparent_black"
-        android:dividerHeight="1dp"
-        android:listSelector="@android:color/transparent" 
-        >
-    </ListView>
-
-    <include layout="@layout/addfriends_pop_up" />
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:divider="#e7e8e9"
+        android:dividerHeight="1dp" />
 
 </RelativeLayout>

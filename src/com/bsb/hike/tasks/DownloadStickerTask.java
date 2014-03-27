@@ -113,6 +113,9 @@ public class DownloadStickerTask extends StickerTaskBase
 		}
 		smallStickerDir.mkdirs();
 
+		Utils.makeNoMediaFile(largeStickerDir);
+		Utils.makeNoMediaFile(smallStickerDir);
+
 		try
 		{
 

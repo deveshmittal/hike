@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
-    android:versionCode="322"
     android:installLocation="auto"
-    android:versionName="2.8.4.2">
+    android:versionCode="350"
+    android:versionName="2.8.4.3" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -205,10 +205,12 @@
                 <data android:mimeType="audio/*" />
             </intent-filter>
             <intent-filter>
-                 <action android:name="android.intent.action.SEND_MULTIPLE" />
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <data android:mimeType="image/*" />
-             </intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.bsb.hike.ui.SocialNetInviteActivity"
@@ -222,6 +224,7 @@
         </activity>
         <activity android:name=".ui.FileSelectActivity" >
         </activity>
+
         <receiver android:name=".service.BootService" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

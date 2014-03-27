@@ -1326,7 +1326,7 @@
     <string name="external_storage">External Storage</string>
     <string name="system_root">System Root</string>
     <string name="sd_card">SD Card</string>
-    <string name="multi_file_creation">Placeholder creation</string>
+    <string name="multi_file_creation">Attaching files...</string>
     <string name="file">File</string>
     <string name="file_msg_received">Sent you a file</string>
     <string name="file_msg_sent">File</string>
@@ -1370,8 +1370,15 @@
 	<string name="sync_contacts">Sync contacts</string>
 	<string name="sync_contacts_hinttext">Tap to start a manual sync of contacts</string>
 	<string name="contacts_synced">Contacts synced</string>
-	<string name="contacts_sync_started">"Contacts sync started"</string>	
     <string name="compose_chat_heading">Create a new group</string>
     <string name="compose_chat_editText_hint">Type to filter names...</string>
-
+	<string name="contacts_sync_started">"Contacts sync started"</string>
+	<string name="add_friends_listview_header">"You have got %1$s contacts \n on hike. Nice!"</string>
+	<string name="contacts_on_hike_section">Contacts on hike</string>
+	<string name="recommended_contacts_section">Recommended contacts</string>
+	<string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of 20Rs. for each friend who joins.</string>
+	<string name="start_inviting_friends">Start inviting friends</string>
+	<string name="add_count_btn">Add(%1$s)</string>
+	<string name="all_contacts">All contacts</string>
+	<string name="blocked_contacts">Blocked contacts</string>
 </resources>

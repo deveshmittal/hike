@@ -109,5 +109,11 @@
 	<dimen name="file_thumbnail_size">150dp</dimen>
 	<dimen name="notification_bar_height">25dp</dimen>
 	<dimen name="gallery_selected_grid_height">150dp</dimen>
-	<dimen name="remove_selection_padding">10dp</dimen>	
+	<dimen name="remove_selection_padding">10dp</dimen>
+	<dimen name="hike_list_item_avtar">36dp</dimen>
+	<dimen name="addfriend_popup_content_height">128dp</dimen>
+	<dimen name="addfriend_popup_content_margin_top">35dp</dimen>
+	<dimen name="addfriend_popup_title_padding_right">32dp</dimen>
+	<dimen name="addfriend_popup_title_margin_bottom">16dp</dimen>
+	<dimen name="addfriend_popup_btn_margin_bottom">19dp</dimen>
 </resources>
