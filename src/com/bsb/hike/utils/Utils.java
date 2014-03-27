@@ -47,6 +47,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -103,6 +105,7 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Patterns;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -3793,5 +3796,21 @@ public class Utils
 		{
 			return false;
 		}
+	}
+
+		public static String getEmail(Context context)
+	{
+		String email = null;
+		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+		Account[] accounts = AccountManager.get(context).getAccounts();
+		for (Account account : accounts)
+		{
+			if (emailPattern.matcher(account.name).matches())
+			{
+				email = account.name;
+				break;
+			}
+		}
+		return email;
 	}
 }
