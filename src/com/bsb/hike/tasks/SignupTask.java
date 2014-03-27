@@ -469,7 +469,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						this.wait();
 					}
 				}
-				name = this.data;
 				
 				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				AccountUtils.setProfile(name, birthdate, isFemale);
