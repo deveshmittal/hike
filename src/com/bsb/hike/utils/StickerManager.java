@@ -849,9 +849,16 @@ public class StickerManager
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(size));
 			for (int i = 0; i < size; i++)
 			{
-				Sticker s = new Sticker();
-				s.deSerializeObj(in);
-				list.add(s);
+				try
+				{
+					Sticker s = new Sticker();
+					s.deSerializeObj(in);
+					list.add(s);
+				}
+				catch (Exception e)
+				{
+
+				}
 			}
 			in.close();
 			fileIn.close();
@@ -887,7 +894,14 @@ public class StickerManager
 				Iterator<Sticker> it = list.iterator();
 				while (it.hasNext())
 				{
-					it.next().serializeObj(out);
+					try
+					{
+						it.next().serializeObj(out);
+					}
+					catch (Exception e)
+					{
+
+					}
 				}
 			}
 			out.flush();
