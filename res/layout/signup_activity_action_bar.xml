@@ -24,7 +24,7 @@
     
     <LinearLayout
         android:id="@+id/next_btn_container"
-        android:layout_width="61dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:orientation="horizontal" >
@@ -40,6 +40,8 @@
             android:id="@+id/next_btn"
         	android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingLeft="14dp"
+        	android:paddingRight="14dp"
             android:shadowColor="#40000000"
         	android:shadowDy="1.0"
         	android:shadowRadius="1.0"

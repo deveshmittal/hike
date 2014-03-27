@@ -2405,7 +2405,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String metadataString = c1.getString(c1.getColumnIndex(DBConstants.MESSAGE_METADATA));
 				try
 				{
-					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadataString));
+					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadataString), false);
 
 					if (statusId.equals(messageMetadata.getStatusMessage().getMappedId()))
 					{
@@ -2487,7 +2487,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.GROUP_PARTICIPANT, groupParticipant);
 				try
 				{
-					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadata));
+					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadata), false);
 					contentValues.put(DBConstants.IS_STATUS_MSG, messageMetadata.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE);
 				}
 				catch (JSONException e)
@@ -2756,7 +2756,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					JSONObject fileJson = fileJsonArray.getJSONObject(0);
 
-					HikeFile hikeFile = new HikeFile(fileJson);
+					HikeFile hikeFile = new HikeFile(fileJson, false);
 
 					if (hikeFile.getThumbnail() == null)
 					{

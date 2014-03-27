@@ -268,12 +268,21 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				{
 					loadingText.setText(R.string.almost_there_signup);
 				}
+				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
 			case PIN:
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
+				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
 			case NAME:
 				prepareLayoutForGettingName(savedInstanceState, false);
+				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
+				break;
+			case GENDER:
+				prepareLayoutForGender(savedInstanceState);
+				break;
+			case SCANNING_CONTACTS:
+				prepareLayoutForScanning(savedInstanceState);
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -284,7 +293,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			{
 				showErrorMsg();
 			}
-			enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 		}
 		else
 		{
@@ -695,7 +703,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		countryPicker.setEnabled(true);
 		
 		setupCountryCodeData();
-		
+		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		String number = manager.getLine1Number();
+		if(number !=null)
+		{
+			enterEditText.setText(number);
+		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
 		loadingText.setText(R.string.hang_on);
@@ -1048,15 +1061,18 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	
 	private void setListeners()
 	{
-		enterEditText.setOnEditorActionListener(this);
-		enterEditText.setOnKeyListener(new OnKeyListener()
+		if(enterEditText != null)
 		{
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event)
+			enterEditText.setOnEditorActionListener(this);
+			enterEditText.setOnKeyListener(new OnKeyListener()
 			{
-				return loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
-			}
-		});
+				@Override
+				public boolean onKey(View v, int keyCode, KeyEvent event)
+				{
+					return loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -1068,7 +1084,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout!=null&&loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
-		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
+		if(enterEditText!=null)
+		{
+			outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
+		}
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		outState.putBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT, showingSecondLoadingTxt);
 		if (viewFlipper.getDisplayedChild() == NUMBER)
@@ -1138,6 +1157,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				prepareLayoutForGettingName(null, false);
 			}
 			break;
+		case PULLING_PIN:
+			break;
 		case PIN:
 			viewFlipper.setDisplayedChild(PIN);
 
@@ -1191,7 +1212,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					@Override
 					public void run()
 					{
-						loadingText.setText(R.string.setting_profile);
+						if(loadingText !=null)
+						{
+							loadingText.setText(R.string.setting_profile);
+						}
 					}
 				}, 500);
 			}
@@ -1203,7 +1227,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					@Override
 					public void run()
 					{
-						loadingText.setText(R.string.getting_in_signup);
+						if(loadingText !=null)
+						{
+							loadingText.setText(R.string.getting_in_signup);
+						}
 					}
 				}, 500);
 			}
@@ -1230,7 +1257,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event)
 	{
 		if ((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && !TextUtils.isEmpty(enterEditText.getText().toString().trim())
-				&& loadingLayout.getVisibility() != View.VISIBLE)
+				&& loadingLayout != null && loadingLayout.getVisibility() != View.VISIBLE)
 		{
 			if (viewFlipper.getDisplayedChild() == NAME)
 			{
@@ -1493,7 +1520,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				return;
 			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			File selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null); // create a file to save
+			File selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false); // create a file to save
 			// the image
 			if (selectedFileIcon != null)
 			{
@@ -1592,7 +1619,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{
 					isPicasaImage = true;
-					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null).getAbsolutePath();
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false).getAbsolutePath();
 				}
 				else
 				{
@@ -1812,7 +1839,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			countryPicker.setText(countryCode);
 			selectedCountryName.setText(countryName);
 		}
-		return !countryCode.isEmpty();
+		return !TextUtils.isEmpty(countryCode);
 	}
 	
 	private boolean isInvalidCountryCode(){

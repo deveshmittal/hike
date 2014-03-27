@@ -12,12 +12,19 @@ import com.bsb.hike.R;
 
 public final class WelcomeTutorialFragment extends Fragment
 {
-	int fragmentNum;
+	private int fragmentNum;
 	private boolean isMicromaxDevice;
 
-	public WelcomeTutorialFragment(int position, boolean isMicromaxDevice)
+	public static WelcomeTutorialFragment newInstance(int position, boolean isMicromaxDevice) {
+		WelcomeTutorialFragment fragment = new WelcomeTutorialFragment();
+	    fragment.setFragmentNum(position);
+	    fragment.setIsMicromaxDevice(isMicromaxDevice);
+	    return fragment;
+	}
+	
+	public WelcomeTutorialFragment()
 	{
-		fragmentNum = position;
+		fragmentNum = 0;
 		this.isMicromaxDevice = isMicromaxDevice;
 	}
 
@@ -49,8 +56,14 @@ public final class WelcomeTutorialFragment extends Fragment
 		return parent;
 	}
 
-	@Override
-	public void onSaveInstanceState(Bundle outState)
+	public void setFragmentNum(int fragmentNum)
 	{
+		this.fragmentNum = fragmentNum;
 	}
+	
+	public void setIsMicromaxDevice(boolean isMicromaxDevice)
+	{
+		this.isMicromaxDevice = isMicromaxDevice;
+	}
+
 }

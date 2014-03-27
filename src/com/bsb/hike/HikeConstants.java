@@ -499,14 +499,12 @@ public class HikeConstants
 	/* the max amount of time we allow the service to run in case of no activity */
 	public static final int DISCONNECT_TIME = 10 * 60;
 
+	/* the max amount of time we wait for the PIN */
+	public static final int PIN_CAPTURE_TIME = 10 * 1000;
+
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
 	
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
-
-	/*
-	 * the amount to wait before showing the PIN screen on non sim devices.
-	 */
-	public static final int NON_SIM_WAIT_TIME = 30 * 1000;
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
@@ -674,6 +672,8 @@ public class HikeConstants
 	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
 
 	public static final String OTHER_ROOT = "/hike Others";
+
+	public static final String SENT_ROOT = "/sent";
 
 	public static final String STICKERS_ROOT = "/stickers";
 
@@ -1053,6 +1053,8 @@ public class HikeConstants
 		public static final String SELECTED_COUNTRY = "selectedCountry";
 
 		public static final String MANUAL_SYNC = "manualSync";
+
+		public static final String IS_FTUT_ADD_FRIEND_POPUP_SHOWING = "isFtueAddFriendPopup";
 	}
 
 	public static final class LogEvent

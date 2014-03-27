@@ -200,7 +200,7 @@ public class UploadFileTask extends FileTransferBase
 						// fileName = cursor.getString(nameIdx);
 					}
 				}
-				destinationFile = Utils.getOutputMediaFile(hikeFileType, fileName);
+				destinationFile = Utils.getOutputMediaFile(hikeFileType, fileName, true);
 				if (TextUtils.isEmpty(fileName))
 				{
 					fileName = destinationFile.getName();
@@ -234,7 +234,7 @@ public class UploadFileTask extends FileTransferBase
 	{
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration,
-				sourceFilePath).serialize());
+				sourceFilePath, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
@@ -266,19 +266,19 @@ public class UploadFileTask extends FileTransferBase
 			if (hikeFile.getSourceFilePath() == null)
 			{
 				Log.d("This filepath: ", selectedFile.getPath());
-				Log.d("Hike filepath: ", Utils.getFileParent(hikeFileType));
+				Log.d("Hike filepath: ", Utils.getFileParent(hikeFileType, true));
 			}
 			else
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
-				if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType)))
+				if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = mFile;
 				}
 				else
 				{
 					boolean makeCopy = true;
-					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName);
+					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, true);
 					if (selectedFile == null)
 						throw new Exception(FileTransferManager.READ_FAIL);
 
@@ -296,12 +296,12 @@ public class UploadFileTask extends FileTransferBase
 							}
 							else
 							{
-								selectedFile = Utils.getOutputMediaFile(hikeFileType, null);
+								selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
 							}
 						}
 						else
 						{
-							selectedFile = Utils.getOutputMediaFile(hikeFileType, null);
+							selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
 						}
 					}
 					// Saving the file to hike local folder
@@ -380,7 +380,7 @@ public class UploadFileTask extends FileTransferBase
 	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration).serialize());
+		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;

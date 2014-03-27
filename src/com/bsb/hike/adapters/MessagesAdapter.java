@@ -43,18 +43,17 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ListAdapter;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -1126,7 +1125,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				createMediaThumb(holder.fileThumb);
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileExtension.setVisibility(View.VISIBLE);
-				holder.fileExtension.setText(MimeTypeMap.getFileExtensionFromUrl(hikeFile.getFile().getAbsolutePath()).toUpperCase());
+				holder.fileExtension.setText(Utils.getFileExtension(hikeFile.getFileName()).toUpperCase());
 			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail Dimensions
