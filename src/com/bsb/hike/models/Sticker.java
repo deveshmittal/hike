@@ -137,7 +137,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		else
 		{
 			Sticker st = (Sticker) object;
-			if (this.category.categoryId.equals(st.getCategory().categoryId) && this.stickerId.equals(st.getStickerId()))
+			if (this.category != null && this.category.categoryId.equals(st.getCategory().categoryId) && this.stickerId.equals(st.getStickerId()))
 			{
 				result = true;
 			}
@@ -149,7 +149,8 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public int hashCode()
 	{
 		int hash = 3;
-		hash = 7 * hash + this.category.categoryId.hashCode();
+		if(category != null)
+			hash = 7 * hash + this.category.categoryId.hashCode();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
 	}
