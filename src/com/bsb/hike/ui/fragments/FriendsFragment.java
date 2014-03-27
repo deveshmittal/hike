@@ -122,14 +122,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		}
 		else
 		{
-			Intent intent = new Intent(getActivity(), ChatThread.class);
-			if (contactInfo.getName() != null)
-			{
-				intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
-			}
-			intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
-			intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
-			startActivity(intent);
+			Utils.startChatThread(getActivity(), contactInfo);
 		}
 	}
 
