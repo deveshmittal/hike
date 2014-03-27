@@ -6,13 +6,11 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -20,6 +18,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
@@ -27,7 +26,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
-import com.bsb.hike.ui.fragments.WelcomeTutorialFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -112,7 +110,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		});
 
 		mPager = (ViewPager) findViewById(R.id.tutorial_pager);
-		mPager.setAdapter(new TutorialFragmentAdapter(getSupportFragmentManager()));
+		mPager.setAdapter(new TutorialPagerAdapter());
 
 		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
 		mIndicator.setViewPager(mPager);
@@ -206,20 +204,9 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		super.onBackPressed();
 	}
 
-	class TutorialFragmentAdapter extends FragmentPagerAdapter implements IconPagerAdapter
+	private class TutorialPagerAdapter extends PagerAdapter implements IconPagerAdapter
 	{
 		private int mCount = 3;
-
-		public TutorialFragmentAdapter(FragmentManager fm)
-		{
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position)
-		{
-			return WelcomeTutorialFragment.newInstance(position, isMicromaxDevice);
-		}
 
 		@Override
 		public int getCount()
@@ -232,6 +219,50 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 			return R.drawable.welcome_tutorial_icon_indecator;
 		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object)
+		{
+			// TODO Auto-generated method stub
+			return view == object;
+		}
+		
+		@Override
+		public Object instantiateItem(ViewGroup container, int position)
+		{
+			View parent = LayoutInflater.from(WelcomeActivity.this).inflate(R.layout.tutorial_fragments, null);
+			TextView tutorialHeader = (TextView) parent.findViewById(R.id.tutorial_title);
+			ImageView tutorialImage = (ImageView) parent.findViewById(R.id.tutorial_img);
+			ImageView micromaxImage = (ImageView) parent.findViewById(R.id.ic_micromax);
+			switch (position)
+			{
+			case 0:
+				tutorialHeader.setText(R.string.tutorial1_header_title);
+				tutorialImage.setBackgroundResource(R.drawable.tutorial1_img);
+				micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
+				break;
+			case 1:
+				tutorialHeader.setText(R.string.tutorial2_header_title);
+				tutorialImage.setBackgroundResource(R.drawable.tutorial2_img);
+				micromaxImage.setVisibility(View.GONE);
+				break;
+			case 2:
+				tutorialHeader.setText(R.string.tutorial3_header_title);
+				tutorialImage.setBackgroundResource(R.drawable.tutorial3_img);
+				micromaxImage.setVisibility(View.GONE);
+				break;
+			}
+			((ViewPager) container).addView(parent);
+			return parent;
+		}
+		
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object)
+		{
+			Log.d(getClass().getSimpleName(), "Item removed from position : " + position);
+			((ViewPager) container).removeView((View) object);
+		}
+
 
 	}
 	
