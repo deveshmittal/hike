@@ -857,7 +857,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		femaleText = (TextView) genderLayout.findViewById(R.id.female);
 		maleText = (TextView) genderLayout.findViewById(R.id.male);
 		genderDesctribeText = (TextView) genderLayout.findViewById(R.id.describe_txt);
-		if(mActivityState.isFemale == null )
+		if(savedInstanceState!=null && savedInstanceState.containsKey(HikeConstants.Extras.GENDER))
+		{
+			mActivityState.isFemale = savedInstanceState.getBoolean(HikeConstants.Extras.GENDER);
+			selectGender(mActivityState.isFemale);
+		}
+		if(mActivityState.isFemale == null)
 		{
 			genderDesctribeText.setText("");
 		}
@@ -891,15 +896,19 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			mActivityState.isFemale = false;
 		}
 		
-		femaleText.setSelected(mActivityState.isFemale);
-		maleText.setSelected(!mActivityState.isFemale);
-		
-		setGenderDescribeRandomText(mActivityState.isFemale);
-		
+		selectGender(mActivityState.isFemale);
 		if (mTask != null)
 		{
 			mTask.addGender(mActivityState.isFemale);
 		}
+	}
+
+	private void selectGender(Boolean isFemale)
+	{
+		femaleText.setSelected(mActivityState.isFemale);
+		maleText.setSelected(!mActivityState.isFemale);
+		
+		setGenderDescribeRandomText(mActivityState.isFemale);
 	}
 
 	private void setGenderDescribeRandomText(boolean isFemale)
@@ -1098,6 +1107,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		if (viewFlipper.getDisplayedChild() == NUMBER)
 		{
 			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
+		}
+		if (viewFlipper.getDisplayedChild() == GENDER && mActivityState.isFemale != null)
+		{
+			outState.putBoolean(HikeConstants.Extras.GENDER, mActivityState.isFemale);
 		}
 		super.onSaveInstanceState(outState);
 	}
