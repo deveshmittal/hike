@@ -35,6 +35,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -614,12 +615,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null));
 
-		ftueAddFriendWindow = findViewById(R.id.addfriend_popup);
+		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
+	    ftueAddFriendWindow = popupViewStub.inflate();
 
-		ImageView popUpImage = (ImageView) findViewById(R.id.popup_img);
-		TextView popUpTitle = (TextView) findViewById(R.id.popup_title);
-		TextView popUpMsg = (TextView) findViewById(R.id.popup_msg);
-		Button popUpAddButton = (Button) findViewById(R.id.add_btn);
+		ImageView popUpImage = (ImageView) ftueAddFriendWindow.findViewById(R.id.popup_img);
+		TextView popUpTitle = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_title);
+		TextView popUpMsg = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_msg);
+		Button popUpAddButton = (Button) ftueAddFriendWindow.findViewById(R.id.add_btn);
 		
 		if(isAddFriendsPopup)
 		{

@@ -52,5 +52,9 @@
         android:gravity="center"/>
     </RelativeLayout>
     
-    <include layout="@layout/addfriends_pop_up"/>
+    <ViewStub android:id="@+id/addfriends_popup_viewstub"
+         android:inflatedId="@+id/addfriend_popup"
+         android:layout="@layout/addfriends_pop_up"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent" />
 </FrameLayout>
