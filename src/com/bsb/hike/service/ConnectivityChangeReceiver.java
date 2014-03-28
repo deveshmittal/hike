@@ -15,7 +15,7 @@ public class ConnectivityChangeReceiver extends BroadcastReceiver
 	{
 		// TODO Auto-generated method stub
 		Log.d(getClass().getSimpleName(), "Connectivity Change Occured");
-		FileTransferManager.getInstance(context).setChunkSize();
+		FileTransferManager.getInstance(context).networkSwitched();
 	}
 
 }

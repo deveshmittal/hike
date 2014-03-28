@@ -389,6 +389,7 @@ public class UploadFileTask extends FileTransferBase
 	@Override
 	public FTResult call()
 	{
+		mThread  = Thread.currentThread();
 		try
 		{
 			initFileUpload();

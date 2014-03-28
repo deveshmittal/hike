@@ -59,6 +59,8 @@ public class DownloadFileTask extends FileTransferBase
 		if (_state == FTState.CANCELLED)
 			return FTResult.CANCELLED;
 		
+		mThread  = Thread.currentThread();
+		
 		try
 		{
 			tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");

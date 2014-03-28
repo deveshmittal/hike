@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.Thread.State;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -134,6 +136,20 @@ public class FileTransferManager
 			{
 				return 16 * 1024;
 			}
+		},
+		NO_NETWORK
+		{
+			@Override
+			public int getMaxChunkSize()
+			{
+				return 2 * 1024;
+			}
+
+			@Override
+			public int getMinChunkSize()
+			{
+				return 1 * 1024;
+			}
 		};
 
 		public abstract int getMaxChunkSize();
@@ -222,7 +238,7 @@ public class FileTransferManager
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
 		handler = new Handler(context.getMainLooper());
-		setChunkSize();
+		networkSwitched();
 	}
 
 	public static FileTransferManager getInstance(Context context)
@@ -539,6 +555,8 @@ public class FileTransferManager
 		NetworkInfo info = cm.getActiveNetworkInfo();
 		if (info != null)
 		{
+			if (!info.isConnected())
+				return NetworkType.NO_NETWORK;
 			// If device is connected via WiFi
 			if (info.getType() == ConnectivityManager.TYPE_WIFI)
 				return NetworkType.WIFI; // return 1024 * 1024;
@@ -572,12 +590,43 @@ public class FileTransferManager
 		}
 	}
 
-	// Set the limits of chunk sizes of files to transfer
-	public void setChunkSize()
+	public void networkSwitched()
 	{
 		NetworkType networkType = getNetworkType();
+		setChunkSize(networkType);
+		if(networkType != NetworkType.NO_NETWORK)
+			resumeAllTasks();
+	}
+
+	// Set the limits of chunk sizes of files to transfer
+	private void setChunkSize(NetworkType networkType)
+	{
 		maxChunkSize = networkType.getMaxChunkSize();
 		minChunkSize = networkType.getMinChunkSize();
+	}
+	
+	private void resumeAllTasks()
+	{
+		for(Entry<Long, FutureTask<FTResult>> entry : fileTaskMap.entrySet())
+		{
+			if(entry != null)
+			{
+				FutureTask<FTResult> obj = entry.getValue();
+				if (obj != null)
+				{
+					Thread t = ((MyFutureTask) obj).getTask().getThread();
+					if(t != null)
+					{
+						if (t.getState() == State.TIMED_WAITING)
+						{
+							Log.d(getClass().getSimpleName(), "interrupting the task: " + t.toString());
+							t.interrupt();
+						}
+					}
+				}
+			}
+			
+		}
 	}
 
 	public int getMaxChunkSize()
