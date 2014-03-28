@@ -498,7 +498,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		if (callmeBtn != null)
 		{
-			callmeBtn.setVisibility(View.GONE);
+			callmeBtn.setEnabled(false);
 		}
 	}
 
@@ -1193,6 +1193,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				invalidPin.setVisibility(View.VISIBLE);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
+				callmeBtn.setEnabled(true);
 				nextBtn.setEnabled(true);
 				enterEditText.setText("");
 			}
