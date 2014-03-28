@@ -51,6 +51,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		listview.setOnItemClickListener(this);
 		View header = LayoutInflater.from(this).inflate(
 				R.layout.addfriends_listview_header, null);
+		header.setOnClickListener(null);
 		TextView headerTextView = (TextView) header.findViewById(R.id.header_txt);
 		headerTextView.setText(getResources().getString(R.string.add_friends_listview_header, hikeContactsCount));
 		listview.addHeaderView(header);
