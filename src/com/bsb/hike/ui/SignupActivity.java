@@ -537,7 +537,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			return;
 		}
 		
-		if (enterEditText !=null && TextUtils.isEmpty(enterEditText.getText()))
+		if (enterEditText !=null && TextUtils.isEmpty(enterEditText.getText().toString().replaceAll(" ", "")))
 		{
 			int displayedChild = viewFlipper.getDisplayedChild();
 			int stringRes;
