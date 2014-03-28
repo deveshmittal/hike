@@ -348,7 +348,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		else if (displayedChild == PIN)
 		{
-			mActionBarTitle.setText(R.string.enter_pin);
+			mActionBarTitle.setText(R.string.pin);
 		}
 		else if (displayedChild == NAME)
 		{
