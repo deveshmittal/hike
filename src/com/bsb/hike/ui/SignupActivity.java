@@ -867,6 +867,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			genderDesctribeText.setText("");
 		}
 		nextBtnContainer.setVisibility(View.VISIBLE);
+		setupActionBarTitle();
 	}
 	private void prepareLayoutForScanning(Bundle savedInstanceState)
 	{
