@@ -991,7 +991,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.AUDIO)
 			{
-				createMediaThumb(holder.fileThumb);
+				createFileThumbWide(holder.fileThumb);
 				holder.fileThumb.setImageResource(R.drawable.ic_default_audio);
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				// holder.fileIcon.setBackgroundResource(R.drawable.ic_default_audio);
@@ -1122,7 +1122,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.OTHER)
 			{
-				createMediaThumb(holder.fileThumb);
+				createFileThumbWide(holder.fileThumb);
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileExtension.setVisibility(View.VISIBLE);
 				holder.fileExtension.setText(Utils.getFileExtension(hikeFile.getFileName()).toUpperCase());
@@ -1534,9 +1534,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
-					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
-							|| (hikeFile.getHikeFileType() == HikeFileType.LOCATION) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+					if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
+							|| (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
 					{
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					}
+					else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+					{
+						setFileTypeText(holder.fileType, hikeFile);
+						holder.fileType.setVisibility(View.VISIBLE);
 						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					}
 					else
@@ -1577,12 +1583,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
-				else if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
-						 || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+				else if((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
 					if(fss.getFTState() == FTState.COMPLETED)
 					{
 						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					}
+				}
+				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+				{
+					if(fss.getFTState() == FTState.COMPLETED)
+					{
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+						setFileTypeText(holder.fileType, hikeFile);
+						holder.fileType.setVisibility(View.VISIBLE);
 					}
 				}
 				else
@@ -2026,7 +2040,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Log.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
 		if (bytes < 0)
 			return ("");
-		if (bytes >= (1024 * 1000))
+		if (bytes >= (1000 * 1024))
 		{
 			int mb = bytes / (1024 * 1024);
 			int mbPoint = bytes % (1024 * 1024);
@@ -2093,7 +2107,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		if(holder.fileType != null)
 		{
-			setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
+			setFileTypeText(holder.fileType, hikeFile);
 			holder.fileType.setVisibility(View.VISIBLE);
 		}
 		if(holder.fileSize != null && hikeFile.getFileSize() > 0)
@@ -2132,18 +2146,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 	
-	private void setFileTypeText(TextView fileType, HikeFileType hikeFileType)
+	private void setFileTypeText(TextView fileType, HikeFile hikeFile)
 	{
+		HikeFileType hikeFileType = hikeFile.getHikeFileType();
 		if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			fileType.setText(R.string.recording);
-		else if (hikeFileType == HikeFileType.AUDIO)
-			fileType.setText(R.string.audio);
+//		else if (hikeFileType == HikeFileType.AUDIO)
+//			fileType.setText(R.string.audio);
 		else if (hikeFileType == HikeFileType.VIDEO)
 			fileType.setText(R.string.video);
 		else if (hikeFileType == HikeFileType.IMAGE)
 			fileType.setText(R.string.photo);
 		else
-			fileType.setText("File");
+			fileType.setText(hikeFile.getFileName());
 	}
 
 	private boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
@@ -2174,6 +2189,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
 		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
+		fileThumb.getLayoutParams().width = pixels;
+		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
+		fileThumb.setImageResource(0);
+	}
+	
+	private void createFileThumbWide(ImageView fileThumb)
+	{
+		// TODO Auto-generated method stub
+		Log.d(getClass().getSimpleName(), "creating default thumb wide. . . ");
+		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
+		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
+		fileThumb.getLayoutParams().height = pixels;
+		pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_wide_size);
+		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().width = pixels;
 		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
 		fileThumb.setImageResource(0);

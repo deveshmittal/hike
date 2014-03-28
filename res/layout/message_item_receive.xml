@@ -171,7 +171,7 @@
                     
 	                <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/file_extension"
-	                    android:layout_width="@dimen/file_message_item_size"
+	                    android:layout_width="@dimen/file_message_item_wide_size"
 	                    android:layout_height="@dimen/file_message_item_size"
 	                    android:layout_gravity="center"
 	                    android:gravity="center"
@@ -237,7 +237,8 @@
                             android:layout_height="match_parent"
                             android:layout_alignParentLeft="true"
                             android:gravity="left|center_vertical"
-                            android:layout_toLeftOf="@id/ft_action_button" >
+                            android:layout_toLeftOf="@id/ft_action_button"
+                            android:layout_alignWithParentIfMissing="true" >
 
                         <ImageView
                             android:id="@+id/audio_rec_ic"
@@ -258,7 +259,7 @@
 
                             <com.bsb.hike.view.CustomFontTextView
                                 android:id="@+id/file_type"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="#00000000"
                                 android:gravity="left"
@@ -266,7 +267,10 @@
                                 android:layout_marginTop="-2dp"
                                 android:textSize="10dp"
                                 android:textStyle="bold"
-                                android:visibility="gone" />
+                                android:visibility="gone"
+                                android:maxWidth="115dp"
+                                android:maxLines="1"
+                                android:ellipsize="middle" />
 
                             <com.bsb.hike.view.CustomFontTextView
                                 android:id="@+id/file_size"

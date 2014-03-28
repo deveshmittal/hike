@@ -159,7 +159,7 @@ public class DownloadFileTask extends FileTransferBase
 				// Make sure the response code is in the 200 range.
 				if (resCode / 100 != 2)
 				{
-					Log.d(getClass().getSimpleName(), "Server response code is not in 200 range");
+					Log.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();
 					res = FTResult.SERVER_ERROR;
 				}
