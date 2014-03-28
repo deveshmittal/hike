@@ -776,7 +776,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				protected List<StatusMessage> doInBackground(Void... params)
 				{
 					StatusMessage statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 1)).getStatusMessage();
-					
+
 					if (statusMessage != null && statusMessage.getId() == HikeConstants.JOINED_HIKE_STATUS_ID)
 					{
 						statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 2)).getStatusMessage();
@@ -791,7 +791,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 							(int) statusMessage.getId(), mLocalMSISDN);
 					if (!olderMessages.isEmpty() && isLastMessageJoinedHike)
 					{
-						olderMessages.add(((ProfileStatusItem)getJoinedHikeStatus(contactInfo)).getStatusMessage());
+						olderMessages.add(((ProfileStatusItem) getJoinedHikeStatus(contactInfo)).getStatusMessage());
 					}
 					return olderMessages;
 				}
@@ -1888,8 +1888,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private ProfileItem getJoinedHikeStatus(ContactInfo contactInfo)
 	{
-		return new ProfileItem.ProfileStatusItem(new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(), getString(R.string.joined_hike_update),
-				StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime()));
+		return new ProfileItem.ProfileStatusItem(new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
+				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime()));
 	}
 
 	@Override
