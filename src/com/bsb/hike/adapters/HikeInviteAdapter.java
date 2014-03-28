@@ -175,7 +175,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 							}
 						}
 					}
-					if (shouldShowExtraElement(textToBeFiltered))
+					if (section+1 == completeSectionsData.size() && shouldShowExtraElement(textToBeFiltered))
 					{
 						filteredContacts.add(null);
 					}
