@@ -269,7 +269,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)
 			{
-				bigPicImageLoader.loadImage(msisdn, viewHolder.image);
+				bigPicImageLoader.loadImage(msisdn, viewHolder.image, isListFlinging);
 			}
 			else
 			{
@@ -457,7 +457,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 			viewHolder.image.setTag(imageViewerInfo2);
 
-			bigPicImageLoader.loadImage(profilePicStatusUpdate.getMappedId(), viewHolder.image);
+			bigPicImageLoader.loadImage(profilePicStatusUpdate.getMappedId(), viewHolder.image, isListFlinging);
 
 			viewHolder.timeStamp.setText(profilePicStatusUpdate.getTimestampFormatted(true, context));
 

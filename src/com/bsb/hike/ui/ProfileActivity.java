@@ -743,9 +743,25 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	boolean loadingMoreMessages;
 
+	private int previousFirstVisibleItem;
+
+	private int velocity;
+
+	private long previousEventTime;
+
 	@Override
 	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
+		if (previousFirstVisibleItem != firstVisibleItem)
+		{
+			long currTime = System.currentTimeMillis();
+			long timeToScrollOneElement = currTime - previousEventTime;
+			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+			previousFirstVisibleItem = firstVisibleItem;
+			previousEventTime = currTime;
+		}
+
 		if (!reachedEnd && !loadingMoreMessages && !profileItems.isEmpty()
 				&& (firstVisibleItem + visibleItemCount) >= (profileItems.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
@@ -823,7 +839,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		if (profileAdapter != null)
 		{
 			Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
-			profileAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+			profileAdapter.setIsListFlinging(velocity > 10 && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		}
 		/*
 		 * // Pause fetcher to ensure smoother scrolling when flinging if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) { // Before Honeycomb pause image loading

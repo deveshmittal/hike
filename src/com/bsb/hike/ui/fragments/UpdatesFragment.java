@@ -58,6 +58,12 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 	private String[] friendMsisdns;
 
+	private int previousFirstVisibleItem;
+
+	private long previousEventTime;
+
+	private int velocity;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -153,6 +159,17 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
+		if (previousFirstVisibleItem != firstVisibleItem)
+		{
+			long currTime = System.currentTimeMillis();
+			long timeToScrollOneElement = currTime - previousEventTime;
+			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+			previousFirstVisibleItem = firstVisibleItem;
+			previousEventTime = currTime;
+		}
+
+
 		if (!reachedEnd && !loadingMoreMessages && !statusMessages.isEmpty()
 				&& (firstVisibleItem + visibleItemCount) >= (statusMessages.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
@@ -212,7 +229,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 		Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
-		centralTimelineAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		centralTimelineAdapter.setIsListFlinging(velocity > 10 && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		/*
 		 * // Pause fetcher to ensure smoother scrolling when flinging if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) { // Before Honeycomb pause image loading
 		 * on scroll to help with performance if (!Utils.hasHoneycomb()) { if(centralTimelineAdapter != null) { centralTimelineAdapter.getTimelineImageLoader().setPauseWork(true);

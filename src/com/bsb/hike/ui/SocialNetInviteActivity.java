@@ -381,15 +381,28 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 	OnScrollListener scrollListener = new OnScrollListener()
 	{
+		private int previousFirstVisibleItem;
+		private int velocity;
+		private long previousEventTime;
+
 		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState)
 		{
-			adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+			adapter.setIsListFlinging(velocity > 10 && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		}
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 		{
+			if (previousFirstVisibleItem != firstVisibleItem)
+			{
+				long currTime = System.currentTimeMillis();
+				long timeToScrollOneElement = currTime - previousEventTime;
+				velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+				previousFirstVisibleItem = firstVisibleItem;
+				previousEventTime = currTime;
+			}
 		}
 	};
 
