@@ -788,6 +788,10 @@ public class HikeConstants
 	
 	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
+	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
+
+	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

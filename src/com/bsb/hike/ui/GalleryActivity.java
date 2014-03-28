@@ -293,7 +293,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		adapter.setIsListFlinging(velocity > 10 && scrollState == OnScrollListener.SCROLL_STATE_FLING);
+		adapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 	}
 
 	@Override

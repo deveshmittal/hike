@@ -373,7 +373,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				/*
 				 * Only set flinging true if the list is actually flinging and the velocity is greater than 10.
 				 */
-				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > 10);
+				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES);
 			}
 
 			@Override
