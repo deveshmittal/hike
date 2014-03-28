@@ -234,4 +234,5 @@
     <color name="red_no_network">#ffee5953</color>
     <color name="blue_hike">#0f8fe1</color>
     <color name="light_gray_hike">#e7e8e9</color>
+    <color name="transparent_white_ab">#3dffffff</color>
 </resources>
