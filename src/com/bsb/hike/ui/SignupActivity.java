@@ -710,8 +710,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		setupCountryCodeData();
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		String number = manager.getLine1Number();
-		if(number !=null)
+		if(number !=null && number.startsWith("+91"))
 		{
+			number = number.replace("+91", "");
 			enterEditText.setText(number);
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
