@@ -617,6 +617,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 							startLoading();
 							dialog.cancel();
+							if(Utils.densityMultiplier < 1.5 )
+							{
+								Utils.hideSoftKeyboard(SignupActivity.this, enterEditText);
+							}
 						}
 					});
 					builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
