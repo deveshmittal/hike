@@ -12,11 +12,9 @@ import android.text.Spannable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.utils.SpanUtil;
-import com.google.android.gms.internal.ed;
 
 public class TagEditText extends EditText
 {
