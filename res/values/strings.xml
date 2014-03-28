@@ -816,4 +816,5 @@
 	<string name="add_count_btn">Add(%1$s)</string>
 	<string name="all_contacts">All contacts</string>
 	<string name="blocked_contacts">Blocked contacts</string>
+	<string name="friend_requests_sent">Friend requests sent</string>
 </resources>

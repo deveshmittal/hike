@@ -131,12 +131,20 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 			else
 			{
 				favoriteType = FavoriteType.REQUEST_SENT;
-				Toast.makeText(this, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
 			}
 
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);					
 		}
+		if(contacts.size() > 1)
+		{
+			Toast.makeText(this, R.string.friend_requests_sent, Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Toast.makeText(this, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
+		}
+
 	}
 
 	@Override
