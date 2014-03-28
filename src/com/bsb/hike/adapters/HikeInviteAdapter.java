@@ -224,7 +224,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		{
 			return filterString.matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
-		return super.isEnabled(position);
+		return true;
 	}
 
 	@Override
