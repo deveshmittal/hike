@@ -1055,6 +1055,8 @@ public class HikeConstants
 		public static final String MANUAL_SYNC = "manualSync";
 
 		public static final String IS_FTUT_ADD_FRIEND_POPUP_SHOWING = "isFtueAddFriendPopup";
+
+		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
 	}
 
 	public static final class LogEvent

@@ -275,6 +275,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			case PIN:
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
 				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
+				if(savedInstanceState.getBoolean(HikeConstants.Extras.SHOWING_INVALID_PIN_ERROR, false)){
+					invalidPin.setVisibility(View.VISIBLE);
+				}
 				break;
 			case NAME:
 				prepareLayoutForGettingName(savedInstanceState, false);
@@ -490,6 +493,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		if (invalidNum != null)
 		{
 			invalidNum.setVisibility(View.GONE);
+		}
+		if (invalidPin != null)
+		{
+			invalidPin.setVisibility(View.INVISIBLE);
 		}
 		if (countryPicker != null)
 		{
@@ -1106,6 +1113,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		outState.putBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT, showingSecondLoadingTxt);
+		outState.putBoolean(HikeConstants.Extras.SHOWING_INVALID_PIN_ERROR, invalidPin!=null && invalidPin.getVisibility()==View.VISIBLE);
 		if (viewFlipper.getDisplayedChild() == NUMBER)
 		{
 			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
