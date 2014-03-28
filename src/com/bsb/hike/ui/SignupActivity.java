@@ -19,8 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -56,7 +54,6 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -808,11 +805,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		initializeViews(nameLayout);
 
-		if (mActivityState.birthday != null)
-		{
-			onDateSetListener.onDateSet(null, mActivityState.birthday.year, mActivityState.birthday.month - 1, mActivityState.birthday.day);
-		}
-
 		Session session = Session.getActiveSession();
 		if (session == null)
 		{
@@ -944,88 +936,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		genderDesctribeText.setText(describeStringRes);
 	}
-
-	public void onBirthdayClick(View v)
-	{
-
-		int day;
-		int month;
-		int year;
-
-		Calendar calendar = Calendar.getInstance();
-
-		if (mActivityState.birthday == null)
-		{
-			/*
-			 * Default values for birthday
-			 */
-			day = 1;
-			month = 0;
-			year = 1990;
-		}
-		else
-		{
-			day = mActivityState.birthday.day;
-			month = mActivityState.birthday.month;
-			year = mActivityState.birthday.year;
-		}
-
-		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener, year, month, day);
-		if (Utils.isHoneycombOrHigher())
-		{
-			dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
-		}
-		dialog.show();
-	}
-
-	private OnDateSetListener onDateSetListener = new OnDateSetListener()
-	{
-
-		@Override
-		public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
-		{
-			if (birthdayText == null)
-			{
-				return;
-			}
-			Calendar calendar = Calendar.getInstance();
-			boolean thisYear = false;
-
-			if (year >= calendar.get(Calendar.YEAR))
-			{
-				year = calendar.get(Calendar.YEAR);
-				thisYear = true;
-			}
-
-			if (thisYear)
-			{
-				boolean thisMonth = false;
-				if (monthOfYear >= calendar.get(Calendar.MONTH))
-				{
-					monthOfYear = calendar.get(Calendar.MONTH);
-					thisMonth = true;
-				}
-
-				if (thisMonth)
-				{
-					if (dayOfMonth > calendar.get(Calendar.DAY_OF_MONTH))
-					{
-						dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-					}
-				}
-			}
-
-			birthdayText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-
-			mActivityState.birthday = new Birthday(dayOfMonth, monthOfYear + 1, year);
-			if (mTask != null)
-			{
-				mTask.addBirthdate(mActivityState.birthday);
-			}
-
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-		}
-	};
 
 	private void resetViewFlipper()
 	{
