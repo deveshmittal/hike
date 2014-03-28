@@ -314,8 +314,24 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		mTask = SignupTask.startTask(this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
+		setWindowSoftInputState();
 	}
 	
+	private void setWindowSoftInputState()
+	{
+		int displayedChild = viewFlipper.getDisplayedChild();
+		switch (displayedChild)
+		{
+		case GENDER:
+		case SCANNING_CONTACTS:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+			break;
+		default:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+			break;
+		}
+	}
+
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
