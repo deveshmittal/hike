@@ -80,13 +80,12 @@ import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageState;
 
-public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener, OnLongClickListener,
-		OnItemLongClickListener, OnScrollListener, View.OnClickListener
+public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
+		View.OnClickListener
 {
 
 	private EditText mNameEdit;
@@ -1284,73 +1283,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				saveChanges();
 			}
-			break;
-		}
-	}
-
-	public void onChangeImageClicked(View v)
-	{
-		/*
-		 * The user wants to change their profile picture. Open a dialog to allow them pick Camera or Gallery
-		 */
-		final CharSequence[] items = getResources().getStringArray(R.array.profile_pic_dialog);
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.choose_picture);
-		builder.setItems(items, this);
-		builder.show();
-	}
-
-	@Override
-	public void onClick(DialogInterface dialog, int item)
-	{
-		Intent intent = null;
-		switch (item)
-		{
-		case HikeConstants.PROFILE_PICTURE_FROM_CAMERA:
-			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
-			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!Utils.hasEnoughFreeSpaceForProfilePic())
-			{
-				Toast.makeText(getApplicationContext(), R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false); // create a file to save the image
-			if (selectedFileIcon != null)
-			{
-				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
-
-				/*
-				 * Saving the file path. Will use this to get the file once the image has been captured.
-				 */
-				Editor editor = preferences.edit();
-				editor.putString(HikeMessengerApp.FILE_PATH, selectedFileIcon.getAbsolutePath());
-				editor.commit();
-
-				startActivityForResult(intent, HikeConstants.CAMERA_RESULT);
-			}
-			else
-			{
-				Toast.makeText(this, getString(R.string.no_sd_card), Toast.LENGTH_LONG).show();
-			}
-			break;
-		case HikeConstants.PROFILE_PICTURE_FROM_GALLERY:
-			if (Utils.getExternalStorageState() == ExternalStorageState.NONE)
-			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!Utils.hasEnoughFreeSpaceForProfilePic())
-			{
-				Toast.makeText(getApplicationContext(), R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			intent = new Intent(Intent.ACTION_PICK);
-			intent.setType("image/*");
-			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
 			break;
 		}
 	}
