@@ -36,5 +36,7 @@
 	<dimen name="gift_card_height">216dp</dimen>
 	<dimen name="signup_gender_padding_top">7dp</dimen>
 	<dimen name="signup_gender_drawable_padding">7dp</dimen>
+	<dimen name="signup_header_height">70dp</dimen>
+	
 	
 </resources>
