@@ -1205,7 +1205,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			if (value != null && value.equals(HikeConstants.ADDRESS_BOOK_ERROR))
 			{
 				addressBookError = true;
-				if (loadingLayout.getVisibility() == View.VISIBLE)
+				if (loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE)
 				{
 					showErrorMsg();
 				}
