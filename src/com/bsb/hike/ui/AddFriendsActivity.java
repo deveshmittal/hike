@@ -76,7 +76,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		List<ContactInfo> recommendedContacts = new ArrayList<ContactInfo>();
 		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
-			recommendedContacts = HikeUserDatabase.getInstance().getHikeContacts(100, recommendedContactsSelection, null, msisdn);
+			recommendedContacts = HikeUserDatabase.getInstance().getHikeContacts(-1, recommendedContactsSelection, null, msisdn);
 			recommendedContacts.removeAll(friendsList);
 			sectionsData.put(0, recommendedContacts);
 		}
