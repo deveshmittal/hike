@@ -638,6 +638,13 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 						Utils.hideSoftKeyboard(this, enterEditText);
 					}
 					mTask.addUserInput(input);
+					if(birthdayText!=null && !TextUtils.isEmpty(birthdayText.getText().toString()))
+					{
+						Calendar calendar = Calendar.getInstance();
+						int currentYear = calendar.get(Calendar.YEAR);
+						mActivityState.birthday = new Birthday(1, 1, currentYear - Integer.valueOf(birthdayText.getText().toString()));
+						mTask.addBirthdate(mActivityState.birthday);
+					}
 				}
 			}
 		}
@@ -1423,10 +1430,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 							if (!TextUtils.isEmpty(birthdayString))
 							{
 								Date date = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).parse(user.getBirthday());
-								Calendar calendar = Calendar.getInstance();
-								calendar.setTime(date);
-
-								onDateSetListener.onDateSet(null, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+								if(date.compareTo(Calendar.getInstance().getTime()) <= 0)
+								{
+									Calendar calendar = Calendar.getInstance();
+									calendar.setTime(date);
+									mActivityState.birthday = new Birthday(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
+									mTask.addBirthdate(mActivityState.birthday);
+									birthdayText.setText(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - mActivityState.birthday.year));
+								}
 							}
 
 						}
