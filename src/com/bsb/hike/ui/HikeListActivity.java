@@ -364,7 +364,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean,ContactInfo>>>();
 			contactList.removeAll(firstSectionList);
-			if(!(type == Type.INVITE && firstSectionList.isEmpty()))
+			if(!firstSectionList.isEmpty())
 			{
 				completeSectionsData.put(0,firstSectionList);
 			}

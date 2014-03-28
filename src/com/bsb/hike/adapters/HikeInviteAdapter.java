@@ -286,7 +286,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			}
 			else
 			{
-				textView.setText(R.string.blocked_contacts);
+				textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.blocked_contacts);
 			}
 			break;
 		case 1:
