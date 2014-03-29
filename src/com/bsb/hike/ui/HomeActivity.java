@@ -40,6 +40,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowManager.BadTokenException;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -136,6 +137,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private View ftueAddFriendWindow;
 	
 	private boolean shouldShowAddFriendsPopup = true;
+	
+	private boolean isAddFriendFtueShowing = false;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -172,7 +175,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
 		
-		shouldShowAddFriendsPopup = savedInstanceState!=null?savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING):false;
+		shouldShowAddFriendsPopup = false;
+		if(savedInstanceState!=null)
+		{
+			shouldShowAddFriendsPopup = savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING);
+			isAddFriendFtueShowing = shouldShowAddFriendsPopup;
+		}
 		
 		if (!showingProgress)
 		{
@@ -715,6 +723,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
 				findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
 				getSupportActionBar().hide();
+				
+				/*
+				 * here if condition is used to not show this slide up animation on orientation changes
+				 */
+				if(!isAddFriendFtueShowing)
+				{
+					View popup = ftueAddFriendWindow.findViewById(R.id.popup);
+					Animation anim = AnimationUtils.loadAnimation(HomeActivity.this, R.anim.slide_up_noalpha);
+					anim.setInterpolator(new AccelerateDecelerateInterpolator());
+					anim.setDuration(600);
+					popup.setAnimation(anim);
+				}
 
 				
 			}
