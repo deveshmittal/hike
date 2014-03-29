@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:minHeight="30dp" 
     android:paddingBottom="2dp"
-    android:descendantFocusability="blocksDescendants">
+    android:descendantFocusability="blocksDescendants" xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike">
 
     <LinearLayout
 		android:layout_marginBottom="5dp"
@@ -79,12 +79,34 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_download_failed"
                 android:visibility="invisible" />
-
+            
+            <RelativeLayout
+                android:id="@+id/circular_progress_bg_ext"
+                android:layout_width="46dp"
+	            android:layout_height="46dp"
+	            android:background="@drawable/ic_ft_spinner_bg"
+	            android:layout_centerVertical="true"
+	            android:layout_marginRight="13dp"
+	            android:gravity="center"
+	            android:visibility="gone" >
+	            <com.bsb.hike.view.CircularProgress3
+	               android:id="@+id/circular_progress_ext"
+	               android:layout_width="46dp"
+	               android:layout_height="46dp"
+	               app:progress_color="@color/white_65"
+	               app:progress_background_color="@color/white_45"
+	               android:gravity="center"
+	               app:progress="0.4"
+	               app:stroke_width="3dp"
+	               app:marker_visible="false"
+	               app:thumb_visible="false" />
+            </RelativeLayout>
+          
             <RelativeLayout
                 android:id="@+id/sent_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
+                android:layout_toRightOf="@id/circular_progress_bg_ext"
                 android:background="@drawable/ic_bubble_green_selector" >
 
                 <LinearLayout
@@ -128,6 +150,27 @@
                         android:background="@drawable/bg_blue_btn"
                         android:scaleType="centerInside"
                         android:visibility="gone" />
+                    
+                     <RelativeLayout
+		                android:id="@+id/circular_progress_bg"
+		                android:layout_width="56dp"
+			            android:layout_height="56dp"
+			            android:background="@drawable/ic_ft_spinner_bg"
+			            android:gravity="center"
+			            android:layout_centerInParent="true"
+			            android:visibility="gone" >
+			            <com.bsb.hike.view.CircularProgress3
+			               android:id="@+id/circular_progress"
+			               android:layout_width="56dp"
+			               android:layout_height="56dp"
+			               app:progress_color="@color/white_65"
+			               app:progress_background_color="@color/white_45"
+			               android:gravity="center"
+			               app:progress="0.4"
+			               app:stroke_width="3dp"
+			               app:marker_visible="false"
+			               app:thumb_visible="false" />
+            		</RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/overlayBg"

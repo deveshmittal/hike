@@ -93,6 +93,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.view.CircularProgress3;
 import com.bsb.hike.view.CustomProgressBar;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
@@ -164,6 +165,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ViewGroup typingAvatarContainer;
 
 		// @GM View Items needed for pause/resume overlay
+		CircularProgress3 circularProgress;
+		
+		CircularProgress3 circularProgressExt;
+		
+		View circularProgressBg;
+		
+		View circularProgressBgExt;
+		
 		View overlayBg;
 
 		ImageView ftAction;
@@ -518,6 +527,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay); 
 				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
 				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
+				holder.circularProgress = (CircularProgress3) v.findViewById(R.id.circular_progress);
+				holder.circularProgressExt = (CircularProgress3) v.findViewById(R.id.circular_progress_ext);
+				holder.circularProgressBg = (View) v.findViewById(R.id.circular_progress_bg);
+				holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_progress_bg_ext);
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null)
@@ -578,6 +591,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
+
+				holder.circularProgress = (CircularProgress3) v.findViewById(R.id.circular_progress);
+				holder.circularProgressExt = (CircularProgress3) v.findViewById(R.id.circular_progress_ext);
+				holder.circularProgressBg = (View) v.findViewById(R.id.circular_progress_bg);
+				holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_progress_bg_ext);
 			case RECEIVE:
 				if (v == null)
 				{
@@ -2121,29 +2139,46 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		int progressUpdate = 0;
-		if (fss.getTotalSize() > 0)
-			progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
-		
-		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
+		if((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO))
 		{
-			showTransferInitialization(holder, hikeFile);
-			holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
+			holder.circularProgress.setProgress(progress * 0.01f);
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else
 		{
-			if (fss.getTransferredSize() == 0)
-			{
-				showFileDetails(holder, hikeFile);
-			}
-			else
-			{
-				holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
-				holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
-				holder.dataTransferred.setVisibility(View.VISIBLE);
-				holder.barProgress.setVisibility(View.VISIBLE);
-			}
+			holder.circularProgressExt.setProgress(progress * 0.01f);
+			holder.circularProgressExt.setVisibility(View.VISIBLE);
+			holder.circularProgressBgExt.setVisibility(View.VISIBLE);
 		}
+//		int progressUpdate = 0;
+//		if (fss.getTotalSize() > 0)
+//			progressUpdate = (int) ((chunkSize * 100) / fss.getTotalSize());
+//		
+//		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
+//		{
+//			showTransferInitialization(holder, hikeFile);
+//			holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
+//		}
+//		else
+//		{
+//			if (fss.getTransferredSize() == 0)
+//			{
+//				showFileDetails(holder, hikeFile);
+//			}
+//			else
+//			{
+//				holder.dataTransferred.setText(dataDisplay(fss.getTransferredSize()) + "/" + dataDisplay(fss.getTotalSize()));
+//				holder.barProgress.setAnimatedProgress(progress, progress + progressUpdate, 6000, msgId);
+//				holder.dataTransferred.setVisibility(View.VISIBLE);
+//				holder.barProgress.setVisibility(View.VISIBLE);
+//				if(holder.circularProgress != null)
+//				{
+//				holder.circularProgress.setProgress(progress * 0.01f);
+//				holder.circularProgress.setVisibility(View.VISIBLE);
+//				}
+//			}
+//		}
 	}
 	
 	private void setFileTypeText(TextView fileType, HikeFile hikeFile)

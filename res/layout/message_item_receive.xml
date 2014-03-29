@@ -161,6 +161,7 @@
 	                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
+                    
 
 	                <com.bsb.hike.ui.utils.RecyclingImageView
 	                    android:id="@+id/file_thumb"
@@ -190,6 +191,29 @@
                         android:background="@drawable/bg_blue_btn"
                         android:scaleType="centerInside"
                         android:visibility="gone" />
+                    
+                    
+	                <RelativeLayout
+		                android:id="@+id/circular_progress_bg"
+		                android:layout_width="56dp"
+			            android:layout_height="56dp"
+			            android:background="@drawable/ic_ft_spinner_bg"
+			            android:visibility="gone"
+			            android:gravity="center"
+			            android:layout_centerInParent="true" >
+			            <com.bsb.hike.view.CircularProgress3
+			               xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
+			               android:id="@+id/circular_progress"
+			               android:layout_width="56dp"
+			               android:layout_height="56dp"
+			               app:progress_color="@color/white_65"
+			               app:progress_background_color="@color/white_45"
+			               android:gravity="center"
+			               app:progress="0.4"
+			               app:stroke_width="3dp"
+			               app:marker_visible="false"
+			               app:thumb_visible="false" />
+            		</RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/overlayBg"
@@ -432,6 +456,31 @@
                 android:visibility="gone" />
 			
 	        </RelativeLayout>
+	        
+	        <RelativeLayout
+                android:id="@+id/circular_progress_bg_ext"
+                android:layout_width="46dp"
+	            android:layout_height="46dp"
+	            android:background="@drawable/ic_ft_spinner_bg"
+	            android:layout_centerVertical="true"
+	            android:layout_marginLeft="13dp"
+	            android:layout_toRightOf="@id/receive_message_container"
+	            android:visibility="gone"
+	            android:gravity="center" >
+	            <com.bsb.hike.view.CircularProgress3
+	               xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
+			       android:id="@+id/circular_progress_ext"
+	               android:layout_width="46dp"
+	               android:layout_height="46dp"
+	               app:progress_color="@color/white_65"
+	               app:progress_background_color="@color/white_45"
+	               android:gravity="center"
+	               app:progress="0.4"
+	               app:stroke_width="3dp"
+	               app:marker_visible="false"
+	               app:thumb_visible="false" />
+            </RelativeLayout>
+            
 	        <ImageView
 	             android:id="@+id/poke_receive_custom"
 	             android:layout_width="wrap_content"
