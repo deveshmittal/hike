@@ -626,68 +626,78 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void showFTUEAddFtriendsPopup()
 	{
-		boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null));
-
+		
 		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
-	    ftueAddFriendWindow = popupViewStub.inflate();
-
-		ImageView popUpImage = (ImageView) ftueAddFriendWindow.findViewById(R.id.popup_img);
-		TextView popUpTitle = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_title);
-		TextView popUpMsg = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_msg);
-		Button popUpAddButton = (Button) ftueAddFriendWindow.findViewById(R.id.add_btn);
-		
-		if(isAddFriendsPopup)
+	    popupViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
 		{
-			popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
-			popUpTitle.setText(R.string.friends_on_hike_tut);
-			popUpMsg.setText(R.string.add_friend_popup_msg);
-			popUpAddButton.setText(R.string.start_adding);
-			/*
-			 * This tag value true represents weather this popup is Add Friends popup
-			 * and false represents that this popup is invite Friends popup
-			 */
-			popUpAddButton.setTag(true);
-		}
-		else
-		{
-			popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
-			popUpTitle.setText(R.string.invite_friends);
-			popUpMsg.setText(R.string.ftue_invite_friends_msg);
-			popUpAddButton.setText(R.string.start_inviting_friends);
-			popUpAddButton.setTag(false);
-		}
-		
-		findViewById(R.id.popup_black_overlay).setOnClickListener(null);
-		popUpAddButton.setOnClickListener(new OnClickListener()
-		{
-			
+	    	boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null));
 			@Override
-			public void onClick(View v)
+			public void onInflate(ViewStub stub, View inflated)
 			{
-				boolean isAddFriendsPopup = (Boolean) v.getTag();
-				Intent intent = new Intent(HomeActivity.this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
-				startActivity(intent);
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-				editor.commit();
-				(new Handler()).postDelayed(new Runnable()
+				ftueAddFriendWindow = inflated;
+				ImageView popUpImage = (ImageView) ftueAddFriendWindow.findViewById(R.id.popup_img);
+				TextView popUpTitle = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_title);
+				TextView popUpMsg = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_msg);
+				Button popUpAddButton = (Button) ftueAddFriendWindow.findViewById(R.id.add_btn);
+				
+				if(isAddFriendsPopup)
+				{
+					popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
+					popUpTitle.setText(R.string.friends_on_hike_tut);
+					popUpMsg.setText(R.string.add_friend_popup_msg);
+					popUpAddButton.setText(R.string.start_adding);
+					/*
+					 * This tag value true represents weather this popup is Add Friends popup
+					 * and false represents that this popup is invite Friends popup
+					 */
+					popUpAddButton.setTag(true);
+				}
+				else
+				{
+					popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
+					popUpTitle.setText(R.string.invite_friends);
+					popUpMsg.setText(R.string.ftue_invite_friends_msg);
+					popUpAddButton.setText(R.string.start_inviting_friends);
+					popUpAddButton.setTag(false);
+				}
+				
+				findViewById(R.id.popup_black_overlay).setOnClickListener(null);
+				popUpAddButton.setOnClickListener(new OnClickListener()
 				{
 					
 					@Override
-					public void run()
+					public void onClick(View v)
 					{
-						getSupportActionBar().show();
-						findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+						boolean isAddFriendsPopup = (Boolean) v.getTag();
+						Intent intent = new Intent(HomeActivity.this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
+						startActivity(intent);
+						Editor editor = accountPrefs.edit();
+						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
+						editor.commit();
+						(new Handler()).postDelayed(new Runnable()
+						{
+							
+							@Override
+							public void run()
+							{
+								getSupportActionBar().show();
+								findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+							}
+						}, 500);
+						ftueAddFriendWindow.setVisibility(View.GONE);
 					}
-				}, 500);
-				ftueAddFriendWindow.setVisibility(View.GONE);
+				});
+
+				ftueAddFriendWindow.setVisibility(View.VISIBLE);
+				findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
+				findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
+				getSupportActionBar().hide();
+
+				
 			}
 		});
+	    popupViewStub.inflate();
 
-		ftueAddFriendWindow.setVisibility(View.VISIBLE);
-		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
-		findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
-		getSupportActionBar().hide();
 	}
 
 	@Override
