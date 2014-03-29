@@ -811,7 +811,7 @@
 	<string name="add_friends_listview_header">"You have got %1$s contacts \n on hike. Nice!"</string>
 	<string name="contacts_on_hike_section">Contacts on hike</string>
 	<string name="recommended_contacts_section">Recommended contacts</string>
-	<string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of 20Rs. for each friend who joins.</string>
+	<string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of 20 for each friend who joins.</string>
 	<string name="start_inviting_friends">Start inviting friends</string>
 	<string name="add_count_btn">Add(%1$s)</string>
 	<string name="all_contacts">All contacts</string>

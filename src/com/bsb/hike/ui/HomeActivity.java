@@ -687,7 +687,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
 					popUpTitle.setText(R.string.invite_friends);
-					popUpMsg.setText(R.string.ftue_invite_friends_msg);
+					
+					String titleString = getResources().getString(R.string.ftue_invite_friends_msg);
+					Spannable titleStringSpan = new SpannableString(titleString);  
+					
+					int startSpan = titleString.indexOf("20");
+					int endSpan = startSpan + 2;
+					if(startSpan>=0)
+					{
+						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					}
+					
+					//TODO still need to set up Rupee symbol ImageSpan
+					
+					popUpMsg.setText(titleStringSpan);
 					popUpAddButton.setText(R.string.start_inviting_friends);
 					popUpAddButton.setTag(false);
 				}
