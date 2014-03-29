@@ -8,7 +8,10 @@ import java.util.Set;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,10 +56,27 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 				R.layout.addfriends_listview_header, null);
 		header.setOnClickListener(null);
 		TextView headerTextView = (TextView) header.findViewById(R.id.header_txt);
-		headerTextView.setText(getResources().getString(R.string.add_friends_listview_header, hikeContactsCount));
+		setColorSpannedText(headerTextView);
 		listview.addHeaderView(header);
 		listview.setAdapter(mAdapter);
 		setupActionBar();
+	}
+
+	private void setColorSpannedText(TextView headerTextView)
+	{
+		String headerTextString = getResources().getString(R.string.add_friends_listview_header, hikeContactsCount);
+		Spannable headerTextStringSpan = new SpannableString(headerTextString);  
+		
+		String numContactsString = getResources().getString(R.string.num_contacts, hikeContactsCount);
+		int startSpan = headerTextString.indexOf(numContactsString);
+		int endSpan = startSpan + numContactsString.length();
+		if(startSpan>=0)
+		{
+			headerTextStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		
+		headerTextView.setText(headerTextStringSpan);
+		
 	}
 
 	private AddFriendAdapter createAdapter()

@@ -819,4 +819,5 @@
 	<string name="friend_requests_sent">Friend requests sent</string>
 	<string name="blue_status_updates">status updates</string>
 	<string name="red_last_seen">last seen</string>
+	<string name="num_contacts">%1$s contacts</string>
 </resources>
