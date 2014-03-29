@@ -606,7 +606,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
-			showFTUEAddFtriendsPopup();
+			String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			/*
+			 * we only show ftue popups if user doesn't have both way friends over a certain limit
+			 */
+			if(Utils.shouldShowAddOrInviteFTUE(msisdn))
+			{
+				showFTUEAddFtriendsPopup();
+			}
+			else
+			{
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
+				editor.commit();
+			}
 		}
 		shouldShowAddFriendsPopup = true;
 	}
