@@ -27,7 +27,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -643,8 +646,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				if(isAddFriendsPopup)
 				{
 					popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
+					
+					String titleString = getResources().getString(R.string.add_friend_popup_msg);
+					Spannable titleStringSpan = new SpannableString(titleString);  
+					
+					String statusUpdatesString = getResources().getString(R.string.blue_status_updates);
+					int startSpan = titleString.indexOf(statusUpdatesString);
+					int endSpan = startSpan + statusUpdatesString.length();
+					if(startSpan>=0)
+					{
+						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					}
+					
+					String lastSeenString = getResources().getString(R.string.red_last_seen);
+					startSpan = titleString.indexOf(lastSeenString);
+					endSpan = startSpan + lastSeenString.length();
+					if(startSpan>=0)
+					{
+						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.red_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					}
+
 					popUpTitle.setText(R.string.friends_on_hike_tut);
-					popUpMsg.setText(R.string.add_friend_popup_msg);
+					popUpMsg.setText(titleStringSpan);
 					popUpAddButton.setText(R.string.start_adding);
 					/*
 					 * This tag value true represents weather this popup is Add Friends popup
