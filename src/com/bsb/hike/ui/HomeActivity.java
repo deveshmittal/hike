@@ -1273,6 +1273,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU)
 			{
+				if(ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE)
+				{
+					return true;
+				}
 				if (overFlowWindow == null || !overFlowWindow.isShowing())
 				{
 					showOverFlowMenu();
