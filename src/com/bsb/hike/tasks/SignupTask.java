@@ -34,6 +34,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -56,7 +57,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					String pin = Utils.getSMSPinCode(body);
 					if (pin != null)
 					{
-						SignupTask.this.addUserInput(pin);
+						if(getDisplayChild() != SignupActivity.PIN){
+							SignupTask.this.addUserInput(pin);
+						} else{
+							SignupTask.this.autoFillPin(pin);
+						}
 						this.abortBroadcast();
 						break;
 					}
@@ -68,6 +73,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public interface OnSignupTaskProgressUpdate extends FinishableEvent
 	{
 		public void onProgressUpdate(StateValue value);
+	}
+	
+	public int getDisplayChild(){
+		return ((SignupActivity) context).getDisplayItem();
+	}
+
+	public void autoFillPin(String pin)
+	{
+		((SignupActivity) context).autoFillPin(pin);
 	}
 
 	public enum State

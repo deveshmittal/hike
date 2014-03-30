@@ -141,15 +141,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private boolean msisdnErrorDuringSignup = false;
 
-	private final int SCANNING_CONTACTS = 4;
+	public static final int SCANNING_CONTACTS = 4;
 	
-	private final int GENDER = 3;
+	public static final int GENDER = 3;
 	
-	private final int NAME = 2;
+	public static final int NAME = 2;
 
-	private final int PIN = 1;
+	public static final int PIN = 1;
 
-	private final int NUMBER = 0;
+	public static final int NUMBER = 0;
 
 	private String countryCode;
 
@@ -1135,6 +1135,11 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		viewFlipper.setInAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_in_animation));
 		viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
 	}
+	
+	public int getDisplayItem()
+	{
+		return viewFlipper.getDisplayedChild();
+	}
 
 	@Override
 	public void onProgressUpdate(StateValue stateValue)
@@ -1865,6 +1870,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private boolean isInvalidCountryCode(){
 		String countryName = codesMap.get(countryPicker.getText().toString());
 		return ! (countryName != null && countriesArray.indexOf(countryName) != -1);
+	}
+
+	public void autoFillPin(String pin)
+	{
+		if(viewFlipper.getDisplayedChild() == PIN)
+		{
+			enterEditText.setText(pin);
+			submitClicked();
+		}
 	}
 
 }
