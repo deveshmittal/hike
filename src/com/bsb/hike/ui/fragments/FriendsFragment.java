@@ -33,6 +33,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
@@ -114,8 +115,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			}
 			else
 			{
-				intent = new Intent(getActivity(), ComposeActivity.class);
-				intent.putExtra(HikeConstants.Extras.CREATE_GROUP, true);
+				intent = new Intent(getActivity(), CreateNewGroupActivity.class);
 			}
 			startActivity(intent);
 		}
