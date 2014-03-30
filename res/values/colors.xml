@@ -235,4 +235,6 @@
     <color name="blue_hike">#0f8fe1</color>
     <color name="light_gray_hike">#e7e8e9</color>
     <color name="transparent_white_ab">#3dffffff</color>
+    <color name="blue_color_span">#0f8fe1</color>
+    <color name="red_color_span">#ef554e</color>
 </resources>

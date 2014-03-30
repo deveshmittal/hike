@@ -138,6 +138,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -3823,5 +3824,15 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		context.startActivity(intent);
+	}
+	
+	public static boolean shouldShowAddOrInviteFTUE(String msisdn)
+	{
+		List<ContactInfo>  friendsList = HikeUserDatabase.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false);
+		if(friendsList.size() < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
+		{
+			return true;
+		}
+		return false;
 	}
 }

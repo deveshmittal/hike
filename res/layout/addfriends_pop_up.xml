@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/addfriend_popup"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:visibility="gone" >
 
     <View
+        android:id="@+id/popup_black_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0.48"
         android:background="@color/transparent_black" />
     
     <LinearLayout
+        android:id="@+id/popup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

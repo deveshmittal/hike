@@ -114,5 +114,5 @@
     <dimen name="addfriend_popup_title_margin_bottom">16dp</dimen>
     <dimen name="addfriend_popup_btn_margin_bottom">19dp</dimen>
     <dimen name="compose_chat_content_margin">10dp</dimen>
-
+	<dimen name="signup_gender_drawable_padding">15dp</dimen>
 </resources>

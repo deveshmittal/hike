@@ -12,7 +12,7 @@
         android:layout_weight="240"
         android:gravity="center"
         android:text="@string/tutorial1_header_title"
-        android:textColor="#8d939c"
+        android:textColor="@color/phone_entering_header"
         android:textSize="24sp"
         android:clickable="true" 
         android:onClick="onHikeIconClicked" />

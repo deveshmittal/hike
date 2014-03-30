@@ -1357,7 +1357,7 @@
 	<string name="scanning_your_contacts">You are all set!\nScanning your contacts...</string>
 	<string name="about_you">About you</string>
 	<string name="tell_us_more">Tell us more</string>
-	<string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
+	<string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
 	<string name="start_adding">Start adding friends</string>
 	<string name="how_young_are_you">How young are you?</string>
 	<string name="your_name">Your name</string>
@@ -1374,7 +1374,7 @@
 	<string name="add_friends_listview_header">"You have got %1$s contacts \n on hike. Nice!"</string>
 	<string name="contacts_on_hike_section">Contacts on hike</string>
 	<string name="recommended_contacts_section">Recommended contacts</string>
-	<string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of 20Rs. for each friend who joins.</string>
+	<string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of 20 for each friend who joins.</string>
 	<string name="start_inviting_friends">Start inviting friends</string>
 	<string name="add_count_btn">Add(%1$s)</string>
 	<string name="all_contacts">All contacts</string>
@@ -1392,4 +1392,8 @@
     <string name="compose_chat_action_bar_title">New Chat</string>
     <string name="name_group">Name the group</string>
     <string name="group_chats">Group Chats</string>
+	<string name="friend_requests_sent">Friend requests sent</string>
+	<string name="blue_status_updates">status updates</string>
+	<string name="red_last_seen">last seen</string>
+	<string name="num_contacts">%1$s contacts</string>
 </resources>
