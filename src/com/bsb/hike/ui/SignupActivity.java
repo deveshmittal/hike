@@ -521,6 +521,28 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			callmeBtn.setEnabled(false);
 		}
 	}
+	
+	private void endLoading()
+	{
+		if(loadingLayout !=null)
+		{
+			loadingLayout.setVisibility(View.GONE);
+		}
+		if(infoTxt != null)
+		{
+			infoTxt.setVisibility(View.VISIBLE);
+		}
+		nextBtn.setEnabled(true);
+		if (countryPicker != null)
+		{
+			countryPicker.setEnabled(true);
+			selectedCountryPicker.setEnabled(true);
+		}
+		if (callmeBtn != null)
+		{
+			callmeBtn.setEnabled(true);
+		}
+	}
 
 	private void submitClicked()
 	{
@@ -992,7 +1014,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	{
 		errorDialog = new Dialog(this, R.style.Theme_CustomDialog);
 		errorDialog.setContentView(R.layout.no_internet_pop_up);
-		errorDialog.setCancelable(false);
+		errorDialog.setCancelable(true);
 		Button btnOk = (Button) errorDialog.findViewById(R.id.btn_ok);
 		btnOk.setOnClickListener(new OnClickListener()
 		{
@@ -1014,6 +1036,17 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 						submitClicked();
 					}
 				}, 100);
+			}
+		});
+		
+		errorDialog.setOnCancelListener(new OnCancelListener()
+		{
+			
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				endLoading();
+				
 			}
 		});
 		errorDialog.show();

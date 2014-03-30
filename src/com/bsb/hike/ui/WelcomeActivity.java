@@ -270,7 +270,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	{
 		errorDialog = new Dialog(this, R.style.Theme_CustomDialog);
 		errorDialog.setContentView(R.layout.no_internet_pop_up);
-		errorDialog.setCancelable(false);
+		errorDialog.setCancelable(true);
 		Button btnOk = (Button) errorDialog.findViewById(R.id.btn_ok);
 		btnOk.setOnClickListener(new OnClickListener()
 		{
