@@ -292,32 +292,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.subText.setVisibility(View.VISIBLE);
 					viewHolder.subText.setText(R.string.tap_to_save);
 				}
-				else if (mContactInfo.isOnhike())
-				{
-					String subText = null;
-					if (lastSeenPref
-							&& (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED || mContactInfo.getFavoriteType() == FavoriteType.FRIEND || mContactInfo
-									.getFavoriteType() == FavoriteType.REQUEST_RECEIVED))
-					{
-						subText = Utils.getLastSeenTimeAsString(context, mContactInfo.getLastSeenTime(), mContactInfo.getOffline());
-					}
-
-					if (TextUtils.isEmpty(subText) && mContactInfo.getHikeJoinTime() != 0)
-					{
-						subText = context.getString(R.string.on_hike_since, mContactInfo.getFormattedHikeJoinTime());
-					}
-					else if (TextUtils.isEmpty(subText))
-					{
-						subText = context.getString(R.string.on_hike);
-					}
-
-					viewHolder.subText.setVisibility(View.VISIBLE);
-					viewHolder.subText.setText(subText);
-
-				}
 				else
 				{
-					viewHolder.subText.setText(R.string.on_sms);
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(mContactInfo.getMsisdn());
+					if(!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
+					{
+						viewHolder.subText.append(" (" + mContactInfo.getMsisdnType() + ")");
+					}
 				}
 			}
 			else if (groupProfile)

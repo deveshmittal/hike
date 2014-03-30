@@ -38,11 +38,11 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected short retryAttempts = 0;
 
-	protected short MAX_RETRY_ATTEMPTS = 5;
+	protected short MAX_RETRY_ATTEMPTS = 10;
 
 	protected int reconnectTime = 0;
 
-	protected int MAX_RECONNECT_TIME = 30; // in seconds
+	protected int MAX_RECONNECT_TIME = 20; // in seconds
 
 	protected Handler handler;
 
@@ -56,6 +56,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected File mFile;
 
 	protected String fileKey; // this is used for download from server , and in upload too
+	
+	protected int fileSize;
 
 	protected File stateFile; // this represents state file in which file state will be saved
 
@@ -70,6 +72,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile int _bytesTransferred = 0;
 
 	protected int chunkSize = 0;
+	
+	protected Thread mThread = null;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 
@@ -189,6 +193,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
+				Log.d(getClass().getSimpleName(),"Sleep interrupted: " + mThread.toString());
 				e.printStackTrace();
 			}
 			retryAttempts++;
@@ -201,5 +206,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			Log.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
 			return false;
 		}
+	}
+	public Thread getThread()
+	{
+		return mThread;
 	}
 }

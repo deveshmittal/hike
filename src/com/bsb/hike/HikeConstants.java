@@ -500,14 +500,11 @@ public class HikeConstants
 	public static final int DISCONNECT_TIME = 10 * 60;
 
 	/* the max amount of time we wait for the PIN */
-	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+	public static final int PIN_CAPTURE_TIME = 10 * 1000;
 
 	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
-
-	/*
-	 * the amount to wait before showing the PIN screen on non sim devices.
-	 */
-	public static final int NON_SIM_WAIT_TIME = 30 * 1000;
+	
+	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
@@ -543,7 +540,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 25 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
@@ -556,6 +553,8 @@ public class HikeConstants
 	public static final int SHARE_LOCATION_CODE = 1192;
 
 	public static final int SHARE_CONTACT_CODE = 1193;
+
+	public static final int SHARE_FILE_CODE = 1194;
 
 	public static final int FACEBOOK_REQUEST_CODE = 64206;
 
@@ -644,6 +643,9 @@ public class HikeConstants
 
 	// Picasa URI prefix for creating convMessage
 	public static final String PICASA_PREFIX = "picasaUri:";
+	
+	// Gmail URI prefix for all devices
+	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 
@@ -670,6 +672,8 @@ public class HikeConstants
 	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
 
 	public static final String OTHER_ROOT = "/hike Others";
+
+	public static final String SENT_ROOT = "/sent";
 
 	public static final String STICKERS_ROOT = "/stickers";
 
@@ -781,6 +785,8 @@ public class HikeConstants
 	public static final int LED_LIGHTS_OFF_MS = 1000;
 	
 	public static final int JOINED_HIKE_STATUS_ID = -1;
+	
+	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
 	public static final class Extras
 	{
@@ -1025,6 +1031,30 @@ public class HikeConstants
 		public static final String SELECTED_THEME = "selectedTheme";
 		
 		public static final String BLOKING_TASK_TYPE = "blockingTaskType";
+
+		public static final String MULTIPLE_MSG_OBJECT = "multipleMsgObject";
+
+		public static final String SELECTED_BUCKET = "selectedBucket";
+
+		public static final String GALLERY_SELECTIONS = "gallerySelections";
+
+		public static final String FILE_PATHS = "filePaths";
+
+		public static final String IS_ACTION_MODE_ON = "isActionModeOn";
+		
+		public static final String SELECTED_POSITIONS = "selectedPositions";
+
+		public static final String SELECTED_NON_FORWARDABLE_MSGS = "selectedNonForwadableMsgs";
+		
+		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
+		
+		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
+
+		public static final String SELECTED_COUNTRY = "selectedCountry";
+
+		public static final String MANUAL_SYNC = "manualSync";
+
+		public static final String IS_FTUT_ADD_FRIEND_POPUP_SHOWING = "isFtueAddFriendPopup";
 	}
 
 	public static final class LogEvent
@@ -1326,6 +1356,8 @@ public class HikeConstants
 		public static final String MULTI_INVITE = "mi";
 
 		public static final String CHAT_BACKGROUD = "cbg";
+
+		public static final String GROUP_OWNER_CHANGE = "goc";
 	}
 
 	public static final class SMSNative
@@ -1381,5 +1413,9 @@ public class HikeConstants
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
+	
+	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3 };
+	
+	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3 };
 
 }

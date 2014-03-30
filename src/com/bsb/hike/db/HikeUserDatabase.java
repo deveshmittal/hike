@@ -1943,46 +1943,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		db.replace(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, contentValues);
 	}
 
-	private String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
-	{
-		if (TextUtils.isEmpty(serverRecommendedArrayString))
-		{
-			return null;
-		}
-		try
-		{
-			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
-			if (serverRecommendedArray.length() == 0)
-			{
-				return null;
-			}
-
-			StringBuilder sb = new StringBuilder("(");
-			int i = 0;
-			for (i = 0; i < serverRecommendedArray.length(); i++)
-			{
-				String msisdn = serverRecommendedArray.optString(i);
-				if (!myMsisdn.equals(msisdn))
-				{
-					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
-				}
-			}
-			/*
-			 * Making sure the string exists.
-			 */
-			if (sb.lastIndexOf(",") == -1)
-			{
-				return null;
-			}
-			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-			return sb.toString();
-		}
-		catch (JSONException e)
-		{
-			return null;
-		}
-	}
-
+	
 	private String getQueryableNumbersString(List<ContactInfo> contactInfos)
 	{
 		if (contactInfos.isEmpty())
@@ -2024,7 +1985,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		String currentSelection = getQueryableNumbersString(contactInfoList);
 
-		String recommendedContactsSelection = getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
+		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
 		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
 			List<ContactInfo> recommendedContacts = getHikeContacts(limit, recommendedContactsSelection, currentSelection, myMsisdn);

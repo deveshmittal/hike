@@ -245,6 +245,13 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			else
 			{
 				String msg = message.getMessage();
+				/*
+				 * Making sure this string is never null.
+				 */
+				if (msg == null)
+				{
+					msg = "";
+				}
 				markedUp = msg.substring(0, Math.min(msg.length(), HikeConstants.MAX_MESSAGE_PREVIEW_LENGTH));
 				// For showing the name of the contact that sent the message in
 				// a group chat

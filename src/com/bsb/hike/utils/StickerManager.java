@@ -82,6 +82,8 @@ public class StickerManager
 
 	public static final String STICKERS_UPDATED = "stickersUpdated";
 
+	public static final String ADD_NO_MEDIA_FILE_FOR_STICKERS = "addNoMediaFileForStickers";
+
 	public static int RECENT_STICKERS_COUNT = 30;
 
 	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1, R.drawable.sticker_10_love2, R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
@@ -601,6 +603,42 @@ public class StickerManager
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
 			editor.commit();
+		}
+	}
+
+	public void addNoMediaFilesToStickerDirectories()
+	{
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null)
+		{
+			return;
+		}
+		String rootPath = dir.getPath() + HikeConstants.STICKERS_ROOT;
+		File root = new File(rootPath);
+		if (!root.exists())
+		{
+			return;
+		}
+		addNoMedia(root);
+
+		Editor editor = preferenceManager.edit();
+		editor.putBoolean(ADD_NO_MEDIA_FILE_FOR_STICKERS, true);
+		editor.commit();
+	}
+
+	private void addNoMedia(File directory)
+	{
+		String path = directory.getPath();
+		if (path.endsWith(HikeConstants.LARGE_STICKER_ROOT) || path.endsWith(HikeConstants.SMALL_STICKER_ROOT))
+		{
+			Utils.makeNoMediaFile(directory);
+		}
+		else if (directory.isDirectory())
+		{
+			for (File file : directory.listFiles())
+			{
+				addNoMedia(file);
+			}
 		}
 	}
 

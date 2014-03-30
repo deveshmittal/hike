@@ -59,6 +59,8 @@ public class DownloadFileTask extends FileTransferBase
 		if (_state == FTState.CANCELLED)
 			return FTResult.CANCELLED;
 		
+		mThread  = Thread.currentThread();
+		
 		try
 		{
 			tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");
@@ -159,7 +161,7 @@ public class DownloadFileTask extends FileTransferBase
 				// Make sure the response code is in the 200 range.
 				if (resCode / 100 != 2)
 				{
-					Log.d(getClass().getSimpleName(), "Server response code is not in 200 range");
+					Log.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();
 					res = FTResult.SERVER_ERROR;
 				}
@@ -190,19 +192,20 @@ public class DownloadFileTask extends FileTransferBase
 
 					// open the output file and seek to the start location
 					raf.seek(mStart);
-					if (networkType == FileTransferManager.getInstance(context).getNetworkType())
-					{
-						chunkSize /= 2;
-					}
-					else
-					{
-						networkType = FileTransferManager.getInstance(context).getNetworkType();
-						chunkSize = networkType.getMinChunkSize();
-					}
+					setChunkSize();
+//					if (networkType == FileTransferManager.getInstance(context).getNetworkType())
+//					{
+//						chunkSize /= 2;
+//					}
+//					else
+//					{
+//						networkType = FileTransferManager.getInstance(context).getNetworkType();
+//						chunkSize = networkType.getMinChunkSize();
+//					}
 					byte data[] = new byte[chunkSize];
 					// while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					int numRead = 0;
-					while (_state == FTState.IN_PROGRESS)
+					do
 					{
 						int byteRead = 0;
 						if (numRead == -1)
@@ -227,26 +230,27 @@ public class DownloadFileTask extends FileTransferBase
 							return FTResult.CARD_UNMOUNT;
 						}
 						Log.d(getClass().getSimpleName(), "ChunkSize : " + chunkSize + "Bytes");
+						setChunkSize();
 						// ChunkSize is increased within the limits
-						chunkSize *= 2;
-						if (chunkSize > networkType.getMaxChunkSize())
-							chunkSize = networkType.getMaxChunkSize();
-						else if (chunkSize < networkType.getMinChunkSize())
-							chunkSize = networkType.getMinChunkSize();
+//						chunkSize *= 2;
+//						if (chunkSize > networkType.getMaxChunkSize())
+//							chunkSize = networkType.getMaxChunkSize();
+//						else if (chunkSize < networkType.getMinChunkSize())
+//							chunkSize = networkType.getMinChunkSize();
 
 						/*
 						 * This chunk size should ideally be no more than 1/8 of the total memory available.
 						 */
-						try
-						{
-							int maxMemory = (int) Runtime.getRuntime().maxMemory();
-							if (chunkSize > (maxMemory / 8))
-								chunkSize = maxMemory / 8;
-						}
-						catch (Exception e)
-						{
-							e.printStackTrace();
-						}
+//						try
+//						{
+//							int maxMemory = (int) Runtime.getRuntime().maxMemory();
+//							if (chunkSize > (maxMemory / 8))
+//								chunkSize = maxMemory / 8;
+//						}
+//						catch (Exception e)
+//						{
+//							e.printStackTrace();
+//						}
 						// change buffer size
 						data = new byte[chunkSize];
 						// increase the startByte for resume later
@@ -257,6 +261,7 @@ public class DownloadFileTask extends FileTransferBase
 						// showButton();
 						sendProgress();
 					}
+					while (_state == FTState.IN_PROGRESS);
 
 					switch (_state)
 					{
@@ -380,6 +385,29 @@ public class DownloadFileTask extends FileTransferBase
 		return FTResult.SUCCESS;
 	}
 
+	private void setChunkSize()
+	{
+//		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+//		if (Utils.densityMultiplier > 1)
+//			chunkSize = networkType.getMaxChunkSize();
+//		else if (Utils.densityMultiplier == 1)
+//			chunkSize = networkType.getMinChunkSize() * 2;
+//		else
+//			chunkSize = networkType.getMinChunkSize();
+		chunkSize = NetworkType.WIFI.getMaxChunkSize();
+
+		try
+		{
+			int maxMemory = (int) Runtime.getRuntime().maxMemory();
+			if (chunkSize > (maxMemory / 8))
+				chunkSize = (maxMemory / 8);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	private boolean shouldSendProgress()
 	{
 		int x = progressPercentage / 10;
@@ -438,7 +466,7 @@ public class DownloadFileTask extends FileTransferBase
 					HikeMessengerApp.getPubSub().publish(HikePubSub.PUSH_FILE_DOWNLOADED, (ConvMessage) userContext);
 			}
 		}
-		else if (result != FTResult.PAUSED && result != FTResult.CANCELLED) // if no PAUSE and no SUCCESS
+		else if (result != FTResult.PAUSED) // if no PAUSE
 		{
 			final int errorStringId = result == FTResult.FILE_TOO_LARGE ? R.string.not_enough_space : result == FTResult.CANCELLED ? R.string.download_cancelled
 					: (result == FTResult.FILE_EXPIRED || result == FTResult.SERVER_ERROR) ? R.string.file_expire

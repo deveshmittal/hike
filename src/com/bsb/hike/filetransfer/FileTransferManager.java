@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.Thread.State;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +51,11 @@ public class FileTransferManager
 	private File HIKE_TEMP_DIR;
 
 	// Constant variables
-	private int THREAD_POOL_SIZE = 10;
+	private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+	
+	private final int CORE_POOL_SIZE = CPU_COUNT + 1;
+	
+	private final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
 
 	private final short KEEP_ALIVE_TIME = 60; // in seconds
 
@@ -122,13 +128,27 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 64 * 1024;
+				return 32 * 1024;
 			}
 
 			@Override
 			public int getMinChunkSize()
 			{
-				return 32 * 1024;
+				return 16 * 1024;
+			}
+		},
+		NO_NETWORK
+		{
+			@Override
+			public int getMaxChunkSize()
+			{
+				return 2 * 1024;
+			}
+
+			@Override
+			public int getMinChunkSize()
+			{
+				return 1 * 1024;
 			}
 		};
 
@@ -148,10 +168,11 @@ public class FileTransferManager
 		@Override
 		public Thread newThread(Runnable r)
 		{
+			int threadCount = threadNumber.getAndIncrement();
 			Thread t = new Thread(r);
 			// This approach reduces resource competition between the Runnable object's thread and the UI thread.
 			t.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-			t.setName("FT Thread-" + threadNumber.getAndIncrement());
+			t.setName("FT Thread-" + threadCount);
 			Log.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
 			return t;
 		}
@@ -213,14 +234,11 @@ public class FileTransferManager
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
 		fileTaskMap = new ConcurrentHashMap<Long, FutureTask<FTResult>>();
 		// here choosing TimeUnit in seconds as minutes are added after api level 9
-		THREAD_POOL_SIZE = (Runtime.getRuntime().availableProcessors()) * 2;
-		if (THREAD_POOL_SIZE < 2)
-			THREAD_POOL_SIZE = 2;
-		pool = new ThreadPoolExecutor(2, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
+		pool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
 		handler = new Handler(context.getMainLooper());
-		setChunkSize();
+		networkSwitched();
 	}
 
 	public static FileTransferManager getInstance(Context context)
@@ -537,6 +555,8 @@ public class FileTransferManager
 		NetworkInfo info = cm.getActiveNetworkInfo();
 		if (info != null)
 		{
+			if (!info.isConnected())
+				return NetworkType.NO_NETWORK;
 			// If device is connected via WiFi
 			if (info.getType() == ConnectivityManager.TYPE_WIFI)
 				return NetworkType.WIFI; // return 1024 * 1024;
@@ -570,12 +590,43 @@ public class FileTransferManager
 		}
 	}
 
-	// Set the limits of chunk sizes of files to transfer
-	public void setChunkSize()
+	public void networkSwitched()
 	{
 		NetworkType networkType = getNetworkType();
+		setChunkSize(networkType);
+		if(networkType != NetworkType.NO_NETWORK)
+			resumeAllTasks();
+	}
+
+	// Set the limits of chunk sizes of files to transfer
+	private void setChunkSize(NetworkType networkType)
+	{
 		maxChunkSize = networkType.getMaxChunkSize();
 		minChunkSize = networkType.getMinChunkSize();
+	}
+	
+	private void resumeAllTasks()
+	{
+		for(Entry<Long, FutureTask<FTResult>> entry : fileTaskMap.entrySet())
+		{
+			if(entry != null)
+			{
+				FutureTask<FTResult> obj = entry.getValue();
+				if (obj != null)
+				{
+					Thread t = ((MyFutureTask) obj).getTask().getThread();
+					if(t != null)
+					{
+						if (t.getState() == State.TIMED_WAITING)
+						{
+							Log.d(getClass().getSimpleName(), "interrupting the task: " + t.toString());
+							t.interrupt();
+						}
+					}
+				}
+			}
+			
+		}
 	}
 
 	public int getMaxChunkSize()

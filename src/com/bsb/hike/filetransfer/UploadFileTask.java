@@ -200,7 +200,7 @@ public class UploadFileTask extends FileTransferBase
 						// fileName = cursor.getString(nameIdx);
 					}
 				}
-				destinationFile = Utils.getOutputMediaFile(hikeFileType, fileName);
+				destinationFile = Utils.getOutputMediaFile(hikeFileType, fileName, true);
 				if (TextUtils.isEmpty(fileName))
 				{
 					fileName = destinationFile.getName();
@@ -234,7 +234,7 @@ public class UploadFileTask extends FileTransferBase
 	{
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration,
-				sourceFilePath).serialize());
+				sourceFilePath, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
@@ -249,7 +249,7 @@ public class UploadFileTask extends FileTransferBase
 	 */
 	private void initFileUpload() throws FileTransferCancelledException, Exception
 	{
-		_state = FTState.IN_PROGRESS;
+		//_state = FTState.IN_PROGRESS;
 		msgId = ((ConvMessage) userContext).getMsgID();
 		// fileTaskMap.put(msgId, futureTask);
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
@@ -266,19 +266,19 @@ public class UploadFileTask extends FileTransferBase
 			if (hikeFile.getSourceFilePath() == null)
 			{
 				Log.d("This filepath: ", selectedFile.getPath());
-				Log.d("Hike filepath: ", Utils.getFileParent(hikeFileType));
+				Log.d("Hike filepath: ", Utils.getFileParent(hikeFileType, true));
 			}
 			else
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
-				if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType)))
+				if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = mFile;
 				}
 				else
 				{
 					boolean makeCopy = true;
-					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName);
+					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, true);
 					if (selectedFile == null)
 						throw new Exception(FileTransferManager.READ_FAIL);
 
@@ -296,12 +296,12 @@ public class UploadFileTask extends FileTransferBase
 							}
 							else
 							{
-								selectedFile = Utils.getOutputMediaFile(hikeFileType, null);
+								selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
 							}
 						}
 						else
 						{
-							selectedFile = Utils.getOutputMediaFile(hikeFileType, null);
+							selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
 						}
 					}
 					// Saving the file to hike local folder
@@ -380,7 +380,7 @@ public class UploadFileTask extends FileTransferBase
 	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration).serialize());
+		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
@@ -389,6 +389,7 @@ public class UploadFileTask extends FileTransferBase
 	@Override
 	public FTResult call()
 	{
+		mThread  = Thread.currentThread();
 		try
 		{
 			initFileUpload();
@@ -440,6 +441,7 @@ public class UploadFileTask extends FileTransferBase
 				JSONObject fileJSON = response.getJSONObject(HikeConstants.DATA_2);
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
+				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 				String md5Hash = fileJSON.optString("md5_original");
 				Log.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
 				if (md5Hash != null)
@@ -465,6 +467,7 @@ public class UploadFileTask extends FileTransferBase
 
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 			hikeFile.setFileKey(fileKey);
+			hikeFile.setFileSize(fileSize);
 			hikeFile.setFileTypeString(fileType);
 
 			filesArray.put(hikeFile.serialize());
@@ -563,12 +566,18 @@ public class UploadFileTask extends FileTransferBase
 			Log.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
 		}
+		long length = sourceFile.length();
+		if(mStart >= length)
+		{
+			mStart = 0;
+			X_SESSION_ID = UUID.randomUUID().toString();
+		}
 		// @GM setting transferred bytes if there are any
 		setBytesTransferred(mStart);
 		mUrl = new URL(AccountUtils.fileTransferUploadBase + "/user/pft/");
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
-		long length = sourceFile.length();
+		
 
 		// /// New Logic Test 1
 
@@ -577,7 +586,9 @@ public class UploadFileTask extends FileTransferBase
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
 
 		int start = mStart;
-		int end = start + chunkSize;
+		int end = (int) length;
+		if (end > (start + chunkSize))
+			end = start + chunkSize;
 		end--;
 
 		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
@@ -588,6 +599,7 @@ public class UploadFileTask extends FileTransferBase
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 
+			Log.d(getClass().getSimpleName(),"bytes " + start + "-" + end + "/" + length + "/" + chunkSize);
 			boolean resetAndUpdate = false;
 			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
 			if (bytesRead == -1)
@@ -602,6 +614,7 @@ public class UploadFileTask extends FileTransferBase
 
 			if (end == (length - 1) && responseString != null)
 			{
+				Log.d(getClass().getSimpleName(),"response: " + responseString);
 				responseJson = new JSONObject(responseString);
 				incrementBytesTransferred(chunkSize);
 				resetAndUpdate = true; // To update UI
@@ -874,17 +887,20 @@ public class UploadFileTask extends FileTransferBase
 
 	private void setChunkSize(long length)
 	{
-		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
-		// int chunkSize = networkType.getMinChunkSize()*2;
-		if (Utils.densityMultiplier > 1)
-			chunkSize = networkType.getMaxChunkSize();
-		else if (Utils.densityMultiplier == 1)
-			chunkSize = networkType.getMinChunkSize() * 2;
-		else
-			chunkSize = networkType.getMinChunkSize();
+//		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+//		if (Utils.densityMultiplier > 1)
+//			chunkSize = networkType.getMaxChunkSize();
+//		else if (Utils.densityMultiplier == 1)
+//			chunkSize = networkType.getMinChunkSize() * 2;
+//		else
+//			chunkSize = networkType.getMinChunkSize();
+		chunkSize = NetworkType.WIFI.getMaxChunkSize();
 
 		if (chunkSize > (int) length)
 			chunkSize = (int) length;
+		
+//		while(chunkSize > length)
+//			chunkSize/=2;
 
 		try
 		{
@@ -1093,9 +1109,9 @@ public class UploadFileTask extends FileTransferBase
 		{
 			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 		}
-		else if (result != FTResult.SUCCESS && result != FTResult.PAUSED && result != FTResult.CANCELLED)
+		else if (result != FTResult.PAUSED)
 		{
-			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
+			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
 					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
 
 			handler.post(new Runnable()
