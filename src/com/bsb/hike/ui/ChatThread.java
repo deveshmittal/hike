@@ -5892,7 +5892,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent.getAction().equals(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED))
+			if (mAdapter != null && intent.getAction().equals(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED))
 			{
 				// runOnUiThread(mUpdateAdapter);
 				// @GM
