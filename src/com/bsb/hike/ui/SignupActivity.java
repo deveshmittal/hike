@@ -1115,6 +1115,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	@Override
 	public void onBackPressed()
 	{
+		if(viewFlipper.getDisplayedChild() == PIN)
+		{
+			if (countDownTimer != null)
+			{
+				countDownTimer.cancel();
+			}
+			mTask.addUserInput("");
+			return;
+		}
 		if (mTask != null)
 		{
 			mTask.cancelTask();
