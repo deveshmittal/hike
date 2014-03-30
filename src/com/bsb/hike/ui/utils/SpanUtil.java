@@ -18,12 +18,12 @@ public class SpanUtil {
 		TextView textView = (TextView) lf.inflate(layoutId, null).findViewById(
 				textviewId);
 		textView.setText(text); // set text
-		return getImageSpan(textView);
+		return getImageSpan(context, textView);
 	}
 
-	public static ImageSpan getImageSpan(TextView textView) {
+	public static ImageSpan getImageSpan(Context context, TextView textView) {
 		// create bitmap drawable for imagespan
-		BitmapDrawable bmpDrawable = new BitmapDrawable(
+		BitmapDrawable bmpDrawable = new BitmapDrawable(context.getResources(),
 				getBitMapFromTV(textView));
 		bmpDrawable.setBounds(0, 0, bmpDrawable.getIntrinsicWidth(),
 				bmpDrawable.getIntrinsicHeight());
