@@ -769,11 +769,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		case SECTION:
 			TextView headerName = (TextView) convertView.findViewById(R.id.name);
 			TextView headerCount = (TextView) convertView.findViewById(R.id.count);
-			ImageView icon = (ImageView) convertView.findViewById(R.id.icon);
 
 			headerName.setText(contactInfo.getName());
 			headerCount.setText(contactInfo.getMsisdn());
-			icon.setImageResource(FRIEND_PHONE_NUM.equals(contactInfo.getPhoneNum()) ? R.drawable.ic_header_friends : R.drawable.ic_header_contacts);
 			break;
 
 		case EXTRA:
