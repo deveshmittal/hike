@@ -294,8 +294,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						}
 					}
 
-					this.context.getApplicationContext().unregisterReceiver(receiver);
-					receiver = null;
 				}
 				
 				accountInfo = null;
@@ -355,6 +353,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				while (this.data == null);
+			}
+			
+			if(canPullInSms)
+			{
+				this.context.getApplicationContext().unregisterReceiver(receiver);
+				receiver = null;
 			}
 
 			Log.d("SignupTask", "saving MSISDN/Token");
