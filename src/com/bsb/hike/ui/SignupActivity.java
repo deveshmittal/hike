@@ -597,7 +597,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			{
 				if(mActivityState.isFemale != null)
 				{
+					mTask.addGender(mActivityState.isFemale);
 					mTask.addUserInput(mActivityState.isFemale.toString());
+					viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
+					prepareLayoutForScanning(null);
 				}
 				else{
 					Toast toast = Toast.makeText(this, "please select your gender", Toast.LENGTH_SHORT);
@@ -675,6 +678,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					if (viewFlipper.getDisplayedChild() == NAME)
 					{
 						Utils.hideSoftKeyboard(this, enterEditText);
+						mActivityState.userName = input;
+						mTask.addUserName(mActivityState.userName);
+						viewFlipper.setDisplayedChild(GENDER);
+						prepareLayoutForGender(null);
 					}
 					mTask.addUserInput(input);
 					if(birthdayText!=null && !TextUtils.isEmpty(birthdayText.getText().toString()))
@@ -996,6 +1003,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		mTask = SignupTask.restartTask(this);
 	}
 
+	private void restartTask(String userName, Boolean isFemale, Birthday birthday)
+	{
+		resetViewFlipper();
+		mTask = SignupTask.restartTask(this, userName, isFemale, birthday);
+	}
+
 	private void showErrorMsg()
 	{
 		nextBtn.setEnabled(false);
@@ -1007,7 +1020,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			infoTxt.setVisibility(View.VISIBLE);
 		}
-		showNetworkErrorPopup();
+		if(errorDialog == null)
+		{
+			showNetworkErrorPopup();
+		}
 	}
 
 	private void showNetworkErrorPopup()
@@ -1023,7 +1039,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			public void onClick(View v)
 			{
 				errorDialog.dismiss();
-				restartTask();
+				v.setEnabled(false);
+				restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 				/*
 				 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
 				 */
@@ -1196,7 +1213,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			}
 			break;
 		case SCANNING_CONTACTS:
-			if (TextUtils.isEmpty(value))
+			if (TextUtils.isEmpty(value) && viewFlipper.getDisplayedChild() != SCANNING_CONTACTS)
 			{
 				viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
 				prepareLayoutForScanning(null);
@@ -1238,7 +1255,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			if (value != null && value.equals(HikeConstants.ADDRESS_BOOK_ERROR))
 			{
 				addressBookError = true;
-				if (loadingLayout!=null && loadingLayout.getVisibility() == View.VISIBLE)
+				if (viewFlipper.getDisplayedChild() == SCANNING_CONTACTS)
 				{
 					showErrorMsg();
 				}
