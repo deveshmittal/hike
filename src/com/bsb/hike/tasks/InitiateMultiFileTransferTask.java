@@ -32,6 +32,11 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 		this.onHike = onHike;
 	}
 
+	public String getMsisdn()
+	{
+		return msisdn;
+	}
+
 	@Override
 	protected Void doInBackground(Void... params)
 	{

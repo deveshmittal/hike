@@ -7,16 +7,20 @@
 
     <com.bsb.hike.view.TagEditText
         android:id="@+id/composeChatNewGroupTagET"
-        style="@android:style/TextAppearance.Large"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="46dp"
+        android:layout_gravity="center_vertical"
         android:layout_marginLeft="@dimen/compose_chat_content_margin"
         android:layout_marginRight="@dimen/compose_chat_content_margin"
         android:background="@drawable/bg_country_search_bar"
+        android:drawableLeft="@drawable/ic_search_dark_grey"
+        android:drawablePadding="9dp"
+        android:gravity="center_vertical"
         android:hint="@string/compose_chat_editText_hint"
         android:maxLines="2"
-        android:padding="15dp"
-        android:visibility="gone" >
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="8dp" >
     </com.bsb.hike.view.TagEditText>
 
     <com.bsb.hike.view.PinnedSectionListView

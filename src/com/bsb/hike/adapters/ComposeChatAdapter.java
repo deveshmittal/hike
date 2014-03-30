@@ -2,9 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import android.content.Context;
 import android.util.Log;
@@ -17,6 +15,9 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.tasks.FetchFriendsTask;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionListAdapter
@@ -27,10 +28,34 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private boolean showCheckbox, showExtraAtFirst;
 
-	public ComposeChatAdapter(Context context)
+	private int mIconImageSize;
+
+	private IconLoader iconloader;
+
+	private boolean fetchGroups;
+
+	private String existingGroupId;
+
+	public ComposeChatAdapter(Context context, boolean fetchGroups, String existingGroupId)
 	{
 		super(context);
 		selectedPeople = new HashMap<String, ContactInfo>();
+
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconloader = new IconLoader(context, mIconImageSize);
+
+		this.existingGroupId = existingGroupId;
+		this.fetchGroups = fetchGroups;
+		groupsList = new ArrayList<ContactInfo>(0);
+		filteredGroupsList = new ArrayList<ContactInfo>(0);
+	}
+
+	@Override
+	public void executeFetchTask()
+	{
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
+				filteredSmsContactsList, groupsList, filteredGroupsList, selectedPeople, fetchGroups, existingGroupId);
+		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
 	@Override
@@ -53,13 +78,14 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		// either section or other we do have
 		if (viewType == ViewType.SECTION)
 		{
-			TextView tv = (TextView) convertView.findViewById(R.id.sectionName);
+			TextView tv = (TextView) convertView.findViewById(R.id.settings_section_text);
 			tv.setText(contactInfo.getName());
 			// set section heading
 		}
 		else if (viewType == ViewType.EXTRA)
 		{
-			return convertView;
+			TextView tv = (TextView) convertView.findViewById(R.id.contact);
+			tv.setText(R.string.compose_chat_heading);
 		}
 		else
 		{
@@ -67,6 +93,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			holder = (ViewHolder) convertView.getTag();
 			holder.name.setText(contactInfo.getName());
 			holder.status.setText(contactInfo.getMsisdn());
+			iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
 			if (showCheckbox)
 			{
 				holder.checkbox.setVisibility(View.VISIBLE);
@@ -95,7 +122,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		switch (viewType)
 		{
 		case SECTION:
-			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_section, null);
+			convertView = LayoutInflater.from(context).inflate(R.layout.settings_section_layout, null);
 			break;
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
@@ -128,7 +155,13 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	@Override
 	public void makeCompleteList(boolean filtered)
 	{
-		makeSetupForCompleteList(filtered);
+		boolean shouldContinue = makeSetupForCompleteList(filtered);
+
+		if (!shouldContinue)
+		{
+			return;
+		}
+
 		// hack for header, as we are using pinnedSectionListView
 		if (showExtraAtFirst)
 		{
@@ -136,8 +169,17 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			completeList.add(header);
 		}
 
+		if (fetchGroups && !groupsList.isEmpty())
+		{
+			ContactInfo groupSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.group_chats), FRIEND_PHONE_NUM);
+
+			completeList.add(groupSection);
+			completeList.addAll(filteredGroupsList);
+		}
+
 		ContactInfo friendsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_friends_on_hike), FRIEND_PHONE_NUM);
 		updateFriendsList(friendsSection);
+
 		if (isHikeContactsPresent())
 		{
 			ContactInfo hikeContactsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_contacts_on_hike), CONTACT_PHONE_NUM);
