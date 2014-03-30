@@ -2123,7 +2123,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		GroupParticipant groupParticipant = (GroupParticipant) v.getTag();
 		if (groupParticipant == null)
 		{
-			Intent intent = new Intent(ProfileActivity.this, ComposeActivity.class);
+			Intent intent = new Intent(ProfileActivity.this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
 			startActivity(intent);

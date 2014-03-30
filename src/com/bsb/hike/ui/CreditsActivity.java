@@ -62,7 +62,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public void onStartHikingClick(View v)
 	{
-		Intent intent = new Intent(this, ComposeActivity.class);
+		Intent intent = new Intent(this, ComposeChatActivity.class);
 		startActivity(intent);
 	}
 
