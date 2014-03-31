@@ -411,7 +411,7 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 				listView.setVerticalScrollBarEnabled(true);
 			}
 			searching = true;
-			filter.filter(s);
+			filter.filter(query);
 		}
 		else
 		{
