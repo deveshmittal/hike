@@ -31,6 +31,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -698,7 +699,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
 					
-					//TODO still need to set up Rupee symbol ImageSpan
+					startSpan = titleString.indexOf("*");
+					endSpan = startSpan+1;
+					if(startSpan>0)
+					{
+						titleStringSpan.setSpan(new ImageSpan(HomeActivity.this, R.drawable.ic_rupee), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					}
 					
 					popUpMsg.setText(titleStringSpan);
 					popUpAddButton.setText(R.string.start_inviting_friends);
