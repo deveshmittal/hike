@@ -368,7 +368,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private int unreadMessageCount = 0;
 	
-	private View fastScrollIndicator;
+	private View bottomFastScrollIndicator;
+	
+	private View upFastScrollIndicator;
 	
 	int currentFirstVisibleItem = Integer.MAX_VALUE;
 	
@@ -544,14 +546,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			} 
 		});
 		
-		fastScrollIndicator = findViewById(R.id.scroll_bottom_indicator);
-		fastScrollIndicator.setOnClickListener(new OnClickListener()
+		bottomFastScrollIndicator = findViewById(R.id.scroll_bottom_indicator);
+		bottomFastScrollIndicator.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
 				mConversationsView.setSelection(messages.size() - 1);
 				hideFastScrollIndicator();
+			}
+		});
+		
+		upFastScrollIndicator = findViewById(R.id.scroll_top_indicator);
+		((ImageView)upFastScrollIndicator.findViewById(R.id.indicator_img)).setVisibility(View.GONE);
+		((ImageView)upFastScrollIndicator.findViewById(R.id.up_indicator_img)).setVisibility(View.VISIBLE);
+		upFastScrollIndicator.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mConversationsView.setSelection(0);
+				hideUpFastScrollIndicator();
 			}
 		});
 		
@@ -3337,7 +3352,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		unreadMessageCount++;
 		// fast scroll indicator and unread message should not show
 		// simultaneously.
-		fastScrollIndicator.setVisibility(View.GONE);
+		bottomFastScrollIndicator.setVisibility(View.GONE);
 		unreadMessageIndicator.setVisibility(View.VISIBLE);
 		TextView indicatorText = (TextView)findViewById(R.id.indicator_text);
 		indicatorText.setVisibility(View.VISIBLE);
@@ -3360,15 +3375,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void showFastScrollIndicator()
 	{
 		if(unreadMessageIndicator.getVisibility() == View.GONE){
-			fastScrollIndicator.setVisibility(View.VISIBLE);
+			bottomFastScrollIndicator.setVisibility(View.VISIBLE);
 		}
 	}
 	
 	private void hideFastScrollIndicator()
 	{
-		if(fastScrollIndicator != null)
+		if(bottomFastScrollIndicator != null)
 		{
-			fastScrollIndicator.setVisibility(View.GONE);
+			bottomFastScrollIndicator.setVisibility(View.GONE);
+		}
+	}
+	
+	private void hideUpFastScrollIndicator()
+	{
+		if(upFastScrollIndicator != null)
+		{
+			upFastScrollIndicator.setVisibility(View.GONE);
 		}
 	}
 	
@@ -5645,15 +5668,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if(currentFirstVisibleItem < firstVisibleItem)
 			{
 				showFastScrollIndicator();
+				hideUpFastScrollIndicator();
 			}
 			else if (currentFirstVisibleItem > firstVisibleItem)
 			{
 				hideFastScrollIndicator();
+				if(firstVisibleItem > 6)
+				{
+					upFastScrollIndicator.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					hideUpFastScrollIndicator();
+				}
 			}
 		}
 		else
 		{
 			hideFastScrollIndicator();
+			hideUpFastScrollIndicator();
 		}
 		currentFirstVisibleItem = firstVisibleItem;
 	}
@@ -5663,7 +5696,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		Log.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
 		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
-		if(fastScrollIndicator.getVisibility() ==View.VISIBLE)
+		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
 			if(view.getLastVisiblePosition() >= messages.size()-6)
 			{
@@ -5678,6 +5711,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					public void run()
 					{
 						hideFastScrollIndicator();
+					}
+				}, 2000);
+			}
+		}
+		if(upFastScrollIndicator.getVisibility() ==View.VISIBLE)
+		{
+			if(view.getFirstVisiblePosition() <= 6)
+			{
+				hideUpFastScrollIndicator();
+			}
+			else if( scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+			{
+				mHandler.postDelayed(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						hideUpFastScrollIndicator();
 					}
 				}, 2000);
 			}
