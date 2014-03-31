@@ -1273,6 +1273,8 @@ public class HikeConstants
 		public static final String FTUE_TUTORIAL_STICKER_VIEWED = "ftueTutorialStickerViewed";
 		
 		public static final String FTUE_TUTORIAL_CBG_VIEWED = "ftueTutorialCbgViewed";
+
+		public static final String START_HIKING = "startHiking";
 	}
 
 	public static final class MqttMessageTypes
