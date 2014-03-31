@@ -1035,7 +1035,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
-			Log.d(TAG, "Connection check happened from GCM");
+			Log.d(TAG, "Connection check happened from GCM, client already connected ? : " + isConnected());
 			boolean reconnect = intent.getBooleanExtra("reconnect", false);
 			if(reconnect)
 			{
