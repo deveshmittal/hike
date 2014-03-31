@@ -51,6 +51,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import com.google.android.gms.internal.ad;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
@@ -188,6 +189,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
 	{
 		final ContactInfo contactInfo = adapter.getItem(arg2);
+
 		// jugaad , coz of pinned listview , discussed with team
 		if (ComposeChatAdapter.EXTRA_ID.equals(contactInfo.getId()))
 		{
@@ -199,11 +201,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 
 			// for SMS users, append SMS text with name
-			String name = adapter.getViewTypebasedOnFavType(contactInfo) == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
+			int viewtype = adapter.getItemViewType(arg2);
+			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
+			// for empty type, mean user types numbers that we show as last tuple
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 		}
 		else
 		{
+			Log.i("composeactivity", contactInfo.getId() + " - id of clicked");
 			if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId()) || FriendsAdapter.EMPTY_ID.equals(contactInfo.getId()))
 			{
 				return;
@@ -258,6 +263,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			setActionBar();
 		}
+		else
+		{
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
+		}
 	}
 
 	@Override
@@ -299,6 +308,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.showCheckBoxAgainstItems(true);
 			tagEditText.clear(false);
 			adapter.removeFilter();
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			break;
 		case START_CHAT_MODE:
 			// createGroupHeader.setVisibility(View.VISIBLE);
@@ -306,7 +316,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			tagEditText.clear(false);
 			adapter.clearAllSelection(false);
 			adapter.removeFilter();
-			break;
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
+			title.setText(R.string.new_chat);
+			return;
 		}
 		setTitle();
 	}
@@ -592,13 +604,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		finish();
 	}
 
-	private String getNormalisedMsisdn()
-	{
-		String textEntered = tagEditText.getText().toString();
-		return Utils.normalizeNumber(textEntered,
-				getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE));
-	}
-
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
@@ -630,5 +635,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			});
 		}
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		if (composeMode == CREATE_GROUP_MODE)
+		{
+			setMode(START_CHAT_MODE);
+			return;
+		}
+		super.onBackPressed();
 	}
 }
