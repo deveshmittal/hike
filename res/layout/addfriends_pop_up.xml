@@ -8,8 +8,7 @@
         android:id="@+id/popup_black_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.48"
-        android:background="@color/transparent_black" />
+        android:background="@color/light_transparent_black" />
     
     <LinearLayout
         android:id="@+id/popup"
@@ -56,6 +55,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/add_friend_popup_msg"
                     android:textColor="#535e6d"
+                    android:layout_gravity="center"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>

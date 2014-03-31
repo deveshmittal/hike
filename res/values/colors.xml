@@ -234,4 +234,5 @@
     <color name="red_no_network">#ffee5953</color>
     <color name="blue_color_span">#0f8fe1</color>
     <color name="red_color_span">#ef554e</color>
+    <color name="light_transparent_black">#7B000000</color>
 </resources>
