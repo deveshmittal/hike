@@ -173,11 +173,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 
 		// hack for header, as we are using pinnedSectionListView
-		if (showExtraAtFirst)
-		{
-			ContactInfo header = new ContactInfo(EXTRA_ID, null, null, null);
-			completeList.add(header);
-		}
 
 		if (fetchGroups && !groupsList.isEmpty())
 		{
@@ -203,6 +198,12 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		if (newContactsList != null)
 		{
 			completeList.addAll(newContactsList);
+		}
+		if (completeList.size() != 0 && showExtraAtFirst)
+		{
+			// items are > 0
+			ContactInfo header = new ContactInfo(EXTRA_ID, null, null, null);
+			completeList.add(0, header);
 		}
 
 		notifyDataSetChanged();
