@@ -32,8 +32,8 @@ import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
@@ -58,6 +58,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
 
 		friendsAdapter = new FriendsAdapter(getActivity());
+		friendsAdapter.executeFetchTask();
 		friendsList.setAdapter(friendsAdapter);
 
 		friendsList.setOnItemLongClickListener(this);
@@ -115,21 +116,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			}
 			else
 			{
-				intent = new Intent(getActivity(), ComposeActivity.class);
-				intent.putExtra(HikeConstants.Extras.CREATE_GROUP, true);
+				intent = new Intent(getActivity(), CreateNewGroupActivity.class);
 			}
 			startActivity(intent);
 		}
 		else
 		{
-			Intent intent = new Intent(getActivity(), ChatThread.class);
-			if (contactInfo.getName() != null)
-			{
-				intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
-			}
-			intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
-			intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
-			startActivity(intent);
+			Utils.startChatThread(getActivity(), contactInfo);
 		}
 	}
 

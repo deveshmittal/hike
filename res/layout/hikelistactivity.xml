@@ -40,14 +40,16 @@
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
+            android:layout_alignParentRight="true"
             android:button="@drawable/select_all_checkbox" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/select_all_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
             android:text="@string/select_all"
             android:textColor="@color/actionbar_text"
             android:textSize="18sp"

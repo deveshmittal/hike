@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/list_item"
+    android:orientation="vertical" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/contact"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:drawableLeft="@drawable/ic_create_group"
+        android:drawablePadding="12dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:paddingLeft="12dp"
+        android:singleLine="true"
+        android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
+        android:textColor="@color/selected_msg_item_bg_lines"
+        android:textSize="16sp"
+        android:textStyle="bold|italic" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light_gray_hike" />
+
+</LinearLayout>

@@ -86,7 +86,7 @@
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/btn_call_me"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="41dp"
                 android:textSize="14sp"
 	    		android:textStyle="bold|italic"
 		    	android:shadowColor="@color/black"

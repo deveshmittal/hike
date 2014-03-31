@@ -670,7 +670,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		listAdapter.setIsListFlinging(velocity > 10 && scrollState == OnScrollListener.SCROLL_STATE_FLING);
+		listAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 	}
 
 	private class ListAdapter extends BaseAdapter
