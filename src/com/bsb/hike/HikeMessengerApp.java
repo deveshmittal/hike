@@ -315,6 +315,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
 
+	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

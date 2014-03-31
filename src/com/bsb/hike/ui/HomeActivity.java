@@ -1248,6 +1248,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
 					}
+					if(accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
+					{
+						if(accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+						{
+							Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+						}
+						else if(accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+						{
+							Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+						}
+						editor = accountPrefs.edit();
+						editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+						editor.commit();
+					}
+					
 				}
 			}
 		}
