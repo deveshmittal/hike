@@ -671,7 +671,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				lastSeen.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				lastSeen.setVisibility(View.GONE);
 
-				avatarFrame.setImageResource(R.drawable.frame_avatar_medium_selector);
+				avatarFrame.setImageDrawable(null);
 
 				TextView inviteBtn = (TextView) convertView.findViewById(R.id.invite_btn);
 				if (inviteBtn != null)

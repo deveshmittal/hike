@@ -393,7 +393,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					else
 					{
 						mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-						avatarFrame.setImageResource(R.drawable.frame_avatar_medium_selector);
+						avatarFrame.setImageDrawable(null);
 					}
 					iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
 

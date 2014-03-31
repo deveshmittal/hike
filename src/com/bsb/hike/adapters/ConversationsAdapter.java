@@ -89,7 +89,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				int resId = message.getImageState();
 				if (resId > 0)
 				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_large_selector);
+					avatarframe.setImageDrawable(null);
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				}
@@ -109,7 +109,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				}
 				else
 				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_large_selector);
+					avatarframe.setImageDrawable(null);
 				}
 			}
 
