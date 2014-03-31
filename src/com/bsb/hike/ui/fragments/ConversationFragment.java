@@ -54,7 +54,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -221,7 +221,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void onClick(View v)
 				{
-					startActivity(new Intent(getActivity(), ComposeActivity.class));
+					startActivity(new Intent(getActivity(), ComposeChatActivity.class));
 
 					Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
 				}

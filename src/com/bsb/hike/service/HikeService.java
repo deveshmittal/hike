@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -40,6 +41,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.thor.ThorThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.StickerManager;
@@ -239,7 +241,7 @@ public class HikeService extends Service
 			registerReceiver(postGreenBlueDetails, new IntentFilter(SEND_GB_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
-
+		LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(localBroadcastThor, new IntentFilter(HikeMessengerApp.THOR_DETAILS_SENT));
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
 		{
 			Log.d(getClass().getSimpleName(), "SYNCING");
@@ -323,17 +325,27 @@ public class HikeService extends Service
 				e.printStackTrace();
 			}
 		}
+		if (Utils.hasGingerbread())
+			runThor();
 		// return START_NOT_STICKY - we want this Service to be left running
 		// unless explicitly stopped, and it's process is killed, we want it to
 		// be restarted
 		return START_STICKY;
 	}
 
+	private void runThor()
+	{
+		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
+		{
+			Thread thor = new Thread(new ThorThread(getApplicationContext()));
+			thor.start();
+		}
+	}
+
 	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
-
 		Log.i("HikeService", "onDestroy.  Shutting down service");
 		mMqttManager.destroyMqtt();
 		this.mMqttManager = null;
@@ -387,6 +399,7 @@ public class HikeService extends Service
 			unregisterReceiver(postGreenBlueDetails);
 			postGreenBlueDetails = null;
 		}
+		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastThor);
 	}
 
 	public void unregisterDataChangeReceivers()
@@ -837,4 +850,48 @@ public class HikeService extends Service
 			Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 		}
 	}
+
+	private BroadcastReceiver localBroadcastThor = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			if (intent.getAction().equals(HikeMessengerApp.THOR_DETAILS_SENT))
+			{
+				String b = intent.getStringExtra(ThorThread.THOR);
+				if (b != null)
+				{
+					try
+					{
+						JSONObject obj = new JSONObject();
+						obj.put(ThorThread.THOR, b);
+						HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/thor", RequestType.OTHER, new HikeHttpCallback()
+						{
+							public void onSuccess(JSONObject response)
+							{
+								Log.d("PostInfo", "Thor info sent successfully");
+								Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+								editor.putBoolean(HikeMessengerApp.THOR_DETAILS_SENT, true);
+								editor.commit();
+							}
+
+							public void onFailure()
+							{
+								Log.d("PostInfo", "Thor info could not be sent");
+							}
+						});
+						hikeHttpRequest.setJSONData(obj);
+
+						Log.d("PostInfo", "Executing thor request...");
+						HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+						Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
+					}
+					catch (JSONException e)
+					{
+						Log.e(getClass().getSimpleName(), "JsonException in sending Thor details", e);
+					}
+				}
+			}
+		}
+	};
 }

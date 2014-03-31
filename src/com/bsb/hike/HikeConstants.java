@@ -381,6 +381,8 @@ public class HikeConstants
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
+	public static final String REQUEST_DP = "rdp";
+
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
@@ -788,6 +790,10 @@ public class HikeConstants
 	
 	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
+	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
+
+	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -1055,6 +1061,10 @@ public class HikeConstants
 		public static final String MANUAL_SYNC = "manualSync";
 
 		public static final String IS_FTUT_ADD_FRIEND_POPUP_SHOWING = "isFtueAddFriendPopup";
+
+		public static final String GROUP_NAME = "groupName";
+
+		public static final String GROUP_ID = "groupId";
 
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
 	}
@@ -1360,6 +1370,8 @@ public class HikeConstants
 		public static final String CHAT_BACKGROUD = "cbg";
 
 		public static final String GROUP_OWNER_CHANGE = "goc";
+
+		public static final String REQUEST_DP = "rdp";
 	}
 
 	public static final class SMSNative

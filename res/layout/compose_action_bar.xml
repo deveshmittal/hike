@@ -64,16 +64,22 @@
         android:id="@+id/post_btn"
         android:layout_width="wrap_content"
         android:minWidth="56dp"
-        android:layout_height="32dp"
+        android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
-        android:layout_marginRight="8dp"
-        android:background="@drawable/bg_update_post_btn"
+        android:background="@drawable/bg_overflow_menu_selector"
         android:textColor="@drawable/action_bar_btn_text"
-        android:textSize="14sp"
-        android:textStyle="bold"
+        android:textSize="16sp"
         android:visibility="gone" />
-    
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/transparent_white_ab"
+        android:layout_toLeftOf="@id/post_btn" />
+
 </RelativeLayout>

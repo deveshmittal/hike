@@ -777,7 +777,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return true;
 		case R.id.forward:
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
-			Intent intent = new Intent(this, ComposeActivity.class);
+			Intent intent = new Intent(this, ComposeChatActivity.class);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			if (message.isFileTransferMessage())
@@ -5892,7 +5892,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent.getAction().equals(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED))
+			if (mAdapter != null && intent.getAction().equals(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED))
 			{
 				// runOnUiThread(mUpdateAdapter);
 				// @GM
@@ -6166,7 +6166,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			convMsgs = new ConvMessage[selectedMessagesIds.size()];
 
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
-			Intent intent = new Intent(ChatThread.this, ComposeActivity.class);
+			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			JSONArray multipleMsgArray = new JSONArray();

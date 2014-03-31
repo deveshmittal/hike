@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -50,11 +51,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -70,7 +71,6 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
-import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
@@ -98,7 +98,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP 
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -134,7 +134,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private TextView topBarIndicator;
 
 	private Drawable myProfileImage;
-	
+
 	private View ftueAddFriendWindow;
 	
 	private boolean shouldShowAddFriendsPopup = true;
@@ -175,7 +175,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
-		
+
 		shouldShowAddFriendsPopup = false;
 		if(savedInstanceState!=null)
 		{
@@ -208,16 +208,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
-		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false)){
-			//if chat bg ftue is not shown show this on the highest priority
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
+		{
+			// if chat bg ftue is not shown show this on the highest priority
 			dialogShowing = DialogShowing.ADD_FRIEND_FTUE_POPUP;
-		} else {
+		}
+		else
+		{
 			// check the preferences and show update
-			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE,
-					HikeConstants.NO_UPDATE);
+			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
-		
+
 		initialiseViewPager();
 		initialiseTabs();
 
@@ -385,7 +387,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		switch (item.getItemId())
 		{
 		case R.id.new_conversation:
-			intent = new Intent(this, ComposeActivity.class);
+			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
@@ -616,7 +618,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * We only show addfriends popup on second resume and also not on orientation changes
 		 */
-		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
 			String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 			/*
@@ -714,7 +716,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				findViewById(R.id.popup_black_overlay).setOnClickListener(null);
 				popUpAddButton.setOnClickListener(new OnClickListener()
 				{
-					
+
 					@Override
 					public void onClick(View v)
 					{
@@ -833,6 +835,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
+	@SuppressLint("NewApi")
 	private void initialiseTabs()
 	{
 		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
@@ -872,6 +875,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
+	@SuppressLint("NewApi")
 	/*
 	 * Implemented to add a fade change in color when switching between updates tab and other tabs
 	 */
@@ -1143,6 +1147,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					runOnUiThread(new Runnable()
 					{
+						@SuppressLint("NewApi")
 						@Override
 						public void run()
 						{
@@ -1338,6 +1343,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event)
 	{
@@ -1479,10 +1485,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 
 				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
-				int totalCredits = Integer.parseInt(accountPrefs.getString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "100"));
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
-				freeSmsCount.setText(currentCredits + "/" + totalCredits);
+				freeSmsCount.setText(Integer.toString(currentCredits));
 				if (item.getKey() == 1)
 				{
 					freeSmsCount.setVisibility(View.VISIBLE);
@@ -1597,7 +1602,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					showOverFlowMenu();
 				}
 			});
-		
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 

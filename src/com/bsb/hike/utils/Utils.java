@@ -47,6 +47,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -103,6 +105,7 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Patterns;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -3730,7 +3733,7 @@ public class Utils
 			}
 		}
 	}
-	
+
 	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
 	{
 		if (TextUtils.isEmpty(serverRecommendedArrayString))
@@ -3772,8 +3775,7 @@ public class Utils
 	}
 
 	/*
-	 *  When Active Contacts >= 3 show the 'Add Friends' pop-up
- 	 *	When Activate Contacts <3 show the 'Invite Friends' pop-up
+	 * When Active Contacts >= 3 show the 'Add Friends' pop-up When Activate Contacts <3 show the 'Invite Friends' pop-up
 	 */
 	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
 	{
@@ -3794,6 +3796,34 @@ public class Utils
 		{
 			return false;
 		}
+	}
+
+	public static String getEmail(Context context)
+	{
+		String email = null;
+		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+		Account[] accounts = AccountManager.get(context).getAccounts();
+		for (Account account : accounts)
+		{
+			if (emailPattern.matcher(account.name).matches())
+			{
+				email = account.name;
+				break;
+			}
+		}
+		return email;
+	}
+
+	public static void startChatThread(Context context, ContactInfo contactInfo)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		if (contactInfo.getName() != null)
+		{
+			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		context.startActivity(intent);
 	}
 	
 	public static boolean shouldShowAddOrInviteFTUE(String msisdn)

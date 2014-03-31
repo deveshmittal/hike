@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
 import java.util.List;
 
 import android.app.Activity;
@@ -316,12 +317,18 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		int currentIdx = ((ChatThread) activity).getCurrentPage();
 		StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 
-		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. */
-		if (!StickerCategoryId.recent.equals(sc.categoryId))
+		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI*/
+		if (!StickerCategoryId.recent.equals(sc.categoryId) && !stickerDisabled(sticker))
 		{
 			StickerManager.getInstance().addRecentSticker(sticker);
 			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
 		}
+	}
+
+	private boolean stickerDisabled(Sticker sticker)
+	{
+		File f = new File(sticker.getSmallStickerPath(activity.getApplicationContext()));
+		return !f.exists();
 	}
 
 	public void setIsListFlinging(boolean b)

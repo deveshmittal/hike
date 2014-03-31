@@ -2,6 +2,7 @@
     android:id="@+id/settings_section_view"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:background="@color/white"
     android:layout_gravity="top"
     android:orientation="vertical" >
 
