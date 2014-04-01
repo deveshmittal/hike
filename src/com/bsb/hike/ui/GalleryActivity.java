@@ -212,6 +212,14 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(titleString == null ? getString(R.string.gallery) : titleString);
+
+		if (isInsideAlbum)
+		{
+			TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
+			subText.setVisibility(View.VISIBLE);
+			subText.setText(R.string.tap_hold_multi_select);
+		}
+
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 
