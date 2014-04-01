@@ -1387,7 +1387,8 @@
     <string name="compose_chat_editText_hint">Type to filter names...</string>
     <string name="compose_chat_friends_on_hike">Friends on Hike</string>
     <string name="compose_chat_contacts_on_hike">Contacts on Hike</string>
-    <string name="compose_chat_all_contacts">Other Contacts</string>
+    <string name="compose_chat_all_contacts">SMS Contacts</string>
+    <string name="compose_chat_other_contacts">Other Contacts</string>
     <string name="compose_chat_action_bar_group_mode_title">Select members (min 2)</string>
     <string name="compose_chat_action_bar_title">New Chat</string>
     <string name="name_group">Name the group</string>
@@ -1396,6 +1397,8 @@
 	<string name="blue_status_updates">status updates</string>
 	<string name="red_last_seen">last seen</string>
 	<string name="num_contacts">%1$s contacts</string>
+	<string name="compose_chat_empty_contact_status_group_mode">Tap to add number</string>
+    <string name="compose_chat_empty_contact_status_chat_mode">Tap to start chat</string>
 	<string name="verified">Verified</string>
 	<string name="sent_txt">Sent</string>
 	<string name="delivered_txt">Delivered</string>

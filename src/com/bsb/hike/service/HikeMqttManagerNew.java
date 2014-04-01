@@ -243,7 +243,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		{
 			try
 			{
-				cancelNetworkErrorTimer();
 				switch (msg.what)
 				{
 				case HikeService.MSG_APP_PUBLISH:
@@ -455,7 +454,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private void scheduleNextConnectionCheck()
 	{
-		scheduleNextConnectionCheck((short) (HikeConstants.KEEP_ALIVE * 0.9 * 1000));
+		scheduleNextConnectionCheck(HikeConstants.MAX_RECONNECT_TIME);
 	}
 
 	private void scheduleNextConnectionCheck(int reconnectTime)
@@ -822,6 +821,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					try
 					{
+						cancelNetworkErrorTimer();
 						String messageBody = new String(arg1.getPayload(), "UTF-8");
 						Log.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);

@@ -193,7 +193,7 @@ public class HikeFile
 		this.isSent = isSent;
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, boolean isSent)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, int fileSize, boolean isSent)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
@@ -203,6 +203,7 @@ public class HikeFile
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
+		this.fileSize = fileSize;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail, boolean isSent)
