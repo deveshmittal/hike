@@ -1432,36 +1432,47 @@ public class MqttMessagesManager
 		else if (HikeConstants.MqttMessageTypes.REQUEST_DP.equals(type))
 		{
 			final String groupId = jsonObj.getString(HikeConstants.TO);
+			uploadGroupProfileImage(groupId, true);
+		}
+	}
 
-			String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-			String fileName = Utils.getTempProfileImageFileName(groupId);
+	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
+	{
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+		String fileName = Utils.getTempProfileImageFileName(groupId);
 
-			File groupImageFile = new File(directory, fileName);
-			if (!groupImageFile.exists())
+		File groupImageFile = new File(directory, fileName);
+		if (!groupImageFile.exists())
+		{
+			return;
+		}
+
+		String path = "/group/" + groupId + "/avatar";
+
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(path, RequestType.PROFILE_PIC, new HikeHttpCallback()
+		{
+			public void onFailure()
 			{
-				return;
-			}
-
-			String path = "/group/" + groupId + "/avatar";
-
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(path, RequestType.PROFILE_PIC, new HikeHttpCallback()
-			{
-				public void onFailure()
+				if (retryOnce)
+				{
+					uploadGroupProfileImage(groupId, false);
+				}
+				else
 				{
 					Utils.removeTempProfileImage(groupId);
 					HikeMessengerApp.getLruCache().deleteIconForMSISDN(groupId);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_REMOVED, groupId);
 				}
+			}
 
-				public void onSuccess(JSONObject response)
-				{
-					Utils.renameTempProfileImage(groupId);
-				}
-			});
+			public void onSuccess(JSONObject response)
+			{
+				Utils.renameTempProfileImage(groupId);
+			}
+		});
 
-			HikeHTTPTask task = new HikeHTTPTask(null, 0);
-			Utils.executeHttpTask(task, hikeHttpRequest);
-		}
+		HikeHTTPTask task = new HikeHTTPTask(null, 0);
+		Utils.executeHttpTask(task, hikeHttpRequest);
 	}
 
 	private void handleSendNativeInviteKey(boolean sendNativeInvite, boolean showFreeSmsPopup, String header, String body, Editor editor)
