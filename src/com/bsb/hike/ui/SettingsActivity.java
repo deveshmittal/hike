@@ -62,8 +62,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
-		//TODO need to change this icon.
-		itemIcons.add(R.drawable.ic_account_settings);
+		itemIcons.add(R.drawable.ic_sync_contacts);
 		itemIcons.add(R.drawable.ic_help_settings);
 
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this, R.layout.setting_item, R.id.item, items)
