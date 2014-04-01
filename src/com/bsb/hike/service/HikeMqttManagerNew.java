@@ -243,7 +243,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		{
 			try
 			{
-				cancelNetworkErrorTimer();
 				switch (msg.what)
 				{
 				case HikeService.MSG_APP_PUBLISH:
@@ -822,6 +821,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					try
 					{
+						cancelNetworkErrorTimer();
 						String messageBody = new String(arg1.getPayload(), "UTF-8");
 						Log.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
