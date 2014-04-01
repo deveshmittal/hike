@@ -213,6 +213,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView fileExtension;
 
 		View selectedStateOverlay;
+
+		View sdrFtueTip;
 	}
 
 	private Conversation conversation;
@@ -236,6 +238,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private VoiceMessagePlayer voiceMessagePlayer;
 
 	private String statusIdForTip;
+	
+	private long msgIdForSdrTip = -1;
 
 	private SharedPreferences preferences;
 
@@ -256,6 +260,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean isActionModeOn = false;
 
+	private boolean shownSdrIntroTip = true;
+
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -271,6 +277,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.chatTheme = ChatTheme.DEFAULT;
 		this.mSelectedItemsIds = new HashSet<Integer>();
 		setLastSentMessagePosition();
+		this.shownSdrIntroTip  = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -553,6 +560,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
 				holder.intMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_int);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				holder.sdrFtueTip = v.findViewById(R.id.sdr_ftue_tip);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -940,7 +948,36 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+				
+				boolean showTip = false;
+
+				if( viewType == ViewType.SEND_HIKE )
+				{
+					if (!shownSdrIntroTip && convMessage.getState() == State.SENT_DELIVERED_READ )
+					{
+						if (msgIdForSdrTip == -1)
+						{
+							showTip = true;
+						}
+						else if (convMessage.getMsgID() == msgIdForSdrTip)
+						{
+							showTip = true;
+						}
+					}
+	
+					if (showTip)
+					{
+						msgIdForSdrTip = convMessage.getMsgID();
+						holder.sdrFtueTip.setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						holder.sdrFtueTip.setVisibility(View.GONE);
+					}
+				}
 			}
+			
+
 //			if(isDefaultTheme)
 //			{
 //				if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
@@ -3570,5 +3607,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void setActionMode(boolean isOn)
 	{
 		isActionModeOn = isOn;
+	}
+	
+	public boolean shownSdrToolTip()
+	{
+		return msgIdForSdrTip != -1;
 	}
 }

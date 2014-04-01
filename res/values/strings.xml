@@ -1397,4 +1397,7 @@
 	<string name="red_last_seen">last seen</string>
 	<string name="num_contacts">%1$s contacts</string>
 	<string name="verified">Verified</string>
+	<string name="sent_txt">Sent</string>
+	<string name="delivered_txt">Delivered</string>
+	<string name="read_txt">Read</string>
 </resources>

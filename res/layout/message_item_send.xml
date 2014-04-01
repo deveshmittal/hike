@@ -455,6 +455,17 @@
                     android:visibility="gone" />
             </LinearLayout>
         </RelativeLayout>
+        <LinearLayout
+			android:id="@+id/sdr_ftue_tip"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:layout_marginRight="6dp"
+	        android:layout_below="@id/bubble_container"
+	        android:visibility="gone" >
+	    	
+	    	<include layout="@layout/sdr_tool_tip" />
+	    </LinearLayout>
 
         <LinearLayout
            	android:id="@+id/message_time_status_ext"

@@ -434,6 +434,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		if(!prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
+		{
+			Editor editor = prefs.edit();
+			editor.putBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
+			editor.commit();
+		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
