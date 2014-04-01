@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -82,6 +83,20 @@ public class Sticker implements Serializable, Comparable<Sticker>
 			return true;
 		return false;
 		
+	}
+	
+	/**
+	 * If sticker is default sticker then its not disabled
+	 * Else if sticker small image does'nt exist then also its disabled
+	 * @param sticker
+	 * @return
+	 */
+	public boolean isDisabled(Sticker sticker,Context ctx)
+	{
+		if(sticker.isDefaultSticker())
+			return false;
+		File f = new File(sticker.getSmallStickerPath(ctx));
+		return !f.exists();
 	}
 	
 	public int getStickerIndex()

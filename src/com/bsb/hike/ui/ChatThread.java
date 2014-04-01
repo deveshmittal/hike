@@ -1364,8 +1364,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
 				Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
 				sendSticker(sticker);
-				// add this sticker to recents
-				StickerManager.getInstance().addRecentSticker(sticker);
+				// add this sticker to recents if this sticker is not disabled
+				if(!sticker.isDisabled(sticker, this.getApplicationContext()));
+					StickerManager.getInstance().addRecentSticker(sticker);
 				/*
 				 * Making sure the sticker is not forwarded again on orientation change
 				 */
