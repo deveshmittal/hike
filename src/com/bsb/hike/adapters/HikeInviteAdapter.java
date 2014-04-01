@@ -286,10 +286,12 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		if (convertView == null)
 		{
 			LayoutInflater li = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = li.inflate(R.layout.settings_section_layout, parent, false);
+			convertView = li.inflate(R.layout.friends_group_view, parent, false);
 			convertView.setBackgroundColor(activity.getResources().getColor(R.color.white));
+			convertView.findViewById(R.id.home_list_divider).setVisibility(View.GONE);
 		}
-		TextView textView = (TextView) convertView.findViewById(R.id.settings_section_text);
+		TextView textView = (TextView) convertView.findViewById(R.id.name);
+		TextView countView = (TextView) convertView.findViewById(R.id.count);
 		switch (section)
 		{
 		case 0:
@@ -308,7 +310,9 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		default:
 			break;
 		}
-		if(getCountForSection(section) > 0)
+		int sectionCount = getCountForSection(section);
+		countView.setText(sectionCount+"");
+		if(sectionCount > 0)
 		{
 			convertView.findViewById(R.id.section_view).setVisibility(View.VISIBLE);
 		}
