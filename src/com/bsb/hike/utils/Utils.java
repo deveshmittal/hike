@@ -3332,9 +3332,8 @@ public class Utils
 			/*
 			 * If this is the first category, then the sticker are a part of the app bundle itself
 			 */
-			if (sticker.getStickerIndex() != -1)
+			if (sticker.isDefaultSticker())
 			{
-
 				int resourceId = 0;
 
 				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))

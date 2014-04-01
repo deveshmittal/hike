@@ -860,16 +860,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				/*
 				 * If this is the default category, then the sticker are part of the app bundle itself
 				 */
-				if (sticker.getStickerIndex() != -1)
+				if (sticker.isDefaultSticker())
 				{
 					holder.stickerImage.setVisibility(View.VISIBLE);
 					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
 					{
-						holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker.getStickerIndex()]);
+						//TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+						int idx = sticker.getStickerIndex();
+						if(idx >= 0)
+							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
 					}
 					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 					{
-						holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
+						//TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+						int idx = sticker.getStickerIndex();
+						if(idx >= 0)
+							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
 					}
 				}
 				else
