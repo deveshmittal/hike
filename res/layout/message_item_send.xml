@@ -126,9 +126,7 @@
                     android:layout_width="wrap_content"
                 	android:layout_height="wrap_content"
                 	android:gravity="center_vertical"
-                	android:orientation="horizontal"
-                	android:layout_marginLeft="2dp"
-                	android:layout_marginRight="2dp" >
+                	android:orientation="horizontal" >
                 <RelativeLayout 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
@@ -211,7 +209,8 @@
 			                android:layout_height="wrap_content"
 			      	        android:text="00:00"
 			      	        android:textColor="@color/white_60"
-			                android:textSize="12sp" />
+			                android:textSize="12sp"
+			                android:visibility="gone" />
 			            
 			            <ImageView
 			                android:id="@+id/message_status_ft"
@@ -369,7 +368,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/sent_message_inner_container"
-                android:layout_marginLeft="5dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|right" >
                 
@@ -379,7 +377,8 @@
                 android:layout_height="wrap_content"
       	        android:text="00:00"
                 android:textColor="@color/black_70"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
             
             <ImageView
                 android:id="@+id/message_status"
@@ -406,7 +405,8 @@
                 android:layout_height="wrap_content"
       	        android:text="00:00"
                 android:textColor="@color/black_70"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
             
             <ImageView
                 android:id="@+id/message_status_int"
