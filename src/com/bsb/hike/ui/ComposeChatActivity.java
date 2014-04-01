@@ -51,11 +51,12 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import com.google.android.gms.internal.ac;
 import com.google.android.gms.internal.ad;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
-	private static final int MIN_MEMBERS_GROUP_CHAT = 2;
+	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
 	private static final int CREATE_GROUP_MODE = 1;
 
@@ -138,16 +139,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		listView = (ListView) findViewById(R.id.list);
 
-		adapter = new ComposeChatAdapter(this, isForwardingMessage, existingGroupId);
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId);
 		adapter.executeFetchTask();
-		listView.setEmptyView(findViewById(android.R.id.empty));
+		adapter.setEmptyView(findViewById(android.R.id.empty));
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		originalAdapterLength = adapter.getCount();
 
 		initTagEditText();
 
-		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) ? CREATE_GROUP_MODE : START_CHAT_MODE);
+		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+		if (existingGroupId != null)
+		{
+			MIN_MEMBERS_GROUP_CHAT = 1;
+		}
 	}
 
 	private void initTagEditText()
@@ -200,10 +205,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (composeMode == CREATE_GROUP_MODE)
 		{
 
+			if (adapter.isContactPresentInExistingParticipants(contactInfo))
+			{
+				// basicly it will work when you add participants to existing group via typing numbers
+				Toast.makeText(getBaseContext(), "You have already added this contact in group", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			// for SMS users, append SMS text with name
 			int viewtype = adapter.getItemViewType(arg2);
 			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
-			// for empty type, mean user types numbers that we show as last tuple
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 		}
 		else
@@ -274,11 +284,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		adapter.addContact((ContactInfo) data);
 		int selectedCount = adapter.getSelectedContactCount();
-		// so we add it only first time
-		if (selectedCount == 1)
-		{
-			setupMultiSelectActionBar();
-		}
+		setupMultiSelectActionBar();
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
 	}
 
@@ -308,6 +314,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.showCheckBoxAgainstItems(true);
 			tagEditText.clear(false);
 			adapter.removeFilter();
+			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			break;
 		case START_CHAT_MODE:
@@ -317,6 +324,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.clearAllSelection(false);
 			adapter.removeFilter();
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
+			setActionBar();
 			title.setText(R.string.new_chat);
 			return;
 		}
@@ -420,6 +428,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			groupChatActionBar = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 		}
+		if (actionBar.getCustomView() == groupChatActionBar)
+		{
+			return;
+		}
 		View backContainer = groupChatActionBar.findViewById(R.id.back);
 
 		title = (TextView) groupChatActionBar.findViewById(R.id.title);
@@ -429,7 +441,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				onBackPressed();
+				if (existingGroupId != null)
+				{
+					ComposeChatActivity.this.finish();
+				}
+				else
+				{
+					onBackPressed();
+				}
 			}
 		});
 		setTitle();
@@ -483,7 +502,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				if (adapter.getSelectedContactCount() < MIN_MEMBERS_GROUP_CHAT)
 				{
-					Toast.makeText(getApplicationContext(), "Select Min 2 members to start group chat", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
 					return;
 				}
 				createGroup(adapter.getAllSelectedContacts());
@@ -496,7 +515,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				onBackPressed();
+				setMode(CREATE_GROUP_MODE);
+				setActionBar();
 			}
 		});
 		actionBar.setCustomView(multiSelectActionBar);
