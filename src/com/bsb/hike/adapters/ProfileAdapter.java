@@ -311,7 +311,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				{
 					viewHolder.subText.setVisibility(View.VISIBLE);
 					viewHolder.subText.setText(mContactInfo.getMsisdn());
-					if(!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
+					if (!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
 					{
 						viewHolder.subText.append(" (" + mContactInfo.getMsisdnType() + ")");
 					}

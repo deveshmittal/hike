@@ -183,7 +183,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				filterList(friendsList, filteredFriendsList, textToBeFiltered);
 				filterList(hikeContactsList, filteredHikeContactsList, textToBeFiltered);
 				filterList(smsContactsList, filteredSmsContactsList, textToBeFiltered);
-				if(groupsList != null && !groupsList.isEmpty())
+				if (groupsList != null && !groupsList.isEmpty())
 				{
 					filterList(groupsList, filteredGroupList, textToBeFiltered);
 				}
@@ -192,7 +192,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				resultList.add(filteredFriendsList);
 				resultList.add(filteredHikeContactsList);
 				resultList.add(filteredSmsContactsList);
-				if(groupsList != null && !groupsList.isEmpty())
+				if (groupsList != null && !groupsList.isEmpty())
 				{
 					resultList.add(filteredGroupList);
 				}
@@ -205,7 +205,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				resultList.add(friendsList);
 				resultList.add(hikeContactsList);
 				resultList.add(smsContactsList);
-				if(groupsList != null && !groupsList.isEmpty())
+				if (groupsList != null && !groupsList.isEmpty())
 				{
 					resultList.add(groupsList);
 				}
@@ -270,8 +270,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			filteredSmsContactsList.clear();
 			filteredSmsContactsList.addAll(resultList.get(2));
-			
-			if(groupsList != null && !groupsList.isEmpty())
+
+			if (groupsList != null && !groupsList.isEmpty())
 			{
 				filteredGroupsList.clear();
 				filteredGroupsList.addAll(resultList.get(3));
