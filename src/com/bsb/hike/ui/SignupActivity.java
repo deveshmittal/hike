@@ -19,8 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -56,7 +54,6 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -79,10 +76,9 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserCallback;
 import com.facebook.Response;
@@ -90,8 +86,8 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
-public class SignupActivity extends HikeAppStateBaseFragmentActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, OnClickListener, FinishableEvent,
-		OnCancelListener, DialogInterface.OnClickListener, Listener
+public class SignupActivity extends ChangeProfileImageBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, OnClickListener, FinishableEvent,
+		OnCancelListener, Listener
 {
 
 	private SignupTask mTask;
@@ -144,15 +140,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private boolean msisdnErrorDuringSignup = false;
 
-	private final int SCANNING_CONTACTS = 4;
+	public static final int SCANNING_CONTACTS = 4;
 	
-	private final int GENDER = 3;
+	public static final int GENDER = 3;
 	
-	private final int NAME = 2;
+	public static final int NAME = 2;
 
-	private final int PIN = 1;
+	public static final int PIN = 1;
 
-	private final int NUMBER = 0;
+	public static final int NUMBER = 0;
 
 	private String countryCode;
 
@@ -179,6 +175,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	View nextBtn;
 	
 	View nextBtnContainer;
+	
+	View selectedCountryPicker;
 	
 	private TextView invalidPin;
 	
@@ -273,6 +271,9 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			case PIN:
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
 				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
+				if(savedInstanceState.getBoolean(HikeConstants.Extras.SHOWING_INVALID_PIN_ERROR, false)){
+					invalidPin.setVisibility(View.VISIBLE);
+				}
 				break;
 			case NAME:
 				prepareLayoutForGettingName(savedInstanceState, false);
@@ -312,8 +313,24 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		mTask = SignupTask.startTask(this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
+		setWindowSoftInputState();
 	}
 	
+	private void setWindowSoftInputState()
+	{
+		int displayedChild = viewFlipper.getDisplayedChild();
+		switch (displayedChild)
+		{
+		case GENDER:
+		case SCANNING_CONTACTS:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+			break;
+		default:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+			break;
+		}
+	}
+
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -346,7 +363,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		else if (displayedChild == PIN)
 		{
-			mActionBarTitle.setText(R.string.enter_pin);
+			mActionBarTitle.setText(R.string.pin);
 		}
 		else if (displayedChild == NAME)
 		{
@@ -489,13 +506,40 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			invalidNum.setVisibility(View.GONE);
 		}
+		if (invalidPin != null)
+		{
+			invalidPin.setVisibility(View.INVISIBLE);
+		}
 		if (countryPicker != null)
 		{
 			countryPicker.setEnabled(false);
+			selectedCountryPicker.setEnabled(false);
 		}
 		if (callmeBtn != null)
 		{
-			callmeBtn.setVisibility(View.GONE);
+			callmeBtn.setEnabled(false);
+		}
+	}
+	
+	private void endLoading()
+	{
+		if(loadingLayout !=null)
+		{
+			loadingLayout.setVisibility(View.GONE);
+		}
+		if(infoTxt != null)
+		{
+			infoTxt.setVisibility(View.VISIBLE);
+		}
+		nextBtn.setEnabled(true);
+		if (countryPicker != null)
+		{
+			countryPicker.setEnabled(true);
+			selectedCountryPicker.setEnabled(true);
+		}
+		if (callmeBtn != null)
+		{
+			callmeBtn.setEnabled(true);
 		}
 	}
 
@@ -514,7 +558,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			return;
 		}
 		
-		if (enterEditText !=null && TextUtils.isEmpty(enterEditText.getText()))
+		if (enterEditText !=null && TextUtils.isEmpty(enterEditText.getText().toString().replaceAll(" ", "")))
 		{
 			int displayedChild = viewFlipper.getDisplayedChild();
 			int stringRes;
@@ -552,7 +596,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			{
 				if(mActivityState.isFemale != null)
 				{
+					mTask.addGender(mActivityState.isFemale);
 					mTask.addUserInput(mActivityState.isFemale.toString());
+					viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
+					prepareLayoutForScanning(null);
 				}
 				else{
 					Toast toast = Toast.makeText(this, "please select your gender", Toast.LENGTH_SHORT);
@@ -594,6 +641,10 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 							startLoading();
 							dialog.cancel();
+							if(Utils.densityMultiplier < 1.5 )
+							{
+								Utils.hideSoftKeyboard(SignupActivity.this, enterEditText);
+							}
 						}
 					});
 					builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
@@ -626,8 +677,19 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 					if (viewFlipper.getDisplayedChild() == NAME)
 					{
 						Utils.hideSoftKeyboard(this, enterEditText);
+						mActivityState.userName = input;
+						mTask.addUserName(mActivityState.userName);
+						viewFlipper.setDisplayedChild(GENDER);
+						prepareLayoutForGender(null);
 					}
 					mTask.addUserInput(input);
+					if(birthdayText!=null && !TextUtils.isEmpty(birthdayText.getText().toString()))
+					{
+						Calendar calendar = Calendar.getInstance();
+						int currentYear = calendar.get(Calendar.YEAR);
+						mActivityState.birthday = new Birthday(1, 1, currentYear - Integer.valueOf(birthdayText.getText().toString()));
+						mTask.addBirthdate(mActivityState.birthday);
+					}
 				}
 			}
 		}
@@ -668,6 +730,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		invalidNum = (TextView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (EditText)layout.findViewById(R.id.country_picker);
 		selectedCountryName = (TextView)layout.findViewById(R.id.selected_country_name);
+		selectedCountryPicker = layout.findViewById(R.id.selected_country);
 		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 		mIconView = (ImageView) layout.findViewById(R.id.profile);
 		
@@ -701,12 +764,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		});
 		
 		countryPicker.setEnabled(true);
+		selectedCountryPicker.setEnabled(true);
 		
 		setupCountryCodeData();
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		String number = manager.getLine1Number();
-		if(number !=null)
+		if(number !=null && number.startsWith("+91"))
 		{
+			number = number.replace("+91", "");
 			enterEditText.setText(number);
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
@@ -788,11 +853,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		initializeViews(nameLayout);
 
-		if (mActivityState.birthday != null)
-		{
-			onDateSetListener.onDateSet(null, mActivityState.birthday.year, mActivityState.birthday.month - 1, mActivityState.birthday.day);
-		}
-
 		Session session = Session.getActiveSession();
 		if (session == null)
 		{
@@ -852,11 +912,17 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		femaleText = (TextView) genderLayout.findViewById(R.id.female);
 		maleText = (TextView) genderLayout.findViewById(R.id.male);
 		genderDesctribeText = (TextView) genderLayout.findViewById(R.id.describe_txt);
-		if(mActivityState.isFemale == null )
+		if(savedInstanceState!=null && savedInstanceState.containsKey(HikeConstants.Extras.GENDER))
+		{
+			mActivityState.isFemale = savedInstanceState.getBoolean(HikeConstants.Extras.GENDER);
+			selectGender(mActivityState.isFemale);
+		}
+		if(mActivityState.isFemale == null)
 		{
 			genderDesctribeText.setText("");
 		}
 		nextBtnContainer.setVisibility(View.VISIBLE);
+		setupActionBarTitle();
 	}
 	private void prepareLayoutForScanning(Bundle savedInstanceState)
 	{
@@ -886,15 +952,19 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			mActivityState.isFemale = false;
 		}
 		
-		femaleText.setSelected(mActivityState.isFemale);
-		maleText.setSelected(!mActivityState.isFemale);
-		
-		setGenderDescribeRandomText(mActivityState.isFemale);
-		
+		selectGender(mActivityState.isFemale);
 		if (mTask != null)
 		{
 			mTask.addGender(mActivityState.isFemale);
 		}
+	}
+
+	private void selectGender(Boolean isFemale)
+	{
+		femaleText.setSelected(mActivityState.isFemale);
+		maleText.setSelected(!mActivityState.isFemale);
+		
+		setGenderDescribeRandomText(mActivityState.isFemale);
 	}
 
 	private void setGenderDescribeRandomText(boolean isFemale)
@@ -915,88 +985,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		genderDesctribeText.setText(describeStringRes);
 	}
 
-	public void onBirthdayClick(View v)
-	{
-
-		int day;
-		int month;
-		int year;
-
-		Calendar calendar = Calendar.getInstance();
-
-		if (mActivityState.birthday == null)
-		{
-			/*
-			 * Default values for birthday
-			 */
-			day = 1;
-			month = 0;
-			year = 1990;
-		}
-		else
-		{
-			day = mActivityState.birthday.day;
-			month = mActivityState.birthday.month;
-			year = mActivityState.birthday.year;
-		}
-
-		DatePickerDialog dialog = new DatePickerDialog(this, onDateSetListener, year, month, day);
-		if (Utils.isHoneycombOrHigher())
-		{
-			dialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
-		}
-		dialog.show();
-	}
-
-	private OnDateSetListener onDateSetListener = new OnDateSetListener()
-	{
-
-		@Override
-		public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
-		{
-			if (birthdayText == null)
-			{
-				return;
-			}
-			Calendar calendar = Calendar.getInstance();
-			boolean thisYear = false;
-
-			if (year >= calendar.get(Calendar.YEAR))
-			{
-				year = calendar.get(Calendar.YEAR);
-				thisYear = true;
-			}
-
-			if (thisYear)
-			{
-				boolean thisMonth = false;
-				if (monthOfYear >= calendar.get(Calendar.MONTH))
-				{
-					monthOfYear = calendar.get(Calendar.MONTH);
-					thisMonth = true;
-				}
-
-				if (thisMonth)
-				{
-					if (dayOfMonth > calendar.get(Calendar.DAY_OF_MONTH))
-					{
-						dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-					}
-				}
-			}
-
-			birthdayText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-
-			mActivityState.birthday = new Birthday(dayOfMonth, monthOfYear + 1, year);
-			if (mTask != null)
-			{
-				mTask.addBirthdate(mActivityState.birthday);
-			}
-
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-		}
-	};
-
 	private void resetViewFlipper()
 	{
 		errorDialog = null;
@@ -1014,6 +1002,12 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		mTask = SignupTask.restartTask(this);
 	}
 
+	private void restartTask(String userName, Boolean isFemale, Birthday birthday)
+	{
+		resetViewFlipper();
+		mTask = SignupTask.restartTask(this, userName, isFemale, birthday);
+	}
+
 	private void showErrorMsg()
 	{
 		nextBtn.setEnabled(false);
@@ -1025,14 +1019,17 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 			infoTxt.setVisibility(View.VISIBLE);
 		}
-		showNetworkErrorPopup();
+		if(errorDialog == null)
+		{
+			showNetworkErrorPopup();
+		}
 	}
 
 	private void showNetworkErrorPopup()
 	{
 		errorDialog = new Dialog(this, R.style.Theme_CustomDialog);
 		errorDialog.setContentView(R.layout.no_internet_pop_up);
-		errorDialog.setCancelable(false);
+		errorDialog.setCancelable(true);
 		Button btnOk = (Button) errorDialog.findViewById(R.id.btn_ok);
 		btnOk.setOnClickListener(new OnClickListener()
 		{
@@ -1041,7 +1038,8 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			public void onClick(View v)
 			{
 				errorDialog.dismiss();
-				restartTask();
+				v.setEnabled(false);
+				restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 				/*
 				 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
 				 */
@@ -1054,6 +1052,17 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 						submitClicked();
 					}
 				}, 100);
+			}
+		});
+		
+		errorDialog.setOnCancelListener(new OnCancelListener()
+		{
+			
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				endLoading();
+				
 			}
 		});
 		errorDialog.show();
@@ -1090,9 +1099,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 		}
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		outState.putBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT, showingSecondLoadingTxt);
+		outState.putBoolean(HikeConstants.Extras.SHOWING_INVALID_PIN_ERROR, invalidPin!=null && invalidPin.getVisibility()==View.VISIBLE);
 		if (viewFlipper.getDisplayedChild() == NUMBER)
 		{
 			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
+		}
+		if (viewFlipper.getDisplayedChild() == GENDER && mActivityState.isFemale != null)
+		{
+			outState.putBoolean(HikeConstants.Extras.GENDER, mActivityState.isFemale);
 		}
 		super.onSaveInstanceState(outState);
 	}
@@ -1100,6 +1114,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	@Override
 	public void onBackPressed()
 	{
+		if(viewFlipper.getDisplayedChild() == PIN)
+		{
+			if (countDownTimer != null)
+			{
+				countDownTimer.cancel();
+			}
+			mTask.addUserInput("");
+			return;
+		}
 		if (mTask != null)
 		{
 			mTask.cancelTask();
@@ -1117,8 +1140,13 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 
 	private void setAnimation()
 	{
-		viewFlipper.setInAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_in_right));
-		viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_left));
+		viewFlipper.setInAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_in_animation));
+		viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
+	}
+	
+	public int getDisplayItem()
+	{
+		return viewFlipper.getDisplayedChild();
 	}
 
 	@Override
@@ -1173,6 +1201,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 				invalidPin.setVisibility(View.VISIBLE);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
+				callmeBtn.setEnabled(true);
 				nextBtn.setEnabled(true);
 				enterEditText.setText("");
 			}
@@ -1197,7 +1226,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			}
 			break;
 		case SCANNING_CONTACTS:
-			if (TextUtils.isEmpty(value))
+			if (TextUtils.isEmpty(value) && viewFlipper.getDisplayedChild() != SCANNING_CONTACTS)
 			{
 				viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
 				prepareLayoutForScanning(null);
@@ -1239,7 +1268,7 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			if (value != null && value.equals(HikeConstants.ADDRESS_BOOK_ERROR))
 			{
 				addressBookError = true;
-				if (loadingLayout.getVisibility() == View.VISIBLE)
+				if (viewFlipper.getDisplayedChild() == SCANNING_CONTACTS)
 				{
 					showErrorMsg();
 				}
@@ -1394,10 +1423,14 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 							if (!TextUtils.isEmpty(birthdayString))
 							{
 								Date date = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).parse(user.getBirthday());
-								Calendar calendar = Calendar.getInstance();
-								calendar.setTime(date);
-
-								onDateSetListener.onDateSet(null, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+								if(date.compareTo(Calendar.getInstance().getTime()) <= 0)
+								{
+									Calendar calendar = Calendar.getInstance();
+									calendar.setTime(date);
+									mActivityState.birthday = new Birthday(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
+									mTask.addBirthdate(mActivityState.birthday);
+									birthdayText.setText(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - mActivityState.birthday.year));
+								}
 							}
 
 						}
@@ -1488,74 +1521,6 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 			}
 		}
 
-	}
-
-	public void onChangeImageClicked(View v)
-	{
-		/*
-		 * The wants to change their profile picture. Open a dialog to allow them pick Camera or Gallery
-		 */
-		final CharSequence[] items = getResources().getStringArray(R.array.profile_pic_dialog);
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.choose_picture);
-		builder.setItems(items, this);
-		builder.show();
-	}
-
-	@Override
-	public void onClick(DialogInterface dialog, int item)
-	{
-		Intent intent = null;
-		switch (item)
-		{
-		case HikeConstants.PROFILE_PICTURE_FROM_CAMERA:
-			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
-			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!Utils.hasEnoughFreeSpaceForProfilePic())
-			{
-				Toast.makeText(getApplicationContext(), R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			File selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false); // create a file to save
-			// the image
-			if (selectedFileIcon != null)
-			{
-				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
-
-				/*
-				 * Saving the file path. Will use this to get the file once the image has been captured.
-				 */
-				Editor editor = accountPrefs.edit();
-				editor.putString(HikeMessengerApp.FILE_PATH, selectedFileIcon.getAbsolutePath());
-				editor.commit();
-
-				startActivityForResult(intent, HikeConstants.CAMERA_RESULT);
-			}
-			else
-			{
-				Toast.makeText(this, getString(R.string.no_sd_card), Toast.LENGTH_LONG).show();
-			}
-			break;
-		case HikeConstants.PROFILE_PICTURE_FROM_GALLERY:
-			if (Utils.getExternalStorageState() == ExternalStorageState.NONE)
-			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!Utils.hasEnoughFreeSpaceForProfilePic())
-			{
-				Toast.makeText(getApplicationContext(), R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			intent = new Intent(Intent.ACTION_PICK);
-			intent.setType("image/*");
-			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
-			break;
-		}
 	}
 
 	@Override
@@ -1845,6 +1810,15 @@ public class SignupActivity extends HikeAppStateBaseFragmentActivity implements 
 	private boolean isInvalidCountryCode(){
 		String countryName = codesMap.get(countryPicker.getText().toString());
 		return ! (countryName != null && countriesArray.indexOf(countryName) != -1);
+	}
+
+	public void autoFillPin(String pin)
+	{
+		if(viewFlipper.getDisplayedChild() == PIN)
+		{
+			enterEditText.setText(pin);
+			submitClicked();
+		}
 	}
 
 }

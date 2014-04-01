@@ -31,26 +31,27 @@
             android:text="@string/chat_theme" />
     </LinearLayout>
 
-    <View
-        android:id="@+id/margin_view"
-        android:layout_width="9dp"
-        android:layout_height="1dp"
-        android:layout_alignParentRight="true" />
-
     <com.bsb.hike.view.CustomFontButton
         android:id="@+id/save"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
+        android:layout_height="match_parent"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/margin_view"
-        android:background="@drawable/bg_save_theme_btn"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/bg_overflow_menu_selector"
+        android:textColor="@drawable/action_bar_btn_text"
         android:gravity="center"
         android:minWidth="56dp"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
         android:text="@string/done"
-        android:textColor="@drawable/action_bar_btn_text"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textSize="16sp" />
 
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/transparent_white_ab"
+        android:layout_toLeftOf="@id/save" />
+    
 </RelativeLayout>

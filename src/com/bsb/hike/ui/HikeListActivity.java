@@ -364,7 +364,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean,ContactInfo>>>();
 			contactList.removeAll(firstSectionList);
-			if(!(type == Type.INVITE && firstSectionList.isEmpty()))
+			if(!firstSectionList.isEmpty())
 			{
 				completeSectionsData.put(0,firstSectionList);
 			}
@@ -529,10 +529,18 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private void getRecommendedInvitesList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
 	{
-		List<ContactInfo> recommendedContactList = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(6);
-		for (ContactInfo info : recommendedContactList)
+		int limit = 6;
+		List<ContactInfo> recommendedContactList = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(20);
+		if (recommendedContactList.size() >= limit)
 		{
-			firstSectionList.add(new Pair(new AtomicBoolean(false), info));
+			recommendedContactList = recommendedContactList.subList(0, limit);
+		}
+		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
+		{
+			ContactInfo contactInfo = pair.second;
+			if(recommendedContactList.contains(contactInfo)){
+				firstSectionList.add(pair);
+			}
 		}
 	}
 

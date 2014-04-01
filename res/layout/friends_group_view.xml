@@ -2,34 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical" >
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/home_list_divider" />
+        
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="34dp"
-        android:background="#e7e2d6"
         android:paddingLeft="12dp"
         android:paddingRight="12dp" >
-
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_header_friends" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="7dp"
-            android:layout_toRightOf="@id/icon"
             android:text="Friends"
-            android:textColor="@color/list_item_subtext"
+            android:textColor="#0f8fe1"
             android:textSize="14sp"
-            android:textStyle="bold|italic" />
+            android:textStyle="bold" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/count"
@@ -38,9 +33,15 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:text="Friends"
-            android:textColor="@color/list_item_subtext"
+            android:textColor="#0f8fe1"
             android:textSize="14sp"
-            android:textStyle="bold|italic" />
+            android:textStyle="bold" />
     </RelativeLayout>
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="#0f8fe1" />
 </LinearLayout>

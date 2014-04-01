@@ -175,7 +175,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 							}
 						}
 					}
-					if (shouldShowExtraElement(textToBeFiltered))
+					if (section+1 == completeSectionsData.size() && shouldShowExtraElement(textToBeFiltered))
 					{
 						filteredContacts.add(null);
 					}
@@ -224,7 +224,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		{
 			return filterString.matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
-		return super.isEnabled(position);
+		return true;
 	}
 
 	@Override
@@ -286,7 +286,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			}
 			else
 			{
-				textView.setText(R.string.blocked_contacts);
+				textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.blocked_contacts);
 			}
 			break;
 		case 1:

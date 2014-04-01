@@ -30,7 +30,6 @@ import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.ct;
 
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 {
