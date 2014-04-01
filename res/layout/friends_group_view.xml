@@ -13,8 +13,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="34dp"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp" >
+        android:paddingLeft="@dimen/contact_list_header_padding"
+        android:paddingRight="@dimen/contact_list_header_padding" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/name"
@@ -41,7 +41,7 @@
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginLeft="@dimen/contact_list_divider_padding"
+        android:layout_marginRight="@dimen/contact_list_divider_padding"
         android:background="#0f8fe1" />
 </LinearLayout>

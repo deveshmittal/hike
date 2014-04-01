@@ -9,8 +9,8 @@
         android:layout_height="64dp"
         android:background="@drawable/list_item"
         android:orientation="horizontal"
-        android:paddingLeft="14dp"
-        android:paddingRight="14dp" >
+        android:paddingLeft="@dimen/contact_list_item_padding"
+        android:paddingRight="@dimen/contact_list_item_padding" >
 
         <FrameLayout
             android:id="@+id/avatar_container"

@@ -94,8 +94,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		// either section or other we do have
 		if (viewType == ViewType.SECTION)
 		{
-			TextView tv = (TextView) convertView.findViewById(R.id.settings_section_text);
+			TextView tv = (TextView) convertView.findViewById(R.id.name);
 			tv.setText(contactInfo.getName());
+
+			TextView count = (TextView) convertView.findViewById(R.id.count);
+			count.setText(contactInfo.getMsisdn());
 			// set section heading
 		}
 		else if (viewType == ViewType.EXTRA)
@@ -168,7 +171,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		switch (viewType)
 		{
 		case SECTION:
-			convertView = LayoutInflater.from(context).inflate(R.layout.settings_section_layout, null);
+			convertView = LayoutInflater.from(context).inflate(R.layout.friends_group_view, null);
 			break;
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
@@ -211,7 +214,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		if (fetchGroups && !groupsList.isEmpty())
 		{
-			ContactInfo groupSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.group_chats), FRIEND_PHONE_NUM);
+			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats), FRIEND_PHONE_NUM);
 			if (filteredGroupsList.size() > 0)
 			{
 				completeList.add(groupSection);
@@ -219,17 +222,19 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 
-		ContactInfo friendsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_friends_on_hike), FRIEND_PHONE_NUM);
+		ContactInfo friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
 		updateFriendsList(friendsSection);
 
 		if (isHikeContactsPresent())
 		{
-			ContactInfo hikeContactsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_contacts_on_hike), CONTACT_PHONE_NUM);
+			ContactInfo hikeContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredHikeContactsList.size()), context.getString(R.string.hike_contacts),
+					CONTACT_PHONE_NUM);
 			updateHikeContactList(hikeContactsSection);
 		}
 		if (showSMSContacts)
 		{
-			ContactInfo smsContactsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_all_contacts), CONTACT_PHONE_NUM);
+			ContactInfo smsContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredSmsContactsList.size()), context.getString(R.string.sms_contacts),
+					CONTACT_PHONE_NUM);
 			updateSMSContacts(smsContactsSection);
 		}
 		if (newContactsList != null)

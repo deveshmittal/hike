@@ -26,12 +26,7 @@
 
     <com.bsb.hike.view.PinnedSectionListView
         android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/compose_chat_content_margin"
-        android:layout_marginRight="@dimen/compose_chat_content_margin"
-        android:divider="@color/light_gray_hike"
-        android:dividerHeight="1dp" >
+        style="@style/HomeList" >
     </com.bsb.hike.view.PinnedSectionListView>
 
     <TextView
