@@ -15,16 +15,30 @@
         android:textColor="@color/phone_entering_header"
         android:textSize="24sp" />
     
-    <com.bsb.hike.view.CustomFontTextView
+    <LinearLayout 
         android:id="@+id/verified_pin"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/signup_header_height"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/verified"
-        android:textColor="@color/phone_entering_header"
-        android:textSize="24sp"
-        android:visibility="gone" />
-
+        android:orientation="horizontal"
+        android:visibility="gone">
+        
+        <ImageView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_pin_verified"
+            android:layout_marginRight="12dp"
+            android:layout_gravity="center"/>
+        
+	    <com.bsb.hike.view.CustomFontTextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="@dimen/signup_header_height"
+	        android:gravity="center"
+	        android:text="@string/verified"
+	        android:textColor="@color/phone_entering_header"
+	        android:textSize="24sp" />
+	</LinearLayout>
+	
         <LinearLayout
             android:id="@+id/loading_layout"
             android:layout_width="match_parent"
