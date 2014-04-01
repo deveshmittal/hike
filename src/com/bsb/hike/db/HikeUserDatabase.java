@@ -1721,21 +1721,27 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.ONHIKE + " from "
-					+ DBConstants.USERS_TABLE + " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
+			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.ONHIKE + ", "
+					+ DBConstants.HAS_CUSTOM_PHOTO + " from " + DBConstants.USERS_TABLE + " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN,
+					null);
 
 			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
 
 			final int nameIdx = c.getColumnIndex(DBConstants.NAME);
 			final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 			final int onHikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			final int hasCustomIconIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnIdx);
 				String name = c.getString(nameIdx);
 				boolean onHike = c.getInt(onHikeIdx) != 0;
-				contactList.add(new ContactInfo(null, msisdn, name, null, onHike));
+
+				ContactInfo contactInfo = new ContactInfo(null, msisdn, name, null, onHike);
+				contactInfo.setHasCustomPhoto(c.getInt(hasCustomIconIdx) == 1);
+
+				contactList.add(contactInfo);
 			}
 			return contactList;
 		}
