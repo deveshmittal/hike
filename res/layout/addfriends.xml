@@ -7,11 +7,6 @@
     <com.bsb.hike.adapters.PinnedHeaderListView
         android:headerDividersEnabled="false"
         android:id="@+id/addfriend_listview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:divider="#e7e8e9"
-        android:dividerHeight="1dp" />
+        style="@style/HomeList" />
 
 </RelativeLayout>

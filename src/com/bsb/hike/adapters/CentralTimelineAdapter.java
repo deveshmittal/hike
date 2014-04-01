@@ -257,8 +257,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			}
 			else
 			{
-				iconImageLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.avatar, true);
-				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
+				setAvatar(statusMessage, viewHolder.avatar);
 			}
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 
@@ -402,7 +401,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			iconImageLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.avatar, true);
+			setAvatar(statusMessage, viewHolder.avatar);
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 			viewHolder.mainInfo.setText(R.string.status_profile_pic_notification);
 
@@ -445,7 +444,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView addBtn = (TextView) parentView.findViewById(R.id.invite_btn);
 
-				iconImageLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+				setAvatar(statusMessage, avatar);
+
 				name.setText(contactInfo.getName());
 
 				addBtn.setTag(contactInfo);
@@ -478,6 +478,22 @@ public class CentralTimelineAdapter extends BaseAdapter
 		}
 
 		return convertView;
+	}
+
+	private void setAvatar(StatusMessage statusMessage, ImageView avatar)
+	{
+		if (statusMessage.getMsisdnHasCustomIcon())
+		{
+			avatar.setScaleType(ScaleType.FIT_CENTER);
+			avatar.setBackgroundDrawable(null);
+			iconImageLoader.loadImage(statusMessage.getMsisdn(), true, avatar, true);
+		}
+		else
+		{
+			avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(statusMessage.getMsisdn(), true));
+			avatar.setImageResource(R.drawable.ic_default_avatar);
+		}
 	}
 
 	private void addMoods(ViewGroup container, int[] moods)

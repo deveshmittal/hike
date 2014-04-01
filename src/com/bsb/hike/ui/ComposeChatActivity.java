@@ -310,7 +310,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 		case CREATE_GROUP_MODE:
 			// createGroupHeader.setVisibility(View.GONE);
-			adapter.setShowExtraAtFirst(false);
 			adapter.showCheckBoxAgainstItems(true);
 			tagEditText.clear(false);
 			adapter.removeFilter();
@@ -319,7 +318,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			break;
 		case START_CHAT_MODE:
 			// createGroupHeader.setVisibility(View.VISIBLE);
-			adapter.setShowExtraAtFirst(!isForwardingMessage);
 			tagEditText.clear(false);
 			adapter.clearAllSelection(false);
 			adapter.removeFilter();

@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -56,6 +57,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -891,7 +893,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		if (mActivityState.profileBitmap == null)
 		{
-			mIconView.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true));
+			BitmapDrawable bd = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
+			if(bd != null)
+			{
+				mIconView.setImageDrawable(bd);
+			}
+			else
+			{
+				mIconView.setScaleType(ScaleType.CENTER_INSIDE);
+				mIconView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+				mIconView.setImageResource(R.drawable.ic_default_avatar);
+			}
 			// mIconView.setImageDrawable(IconCacheManager.getInstance()
 			// .getIconForMSISDN(msisdn, true));
 		}

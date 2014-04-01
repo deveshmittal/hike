@@ -305,7 +305,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.SHOWN_UNDELIVERED_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.ICON_REMOVED };
 
 	private EmoticonType emoticonType;
 
@@ -539,9 +539,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
-		View empty = findViewById(android.R.id.empty);
-		empty.setOnTouchListener(this);
-		mConversationsView.setEmptyView(empty);
+//		View empty = findViewById(android.R.id.empty);
+//		empty.setOnTouchListener(this);
+//		mConversationsView.setEmptyView(empty);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
@@ -2093,7 +2093,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
 		}
 
-		avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true));
+		setAvatar();
 		// avatar.setImageDrawable(IconCacheManager.getInstance()
 		// .getIconForMSISDN(mContactNumber, true));
 		mLabelView.setText(mLabel);
@@ -2125,6 +2125,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void setAvatar()
+	{
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+		if(drawable != null)
+		{
+			avatar.setScaleType(ScaleType.FIT_CENTER);
+			avatar.setImageDrawable(drawable);
+			avatar.setBackgroundDrawable(null);
+		}
+		else
+		{
+			avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			avatar.setImageResource((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(mContactNumber, true));
+		}
 	}
 
 	private void updateActivePeopleNumberView(int addPeopleCount)
@@ -2232,7 +2249,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			removeSMSToggle();
 
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
 			if ((mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).hasSmsUser())
 			{
@@ -2253,7 +2270,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
@@ -2622,7 +2639,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
-		else if (HikePubSub.ICON_CHANGED.equals(type))
+		else if (HikePubSub.ICON_CHANGED.equals(type) || HikePubSub.ICON_REMOVED.equals(type))
 		{
 			String msisdn = (String) object;
 			if (mContactNumber.equals(msisdn))
@@ -2634,7 +2651,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					@Override
 					public void run()
 					{
-						avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true));
+						setAvatar();
 						// avatar.setImageDrawable(IconCacheManager.getInstance()
 						// .getIconForMSISDN(mContactNumber, true));
 					}
@@ -3676,7 +3693,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
-			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.MATRIX);
 			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
 		}
 		else

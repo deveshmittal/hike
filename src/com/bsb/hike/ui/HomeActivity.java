@@ -50,6 +50,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -1436,19 +1437,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
-		SharedPreferences appPref = PreferenceManager.getDefaultSharedPreferences(this);
-
-		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
-
-		if (appPref.getBoolean(HikeConstants.FREE_SMS_PREF, true))
-		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.free_sms_txt), 1));
-		}
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
@@ -1462,6 +1456,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
 
 		overFlowWindow = new PopupWindow(this);
 
@@ -1491,7 +1487,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				ImageView itemImageView = (ImageView) convertView.findViewById(R.id.item_icon);
 				if (item.getKey() == 0)
 				{
-					itemImageView.setImageDrawable(myProfileImage);
+					if(myProfileImage != null)
+					{
+						itemImageView.setImageDrawable(myProfileImage);
+					}
+					else
+					{
+						itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
+						itemImageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+						itemImageView.setImageResource(R.drawable.ic_default_avatar);
+					}
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
 				}
 				else
@@ -1564,6 +1569,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case 5:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
+					break;
+				case 6:
+					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				}
 

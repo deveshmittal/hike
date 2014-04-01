@@ -20,11 +20,13 @@ import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.utils.Utils;
 
 public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatcher
 {
@@ -41,13 +43,13 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 	private IconLoader iconLoader;
 
 	private int mIconImageSize;
-	
+
 	private Activity activity;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId, HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData, boolean showingBLockedList)
 	{
 
-		//super(activity, viewItemId, completeList);
+		// super(activity, viewItemId, completeList);
 		mIconImageSize = activity.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.activity = activity;
 		this.filteredSectionsData = completeSectionsData;
@@ -66,7 +68,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 	@Override
 	public View getItemView(int section, int position, View convertView, ViewGroup parent)
 	{
-		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) getItem(section,position);
+		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) getItem(section, position);
 
 		AtomicBoolean isChecked = null;
 		ContactInfo contactInfo = null;
@@ -89,10 +91,25 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		if (pair != null)
 		{
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
+			if (contactInfo.hasCustomPhoto())
+			{
+				imageView.setScaleType(ScaleType.FIT_CENTER);
+				imageView.setBackgroundDrawable(null);
+				iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
+			}
+			else
+			{
+				imageView.setScaleType(ScaleType.CENTER_INSIDE);
+				imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+				imageView.setImageResource(R.drawable.ic_default_avatar);
+			}
 		}
 		else
-			imageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_avatar1_rounded));
+		{
+			imageView.setScaleType(ScaleType.CENTER_INSIDE);
+			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+			imageView.setImageResource(R.drawable.ic_default_avatar);
+		}
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
@@ -158,9 +175,9 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			{
 
 				HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> filteredSectionsContacts = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>();
-				
-				Set<Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>>> entrySet  = HikeInviteAdapter.this.completeSectionsData.entrySet();
-				for(Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : entrySet)
+
+				Set<Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>>> entrySet = HikeInviteAdapter.this.completeSectionsData.entrySet();
+				for (Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : entrySet)
 				{
 					int section = entry.getKey();
 					List<Pair<AtomicBoolean, ContactInfo>> filteredContacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
@@ -175,11 +192,11 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 							}
 						}
 					}
-					if (section+1 == completeSectionsData.size() && shouldShowExtraElement(textToBeFiltered))
+					if (section + 1 == completeSectionsData.size() && shouldShowExtraElement(textToBeFiltered))
 					{
 						filteredContacts.add(null);
 					}
-					filteredSectionsContacts.put(section,filteredContacts);
+					filteredSectionsContacts.put(section, filteredContacts);
 				}
 				results.count = filteredSectionsContacts.size();
 				results.values = filteredSectionsContacts;
@@ -295,13 +312,13 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		switch (section)
 		{
 		case 0:
-			if(!showingBlockedList)
+			if (!showingBlockedList)
 			{
-				textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.recommended_contacts_section);
+				textView.setText(getSectionCount() == 1 ? R.string.all_contacts : R.string.recommended_contacts_section);
 			}
 			else
 			{
-				textView.setText(getSectionCount()==1? R.string.all_contacts : R.string.blocked_contacts);
+				textView.setText(getSectionCount() == 1 ? R.string.all_contacts : R.string.blocked_contacts);
 			}
 			break;
 		case 1:
@@ -322,5 +339,5 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		}
 		return convertView;
 	}
-	
+
 }
