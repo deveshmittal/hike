@@ -294,7 +294,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			newContactsList = new ArrayList<ContactInfo>();
 			ContactInfo section = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_other_contacts), null);
 			String normalisedMsisdn = getNormalisedMsisdn(text);
-			ContactInfo info = new ContactInfo(normalisedMsisdn, normalisedMsisdn, text, text);
+			ContactInfo info = new ContactInfo(normalisedMsisdn, normalisedMsisdn, normalisedMsisdn, text);
 			info.setFavoriteType(FavoriteType.NEW_CONTACT);
 			newContactsList.add(section);
 			newContactsList.add(info);
