@@ -232,11 +232,11 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
 				{
-					stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
+//					stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
 				}
 				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 				{
-					stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
+//					stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
 				}
 				else
 				{
