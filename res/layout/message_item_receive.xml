@@ -168,11 +168,10 @@
                     
 	                <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/file_extension"
-	                    android:layout_width="wrap_content"
+	                    android:layout_width="@dimen/file_message_item_size"
 	                    android:layout_height="wrap_content"
 	                    android:layout_alignLeft="@id/file_thumb"
 	                    android:layout_alignTop="@id/file_thumb"
-	                    android:layout_marginLeft="13dp"
 	                    android:layout_marginTop="17dp"
 	                    android:gravity="center"
 	                    android:singleLine="true"

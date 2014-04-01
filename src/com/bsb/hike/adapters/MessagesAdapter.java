@@ -1009,8 +1009,34 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Drawable thumbnail = null;
 			if (hikeFileType == HikeFileType.CONTACT)
 			{
-				// holder.fileThumb.setBackgroundResource(R.drawable.ic_default_contact);
-				// holder.fileThumb.setVisibility(View.VISIBLE);
+				createFileThumb(holder.fileThumb);
+				holder.fileThumb.setImageResource(R.drawable.ic_default_contact);
+				holder.fileName.setText(hikeFile.getDisplayName());
+				List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
+				String phone = null, email = null;
+				for (ContactInfoData contactInfoData : items)
+				{
+					if(contactInfoData.getDataType() == DataType.PHONE_NUMBER)
+						phone = contactInfoData.getData();
+					
+					else if(contactInfoData.getDataType() == DataType.EMAIL)
+						email = contactInfoData.getData();
+				}
+
+				if(!TextUtils.isEmpty(phone))
+				{
+					holder.fileSizeExt.setText(phone);
+					holder.fileSizeExt.setVisibility(View.VISIBLE);
+				}
+				else if(!TextUtils.isEmpty(email))
+				{
+					holder.fileSizeExt.setText(email);
+					holder.fileSizeExt.setVisibility(View.VISIBLE);
+				}
+				
+				holder.fileThumb.setVisibility(View.VISIBLE);
+				holder.fileName.setVisibility(View.VISIBLE);
+				holder.fileDetails.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.AUDIO)
 			{
@@ -1121,14 +1147,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.loadingThumb.setVisibility(View.VISIBLE);
 				}
-				
-				if(hikeFileType == HikeFileType.IMAGE)
-				{
-					holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
-					holder.fileSize.setVisibility(View.VISIBLE);
-					holder.messageSize.setVisibility(View.VISIBLE);
-					holder.fileThumb.setVisibility(View.VISIBLE);
-				}
 			}
 			else if (hikeFileType == HikeFileType.OTHER)
 			{
@@ -1151,7 +1169,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			}
 			else if ((!showThumbnail)
-					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER))
+					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO
+					|| hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT))
 			{
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
@@ -1190,8 +1209,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.CONTACT)
 			{
-				holder.messageTextView.setText(hikeFile.getFileName());
-				holder.messageTextView.setVisibility(View.VISIBLE);
+//				holder.messageTextView.setText(hikeFile.getFileName());
+//				holder.messageTextView.setVisibility(View.VISIBLE);
 			}
 			else
 			{
@@ -1250,9 +1269,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.CONTACT)
 			{
-				holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_pressed);
-				holder.mediaAction.setImageResource(R.drawable.ic_default_contact);
-				holder.mediaAction.setVisibility(View.VISIBLE);
+//				holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_pressed);
+//				holder.mediaAction.setImageResource(R.drawable.ic_default_contact);
+//				holder.mediaAction.setVisibility(View.VISIBLE);
 			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Margin View
@@ -1476,7 +1495,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
-				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
 				{
 					// setFileTypeText(holder.fileType, hikeFile);
 					// holder.fileType.setVisibility(View.VISIBLE);
@@ -1511,7 +1530,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					// }
 				}
-				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)  || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
 				{
 					// if(fss.getFTState() == FTState.COMPLETED)
 					// {
@@ -2085,7 +2104,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
+		//fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
+		fileThumb.setBackgroundResource(R.drawable.bg_grey);
 		fileThumb.setImageResource(0);
 	}
 
