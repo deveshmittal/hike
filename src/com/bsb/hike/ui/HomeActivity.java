@@ -1421,6 +1421,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
 
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
+
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
@@ -1546,6 +1548,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case 5:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
+					break;
+				case 6:
+					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				}
 
