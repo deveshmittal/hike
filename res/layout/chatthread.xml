@@ -191,24 +191,10 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="@drawable/bg_red_btn_selector"
+                    android:background="@drawable/bg_overflow_menu_selector"
                     android:onClick="onSendClick"
-                    android:src="@drawable/ic_msg_btn"
+                    android:src="@drawable/ic_walkie_talkie"
                     android:state_enabled="false" />
-
-                <ImageButton
-                    android:id="@+id/emo_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/tb_layout"
-                    android:layout_toLeftOf="@id/send_message"
-                    android:background="@null"
-                    android:onClick="onEmoticonBtnClicked"
-                    android:paddingBottom="9dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:paddingTop="8dp"
-                    android:src="@drawable/emoticon_hike_btn" />
 
                 <ImageButton
                     android:id="@+id/sticker_btn"
@@ -216,25 +202,41 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/bg_dark_grey_btn_selector"
+                    android:background="@drawable/bg_overflow_menu_selector"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
-                    android:src="@drawable/ic_sticker_btn" />
+                    android:src="@drawable/ic_sticker" />
 
                 <RelativeLayout
                     android:id="@+id/tb_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@id/emo_btn"
+                    android:layout_toLeftOf="@id/send_message"
                     android:layout_toRightOf="@id/sticker_btn"
+                    android:background="@drawable/bg_compose_text"
                     android:gravity="center_vertical" >
 
+                    <ImageButton
+                        android:id="@+id/emo_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_overflow_menu_selector"
+                        android:onClick="onEmoticonBtnClicked"
+                        android:paddingBottom="9dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="8dp"
+                        android:src="@drawable/ic_smiley" />
+                    
                     <com.bsb.hike.view.CustomFontEditText
                         android:id="@+id/msg_compose"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@null"
+                        android:layout_toLeftOf="@id/emo_btn"
                         android:gravity="center_vertical"
                         android:hint="@string/type_to_compose"
                         android:imeOptions="actionSend"

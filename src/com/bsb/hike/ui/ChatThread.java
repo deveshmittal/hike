@@ -2228,7 +2228,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			removeSMSToggle();
 
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
 			if ((mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).hasSmsUser())
 			{
@@ -2249,7 +2249,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
