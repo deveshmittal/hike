@@ -122,6 +122,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
+		findViewById(android.R.id.empty).setVisibility(View.GONE);
 
 		list = new ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>();
 
@@ -370,6 +371,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 			listView.setAdapter(adapter);
 			listView.setOnScrollListener(scrollListener);
+			listView.setEmptyView(findViewById(android.R.id.empty));
 
 			adapter.notifyDataSetChanged();
 			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
