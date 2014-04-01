@@ -32,6 +32,7 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -40,6 +41,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
+
+	public static final String PROFILE_PIC_SUFFIX = "pp";
 
 	private static enum ViewType
 	{
@@ -67,6 +70,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private IconLoader iconLoader;
 
 	private TimelineImageLoader bigPicImageLoader;
+	
+	private ProfilePicImageLoader profileImageLoader;
 
 	private int mIconImageSize;
 
@@ -91,7 +96,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.iconLoader = new IconLoader(context, mIconImageSize);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
+		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
 	}
+	
 
 	@Override
 	public int getItemViewType(int position)
@@ -265,11 +272,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 			viewHolder.text.setText(name);
 
-			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
+			String mappedId = msisdn + PROFILE_PIC_SUFFIX;
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)
 			{
-				bigPicImageLoader.loadImage(msisdn, viewHolder.image);
+				profileImageLoader.loadImage(mappedId, viewHolder.image);
 			}
 			else
 			{

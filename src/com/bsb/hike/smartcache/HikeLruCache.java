@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -309,6 +310,9 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		BitmapDrawable b = get(cacheKey);
 		if (b == null)
 		{
+			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			if (idx > 0)
+				key = key.substring(0, idx);
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
 			if (!Utils.hasHoneycomb())
 			{
@@ -359,7 +363,9 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public void clearIconForMSISDN(String msisdn)
 	{
 		remove(msisdn);
+		remove(msisdn + ProfileAdapter.PROFILE_PIC_SUFFIX);
 		remove(msisdn + IconLoader.ROUND_SUFFIX);
+
 	}
 
 	public void clearIconCache()
