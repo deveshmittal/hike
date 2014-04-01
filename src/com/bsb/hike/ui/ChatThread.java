@@ -531,9 +531,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
-		View empty = findViewById(android.R.id.empty);
-		empty.setOnTouchListener(this);
-		mConversationsView.setEmptyView(empty);
+//		View empty = findViewById(android.R.id.empty);
+//		empty.setOnTouchListener(this);
+//		mConversationsView.setEmptyView(empty);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
