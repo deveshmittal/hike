@@ -11,8 +11,6 @@
         android:layout_height="46dp"
         android:layout_gravity="center_vertical"
         android:background="@drawable/bg_country_search_bar"
-        android:drawableLeft="@drawable/ic_search_dark_grey"
-        android:drawablePadding="9dp"
         android:gravity="center_vertical"
         android:hint="@string/search_hint"
         android:paddingLeft="10dp"
