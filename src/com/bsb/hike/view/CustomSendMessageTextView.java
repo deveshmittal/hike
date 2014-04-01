@@ -11,11 +11,13 @@ public class CustomSendMessageTextView extends CustomFontTextView
 {
 	//private String TAG = "CustomSendMessageTextView";
 	
-	private static final int widthAdditon = 80;
+	private static final int widthTime12Hour = 75;
+	
+	private static final int widthTime24Hour = 56;
 	
 	private static final int widthMargin = 100;
 	
-	private static final int heightAddition = 14;
+	private static final int heightTime = 14;
 
 	public CustomSendMessageTextView(Context context)
 	{
@@ -69,15 +71,26 @@ public class CustomSendMessageTextView extends CustomFontTextView
 
 				linesMaxWidth = Math.max(linesMaxWidth, (int) Math.ceil(lineWidth));
 			}
+			
+			int heightAddition = heightTime;
+			int widthAddition;
+			if (android.text.format.DateFormat.is24HourFormat(getContext()))
+			{
+				widthAddition = widthTime24Hour;
+			}
+			else
+			{
+				widthAddition = widthTime12Hour;
+			}
 
-			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAdditon + widthMargin) * Utils.densityMultiplier))
+			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
 				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = viewHeight;
 				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
-				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAdditon * Utils.densityMultiplier) + lastLineWidth));
+				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 			else
