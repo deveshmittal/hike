@@ -1416,19 +1416,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
-		SharedPreferences appPref = PreferenceManager.getDefaultSharedPreferences(this);
-
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
-
-		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
-
-		if (appPref.getBoolean(HikeConstants.FREE_SMS_PREF, true))
-		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.free_sms_txt), 1));
-		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
@@ -1442,6 +1433,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
 
 		overFlowWindow = new PopupWindow(this);
 
