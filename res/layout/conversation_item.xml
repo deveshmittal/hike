@@ -45,8 +45,7 @@
                     android:layout_centerVertical="true"
                     android:text="9:35AM"
                     android:textColor="@color/timestamp"
-                    android:textSize="12sp"
-                    android:textStyle="bold|italic" />
+                    android:textSize="12sp" />
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/contact"
@@ -60,7 +59,7 @@
                     android:singleLine="true"
                     android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
                     android:textColor="@color/list_item_header"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:drawablePadding="3dp"
                     android:textStyle="bold|italic" />
             </RelativeLayout>
@@ -116,7 +115,7 @@
                     android:layout_marginTop="1dp"
                     android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                     android:textColor="@color/list_item_header"
-                    android:textSize="15sp"
+                    android:textSize="14sp"
                     android:textStyle="italic"
                     android:visibility="invisible" />
             </RelativeLayout>
