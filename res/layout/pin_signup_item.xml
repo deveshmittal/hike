@@ -14,6 +14,16 @@
         android:text="@string/whats_your_number"
         android:textColor="@color/phone_entering_header"
         android:textSize="24sp" />
+    
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/verified_pin"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/signup_header_height"
+        android:gravity="center"
+        android:text="@string/verified"
+        android:textColor="@color/phone_entering_header"
+        android:textSize="24sp"
+        android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/loading_layout"

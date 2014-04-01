@@ -180,6 +180,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	
 	private TextView invalidPin;
 	
+	private View verifiedPin;
+	
 	 private ArrayList<String> countriesArray = new ArrayList<String>();
 	 private HashMap<String, String> countriesMap = new HashMap<String, String>();
 	 private HashMap<String, String> codesMap = new HashMap<String, String>();
@@ -718,6 +720,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
 			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
 			invalidPin = (TextView) layout.findViewById(R.id.invalid_pin);
+			verifiedPin = layout.findViewById(R.id.verified_pin);
 			infoTxt.setVisibility(View.VISIBLE);
 			invalidPin.setVisibility(View.INVISIBLE);
 			break;
@@ -836,7 +839,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			callmeBtn.setText(getResources().getString(R.string.call_me_for_the_pin, ""));
 			callmeBtn.setEnabled(true);
 		}
-		loadingText.setText(R.string.verifying);
+		loadingText.setText(R.string.verify_pin_signup);
 	}
 
 	private void prepareLayoutForGettingName(Bundle savedInstanceState, boolean addressBookScanningDone)
@@ -1210,6 +1213,30 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				prepareLayoutForGettingPin(HikeConstants.CALL_ME_WAIT_TIME);
 				setAnimation();
+			}
+			break;
+		case PIN_VERIFIED:
+			if(verifiedPin != null)
+			{
+				verifiedPin.setVisibility(View.VISIBLE);
+				loadingLayout.setVisibility(View.GONE);
+				nextBtn.setEnabled(false);
+				/*
+				 * after verifying pin we would wait for 2 second to get user to the next screen
+				 * and show him/her that pin is verified
+				 */
+				mHandler.postDelayed(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						if(mTask != null)
+						{
+							mTask.addUserInput("");
+						}
+					}
+				}, 2000);
 			}
 			break;
 		case NAME:
