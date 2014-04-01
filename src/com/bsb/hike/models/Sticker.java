@@ -8,6 +8,7 @@ import java.io.Serializable;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.StickerManager;
@@ -45,9 +46,18 @@ public class Sticker implements Serializable, Comparable<Sticker>
 			/*
 			 * Making sure there is an '_' character in the sticker name.
 			 */
-			if (stickerId.indexOf("_") != -1)
+			int idx = stickerId.indexOf("_");
+			if (idx != -1)
 			{
-				int stickerNumber = Integer.valueOf(stickerId.substring(0, stickerId.indexOf("_")));
+				int stickerNumber = -1;
+				try
+				{
+					stickerNumber = Integer.valueOf(stickerId.substring(0, idx));
+				}
+				catch (NumberFormatException e)
+				{
+					Log.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
+				}
 
 				if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
 						|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
@@ -79,26 +89,26 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public boolean isDefaultSticker()
 	{
-		if(category != null && category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.doggy)
+		if (category != null && category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.doggy)
 			return true;
 		return false;
-		
+
 	}
-	
+
 	/**
-	 * If sticker is default sticker then its not disabled
-	 * Else if sticker small image does'nt exist then also its disabled
+	 * If sticker is default sticker then its not disabled Else if sticker small image does'nt exist then also its disabled
+	 * 
 	 * @param sticker
 	 * @return
 	 */
-	public boolean isDisabled(Sticker sticker,Context ctx)
+	public boolean isDisabled(Sticker sticker, Context ctx)
 	{
-		if(sticker.isDefaultSticker())
+		if (sticker.isDefaultSticker())
 			return false;
 		File f = new File(sticker.getSmallStickerPath(ctx));
 		return !f.exists();
 	}
-	
+
 	public int getStickerIndex()
 	{
 		return stickerIndex;
@@ -172,7 +182,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public int hashCode()
 	{
 		int hash = 3;
-		if(category != null)
+		if (category != null)
 			hash = 7 * hash + this.category.categoryId.hashCode();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
