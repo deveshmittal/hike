@@ -27,12 +27,12 @@ import android.view.View;
  * 
  * @version 1.1 (12.10.2013)
  */
-public class CircularProgress3 extends View {
+public class HoloCircularProgress extends View {
 
 	/**
 	 * The Constant TAG.
 	 */
-	private static final String TAG = CircularProgress3.class.getSimpleName();
+	private static final String TAG = HoloCircularProgress.class.getSimpleName();
 
 	/**
 	 * used to save the super state on configuration change
@@ -220,7 +220,7 @@ public class CircularProgress3 extends View {
 	 * @param context
 	 *            the context
 	 */
-	public CircularProgress3(final Context context) {
+	public HoloCircularProgress(final Context context) {
 		this(context, null);
 	}
 
@@ -232,7 +232,7 @@ public class CircularProgress3 extends View {
 	 * @param attrs
 	 *            the attrs
 	 */
-	public CircularProgress3(final Context context, final AttributeSet attrs) {
+	public HoloCircularProgress(final Context context, final AttributeSet attrs) {
 		this(context, attrs, R.attr.circularProgressBarStyle);
 	}
 
@@ -246,11 +246,11 @@ public class CircularProgress3 extends View {
 	 * @param defStyle
 	 *            the def style
 	 */
-	public CircularProgress3(final Context context, final AttributeSet attrs, final int defStyle) {
+	public HoloCircularProgress(final Context context, final AttributeSet attrs, final int defStyle) {
 		super(context, attrs, defStyle);
 
 		// load the styled attributes and set their properties
-		final TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CircularProgress3,
+		final TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.HoloCircularProgress,
 				defStyle, 0);
 
 		setProgressColor(attributes.getColor(CircularProgressBar_progress_color, Color.CYAN));

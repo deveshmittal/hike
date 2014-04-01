@@ -98,7 +98,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-import com.bsb.hike.view.CircularProgress3;
+import com.bsb.hike.view.HoloCircularProgress;
 import com.bsb.hike.view.CustomProgressBar;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
@@ -172,9 +172,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View circularProgressBgExt;
 
-		CircularProgress3 circularProgress;
+		HoloCircularProgress circularProgress;
 
-		CircularProgress3 circularProgressExt;
+		HoloCircularProgress circularProgressExt;
 
 		ProgressBar wating;
 
@@ -526,8 +526,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
 				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
 				holder.ftMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ft);
-				holder.circularProgress = (CircularProgress3) v.findViewById(R.id.circular_progress);
-				holder.circularProgressExt = (CircularProgress3) v.findViewById(R.id.circular_progress_ext);
+				holder.circularProgress = (HoloCircularProgress) v.findViewById(R.id.circular_progress);
+				holder.circularProgressExt = (HoloCircularProgress) v.findViewById(R.id.circular_progress_ext);
 				holder.circularProgressBg = (View) v.findViewById(R.id.circular_bg);
 				holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_bg_ext);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
@@ -588,8 +588,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
 				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
 				holder.ftMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ft);
-				holder.circularProgress = (CircularProgress3) v.findViewById(R.id.circular_progress);
-				holder.circularProgressExt = (CircularProgress3) v.findViewById(R.id.circular_progress_ext);
+				holder.circularProgress = (HoloCircularProgress) v.findViewById(R.id.circular_progress);
+				holder.circularProgressExt = (HoloCircularProgress) v.findViewById(R.id.circular_progress_ext);
 				holder.circularProgressBg = (View) v.findViewById(R.id.circular_bg);
 				holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_bg_ext);
 				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
