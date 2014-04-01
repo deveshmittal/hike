@@ -345,7 +345,7 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static HashMap<String, String> hikeBotNamesMap;
 	
-	public static boolean networkError;
+	public static volatile boolean networkError;
 
 	class IncomingHandler extends Handler
 	{
