@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -109,9 +110,9 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 					// files.
 					HikeFile hikeFile = cMetadata.getHikeFiles().get(0);
 					HikeFileType fileType = hikeFile.getHikeFileType();
-					if (fileType == (HikeFileType.IMAGE) || fileType == (HikeFileType.AUDIO) || fileType == (HikeFileType.AUDIO_RECORDING) || fileType == (HikeFileType.VIDEO))
+					if ((fileType == (HikeFileType.IMAGE) || fileType == (HikeFileType.AUDIO) || fileType == (HikeFileType.AUDIO_RECORDING) || fileType == (HikeFileType.VIDEO))
+							&& !TextUtils.isEmpty(hikeFile.getFilePath()))
 					{
-
 						listValues.add(hikeFile.getFilePath());
 					}
 					// tweak the message here based on the file

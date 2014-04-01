@@ -449,7 +449,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private void scheduleNextConnectionCheck()
 	{
-		scheduleNextConnectionCheck((short) (HikeConstants.KEEP_ALIVE * 0.9 * 1000));
+		scheduleNextConnectionCheck(HikeConstants.MAX_RECONNECT_TIME);
 	}
 
 	private void scheduleNextConnectionCheck(int reconnectTime)
@@ -548,8 +548,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			if (isNetworkAvailable())
 			{
 				acquireWakeLock(connectionTimeoutSec);
-				IMqttToken t = mqtt.connect(op);
-				t.setActionCallback(getConnectListener());
+				mqtt.connect(op,null,getConnectListener());
 			}
 			else
 			{

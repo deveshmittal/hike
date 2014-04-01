@@ -617,7 +617,7 @@ public class AccountUtils
 					contactInfo.put("phone_no", cInfo.getPhoneNum());
 					if (sendWAValue)
 					{
-						contactInfo.put("t1", calculateWhatsappValue(cInfo.isOnWhatsapp()));
+						contactInfo.put("t1", calculateGreenBlueValue(cInfo.isOnGreenBlue()));
 					}
 					contactInfoList.put(contactInfo);
 				}
@@ -640,7 +640,7 @@ public class AccountUtils
 			for (ContactInfo cInfo : contactsList)
 			{
 				JSONObject waInfoObject = new JSONObject();
-				waInfoObject.put("t1", calculateWhatsappValue(cInfo.isOnWhatsapp()));
+				waInfoObject.put("t1", calculateGreenBlueValue(cInfo.isOnGreenBlue()));
 				contactsJson.put(cInfo.getMsisdn(), waInfoObject);
 			}
 
@@ -910,11 +910,11 @@ public class AccountUtils
 		}
 	}
 
-	private static int calculateWhatsappValue(boolean isOnWhatsapp)
+	private static int calculateGreenBlueValue(boolean isOnGreenBlue)
 	{
 		int rand = (new Random()).nextInt(100);
 		int msb = (rand / 10);
-		if (isOnWhatsapp)
+		if (isOnGreenBlue)
 		{
 			return ((msb & 1) == 0 ? rand : (rand + 10) % 100);
 		}
@@ -922,5 +922,10 @@ public class AccountUtils
 		{
 			return ((msb & 1) != 0 ? rand : (rand + 10));
 		}
+	}
+
+	public static void setNoTransform(URLConnection urlConnection)
+	{
+		urlConnection.setRequestProperty("Cache-Control", "no-transform");
 	}
 }

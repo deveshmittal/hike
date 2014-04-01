@@ -41,12 +41,18 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		 */
 		if (category != null && category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy))
 		{
-			int stickerNumber = Integer.valueOf(stickerId.substring(0, stickerId.indexOf("_")));
-
-			if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
-					|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
+			/*
+			 * Making sure there is an '_' character in the sticker name.
+			 */
+			if (stickerId.indexOf("_") != -1)
 			{
-				this.stickerIndex = stickerNumber - 1;
+				int stickerNumber = Integer.valueOf(stickerId.substring(0, stickerId.indexOf("_")));
+
+				if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
+						|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
+				{
+					this.stickerIndex = stickerNumber - 1;
+				}
 			}
 		}
 
@@ -131,7 +137,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		else
 		{
 			Sticker st = (Sticker) object;
-			if (this.category.categoryId.equals(st.getCategory().categoryId) && this.stickerId.equals(st.getStickerId()))
+			if (this.category != null && this.category.categoryId.equals(st.getCategory().categoryId) && this.stickerId.equals(st.getStickerId()))
 			{
 				result = true;
 			}
@@ -143,7 +149,8 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public int hashCode()
 	{
 		int hash = 3;
-		hash = 7 * hash + this.category.categoryId.hashCode();
+		if(category != null)
+			hash = 7 * hash + this.category.categoryId.hashCode();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
 	}

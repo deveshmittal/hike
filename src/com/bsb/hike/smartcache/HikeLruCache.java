@@ -134,6 +134,10 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public static int getBitmapSize(BitmapDrawable value)
 	{
 		Bitmap bitmap = value.getBitmap();
+		if (bitmap == null)
+		{
+			return 0;
+		}
 
 		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
 		// larger than bitmap byte count.
@@ -369,10 +373,16 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (bd != null)
 			return bd;
 
+		Bitmap stickerBitmap = BitmapFactory.decodeFile(path);
+		if (stickerBitmap == null)
+		{
+			return null;
+		}
+
 		if (Utils.hasHoneycomb())
-			bd = new BitmapDrawable(mResources, BitmapFactory.decodeFile(path));
+			bd = new BitmapDrawable(mResources, stickerBitmap);
 		else
-			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeFile(path));
+			bd = new RecyclingBitmapDrawable(mResources, stickerBitmap);
 		putInCache(path, bd);
 		return bd;
 	}
