@@ -131,10 +131,10 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		switch (section)
 		{
 		case 0:
-			textView.setText(getSectionCount()==1? R.string.contacts_on_hike_section : R.string.recommended_contacts_section);
+			textView.setText(getSectionCount()==1? R.string.hike_contacts : R.string.recommended_contacts_section);
 			break;
 		case 1:
-			textView.setText(R.string.contacts_on_hike_section);
+			textView.setText(R.string.hike_contacts);
 			break;
 		default:
 			break;
