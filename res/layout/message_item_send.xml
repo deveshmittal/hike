@@ -93,7 +93,7 @@
 		            android:id="@+id/initializing_ext"
 		            android:layout_width="36dp"
 		            android:layout_height="36dp"
-		            android:indeterminateDrawable="@drawable/circular_media_spinner_drawable"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				    android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.CircularProgress3
 	               android:id="@+id/circular_progress_ext"
@@ -170,7 +170,7 @@
 				            android:id="@+id/initializing"
 				            android:layout_width="46dp"
 				            android:layout_height="46dp"
-				            android:indeterminateDrawable="@drawable/circular_media_spinner_drawable"
+				            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				            android:layout_centerInParent="true" />
 			            <com.bsb.hike.view.CircularProgress3
 			               android:id="@+id/circular_progress"
