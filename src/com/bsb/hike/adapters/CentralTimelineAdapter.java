@@ -257,7 +257,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			}
 			else
 			{
-				setAvatar(statusMessage, viewHolder.avatar);
+				setAvatar(statusMessage.getMsisdn(), statusMessage.getMsisdnHasCustomIcon(), viewHolder.avatar);
 			}
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 
@@ -401,7 +401,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			setAvatar(statusMessage, viewHolder.avatar);
+			setAvatar(statusMessage.getMsisdn(), statusMessage.getMsisdnHasCustomIcon(), viewHolder.avatar);
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 			viewHolder.mainInfo.setText(R.string.status_profile_pic_notification);
 
@@ -444,7 +444,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView addBtn = (TextView) parentView.findViewById(R.id.invite_btn);
 
-				setAvatar(statusMessage, avatar);
+				setAvatar(contactInfo.getMsisdn(), contactInfo.hasCustomPhoto(), avatar);
 
 				name.setText(contactInfo.getName());
 
@@ -480,18 +480,18 @@ public class CentralTimelineAdapter extends BaseAdapter
 		return convertView;
 	}
 
-	private void setAvatar(StatusMessage statusMessage, ImageView avatar)
+	private void setAvatar(String msisdn, boolean hasCustomIcon, ImageView avatar)
 	{
-		if (statusMessage.getMsisdnHasCustomIcon())
+		if (hasCustomIcon)
 		{
 			avatar.setScaleType(ScaleType.FIT_CENTER);
 			avatar.setBackgroundDrawable(null);
-			iconImageLoader.loadImage(statusMessage.getMsisdn(), true, avatar, true);
+			iconImageLoader.loadImage(msisdn, true, avatar, true);
 		}
 		else
 		{
 			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(statusMessage.getMsisdn(), true));
+			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
 			avatar.setImageResource(R.drawable.ic_default_avatar);
 		}
 	}
