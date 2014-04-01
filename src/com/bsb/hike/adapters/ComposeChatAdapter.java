@@ -120,17 +120,26 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.status.setText(contactInfo.getMsisdn());
 			}
 
-			if (contactInfo.hasCustomPhoto())
+			if (contactInfo.isUnknownContact())
 			{
-				holder.userImage.setScaleType(ScaleType.FIT_CENTER);
-				holder.userImage.setBackgroundDrawable(null);
-				iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
+				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
 			}
 			else
 			{
-				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-				holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
-				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+				if (contactInfo.hasCustomPhoto())
+				{
+					holder.userImage.setScaleType(ScaleType.FIT_CENTER);
+					holder.userImage.setBackgroundDrawable(null);
+					iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+				}
+				else
+				{
+					holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+					holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+					holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+				}
 			}
 			if (showCheckbox)
 			{
@@ -295,7 +304,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			ContactInfo section = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_other_contacts), null);
 			String normalisedMsisdn = getNormalisedMsisdn(text);
 			ContactInfo info = new ContactInfo(normalisedMsisdn, normalisedMsisdn, normalisedMsisdn, text);
-			info.setFavoriteType(FavoriteType.NEW_CONTACT);
 			newContactsList.add(section);
 			newContactsList.add(info);
 		}
@@ -335,7 +343,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public int getItemViewType(int position)
 	{
 		ContactInfo info = getItem(position);
-		if (FavoriteType.NEW_CONTACT == info.getFavoriteType())
+		if (info.isUnknownContact())
 		{
 			return ViewType.NEW_CONTACT.ordinal();
 		}
