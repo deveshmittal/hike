@@ -67,7 +67,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public enum ViewType
 	{
-		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS , NEW_CONTACT
+		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT
 	}
 
 	private LayoutInflater layoutInflater;
@@ -219,23 +219,29 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					{
 						name = name.toLowerCase();
 						// for word boundary
-						if (name.matches(regex))
+						try
 						{
-							listToUpdate.add(info);
-							continue;
-						}
-					}
-					else
-					{
-
-						if (info.getMsisdn() != null)
-						{
-							if (info.getMsisdn().matches(regex))
+							if (name.matches(regex))
 							{
 								listToUpdate.add(info);
+								continue;
 							}
-
 						}
+						catch (Exception e)
+						{
+						}
+					}
+
+					String msisdn = info.getMsisdn();
+					if (msisdn != null)
+					{
+						// word boundary is not working because of +91 , resolve later --gauravKhanna
+						Log.i(TAG, "msisdn is not null and regex is " + regex);
+						if (msisdn.contains(textToBeFiltered))
+						{
+							listToUpdate.add(info);
+						}
+
 					}
 				}
 			}
