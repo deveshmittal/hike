@@ -531,7 +531,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
-		mConversationsView.setEmptyView(findViewById(android.R.id.empty));
+		View empty = findViewById(android.R.id.empty);
+		empty.setOnTouchListener(this);
+		mConversationsView.setEmptyView(empty);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
@@ -5571,13 +5573,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return gestureDetector.onTouchEvent(event);
 	}
 
-	
 	SimpleOnGestureListener simpleOnGestureListener = new SimpleOnGestureListener()
 	{
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e)
 		{
+			Log.i("chatthread", "double tap");
 			if (isActionModeOn)
 			{
 				return false;
@@ -6383,7 +6385,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void run()
 			{
 				// TODO Auto-generated method stub
-				Log.i("chatadapter", mAdapter.getCount()+" --total items");
+				Log.i("chatadapter", mAdapter.getCount() + " --total items");
 			}
 		}, 2000);
 	}

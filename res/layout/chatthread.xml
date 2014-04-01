@@ -51,9 +51,6 @@
             </ListView>
 
             <include
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:clickable="false"
                 android:id="@android:id/empty"
                 layout="@layout/nudge_tutorial_pop_up" />
 
