@@ -49,6 +49,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -1417,7 +1418,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		SharedPreferences appPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
@@ -1470,7 +1471,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				ImageView itemImageView = (ImageView) convertView.findViewById(R.id.item_icon);
 				if (item.getKey() == 0)
 				{
-					itemImageView.setImageDrawable(myProfileImage);
+					if(myProfileImage != null)
+					{
+						itemImageView.setImageDrawable(myProfileImage);
+					}
+					else
+					{
+						itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
+						itemImageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+						itemImageView.setImageResource(R.drawable.ic_default_avatar);
+					}
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
 				}
 				else

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
@@ -93,7 +94,18 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			holder = (ViewHolder) convertView.getTag();
 			holder.name.setText(contactInfo.getName());
 			holder.status.setText(contactInfo.getMsisdn());
-			iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+			if (contactInfo.hasCustomPhoto())
+			{
+				holder.userImage.setScaleType(ScaleType.FIT_CENTER);
+				holder.userImage.setBackgroundDrawable(null);
+				iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+			}
+			else
+			{
+				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+			}
 			if (showCheckbox)
 			{
 				holder.checkbox.setVisibility(View.VISIBLE);

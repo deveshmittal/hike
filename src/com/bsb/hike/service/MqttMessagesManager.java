@@ -242,7 +242,7 @@ public class MqttMessagesManager
 			else
 			{
 				HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_REMOVED, msisdn);
 				// IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
 
@@ -1450,7 +1450,7 @@ public class MqttMessagesManager
 				{
 					Utils.removeTempProfileImage(groupId);
 					HikeMessengerApp.getLruCache().deleteIconForMSISDN(groupId);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_REMOVED, groupId);
 				}
 
 				public void onSuccess(JSONObject response)

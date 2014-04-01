@@ -310,17 +310,16 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
-			if (!Utils.hasHoneycomb())
+			if (bd != null)
 			{
-				if (bd == null)
+				if (!Utils.hasHoneycomb())
 				{
-					return null;
+					// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+					// which will recycle automagically
+					bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
 				}
-				// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-				// which will recycle automagically
-				bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
+				putInCache(cacheKey, bd);
 			}
-			putInCache(cacheKey, bd);
 			return bd;
 		}
 		else

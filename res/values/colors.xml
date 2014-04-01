@@ -237,4 +237,9 @@
     <color name="transparent_white_ab">#3dffffff</color>
     <color name="blue_color_span">#0f8fe1</color>
     <color name="red_color_span">#ef554e</color>
+    <color name="blue_avatar">#70d6f8</color>
+    <color name="green_avatar">#8dde87</color>
+    <color name="orange_avatar">#ffaf5a</color>
+    <color name="pink_avatar">#ff92a5</color>
+    <color name="violet_avatar">#c1a0e1</color>
 </resources>

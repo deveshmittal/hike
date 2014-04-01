@@ -25,8 +25,7 @@
 
         <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/contact_image"
-            style="@style/AvatarStyle"
-            android:src="@drawable/ic_avatar1" />
+            style="@style/AvatarStyle" />
 
     </FrameLayout>
 

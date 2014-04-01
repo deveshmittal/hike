@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
@@ -659,7 +660,18 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			ImageView avatar = (ImageView) convertView.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
-			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+			if (contactInfo.hasCustomPhoto())
+			{
+				avatar.setScaleType(ScaleType.FIT_CENTER);
+				avatar.setBackgroundDrawable(null);
+				iconloader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+			}
+			else
+			{
+				avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+				avatar.setImageResource(R.drawable.ic_default_avatar);
+				avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			}
 
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName());
 
@@ -687,7 +699,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 						if (contactInfo.getOffline() == 0)
 						{
 							lastSeen.setTextColor(context.getResources().getColor(R.color.action_bar_disabled_text));
-							avatarFrame.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+							avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
 						}
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(lastSeenString);

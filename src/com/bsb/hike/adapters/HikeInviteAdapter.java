@@ -20,11 +20,13 @@ import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.utils.Utils;
 
 public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatcher
 {
@@ -89,10 +91,25 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		if (pair != null)
 		{
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
+			if (contactInfo.hasCustomPhoto())
+			{
+				imageView.setScaleType(ScaleType.FIT_CENTER);
+				imageView.setBackgroundDrawable(null);
+				iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
+			}
+			else
+			{
+				imageView.setScaleType(ScaleType.CENTER_INSIDE);
+				imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+				imageView.setImageResource(R.drawable.ic_default_avatar);
+			}
 		}
 		else
-			imageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_avatar1_rounded));
+		{
+			imageView.setScaleType(ScaleType.CENTER_INSIDE);
+			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+			imageView.setImageResource(R.drawable.ic_default_avatar);
+		}
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());

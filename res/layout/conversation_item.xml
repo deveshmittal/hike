@@ -19,12 +19,12 @@
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
-                style="@style/AvatarStyle.MorePadding"
-                android:src="@drawable/ic_avatar1" />
+                style="@style/AvatarStyle.MorePadding" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle" />
+                style="@style/AvatarStyle"
+                android:src="@drawable/frame_avatar_highlight" />
         </FrameLayout>
 
         <LinearLayout

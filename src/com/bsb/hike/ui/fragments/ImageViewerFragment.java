@@ -83,30 +83,38 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(mappedId);
 		}
 
-		fileName = hasCustomImage ? Utils.getProfileImageFileName(mappedId) : Utils.getDefaultAvatarServerName(mappedId);
-
-		File file = new File(basePath, fileName);
-
-		boolean downloadImage = true;
-		if (file.exists())
+		if (hasCustomImage)
 		{
-			Drawable drawable = BitmapDrawable.createFromPath(basePath + "/" + fileName);
-			if (drawable != null)
+			fileName = Utils.getProfileImageFileName(mappedId);
+
+			File file = new File(basePath, fileName);
+
+			boolean downloadImage = true;
+			if (file.exists())
 			{
-				downloadImage = false;
-				imageView.setImageDrawable(drawable);
+				Drawable drawable = BitmapDrawable.createFromPath(basePath + "/" + fileName);
+				if (drawable != null)
+				{
+					downloadImage = false;
+					imageView.setImageDrawable(drawable);
+				}
+			}
+			if (downloadImage)
+			{
+				iconLoader.loadImage(mappedId, imageView);
+				// imageView.setImageDrawable(IconCacheManager.getInstance()
+				// .getIconForMSISDN(mappedId));
+
+				getLoaderManager().initLoader(0, null, this);
+
+				mDialog = ProgressDialog.show(getActivity(), null, getResources().getString(R.string.downloading_image));
+				mDialog.setCancelable(true);
 			}
 		}
-		if (downloadImage)
+		else
 		{
-			iconLoader.loadImage(mappedId, imageView);
-			// imageView.setImageDrawable(IconCacheManager.getInstance()
-			// .getIconForMSISDN(mappedId));
-
-			getLoaderManager().initLoader(0, null, this);
-
-			mDialog = ProgressDialog.show(getActivity(), null, getResources().getString(R.string.downloading_image));
-			mDialog.setCancelable(true);
+			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(mappedId, false));
+			imageView.setImageResource(Utils.isGroupConversation(mappedId) ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
 		}
 
 	}
