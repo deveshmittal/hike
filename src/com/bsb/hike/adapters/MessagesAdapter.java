@@ -186,6 +186,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View fileDetails;
 
+		View messageSize;
+		
+		TextView fileSize;
+		
 		TextView fileName;
 
 		TextView fileSizeExt;
@@ -516,6 +520,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.image = (ImageView) v.findViewById(R.id.msg_status_indicator);
 				holder.messageTextView = (TextView) v.findViewById(R.id.message_send_ft);
 				v.findViewById(R.id.message_send).setVisibility(View.GONE);
+				holder.messageSize = (View) v.findViewById(R.id.message_size_ft);
+				holder.fileSize = (TextView) v.findViewById(R.id.file_size);
 				holder.fileDetails = (View) v.findViewById(R.id.file_details);
 				holder.fileSizeExt = (TextView) v.findViewById(R.id.file_size_ext);
 				holder.fileName = (TextView) v.findViewById(R.id.file_name);
@@ -577,6 +583,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
 				holder.mediaAction = (ImageView) v.findViewById(R.id.btn_media_action);
 				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive_ft);
+				holder.messageSize = (View) v.findViewById(R.id.message_size_ft);
+				holder.fileSize = (TextView) v.findViewById(R.id.file_size);
 				holder.messageTextView.setVisibility(View.VISIBLE);
 				holder.fileDetails = (View) v.findViewById(R.id.file_details);
 				holder.fileSizeExt = (TextView) v.findViewById(R.id.file_size_ext);
@@ -1069,11 +1077,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else
 				{
 					createFileThumb(holder.fileThumb);
-					// holder.fileThumb.setImageResource(R.drawable.ic_default_video);
-					// holder.fileIcon.setBackgroundResource(R.drawable.ic_default_video);
-					// holder.fileIcon.setVisibility(View.VISIBLE);
 				}
-				// holder.fileIcon.setVisibility(View.VISIBLE);
+				
+				holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+				holder.fileSize.setVisibility(View.VISIBLE);
+				holder.messageSize.setVisibility(View.VISIBLE);
 				holder.fileThumb.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
@@ -1112,6 +1120,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else if (hikeFileType == HikeFileType.LOCATION)
 				{
 					holder.loadingThumb.setVisibility(View.VISIBLE);
+				}
+				
+				if(hikeFileType == HikeFileType.IMAGE)
+				{
+					holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					holder.fileSize.setVisibility(View.VISIBLE);
+					holder.messageSize.setVisibility(View.VISIBLE);
+					holder.fileThumb.setVisibility(View.VISIBLE);
 				}
 			}
 			else if (hikeFileType == HikeFileType.OTHER)
