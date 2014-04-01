@@ -21,6 +21,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.ProfileImageLoader;
@@ -34,6 +35,8 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	private ProgressDialog mDialog;
 
 	private String mappedId;
+
+	private String key;
 
 	private boolean isStatusImage;
 
@@ -71,6 +74,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		super.onActivityCreated(savedInstanceState);
 
 		mappedId = getArguments().getString(HikeConstants.Extras.MAPPED_ID);
+
 		isStatusImage = getArguments().getBoolean(HikeConstants.Extras.IS_STATUS_IMAGE);
 
 		url = getArguments().getString(HikeConstants.Extras.URL);
@@ -78,21 +82,27 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 
 		hasCustomImage = true;
+		key = mappedId;
 		if (!isStatusImage)
 		{
-			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(mappedId);
+			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			if (idx > 0)
+				key = key.substring(0, idx);
+			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(key);
 		}
 
 		if (hasCustomImage)
 		{
-			fileName = Utils.getProfileImageFileName(mappedId);
+			fileName = Utils.getProfileImageFileName(key);
 
 			File file = new File(basePath, fileName);
 
 			boolean downloadImage = true;
 			if (file.exists())
 			{
-				Drawable drawable = BitmapDrawable.createFromPath(basePath + "/" + fileName);
+				Drawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
+				if (drawable == null)
+					drawable = BitmapDrawable.createFromPath(basePath + "/" + fileName);
 				if (drawable != null)
 				{
 					downloadImage = false;
@@ -113,7 +123,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		}
 		else
 		{
-			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(mappedId, false));
+			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(key, false));
 			imageView.setImageResource(Utils.isGroupConversation(mappedId) ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
 		}
 
@@ -135,7 +145,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	@Override
 	public Loader<Boolean> onCreateLoader(int id, Bundle arguments)
 	{
-		return new ProfileImageLoader(getActivity(), mappedId, fileName, hasCustomImage, isStatusImage, url);
+		return new ProfileImageLoader(getActivity(), key, fileName, hasCustomImage, isStatusImage, url);
 	}
 
 	@Override
