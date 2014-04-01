@@ -776,7 +776,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
-		loadingText.setText(R.string.hang_on);
+		loadingText.setText(R.string.verifying);
 	}
 
 	public void onCountryPickerClick(View v)
