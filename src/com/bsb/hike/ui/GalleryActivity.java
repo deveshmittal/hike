@@ -87,6 +87,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
 
+		String sortBy;
 		if (selectedBucket != null)
 		{
 			selection = MediaStore.Images.Media.BUCKET_ID + "=?";
@@ -114,15 +115,19 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 				}
 				setMultiSelectTitle();
 			}
+
+			sortBy = MediaStore.Images.Media.DATE_MODIFIED + " DESC";
 		}
 		else
 		{
 			selection = "1) GROUP BY (" + MediaStore.Images.Media.BUCKET_ID;
 
 			isInsideAlbum = false;
+
+			sortBy = MediaStore.Images.Media.DATE_ADDED + " ASC";
 		}
 
-		Cursor cursor = getContentResolver().query(uri, projection, selection, args, MediaStore.Images.Media.DATE_MODIFIED + " DESC");
+		Cursor cursor = getContentResolver().query(uri, projection, selection, args, sortBy);
 
 		if (cursor != null)
 		{
