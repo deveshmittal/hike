@@ -295,6 +295,14 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		default:
 			break;
 		}
+		if(getCountForSection(section) > 0)
+		{
+			convertView.findViewById(R.id.section_view).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			convertView.findViewById(R.id.section_view).setVisibility(View.GONE);
+		}
 		return convertView;
 	}
 	
