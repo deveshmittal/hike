@@ -3660,7 +3660,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
-			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.MATRIX);
 			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
 		}
 		else
