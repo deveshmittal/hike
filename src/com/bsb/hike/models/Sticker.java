@@ -76,6 +76,14 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		this.stickerIndex = stickerIdx;
 	}
 
+	public boolean isDefaultSticker()
+	{
+		if(category != null && category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.doggy)
+			return true;
+		return false;
+		
+	}
+	
 	public int getStickerIndex()
 	{
 		return stickerIndex;

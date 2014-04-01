@@ -326,8 +326,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		}
 	}
 
+	/**
+	 * If sticker is default sticker then its not disabled
+	 * Else if sticker small image does'nt exist then also its disabled
+	 * @param sticker
+	 * @return
+	 */
 	private boolean stickerDisabled(Sticker sticker)
 	{
+		if(sticker.isDefaultSticker())
+			return false;
 		File f = new File(sticker.getSmallStickerPath(activity.getApplicationContext()));
 		return !f.exists();
 	}
