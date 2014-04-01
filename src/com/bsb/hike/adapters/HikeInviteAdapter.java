@@ -217,6 +217,19 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 	{
 		return false;
 	}
+	
+	@Override
+	public boolean isEmpty()
+	{
+		for (Integer section : filteredSectionsData.keySet())
+			{
+				if(getCountForSection(section)>0)
+				{
+					return false;
+				}
+			}
+		return true;
+	}
 
 	public boolean isEnabled(int section, int position)
 	{

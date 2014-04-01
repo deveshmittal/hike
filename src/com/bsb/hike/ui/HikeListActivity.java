@@ -105,6 +105,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
+		
+		listView.setEmptyView(findViewById(android.R.id.empty));
 
 		switch (type)
 		{
