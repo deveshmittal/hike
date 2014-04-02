@@ -245,7 +245,7 @@
 			                android:textSize="12sp" />
         			</LinearLayout>
 				
-                <ProgressBar
+                <!-- <ProgressBar
                     android:id="@+id/audio_rec_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_gravity="center"
@@ -269,7 +269,7 @@
                     android:textColor="@color/white"
                     android:textSize="10dp"
                     android:textStyle="bold"
-                    android:visibility="gone" />
+                    android:visibility="gone" /> -->
                 
                 	<LinearLayout
                     android:id="@+id/file_details"
@@ -338,22 +338,11 @@
                     android:textColor="@color/chat_color"
                     android:textSize="16sp" />
                 
-                  <ImageView
-                    android:id="@+id/btn_media_action"
-                    android:layout_width="40dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="4dp"
-                    android:background="@drawable/bg_audio_btn"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_play_audio"
-                    android:visibility="gone" />
-
                 <ImageView
                     android:id="@+id/poke_sent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@id/msg_status_indicator"
+                    android:layout_toRightOf="@id/circular_bg_ext"
                     android:gravity="center_vertical"
                     android:src="@drawable/ic_nudge_hike_sent"
                     android:layout_marginTop="1dp"
@@ -433,7 +422,7 @@
                 android:id="@+id/sticker_placeholder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
+                android:layout_toRightOf="@id/circular_bg_ext"
                 android:background="@drawable/bg_sticker_placeholder"
                 android:gravity="center"
                 android:visibility="gone" >
@@ -461,6 +450,54 @@
                     android:src="@drawable/sticker_1_hi"
                     android:visibility="gone" />
             </LinearLayout>
+            
+            <RelativeLayout
+                android:id="@+id/rec_placeholder"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_toRightOf="@id/circular_bg_ext"
+                android:background="@drawable/bg_ft_progress"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="6dp"
+                android:paddingBottom="4dp"
+                android:gravity="center"
+                android:visibility="gone" >
+                
+                <ProgressBar
+		            android:id="@+id/rec_initializing"
+		            android:layout_width="52dp"
+		            android:layout_height="52dp"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner"
+		            android:layout_centerInParent="true" />
+	            <com.bsb.hike.view.HoloCircularProgress
+	               android:id="@+id/rec_circular_progress"
+	               android:layout_width="64dp"
+	               android:layout_height="64dp"
+	               app:progress_color="@color/white_65"
+	               app:progress_background_color="@color/white_45"
+	               android:gravity="center"
+	               app:progress="0.4"
+	               app:stroke_width="3dp"
+	               app:marker_visible="false"
+	               app:thumb_visible="false"
+	               android:layout_centerInParent="true" />
+	            <ImageView
+	                android:id="@+id/rec_action"
+	                android:layout_height="20dp"
+	                android:layout_width="16dp"
+	                android:layout_centerInParent="true" />
+	            <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/rec_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:visibility="gone" />              
+            </RelativeLayout>
         </RelativeLayout>
 
         <LinearLayout
