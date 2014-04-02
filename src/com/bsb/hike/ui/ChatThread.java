@@ -305,7 +305,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.SHOWN_UNDELIVERED_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.ICON_REMOVED };
 
 	private EmoticonType emoticonType;
 
@@ -369,9 +369,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View unreadMessageIndicator;
 
 	private int unreadMessageCount = 0;
-
-	private View fastScrollIndicator;
-
+	
+	private View bottomFastScrollIndicator;
+	
+	private View upFastScrollIndicator;
+	
 	int currentFirstVisibleItem = Integer.MAX_VALUE;
 
 	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
@@ -434,6 +436,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		if(!prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
+		{
+			Editor editor = prefs.edit();
+			editor.putBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
+			editor.commit();
+		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
@@ -531,9 +539,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
-		View empty = findViewById(android.R.id.empty);
-		empty.setOnTouchListener(this);
-		mConversationsView.setEmptyView(empty);
+//		View empty = findViewById(android.R.id.empty);
+//		empty.setOnTouchListener(this);
+//		mConversationsView.setEmptyView(empty);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
@@ -548,9 +556,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				hideUnreadCountIndicator();
 			}
 		});
-
-		fastScrollIndicator = findViewById(R.id.scroll_bottom_indicator);
-		fastScrollIndicator.setOnClickListener(new OnClickListener()
+		
+		bottomFastScrollIndicator = findViewById(R.id.scroll_bottom_indicator);
+		bottomFastScrollIndicator.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -559,7 +567,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				hideFastScrollIndicator();
 			}
 		});
-
+		
+		upFastScrollIndicator = findViewById(R.id.scroll_top_indicator);
+		((ImageView)upFastScrollIndicator.findViewById(R.id.indicator_img)).setVisibility(View.GONE);
+		((ImageView)upFastScrollIndicator.findViewById(R.id.up_indicator_img)).setVisibility(View.VISIBLE);
+		upFastScrollIndicator.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mConversationsView.setSelection(0);
+				hideUpFastScrollIndicator();
+			}
+		});
+		
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different than the sen button we have), we send the message.
 		 */
@@ -2072,7 +2093,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
 		}
 
-		avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true));
+		setAvatar();
 		// avatar.setImageDrawable(IconCacheManager.getInstance()
 		// .getIconForMSISDN(mContactNumber, true));
 		mLabelView.setText(mLabel);
@@ -2104,6 +2125,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void setAvatar()
+	{
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+		if(drawable != null)
+		{
+			avatar.setScaleType(ScaleType.FIT_CENTER);
+			avatar.setImageDrawable(drawable);
+			avatar.setBackgroundDrawable(null);
+		}
+		else
+		{
+			avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			avatar.setImageResource((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(mContactNumber, true));
+		}
 	}
 
 	private void updateActivePeopleNumberView(int addPeopleCount)
@@ -2211,7 +2249,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			removeSMSToggle();
 
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
 			if ((mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).hasSmsUser())
 			{
@@ -2232,7 +2270,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
@@ -2601,7 +2639,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
-		else if (HikePubSub.ICON_CHANGED.equals(type))
+		else if (HikePubSub.ICON_CHANGED.equals(type) || HikePubSub.ICON_REMOVED.equals(type))
 		{
 			String msisdn = (String) object;
 			if (mContactNumber.equals(msisdn))
@@ -2613,7 +2651,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					@Override
 					public void run()
 					{
-						avatar.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true));
+						setAvatar();
 						// avatar.setImageDrawable(IconCacheManager.getInstance()
 						// .getIconForMSISDN(mContactNumber, true));
 					}
@@ -3341,7 +3379,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		unreadMessageCount++;
 		// fast scroll indicator and unread message should not show
 		// simultaneously.
-		fastScrollIndicator.setVisibility(View.GONE);
+		bottomFastScrollIndicator.setVisibility(View.GONE);
 		unreadMessageIndicator.setVisibility(View.VISIBLE);
 		TextView indicatorText = (TextView) findViewById(R.id.indicator_text);
 		indicatorText.setVisibility(View.VISIBLE);
@@ -3363,17 +3401,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showFastScrollIndicator()
 	{
-		if (unreadMessageIndicator.getVisibility() == View.GONE)
-		{
-			fastScrollIndicator.setVisibility(View.VISIBLE);
+		if(unreadMessageIndicator.getVisibility() == View.GONE){
+			bottomFastScrollIndicator.setVisibility(View.VISIBLE);
 		}
 	}
 
 	private void hideFastScrollIndicator()
 	{
-		if (fastScrollIndicator != null)
+		if(bottomFastScrollIndicator != null)
 		{
-			fastScrollIndicator.setVisibility(View.GONE);
+			bottomFastScrollIndicator.setVisibility(View.GONE);
+		}
+	}
+	
+	private void hideUpFastScrollIndicator()
+	{
+		if(upFastScrollIndicator != null)
+		{
+			upFastScrollIndicator.setVisibility(View.GONE);
 		}
 	}
 
@@ -3648,7 +3693,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
-			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.MATRIX);
 			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
 		}
 		else
@@ -5652,15 +5697,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (currentFirstVisibleItem < firstVisibleItem)
 			{
 				showFastScrollIndicator();
+				hideUpFastScrollIndicator();
 			}
 			else if (currentFirstVisibleItem > firstVisibleItem)
 			{
 				hideFastScrollIndicator();
+				if(firstVisibleItem > 6)
+				{
+					upFastScrollIndicator.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					hideUpFastScrollIndicator();
+				}
 			}
 		}
 		else
 		{
 			hideFastScrollIndicator();
+			hideUpFastScrollIndicator();
 		}
 		currentFirstVisibleItem = firstVisibleItem;
 	}
@@ -5670,7 +5725,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		Log.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
 		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
-		if (fastScrollIndicator.getVisibility() == View.VISIBLE)
+		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
 			if (view.getLastVisiblePosition() >= messages.size() - 6)
 			{
@@ -5685,6 +5740,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					public void run()
 					{
 						hideFastScrollIndicator();
+					}
+				}, 2000);
+			}
+		}
+		if(upFastScrollIndicator.getVisibility() ==View.VISIBLE)
+		{
+			if(view.getFirstVisiblePosition() <= 6)
+			{
+				hideUpFastScrollIndicator();
+			}
+			else if( scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+			{
+				mHandler.postDelayed(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						hideUpFastScrollIndicator();
 					}
 				}, 2000);
 			}

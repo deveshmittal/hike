@@ -18,7 +18,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 {
 	public static enum FavoriteType
 	{
-		NOT_FRIEND, REQUEST_RECEIVED, FRIEND, AUTO_RECOMMENDED_FAVORITE, REQUEST_SENT, REQUEST_SENT_REJECTED, REQUEST_RECEIVED_REJECTED , NEW_CONTACT
+		NOT_FRIEND, REQUEST_RECEIVED, FRIEND, AUTO_RECOMMENDED_FAVORITE, REQUEST_SENT, REQUEST_SENT_REJECTED, REQUEST_RECEIVED_REJECTED
 	}
 
 	@Override
@@ -167,6 +167,10 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public boolean isUnknownContact()
 	{
+		if (msisdn == null)
+		{
+			return false;
+		}
 		/*
 		 * For unknown contacts, we make the id and msisdn equal.
 		 */

@@ -39,7 +39,7 @@
     <dimen name="list_margin">16dp</dimen>
     <dimen name="divider_height">1dp</dimen>
     <dimen name="ftue_avatar">65dp</dimen>
-    <dimen name="larger_avatar">50dp</dimen>
+    <dimen name="larger_avatar">54dp</dimen>
     <dimen name="medium_avatar">42dp</dimen>
     <dimen name="small_avatar">30dp</dimen>
     <dimen name="update_line_width">4dp</dimen>
@@ -115,4 +115,7 @@
     <dimen name="addfriend_popup_btn_margin_bottom">19dp</dimen>
     <dimen name="compose_chat_content_margin">10dp</dimen>
 	<dimen name="signup_gender_drawable_padding">15dp</dimen>
+	<dimen name="contact_list_item_padding">14dp</dimen>
+	<dimen name="contact_list_divider_padding">8dp</dimen>
+	<dimen name="contact_list_header_padding">12dp</dimen>
 </resources>

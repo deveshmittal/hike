@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -40,6 +42,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
+
+	public static final String PROFILE_PIC_SUFFIX = "pp";
 
 	private static enum ViewType
 	{
@@ -67,6 +71,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private IconLoader iconLoader;
 
 	private TimelineImageLoader bigPicImageLoader;
+	
+	private ProfilePicImageLoader profileImageLoader;
 
 	private int mIconImageSize;
 
@@ -91,7 +97,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.iconLoader = new IconLoader(context, mIconImageSize);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
+		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
 	}
+	
 
 	@Override
 	public int getItemViewType(int position)
@@ -251,25 +259,40 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case HEADER:
 			String msisdn;
 			String name;
+			boolean hasCustomIcon;
 
 			if (groupProfile)
 			{
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
+				hasCustomIcon = groupConversation.hasCustomIcon();
 			}
 			else
 			{
 				msisdn = mContactInfo.getMsisdn();
 				name = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
+				hasCustomIcon = mContactInfo.hasCustomPhoto();
 			}
 
 			viewHolder.text.setText(name);
 
-			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
+			String mappedId = msisdn + PROFILE_PIC_SUFFIX;
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)
 			{
-				bigPicImageLoader.loadImage(msisdn, viewHolder.image, isListFlinging);
+				if (hasCustomIcon)
+				{
+					viewHolder.image.setBackgroundDrawable(null);
+					viewHolder.image.setScaleType(ScaleType.CENTER_CROP);
+					profileImageLoader.loadImage(mappedId, viewHolder.image, isListFlinging);
+				}
+				else
+				{
+					viewHolder.image.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, false));
+					viewHolder.image.setScaleType(ScaleType.CENTER_INSIDE);
+					viewHolder.image.setImageResource(groupProfile ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
+				}
 			}
 			else
 			{
@@ -296,7 +319,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				{
 					viewHolder.subText.setVisibility(View.VISIBLE);
 					viewHolder.subText.setText(mContactInfo.getMsisdn());
-					if(!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
+					if (!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
 					{
 						viewHolder.subText.append(" (" + mContactInfo.getMsisdnType() + ")");
 					}
@@ -388,14 +411,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					if (showingLastSeen && offline == 0)
 					{
 						mainInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
-						avatarFrame.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+						avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
 					}
 					else
 					{
 						mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-						avatarFrame.setImageResource(R.drawable.frame_avatar_medium_selector);
+						avatarFrame.setImageDrawable(null);
 					}
-					iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+					setAvatar(contactInfo.getMsisdn(), avatar, contactInfo.hasCustomPhoto());
 
 					groupParticipantParentView.setOnLongClickListener(profileActivity);
 				}
@@ -441,7 +464,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{
-				iconLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.icon, true);
+				setAvatar(statusMessage.getMsisdn(), viewHolder.icon, statusMessage.getMsisdnHasCustomIcon());
 				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
@@ -451,7 +474,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(myProfile ? context.getString(R.string.me) : profilePicStatusUpdate.getNotNullName());
 
 			viewHolder.subText.setText(R.string.status_profile_pic_notification);
-			iconLoader.loadImage(profilePicStatusUpdate.getMsisdn(), true, viewHolder.icon, true);
+			setAvatar(profilePicStatusUpdate.getMsisdn(), viewHolder.icon, profilePicStatusUpdate.getMsisdnHasCustomIcon());
 
 			ImageViewerInfo imageViewerInfo2 = new ImageViewerInfo(profilePicStatusUpdate.getMappedId(), null, true);
 
@@ -507,7 +530,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case REQUEST:
 			String contactFirstName = mContactInfo.getFirstName();
 
-			iconLoader.loadImage(mContactInfo.getMsisdn(), true, viewHolder.icon, true);
+			setAvatar(mContactInfo.getMsisdn(), viewHolder.icon, mContactInfo.hasCustomPhoto());
 
 			viewHolder.text.setText(contactFirstName);
 
@@ -597,6 +620,22 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		return v;
 	}
 
+	private void setAvatar(String msisdn, ImageView avatarView, boolean hasCustomIcon)
+	{
+		if (hasCustomIcon)
+		{
+			avatarView.setScaleType(ScaleType.FIT_CENTER);
+			avatarView.setBackgroundDrawable(null);
+			iconLoader.loadImage(msisdn, true, avatarView, true);
+		}
+		else
+		{
+			avatarView.setScaleType(ScaleType.CENTER_INSIDE);
+			avatarView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+			avatarView.setImageResource(R.drawable.ic_default_avatar);
+		}
+	}
+
 	private class ViewHolder
 	{
 		TextView text;
@@ -662,6 +701,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	public IconLoader getIconImageLoader()
 	{
 		return iconLoader;
+	}
+
+	public void toggleHasCustomIcon(boolean b)
+	{
+		if (groupProfile)
+		{
+			groupConversation.setHasCustomIcon(b);
+		}
+		else
+		{
+			mContactInfo.setHasCustomPhoto(b);
+		}
 	}
 
 	private boolean isListFlinging;

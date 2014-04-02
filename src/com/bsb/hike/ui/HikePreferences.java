@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -27,7 +26,6 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
@@ -39,14 +37,9 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
 
-public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, Listener
+public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener
 {
 
-	private enum DialogShowing
-	{
-		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
-	}
-	
 	private enum BlockingTaskType
 	{
 		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER
@@ -59,12 +52,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	private boolean isDeleting;
 	
 	private BlockingTaskType blockingTaskType = BlockingTaskType.NONE;
-
-	private DialogShowing dialogShowing;
-
-	private Dialog smsDialog;
-
-	private String[] pubSubListeners = { HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -136,13 +123,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			{
 				getPreferenceScreen().removePreference(unlinkTwitterPreference);
 			}
-		}
-
-		final IconCheckBoxPreference smsClientPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.RECEIVE_SMS_PREF);
-		if (smsClientPreference != null)
-		{
-			HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
-			smsClientPreference.setOnPreferenceChangeListener(this);
 		}
 
 		final IconCheckBoxPreference lastSeenPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.LAST_SEEN_PREF);
@@ -219,15 +199,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			muteChatBgPreference.setOnPreferenceClickListener(this);
 		}
 
-		if (savedInstanceState != null)
-		{
-			int dialogShowingOrdinal = savedInstanceState.getInt(HikeConstants.Extras.DIALOG_SHOWING, -1);
-			if (dialogShowingOrdinal != -1)
-			{
-				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
-				smsDialog = Utils.showSMSSyncDialog(this, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
-			}
-		}
 		setupActionBar(titleRes);
 
 	}
@@ -262,10 +233,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		outState.putInt(HikeConstants.Extras.BLOKING_TASK_TYPE, blockingTaskType.ordinal());
-		if (mDialog != null && mDialog.isShowing())
-		{
-			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
-		}
 		super.onSaveInstanceState(outState);
 	}
 
@@ -278,12 +245,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			mDialog.dismiss();
 			mDialog = null;
 		}
-		if (smsDialog != null)
-		{
-			smsDialog.cancel();
-			smsDialog = null;
-		}
-		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		mTask = null;
 	}
 
@@ -596,44 +557,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Intent dltIntent = new Intent(this, HomeActivity.class);
 		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(dltIntent);
-	}
-
-	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		if (HikePubSub.SHOW_SMS_SYNC_DIALOG.equals(type))
-		{
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					smsDialog = Utils.showSMSSyncDialog(HikePreferences.this, true);
-					dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
-				}
-			});
-		}
-		else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type) || HikePubSub.SMS_SYNC_FAIL.equals(type))
-		{
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					if (smsDialog != null)
-					{
-						smsDialog.dismiss();
-					}
-					dialogShowing = null;
-				}
-			});
-		}
-		else if (HikePubSub.SMS_SYNC_START.equals(type))
-		{
-			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
-		}
 	}
 
 	@Override

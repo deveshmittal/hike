@@ -74,6 +74,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
@@ -236,6 +237,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView fileExtension;
 
 		View selectedStateOverlay;
+
+		View sdrFtueTip;
 	}
 
 	private Conversation conversation;
@@ -259,6 +262,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private VoiceMessagePlayer voiceMessagePlayer;
 
 	private String statusIdForTip;
+	
+	private long msgIdForSdrTip = -1;
 
 	private SharedPreferences preferences;
 
@@ -279,6 +284,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean isActionModeOn = false;
 
+	private boolean shownSdrIntroTip = true;
+
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -294,6 +301,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.chatTheme = ChatTheme.DEFAULT;
 		this.mSelectedItemsIds = new HashSet<Integer>();
 		setLastSentMessagePosition();
+		this.shownSdrIntroTip  = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -585,6 +593,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
 				holder.intMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_int);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				holder.sdrFtueTip = v.findViewById(R.id.sdr_ftue_tip);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -724,8 +733,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				List<String> participantList = groupTypingNotification.getGroupParticipantList();
 
 				holder.typingAvatarContainer.removeAllViews();
+
+				GroupConversation groupConversation = (GroupConversation) conversation;
 				for (int i = participantList.size() - 1; i >= 0; i--)
 				{
+					String msisdn = participantList.get(i);
+
+					ContactInfo contactInfo = groupConversation.getGroupParticipant(msisdn).getContactInfo();
+
 					View avatarContainer = inflater.inflate(R.layout.small_avatar_container, holder.typingAvatarContainer, false);
 					ImageView imageView = (ImageView) avatarContainer.findViewById(R.id.avatar);
 					/*
@@ -734,7 +749,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 */
 					try
 					{
-						iconLoader.loadImage(participantList.get(i), true, imageView, true);
+						setAvatar(msisdn, imageView, contactInfo.hasCustomPhoto());
+
 						holder.typingAvatarContainer.addView(avatarContainer);
 					}
 					catch (IndexOutOfBoundsException e)
@@ -864,16 +880,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				/*
 				 * If this is the default category, then the sticker are part of the app bundle itself
 				 */
-				if (sticker.getStickerIndex() != -1)
+				if (sticker.isDefaultSticker())
 				{
 					holder.stickerImage.setVisibility(View.VISIBLE);
 					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
 					{
-						holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker.getStickerIndex()]);
+						//TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+						int idx = sticker.getStickerIndex();
+						if(idx >= 0)
+							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
 					}
 					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 					{
-						holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
+						//TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+						int idx = sticker.getStickerIndex();
+						if(idx >= 0)
+							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
 					}
 				}
 				else
@@ -958,8 +980,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (firstMessageFromParticipant)
 				{
+					ContactInfo participantInfo = ((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo();
+
 					holder.image.setVisibility(View.VISIBLE);
-					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image, true);
+					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image, participantInfo.hasCustomPhoto());
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				}
 				else
@@ -975,7 +999,36 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+				
+				boolean showTip = false;
+
+				if( viewType == ViewType.SEND_HIKE )
+				{
+					if (!shownSdrIntroTip && convMessage.getState() == State.SENT_DELIVERED_READ )
+					{
+						if (msgIdForSdrTip == -1)
+						{
+							showTip = true;
+						}
+						else if (convMessage.getMsgID() == msgIdForSdrTip)
+						{
+							showTip = true;
+						}
+					}
+	
+					if (showTip)
+					{
+						msgIdForSdrTip = convMessage.getMsgID();
+						holder.sdrFtueTip.setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						holder.sdrFtueTip.setVisibility(View.GONE);
+					}
+				}
 			}
+			
+
 			// if(isDefaultTheme)
 			// {
 			// if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
@@ -1547,8 +1600,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (firstMessageFromParticipant)
 				{
+					ContactInfo participantInfo = ((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo();
+
 					holder.image.setVisibility(View.VISIBLE);
-					iconLoader.loadImage(convMessage.getGroupParticipantMsisdn(), true, holder.image, true);
+					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image, participantInfo.hasCustomPhoto());
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1615,7 +1670,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			iconLoader.loadImage(conversation.getMsisdn(), true, holder.image, true);
+			setAvatar(conversation.getMsisdn(), holder.image, conversation.hasCustomIcon());
 
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
@@ -2002,6 +2057,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.selectedStateOverlay.setVisibility(View.GONE);
 		}
 		return v;
+	}
+
+	private void setAvatar(String msisdn, ImageView imageView, boolean hasCustomIcon)
+	{
+		if(hasCustomIcon)
+		{
+			imageView.setScaleType(ScaleType.FIT_CENTER);
+			imageView.setBackgroundDrawable(null);
+			iconLoader.loadImage(msisdn, true, imageView, true);
+		}
+		else
+		{
+			imageView.setScaleType(ScaleType.CENTER_INSIDE);
+			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+			imageView.setImageResource(R.drawable.ic_default_avatar);
+		}
 	}
 
 	private int getDownloadFailedResIcon()
@@ -3563,5 +3634,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void setActionMode(boolean isOn)
 	{
 		isActionModeOn = isOn;
+	}
+	
+	public boolean shownSdrToolTip()
+	{
+		return msgIdForSdrTip != -1;
 	}
 }

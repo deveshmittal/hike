@@ -1269,6 +1269,12 @@ public class HikeConstants
 		 * Sticker Ftue
 		 */
 		public static final String STICKER_FTUE_BTN_CLICK = "stickerFtueBtnClick";
+		
+		public static final String FTUE_TUTORIAL_STICKER_VIEWED = "ftueTutorialStickerViewed";
+		
+		public static final String FTUE_TUTORIAL_CBG_VIEWED = "ftueTutorialCbgViewed";
+
+		public static final String START_HIKING = "startHiking";
 	}
 
 	public static final class MqttMessageTypes
@@ -1434,5 +1440,11 @@ public class HikeConstants
 
 	//TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 6;
+	
+	public static enum WelcomeTutorial
+	{
+		INTRO_VIEWED, STICKER_VIEWED, CHAT_BG_VIEWED
+	}
+
 
 }

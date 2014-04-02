@@ -1084,18 +1084,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				huDb = HikeUserDatabase.getInstance();
 
 				String name;
+				boolean hasCustomIcon;
 				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
 				{
 					name = HikeMessengerApp.hikeBotNamesMap.get(msisdn);
 					onhike = true;
+					hasCustomIcon = huDb.hasIcon(msisdn);
 				}
 				else
 				{
 					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
 					name = contactInfo.getName();
 					onhike |= contactInfo.isOnhike();
+					hasCustomIcon = contactInfo.hasCustomPhoto();
 				}
 				conv = new Conversation(msisdn, convid, name, onhike);
+				conv.setHasCustomIcon(hasCustomIcon);
 
 			}
 
@@ -1295,6 +1299,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				Conversation conversation = conversationMap.get(contactInfo.getMsisdn());
 				conversation.setContactName(contactInfo.getName());
 				conversation.setOnhike(contactInfo.isOnhike());
+				conversation.setHasCustomIcon(contactInfo.hasCustomPhoto());
 			}
 
 			/*
@@ -1328,6 +1333,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				groupConversation.setGroupParticipantList(groupParticipants);
 				groupConversation.setMessages(conversation.getMessages());
 				groupConversation.setUnreadCount(conversation.getUnreadCount());
+				groupConversation.setHasCustomIcon(huDb.hasIcon(groupId));
 
 				/*
 				 * Setting the conversation for the message.
@@ -1471,6 +1477,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			conv.setGroupParticipantList(getGroupParticipants(msisdn, false, false));
 			conv.setGroupMemberAliveCount(getActiveParticipantCount(msisdn));
 			conv.setIsMuted(isMuted);
+			conv.setHasCustomIcon(HikeUserDatabase.getInstance().hasIcon(msisdn));
 
 			return conv;
 		}
@@ -2318,6 +2325,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						for (StatusMessage statusMessage : msisdnMessages)
 						{
 							statusMessage.setName(contactInfo.getName());
+							statusMessage.setMsisdnHasCustomIcon(contactInfo.hasCustomPhoto());
 						}
 					}
 				}

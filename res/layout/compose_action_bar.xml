@@ -21,12 +21,32 @@
             android:paddingRight="8dp"
             android:src="@drawable/ic_back" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/title"
-            style="@style/ActionBarText.Shadow"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="1dp" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/title"
+                style="@style/ActionBarText.Shadow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp" />
+            
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/subtext"
+                style="@style/ActionBarText.Shadow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/abs__action_bar_subtitle_bottom_margin"
+                android:layout_marginTop="@dimen/abs__action_bar_subtitle_top_margin"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
