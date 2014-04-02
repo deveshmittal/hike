@@ -144,6 +144,7 @@
         <activity
             android:name=".ui.HikeListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/app_label" >
         </activity>
         <activity
