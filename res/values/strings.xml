@@ -1403,4 +1403,5 @@
 	<string name="sent_txt">Sent</string>
 	<string name="delivered_txt">Delivered</string>
 	<string name="read_txt">Read</string>
+	<string name="no_results">No results</string>
 </resources>

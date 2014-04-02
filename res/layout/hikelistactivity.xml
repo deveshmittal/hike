@@ -97,13 +97,7 @@
             android:fadingEdge="none"
             android:fastScrollEnabled="true" />
         
-        <!-- Need to update this View with exact UI -->
-        <TextView 
-			android:id="@id/android:empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="No data"/>
+        <include layout="@layout/list_empty_view"></include>
         
     </LinearLayout>
 
