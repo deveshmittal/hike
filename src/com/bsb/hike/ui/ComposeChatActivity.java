@@ -140,7 +140,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		listView = (ListView) findViewById(R.id.list);
 
 		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId);
-
+		adapter.setShowExtraAtFirst(true);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
