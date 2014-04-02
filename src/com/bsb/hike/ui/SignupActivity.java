@@ -1252,7 +1252,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							mTask.addUserInput("");
 						}
 					}
-				}, 2000);
+				}, 1500);
 			}
 			break;
 		case NAME:
