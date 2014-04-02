@@ -92,6 +92,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		this.userMsisdn = userMsisdn;
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
 		this.iconImageLoader = new IconLoader(context, mIconImageSize);
+		this.iconImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
 	}
@@ -257,7 +258,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			}
 			else
 			{
-				setAvatar(statusMessage.getMsisdn(), statusMessage.getMsisdnHasCustomIcon(), viewHolder.avatar);
+				setAvatar(statusMessage.getMsisdn(), viewHolder.avatar);
 			}
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 
@@ -401,7 +402,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			setAvatar(statusMessage.getMsisdn(), statusMessage.getMsisdnHasCustomIcon(), viewHolder.avatar);
+			setAvatar(statusMessage.getMsisdn(), viewHolder.avatar);
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 			viewHolder.mainInfo.setText(R.string.status_profile_pic_notification);
 
@@ -444,7 +445,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView addBtn = (TextView) parentView.findViewById(R.id.invite_btn);
 
-				setAvatar(contactInfo.getMsisdn(), contactInfo.hasCustomPhoto(), avatar);
+				setAvatar(contactInfo.getMsisdn(), avatar);
 
 				name.setText(contactInfo.getName());
 
@@ -480,20 +481,9 @@ public class CentralTimelineAdapter extends BaseAdapter
 		return convertView;
 	}
 
-	private void setAvatar(String msisdn, boolean hasCustomIcon, ImageView avatar)
+	private void setAvatar(String msisdn, ImageView avatar)
 	{
-		if (hasCustomIcon)
-		{
-			avatar.setScaleType(ScaleType.FIT_CENTER);
-			avatar.setBackgroundDrawable(null);
-			iconImageLoader.loadImage(msisdn, true, avatar, true);
-		}
-		else
-		{
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
-			avatar.setImageResource(R.drawable.ic_default_avatar);
-		}
+		iconImageLoader.loadImage(msisdn, true, avatar, true);
 	}
 
 	private void addMoods(ViewGroup container, int[] moods)

@@ -12,11 +12,6 @@ import java.util.Set;
 
 import org.json.JSONArray;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -74,7 +69,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
@@ -291,6 +285,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		// this.largeStickerLoader = new StickerLoader(context);
 		this.iconLoader = new IconLoader(context, mIconImageSize);
+		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
@@ -734,12 +729,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				holder.typingAvatarContainer.removeAllViews();
 
-				GroupConversation groupConversation = (GroupConversation) conversation;
 				for (int i = participantList.size() - 1; i >= 0; i--)
 				{
 					String msisdn = participantList.get(i);
-
-					ContactInfo contactInfo = groupConversation.getGroupParticipant(msisdn).getContactInfo();
 
 					View avatarContainer = inflater.inflate(R.layout.small_avatar_container, holder.typingAvatarContainer, false);
 					ImageView imageView = (ImageView) avatarContainer.findViewById(R.id.avatar);
@@ -749,7 +741,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 */
 					try
 					{
-						setAvatar(msisdn, imageView, contactInfo.hasCustomPhoto());
+						setAvatar(msisdn, imageView);
 
 						holder.typingAvatarContainer.addView(avatarContainer);
 					}
@@ -980,10 +972,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (firstMessageFromParticipant)
 				{
-					ContactInfo participantInfo = ((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo();
-
 					holder.image.setVisibility(View.VISIBLE);
-					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image, participantInfo.hasCustomPhoto());
+					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1604,10 +1594,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (firstMessageFromParticipant)
 				{
-					ContactInfo participantInfo = ((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo();
-
 					holder.image.setVisibility(View.VISIBLE);
-					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image, participantInfo.hasCustomPhoto());
+					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
 					holder.avatarContainer.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1674,7 +1662,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			setAvatar(conversation.getMsisdn(), holder.image, conversation.hasCustomIcon());
+			setAvatar(conversation.getMsisdn(), holder.image);
 
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
@@ -2070,20 +2058,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return v;
 	}
 
-	private void setAvatar(String msisdn, ImageView imageView, boolean hasCustomIcon)
+	private void setAvatar(String msisdn, ImageView imageView)
 	{
-		if(hasCustomIcon)
-		{
-			imageView.setScaleType(ScaleType.FIT_CENTER);
-			imageView.setBackgroundDrawable(null);
-			iconLoader.loadImage(msisdn, true, imageView, true);
-		}
-		else
-		{
-			imageView.setScaleType(ScaleType.CENTER_INSIDE);
-			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
-			imageView.setImageResource(R.drawable.ic_default_avatar);
-		}
+		iconLoader.loadImage(msisdn, true, imageView, true);
 	}
 
 	private int getDownloadFailedResIcon()

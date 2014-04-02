@@ -962,7 +962,6 @@ public class Utils
 
 		ContactInfo contactInfo = new ContactInfo(myName, myMsisdn, myName, myMsisdn, true);
 		contactInfo.setHikeJoinTime(userJoinTime);
-		contactInfo.setHasCustomPhoto(HikeUserDatabase.getInstance().hasIcon(myMsisdn));
 
 		return contactInfo;
 	}
@@ -2782,6 +2781,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);

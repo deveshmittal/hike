@@ -58,6 +58,7 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		this.filter = new ContactFilter();
 		this.showingBlockedList = showingBLockedList;
 		iconLoader = new IconLoader(activity, mIconImageSize);
+		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 	}
 
 	public HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> getCompleteList()
@@ -91,23 +92,12 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		if (pair != null)
 		{
-			if (contactInfo.hasCustomPhoto())
-			{
-				imageView.setScaleType(ScaleType.FIT_CENTER);
-				imageView.setBackgroundDrawable(null);
-				iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
-			}
-			else
-			{
-				imageView.setScaleType(ScaleType.CENTER_INSIDE);
-				imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
-				imageView.setImageResource(R.drawable.ic_default_avatar);
-			}
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
 		}
 		else
 		{
 			imageView.setScaleType(ScaleType.CENTER_INSIDE);
-			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+			imageView.setBackgroundResource(R.drawable.avatar_01_rounded);
 			imageView.setImageResource(R.drawable.ic_default_avatar);
 		}
 
