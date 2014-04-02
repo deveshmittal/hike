@@ -363,14 +363,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				while (this.data == null);
+				
+				if(canPullInSms && receiver != null)
+				{
+					this.context.getApplicationContext().unregisterReceiver(receiver);
+					receiver = null;
+				}
+				
 			}
-			
-			if(canPullInSms)
-			{
-				this.context.getApplicationContext().unregisterReceiver(receiver);
-				receiver = null;
-			}
-			
+
 			if(getDisplayChild() == SignupActivity.PIN)
 			{
 				publishProgress(new StateValue(State.PIN_VERIFIED, null));
