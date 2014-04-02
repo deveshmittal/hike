@@ -223,7 +223,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 
 		ContactInfo friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
-		updateFriendsList(friendsSection);
+		updateFriendsList(friendsSection, true);
 
 		if (isHikeContactsPresent())
 		{

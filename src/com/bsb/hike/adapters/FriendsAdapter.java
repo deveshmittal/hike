@@ -310,7 +310,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		updateExtraList();
 
 		friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
-		updateFriendsList(friendsSection);
+		updateFriendsList(friendsSection, false);
 		if (isHikeContactsPresent())
 		{
 			hikeContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredHikeContactsList.size()), context.getString(R.string.hike_contacts), CONTACT_PHONE_NUM);
@@ -364,7 +364,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 	}
 
-	protected void updateFriendsList(ContactInfo section)
+	protected void updateFriendsList(ContactInfo section, boolean dontAddFTUE)
 	{
 
 		boolean hideSuggestions = true;
@@ -373,7 +373,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			completeList.add(section);
 		}
-		if (!HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText) && friendsList.size() < HikeConstants.FTUE_LIMIT)
+		if (dontAddFTUE && !HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText) && friendsList.size() < HikeConstants.FTUE_LIMIT)
 		{
 			SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
