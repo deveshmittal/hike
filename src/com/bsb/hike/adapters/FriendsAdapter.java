@@ -21,6 +21,7 @@ import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
@@ -117,10 +118,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private int mIconImageSize;
 
-	protected View emptyView;
+	protected View emptyView, loadingView;
 
-	public FriendsAdapter(final Context context)
+	protected ListView listView;
+
+	public FriendsAdapter(Context context, ListView listView)
 	{
+		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
 		this.layoutInflater = LayoutInflater.from(context);
@@ -144,6 +148,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public void executeFetchTask()
 	{
+		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
 				filteredSmsContactsList);
 		Utils.executeAsyncTask(fetchFriendsTask);
@@ -1076,5 +1081,18 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void setEmptyView(View view)
 	{
 		this.emptyView = view;
+	}
+
+	public void setLoadingView(View view)
+	{
+		this.loadingView = view;
+	}
+
+	protected void setLoadingView()
+	{
+		if (loadingView != null)
+		{
+			listView.setEmptyView(loadingView);
+		}
 	}
 }
