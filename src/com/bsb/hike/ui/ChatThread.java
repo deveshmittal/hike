@@ -2015,8 +2015,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 		Utils.showTip(this, TipType.CHAT_BG_FTUE, tipView);
-		Animation chatBgFtueAnimation = AnimationUtils.loadAnimation(this, R.anim.chat_bg_ftue_anim);
-		tipView.startAnimation(chatBgFtueAnimation);
 	}
 
 	private void closeChatBgFtueTip()
@@ -2048,8 +2046,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 		Utils.showTip(this, TipType.EMOTICON, tipView);
-		Animation stickerFtueAnimation = AnimationUtils.loadAnimation(this, R.anim.sticker_ftue_anim);
-		findViewById(R.id.sticker_image_icon).startAnimation(stickerFtueAnimation);
 	}
 
 	private void setupActionBar(boolean initialising)
