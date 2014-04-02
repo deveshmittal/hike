@@ -47,7 +47,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private List<ContactInfo> newContactsList;
 
-	private View emptyView;
+	
 
 	private ListView listView;
 
@@ -326,8 +326,5 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return super.getItemViewType(position);
 	}
 
-	public void setEmptyView(View view)
-	{
-		this.emptyView = view;
-	}
+	
 }

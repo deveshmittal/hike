@@ -116,6 +116,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private int mIconImageSize;
 
+	protected View emptyView;
+
 	public FriendsAdapter(final Context context)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -260,7 +262,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			makeFilteredList(constraint, resultList.get(0), resultList.get(1), resultList.get(2));
 
-			if (groupsList != null && !groupsList.isEmpty() )
+			if (groupsList != null && !groupsList.isEmpty())
 			{
 				filteredGroupsList.clear();
 				filteredGroupsList.addAll(resultList.get(3));
@@ -1057,5 +1059,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		filteredFriendsList.clear();
 		filteredHikeContactsList.clear();
 		filteredSmsContactsList.clear();
+	}
+
+	public void setEmptyView(View view)
+	{
+		this.emptyView = view;
 	}
 }
