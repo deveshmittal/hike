@@ -263,5 +263,5 @@
     <color name="bubble_music">#d2f0ff</color>
     <color name="bubble_rains_beach_2">#b2e5ff</color>
     <color name="bubble_white">#ffffff</color>
-
+	<color name="green_connected">#87d156</color>
 </resources>
