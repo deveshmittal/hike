@@ -39,7 +39,7 @@
             android:layout_height="35dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="21dp"
+            android:layout_marginRight="12dp"
             android:button="@drawable/select_all_checkbox" />
 
         <com.bsb.hike.view.CustomFontTextView
