@@ -463,8 +463,8 @@
                 
                 <ProgressBar
 		            android:id="@+id/rec_initializing"
-		            android:layout_width="52dp"
-		            android:layout_height="52dp"
+		            android:layout_width="64dp"
+		            android:layout_height="64dp"
 		            android:indeterminateDrawable="@drawable/circular_double_spinner"
 		            android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress
@@ -490,7 +490,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="9dp"
+                    android:layout_marginBottom="8dp"
                     android:gravity="center"
                     android:textColor="@color/black"
                     android:textSize="10sp"

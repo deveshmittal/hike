@@ -29,6 +29,8 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -99,7 +101,6 @@ import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
-import com.bsb.hike.view.CustomProgressBar;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
@@ -127,8 +128,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		ImageView fileThumb;
 
-//		ImageView mediaAction;
-
 		View participantDetails;
 
 		TextView participantNameFT;
@@ -140,7 +139,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ImageView poke;
 
 		View messageContainer;
-		
+
 		View messageItem;
 
 		TextView messageInfo;
@@ -181,23 +180,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ProgressBar wating;
 
 		ProgressBar watingExt;
-		
+
 		ProgressBar watingRec;
 
 		ImageView ftAction;
 
 		ImageView ftActionExt;
-		
+
 		ImageView recAction;
-		
+
 		View recPlaceholder;
 
 		View fileDetails;
 
 		View messageSize;
-		
+
 		TextView fileSize;
-		
+
 		TextView fileName;
 
 		TextView fileSizeExt;
@@ -1012,10 +1011,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				Log.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
 				Log.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
 			}
-			
 
-			if(hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING)
-			holder.messageContainer.setVisibility(View.VISIBLE);
+			if (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING)
+				holder.messageContainer.setVisibility(View.VISIBLE);
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail
 			holder.fileThumb.setBackgroundResource(0);
@@ -1031,24 +1029,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String phone = null, email = null;
 				for (ContactInfoData contactInfoData : items)
 				{
-					if(contactInfoData.getDataType() == DataType.PHONE_NUMBER)
+					if (contactInfoData.getDataType() == DataType.PHONE_NUMBER)
 						phone = contactInfoData.getData();
-					
-					else if(contactInfoData.getDataType() == DataType.EMAIL)
+
+					else if (contactInfoData.getDataType() == DataType.EMAIL)
 						email = contactInfoData.getData();
 				}
 
-				if(!TextUtils.isEmpty(phone))
+				if (!TextUtils.isEmpty(phone))
 				{
 					holder.fileSizeExt.setText(phone);
 					holder.fileSizeExt.setVisibility(View.VISIBLE);
 				}
-				else if(!TextUtils.isEmpty(email))
+				else if (!TextUtils.isEmpty(email))
 				{
 					holder.fileSizeExt.setText(email);
 					holder.fileSizeExt.setVisibility(View.VISIBLE);
 				}
-				
+
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileDetails.setVisibility(View.VISIBLE);
@@ -1069,26 +1067,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			{
-				if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				
+				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
+				circle.setIntrinsicHeight((int) (64 * Utils.densityMultiplier));
+				circle.setIntrinsicWidth((int) (64 * Utils.densityMultiplier));
+				if (convMessage.isSent())
 				{
+					/* label outgoing hike conversations in green */
+					if (chatTheme == ChatTheme.DEFAULT)
+					{
+						circle.getPaint().setColor(context.getResources().getColor(!convMessage.isSMS() ? R.color.bubble_blue : R.color.bubble_green));
+					}
+					else
+					{
+						circle.getPaint().setColor(context.getResources().getColor(chatTheme.bubbleColor()));
+					}
 
 				}
 				else
 				{
-					holder.watingRec.setVisibility(View.VISIBLE);
-//					if (fss.getFTState() == FTState.NOT_STARTED)
-//					{
-//						holder.fileThumb.getLayoutParams().width = (int) (108 * Utils.densityMultiplier);
-//					}
-//					else
-//					{
-//						holder.fileThumb.getLayoutParams().width = (int) (155 * Utils.densityMultiplier);
-//					}
-//					holder.fileThumb.getLayoutParams().height = (int) (32 * Utils.densityMultiplier);
-//					holder.fileThumb.setBackgroundResource(R.drawable.bg_grey);
-//					holder.fileThumb.setImageResource(0);
-//					holder.fileThumb.setVisibility(View.VISIBLE);
+					circle.getPaint().setColor(context.getResources().getColor(R.color.bubble_white));
 				}
+
+				holder.recPlaceholder.setBackgroundDrawable(circle);
 				holder.recPlaceholder.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
@@ -1121,7 +1122,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					createFileThumb(holder.fileThumb);
 				}
-				
+
 				holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
 				holder.fileSize.setVisibility(View.VISIBLE);
 				holder.messageSize.setVisibility(View.VISIBLE);
@@ -1186,8 +1187,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			}
 			else if ((!showThumbnail)
-					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO
-					|| hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT))
+					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT))
 			{
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
@@ -1226,8 +1226,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.CONTACT)
 			{
-//				holder.messageTextView.setText(hikeFile.getFileName());
-//				holder.messageTextView.setVisibility(View.VISIBLE);
+				// holder.messageTextView.setText(hikeFile.getFileName());
+				// holder.messageTextView.setVisibility(View.VISIBLE);
 			}
 			else
 			{
@@ -1239,9 +1239,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-//					holder.mediaAction.setBackgroundResource(0);
-//					holder.mediaAction.setImageResource(0);
-//					holder.mediaAction.setScaleType(ScaleType.CENTER_INSIDE);
+					// holder.mediaAction.setBackgroundResource(0);
+					// holder.mediaAction.setImageResource(0);
+					// holder.mediaAction.setScaleType(ScaleType.CENTER_INSIDE);
 					holder.recAction.setBackgroundResource(0);
 					holder.recAction.setImageResource(0);
 					holder.recAction.setScaleType(ScaleType.CENTER_INSIDE);
@@ -1256,7 +1256,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							holder.recAction.setImageResource(R.drawable.ic_mic);
 						}
-//						holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
+						// holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
 						holder.recDuration.setTag(hikeFile.getFileKey());
 						voiceMessagePlayer.setDurationTxt(holder.recDuration, holder.recProgress);
 						holder.recDuration.setVisibility(View.VISIBLE);
@@ -1267,8 +1267,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						if ((!convMessage.isSent()) || (!TextUtils.isEmpty(hikeFile.getFileKey())))
 						{
 							// setFileButtonResource(holder.mediaAction, convMessage, hikeFile);
-//							holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
-							//holder.recAction.setImageResource(R.drawable.ic_open_received_file);
+							// holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
+							// holder.recAction.setImageResource(R.drawable.ic_open_received_file);
 							holder.recAction.setImageResource(R.drawable.ic_mic);
 							holder.recAction.setVisibility(View.VISIBLE);
 						}
@@ -1279,18 +1279,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					if (!convMessage.isSent() && fss.getFTState() == FTState.NOT_STARTED)
-					{
-						holder.recAction.setImageResource(R.drawable.ic_retry_image_video);
-						holder.recAction.setVisibility(View.VISIBLE);
-					}
+					holder.recAction.setImageResource(R.drawable.ic_mic);
+					holder.recAction.setVisibility(View.VISIBLE);
 				}
 			}
 			else if (hikeFileType == HikeFileType.CONTACT)
 			{
-//				holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_pressed);
-//				holder.mediaAction.setImageResource(R.drawable.ic_default_contact);
-//				holder.mediaAction.setVisibility(View.VISIBLE);
+				// holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_pressed);
+				// holder.mediaAction.setImageResource(R.drawable.ic_default_contact);
+				// holder.mediaAction.setVisibility(View.VISIBLE);
 			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Margin View
@@ -1312,10 +1309,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// holder.participantNameFT.setVisibility(View.GONE);
 			// }
 			// }
-//			holder.messageContainer.setTag(convMessage);
-//			holder.messageContainer.setOnClickListener(this);
-//			holder.messageContainer.setOnLongClickListener(this);
-			
+			// holder.messageContainer.setTag(convMessage);
+			// holder.messageContainer.setOnClickListener(this);
+			// holder.messageContainer.setOnLongClickListener(this);
+
 			holder.messageItem.setTag(convMessage);
 			holder.messageItem.setOnClickListener(this);
 			holder.messageItem.setOnLongClickListener(this);
@@ -1377,7 +1374,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// }
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT)
+					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING))
 			{
 				Log.d(getClass().getSimpleName(), "updating button visibility : " + convMessage.isSent() + hikeFile.getHikeFileType().toString() + fss.getFTState().toString());
 
@@ -1465,6 +1463,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// holder.image.setImageResource(getDownloadFailedResIcon());
 						// break;
 					case PAUSING:
+						showTransferInitialization(holder, hikeFile);
+						break;
 					case PAUSED:
 						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
 						break;
@@ -1484,6 +1484,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						showTransferInitialization(holder, hikeFile);
 						break;
 					case PAUSING:
+						showTransferInitialization(holder, hikeFile);
+						break;
 					case PAUSED:
 					case ERROR:
 						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
@@ -1523,7 +1525,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
-				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+						|| (hikeFile.getHikeFileType() == HikeFileType.OTHER))
 				{
 					// setFileTypeText(holder.fileType, hikeFile);
 					// holder.fileType.setVisibility(View.VISIBLE);
@@ -1531,7 +1534,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 				{
-					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+							holder.sending);
 				}
 				else
 				{
@@ -1562,7 +1566,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 					// }
 				}
-				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)  || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+						|| (hikeFile.getHikeFileType() == HikeFileType.OTHER))
 				{
 					// if(fss.getFTState() == FTState.COMPLETED)
 					// {
@@ -1573,7 +1578,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 				{
-					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+							holder.sending);
 				}
 				else
 				{
@@ -2079,6 +2085,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.wating.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
+		else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+		{
+			holder.watingRec.setVisibility(View.VISIBLE);
+		}
 		else
 		{
 			holder.watingExt.setVisibility(View.VISIBLE);
@@ -2090,25 +2100,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		// if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
-		// {
-		// showTransferInitialization(holder, hikeFile);
-		// }
-		// else
-		// {
-		if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO))
+		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
 		{
-			holder.circularProgress.setProgress(progress * 0.01f);
-			holder.circularProgress.setVisibility(View.VISIBLE);
-			holder.circularProgressBg.setVisibility(View.VISIBLE);
+			showTransferInitialization(holder, hikeFile);
 		}
 		else
 		{
-			holder.circularProgressExt.setProgress(progress * 0.01f);
-			holder.circularProgressExt.setVisibility(View.VISIBLE);
-			holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+			if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO))
+			{
+				holder.circularProgress.setProgress(progress * 0.01f);
+				holder.circularProgress.setVisibility(View.VISIBLE);
+				holder.circularProgressBg.setVisibility(View.VISIBLE);
+			}
+			else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+			{
+				showTransferInitialization(holder, hikeFile);
+			}
+			else
+			{
+				holder.circularProgressExt.setProgress(progress * 0.01f);
+				holder.circularProgressExt.setVisibility(View.VISIBLE);
+				holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+			}
 		}
-		// }
+
 	}
 
 	private boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
@@ -2140,7 +2155,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		//fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
+		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
 		fileThumb.setBackgroundResource(R.drawable.bg_grey);
 		fileThumb.setImageResource(0);
 	}
