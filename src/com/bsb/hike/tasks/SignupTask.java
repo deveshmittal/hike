@@ -411,18 +411,18 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			Log.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
+		if(userName != null)
+		{
+			publishProgress(new StateValue(State.GENDER, ""));
+			if(isFemale != null)
+			{
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			}
+		}
+
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
-			if(userName != null)
-			{
-				publishProgress(new StateValue(State.GENDER, ""));
-				if(isFemale != null)
-				{
-					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
-				}
-			}
-			
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
 			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
@@ -515,7 +515,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
-				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
+				{
+					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				}
 				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 			}
 			catch (InterruptedException e)

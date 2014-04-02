@@ -298,6 +298,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			mTask = SignupTask.startTask(this,mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 		}
 		else
 		{
@@ -311,10 +312,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForFetchingNumber();
 			}
 
+			mTask = SignupTask.startTask(this);
 		}
 		setAnimation();
 		setListeners();
-		mTask = SignupTask.startTask(this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
 		setWindowSoftInputState();
