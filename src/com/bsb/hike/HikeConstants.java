@@ -1439,7 +1439,7 @@ public class HikeConstants
 	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3 };
 
 	//TODO need to finalize this with AM
-	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 6;
+	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 	
 	public static enum WelcomeTutorial
 	{
