@@ -33,7 +33,7 @@
     </com.bsb.hike.view.PinnedSectionListView>
 
     <include
-        android:id="@+id/friendEmpty"
+        android:id="@android:id/empty"
         layout="@layout/list_empty_view"
         android:visibility="gone" >
     </include>
