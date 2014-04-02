@@ -46,6 +46,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	// Constants to easily toggle various caches
 	private static final boolean DEFAULT_MEM_CACHE_ENABLED = true;
+	
+	private final static int MAX_CACHE_SIZE = 1024 * 15;
 
 	private static HikeLruCache instance;
 
@@ -97,6 +99,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 				throw new IllegalArgumentException("setMemCacheSizePercent - percent must be " + "between 0.01 and 0.8 (inclusive)");
 			}
 			memCacheSize = Math.round(percent * Runtime.getRuntime().maxMemory() / 1024);
+			if(memCacheSize > MAX_CACHE_SIZE)
+				memCacheSize = MAX_CACHE_SIZE;
 		}
 	}
 
