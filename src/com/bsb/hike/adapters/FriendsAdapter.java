@@ -220,6 +220,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			try
 			{
 				String regex = ".*?\\b" + textToBeFiltered + ".*?\\b";
+				Log.d(TAG, "filter list called and regex is " + regex);
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
@@ -244,7 +245,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					if (msisdn != null)
 					{
 						// word boundary is not working because of +91 , resolve later --gauravKhanna
-						Log.i(TAG, "msisdn is not null and regex is " + regex);
 						if (msisdn.contains(textToBeFiltered))
 						{
 							listToUpdate.add(info);
@@ -307,6 +307,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public void makeCompleteList(boolean filtered)
 	{
+
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
 		if (!shouldContinue)
@@ -328,8 +329,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			smsContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredSmsContactsList.size()), context.getString(R.string.sms_contacts), CONTACT_PHONE_NUM);
 			updateSMSContacts(smsContactsSection);
 		}
-
+		
 		notifyDataSetChanged();
+		setEmptyView();
 	}
 
 	protected boolean makeSetupForCompleteList(boolean filtered)
@@ -1093,6 +1095,20 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		if (loadingView != null)
 		{
 			listView.setEmptyView(loadingView);
+			Log.e("errrr", "loading view is not null");
+		}
+		else
+		{
+			Log.e("errrr", "loading view is null");
+		}
+	}
+
+	protected void setEmptyView()
+	{
+		if (emptyView != null)
+		{
+
+			listView.setEmptyView(emptyView);
 		}
 	}
 }

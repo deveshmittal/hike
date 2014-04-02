@@ -136,7 +136,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				else
 				{
 					holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-					holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+					// holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
 					holder.userImage.setImageResource(R.drawable.ic_default_avatar);
 				}
 			}
@@ -199,6 +199,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	@Override
 	public void makeCompleteList(boolean filtered)
 	{
+		
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
 		if (!shouldContinue)
@@ -245,10 +246,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 
 		notifyDataSetChanged();
-		if (emptyView != null)
-		{
-			listView.setEmptyView(emptyView);
-		}
+		setEmptyView();
 	}
 
 	public void addContact(ContactInfo contactInfo)
