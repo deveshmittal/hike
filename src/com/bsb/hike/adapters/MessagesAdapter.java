@@ -1250,18 +1250,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						holder.recAction.setVisibility(View.VISIBLE);
 						if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING)
 						{
-							holder.recAction.setImageResource(R.drawable.ic_pause_audio);
+							holder.recAction.setImageResource(R.drawable.ic_pause_rec);
 						}
 						else
 						{
-							holder.recAction.setImageResource(R.drawable.ic_open_received_file);
+							holder.recAction.setImageResource(R.drawable.ic_mic);
 						}
 //						holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
 						holder.recDuration.setTag(hikeFile.getFileKey());
 						voiceMessagePlayer.setDurationTxt(holder.recDuration, holder.recProgress);
 						holder.recDuration.setVisibility(View.VISIBLE);
 						holder.recProgress.setVisibility(View.VISIBLE);
-
 					}
 					else
 					{
@@ -1269,12 +1268,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							// setFileButtonResource(holder.mediaAction, convMessage, hikeFile);
 //							holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
-							holder.recAction.setImageResource(R.drawable.ic_open_received_file);
+							//holder.recAction.setImageResource(R.drawable.ic_open_received_file);
+							holder.recAction.setImageResource(R.drawable.ic_mic);
 							holder.recAction.setVisibility(View.VISIBLE);
 						}
 						Utils.setupFormattedTime(holder.recDuration, hikeFile.getRecordingDuration());
 						holder.recDuration.setVisibility(View.VISIBLE);
-						holder.recProgress.setVisibility(View.VISIBLE);
+						holder.recProgress.setVisibility(View.INVISIBLE);
 					}
 				}
 				else
@@ -1387,6 +1387,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					ftAction = holder.ftAction;
 					bg = holder.circularProgressBg;
+				}
+				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+				{
+					ftAction = holder.recAction;
+					bg = holder.recPlaceholder;
 				}
 				else
 				{
@@ -3408,8 +3413,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				return;
 			}
-			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_open_received_file : R.drawable.ic_pause_audio);
-			fileBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
+			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_mic : R.drawable.ic_pause_rec);
 		}
 
 		Runnable updateTimer = new Runnable()
@@ -3446,11 +3450,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					int progress = 0;
 					if (mediaPlayer.getDuration() > 0)
 						progress = (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
-					((HoloCircularProgress) durationProgress).setProgress(progress);
+					((HoloCircularProgress) durationProgress).setProgress(progress * 0.01f);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
-					((HoloCircularProgress) durationProgress).setProgress(0);
+					((HoloCircularProgress) durationProgress).setProgress(0.00f);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getDuration() / 1000);
 					break;
 

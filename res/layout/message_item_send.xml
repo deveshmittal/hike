@@ -415,7 +415,6 @@
                 android:gravity="center_vertical"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="6dp"
-                android:paddingBottom="4dp"
                 android:visibility="gone" />
 
             <LinearLayout
@@ -459,7 +458,6 @@
                 android:background="@drawable/bg_ft_progress"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="6dp"
-                android:paddingBottom="4dp"
                 android:gravity="center"
                 android:visibility="gone" >
                 
@@ -473,11 +471,11 @@
 	               android:id="@+id/rec_circular_progress"
 	               android:layout_width="64dp"
 	               android:layout_height="64dp"
-	               app:progress_color="@color/white_65"
-	               app:progress_background_color="@color/white_45"
+	               app:progress_color="@color/rec_progress"
+	               app:progress_background_color="#00000000"
 	               android:gravity="center"
-	               app:progress="0.4"
-	               app:stroke_width="3dp"
+	               app:progress="0.00"
+	               app:stroke_width="2dp"
 	               app:marker_visible="false"
 	               app:thumb_visible="false"
 	               android:layout_centerInParent="true" />
@@ -492,9 +490,9 @@
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="9dp"
                     android:gravity="center"
-                    android:textColor="@color/white"
+                    android:textColor="@color/black"
                     android:textSize="10sp"
                     android:visibility="gone" />              
             </RelativeLayout>
@@ -507,6 +505,7 @@
             android:layout_alignParentRight="true"
           	android:layout_below="@id/bubble_container"
             android:layout_marginRight="5dp"
+            android:layout_marginTop="4dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:background="@drawable/bg_msg_time_status"
