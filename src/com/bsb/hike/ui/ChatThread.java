@@ -3853,7 +3853,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.contact), 5, R.drawable.ic_attach_contact));
 		}
-		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_contact));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
 
 		dismissPopupWindow();
 
