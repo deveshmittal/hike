@@ -30,6 +30,9 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
+import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
@@ -47,6 +50,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
+import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
@@ -437,7 +441,7 @@ public class MqttMessagesManager
 					JSONObject fileJson = fileArray.getJSONObject(i);
 					Log.d(getClass().getSimpleName(), "Previous json: " + fileJson);
 					if (hikeFile.getHikeFileType() != HikeFileType.CONTACT && hikeFile.getHikeFileType() != HikeFileType.LOCATION) // dont change name for contact or location
-						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType()));
+						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType(), hikeFile.getFileName()));
 					Log.d(getClass().getSimpleName(), "New json: " + fileJson);
 				}
 				/*
@@ -1415,6 +1419,48 @@ public class MqttMessagesManager
 
 				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 			}
+		}
+		else if (HikeConstants.MqttMessageTypes.GROUP_OWNER_CHANGE.equals(type))
+		{
+			String groupId = jsonObj.getString(HikeConstants.TO);
+
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			String msisdn = data.getString(HikeConstants.MSISDN);
+
+			convDb.changeGroupOwner(groupId, msisdn);
+		}
+		else if (HikeConstants.MqttMessageTypes.REQUEST_DP.equals(type))
+		{
+			final String groupId = jsonObj.getString(HikeConstants.TO);
+
+			String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+			String fileName = Utils.getTempProfileImageFileName(groupId);
+
+			File groupImageFile = new File(directory, fileName);
+			if (!groupImageFile.exists())
+			{
+				return;
+			}
+
+			String path = "/group/" + groupId + "/avatar";
+
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(path, RequestType.PROFILE_PIC, new HikeHttpCallback()
+			{
+				public void onFailure()
+				{
+					Utils.removeTempProfileImage(groupId);
+					HikeMessengerApp.getLruCache().deleteIconForMSISDN(groupId);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
+				}
+
+				public void onSuccess(JSONObject response)
+				{
+					Utils.renameTempProfileImage(groupId);
+				}
+			});
+
+			HikeHTTPTask task = new HikeHTTPTask(null, 0);
+			Utils.executeHttpTask(task, hikeHttpRequest);
 		}
 	}
 

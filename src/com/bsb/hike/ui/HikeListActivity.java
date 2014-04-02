@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -78,6 +79,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	private TextView title;
 
 	private ImageView backIcon;
+	
+	List<Pair<AtomicBoolean, ContactInfo>> firstSectionList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -316,25 +319,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
 			ViewGroup selectAllContainer = (ViewGroup) findViewById(R.id.select_all_container);
-
+			
+			firstSectionList = new ArrayList<Pair<AtomicBoolean,ContactInfo>>();
+			
 			switch (type)
 			{
 			case BLOCK:
-				/*
-				 * This would be true when we have pre checked items.
-				 */
-				for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList)
-				{
-					boolean checked = contactItem.first.get();
-					if (checked)
-					{
-						selectedContacts.add(contactItem.second.getMsisdn());
-					}
-					else
-					{
-						break;
-					}
-				}
+				getBlockedContactsList(contactList, firstSectionList); 
 				selectAllContainer.setVisibility(View.GONE);
 				break;
 			case INVITE:
@@ -366,10 +357,19 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						selectAllCB.setChecked(!selectAllCB.isChecked());
 					}
 				});
+				
+				getRecommendedInvitesList(contactList, firstSectionList);
 				break;
 			}
 
-			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, contactList, type == Type.BLOCK);
+			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean,ContactInfo>>>();
+			contactList.removeAll(firstSectionList);
+			if(!firstSectionList.isEmpty())
+			{
+				completeSectionsData.put(0,firstSectionList);
+			}
+			completeSectionsData.put(completeSectionsData.size(),contactList);
+			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, completeSectionsData, type == Type.BLOCK);
 			input.addTextChangedListener(adapter);
 
 			listView.setAdapter(adapter);
@@ -378,22 +378,25 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	public void selectAllToggled(boolean isChecked)
 	{
-		List<Pair<AtomicBoolean, ContactInfo>> contactList = adapter.getCompleteList();
+		HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> contactListMap = adapter.getCompleteList();
 
-		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
+		for(Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : contactListMap.entrySet())
 		{
-			pair.first.set(isChecked);
-			String msisdn = pair.second.getMsisdn();
-			if (isChecked)
+			for (Pair<AtomicBoolean, ContactInfo> pair : entry.getValue())
 			{
-				selectedContacts.add(msisdn);
-			}
-			else
-			{
-				selectedContacts.remove(msisdn);
+				pair.first.set(isChecked);
+				String msisdn = pair.second.getMsisdn();
+				if (isChecked)
+				{
+					selectedContacts.add(msisdn);
+				}
+				else
+				{
+					selectedContacts.remove(msisdn);
+				}
 			}
 		}
-		adapter.selectAllToggled();
+		adapter.notifyDataSetChanged();
 		setupActionBarElements();
 	}
 
@@ -501,6 +504,43 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		else
 		{
 			init();
+		}
+	}
+	
+	private void getBlockedContactsList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
+	{
+		/*
+		 * This would be true when we have pre checked items.
+		 */
+		for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList)
+		{
+			boolean checked = contactItem.first.get();
+			if (checked)
+			{
+				firstSectionList.add(contactItem);
+				selectedContacts.add(contactItem.second.getMsisdn());
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	private void getRecommendedInvitesList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
+	{
+		int limit = 6;
+		List<ContactInfo> recommendedContactList = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(20);
+		if (recommendedContactList.size() >= limit)
+		{
+			recommendedContactList = recommendedContactList.subList(0, limit);
+		}
+		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
+		{
+			ContactInfo contactInfo = pair.second;
+			if(recommendedContactList.contains(contactInfo)){
+				firstSectionList.add(pair);
+			}
 		}
 	}
 

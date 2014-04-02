@@ -63,7 +63,6 @@
 	<string name="group_chat">Conversa</string>
 	<string name="add_to_contacts">Adicionar a contatos</string>
 	<string name="new_message">Nova mensagem</string>
-	<string name="new_group">Novo grupo</string>
 	<string name="add_group">Adic. a grupo</string>
 	<string name="invite_share_message">Uso o hike, um excelente app novo e grátis de mensagem! Baixe o app em http://get.hike.in/%1$s para mandar mensagens de graça!</string>
 	<string name="max_sms">Máx. 5 contatos de SMS em um grupo.</string>
@@ -134,12 +133,9 @@
 	<string name="free_sms_left">hike para SMS</string>
 	<string name="normal_update">Atualize para a nova versão do hike para descobrir novas maneiras incríveis de enviar mensagens</string>
 	<string name="critical_update">É preciso atualizar para continuar a usar o hike.</string>
-	<string name="normal_update_head">Atualiz. disponível</string>
-	<string name="critical_update_head">Atualiz. importante</string>
 	<string name="quit">Encerrar</string>
 	<string name="update_app">Atualizar</string>
 	<string name="delete_confirmation">Tem certeza de que deseja excluir a conta permanentemente?</string>
-	<string name="unlink_confirmation">Tem certeza de que deseja desvincular a conta desse telefone?</string>
 	<string name="unlink">Desvinc.</string>
 	<string name="no_favorite">Você não tem favoritos.\nToque em mais e adicione.</string>
 	<string name="plus">mais</string>
@@ -174,7 +170,7 @@
 	<string name="social_unlinking">Desvinculando conta...</string>
 	<string name="contact_selected_already">Esse número já está no grupo.</string>
 	<string name="share_file_message">Acabei de enviar um arquivo pelo hike: %1$s</string>
-	<string name="max_file_size">Tamanho máx. do arquivo: 25MB</string>
+	<string name="max_file_size">Tamanho máx. do arquivo: 100MB</string>
 	<string name="unable_to_read">Impossível ler o arquivo.</string>
 	<string name="share_location">Compartilhar local</string>
 	<string name="group_mute">Essa conversa foi silenciada.</string>
@@ -198,7 +194,6 @@
 	<string name="sms_subtext">Convidar amigos via SMS</string>
 	<string name="email_subtext">Convidar via e-mail</string>
 	<string name="other_subtext">Obter URL de convite</string>
-	<string name="email_subject">hike. Mensagem grátis para sempre</string>
 	<string name="facebook_msg">Comecei a usar o hike, um excelente app novo e grátis de mensagens. Mande mensagens para amigos no hike e fora dele de graça! Mensagens mais simples do que nunca! Baixe o app em http://get.hike.in/%1$s para me mandar mensagens de graça!</string>
 	<string name="gps_disabled">Ative o GPS para ativar seu local mais preciso.</string>
 	<string name="twitter_post_success">Publicado na linha do tempo!</string>
@@ -219,8 +214,6 @@
 	<string name="auto_download_video_title">Vídeo</string>
 	<string name="auto_download_audio_title">Áudio</string>
 	<string name="delete_account">Excluir conta</string>
-	<string name="delete_account_msg">Excluir conta permanentemente</string>
-	<string name="unlink_account">Desvincular conta</string>
 	<string name="unlink_account_msg">Desvincular conta desse telefone</string>
 	<string name="privacy">Privacid.</string>
 	<string name="notifications">Notificações</string>
@@ -359,7 +352,6 @@
 	<string name="waiting_for_accept">Aguardando que %1$s aceite a solicitação de amigo</string>
 	<string name="status_update">Atualiz. de status</string>
 	<string name="remove_friend">Remover</string>
-	<string name="no_status">Parece que você não publicou atualizações de status ainda.</string>
 	<string name="update_status">Atualizar status</string>
 	<string name="free_sms_txt">SMS grátis</string>
 	<string name="on_dnd">em DND</string>
@@ -372,7 +364,6 @@
 	<string name="unmute_group">Ativar som grp</string>
 	<string name="account">Conta</string>
 	<string name="deleting_account">Excluindo conta</string>
-	<string name="unlinking_account">Desvinculando conta</string>
 	<string name="enter_num">Insira o número do telefone</string>
 	<string name="enter_pin">Insira o PIN</string>
 	<string name="enter_name">Insira o nome</string>
@@ -553,7 +544,6 @@
 	<string name="read_by_names_number">Lido por %1$s e %2$d outros</string>
 	<string name="read_by_everyone">Lido por todos</string>
 	<string name="attach">Anexar</string>
-	<string name="new_chat">Nova conv.</string>
 	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">Enviou solicitação de amigo</string>
 	<string name="xyz_posted_update">%1$s publicou uma atualização</string>
@@ -627,7 +617,6 @@
 	<string name="x_regular_sms">%1$d x SMS comum</string>
 	<string name="last_seen_yesterday_group_participant">Ontem</string>
 	<string name="invite_friends_hike">Convidar amigos para o hike</string>
-	<string name="create_group">Criar grupo</string>
 	<string name="hike_contacts">CONTATOS DO HIKE</string>
 	<string name="sms_contacts">CONTATOS DE SMS</string>
 	<string name="invite_subtext">Ganhe SMS adicionais para cada amigo que entrar no hike através de você.</string>
@@ -704,12 +693,9 @@
 	<string name="sent_via_sms">Enviado como SMS - %1$s</string>
 	<string name="chat_theme">Tema da conversa</string>
 	<string name="unknown_chat_theme">Uh-oh! Há um novo tema de conversa incrível esperando você, mas ainda está usando uma versão antiga do hike :(. Atualize agora http://hike.in</string>
-	<string name="merry_christmas_msg">O Natal é mágico! E temos uma surpresa para você...</string>	
-	<string name="open_it_up">Abrir</string>	
 	<string name="chat_themes">Temas de conversa!</string>
 	<string name="chat_themes_popup_msg">Personalize as conversas com temas sensacionais.</string>
 	<string name="give_it_a_spin">Experimente</string>		
-	<string name="chat_bg_ftue_tip">E muitos outros temas aqui...</string>
 	<string name="last_seen_today_ct">hoje, %1$s</string>
 	<string name="last_seen_yesterday_ct">ontem, %1$s</string>
 	<string name="last_seen_more_ct">%1$s</string>

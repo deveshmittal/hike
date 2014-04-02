@@ -149,6 +149,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
+				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -156,6 +157,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 			hikeFile.setFileKey(fileKey);
+			hikeFile.setFileSize(fileSize);
 			hikeFile.setFileTypeString(uploadingContact ? HikeConstants.CONTACT_CONTENT_TYPE : HikeConstants.LOCATION_CONTENT_TYPE);
 
 			filesArray.put(hikeFile.serialize());
@@ -223,7 +225,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private JSONObject getFileTransferMetadataForLocation(double latitude, double longitude, int zoomLevel, String address, String thumbnailString) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null).serialize());
+		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 

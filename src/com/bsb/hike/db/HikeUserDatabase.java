@@ -502,11 +502,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			{
 				selectionBuilder.append(DBConstants.MSISDN + " NOT IN " + msisdnsNotIn + " AND ");
 			}
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION, DBConstants.HIKE_JOIN_TIME,
-					DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN }, selectionBuilder.toString() + DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn) + " AND "
-					+ DBConstants.ONHIKE + "=1 LIMIT " + limit, null, null, null, null);
-
+			if(limit > 0)
+			{
+				c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+						DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION, DBConstants.HIKE_JOIN_TIME,
+						DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN }, selectionBuilder.toString() + DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn) + " AND "
+						+ DBConstants.ONHIKE + "=1 LIMIT " + limit, null, null, null, null);
+			}
+			else
+			{
+				c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+						DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION, DBConstants.HIKE_JOIN_TIME,
+						DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN }, selectionBuilder.toString() + DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn) + " AND "
+						+ DBConstants.ONHIKE + "=1", null, null, null, null);
+			}
 			contactInfos = extractContactInfo(c, true);
 			return contactInfos;
 		}
@@ -1943,46 +1952,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		db.replace(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, contentValues);
 	}
 
-	private String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
-	{
-		if (TextUtils.isEmpty(serverRecommendedArrayString))
-		{
-			return null;
-		}
-		try
-		{
-			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
-			if (serverRecommendedArray.length() == 0)
-			{
-				return null;
-			}
-
-			StringBuilder sb = new StringBuilder("(");
-			int i = 0;
-			for (i = 0; i < serverRecommendedArray.length(); i++)
-			{
-				String msisdn = serverRecommendedArray.optString(i);
-				if (!myMsisdn.equals(msisdn))
-				{
-					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
-				}
-			}
-			/*
-			 * Making sure the string exists.
-			 */
-			if (sb.lastIndexOf(",") == -1)
-			{
-				return null;
-			}
-			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-			return sb.toString();
-		}
-		catch (JSONException e)
-		{
-			return null;
-		}
-	}
-
+	
 	private String getQueryableNumbersString(List<ContactInfo> contactInfos)
 	{
 		if (contactInfos.isEmpty())
@@ -2024,7 +1994,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		String currentSelection = getQueryableNumbersString(contactInfoList);
 
-		String recommendedContactsSelection = getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
+		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
 		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
 			List<ContactInfo> recommendedContacts = getHikeContacts(limit, recommendedContactsSelection, currentSelection, myMsisdn);

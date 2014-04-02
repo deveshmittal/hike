@@ -1,0 +1,37 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="48dp"
+    android:layout_gravity="top"
+    android:background="@color/white" >
+
+    <TextView
+        android:id="@+id/settings_row_text"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="4dp"
+        android:gravity="center_vertical"
+        android:text="Afganistan"
+        android:textColor="#33312e"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/settings_row_text_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_marginRight="12dp"
+        android:layout_toRightOf="@id/settings_row_text"
+        android:gravity="center_vertical"
+        android:text="+93"
+        android:textColor="#33312e"
+        android:textSize="16sp" />
+
+    <View
+        android:id="@+id/settings_row_divider"
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_alignParentBottom="true"
+        android:background="#e7e8e9" />
+
+</RelativeLayout>

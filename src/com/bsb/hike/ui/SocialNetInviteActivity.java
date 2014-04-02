@@ -127,7 +127,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		input = (EditText) findViewById(R.id.input_number);
 
-		findViewById(R.id.input_number_container).setVisibility(View.GONE);
+		findViewById(R.id.input_number).setVisibility(View.GONE);
 		findViewById(R.id.contact_list).setVisibility(View.GONE);
 		findViewById(R.id.progress_container).setVisibility(View.VISIBLE);
 		if (isFacebook)
@@ -320,7 +320,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			input.addTextChangedListener(adapter);
 			listView.setAdapter(adapter);
 			listView.setOnScrollListener(scrollListener);
-			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
+			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
@@ -372,7 +372,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			listView.setOnScrollListener(scrollListener);
 
 			adapter.notifyDataSetChanged();
-			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
+			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
@@ -381,15 +381,28 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 	OnScrollListener scrollListener = new OnScrollListener()
 	{
+		private int previousFirstVisibleItem;
+		private int velocity;
+		private long previousEventTime;
+
 		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState)
 		{
-			adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+			adapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		}
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 		{
+			if (previousFirstVisibleItem != firstVisibleItem)
+			{
+				long currTime = System.currentTimeMillis();
+				long timeToScrollOneElement = currTime - previousEventTime;
+				velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+				previousFirstVisibleItem = firstVisibleItem;
+				previousEventTime = currTime;
+			}
 		}
 	};
 

@@ -80,13 +80,12 @@ import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageState;
 
-public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener, OnLongClickListener,
-		OnItemLongClickListener, OnScrollListener, View.OnClickListener
+public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
+		View.OnClickListener
 {
 
 	private EditText mNameEdit;
@@ -743,9 +742,25 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	boolean loadingMoreMessages;
 
+	private int previousFirstVisibleItem;
+
+	private int velocity;
+
+	private long previousEventTime;
+
 	@Override
 	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
+		if (previousFirstVisibleItem != firstVisibleItem)
+		{
+			long currTime = System.currentTimeMillis();
+			long timeToScrollOneElement = currTime - previousEventTime;
+			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+			previousFirstVisibleItem = firstVisibleItem;
+			previousEventTime = currTime;
+		}
+
 		if (!reachedEnd && !loadingMoreMessages && !profileItems.isEmpty()
 				&& (firstVisibleItem + visibleItemCount) >= (profileItems.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
@@ -761,7 +776,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				protected List<StatusMessage> doInBackground(Void... params)
 				{
 					StatusMessage statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 1)).getStatusMessage();
-					
+
 					if (statusMessage != null && statusMessage.getId() == HikeConstants.JOINED_HIKE_STATUS_ID)
 					{
 						statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 2)).getStatusMessage();
@@ -776,7 +791,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 							(int) statusMessage.getId(), mLocalMSISDN);
 					if (!olderMessages.isEmpty() && isLastMessageJoinedHike)
 					{
-						olderMessages.add(((ProfileStatusItem)getJoinedHikeStatus(contactInfo)).getStatusMessage());
+						olderMessages.add(((ProfileStatusItem) getJoinedHikeStatus(contactInfo)).getStatusMessage());
 					}
 					return olderMessages;
 				}
@@ -823,7 +838,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		if (profileAdapter != null)
 		{
 			Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
-			profileAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+			profileAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		}
 		/*
 		 * // Pause fetcher to ensure smoother scrolling when flinging if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) { // Before Honeycomb pause image loading
@@ -1199,7 +1214,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{
 					isPicasaImage = true;
-					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null).getAbsolutePath();
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false).getAbsolutePath();
 				}
 				else
 				{
@@ -1268,73 +1283,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				saveChanges();
 			}
-			break;
-		}
-	}
-
-	public void onChangeImageClicked(View v)
-	{
-		/*
-		 * The user wants to change their profile picture. Open a dialog to allow them pick Camera or Gallery
-		 */
-		final CharSequence[] items = getResources().getStringArray(R.array.profile_pic_dialog);
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.choose_picture);
-		builder.setItems(items, this);
-		builder.show();
-	}
-
-	@Override
-	public void onClick(DialogInterface dialog, int item)
-	{
-		Intent intent = null;
-		switch (item)
-		{
-		case HikeConstants.PROFILE_PICTURE_FROM_CAMERA:
-			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
-			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!Utils.hasEnoughFreeSpaceForProfilePic())
-			{
-				Toast.makeText(getApplicationContext(), R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null); // create a file to save the image
-			if (selectedFileIcon != null)
-			{
-				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
-
-				/*
-				 * Saving the file path. Will use this to get the file once the image has been captured.
-				 */
-				Editor editor = preferences.edit();
-				editor.putString(HikeMessengerApp.FILE_PATH, selectedFileIcon.getAbsolutePath());
-				editor.commit();
-
-				startActivityForResult(intent, HikeConstants.CAMERA_RESULT);
-			}
-			else
-			{
-				Toast.makeText(this, getString(R.string.no_sd_card), Toast.LENGTH_LONG).show();
-			}
-			break;
-		case HikeConstants.PROFILE_PICTURE_FROM_GALLERY:
-			if (Utils.getExternalStorageState() == ExternalStorageState.NONE)
-			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!Utils.hasEnoughFreeSpaceForProfilePic())
-			{
-				Toast.makeText(getApplicationContext(), R.string.not_enough_space_profile_pic, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			intent = new Intent(Intent.ACTION_PICK);
-			intent.setType("image/*");
-			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
 			break;
 		}
 	}
@@ -1940,8 +1888,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private ProfileItem getJoinedHikeStatus(ContactInfo contactInfo)
 	{
-		return new ProfileItem.ProfileStatusItem(new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(), getString(R.string.joined_hike_update),
-				StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime()));
+		return new ProfileItem.ProfileStatusItem(new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
+				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime()));
 	}
 
 	@Override
@@ -2175,7 +2123,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		GroupParticipant groupParticipant = (GroupParticipant) v.getTag();
 		if (groupParticipant == null)
 		{
-			Intent intent = new Intent(ProfileActivity.this, ComposeActivity.class);
+			Intent intent = new Intent(ProfileActivity.this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
 			startActivity(intent);

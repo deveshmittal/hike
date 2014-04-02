@@ -47,6 +47,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -61,6 +63,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
@@ -102,6 +105,7 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Patterns;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -134,6 +138,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -491,12 +496,12 @@ public class Utils
 	}
 
 	/** Create a File for saving an image or video */
-	public static File getOutputMediaFile(HikeFileType type, String orgFileName)
+	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
 	{
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
-		String path = getFileParent(type);
+		String path = getFileParent(type, isSent);
 		if (path == null)
 		{
 			return null;
@@ -557,27 +562,75 @@ public class Utils
 
 	public static String getFinalFileName(HikeFileType type)
 	{
-		String orgFileName = "";
+		return getFinalFileName(type, null);
+	}
+
+	public static String getFinalFileName(HikeFileType type, String orgName)
+	{
+		StringBuilder orgFileName = new StringBuilder();
 		// String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS")
 		// .format(new Date());
 		String timeStamp = Long.toString(System.currentTimeMillis());
-		switch (type)
+		if (TextUtils.isEmpty(orgName))
 		{
-		case PROFILE:
-		case IMAGE:
-			orgFileName = "IMG_" + timeStamp + ".jpg";
-			break;
-		case VIDEO:
-			orgFileName = "MOV_" + timeStamp + ".mp4";
-			break;
-		case AUDIO:
-		case AUDIO_RECORDING:
-			orgFileName = "AUD_" + timeStamp + ".m4a";
+			switch (type)
+			{
+			case PROFILE:
+			case IMAGE:
+				orgFileName.append("IMG_" + timeStamp + ".jpg");
+				break;
+			case VIDEO:
+				orgFileName.append("MOV_" + timeStamp + ".mp4");
+				break;
+			case AUDIO:
+			case AUDIO_RECORDING:
+				orgFileName.append("AUD_" + timeStamp + ".m4a");
+				break;
+			case OTHER:
+				orgFileName.append("FILE_" + timeStamp);
+			}
 		}
-		return orgFileName;
+		else
+		{
+			int lastDotIndex = orgName.lastIndexOf(".");
+
+			String actualName;
+			String extension = getFileExtension(orgName);
+
+			if (lastDotIndex != -1 && lastDotIndex != orgName.length() - 1)
+			{
+				actualName = new String(orgName.substring(0, lastDotIndex));
+			}
+			else
+			{
+				actualName = orgName;
+			}
+
+			orgFileName.append(actualName + "_" + timeStamp);
+
+			if (!TextUtils.isEmpty(extension))
+			{
+				orgFileName.append("." + extension);
+			}
+		}
+		return orgFileName.toString();
 	}
 
-	public static String getFileParent(HikeFileType type)
+	public static String getFileExtension(String fileName)
+	{
+		int lastDotIndex = fileName.lastIndexOf(".");
+
+		String extension = "";
+
+		if (lastDotIndex != -1 && lastDotIndex != fileName.length() - 1)
+		{
+			extension = new String(fileName.substring(lastDotIndex + 1));
+		}
+
+		return extension;
+	}
+
+	public static String getFileParent(HikeFileType type, boolean isSent)
 	{
 		StringBuilder path = new StringBuilder(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
 		switch (type)
@@ -600,6 +653,10 @@ public class Utils
 		default:
 			path.append(HikeConstants.OTHER_ROOT);
 			break;
+		}
+		if (isSent)
+		{
+			path.append(HikeConstants.SENT_ROOT);
 		}
 		return path.toString();
 	}
@@ -1533,7 +1590,7 @@ public class Utils
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
 	{
-		if (convMessage == null || convMessage.getTypingNotification() != null)
+		if (convMessage == null || convMessage.getTypingNotification() != null || convMessage.getUnreadCount() != -1)
 		{
 			return false;
 		}
@@ -2049,8 +2106,8 @@ public class Utils
 
 	public static boolean isPicasaUri(String picasaUriString)
 	{
-		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START) || picasaUriString
-				.toString().startsWith("http"));
+		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START)
+				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX));
 	}
 
 	public static Uri makePicasaUri(Uri uri)
@@ -3324,7 +3381,7 @@ public class Utils
 			Log.w("LE", "Invalid json");
 		}
 	}
-	
+
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3338,7 +3395,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-			
+
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
@@ -3639,5 +3696,143 @@ public class Utils
 			// which will recycle automagically
 			return new RecyclingBitmapDrawable(mResources, bitmap);
 		}
+	}
+
+	public static int getNumColumnsForGallery(Resources resources, int sizeOfImage)
+	{
+		return (int) (resources.getDisplayMetrics().widthPixels / sizeOfImage);
+	}
+
+	public static int getActualSizeForGallery(Resources resources, int sizeOfImage, int numColumns)
+	{
+		int remainder = resources.getDisplayMetrics().widthPixels - (numColumns * sizeOfImage);
+		return (int) (sizeOfImage + (int) (remainder / numColumns));
+	}
+
+	public static void makeNoMediaFile(File root)
+	{
+		if (root == null)
+		{
+			return;
+		}
+
+		if (!root.exists())
+		{
+			root.mkdirs();
+		}
+		File file = new File(root, ".nomedia");
+		if (!file.exists())
+		{
+			try
+			{
+				file.createNewFile();
+			}
+			catch (IOException e)
+			{
+				Log.d("NoMedia", "failed to make nomedia file");
+			}
+		}
+	}
+
+	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
+	{
+		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		{
+			return null;
+		}
+		try
+		{
+			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
+			if (serverRecommendedArray.length() == 0)
+			{
+				return null;
+			}
+
+			StringBuilder sb = new StringBuilder("(");
+			int i = 0;
+			for (i = 0; i < serverRecommendedArray.length(); i++)
+			{
+				String msisdn = serverRecommendedArray.optString(i);
+				if (!myMsisdn.equals(msisdn))
+				{
+					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				}
+			}
+			/*
+			 * Making sure the string exists.
+			 */
+			if (sb.lastIndexOf(",") == -1)
+			{
+				return null;
+			}
+			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+			return sb.toString();
+		}
+		catch (JSONException e)
+		{
+			return null;
+		}
+	}
+
+	/*
+	 * When Active Contacts >= 3 show the 'Add Friends' pop-up When Activate Contacts <3 show the 'Invite Friends' pop-up
+	 */
+	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
+	{
+		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		{
+			return false;
+		}
+		try
+		{
+			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
+			if (serverRecommendedArray.length() > 2)
+			{
+				return true;
+			}
+			return false;
+		}
+		catch (JSONException e)
+		{
+			return false;
+		}
+	}
+
+	public static String getEmail(Context context)
+	{
+		String email = null;
+		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+		Account[] accounts = AccountManager.get(context).getAccounts();
+		for (Account account : accounts)
+		{
+			if (emailPattern.matcher(account.name).matches())
+			{
+				email = account.name;
+				break;
+			}
+		}
+		return email;
+	}
+
+	public static void startChatThread(Context context, ContactInfo contactInfo)
+	{
+		Intent intent = new Intent(context, ChatThread.class);
+		if (contactInfo.getName() != null)
+		{
+			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		context.startActivity(intent);
+	}
+	
+	public static boolean shouldShowAddOrInviteFTUE(String msisdn)
+	{
+		List<ContactInfo>  friendsList = HikeUserDatabase.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false);
+		if(friendsList.size() < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
+		{
+			return true;
+		}
+		return false;
 	}
 }

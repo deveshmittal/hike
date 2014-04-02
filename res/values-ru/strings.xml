@@ -134,12 +134,9 @@
 	<string name="free_sms_left">hike - SMS</string>
 	<string name="normal_update">Обновите hike, чтобы обогатить возможности своего общения</string>
 	<string name="critical_update">Это обновление hike обязательно.</string>
-	<string name="normal_update_head">Доступно обновление</string>
-	<string name="critical_update_head">Важное обновление</string>
 	<string name="quit">Выход</string>
 	<string name="update_app">Обновить</string>
 	<string name="delete_confirmation">Вы действительно хотите удалить свой аккаунт?</string>
-	<string name="unlink_confirmation">Вы действительно хотите отвязать свой аккаунт от этого телефона?</string>
 	<string name="unlink">Отвязать</string>
 	<string name="no_favorite">Нет избранного.\nНажмите плюс, чтобы добавить.</string>
 	<string name="plus">плюс</string>
@@ -174,7 +171,7 @@
 	<string name="social_unlinking">Отвязка аккаунта...</string>
 	<string name="contact_selected_already">Этот номер уже есть в группе.</string>
 	<string name="share_file_message">Я только что отправил тебе файл через hike: %1$s</string>
-	<string name="max_file_size">Макс. размер файла: 25 МБ</string>
+	<string name="max_file_size">Макс. размер файла: 100 МБ</string>
 	<string name="unable_to_read">Невозможно прочесть файл</string>
 	<string name="share_location">Расположение</string>
 	<string name="group_mute">Разговор без уведомлений</string>
@@ -198,7 +195,6 @@
 	<string name="sms_subtext">Пригласить другой по SMS</string>
 	<string name="email_subtext">Пригласить по почте</string>
 	<string name="other_subtext">Получить URL пригл.</string>
-	<string name="email_subject">hike -- удобный чат для жизни</string>
 	<string name="facebook_msg">Я начинаю использовать hike, отличное новое приложение для чата. Оно позволяет бесплатно общаться с пользователями hike и друзьями, еще не использующими hike! Еще никогда чат не был таким простым. Приложение  можно скачать здесь: http://get.hike.in/%1$s!</string>
 	<string name="gps_disabled">Для более точного определения местоположения включите GPS.</string>
 	<string name="twitter_post_success">Опубликовано на вашей врем. шкале!</string>
@@ -219,8 +215,6 @@
 	<string name="auto_download_video_title">Видео</string>
 	<string name="auto_download_audio_title">Аудио</string>
 	<string name="delete_account">Удалить аккаунт</string>
-	<string name="delete_account_msg">Навсегда удалить ваш аккаунт</string>
-	<string name="unlink_account">Отвязать аккаунт</string>
 	<string name="unlink_account_msg">Отвязать ваш аккаунт от этого телефона</string>
 	<string name="privacy">Конфиденциальн.</string>
 	<string name="notifications">Уведомления</string>
@@ -360,7 +354,6 @@
 	<string name="waiting_for_accept">Ожидание принятия пользов. %1$s запроса в друзья</string>
 	<string name="status_update">Обновление статуса</string>
 	<string name="remove_friend">Удалить</string>
-	<string name="no_status">Вы еще не публиковали обновления статуса</string>
 	<string name="update_status">Обновить статус</string>
 	<string name="free_sms_txt">Беспл. SMS</string>
 	<string name="on_dnd">в DND</string>
@@ -373,7 +366,6 @@
 	<string name="unmute_group">Вкл. группу</string>
 	<string name="account">Аккаунт</string>
 	<string name="deleting_account">Удаление аккаунта</string>
-	<string name="unlinking_account">Отвязка аккаунта</string>
 	<string name="enter_num">Введите номер телефона</string>
 	<string name="enter_pin">Введите PIN</string>
 	<string name="enter_name">Введите имя</string>
@@ -560,7 +552,6 @@
 	<string name="read_by_names_number">Прочитано %1$s и %2$d другими</string>
 	<string name="read_by_everyone">Прочитано всеми</string>
 	<string name="attach">Прикрепить</string>
-	<string name="new_chat">Новый чат</string>
 	<string name="sent_friend_request">отправил (-а) приглашение в друзья</string>
 	<string name="xyz_posted_update">%1$s опубликовал (-а) обновление</string>
 	<string name="sent_you_friend_request">отправил (-а) вам приглашение в друзья</string>
@@ -633,7 +624,6 @@
 	<string name="x_regular_sms">%1$d обычных SMS</string>
 	<string name="last_seen_yesterday_group_participant">Вчера</string>
 	<string name="invite_friends_hike">Пригласить друзей в hike</string>
-	<string name="create_group">Создать группу</string>
 	<string name="hike_contacts">Контакты hike</string>
 	<string name="sms_contacts">Контакты SMS</string>
 	<string name="invite_subtext">Получите дополнительные SMS за каждого друга, пришедщего в hike по вашему приглашению</string>
@@ -710,12 +700,9 @@
 	<string name="sent_via_sms">Отправлено как SMS - %1$s</string>
 	<string name="chat_theme">Тема чата</string>
 	<string name="unknown_chat_theme">Ой! Уже появилась новая клевая тема для чата, а ты всё еще пользуешься старой :(. Обнови с http://hike.in</string>
-	<string name="merry_christmas_msg">Что такое праздник без каких-либо подарков? Счастливый hiking!</string>	
-	<string name="open_it_up">Откройте подарок...</string>	
 	<string name="chat_themes">Темы чата!</string>
 	<string name="chat_themes_popup_msg">Персонифицируйте свой чат с помощью великолепных тем.</string>
 	<string name="give_it_a_spin">Попробуйте</string>		
-	<string name="chat_bg_ftue_tip">Более великолепные темы здесь...</string>
 	<string name="chat_bg_ftue_tip_1">И кучу темы здесь...</string>
 	<string name="last_seen_today_ct">сегод, %1$s</string>
 	<string name="last_seen_yesterday_ct">вчера, %1$s</string>

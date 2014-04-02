@@ -34,6 +34,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -56,7 +57,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					String pin = Utils.getSMSPinCode(body);
 					if (pin != null)
 					{
-						SignupTask.this.addUserInput(pin);
+						if(getDisplayChild() != SignupActivity.PIN){
+							SignupTask.this.addUserInput(pin);
+						} else{
+							SignupTask.this.autoFillPin(pin);
+						}
 						this.abortBroadcast();
 						break;
 					}
@@ -69,10 +74,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	{
 		public void onProgressUpdate(StateValue value);
 	}
+	
+	public int getDisplayChild(){
+		return ((SignupActivity) context).getDisplayItem();
+	}
+
+	public void autoFillPin(String pin)
+	{
+		((SignupActivity) context).autoFillPin(pin);
+	}
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS
 	};
 
 	public class StateValue
@@ -110,7 +124,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private Birthday birthdate;
 
-	private boolean isFemale = false;
+	private Boolean isFemale;
+
+	private String userName;
 
 	private static final String INDIA_ISO = "IN";
 
@@ -163,7 +179,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.birthdate = birthdate;
 	}
 
-	public void addGender(boolean isFemale)
+	public void addUserName(String name)
+	{
+		this.userName = name;
+	}
+
+	
+	public void addGender(Boolean isFemale)
 	{
 		this.isFemale = isFemale;
 	}
@@ -265,13 +287,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				editor.putString(HikeMessengerApp.MSISDN_ENTERED, unauthedMSISDN);
 				editor.commit();
 
-				/*
-				 * If the device is a kit kat device, we won't be able to pull in SMS so no point waiting for 1 minute. If the device can't pull in SMS no point waiting for the
-				 * PIN.
-				 */
-				if (!Utils.hasKitKat() && canPullInSms)
+				if (canPullInSms)
 				{
-
 					publishProgress(new StateValue(State.PULLING_PIN, null));
 
 					synchronized (this)
@@ -287,23 +304,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						}
 					}
 
-					this.context.getApplicationContext().unregisterReceiver(receiver);
-					receiver = null;
 				}
-				else
-				{
-					synchronized (this)
-					{
-						try
-						{
-							this.wait(HikeConstants.NON_SIM_WAIT_TIME);
-						}
-						catch (InterruptedException e)
-						{
-							Log.e("SignupTask", "Task was interrupted", e);
-						}
-					}
-				}
+				
 				accountInfo = null;
 				do
 				{
@@ -362,6 +364,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				while (this.data == null);
 			}
+			
+			if(canPullInSms)
+			{
+				this.context.getApplicationContext().unregisterReceiver(receiver);
+				receiver = null;
+			}
 
 			Log.d("SignupTask", "saving MSISDN/Token");
 			msisdn = accountInfo.msisdn;
@@ -390,6 +398,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
+			if(userName != null)
+			{
+				publishProgress(new StateValue(State.GENDER, ""));
+				if(isFemale != null)
+				{
+					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				}
+			}
+			
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
 			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
@@ -458,7 +475,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		{
 			try
 			{
-				if (this.data == null)
+				if (userName == null)
 				{
 					/*
 					 * publishing this will cause the the Activity to ask the user for a name and signal us
@@ -469,8 +486,21 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						this.wait();
 					}
 				}
-				name = this.data;
-				AccountUtils.setProfile(name, birthdate, isFemale);
+				
+				if (isFemale == null)
+				{
+					/*
+					 * publishing this will cause the the Activity to ask the user for a name and signal us
+					 */
+					publishProgress(new StateValue(State.GENDER, ""));
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+				
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 			}
 			catch (InterruptedException e)
 			{
@@ -492,7 +522,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 			this.data = null;
 			Editor editor = settings.edit();
-			editor.putString(HikeMessengerApp.NAME_SETTING, name);
+			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
 			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
 			if (birthdate != null)
 			{
@@ -509,7 +539,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 
 		/* set the name */
-		publishProgress(new StateValue(State.NAME, name));
+		publishProgress(new StateValue(State.NAME, userName));
 
 		if (this.profilePicRequest != null)
 		{
@@ -651,6 +681,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
+	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday)
+	{
+		getSignupTask(activity);
+		if (!signupTask.isRunning())
+		{
+			signupTask.addGender(isFemale);
+			signupTask.addUserName(userName);
+			signupTask.addBirthdate(birthday);
+			Utils.executeSignupTask(signupTask);
+		}
+		return signupTask;
+	}
+
 	public static SignupTask restartTask(Activity activity)
 	{
 		if (signupTask != null && signupTask.isRunning())
@@ -658,6 +701,16 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			signupTask.cancelTask();
 		}
 		startTask(activity);
+		return signupTask;
+	}
+	
+	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday)
+	{
+		if (signupTask != null && signupTask.isRunning())
+		{
+			signupTask.cancelTask();
+		}
+		startTask(activity, userName, isFemale, birthday);
 		return signupTask;
 	}
 }
