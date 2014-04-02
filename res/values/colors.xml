@@ -265,4 +265,6 @@
     <color name="bubble_rains_beach_2">#b2e5ff</color>
     <color name="bubble_white">#ffffff</color>
 	<color name="green_connected">#87d156</color>
+    <color name="action_bar_btn_disable">#0965a0</color>
+    <color name="compose_view_btn_selected">#33000000</color>
 </resources>

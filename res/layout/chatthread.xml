@@ -202,7 +202,7 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="@drawable/bg_overflow_menu_selector"
+                    android:background="@drawable/compose_view_btn_selector"
                     android:onClick="onSendClick"
                     android:src="@drawable/ic_walkie_talkie"
                     android:state_enabled="false" />
@@ -213,7 +213,7 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/bg_overflow_menu_selector"
+                    android:background="@drawable/compose_view_btn_selector"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker" />
@@ -251,7 +251,7 @@
                         android:id="@+id/emo_btn"
                         android:layout_width="40dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_overflow_menu_selector"
+                        android:background="@drawable/compose_view_btn_selector"
                         android:onClick="onEmoticonBtnClicked"
                         android:paddingBottom="7dp"
                         android:paddingTop="12dp"

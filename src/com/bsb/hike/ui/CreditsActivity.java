@@ -109,7 +109,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 				if (!isChecked)
 				{
 					Editor editor = PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).edit();
-					editor.putBoolean(HikeConstants.SEND_SMS_PREF, false);
+					editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, false);
 					editor.commit();
 				}
 				else

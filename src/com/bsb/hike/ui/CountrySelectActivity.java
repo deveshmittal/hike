@@ -189,7 +189,6 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 
 		actionBar.setCustomView(actionBarView);
 
-		actionBarView.findViewById(R.id.done_container).setVisibility(View.GONE);
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		title.setText(R.string.select_country);
