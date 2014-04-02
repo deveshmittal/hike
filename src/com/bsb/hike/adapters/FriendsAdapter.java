@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
@@ -116,8 +117,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private int mIconImageSize;
 
-	public FriendsAdapter(final Context context)
+	protected View emptyView, loadingView;
+
+	protected ListView listView;
+
+	public FriendsAdapter(Context context, ListView listView)
 	{
+		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
 		this.iconloader.setDefaultAvatarIfNoCustomIcon(true);
@@ -142,6 +148,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public void executeFetchTask()
 	{
+		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
 				filteredSmsContactsList);
 		Utils.executeAsyncTask(fetchFriendsTask);
@@ -213,6 +220,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			try
 			{
 				String regex = ".*?\\b" + textToBeFiltered + ".*?\\b";
+				Log.d(TAG, "filter list called and regex is " + regex);
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
@@ -237,7 +245,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					if (msisdn != null)
 					{
 						// word boundary is not working because of +91 , resolve later --gauravKhanna
-						Log.i(TAG, "msisdn is not null and regex is " + regex);
 						if (msisdn.contains(textToBeFiltered))
 						{
 							listToUpdate.add(info);
@@ -300,6 +307,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public void makeCompleteList(boolean filtered)
 	{
+
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
 		if (!shouldContinue)
@@ -321,8 +329,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			smsContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredSmsContactsList.size()), context.getString(R.string.sms_contacts), CONTACT_PHONE_NUM);
 			updateSMSContacts(smsContactsSection);
 		}
-
+		
 		notifyDataSetChanged();
+		setEmptyView();
 	}
 
 	protected boolean makeSetupForCompleteList(boolean filtered)
@@ -1058,5 +1067,37 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		filteredFriendsList.clear();
 		filteredHikeContactsList.clear();
 		filteredSmsContactsList.clear();
+	}
+
+	public void setEmptyView(View view)
+	{
+		this.emptyView = view;
+	}
+
+	public void setLoadingView(View view)
+	{
+		this.loadingView = view;
+	}
+
+	protected void setLoadingView()
+	{
+		if (loadingView != null)
+		{
+			listView.setEmptyView(loadingView);
+			Log.e("errrr", "loading view is not null");
+		}
+		else
+		{
+			Log.e("errrr", "loading view is null");
+		}
+	}
+
+	protected void setEmptyView()
+	{
+		if (emptyView != null)
+		{
+
+			listView.setEmptyView(emptyView);
+		}
 	}
 }

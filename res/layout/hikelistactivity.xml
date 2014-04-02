@@ -10,14 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="46dp"
         android:layout_gravity="center_vertical"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/bg_country_search_bar"
         android:gravity="center_vertical"
         android:hint="@string/search_hint"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="8dp"
-        android:layout_marginLeft="8dp"
-    	android:layout_marginRight="8dp"
         android:singleLine="true" />
 
     <RelativeLayout
@@ -37,9 +37,9 @@
             android:id="@+id/select_all_cb"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="21dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
             android:button="@drawable/select_all_checkbox" />
 
         <com.bsb.hike.view.CustomFontTextView
@@ -54,13 +54,13 @@
             android:textSize="18sp"
             android:textStyle="bold|italic" />
     </RelativeLayout>
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/select_all_container"
-        android:layout_below="@id/input_number"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/input_number"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -89,37 +89,20 @@
 
         <com.bsb.hike.adapters.PinnedHeaderListView
             android:id="@+id/contact_list"
+            style="@style/HomeList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1px"
             android:background="@color/white"
-            style="@style/HomeList"
             android:fadingEdge="none"
             android:fastScrollEnabled="true" />
-        
-        <!-- Need to update this View with exact UI -->
-        <TextView 
-			android:id="@id/android:empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="No data"/>
-        
+
+        <include layout="@layout/list_empty_view" >
+        </include>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/progress_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="gone" >
-
-        <ProgressBar
-            android:id="@+id/loading_progress"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:indeterminateDrawable="@drawable/loading"
-            android:visibility="visible" />
-    </LinearLayout>
+    <include
+        layout="@layout/spinner_center_screen"
+        android:visibility="gone" />
 
 </RelativeLayout>

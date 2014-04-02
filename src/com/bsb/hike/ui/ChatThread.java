@@ -87,6 +87,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -119,11 +120,14 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -175,6 +179,7 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.ShareLocation.ItemListBaseAdapter.ViewHolder;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
@@ -539,9 +544,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
-//		View empty = findViewById(android.R.id.empty);
-//		empty.setOnTouchListener(this);
-//		mConversationsView.setEmptyView(empty);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
@@ -3702,13 +3704,42 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mAdapter.setChatTheme(chatTheme);
-
+		View nudgeTutorial = getNudgeTutorialView(chatTheme);
+		if (nudgeTutorial != null)
+		{
+			ViewGroup empty = (ViewGroup) findViewById(android.R.id.empty);
+			empty.removeAllViews();
+			empty.addView(nudgeTutorial);
+			empty.setOnTouchListener(this);
+			mConversationsView.setEmptyView(empty);
+		}
 		setMuteViewBackground();
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getResources().getDrawable(chatTheme.headerBgResId()));
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayShowTitleEnabled(true);
+	}
+
+	private TextView getNudgeTutorialView(ChatTheme chatTheme)
+	{
+		try
+		{
+			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
+			tv.setText(R.string.chatThreadNudgeTutorialText);
+			tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_left_chat, 0, 0, 0);
+			tv.setCompoundDrawablePadding(10);
+			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			lp.gravity = Gravity.CENTER;
+			tv.setLayoutParams(lp);
+			return tv;
+		}
+		catch (Exception e)
+		{
+			// if chattheme starts returning layout id which is not textview, playSafe
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private void sendChatThemeMessage()

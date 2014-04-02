@@ -48,14 +48,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private List<ContactInfo> newContactsList;
 
-	private View emptyView;
-
-	private ListView listView;
-
 	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId)
 	{
-		super(context);
-		this.listView = listView;
+		super(context, listView);
 		selectedPeople = new HashMap<String, ContactInfo>();
 		existingParticipants = new HashMap<String, ContactInfo>();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -71,6 +66,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	@Override
 	public void executeFetchTask()
 	{
+		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
 				filteredSmsContactsList, groupsList, filteredGroupsList, existingParticipants, fetchGroups, existingGroupId);
 		Utils.executeAsyncTask(fetchFriendsTask);
@@ -193,6 +189,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	@Override
 	public void makeCompleteList(boolean filtered)
 	{
+		
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
 		if (!shouldContinue)
@@ -239,10 +236,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 
 		notifyDataSetChanged();
-		if (emptyView != null)
-		{
-			listView.setEmptyView(emptyView);
-		}
+		setEmptyView();
 	}
 
 	public void addContact(ContactInfo contactInfo)
@@ -345,8 +339,4 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return super.getItemViewType(position);
 	}
 
-	public void setEmptyView(View view)
-	{
-		this.emptyView = view;
-	}
 }
