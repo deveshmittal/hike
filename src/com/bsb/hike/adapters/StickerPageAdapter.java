@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -229,14 +230,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				}
 
 				Sticker sticker = stickerList.get(index);
-
-				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+				if (sticker.getStickerIndex() >= 0) // for already copied stickers this will be > -1
 				{
-//					stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
-				}
-				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-//					stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
+					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
+					}
+					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+					{
+						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
+					}
 				}
 				else
 				{

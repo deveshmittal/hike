@@ -89,8 +89,30 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public boolean isDefaultSticker()
 	{
-		if (category != null && category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.doggy)
-			return true;
+		//TODO : change this logic to make it much more robust as searching in array is not good
+		
+		if (category != null)
+		{
+			if (category.categoryId == StickerCategoryId.humanoid)
+			{
+				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID.length;
+				for (int i = 0; i < count; i++)
+				{
+					if(StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID[i].equals(stickerId))
+						return true;
+				}
+			}
+			else if (category.categoryId == StickerCategoryId.doggy)
+			{
+				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY.length;
+				for (int i = 0; i < count; i++)
+				{
+					if(StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY[i].equals(stickerId))
+						return true;
+				}
+			}
+			return false;
+		}
 		return false;
 
 	}
