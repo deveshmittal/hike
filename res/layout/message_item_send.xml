@@ -127,7 +127,6 @@
                 	android:layout_height="wrap_content"
                 	android:gravity="center_vertical"
                 	android:orientation="horizontal"
-                	android:layout_marginRight="2dp"
                 	android:layout_marginLeft="2dp" >
                 <RelativeLayout 
                     android:layout_width="wrap_content"

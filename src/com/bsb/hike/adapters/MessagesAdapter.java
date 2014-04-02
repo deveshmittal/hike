@@ -1126,8 +1126,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
-				circle.setIntrinsicHeight((int) (64 * Utils.densityMultiplier));
-				circle.setIntrinsicWidth((int) (64 * Utils.densityMultiplier));
+				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
+				circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
 				if (convMessage.isSent())
 				{
 					/* label outgoing hike conversations in green */
