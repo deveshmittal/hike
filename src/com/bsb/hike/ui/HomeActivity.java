@@ -736,7 +736,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 								getSupportActionBar().show();
 								findViewById(R.id.action_bar_img).setVisibility(View.GONE);
 							}
-						}, 500);
+						}, 800);
 						ftueAddFriendWindow.setVisibility(View.GONE);
 					}
 				});
