@@ -1080,7 +1080,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				
 			}
 		});
-		errorDialog.show();
+		if(!SignupActivity.this.isFinishing())
+		{
+			errorDialog.show();
+		}
 	}
 	
 	private void setListeners()
