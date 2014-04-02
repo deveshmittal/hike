@@ -261,6 +261,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			else
 			{
 				Utils.startChatThread(this, contactInfo);
+				finish();
 			}
 		}
 	}
