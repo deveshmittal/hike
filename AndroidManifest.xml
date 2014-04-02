@@ -127,7 +127,7 @@
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:theme="@style/ChatThreadTheme"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
 
