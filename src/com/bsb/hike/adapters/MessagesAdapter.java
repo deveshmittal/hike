@@ -2013,7 +2013,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.container.setVisibility(View.VISIBLE);
 			int layoutRes = chatTheme.systemMessageLayoutId();
 			TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
-			participantInfo.setText(convMessage.getUnreadCount() + " Unread Messages");
+			if (convMessage.getUnreadCount() == 1)
+			{
+				participantInfo.setText(context.getResources().getString(R.string.one_unread_message));
+			}
+			else
+			{
+				participantInfo.setText(context.getResources().getString(R.string.num_unread_messages, convMessage.getUnreadCount()));
+			}
 			((ViewGroup) holder.container).removeAllViews();
 			((ViewGroup) holder.container).addView(participantInfo);
 			return v;
