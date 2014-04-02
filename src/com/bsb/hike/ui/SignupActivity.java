@@ -1328,12 +1328,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event)
 	{
-		if ((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && !TextUtils.isEmpty(enterEditText.getText().toString().trim())
-				&& loadingLayout != null && loadingLayout.getVisibility() != View.VISIBLE)
+		if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) 
+				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim())
+				&& (loadingLayout == null || loadingLayout.getVisibility() != View.VISIBLE))
 		{
 			if (viewFlipper.getDisplayedChild() == NAME)
 			{
-				Utils.hideSoftKeyboard(this, enterEditText);
+				if(enterEditText.isFocused())
+				{
+					birthdayText.requestFocus();
+				}
+				else 
+				{
+					Utils.hideSoftKeyboard(this, enterEditText);
+				}
 			}
 			else
 			{

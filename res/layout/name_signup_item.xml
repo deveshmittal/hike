@@ -29,6 +29,7 @@
         <com.bsb.hike.view.CustomFontEditText
             android:id="@+id/et_enter_name"
             style="@style/NameInput"
+            android:imeOptions="actionNext"
             android:hint="@string/your_name" />
 
         <com.bsb.hike.view.CustomFontEditText
