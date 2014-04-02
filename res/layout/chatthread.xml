@@ -50,11 +50,9 @@
                 android:listSelector="@android:color/transparent" >
             </ListView>
 
-            <!-- <include
+            <include
                 android:id="@android:id/empty"
-                layout="@layout/nudge_tutorial_pop_up" /> -->
-
-            
+                layout="@layout/nudge_tutorial_pop_up" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sms_counter"
@@ -165,20 +163,19 @@
 
                 <include layout="@layout/new_message_indicator" />
             </RelativeLayout>
-            
+
             <RelativeLayout
                 android:id="@+id/scroll_top_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="12dp"
+                android:layout_alignParentTop="true"
                 android:layout_marginRight="16dp"
+                android:layout_marginTop="12dp"
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
             </RelativeLayout>
-
         </RelativeLayout>
 
         <View
@@ -244,13 +241,13 @@
                         android:paddingRight="10dp"
                         android:paddingTop="8dp"
                         android:src="@drawable/ic_smiley" />
-                    
+
                     <com.bsb.hike.view.CustomFontEditText
                         android:id="@+id/msg_compose"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
                         android:layout_toLeftOf="@id/emo_btn"
+                        android:background="@null"
                         android:gravity="center_vertical"
                         android:hint="@string/type_to_compose"
                         android:imeOptions="actionSend"
