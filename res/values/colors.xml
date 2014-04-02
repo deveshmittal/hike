@@ -14,6 +14,7 @@
     <color name="transparent_black">#B000</color>
     <color name="transparent_black_darker">#DA00</color>
     <color name="black_70">#B9000000</color>
+    <color name="black_75">#BF000000</color>
     <color name="black_55">#8C000000</color>
     <color name="white_65">#A6FFFFFF</color>
     <color name="white_60">#99FFFFFF</color>
