@@ -375,11 +375,11 @@ public abstract class ImageWorker
 			Log.d(TAG, "doInBackground - starting work");
 			data = params[0];
 			final String dataString = data;
-			
+
 			int idx = dataString.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				isProfilePic = true;
-			
+
 			Bitmap bitmap = null;
 			BitmapDrawable drawable = null;
 
