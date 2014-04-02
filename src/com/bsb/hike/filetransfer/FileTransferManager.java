@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.Thread.State;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -18,7 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -32,13 +37,14 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Utils;
 
 /* 
  * This manager will manage the upload and download (File Transfers).
  * A general thread pool is maintained which will be used for both downloads and uploads.
  * The manager will run on main thread hence an executor is used to delegate task to thread pool threads.
  */
-public class FileTransferManager
+public class FileTransferManager extends BroadcastReceiver
 {
 	private Context context;
 
@@ -50,16 +56,16 @@ public class FileTransferManager
 
 	// Constant variables
 	private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-	
+
 	private final int CORE_POOL_SIZE = CPU_COUNT + 1;
-	
+
 	private final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
 
 	private final short KEEP_ALIVE_TIME = 60; // in seconds
 
-	private static int minChunkSize = 10 * 1024;
+	private static int minChunkSize = 8 * 1024;
 
-	private static int maxChunkSize = 100 * 1024;
+	private static int maxChunkSize = 128 * 1024;
 
 	private ExecutorService pool;
 
@@ -133,6 +139,20 @@ public class FileTransferManager
 			public int getMinChunkSize()
 			{
 				return 16 * 1024;
+			}
+		},
+		NO_NETWORK
+		{
+			@Override
+			public int getMaxChunkSize()
+			{
+				return 2 * 1024;
+			}
+
+			@Override
+			public int getMinChunkSize()
+			{
+				return 1 * 1024;
 			}
 		};
 
@@ -222,7 +242,8 @@ public class FileTransferManager
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
 		handler = new Handler(context.getMainLooper());
-		setChunkSize();
+		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+		context.registerReceiver(this, filter);
 	}
 
 	public static FileTransferManager getInstance(Context context)
@@ -317,7 +338,7 @@ public class FileTransferManager
 
 	public void uploadContactOrLocation(ConvMessage convMessage, boolean uploadingContact, boolean isRecipientOnhike)
 	{
-		if(isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID()))
 			return;
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, convMessage, uploadingContact, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
@@ -539,6 +560,8 @@ public class FileTransferManager
 		NetworkInfo info = cm.getActiveNetworkInfo();
 		if (info != null)
 		{
+			if (!info.isConnected())
+				return NetworkType.NO_NETWORK;
 			// If device is connected via WiFi
 			if (info.getType() == ConnectivityManager.TYPE_WIFI)
 				return NetworkType.WIFI; // return 1024 * 1024;
@@ -572,12 +595,34 @@ public class FileTransferManager
 		}
 	}
 
-	// Set the limits of chunk sizes of files to transfer
-	public void setChunkSize()
+	private void setChunkSize(NetworkType networkType)
 	{
-		NetworkType networkType = getNetworkType();
 		maxChunkSize = networkType.getMaxChunkSize();
 		minChunkSize = networkType.getMinChunkSize();
+	}
+
+	private void resumeAllTasks()
+	{
+		for (Entry<Long, FutureTask<FTResult>> entry : fileTaskMap.entrySet())
+		{
+			if (entry != null)
+			{
+				FutureTask<FTResult> obj = entry.getValue();
+				if (obj != null)
+				{
+					Thread t = ((MyFutureTask) obj).getTask().getThread();
+					if (t != null)
+					{
+						if (t.getState() == State.TIMED_WAITING)
+						{
+							Log.d(getClass().getSimpleName(), "interrupting the task: " + t.toString());
+							t.interrupt();
+						}
+					}
+				}
+			}
+
+		}
 	}
 
 	public int getMaxChunkSize()
@@ -648,5 +693,21 @@ public class FileTransferManager
 			}
 		}
 		return 0;
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent)
+	{
+		if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+		{
+			Log.d(getClass().getSimpleName(), "Connectivity Change Occured");
+			// if network available then proceed
+			if (Utils.isUserOnline(context))
+			{
+				NetworkType networkType = getNetworkType();
+				setChunkSize(networkType);
+				resumeAllTasks();
+			}
+		}
 	}
 }

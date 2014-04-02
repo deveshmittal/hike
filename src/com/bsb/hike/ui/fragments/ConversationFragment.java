@@ -133,7 +133,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ImageView avatarFrame = (ImageView) convertView.findViewById(R.id.avatar_frame);
 			TextView contactName = (TextView) convertView.findViewById(R.id.name);
 
-			avatarFrame.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike : R.drawable.frame_avatar_ftue_sms);
+			avatarFrame.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_highlight : R.drawable.frame_avatar_highlight_green);
 			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage, true);
 			// avatarImage.setImageDrawable(IconCacheManager.getInstance()
 			// .getIconForMSISDN(contactInfo.getMsisdn(), true));
@@ -148,7 +148,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.ICON_REMOVED };
 
 	private ConversationsAdapter mAdapter;
 
@@ -742,12 +742,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				getActivity().runOnUiThread(this);
 			}
 		}
-		else if (HikePubSub.ICON_CHANGED.equals(type))
+		else if (HikePubSub.ICON_CHANGED.equals(type) || HikePubSub.ICON_REMOVED.equals(type))
 		{
 			if (getActivity() == null)
 			{
 				return;
 			}
+			String msisdn = (String) object;
+
+			Conversation conversation = mConversationsByMSISDN.get(msisdn);
+			if (conversation == null)
+			{
+				return;
+			}
+
+			conversation.setHasCustomIcon(HikePubSub.ICON_CHANGED.equals(type));
 			/* an icon changed, so update the view */
 			getActivity().runOnUiThread(this);
 		}

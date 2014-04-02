@@ -155,9 +155,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private void registerListener()
 	{
-		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, new IntentFilter(StickerManager.STICKERS_DOWNLOADED));
-		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, new IntentFilter(StickerManager.STICKERS_FAILED));
-		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, new IntentFilter(StickerManager.RECENTS_UPDATED));
+		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
+		filter.addAction(StickerManager.STICKERS_FAILED);
+		filter.addAction(StickerManager.RECENTS_UPDATED);
+		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, filter);
 	}
 
 	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver()
@@ -438,8 +439,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	public void unregisterListeners()
 	{
-		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
-		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
 	}
 }

@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -56,6 +57,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -179,6 +181,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	View selectedCountryPicker;
 	
 	private TextView invalidPin;
+	
+	private View verifiedPin;
 	
 	 private ArrayList<String> countriesArray = new ArrayList<String>();
 	 private HashMap<String, String> countriesMap = new HashMap<String, String>();
@@ -718,6 +722,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
 			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
 			invalidPin = (TextView) layout.findViewById(R.id.invalid_pin);
+			verifiedPin = layout.findViewById(R.id.verified_pin);
 			infoTxt.setVisibility(View.VISIBLE);
 			invalidPin.setVisibility(View.INVISIBLE);
 			break;
@@ -776,7 +781,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
-		loadingText.setText(R.string.hang_on);
+		loadingText.setText(R.string.verifying);
 	}
 
 	public void onCountryPickerClick(View v)
@@ -836,7 +841,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			callmeBtn.setText(getResources().getString(R.string.call_me_for_the_pin, ""));
 			callmeBtn.setEnabled(true);
 		}
-		loadingText.setText(R.string.verifying);
+		loadingText.setText(R.string.verify_pin_signup);
 	}
 
 	private void prepareLayoutForGettingName(Bundle savedInstanceState, boolean addressBookScanningDone)
@@ -888,7 +893,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		if (mActivityState.profileBitmap == null)
 		{
-			mIconView.setImageDrawable(HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true));
+			BitmapDrawable bd = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
+			if(bd != null)
+			{
+				mIconView.setImageDrawable(bd);
+			}
+			else
+			{
+				mIconView.setScaleType(ScaleType.CENTER_INSIDE);
+				mIconView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+				mIconView.setImageResource(R.drawable.ic_default_avatar);
+			}
 			// mIconView.setImageDrawable(IconCacheManager.getInstance()
 			// .getIconForMSISDN(msisdn, true));
 		}
@@ -1065,7 +1080,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				
 			}
 		});
-		errorDialog.show();
+		if(!SignupActivity.this.isFinishing())
+		{
+			errorDialog.show();
+		}
 	}
 	
 	private void setListeners()
@@ -1210,6 +1228,30 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				prepareLayoutForGettingPin(HikeConstants.CALL_ME_WAIT_TIME);
 				setAnimation();
+			}
+			break;
+		case PIN_VERIFIED:
+			if(verifiedPin != null)
+			{
+				verifiedPin.setVisibility(View.VISIBLE);
+				loadingLayout.setVisibility(View.GONE);
+				nextBtn.setEnabled(false);
+				/*
+				 * after verifying pin we would wait for 2 second to get user to the next screen
+				 * and show him/her that pin is verified
+				 */
+				mHandler.postDelayed(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						if(mTask != null)
+						{
+							mTask.addUserInput("");
+						}
+					}
+				}, 2000);
 			}
 			break;
 		case NAME:

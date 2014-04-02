@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -93,8 +94,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		// either section or other we do have
 		if (viewType == ViewType.SECTION)
 		{
-			TextView tv = (TextView) convertView.findViewById(R.id.settings_section_text);
+			TextView tv = (TextView) convertView.findViewById(R.id.name);
 			tv.setText(contactInfo.getName());
+
+			TextView count = (TextView) convertView.findViewById(R.id.count);
+			count.setText(contactInfo.getMsisdn());
 			// set section heading
 		}
 		else if (viewType == ViewType.EXTRA)
@@ -105,8 +109,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		else
 		{
 			holder = (ViewHolder) convertView.getTag();
+			holder.status.setText(contactInfo.getMsisdn());
+
 			String name = contactInfo.getName();
 			holder.name.setText("".equals(name) || null == name ? contactInfo.getMsisdn() : name);
+
 			if (viewType == ViewType.NEW_CONTACT)
 			{
 				holder.status.setText(statusForEmptyContactInfo);
@@ -115,7 +122,28 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			{
 				holder.status.setText(contactInfo.getMsisdn());
 			}
-			iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+
+			if (contactInfo.isUnknownContact())
+			{
+				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
+				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+			}
+			else
+			{
+				if (contactInfo.hasCustomPhoto())
+				{
+					holder.userImage.setScaleType(ScaleType.FIT_CENTER);
+					holder.userImage.setBackgroundDrawable(null);
+					iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+				}
+				else
+				{
+					holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+					holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
+					holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+				}
+			}
 			if (showCheckbox)
 			{
 				holder.checkbox.setVisibility(View.VISIBLE);
@@ -143,7 +171,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		switch (viewType)
 		{
 		case SECTION:
-			convertView = LayoutInflater.from(context).inflate(R.layout.settings_section_layout, null);
+			convertView = LayoutInflater.from(context).inflate(R.layout.friends_group_view, null);
 			break;
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
@@ -186,7 +214,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		if (fetchGroups && !groupsList.isEmpty())
 		{
-			ContactInfo groupSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.group_chats), FRIEND_PHONE_NUM);
+			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats), FRIEND_PHONE_NUM);
 			if (filteredGroupsList.size() > 0)
 			{
 				completeList.add(groupSection);
@@ -194,17 +222,19 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 
-		ContactInfo friendsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_friends_on_hike), FRIEND_PHONE_NUM);
+		ContactInfo friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
 		updateFriendsList(friendsSection);
 
 		if (isHikeContactsPresent())
 		{
-			ContactInfo hikeContactsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_contacts_on_hike), CONTACT_PHONE_NUM);
+			ContactInfo hikeContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredHikeContactsList.size()), context.getString(R.string.hike_contacts),
+					CONTACT_PHONE_NUM);
 			updateHikeContactList(hikeContactsSection);
 		}
 		if (showSMSContacts)
 		{
-			ContactInfo smsContactsSection = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_all_contacts), CONTACT_PHONE_NUM);
+			ContactInfo smsContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredSmsContactsList.size()), context.getString(R.string.sms_contacts),
+					CONTACT_PHONE_NUM);
 			updateSMSContacts(smsContactsSection);
 		}
 		if (newContactsList != null)
@@ -279,7 +309,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			ContactInfo section = new ContactInfo(SECTION_ID, null, context.getString(R.string.compose_chat_other_contacts), null);
 			String normalisedMsisdn = getNormalisedMsisdn(text);
 			ContactInfo info = new ContactInfo(normalisedMsisdn, normalisedMsisdn, normalisedMsisdn, text);
-			info.setFavoriteType(FavoriteType.NEW_CONTACT);
 			newContactsList.add(section);
 			newContactsList.add(info);
 		}
@@ -319,7 +348,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public int getItemViewType(int position)
 	{
 		ContactInfo info = getItem(position);
-		if (FavoriteType.NEW_CONTACT == info.getFavoriteType())
+		if (info.isUnknownContact())
 		{
 			return ViewType.NEW_CONTACT.ordinal();
 		}

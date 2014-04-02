@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.WelcomeTutorial;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
@@ -114,6 +116,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
 		mIndicator.setViewPager(mPager);
+		mIndicator.setOnPageChangeListener(onPageChangeListener);
 	}
 
 	public void onHikeIconClicked(View v)
@@ -204,6 +207,51 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		super.onBackPressed();
 	}
 
+	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
+	{
+		
+		@Override
+		public void onPageSelected(int position)
+		{
+			SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			int viewed = sharedPreferences.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1); 
+			Editor editor = sharedPreferences.edit();
+			switch (position)
+			{
+			case 0:
+				if(viewed < HikeConstants.WelcomeTutorial.INTRO_VIEWED.ordinal())
+				{
+					editor.putInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, WelcomeTutorial.INTRO_VIEWED.ordinal());
+				}
+				break;
+			case 1:
+				if(viewed < HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+				{
+					editor.putInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, WelcomeTutorial.STICKER_VIEWED.ordinal());
+				}
+				break;
+			case 2:
+				if(viewed < HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+				{
+					editor.putInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, WelcomeTutorial.CHAT_BG_VIEWED.ordinal());
+				}
+				break;
+			}
+			editor.commit();
+		}
+		
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2)
+		{
+			// TODO Auto-generated method stub
+		}
+		
+		@Override
+		public void onPageScrollStateChanged(int position)
+		{
+			// TODO Auto-generated method stub
+		}
+	};
 	private class TutorialPagerAdapter extends PagerAdapter implements IconPagerAdapter
 	{
 		private int mCount = 3;

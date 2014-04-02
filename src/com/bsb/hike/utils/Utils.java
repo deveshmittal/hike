@@ -349,7 +349,7 @@ public class Utils
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn, boolean rounded)
 	{
-		return context.getResources().getDrawable(getId(msisdn, rounded));
+		return context.getResources().getDrawable(getDefaultAvatarResourceId(msisdn, rounded));
 	}
 
 	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn)
@@ -359,140 +359,36 @@ public class Utils
 
 	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn, boolean rounded)
 	{
-		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getId(msisdn, rounded)));
+		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getDefaultAvatarResourceId(msisdn, rounded)));
 	}
 
-	public static int getId(String msisdn, boolean rounded)
+	public static int getDefaultAvatarResourceId(String msisdn, boolean rounded)
 	{
-		if (isGroupConversation(msisdn))
-		{
-			int count = 6;
-			int id;
-			switch (iconHash(msisdn) % count)
-			{
-			case 0:
-				id = rounded ? R.drawable.ic_group_avatar1_rounded : R.drawable.ic_group_avatar1;
-				break;
-			case 1:
-				id = rounded ? R.drawable.ic_group_avatar2_rounded : R.drawable.ic_group_avatar2;
-				break;
-			case 2:
-				id = rounded ? R.drawable.ic_group_avatar4_rounded : R.drawable.ic_group_avatar4;
-				break;
-			case 3:
-				id = rounded ? R.drawable.ic_group_avatar5_rounded : R.drawable.ic_group_avatar5;
-				break;
-			case 4:
-				id = rounded ? R.drawable.ic_group_avatar6_rounded : R.drawable.ic_group_avatar6;
-				break;
-			case 5:
-				id = rounded ? R.drawable.ic_group_avatar7_rounded : R.drawable.ic_group_avatar7;
-				break;
-			default:
-				id = rounded ? R.drawable.ic_group_avatar1_rounded : R.drawable.ic_group_avatar1;
-				break;
-			}
-			return id;
-		}
-		int count = 7;
+		int count = 5;
 		int id;
 		switch (iconHash(msisdn) % count)
 		{
 		case 0:
-			id = rounded ? R.drawable.ic_avatar1_rounded : R.drawable.ic_avatar1;
+			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
 			break;
 		case 1:
-			id = rounded ? R.drawable.ic_avatar2_rounded : R.drawable.ic_avatar2;
+			id = rounded ? R.drawable.avatar_02_rounded : R.drawable.avatar_02;
 			break;
 		case 2:
-			id = rounded ? R.drawable.ic_avatar3_rounded : R.drawable.ic_avatar3;
+			id = rounded ? R.drawable.avatar_03_rounded : R.drawable.avatar_03;
 			break;
 		case 3:
-			id = rounded ? R.drawable.ic_avatar4_rounded : R.drawable.ic_avatar4;
+			id = rounded ? R.drawable.avatar_04_rounded : R.drawable.avatar_04;
 			break;
 		case 4:
-			id = rounded ? R.drawable.ic_avatar5_rounded : R.drawable.ic_avatar5;
-			break;
-		case 5:
-			id = rounded ? R.drawable.ic_avatar6_rounded : R.drawable.ic_avatar6;
-			break;
-		case 6:
-			id = rounded ? R.drawable.ic_avatar7_rounded : R.drawable.ic_avatar7;
+			id = rounded ? R.drawable.avatar_05_rounded : R.drawable.avatar_05;
 			break;
 		default:
-			id = rounded ? R.drawable.ic_avatar1_rounded : R.drawable.ic_avatar1;
+			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
 			break;
 		}
 
 		return id;
-	}
-
-	public static String getDefaultAvatarServerName(String msisdn)
-	{
-		String name;
-		int count = 7;
-		int id = iconHash(msisdn) % count;
-		if (isGroupConversation(msisdn))
-		{
-			switch (id)
-			{
-			case 0:
-				name = "GreenPeople";
-				break;
-			case 1:
-				name = "RedPeople";
-				break;
-			case 2:
-				name = "BluePeople";
-				break;
-			case 3:
-				name = "CoffeePeople";
-				break;
-			case 4:
-				name = "EarthyPeople";
-				break;
-			case 5:
-				name = "PinkPeople";
-				break;
-			case 6:
-				name = "TealPeople";
-				break;
-			default:
-				name = "GreenPeople";
-				break;
-			}
-		}
-		else
-		{
-			switch (id)
-			{
-			case 0:
-				name = "Beach";
-				break;
-			case 1:
-				name = "Candy";
-				break;
-			case 2:
-				name = "Cocktail";
-				break;
-			case 3:
-				name = "Coffee";
-				break;
-			case 4:
-				name = "Digital";
-				break;
-			case 5:
-				name = "Sneakers";
-				break;
-			case 6:
-				name = "Space";
-				break;
-			default:
-				name = "Beach";
-				break;
-			}
-		}
-		return name + ".jpg";
 	}
 
 	/** Create a File for saving an image or video */
@@ -1066,6 +962,7 @@ public class Utils
 
 		ContactInfo contactInfo = new ContactInfo(myName, myMsisdn, myName, myMsisdn, true);
 		contactInfo.setHikeJoinTime(userJoinTime);
+		contactInfo.setHasCustomPhoto(HikeUserDatabase.getInstance().hasIcon(myMsisdn));
 
 		return contactInfo;
 	}
@@ -3435,9 +3332,8 @@ public class Utils
 			/*
 			 * If this is the first category, then the sticker are a part of the app bundle itself
 			 */
-			if (sticker.getStickerIndex() != -1)
+			if (sticker.isDefaultSticker())
 			{
-
 				int resourceId = 0;
 
 				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))

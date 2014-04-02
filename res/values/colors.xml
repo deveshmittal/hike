@@ -12,8 +12,11 @@
     <color name="transparent_white">#8000</color>
     <color name="transparent_black">#B000</color>
     <color name="transparent_black_darker">#DA00</color>
-    <color name="black_40">#66000000</color>
-    <color name="white_80">#CCFFFFFF</color>
+    <color name="black_70">#B9000000</color>
+    <color name="black_55">#8C000000</color>
+    <color name="white_65">#A6FFFFFF</color>
+    <color name="white_60">#99FFFFFF</color>
+    <color name="white_45">#73FFFFFF</color>
     <color name="offwhite">#F7F7F4</color>
     <color name="signup_blue">#57b2ee</color>
     <color name="disabled">#DDF7F7F4</color>
@@ -185,7 +188,7 @@
 	<color name="context_menu_divider">#f5f5f5</color>
 	<color name="free_sms_divider">#f5f5f2</color>
 	<color name="downloading_sticker">#a4a4a0</color>
-	<color name="timestamp">#adaca9</color>
+	<color name="timestamp">#aeb1b2</color>
 	<color name="signup_hint">#d0d0cf</color>
 	<color name="male_selected">#00b3ff</color>
 	<color name="male_unselected">#babec0</color>
@@ -237,4 +240,10 @@
     <color name="transparent_white_ab">#3dffffff</color>
     <color name="blue_color_span">#0f8fe1</color>
     <color name="red_color_span">#ef554e</color>
+    <color name="light_transparent_black">#7B000000</color>
+    <color name="blue_avatar">#70d6f8</color>
+    <color name="green_avatar">#8dde87</color>
+    <color name="orange_avatar">#ffaf5a</color>
+    <color name="pink_avatar">#ff92a5</color>
+    <color name="violet_avatar">#c1a0e1</color>
 </resources>

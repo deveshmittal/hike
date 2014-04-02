@@ -86,7 +86,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED
 	};
 
 	public class StateValue
@@ -369,6 +369,22 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			{
 				this.context.getApplicationContext().unregisterReceiver(receiver);
 				receiver = null;
+			}
+			
+			if(getDisplayChild() == SignupActivity.PIN)
+			{
+				publishProgress(new StateValue(State.PIN_VERIFIED, null));
+				synchronized (this)
+				{
+					try
+					{
+						this.wait();
+					}
+					catch (InterruptedException e)
+					{
+						Log.e("SignupTask", "Task was interrupted while taking the pin", e);
+					}
+				}
 			}
 
 			Log.d("SignupTask", "saving MSISDN/Token");

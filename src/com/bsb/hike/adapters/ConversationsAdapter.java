@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -89,13 +90,13 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				int resId = message.getImageState();
 				if (resId > 0)
 				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_large_selector);
+					avatarframe.setImageDrawable(null);
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				}
 				else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
 				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
+					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
 					unreadIndicator.setVisibility(View.VISIBLE);
 
 					if (conversation.getUnreadCount() == 0)
@@ -109,8 +110,12 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				}
 				else
 				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_large_selector);
+					avatarframe.setImageDrawable(null);
 				}
+			}
+			else
+			{
+				avatarframe.setImageDrawable(null);
 			}
 
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
@@ -280,6 +285,18 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
 		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
+		if (conversation.hasCustomIcon())
+		{
+			avatarView.setScaleType(ScaleType.FIT_CENTER);
+			avatarView.setBackgroundDrawable(null);
+			iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
+		}
+		else
+		{
+			avatarView.setScaleType(ScaleType.CENTER_INSIDE);
+			avatarView.setBackgroundResource(Utils.getDefaultAvatarResourceId(conversation.getMsisdn(), true));
+			avatarView.setImageResource((conversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+		}
 		return v;
 	}
 
