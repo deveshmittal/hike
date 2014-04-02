@@ -1399,5 +1399,5 @@
     <string name="num_contacts">%1$s contacts</string>
     <string name="compose_chat_empty_contact_status_group_mode">Tap to add number</string>
     <string name="compose_chat_empty_contact_status_chat_mode">Tap to start chat</string>
-
+	<string name="chatThreadNudgeTutorialText">Double tap anywhere to nudge your friend</string>
 </resources>
