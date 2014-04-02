@@ -211,7 +211,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_3x;
 		}
 
 	},
@@ -282,7 +282,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_3x;
 		}
 
 	},
@@ -495,7 +495,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_3x;
 		}
 
 	},
