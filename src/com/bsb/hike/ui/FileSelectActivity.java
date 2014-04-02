@@ -374,7 +374,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 
-		Button sendBtn = (Button) actionBarView.findViewById(R.id.save);
+		View sendBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
 

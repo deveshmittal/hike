@@ -246,4 +246,5 @@
     <color name="orange_avatar">#ffaf5a</color>
     <color name="pink_avatar">#ff92a5</color>
     <color name="violet_avatar">#c1a0e1</color>
+    <color name="action_bar_btn_disable">#0965a0</color>
 </resources>

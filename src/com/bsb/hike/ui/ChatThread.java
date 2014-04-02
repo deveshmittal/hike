@@ -3776,7 +3776,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 
-		Button saveThemeBtn = (Button) actionBarView.findViewById(R.id.save);
+		View saveThemeBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);

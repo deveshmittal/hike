@@ -487,7 +487,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			multiSelectActionBar = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 		}
-		Button sendBtn = (Button) multiSelectActionBar.findViewById(R.id.save);
+		View sendBtn = multiSelectActionBar.findViewById(R.id.done_container);
 		View closeBtn = multiSelectActionBar.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 

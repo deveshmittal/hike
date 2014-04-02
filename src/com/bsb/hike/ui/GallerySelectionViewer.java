@@ -151,10 +151,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		Button doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		View doneBtn = actionBarView.findViewById(R.id.done_container);
+		TextView postText = (TextView) actionBarView.findViewById(R.id.post_btn);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		doneBtn.setText(R.string.send);
+		postText.setText(R.string.send);
 
 		title.setText(R.string.preview);
 
