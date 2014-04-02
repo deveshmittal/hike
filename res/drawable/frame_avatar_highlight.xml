@@ -4,13 +4,6 @@
     <item>
         <shape android:shape="oval" >
             <stroke
-                android:width="3dp"
-                android:color="@color/white" />
-        </shape>
-    </item>
-    <item>
-        <shape android:shape="oval" >
-            <stroke
                 android:width="2dp"
                 android:color="@color/selected_msg_item_bg_lines" />
         </shape>
