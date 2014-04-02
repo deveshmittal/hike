@@ -36,6 +36,7 @@ import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
@@ -71,6 +72,10 @@ public abstract class ImageWorker
 	protected Resources mResources;
 
 	private boolean isProfilePic = false;
+
+	private boolean setDefaultAvatarIfNoCustomIcon = false;
+
+	private boolean setHiResDefaultAvatar = false;
 
 	protected ImageWorker()
 	{
@@ -143,6 +148,10 @@ public abstract class ImageWorker
 				mImageCache.putInCache(data, bd);
 				imageView.setImageDrawable(bd);
 			}
+			else if (b == null && setDefaultAvatarIfNoCustomIcon)
+			{
+				setDefaultAvatar(imageView, data);
+			}
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
@@ -159,6 +168,34 @@ public abstract class ImageWorker
 		else
 		{
 			imageView.setImageDrawable(null);
+		}
+	}
+
+	private void setDefaultAvatar(ImageView imageView, String data)
+	{
+		int idx = data.indexOf(ROUND_SUFFIX);
+		boolean rounded = false;
+		if (idx > 0)
+		{
+			data = data.substring(0, idx);
+			rounded = true;
+		}
+		else
+		{
+			int idx1 = data.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			if (idx1 > 0)
+				data = data.substring(0, idx1);
+		}
+		boolean isGroupConversation = Utils.isGroupConversation(data);
+
+		imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(data, rounded));
+		if (setHiResDefaultAvatar)
+		{
+			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
+		}
+		else
+		{
+			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
 		}
 	}
 
@@ -216,6 +253,16 @@ public abstract class ImageWorker
 	{
 		mExitTasksEarly.set(exitTasksEarly);
 		setPauseWork(false);
+	}
+
+	public void setDefaultAvatarIfNoCustomIcon(boolean b)
+	{
+		this.setDefaultAvatarIfNoCustomIcon = b;
+	}
+
+	public void setHiResDefaultAvatar(boolean b)
+	{
+		this.setHiResDefaultAvatar = b;
 	}
 
 	/**
@@ -397,6 +444,10 @@ public abstract class ImageWorker
 				setImageDrawable(imageView, value);
 				if (isProfilePic)
 					HikeMessengerApp.getPubSub().publish(HikePubSub.LARGER_IMAGE_DOWNLOADED, null);
+			}
+			else if (value == null && imageView != null && setDefaultAvatarIfNoCustomIcon)
+			{
+				setDefaultAvatar(imageView, data);
 			}
 		}
 

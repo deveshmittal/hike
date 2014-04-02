@@ -60,6 +60,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		existingParticipants = new HashMap<String, ContactInfo>();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconloader = new IconLoader(context, mIconImageSize);
+		iconloader.setDefaultAvatarIfNoCustomIcon(true);
 
 		this.existingGroupId = existingGroupId;
 		this.fetchGroups = fetchGroups;
@@ -131,18 +132,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 			else
 			{
-				if (contactInfo.hasCustomPhoto())
-				{
-					holder.userImage.setScaleType(ScaleType.FIT_CENTER);
-					holder.userImage.setBackgroundDrawable(null);
-					iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
-				}
-				else
-				{
-					holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-					holder.userImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
-					holder.userImage.setImageResource(R.drawable.ic_default_avatar);
-				}
+				iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
 			}
 			if (showCheckbox)
 			{

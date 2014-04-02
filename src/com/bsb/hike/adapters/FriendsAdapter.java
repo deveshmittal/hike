@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
@@ -121,6 +120,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
+		this.iconloader.setDefaultAvatarIfNoCustomIcon(true);
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();
@@ -686,18 +686,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			ImageView avatar = (ImageView) convertView.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
-			if (contactInfo.hasCustomPhoto())
-			{
-				avatar.setScaleType(ScaleType.FIT_CENTER);
-				avatar.setBackgroundDrawable(null);
-				iconloader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
-			}
-			else
-			{
-				avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(contactInfo.getMsisdn(), true));
-				avatar.setImageResource(R.drawable.ic_default_avatar);
-				avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			}
+			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
 
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName());
 

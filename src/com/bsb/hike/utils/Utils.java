@@ -962,7 +962,6 @@ public class Utils
 
 		ContactInfo contactInfo = new ContactInfo(myName, myMsisdn, myName, myMsisdn, true);
 		contactInfo.setHikeJoinTime(userJoinTime);
-		contactInfo.setHasCustomPhoto(HikeUserDatabase.getInstance().hasIcon(myMsisdn));
 
 		return contactInfo;
 	}
