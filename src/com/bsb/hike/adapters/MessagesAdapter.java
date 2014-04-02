@@ -1474,7 +1474,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					bg.setVisibility(View.VISIBLE);
 					break;
 				case PAUSING:
-					ftAction.setImageResource(R.drawable.ic_pause_ftr_disabled);
+					ftAction.setImageResource(0);
 					ftAction.setVisibility(View.VISIBLE);
 					bg.setVisibility(View.VISIBLE);
 					break;
