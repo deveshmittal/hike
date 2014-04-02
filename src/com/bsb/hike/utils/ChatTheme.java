@@ -140,7 +140,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -353,7 +353,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -566,7 +566,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -637,7 +637,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -708,7 +708,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -779,7 +779,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
@@ -850,7 +850,7 @@ public enum ChatTheme
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 
 	},
