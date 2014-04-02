@@ -167,6 +167,10 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public boolean isUnknownContact()
 	{
+		if (msisdn == null)
+		{
+			return false;
+		}
 		/*
 		 * For unknown contacts, we make the id and msisdn equal.
 		 */

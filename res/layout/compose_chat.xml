@@ -9,16 +9,14 @@
         android:id="@+id/composeChatNewGroupTagET"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="46dp"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="@dimen/compose_chat_content_margin"
         android:layout_marginRight="@dimen/compose_chat_content_margin"
         android:background="@drawable/bg_country_search_bar"
-        android:drawableLeft="@drawable/ic_search_dark_grey"
-        android:drawablePadding="9dp"
         android:gravity="center_vertical"
         android:hint="@string/compose_chat_editText_hint"
         android:maxLines="2"
+        android:minHeight="46dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="8dp" >
@@ -26,12 +24,15 @@
 
     <com.bsb.hike.view.PinnedSectionListView
         android:id="@+id/list"
+        style="@style/HomeList" >
+    </com.bsb.hike.view.PinnedSectionListView>
+
+    <TextView
+        android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/compose_chat_content_margin"
-        android:layout_marginRight="@dimen/compose_chat_content_margin"
-        android:divider="@color/light_gray_hike"
-        android:dividerHeight="1dp" >
-    </com.bsb.hike.view.PinnedSectionListView>
+        android:gravity="center"
+        android:text="No Result Found"
+        android:textAppearance="@android:style/TextAppearance.Large" />
 
 </LinearLayout>

@@ -182,7 +182,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 				}
-				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath());
+				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(),(int) mFile.length());
 			}
 			else
 			// this is the case for picasa picture
@@ -205,7 +205,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					fileName = destinationFile.getName();
 				}
-				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null, recordingDuration, HikeConstants.PICASA_PREFIX + picasaUri.toString());
+				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null, recordingDuration, HikeConstants.PICASA_PREFIX + picasaUri.toString(), 0);
 			}
 			userContext = createConvMessage(fileName, metadata, msisdn, isRecipientOnhike);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
@@ -230,18 +230,18 @@ public class UploadFileTask extends FileTransferBase
 	}
 
 	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, long recordingDuration,
-			String sourceFilePath) throws JSONException
+			String sourceFilePath, int fileSize) throws JSONException
 	{
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration,
-				sourceFilePath, true).serialize());
+				sourceFilePath, fileSize, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
 	}
 
 	/**
-	 * This function do the initial steps for uploading ..... 1. Create Thumbnail 2. Create ConvMessage 3. Create copy of file to upload (if required)
+	 * This function do the initial steps for uploading i.e Create copy of file to upload (if required)
 	 * 
 	 * Note : All these steps are done if and only if required else this function will simply return
 	 * 
@@ -249,9 +249,7 @@ public class UploadFileTask extends FileTransferBase
 	 */
 	private void initFileUpload() throws FileTransferCancelledException, Exception
 	{
-		//_state = FTState.IN_PROGRESS;
 		msgId = ((ConvMessage) userContext).getMsgID();
-		// fileTaskMap.put(msgId, futureTask);
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 		hikeFileType = hikeFile.getHikeFileType();
 
@@ -271,7 +269,12 @@ public class UploadFileTask extends FileTransferBase
 			else
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
-				if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
+				// do not copy the file if it is video or audio
+				if(hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING)
+				{
+					selectedFile = mFile;
+				}
+				else if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = mFile;
 				}
@@ -315,26 +318,9 @@ public class UploadFileTask extends FileTransferBase
 					}
 				}
 				hikeFile.removeSourceFile();
-				// Bitmap thumbnail = null;
-				// String thumbnailString = null;
-				// if (hikeFileType == HikeFileType.IMAGE)
-				// {
-				// thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
-				// }
-				// else if (hikeFileType == HikeFileType.VIDEO)
-				// {
-				// thumbnail = ThumbnailUtils.createVideoThumbnail(selectedFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-				// }
-				// if (thumbnail != null)
-				// {
-				// thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-				// }
-				// JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
-				// ((ConvMessage) userContext).setMetadata(metadata);
-				// HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
 			}
 		}
-		else
+		else // picasa case
 		{
 			try
 			{
@@ -389,6 +375,7 @@ public class UploadFileTask extends FileTransferBase
 	@Override
 	public FTResult call()
 	{
+		mThread  = Thread.currentThread();
 		try
 		{
 			initFileUpload();
@@ -577,10 +564,10 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 		
-
-		// /// New Logic Test 1
-
-		setChunkSize(length);
+		setChunkSize();
+		if(chunkSize > length)
+			chunkSize = (int) length;
+		
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
 
@@ -627,7 +614,10 @@ public class UploadFileTask extends FileTransferBase
 					if (shouldRetry())
 					{
 						raf.seek(start);
-						setChunkSize(length);
+						setChunkSize();
+						if(chunkSize > length)
+							chunkSize = (int) length;
+						
 					}
 					else
 					{
@@ -884,35 +874,6 @@ public class UploadFileTask extends FileTransferBase
 		return responseJson;
 	}
 
-	private void setChunkSize(long length)
-	{
-//		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
-//		if (Utils.densityMultiplier > 1)
-//			chunkSize = networkType.getMaxChunkSize();
-//		else if (Utils.densityMultiplier == 1)
-//			chunkSize = networkType.getMinChunkSize() * 2;
-//		else
-//			chunkSize = networkType.getMinChunkSize();
-		chunkSize = NetworkType.WIFI.getMaxChunkSize();
-
-		if (chunkSize > (int) length)
-			chunkSize = (int) length;
-		
-//		while(chunkSize > length)
-//			chunkSize/=2;
-
-		try
-		{
-			int maxMemory = (int) Runtime.getRuntime().maxMemory();
-			if (chunkSize > (maxMemory / 8))
-				chunkSize = (maxMemory / 8);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
 	String getBoundaryMessage()
 	{
 		String sendingFileType = "";
@@ -959,13 +920,6 @@ public class UploadFileTask extends FileTransferBase
 		num = x + 1;
 		return true;
 	}
-
-	// private void showButton()
-	// {
-	// Intent intent = new Intent(HikePubSub.RESUME_BUTTON_UPDATED);
-	// intent.putExtra("msgId", msgId);
-	// LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-	// }
 
 	private String send(String contentRange, byte[] fileBytes)
 	{

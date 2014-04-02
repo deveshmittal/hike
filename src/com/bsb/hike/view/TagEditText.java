@@ -211,9 +211,10 @@ public class TagEditText extends EditText
 			if (listener != null)
 			{
 				String afterSep = getCharAfterSeparator(textS);
-				if (afterSep != null && !afterSep.equals(lastAfterSepCallback) && afterSep.length() >= minCharacterChangeThreshold)
+				if (afterSep != null && afterSep.length() >= minCharacterChangeThreshold)
 				{
-					listener.characterAddedAfterSeparator(lastAfterSepCallback = afterSep);
+					if (!afterSep.equals(lastAfterSepCallback))
+						listener.characterAddedAfterSeparator(lastAfterSepCallback = afterSep);
 				}
 				else
 				{
@@ -265,35 +266,29 @@ public class TagEditText extends EditText
 	private String getCharAfterSeparator(String textS)
 	{
 		textS = textS.trim();
-		int separatorIndex = textS.lastIndexOf(separator);
 
-		if (separatorIndex != -1)
+		int lastTokenIndex = textS.lastIndexOf(TOKEN);
+		if (lastTokenIndex != -1)
 		{
-			String afterSep = textS.substring(separatorIndex + separator.length());
-			int lastTokenIndex = afterSep.lastIndexOf(TOKEN);
-			if (lastTokenIndex != -1)
-			{
-				afterSep = afterSep.substring(lastTokenIndex + TOKEN.length());
-			}
-			return afterSep.trim();
-
+			return textS.substring(lastTokenIndex + TOKEN.length()).trim();
 		}
+
 		else
 		{
-			// no separator present , try for token
-			int tokenIndex = textS.lastIndexOf(TOKEN);
-			if (tokenIndex != -1)
+			// no TOKEN present , try for separator
+			// int separatorIndex = textS.lastIndexOf(separator);
+			// if (separatorIndex != -1)
+			// {
+			// return textS.substring(separatorIndex + separator.length()).trim();
+			// }
+			// else
+			// {
+			// separator not present , try for all text
+			if (textS.length() > 0)
 			{
-				return textS.substring(tokenIndex + TOKEN.length()).trim();
+				return textS;
 			}
-			else
-			{
-				// token not present , try for all text
-				if (textS.length() > 0)
-				{
-					return textS;
-				}
-			}
+			// }
 		}
 		return null;
 	}

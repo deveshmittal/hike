@@ -124,21 +124,24 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		if (convertView == null)
 		{
 			LayoutInflater li = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = li.inflate(R.layout.settings_section_layout, parent, false);
+			convertView = li.inflate(R.layout.friends_group_view, parent, false);
 			convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
+			convertView.findViewById(R.id.home_list_divider).setVisibility(View.GONE);
 		}
-		TextView textView = (TextView) convertView.findViewById(R.id.settings_section_text);
+		TextView textView = (TextView) convertView.findViewById(R.id.name);
+		TextView countView = (TextView) convertView.findViewById(R.id.count);
 		switch (section)
 		{
 		case 0:
-			textView.setText(getSectionCount()==1? R.string.contacts_on_hike_section : R.string.recommended_contacts_section);
+			textView.setText(getSectionCount()==1? R.string.hike_contacts : R.string.recommended_contacts_section);
 			break;
 		case 1:
-			textView.setText(R.string.contacts_on_hike_section);
+			textView.setText(R.string.hike_contacts);
 			break;
 		default:
 			break;
 		}
+		countView.setText(getCountForSection(section)+"");
 		return convertView;
 	}
 	

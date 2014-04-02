@@ -315,6 +315,10 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
 
+	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
+
+	public static final String SHOWN_SDR_INTRO_TIP = "shownSdrIntroTip";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -347,7 +351,7 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static HashMap<String, String> hikeBotNamesMap;
 	
-	public static boolean networkError;
+	public static volatile boolean networkError;
 
 	class IncomingHandler extends Handler
 	{

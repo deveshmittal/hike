@@ -153,6 +153,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private TextView multiSelectTitle;
 
+	private TextView subText;
+
 	@Override
 	public void onDestroy()
 	{
@@ -347,6 +349,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
+		subText = (TextView) actionBarView.findViewById(R.id.subtext);
+
 		setTitle(titleString);
 		currentTitle = titleString;
 
@@ -437,6 +441,16 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	private void setTitle(String titleString)
 	{
 		title.setText(titleString);
+
+		if (!history.isEmpty())
+		{
+			subText.setVisibility(View.VISIBLE);
+			subText.setText(R.string.tap_hold_multi_select);
+		}
+		else
+		{
+			subText.setVisibility(View.GONE);
+		}
 	}
 
 	@Override

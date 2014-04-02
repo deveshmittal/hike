@@ -9,8 +9,7 @@
         android:layout_height="288dp"
         android:layout_centerInParent="true"
         android:onClick="onViewImageClicked"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_avatar1" />
+        android:scaleType="centerCrop" />
 
     <RelativeLayout
         android:layout_width="match_parent"
