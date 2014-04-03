@@ -117,6 +117,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			super(context, textViewResourceId, objects);
 			iconLoader = new IconLoader(context, 180);
+			iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		}
 
 		@Override
