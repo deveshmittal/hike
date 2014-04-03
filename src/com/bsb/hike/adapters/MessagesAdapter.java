@@ -1573,7 +1573,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// Log.d(getClass().getSimpleName(), "error display");
 						// holder.image.setVisibility(View.VISIBLE);
 						// holder.image.setImageResource(getDownloadFailedResIcon());
-						// break;
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+						break;
 					case PAUSING:
 						showTransferInitialization(holder, hikeFile);
 						break;
