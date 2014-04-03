@@ -11,6 +11,7 @@
         android:layout_height="0dp"
         android:layout_weight="240"
         android:text="@string/tutorial1_header_title"
+        android:layout_marginBottom="8dp"
         android:clickable="true" 
         android:onClick="onHikeIconClicked"
         style="@style/SignupHeader" />

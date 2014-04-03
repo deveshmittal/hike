@@ -36,6 +36,8 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:onClick="onHikeIconClicked"
+            android:paddingRight="22dp"
+            android:layout_marginBottom="24dp"
             android:text="@string/tutorial1_header_title"
             style="@style/SignupHeader" />
 
@@ -44,7 +46,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginTop="24dp"
             android:src="@drawable/micromax_logo"
             android:visibility="gone" />
     </LinearLayout>

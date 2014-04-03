@@ -1186,11 +1186,6 @@
     <string name="last_seen_tip_friends">Only your friends can see when you were last seen</string>
     <string name="from_your_number">from your own number</string>
     <string name="at_sms_rate">At SMS rate</string>
-    <!--
-	<string name="auto_download_image_header">Image auto download</string>
-	<string name="auto_download_image_info">Images received by you will automatically be downloaded</string>
-<<<<<<< HEAD
-    -->
     <string name="humanoid_category">Hikins</string>
     <string name="empty_chat">You have no chats :(\nStart one now!</string>
     <string name="start_chat">Start a chat</string>

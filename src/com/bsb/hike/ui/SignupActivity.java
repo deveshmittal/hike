@@ -298,6 +298,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			mTask = SignupTask.startTask(this,mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 		}
 		else
 		{
@@ -311,10 +312,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForFetchingNumber();
 			}
 
+			mTask = SignupTask.startTask(this);
 		}
 		setAnimation();
 		setListeners();
-		mTask = SignupTask.startTask(this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
 		setWindowSoftInputState();
@@ -1251,7 +1252,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							mTask.addUserInput("");
 						}
 					}
-				}, 2000);
+				}, 1500);
 			}
 			break;
 		case NAME:
@@ -1327,12 +1328,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event)
 	{
-		if ((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && !TextUtils.isEmpty(enterEditText.getText().toString().trim())
-				&& loadingLayout != null && loadingLayout.getVisibility() != View.VISIBLE)
+		if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) 
+				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim())
+				&& (loadingLayout == null || loadingLayout.getVisibility() != View.VISIBLE))
 		{
 			if (viewFlipper.getDisplayedChild() == NAME)
 			{
-				Utils.hideSoftKeyboard(this, enterEditText);
+				if(enterEditText.isFocused())
+				{
+					birthdayText.requestFocus();
+				}
+				else 
+				{
+					Utils.hideSoftKeyboard(this, enterEditText);
+				}
 			}
 			else
 			{
