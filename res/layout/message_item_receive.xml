@@ -234,7 +234,7 @@
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			      	        android:text="00:00"
-			      	        android:textColor="@color/white_60"
+			      	        android:textColor="@color/white_85"
 			                android:textSize="12sp" />
 			         </LinearLayout>
 			         
@@ -258,7 +258,7 @@
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			      	        android:text="0B"
-			      	        android:textColor="@color/white_60"
+			      	        android:textColor="@color/white_85"
 			                android:textSize="12sp" />
 			         </LinearLayout>
                     
@@ -367,7 +367,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_70"
+                android:textColor="@color/black_45"
                 android:textSize="12sp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/receive_message_inner_container" />
@@ -377,7 +377,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_70"
+                android:textColor="@color/black_45"
                 android:textSize="12sp"
                 android:layout_marginTop="3dp"
                 android:layout_below="@id/receive_message_inner_container"
@@ -551,7 +551,7 @@
             android:paddingRight="5dp"
   	        android:text="00:00"
   	        android:background="@drawable/bg_msg_time_status"
-  	        android:textColor="@color/white_60"
+  	        android:textColor="@color/white_85"
             android:textSize="12sp"
             android:visibility="gone" />
            
