@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +39,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -579,7 +579,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				}
 				catch (ActivityNotFoundException e)
 				{
-					Log.e(CentralTimelineAdapter.class.getSimpleName(), "Unable to open market");
+					Logger.e(CentralTimelineAdapter.class.getSimpleName(), "Unable to open market");
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.GAMING_PROTIP_DOWNLOADED, protip);
 			}

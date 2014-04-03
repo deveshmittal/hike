@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import android.util.Log;
+import com.bsb.hike.utils.Logger;
 
 public class HikePubSub implements Runnable
 {
@@ -381,7 +381,7 @@ public class HikePubSub implements Runnable
 			}
 			catch (InterruptedException e)
 			{
-				Log.e("PubSub", "exception while running", e);
+				Logger.e("PubSub", "exception while running", e);
 				continue;
 			}
 			if (op == DONE_OPERATION)

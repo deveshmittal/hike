@@ -10,11 +10,11 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.Spannable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.EditText;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.utils.SpanUtil;
+import com.bsb.hike.utils.Logger;
 
 public class TagEditText extends EditText
 {
@@ -98,7 +98,7 @@ public class TagEditText extends EditText
 		String curentText = editable.toString();
 		uniqueness = generateUniqueness(uniqueness);
 		int index = curentText.lastIndexOf(uniqueness);
-		Log.i("tagedit", uniqueness + " index of removable tag " + index);
+		Logger.i("tagedit", uniqueness + " index of removable tag " + index);
 		if (index != -1)
 		{
 			editable.replace(index, index + uniqueness.length(), "");
@@ -114,7 +114,7 @@ public class TagEditText extends EditText
 
 	public void toggleTag(String text, String uniqueness, Object data)
 	{
-		Log.i("tagedit", "before toggle #" + getText().toString() + "#");
+		Logger.i("tagedit", "before toggle #" + getText().toString() + "#");
 		String newUniqueness = generateUniqueness(uniqueness);
 		if (addedTags.containsKey(newUniqueness))
 		{
@@ -124,7 +124,7 @@ public class TagEditText extends EditText
 		{
 			appendTag(text, uniqueness, data);
 		}
-		Log.i("tagedit", "after toggle #" + getText().toString() + "#");
+		Logger.i("tagedit", "after toggle #" + getText().toString() + "#");
 	}
 
 	/**
@@ -202,7 +202,7 @@ public class TagEditText extends EditText
 		if (needCallback)
 		{
 			String textS = text.toString();
-			Log.i("tagedit", "length before : " + lengthBefore + " and lengthAfter " + lengthAfter);
+			Logger.i("tagedit", "length before : " + lengthBefore + " and lengthAfter " + lengthAfter);
 			int charChanged = Math.abs((lengthAfter - lengthBefore));
 			if (charChanged > minCharacterChangeThresholdForTag)
 			{
@@ -253,7 +253,7 @@ public class TagEditText extends EditText
 			{
 
 				// give callback
-				Log.e("tagedit", "key " + uniqueNess + " removed");
+				Logger.e("tagedit", "key " + uniqueNess + " removed");
 
 				if (listener != null)
 				{

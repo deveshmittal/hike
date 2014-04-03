@@ -8,9 +8,9 @@ import java.io.Serializable;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
@@ -56,7 +56,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 				}
 				catch (NumberFormatException e)
 				{
-					Log.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
+					Logger.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
 				}
 
 				if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)

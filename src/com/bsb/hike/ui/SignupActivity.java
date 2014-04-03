@@ -42,7 +42,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -79,6 +78,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Request;
@@ -467,7 +467,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			hikeHttpRequest.setJSONData(request);
 
@@ -1180,7 +1180,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		String value = stateValue.value;
 		mCurrentState = stateValue;
-		Log.d("SignupActivity", "Current State " + mCurrentState.state.name() + " VALUE: " + value);
+		Logger.d("SignupActivity", "Current State " + mCurrentState.state.name() + " VALUE: " + value);
 
 		showingSecondLoadingTxt = false;
 		switch (stateValue.state)
@@ -1354,7 +1354,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public void onCancel(DialogInterface dialog)
 	{
-		Log.d(getClass().getSimpleName(), "Dialog cancelled");
+		Logger.d(getClass().getSimpleName(), "Dialog cancelled");
 		if (mActivityState.task != null)
 		{
 			mActivityState.task.setActivity(null);
@@ -1398,17 +1398,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			return;
 		}
 
-		Log.d(getClass().getSimpleName(), "FB CLICKED");
+		Logger.d(getClass().getSimpleName(), "FB CLICKED");
 		if (!session.isOpened() && !session.isClosed())
 		{
 			session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback).setPermissions(Arrays.asList("basic_info", "user_birthday")));
-			Log.d(getClass().getSimpleName(), "Opening for read");
+			Logger.d(getClass().getSimpleName(), "Opening for read");
 			fbAuthing = true;
 		}
 		else
 		{
 			Session.openActiveSession(this, true, statusCallback);
-			Log.d(getClass().getSimpleName(), "Opening active session");
+			Logger.d(getClass().getSimpleName(), "Opening active session");
 		}
 	}
 
@@ -1429,13 +1429,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	protected void onResume()
 	{
 		super.onResume();
-		Log.d(getClass().getSimpleName(), "OnResume Called");
+		Logger.d(getClass().getSimpleName(), "OnResume Called");
 		if (fbAuthing)
 		{
 			Session session = Session.getActiveSession();
 			if (session != null)
 			{
-				Log.d(getClass().getSimpleName(), "Clearing token");
+				Logger.d(getClass().getSimpleName(), "Clearing token");
 				session.closeAndClearTokenInformation();
 			}
 		}
@@ -1466,7 +1466,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						}
 						catch (Exception e)
 						{
-							Log.w(getClass().getSimpleName(), "Exception while fetching gender", e);
+							Logger.w(getClass().getSimpleName(), "Exception while fetching gender", e);
 						}
 						try
 						{
@@ -1487,7 +1487,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						}
 						catch (Exception e)
 						{
-							Log.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
+							Logger.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
 						}
 
 						final File destFile = new File(directory, fileName);
@@ -1559,7 +1559,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void run()
 		{
-			Log.d(getClass().getSimpleName(), "Downloading profileImage");
+			Logger.d(getClass().getSimpleName(), "Downloading profileImage");
 			try
 			{
 				Utils.downloadAndSaveFile(context, destFile, imageUri);
@@ -1567,7 +1567,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			catch (Exception e)
 			{
-				Log.e(getClass().getSimpleName(), "Error while fetching image", e);
+				Logger.e(getClass().getSimpleName(), "Error while fetching image", e);
 				imageDownloadResult.downloadFinished(false);
 			}
 		}
@@ -1607,7 +1607,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
 		case HikeConstants.GALLERY_RESULT:
-			Log.d("ProfileActivity", "The activity is " + this);
+			Logger.d("ProfileActivity", "The activity is " + this);
 			if (requestCode == HikeConstants.CAMERA_RESULT)
 			{
 				String filePath = accountPrefs.getString(HikeMessengerApp.FILE_PATH, "");

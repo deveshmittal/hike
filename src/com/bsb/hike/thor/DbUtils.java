@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import android.util.Log;
-
 public class DbUtils
 {
 	private static final String TAG = "DecryptDbUtils";
@@ -38,10 +36,10 @@ public class DbUtils
 	{
 		DatabaseMetaData md = con.getMetaData();
 		ResultSet rs = md.getTables(null, null, "%", null);
-		//Log.d("TABLES", "Printing tables .....");
+		//Logger.d("TABLES", "Printing tables .....");
 		while (rs.next())
 		{
-			//Log.d("TABLES", rs.getString(3));
+			//Logger.d("TABLES", rs.getString(3));
 		}
 	}
 

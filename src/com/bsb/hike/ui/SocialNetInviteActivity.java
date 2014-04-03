@@ -23,12 +23,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -54,6 +52,7 @@ import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
@@ -228,17 +227,17 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
 	{
-		Log.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
+		Logger.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
 		return mTwitterInviteTask;
 	}
 
 	private void getFriends()
 	{
 		Session activeSession = Session.getActiveSession();
-		Log.d("INFO", activeSession.getPermissions().toString());
+		Logger.d("INFO", activeSession.getPermissions().toString());
 		if (activeSession != null && activeSession.getState().isOpened())
 		{
-			Log.d("SocialNetInviteActivity", "active session is opened quering for friends");
+			Logger.d("SocialNetInviteActivity", "active session is opened quering for friends");
 			Request friendRequest = Request.newMyFriendsRequest(activeSession, new GraphUserListCallback()
 			{
 				@Override
@@ -249,20 +248,20 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 						FacebookRequestError error = response.getError();
 						if (error != null)
 						{
-							Log.i("friend Request Response", "session is invalid");
-							Log.i("friend Request Response", "Do not have permissions");
+							Logger.i("friend Request Response", "session is invalid");
+							Logger.i("friend Request Response", "Do not have permissions");
 						}
 						else
 						{
-							Log.d("SocialNetInviteActivity", "got the friends object from facebook calling getFriends");
-							Log.d("SocialNetInviteActivity", response.toString());
+							Logger.d("SocialNetInviteActivity", "got the friends object from facebook calling getFriends");
+							Logger.d("SocialNetInviteActivity", response.toString());
 							friends = users;
 							Utils.executeStringResultTask(new GetFriends());
 						}
 					}
 					catch (NullPointerException e)
 					{
-						Log.e(this.getClass().getName(), "Unable to Connect to Internet", e);
+						Logger.e(this.getClass().getName(), "Unable to Connect to Internet", e);
 						Toast toast = Toast.makeText(SocialNetInviteActivity.this, getString(R.string.social_invite_network_error), Toast.LENGTH_LONG);
 						toast.show();
 						finish();
@@ -312,7 +311,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			catch (TwitterException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 			return str;
 
@@ -361,7 +360,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), "Invalid JSON");
+				Logger.w(getClass().getSimpleName(), "Invalid JSON");
 			}
 			return str;
 		}
@@ -416,7 +415,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	{
 		String selectedFriendsIds = "";
 		selectedFriendsIds = TextUtils.join(",", selectedFriends);
-		Log.d("selectedFriendsIds", selectedFriendsIds);
+		Logger.d("selectedFriendsIds", selectedFriendsIds);
 
 		if (isFacebook && !selectedFriendsIds.equals(""))
 			sendRequestDialog(selectedFriendsIds);
@@ -434,7 +433,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			catch (JSONException e)
 			{
-				Log.e("SocialNetInviteActivity", "Creating a JSONObject payload for http Twitter Invite request", e);
+				Logger.e("SocialNetInviteActivity", "Creating a JSONObject payload for http Twitter Invite request", e);
 			}
 		}
 	}
@@ -516,14 +515,14 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										data.put(HikeConstants.DATA, d);
 										data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000);
 										HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, data);
-										Log.d("SocialNetInviteActivity", "fb packet" + data.toString());
+										Logger.d("SocialNetInviteActivity", "fb packet" + data.toString());
 
 										// sendFacebookInviteIds(data);
 									}
 									catch (JSONException e)
 									{
 										// TODO Auto-generated catch block
-										Log.e("SocialNetInviteActivity", "while preparing JSON For Fb", e);
+										Logger.e("SocialNetInviteActivity", "while preparing JSON For Fb", e);
 									}
 
 									String alreadyInvited = settings.getString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, "");
@@ -532,7 +531,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										selectedFriends.add(alreadyInvitedArray[i]);
 									settings.edit().putString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, TextUtils.join(",", selectedFriends)).commit();
 
-									Log.d("invited ids", settings.getString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, ""));
+									Logger.d("invited ids", settings.getString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, ""));
 
 									selectedFriends.clear();
 									finish();

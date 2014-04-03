@@ -83,7 +83,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -120,13 +119,11 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -179,7 +176,6 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.ui.ShareLocation.ItemListBaseAdapter.ViewHolder;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
@@ -188,6 +184,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.RoundedRepeatingDrawable;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
@@ -913,7 +910,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (mConversation == null)
 		{
-			Log.w("ChatThread", "OptionItem menu selected when conversation was null");
+			Logger.w("ChatThread", "OptionItem menu selected when conversation was null");
 			return false;
 		}
 
@@ -1048,7 +1045,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 			{
-				Log.d(getClass().getSimpleName(), "Onclick: " + position);
+				Logger.d(getClass().getSimpleName(), "Onclick: " + position);
 
 				dismissPopupWindow();
 				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
@@ -1322,7 +1319,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
-		Log.d(getClass().getSimpleName(), "Intent: " + intent.toString());
+		Logger.d(getClass().getSimpleName(), "Intent: " + intent.toString());
 
 		String prevContactNumber = null;
 
@@ -1356,7 +1353,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 * Replacing all '-' that we get in the number
 			 */
 			phoneNumber = phoneNumber.replaceAll("-", "");
-			Log.d(getClass().getSimpleName(), "SMS To: " + phoneNumber);
+			Logger.d(getClass().getSimpleName(), "SMS To: " + phoneNumber);
 			ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(phoneNumber);
 			/*
 			 * phone lookup fails for a *lot* of people. If that happens, fall back to using their msisdn
@@ -1508,7 +1505,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				catch (JSONException e)
 				{
-					Log.e(getClass().getSimpleName(), "Invalid JSON Array", e);
+					Logger.e(getClass().getSimpleName(), "Invalid JSON Array", e);
 				}
 				intent.removeExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 			}
@@ -1539,7 +1536,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if (prevContactNumber != null && !prevContactNumber.equalsIgnoreCase(mContactNumber))
 		{
-			Log.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
+			Logger.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
 			closeContextMenu();
 		}
 	}
@@ -1553,7 +1550,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
-		Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
+		Logger.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
 
 		if (Utils.isPicasaUri(filePath))
 		{
@@ -1680,7 +1677,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					@Override
 					public void onSuccess(JSONObject response)
 					{
-						Log.d(getClass().getSimpleName(), "Response: " + response.toString());
+						Logger.d(getClass().getSimpleName(), "Response: " + response.toString());
 						try
 						{
 							JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
@@ -2386,7 +2383,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void run()
 			{
-				Log.d(getClass().getSimpleName(), "Marking message as read: " + mContactNumber);
+				Logger.d(getClass().getSimpleName(), "Marking message as read: " + mContactNumber);
 
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(HikeConstants.SMSNative.READ, 1);
@@ -2416,7 +2413,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (messages.isEmpty() || messages.get(messages.size() - 1).getTypingNotification() == null)
 				{
 					addMessage(new ConvMessage(typingNotification));
-					Log.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2129");
+					Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2129");
 				}
 				else if (messages.get(messages.size() - 1).getTypingNotification() != null)
 				{
@@ -2456,7 +2453,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (mContactNumber == null || mConversation == null)
 		{
-			Log.w("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
+			Logger.w("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
 			return;
 		}
 
@@ -2466,7 +2463,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			String msisdn = message.getMsisdn();
 			if (msisdn == null)
 			{
-				Log.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
+				Logger.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
 			}
 			if (msisdn.equals(mContactNumber))
 			{
@@ -2505,7 +2502,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 
 						addMessage(message);
-						Log.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
+						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
 					}
 				});
 
@@ -2748,7 +2745,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				catch (JSONException e)
 				{
-					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
 			runOnUiThread(mUpdateAdapter);
@@ -2775,7 +2772,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				public void run()
 				{
 					addMessage(convMessage);
-					Log.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2429");
+					Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2429");
 				}
 			});
 		}
@@ -3170,7 +3167,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void zeroCredits()
 	{
-		Log.d(getClass().getSimpleName(), "Zero credits");
+		Logger.d(getClass().getSimpleName(), "Zero credits");
 		mSendBtn.setEnabled(false);
 
 		if (!TextUtils.isEmpty(mComposeView.getText()))
@@ -3202,7 +3199,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void nonZeroCredits()
 	{
-		Log.d(getClass().getSimpleName(), "Non Zero credits");
+		Logger.d(getClass().getSimpleName(), "Non Zero credits");
 		if (!mComposeView.isEnabled())
 		{
 			if (!TextUtils.isEmpty(mComposeView.getText()))
@@ -3334,7 +3331,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					if (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty())
 					{
-						Log.d("TypingNotification", "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
+						Logger.d("TypingNotification", "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
 						mAdapter.addMessage(new ConvMessage(typingNotification));
 					}
 				}
@@ -3440,7 +3437,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
-		Log.d(getClass().getSimpleName(), "Keyboard shown");
+		Logger.d(getClass().getSimpleName(), "Keyboard shown");
 		if (emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
 		{
 			onEmoticonBtnClicked(null);
@@ -3644,7 +3641,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		catch (BadTokenException e)
 		{
-			Log.e(getClass().getSimpleName(), "Excepetion in ChatThread ChatTheme picker", e);
+			Logger.e(getClass().getSimpleName(), "Excepetion in ChatThread ChatTheme picker", e);
 		}
 
 		FrameLayout viewParent = (FrameLayout) parentView.getParent();
@@ -4016,7 +4013,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						if (selectedFile == null)
 						{
-							Log.w(getClass().getSimpleName(), "Unable to create file to store media.");
+							Logger.w(getClass().getSimpleName(), "Unable to create file to store media.");
 							Toast.makeText(ChatThread.this, ChatThread.this.getResources().getString(R.string.no_external_storage), Toast.LENGTH_LONG).show();
 							return;
 						}
@@ -4162,7 +4159,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			catch (IOException e)
 			{
-				Log.e(getClass().getSimpleName(), "Error while playing the recording", e);
+				Logger.e(getClass().getSimpleName(), "Error while playing the recording", e);
 				Toast.makeText(getApplicationContext(), R.string.error_play_recording, Toast.LENGTH_SHORT).show();
 				setUpPreviewRecordingLayout(recordBtn, recordInfo, recordImage, sendBtn, 0);
 				stopPlayer();
@@ -4210,7 +4207,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						stopRecorder();
 						recordingError(true);
-						Log.e(getClass().getSimpleName(), "Failed to start recording", e);
+						Logger.e(getClass().getSimpleName(), "Failed to start recording", e);
 					}
 					recording = true;
 
@@ -4253,7 +4250,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// player.prepare();
 		// player.start();
 		// } catch (IOException e) {
-		// Log.e(getClass().getSimpleName(),
+		// Logger.e(getClass().getSimpleName(),
 		// "Error while playing the recording", e);
 		// Toast.makeText(getApplicationContext(),
 		// R.string.error_play_recording,
@@ -4579,7 +4576,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						filePath = Utils.getRealPathFromUri(selectedFileUri, this);
 					}
-					Log.d(getClass().getSimpleName(), "File path: " + filePath);
+					Logger.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
 
@@ -4591,7 +4588,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			double longitude = data.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
 			int zoomLevel = data.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
 
-			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude + " long:" + longitude + " zoom: " + zoomLevel);
+			Logger.d(getClass().getSimpleName(), "Share Location Lat: " + latitude + " long:" + longitude + " zoom: " + zoomLevel);
 			initialiseLocationTransfer(latitude, longitude, zoomLevel);
 		}
 		else if (requestCode == HikeConstants.SHARE_CONTACT_CODE && resultCode == RESULT_OK)
@@ -4602,7 +4599,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else if (resultCode == RESULT_CANCELED)
 		{
 			clearTempData();
-			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
+			Logger.d(getClass().getSimpleName(), "File transfer Cancelled");
 			selectedFile = null;
 		}
 	}
@@ -4743,10 +4740,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 
-		Log.d(getClass().getSimpleName(), "Data of contact is : " + contactJson.toString());
+		Logger.d(getClass().getSimpleName(), "Data of contact is : " + contactJson.toString());
 		clearTempData();
 		showContactDetails(items, name, contactJson, false);
 	}
@@ -4885,7 +4882,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		File file = new File(filePath);
-		Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + file.getName());
+		Logger.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + file.getName());
 
 		if (HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
 		{
@@ -5169,7 +5166,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void onPageSelected(int pageNum)
 		{
-			Log.d("ViewPager", "Page number: " + pageNum);
+			Logger.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
 				StickerCategory category = StickerManager.getInstance().getCategoryForIndex(pageNum);
@@ -5565,7 +5562,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		sendMessage(convMessage);
 
@@ -5605,11 +5602,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			metadata.put(StickerManager.STICKER_INDEX, sticker.getStickerIndex());
 
 			convMessage.setMetadata(metadata);
-			Log.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
+			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		sendMessage(convMessage);
 	}
@@ -5649,7 +5646,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public boolean onDoubleTap(MotionEvent e)
 		{
-			Log.i("chatthread", "double tap");
+			Logger.i("chatthread", "double tap");
 			if (isActionModeOn)
 			{
 				return false;
@@ -5748,7 +5745,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		Log.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
+		Logger.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
 		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
@@ -5889,7 +5886,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				url = new URL(AccountUtils.base + "/user/lastseen/" + mContactNumber);
 
-				Log.d(getClass().getSimpleName(), "URL:  " + url);
+				Logger.d(getClass().getSimpleName(), "URL:  " + url);
 
 				URLConnection connection = url.openConnection();
 				AccountUtils.addUserAgent(connection);
@@ -5901,7 +5898,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				JSONObject response = AccountUtils.getResponse(connection.getInputStream());
-				Log.d(getClass().getSimpleName(), "Response: " + response);
+				Logger.d(getClass().getSimpleName(), "Response: " + response);
 				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 				{
 					return null;
@@ -5912,17 +5909,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			catch (MalformedURLException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 				return null;
 			}
 			catch (IOException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 				return null;
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 				return null;
 			}
 
@@ -6006,16 +6003,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			// else if(intent.getAction().equals(HikePubSub.RESUME_BUTTON_UPDATED))
 			// {
-			// //Log.d(getClass().getSimpleName(),"making button visible...1");
+			// //Logger.d(getClass().getSimpleName(),"making button visible...1");
 			// long msgId = intent.getLongExtra("msgId", -1);
 			// if(msgId<0)
 			// return;
-			// //Log.d(getClass().getSimpleName(),"making button visible...2");
+			// //Logger.d(getClass().getSimpleName(),"making button visible...2");
 			// ConvMessage message = null;
 			// for(int i=(messages.size()-1); i>=0; i--)
 			// {
 			// ConvMessage m = messages.get(i);
-			// //Log.d(getClass().getSimpleName(), "comparing  : " +m.getMsgID() +" == " + msgId);
+			// //Logger.d(getClass().getSimpleName(), "comparing  : " +m.getMsgID() +" == " + msgId);
 			// if(m != null && m.getMsgID() == msgId)
 			// {
 			// message = m;
@@ -6024,11 +6021,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// }
 			// if (message == null)
 			// return;
-			// //Log.d(getClass().getSimpleName(),"making button visible...3");
+			// //Logger.d(getClass().getSimpleName(),"making button visible...3");
 			//
 			// if(!message.getResumeButtonVisibility())
 			// {
-			// Log.d(getClass().getSimpleName(),"making button visible...DONE");
+			// Logger.d(getClass().getSimpleName(),"making button visible...DONE");
 			// message.setResumeButtonVisibility(true);
 			// mAdapter.notifyDataSetChanged();
 			// }
@@ -6330,7 +6327,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
@@ -6459,7 +6456,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		catch (BadTokenException e)
 		{
-			Log.e(getClass().getSimpleName(), "Excepetion in Action Mode Overflow popup", e);
+			Logger.e(getClass().getSimpleName(), "Excepetion in Action Mode Overflow popup", e);
 		}
 		attachmentWindow.getContentView().setFocusableInTouchMode(true);
 		attachmentWindow.getContentView().setOnKeyListener(new View.OnKeyListener()
@@ -6484,7 +6481,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void run()
 			{
 				// TODO Auto-generated method stub
-				Log.i("chatadapter", mAdapter.getCount() + " --total items");
+				Logger.i("chatadapter", mAdapter.getCount() + " --total items");
 			}
 		}, 2000);
 	}

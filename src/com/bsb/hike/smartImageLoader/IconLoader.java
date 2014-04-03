@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.utils.Utils;
 
 public class IconLoader extends ImageWorker
 {

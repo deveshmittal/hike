@@ -8,7 +8,6 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -125,7 +124,7 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 	@Override
 	public void onSuccess(TwitterOAuthView view, AccessToken accessToken)
 	{
-		Log.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken() + " SECRET: " + accessToken.getTokenSecret());
+		Logger.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken() + " SECRET: " + accessToken.getTokenSecret());
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
@@ -177,7 +176,7 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 				}
 				if (response.getError() != null)
 				{
-					Log.e(getClass().getSimpleName(), "Facebook Get newMeRequest Failled", response.getError().getException());
+					Logger.e(getClass().getSimpleName(), "Facebook Get newMeRequest Failled", response.getError().getException());
 					facebookError();
 				}
 			}
@@ -206,9 +205,9 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFrag
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
-		Log.d(getClass().getSimpleName(), "Request: " + request.toString());
+		Logger.d(getClass().getSimpleName(), "Request: " + request.toString());
 		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(facebook ? "/account/connect/fb" : "/account/connect/twitter", RequestType.OTHER,
 				new HikeHttpRequest.HikeHttpCallback()
 				{

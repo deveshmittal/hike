@@ -27,7 +27,6 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
@@ -44,6 +43,7 @@ import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.thor.ThorThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
@@ -64,7 +64,7 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			Log.d("ContactsChanged", "calling syncUpdates");
+			Logger.d("ContactsChanged", "calling syncUpdates");
 			ContactUtils.syncUpdates(this.context);
 			if (manualSync)
 			{
@@ -157,7 +157,7 @@ public class HikeService extends Service
 	{
 		super.onCreate();
 
-		Log.d("TestUpdate", "Service started");
+		Logger.d("TestUpdate", "Service started");
 
 		if (registerToGCMTrigger == null)
 		{
@@ -171,7 +171,7 @@ public class HikeService extends Service
 			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(SEND_TO_SERVER_ACTION));
 		}
 
-		Log.d("HikeService", "onCreate called");
+		Logger.d("HikeService", "onCreate called");
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
@@ -225,14 +225,14 @@ public class HikeService extends Service
 			postDeviceDetails = new PostDeviceDetails();
 			registerReceiver(postDeviceDetails, new IntentFilter(SEND_DEV_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Update details sender registered");
+			Logger.d("TestUpdate", "Update details sender registered");
 		}
 
 		if (sendRai == null)
 		{
 			sendRai = new SendRai();
 			registerReceiver(sendRai, new IntentFilter(SEND_RAI_TO_SERVER_ACTION));
-			Log.d("TestUpdate", "Update details sender registered");
+			Logger.d("TestUpdate", "Update details sender registered");
 		}
 
 		if (postGreenBlueDetails == null)
@@ -244,7 +244,7 @@ public class HikeService extends Service
 		LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(localBroadcastThor, new IntentFilter(HikeMessengerApp.THOR_DETAILS_SENT));
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
 		{
-			Log.d(getClass().getSimpleName(), "SYNCING");
+			Logger.d(getClass().getSimpleName(), "SYNCING");
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
@@ -307,16 +307,16 @@ public class HikeService extends Service
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
-		Log.d("HikeService", "Start MQTT Thread.");
+		Logger.d("HikeService", "Start MQTT Thread.");
 		mMqttManager.connectOnMqttThread();
-		Log.d("HikeService", "Intent is " + intent);
+		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
 		{
 			String s = intent.getExtras().getString(HikeConstants.Extras.SMS_MESSAGE);
 			try
 			{
 				JSONObject msg = new JSONObject(s);
-				Log.d("HikeService", "Intent contained SMS message " + msg.getString(HikeConstants.TYPE));
+				Logger.d("HikeService", "Intent contained SMS message " + msg.getString(HikeConstants.TYPE));
 				MqttMessagesManager mgr = MqttMessagesManager.getInstance(this);
 				mgr.saveMqttMessage(msg);
 			}
@@ -346,7 +346,7 @@ public class HikeService extends Service
 	public void onDestroy()
 	{
 		super.onDestroy();
-		Log.i("HikeService", "onDestroy.  Shutting down service");
+		Logger.i("HikeService", "onDestroy.  Shutting down service");
 		mMqttManager.destroyMqtt();
 		this.mMqttManager = null;
 		// inform the app that the app has successfully disconnected
@@ -425,7 +425,7 @@ public class HikeService extends Service
 
 	public void notifyUser(String alert, String title, String body)
 	{
-		Log.w("HikeService", alert + ":" + "body");
+		Logger.w("HikeService", alert + ":" + "body");
 	}
 
 	/************************************************************************/
@@ -454,7 +454,7 @@ public class HikeService extends Service
 		@Override
 		public void onChange(boolean selfChange)
 		{
-			Log.d(getClass().getSimpleName(), "Contact content observer called");
+			Logger.d(getClass().getSimpleName(), "Contact content observer called");
 
 			mContactsChanged.manualSync = manualSync;
 
@@ -478,10 +478,10 @@ public class HikeService extends Service
 			boolean isWifiOn = Utils.switchSSLOn(getApplicationContext());
 			if (wasWifiOnLastTime == isWifiOn)
 			{
-				Log.d("SSL", "Same connection type as before. Wifi? " + isWifiOn);
+				Logger.d("SSL", "Same connection type as before. Wifi? " + isWifiOn);
 				return;
 			}
-			Log.d("SSL", "Different connection type. Wifi? " + isWifiOn);
+			Logger.d("SSL", "Different connection type. Wifi? " + isWifiOn);
 			wasWifiOnLastTime = isWifiOn;
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCHED_DATA_CONNECTION, isWifiOn);
 		}
@@ -514,7 +514,7 @@ public class HikeService extends Service
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			Log.d(getClass().getSimpleName(), "Registering for GCM");
+			Logger.d(getClass().getSimpleName(), "Registering for GCM");
 			try
 			{
 				GCMRegistrar.checkDevice(HikeService.this);
@@ -550,28 +550,28 @@ public class HikeService extends Service
 		@Override
 		public void onReceive(final Context context, Intent intent)
 		{
-			Log.d(getClass().getSimpleName(), "Sending GCM ID");
+			Logger.d(getClass().getSimpleName(), "Sending GCM ID");
 			final String regId = GCMRegistrar.getRegistrationId(context);
 			if ("".equals(regId))
 			{
 				sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
-				Log.d(getClass().getSimpleName(), "GCM id not found");
+				Logger.d(getClass().getSimpleName(), "GCM id not found");
 				return;
 			}
 
 			final SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 			if (prefs.getBoolean(HikeMessengerApp.GCM_ID_SENT, false))
 			{
-				Log.d(getClass().getSimpleName(), "GCM id sent");
+				Logger.d(getClass().getSimpleName(), "GCM id sent");
 				return;
 			}
 
-			Log.d(getClass().getSimpleName(), "GCM id was not sent. Sending now");
+			Logger.d(getClass().getSimpleName(), "GCM id was not sent. Sending now");
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/device", RequestType.OTHER, new HikeHttpCallback()
 			{
 				public void onSuccess(JSONObject response)
 				{
-					Log.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send successful");
+					Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send successful");
 					Editor editor = prefs.edit();
 					editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, true);
 					editor.commit();
@@ -579,7 +579,7 @@ public class HikeService extends Service
 
 				public void onFailure()
 				{
-					Log.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
+					Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
 					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, sendGCMIdToServer);
 				}
 			});
@@ -591,7 +591,7 @@ public class HikeService extends Service
 			}
 			catch (JSONException e)
 			{
-				Log.d(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.d(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			hikeHttpRequest.setJSONData(request);
 
@@ -608,11 +608,11 @@ public class HikeService extends Service
 		{
 			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, false))
 			{
-				Log.d(getClass().getSimpleName(), "Device details sent");
+				Logger.d(getClass().getSimpleName(), "Device details sent");
 				return;
 			}
-			Log.d("TestUpdate", "Sending device details to server");
-			Log.d(getClass().getSimpleName(), "Sending device details to server");
+			Logger.d("TestUpdate", "Sending device details to server");
+			Logger.d(getClass().getSimpleName(), "Sending device details to server");
 
 			String osVersion = Build.VERSION.RELEASE;
 			String devType = HikeConstants.ANDROID;
@@ -625,7 +625,7 @@ public class HikeService extends Service
 			}
 			catch (NameNotFoundException e)
 			{
-				Log.e("AccountUtils", "Unable to get app version");
+				Logger.e("AccountUtils", "Unable to get app version");
 			}
 
 			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -644,17 +644,17 @@ public class HikeService extends Service
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 
-			Log.d("TestUpdate", "Sending data: " + data.toString());
+			Logger.d("TestUpdate", "Sending data: " + data.toString());
 
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/update", RequestType.OTHER, new HikeHttpCallback()
 			{
 				public void onSuccess(JSONObject response)
 				{
-					Log.d("TestUpdate", "Device details sent successfully");
-					Log.d(getClass().getSimpleName(), "Send successful");
+					Logger.d("TestUpdate", "Device details sent successfully");
+					Logger.d(getClass().getSimpleName(), "Send successful");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
 					editor.commit();
@@ -662,8 +662,8 @@ public class HikeService extends Service
 
 				public void onFailure()
 				{
-					Log.d("TestUpdate", "Device details could not be sent");
-					Log.d(getClass().getSimpleName(), "Send unsuccessful");
+					Logger.d("TestUpdate", "Device details could not be sent");
+					Logger.d(getClass().getSimpleName(), "Send unsuccessful");
 					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, sendDevDetailsToServer);
 				}
 			});
@@ -682,10 +682,10 @@ public class HikeService extends Service
 		{
 			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, false))
 			{
-				Log.d(getClass().getSimpleName(), "Rai was already sent");
+				Logger.d(getClass().getSimpleName(), "Rai was already sent");
 				return;
 			}
-			Log.d("TestUpdate", "Sending rai packet to server");
+			Logger.d("TestUpdate", "Sending rai packet to server");
 
 			// Send the device details again which includes the new app
 			// version
@@ -701,13 +701,13 @@ public class HikeService extends Service
 			editor.putBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, true);
 			editor.commit();
 
-			Log.d("TestUpdate", "rai packet sent to server");
+			Logger.d("TestUpdate", "rai packet sent to server");
 		}
 	}
 
 	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference)
 	{
-		Log.d(getClass().getSimpleName(), "Scheduling next " + lastBackOffTimePref + " send");
+		Logger.d(getClass().getSimpleName(), "Scheduling next " + lastBackOffTimePref + " send");
 
 		SharedPreferences preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		int lastBackOffTime = preferences.getInt(lastBackOffTimePref, 0);
@@ -715,7 +715,7 @@ public class HikeService extends Service
 		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME : (lastBackOffTime * 2);
 		lastBackOffTime = Math.min(HikeConstants.MAX_RECONNECT_TIME, lastBackOffTime);
 
-		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
+		Logger.d(getClass().getSimpleName(), "Scheduling the next disconnect");
 
 		postRunnableWithDelay(postRunnableReference, lastBackOffTime * 1000);
 
@@ -819,7 +819,7 @@ public class HikeService extends Service
 		{
 			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false))
 			{
-				Log.d("PostInfo", "info details sent");
+				Logger.d("PostInfo", "info details sent");
 				return;
 			}
 
@@ -831,7 +831,7 @@ public class HikeService extends Service
 			{
 				public void onSuccess(JSONObject response)
 				{
-					Log.d("PostInfo", "info sent successfully");
+					Logger.d("PostInfo", "info sent successfully");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, true);
 					editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, 0);
@@ -840,7 +840,7 @@ public class HikeService extends Service
 
 				public void onFailure()
 				{
-					Log.d("PostInfo", "info could not be sent");
+					Logger.d("PostInfo", "info could not be sent");
 					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, sendGreenBlueDetailsToServer);
 				}
 			});
@@ -869,7 +869,7 @@ public class HikeService extends Service
 						{
 							public void onSuccess(JSONObject response)
 							{
-								Log.d("PostInfo", "Thor info sent successfully");
+								Logger.d("PostInfo", "Thor info sent successfully");
 								Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 								editor.putBoolean(HikeMessengerApp.THOR_DETAILS_SENT, true);
 								editor.commit();
@@ -877,18 +877,18 @@ public class HikeService extends Service
 
 							public void onFailure()
 							{
-								Log.d("PostInfo", "Thor info could not be sent");
+								Logger.d("PostInfo", "Thor info could not be sent");
 							}
 						});
 						hikeHttpRequest.setJSONData(obj);
 
-						Log.d("PostInfo", "Executing thor request...");
+						Logger.d("PostInfo", "Executing thor request...");
 						HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 						Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 					}
 					catch (JSONException e)
 					{
-						Log.e(getClass().getSimpleName(), "JsonException in sending Thor details", e);
+						Logger.e(getClass().getSimpleName(), "JsonException in sending Thor details", e);
 					}
 				}
 			}

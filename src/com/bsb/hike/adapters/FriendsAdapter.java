@@ -11,7 +11,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +34,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
@@ -220,7 +220,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			try
 			{
 				String regex = ".*?\\b" + textToBeFiltered + ".*?\\b";
-				Log.d(TAG, "filter list called and regex is " + regex);
+				Logger.d(TAG, "filter list called and regex is " + regex);
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
@@ -257,7 +257,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			{
 				ex.printStackTrace();
 			}
-			Log.i("filterlist", "done");
+			Logger.i("filterlist", "done");
 
 		}
 
@@ -597,7 +597,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 
 		ContactInfo contactInfo = getItem(position);
-		Log.d(TAG, "in getitemviewtype position " + position + " and total " + completeList.size() + " and contactInfo " + contactInfo);
+		Logger.d(TAG, "in getitemviewtype position " + position + " and total " + completeList.size() + " and contactInfo " + contactInfo);
 		if (EMPTY_ID.equals(contactInfo.getId()))
 		{
 			return ViewType.EMPTY.ordinal();
@@ -1084,11 +1084,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		if (loadingView != null)
 		{
 			listView.setEmptyView(loadingView);
-			Log.e("errrr", "loading view is not null");
+			Logger.e("errrr", "loading view is not null");
 		}
 		else
 		{
-			Log.e("errrr", "loading view is null");
+			Logger.e("errrr", "loading view is null");
 		}
 	}
 

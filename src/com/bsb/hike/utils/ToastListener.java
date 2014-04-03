@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -82,12 +81,12 @@ public class ToastListener implements Listener
 
 				if (message.getConversation() == null)
 				{
-					Log.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
+					Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 					return;
 				}
 				if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
 				{
-					Log.d(getClass().getSimpleName(), "Group has been muted");
+					Logger.d(getClass().getSimpleName(), "Group has been muted");
 					return;
 				}
 				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
@@ -118,7 +117,7 @@ public class ToastListener implements Listener
 					ContactInfo contactInfo;
 					if (message.isGroupChat())
 					{
-						Log.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
+						Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
 						contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
 					}
 					else
@@ -215,7 +214,7 @@ public class ToastListener implements Listener
 
 			if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
 			{
-				Log.d(getClass().getSimpleName(), "Group has been muted");
+				Logger.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
 			final Bitmap bigPicture = Utils.returnBigPicture(message, context);
@@ -224,7 +223,7 @@ public class ToastListener implements Listener
 				ContactInfo contactInfo;
 				if (message.isGroupChat())
 				{
-					Log.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
+					Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
 					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
 				}
 				else
