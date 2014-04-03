@@ -269,4 +269,5 @@
 	<color name="green_connected">#87d156</color>
     <color name="action_bar_btn_disable">#0965a0</color>
     <color name="compose_view_btn_selected">#33000000</color>
+    <color name="file_size">#787878</color>
 </resources>

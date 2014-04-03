@@ -245,7 +245,8 @@
 			                android:layout_height="wrap_content"
 			      	        android:text="0B"
 			      	        android:textColor="@color/white_85"
-			                android:textSize="12sp" />
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
         			</LinearLayout>
 				
                 <!-- <ProgressBar
@@ -299,6 +300,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
+                        android:textColor="@color/file_size"
                         android:maxLines="1"
                         android:ellipsize="end" />
                 	</LinearLayout>
