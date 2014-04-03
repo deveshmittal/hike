@@ -1394,7 +1394,7 @@
     <string name="compose_chat_empty_contact_status_group_mode">Tap to add number</string>
     <string name="compose_chat_empty_contact_status_chat_mode">Tap to start chat</string>
     <string name="chatThreadNudgeTutorialText">Double tap anywhere to nudge your friend</string>
-    <string name="tap_hold_multi_select">Tap and hold to select multiple</string>
+    <string name="tap_hold_multi_select">Tap and hold to select multiple files</string>
 	<string name="verified">Verified</string>
 	<string name="sent_txt">Sent</string>
 	<string name="delivered_txt">Delivered</string>
