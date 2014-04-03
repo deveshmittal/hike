@@ -903,7 +903,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			else
 			{
 				mIconView.setScaleType(ScaleType.CENTER_INSIDE);
-				mIconView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+				mIconView.setBackgroundResource(R.drawable.avatar_03_rounded);
 				mIconView.setImageResource(R.drawable.ic_default_avatar);
 			}
 			// mIconView.setImageDrawable(IconCacheManager.getInstance()
@@ -1738,6 +1738,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		mActivityState.profileBitmap = Utils.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
+		mIconView.setBackgroundResource(R.color.transparent);
 		profilePicCamIcon.setImageResource(R.drawable.ic_signup_editphoto);
 		
 		tempBitmap.recycle();
