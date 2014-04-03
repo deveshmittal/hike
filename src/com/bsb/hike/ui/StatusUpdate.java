@@ -104,7 +104,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private View tipView;
 
-	private Button doneBtn;
+	private View doneBtn;
+
+	private TextView postText;
+
+	private ImageView arrow;
 
 	private TextView title;
 
@@ -238,11 +242,15 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
-		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+
+		postText.setText(R.string.post);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		doneBtn.setText(R.string.post);
-		doneBtn.setEnabled(false);
+
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 
 		setTitle();
 
@@ -788,7 +796,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		 * Enabling if the text length is > 0 or if the user has selected a mood with some prefilled text.
 		 */
 		boolean enable = mActivityTask.moodId >= 0 || statusTxt.getText().toString().trim().length() > 0 || isEmojiOrMoodLayoutVisible();
-		doneBtn.setEnabled(enable);
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, enable);
 	}
 
 	@Override
