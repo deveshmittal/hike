@@ -584,7 +584,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_music;
+			return R.drawable.ic_nudge_sent_white;
 		}
 
 		@Override
