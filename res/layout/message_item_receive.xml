@@ -209,8 +209,8 @@
 			               android:layout_centerInParent="true" />
 			            <ImageView
 			                android:id="@+id/ft_action"
-			                android:layout_height="20dp"
-			                android:layout_width="20dp"
+			                android:layout_height="40dp"
+			                android:layout_width="40dp"
 			                android:layout_centerInParent="true" />
             		</RelativeLayout>
             		
@@ -235,7 +235,8 @@
 			                android:layout_height="wrap_content"
 			      	        android:text="00:00"
 			      	        android:textColor="@color/white_85"
-			                android:textSize="12sp" />
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
 			         </LinearLayout>
 			         
 	                <LinearLayout
@@ -369,6 +370,7 @@
       	        android:text="00:00"
                 android:textColor="@color/black_45"
                 android:textSize="12sp"
+                android:textStyle="italic"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/receive_message_inner_container" />
 			
@@ -379,6 +381,7 @@
       	        android:text="00:00"
                 android:textColor="@color/black_45"
                 android:textSize="12sp"
+                android:textStyle="italic"
                 android:layout_marginTop="3dp"
                 android:layout_below="@id/receive_message_inner_container"
                 android:layout_alignRight="@id/receive_message_inner_container"
@@ -418,8 +421,8 @@
 	               android:layout_centerInParent="true" />
 	            <ImageView
 	                android:id="@+id/ft_action_ext"
-	                android:layout_height="15dp"
-	                android:layout_width="15dp"
+	                android:layout_height="30dp"
+	                android:layout_width="30dp"
 	                android:layout_centerInParent="true" />
             </RelativeLayout>
             
@@ -553,6 +556,7 @@
   	        android:background="@drawable/bg_msg_time_status"
   	        android:textColor="@color/white_85"
             android:textSize="12sp"
+            android:textStyle="italic"
             android:visibility="gone" />
            
 
