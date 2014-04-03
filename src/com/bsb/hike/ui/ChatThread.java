@@ -3385,11 +3385,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		indicatorText.setVisibility(View.VISIBLE);
 		if (unreadMessageCount == 1)
 		{
-			indicatorText.setText(getResources().getString(R.string.one_unread_message));
+			indicatorText.setText(getResources().getString(R.string.one_new_message));
 		}
 		else
 		{
-			indicatorText.setText(getResources().getString(R.string.num_unread_messages, unreadMessageCount));
+			indicatorText.setText(getResources().getString(R.string.num_new_messages, unreadMessageCount));
 		}
 	}
 

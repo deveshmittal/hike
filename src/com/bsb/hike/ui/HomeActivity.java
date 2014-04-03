@@ -1424,7 +1424,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			alphaIn.setStartOffset(1000);
 			alphaIn.setDuration(400);
 			networkErrorPopUp.setText(R.string.connected);
-			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.green));
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.green_connected));
 			networkErrorPopUp.setVisibility(View.GONE);
 			networkErrorPopUp.setAnimation(alphaIn);
 			alphaIn.start();
