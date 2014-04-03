@@ -319,6 +319,10 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_SDR_INTRO_TIP = "shownSdrIntroTip";
 
+	public static final String SIGNUP_PROFILE_PIC_PATH = "signupProfilePicSet";
+
+	public static final String LAST_BACK_OFF_TIME_SIGNUP_PRO_PIC = "lastBackOffTimeSignupProPic";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

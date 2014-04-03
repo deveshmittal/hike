@@ -114,6 +114,8 @@ public class HikeService extends Service
 
 	public static final int MQTT_NOTIFICATION_UPDATE = 2;
 
+	public static final String POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION = "com.bsb.hike.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION";
+
 	/************************************************************************/
 	/* VARIABLES - other local variables */
 	/************************************************************************/
@@ -131,6 +133,8 @@ public class HikeService extends Service
 	private PostDeviceDetails postDeviceDetails;
 
 	private PostGreenBlueDetails postGreenBlueDetails;
+	
+	private PostSignupProfilePic postSignupProfilePic;
 
 	private HikeMqttManagerNew mMqttManager;
 
@@ -241,6 +245,14 @@ public class HikeService extends Service
 			registerReceiver(postGreenBlueDetails, new IntentFilter(SEND_GB_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
+		
+		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, null) !=null && postSignupProfilePic ==null)
+		{
+			postSignupProfilePic = new PostSignupProfilePic();
+			registerReceiver(postSignupProfilePic, new IntentFilter(POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
+		}
+		
 		LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(localBroadcastThor, new IntentFilter(HikeMessengerApp.THOR_DETAILS_SENT));
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
 		{
@@ -399,6 +411,13 @@ public class HikeService extends Service
 			unregisterReceiver(postGreenBlueDetails);
 			postGreenBlueDetails = null;
 		}
+		
+		if (postSignupProfilePic != null)
+		{
+			unregisterReceiver(postSignupProfilePic);
+			postSignupProfilePic = null;
+		}
+		
 		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastThor);
 	}
 
@@ -750,6 +769,15 @@ public class HikeService extends Service
 			sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
 	};
+	
+	private Runnable sendSignupProfilePicToServer = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			sendBroadcast(new Intent(HikeService.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
+		}
+	};
 
 	private void scheduleNextManualContactSync()
 	{
@@ -894,4 +922,47 @@ public class HikeService extends Service
 			}
 		}
 	};
+	
+	class PostSignupProfilePic extends BroadcastReceiver
+	{
+
+		@Override
+		public void onReceive(final Context context, Intent intent)
+		{
+			String profilePicPath = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, null);
+			if (profilePicPath == null)
+			{
+				Logger.d(getClass().getSimpleName(), "Signup profile pic already uploaded");
+				return;
+			}
+			Logger.d(getClass().getSimpleName(), "profile pic upload started");
+
+			HikeHttpCallback hikeHttpCallBack = new HikeHttpCallback()
+			{
+				public void onSuccess(JSONObject response)
+				{
+					SharedPreferences prefs =  context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+					Editor editor = prefs.edit();
+					editor.remove(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+					editor.commit();
+					String msisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+					Utils.renameTempProfileImage(msisdn);
+					Logger.d(getClass().getSimpleName(), "profile pic upload done");
+				}
+
+				public void onFailure()
+				{
+					Logger.d(getClass().getSimpleName(), "profile pic upload failed");
+					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_SIGNUP_PRO_PIC, sendSignupProfilePicToServer);
+				}
+			};
+
+			HikeHttpRequest profilePicRequest = new HikeHttpRequest("/account/avatar", RequestType.PROFILE_PIC, hikeHttpCallBack);
+			profilePicRequest.setFilePath(profilePicPath);
+			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
+
+		}
+	}
+
 }

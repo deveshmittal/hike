@@ -30,7 +30,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.ui.SignupActivity;
@@ -169,8 +168,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public void addProfilePicPath(String path, Bitmap profilePic)
 	{
-		profilePicRequest = new HikeHttpRequest("/account/avatar", RequestType.PROFILE_PIC, null);
-		profilePicRequest.setFilePath(path);
+		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, path);
+		editor.commit();
 		this.profilePicSmall = profilePic;
 	}
 
@@ -561,35 +561,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* set the name */
 		publishProgress(new StateValue(State.NAME, userName));
 
-		if (this.profilePicRequest != null)
+		if (profilePicSmall != null)
 		{
-			try
-			{
-				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.performRequest(profilePicRequest, true);
-
 				byte[] bytes = Utils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
 				HikeUserDatabase db = HikeUserDatabase.getInstance();
 				db.setIcon(msisdn, bytes, false);
-
-				Utils.renameTempProfileImage(msisdn);
-
-			}
-			catch (NetworkErrorException e)
-			{
-				Logger.e("SignupTask", "Unable to set profile pic", e);
-				Utils.removeTempProfileImage(msisdn);
-				publishProgress(new StateValue(State.ERROR, null));
-				return Boolean.FALSE;
-			}
-			catch (IllegalStateException e)
-			{
-				Logger.e("SignupTask", "Null token", e);
-				Utils.removeTempProfileImage(msisdn);
-				publishProgress(new StateValue(State.ERROR, null));
-				return Boolean.FALSE;
-			}
 		}
+		publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
 
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
@@ -599,22 +577,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
-		deletePreviouslySavedProfileImages();
 		return Boolean.TRUE;
-	}
-
-	private void deletePreviouslySavedProfileImages()
-	{
-		String dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-		File dir = new File(dirPath);
-		if (!dir.exists())
-		{
-			return;
-		}
-		for (File file : dir.listFiles())
-		{
-			file.delete();
-		}
 	}
 
 	@Override
