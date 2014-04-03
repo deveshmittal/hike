@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -94,10 +93,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.isContactBlocked = isContactBlocked;
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
-		this.iconLoader = new IconLoader(context, mIconImageSize);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
+
 		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
+		profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
+		profileImageLoader.setHiResDefaultAvatar(true);
+
+		this.iconLoader = new IconLoader(context, mIconImageSize);
+		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 	}
 	
 
@@ -259,19 +264,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case HEADER:
 			String msisdn;
 			String name;
-			boolean hasCustomIcon;
 
 			if (groupProfile)
 			{
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
-				hasCustomIcon = groupConversation.hasCustomIcon();
 			}
 			else
 			{
 				msisdn = mContactInfo.getMsisdn();
 				name = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
-				hasCustomIcon = mContactInfo.hasCustomPhoto();
 			}
 
 			viewHolder.text.setText(name);
@@ -281,18 +283,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)
 			{
-				if (hasCustomIcon)
-				{
-					viewHolder.image.setBackgroundDrawable(null);
-					viewHolder.image.setScaleType(ScaleType.CENTER_CROP);
-					profileImageLoader.loadImage(mappedId, viewHolder.image, isListFlinging);
-				}
-				else
-				{
-					viewHolder.image.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, false));
-					viewHolder.image.setScaleType(ScaleType.CENTER_INSIDE);
-					viewHolder.image.setImageResource(groupProfile ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
-				}
+				profileImageLoader.loadImage(mappedId, viewHolder.image, isListFlinging);
 			}
 			else
 			{
@@ -418,7 +409,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 						mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
 						avatarFrame.setImageDrawable(null);
 					}
-					setAvatar(contactInfo.getMsisdn(), avatar, contactInfo.hasCustomPhoto());
+					setAvatar(contactInfo.getMsisdn(), avatar);
 
 					groupParticipantParentView.setOnLongClickListener(profileActivity);
 				}
@@ -464,7 +455,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{
-				setAvatar(statusMessage.getMsisdn(), viewHolder.icon, statusMessage.getMsisdnHasCustomIcon());
+				setAvatar(statusMessage.getMsisdn(), viewHolder.icon);
 				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
@@ -474,7 +465,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(myProfile ? context.getString(R.string.me) : profilePicStatusUpdate.getNotNullName());
 
 			viewHolder.subText.setText(R.string.status_profile_pic_notification);
-			setAvatar(profilePicStatusUpdate.getMsisdn(), viewHolder.icon, profilePicStatusUpdate.getMsisdnHasCustomIcon());
+			setAvatar(profilePicStatusUpdate.getMsisdn(), viewHolder.icon);
 
 			ImageViewerInfo imageViewerInfo2 = new ImageViewerInfo(profilePicStatusUpdate.getMappedId(), null, true);
 
@@ -530,7 +521,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case REQUEST:
 			String contactFirstName = mContactInfo.getFirstName();
 
-			setAvatar(mContactInfo.getMsisdn(), viewHolder.icon, mContactInfo.hasCustomPhoto());
+			setAvatar(mContactInfo.getMsisdn(), viewHolder.icon);
 
 			viewHolder.text.setText(contactFirstName);
 
@@ -620,20 +611,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		return v;
 	}
 
-	private void setAvatar(String msisdn, ImageView avatarView, boolean hasCustomIcon)
+	private void setAvatar(String msisdn, ImageView avatarView)
 	{
-		if (hasCustomIcon)
-		{
-			avatarView.setScaleType(ScaleType.FIT_CENTER);
-			avatarView.setBackgroundDrawable(null);
-			iconLoader.loadImage(msisdn, true, avatarView, true);
-		}
-		else
-		{
-			avatarView.setScaleType(ScaleType.CENTER_INSIDE);
-			avatarView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
-			avatarView.setImageResource(R.drawable.ic_default_avatar);
-		}
+		iconLoader.loadImage(msisdn, true, avatarView, true);
 	}
 
 	private class ViewHolder
@@ -701,18 +681,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	public IconLoader getIconImageLoader()
 	{
 		return iconLoader;
-	}
-
-	public void toggleHasCustomIcon(boolean b)
-	{
-		if (groupProfile)
-		{
-			groupConversation.setHasCustomIcon(b);
-		}
-		else
-		{
-			mContactInfo.setHasCustomPhoto(b);
-		}
 	}
 
 	private boolean isListFlinging;

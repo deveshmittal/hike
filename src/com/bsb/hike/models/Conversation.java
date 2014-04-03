@@ -62,8 +62,6 @@ public class Conversation implements Comparable<Conversation>
 
 	private int unreadCount;
 
-	private boolean hasCustomIcon;
-
 	public void setOnhike(boolean onhike)
 	{
 		this.onhike = onhike;
@@ -160,16 +158,6 @@ public class Conversation implements Comparable<Conversation>
 	public List<ConvMessage> getMessages()
 	{
 		return messages;
-	}
-
-	public void setHasCustomIcon(boolean b)
-	{
-		this.hasCustomIcon = b;
-	}
-
-	public boolean hasCustomIcon()
-	{
-		return hasCustomIcon;
 	}
 
 	@Override

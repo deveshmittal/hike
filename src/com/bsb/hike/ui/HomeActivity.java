@@ -723,6 +723,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						boolean isAddFriendsPopup = (Boolean) v.getTag();
 						Intent intent = new Intent(HomeActivity.this, isAddFriendsPopup?AddFriendsActivity.class:HikeListActivity.class);
+						intent.putExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, true);
 						startActivity(intent);
 						Editor editor = accountPrefs.edit();
 						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
@@ -736,7 +737,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 								getSupportActionBar().show();
 								findViewById(R.id.action_bar_img).setVisibility(View.GONE);
 							}
-						}, 500);
+						}, 800);
 						ftueAddFriendWindow.setVisibility(View.GONE);
 					}
 				});
@@ -1424,7 +1425,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			alphaIn.setStartOffset(1000);
 			alphaIn.setDuration(400);
 			networkErrorPopUp.setText(R.string.connected);
-			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.green));
+			networkErrorPopUp.setBackgroundColor(getResources().getColor(R.color.green_connected));
 			networkErrorPopUp.setVisibility(View.GONE);
 			networkErrorPopUp.setAnimation(alphaIn);
 			alphaIn.start();

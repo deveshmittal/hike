@@ -94,9 +94,11 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 	private int MAX_INVITE_LIMIT = 10;
 
-	private ViewGroup doneContainer;
+	private View doneBtn;
 
-	private TextView doneText;
+	private ImageView arrow;
+
+	private TextView postText;
 
 	private TextView title;
 
@@ -150,7 +152,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	private void init()
 	{
 		selectedFriends.clear();
-		doneContainer.setVisibility(View.GONE);
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
+
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		setLabel();
@@ -167,8 +170,9 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 
-		doneContainer = (ViewGroup) actionBarView.findViewById(R.id.done_container);
-		doneText = (TextView) actionBarView.findViewById(R.id.done_text);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
@@ -185,7 +189,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 		});
 
-		doneContainer.setOnClickListener(new OnClickListener()
+		doneBtn.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -571,8 +575,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		if (!selectedFriends.isEmpty())
 		{
-			doneContainer.setVisibility(View.VISIBLE);
-			doneText.setText(Integer.toString(selectedFriends.size()));
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
+			postText.setText(Integer.toString(selectedFriends.size()));
 			getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header_compose));
 
 			// title.setText(R.string.invite);

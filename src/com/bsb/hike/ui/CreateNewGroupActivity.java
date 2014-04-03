@@ -44,7 +44,11 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 	private EditText groupName;
 
-	private Button doneBtn;
+	private View doneBtn;
+
+	private ImageView arrow;
+
+	private TextView postText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -74,7 +78,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			@Override
 			public void afterTextChanged(Editable editable)
 			{
-				doneBtn.setEnabled(!TextUtils.isEmpty(editable));
+				Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, !TextUtils.isEmpty(editable));
 			}
 		});
 
@@ -94,11 +98,14 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		doneBtn.setText(R.string.next_signup);
-		doneBtn.setEnabled(false);
+		postText.setText(R.string.next_signup);
+
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 
 		title.setText(R.string.new_group);
 

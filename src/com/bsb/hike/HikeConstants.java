@@ -383,6 +383,8 @@ public class HikeConstants
 
 	public static final String REQUEST_DP = "rdp";
 
+	public static final String C_TIME_STAMP = "cts";
+
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
@@ -793,7 +795,11 @@ public class HikeConstants
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
+	
+	public static final String SCREEN = "screen";
 
+	public static final String FTUE = "ftue";
+	
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -1067,6 +1073,8 @@ public class HikeConstants
 		public static final String GROUP_ID = "groupId";
 
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
+
+		public static final String CALLED_FROM_FTUE_POPUP = "calledFromFtuePopUP";
 	}
 
 	public static final class LogEvent
@@ -1439,7 +1447,7 @@ public class HikeConstants
 	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3 };
 
 	//TODO need to finalize this with AM
-	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 6;
+	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 	
 	public static enum WelcomeTutorial
 	{

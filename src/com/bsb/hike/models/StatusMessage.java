@@ -42,8 +42,6 @@ public class StatusMessage
 
 	private Protip protip;
 
-	private boolean msisdnHasCustomIcon;
-
 	public StatusMessage(JSONObject statusMessageJson) throws JSONException
 	{
 		this.msisdn = statusMessageJson.getString(HikeConstants.FROM);
@@ -172,16 +170,6 @@ public class StatusMessage
 	public Protip getProtip()
 	{
 		return protip;
-	}
-
-	public void setMsisdnHasCustomIcon(boolean b)
-	{
-		this.msisdnHasCustomIcon = b;
-	}
-
-	public boolean getMsisdnHasCustomIcon()
-	{
-		return msisdnHasCustomIcon;
 	}
 
 	public String getTimestampFormatted(boolean pretty, Context context)
