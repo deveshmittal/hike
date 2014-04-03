@@ -590,7 +590,7 @@
     <string name="how_hike_feel">How does hike make you feel?</string>
     <string name="feedback_success">Thanks for your feedback!</string>
     <string name="phone_num">Phone Number</string>
-    <string name="pin">Pin</string>
+    <string name="pin">PIN</string>
     <string name="name">Name</string>
     <string name="terms_privacy">Terms and Privacy</string>
     <string name="invite_now">Invite now</string>
@@ -841,7 +841,7 @@
     <string name="verifying_num_signup">Verifying your number...</string>
     <string name="invalid_num_signup">That\'s an invalid phone number. Try again.</string>
     <string name="call_me_signup">Call Me</string>
-    <string name="verify_pin_signup">Verifying pin..</string>
+    <string name="verify_pin_signup">Verifying PIN...</string>
     <string name="wrong_num_signup">Entered a wrong number? Tap here</string>
     <string name="all_set_signup">You\'re all set on %1$s</string>
     <string name="enter_name_signup">What\'s your name?</string>
