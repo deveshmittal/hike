@@ -13,10 +13,10 @@
 
         <ImageView
             android:id="@+id/group_profile_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_new_group_default" />
+            android:src="@drawable/ic_default_avatar_group" />
 
         <ImageButton
             android:id="@+id/change_image"

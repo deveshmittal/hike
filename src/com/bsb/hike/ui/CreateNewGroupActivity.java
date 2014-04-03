@@ -86,6 +86,8 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 		String uid = preferences.getString(HikeMessengerApp.UID_SETTING, "");
 		groupId = uid + ":" + System.currentTimeMillis();
+
+		groupImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(groupId, true));
 	}
 
 	private void setupActionBar()
