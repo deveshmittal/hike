@@ -8,6 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="onChangeImageClicked"
         android:layout_marginTop="28dp" >
 
         <ImageView
@@ -24,7 +25,6 @@
             android:layout_alignRight="@id/group_profile_image"
             android:layout_alignTop="@id/group_profile_image"
             android:background="@null"
-            android:onClick="onChangeImageClicked"
             android:paddingBottom="10dp"
             android:paddingLeft="10dp"
             android:src="@drawable/ic_new_group_image" />
