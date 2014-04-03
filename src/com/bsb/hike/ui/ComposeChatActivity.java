@@ -439,7 +439,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (existingGroupId != null)
+				if (existingGroupId != null || createGroup)
 				{
 					ComposeChatActivity.this.finish();
 				}
