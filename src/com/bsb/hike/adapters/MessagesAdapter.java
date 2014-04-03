@@ -1092,20 +1092,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.AUDIO)
 			{
-				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
-				int size = (int) (R.dimen.file_message_item_size * Utils.densityMultiplier);
-				circle.setIntrinsicHeight(size);
-				circle.setIntrinsicWidth(size);
-				circle.getPaint().setColor(context.getResources().getColor(R.color.black_75));
 				createFileThumb(holder.fileThumb);
-				holder.fileThumb.setBackgroundDrawable(circle);
-				holder.fileThumb.setImageResource(R.drawable.ic_play_audio);
 				holder.fileName.setText(hikeFile.getFileName());
 				holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-
+				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+				if(!TextUtils.isEmpty(ext))
+				{
+					holder.fileExtension.setText(ext);
+				}
+				else
+				{
+					holder.fileExtension.setText("?");
+				}
+				
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileSizeExt.setVisibility(View.VISIBLE);
+				holder.fileExtension.setVisibility(View.VISIBLE);
 				holder.fileDetails.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
@@ -1213,8 +1216,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
 				holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-				holder.fileExtension.setText("." + Utils.getFileExtension(hikeFile.getFileName()));
-
+				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+				if(!TextUtils.isEmpty(ext))
+				{
+					holder.fileExtension.setText(ext);
+				}
+				else
+				{
+					holder.fileExtension.setText("?");
+				}
+				
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileSizeExt.setVisibility(View.VISIBLE);
