@@ -10,10 +10,8 @@
         android:id="@+id/txt_img1"
         android:layout_width="match_parent"
         android:layout_height="@dimen/signup_header_height"
-        android:gravity="center"
         android:text="@string/whats_your_number"
-        android:textColor="@color/phone_entering_header"
-        android:textSize="24sp" />
+        style="@style/SignupHeader" />
 
     <LinearLayout
             android:id="@+id/loading_layout"
@@ -36,8 +34,7 @@
 		        android:paddingLeft="15dp"
 		        android:gravity="center"
 		        android:text="@string/hang_on"
-		        android:textColor="@color/phone_entering_header"
-		        android:textSize="24sp" />
+        		style="@style/SignupHeader" />
     </LinearLayout>
     
     <RelativeLayout

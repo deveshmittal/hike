@@ -218,7 +218,11 @@ public class TagEditText extends EditText
 				}
 				else
 				{
-					listener.charResetAfterSeperator();
+					if (null != lastAfterSepCallback)
+					{
+						listener.charResetAfterSeperator();
+						lastAfterSepCallback = null;
+					}
 				}
 			}
 		}

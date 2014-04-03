@@ -50,11 +50,9 @@
                 android:listSelector="@android:color/transparent" >
             </ListView>
 
-            <!-- <include
+            <include
                 android:id="@android:id/empty"
-                layout="@layout/nudge_tutorial_pop_up" /> -->
-
-            
+                layout="@layout/nudge_tutorial_pop_up" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sms_counter"
@@ -74,13 +72,13 @@
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/network_error_chat"
                 android:layout_width="match_parent"
-                android:layout_height="28dp"
+                android:layout_height="35dp"
                 android:background="@color/updates_text"
                 android:gravity="center"
                 android:paddingLeft="18dp"
                 android:text="@string/no_internet_connection"
                 android:textColor="@color/actionbar_text"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:visibility="gone" />
 
             <com.bsb.hike.view.CustomFontTextView
@@ -165,20 +163,19 @@
 
                 <include layout="@layout/new_message_indicator" />
             </RelativeLayout>
-            
+
             <RelativeLayout
                 android:id="@+id/scroll_top_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="12dp"
+                android:layout_alignParentTop="true"
                 android:layout_marginRight="16dp"
+                android:layout_marginTop="12dp"
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
             </RelativeLayout>
-
         </RelativeLayout>
 
         <View
@@ -205,7 +202,7 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="@drawable/bg_overflow_menu_selector"
+                    android:background="@drawable/compose_view_btn_selector"
                     android:onClick="onSendClick"
                     android:src="@drawable/ic_walkie_talkie"
                     android:state_enabled="false" />
@@ -216,12 +213,12 @@
                     android:layout_height="40dp"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/bg_overflow_menu_selector"
+                    android:background="@drawable/compose_view_btn_selector"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker" />
 
-                <RelativeLayout
+                <LinearLayout
                     android:id="@+id/tb_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -229,42 +226,38 @@
                     android:layout_toLeftOf="@id/send_message"
                     android:layout_toRightOf="@id/sticker_btn"
                     android:background="@drawable/bg_compose_text"
-                    android:gravity="center_vertical" >
+                    android:gravity="bottom" >
 
-                    <ImageButton
-                        android:id="@+id/emo_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:background="@drawable/bg_overflow_menu_selector"
-                        android:onClick="onEmoticonBtnClicked"
-                        android:paddingBottom="9dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:paddingTop="8dp"
-                        android:src="@drawable/ic_smiley" />
-                    
                     <com.bsb.hike.view.CustomFontEditText
                         android:id="@+id/msg_compose"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:background="@null"
-                        android:layout_toLeftOf="@id/emo_btn"
                         android:gravity="center_vertical"
                         android:hint="@string/type_to_compose"
                         android:imeOptions="actionSend"
                         android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
-                        android:lineSpacingExtra="3dp"
                         android:maxLength="@integer/max_length_message"
                         android:maxLines="4"
-                        android:minHeight="40dp"
+                        android:minHeight="30dp"
+                        android:lineSpacingExtra="3dp"
                         android:paddingLeft="5dp"
-                        android:paddingRight="5dp"
                         android:textColor="@color/chat_color"
                         android:textColorHint="#cdcdc8"
-                        android:textSize="15sp" />
-                </RelativeLayout>
+                        android:layout_weight="0.9"
+                        android:textSize="17sp" />
+                    
+                    <ImageButton
+                        android:id="@+id/emo_btn"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/compose_view_btn_selector"
+                        android:onClick="onEmoticonBtnClicked"
+                        android:paddingBottom="7dp"
+                        android:paddingTop="12dp"
+                        android:src="@drawable/ic_smiley" />
+                    
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/info_layout"

@@ -72,6 +72,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_blue;
+		}
 	},
 
 	SPRING
@@ -141,6 +147,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_forest_study_sporty;
 		}
 
 	},
@@ -213,6 +225,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom_3x;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_hikin_couple_mountain;
+		}
 
 	},
 
@@ -283,6 +301,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom_3x;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_rains_beach_2;
 		}
 
 	},
@@ -355,6 +379,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_forest_study_sporty;
+		}
 
 	},
 
@@ -425,6 +455,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom_2x;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_chatty_bechy_techy;
 		}
 
 	},
@@ -497,6 +533,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom_3x;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_rains_beach_2;
+		}
 
 	},
 
@@ -567,6 +609,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_music;
 		}
 
 	},
@@ -639,6 +687,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_mr_right_exam;
+		}
 
 	},
 
@@ -709,6 +763,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_hikin_couple_mountain;
 		}
 
 	},
@@ -781,6 +841,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_mr_right_exam;
+		}
 
 	},
 
@@ -851,6 +917,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_stary_Space;
 		}
 
 	},
@@ -923,6 +995,11 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
 
 	},
 
@@ -993,6 +1070,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom_dark;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_night;
 		}
 
 	},
@@ -1065,6 +1148,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom_dark;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_night;
+		}
 
 	},
 
@@ -1135,6 +1224,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_owl;
 		}
 
 	},
@@ -1207,6 +1302,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
 
 	},
 	CHATTY
@@ -1276,6 +1377,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_chatty_bechy_techy;
 		}
 
 	},
@@ -1347,6 +1454,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
 
 	},
 	STARRY
@@ -1416,6 +1529,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_stary_Space;
 		}
 
 	},
@@ -1487,6 +1606,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
 
 	},
 	SPORTY
@@ -1557,6 +1682,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_forest_study_sporty;
+		}
 	},
 	SMILEY
 	{
@@ -1625,6 +1756,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
 		}
 
 	},
@@ -1696,6 +1833,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_creepy;
+		}
 
 	},
 	CELEBRATION
@@ -1765,6 +1908,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_celebration_space;
 		}
 
 	},
@@ -1836,6 +1985,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
 
 	},
 	FOREST
@@ -1905,6 +2060,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_forest_study_sporty;
 		}
 
 	},
@@ -1976,6 +2137,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
 
 	},
 	TECHY
@@ -2045,6 +2212,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_chatty_bechy_techy;
 		}
 
 	},
@@ -2116,6 +2289,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
 
 	},
 	BEACH
@@ -2185,6 +2364,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_chatty_bechy_techy;
 		}
 
 	},
@@ -2256,6 +2441,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
 
 	},
 	STUDY
@@ -2325,6 +2516,12 @@ public enum ChatTheme
 		public int systemMessageLayoutId()
 		{
 			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_forest_study_sporty;
 		}
 
 	},
@@ -2397,6 +2594,11 @@ public enum ChatTheme
 			return R.layout.participant_info_custom;
 		}
 
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
 	},
 	BIKER
 	{
@@ -2466,6 +2668,12 @@ public enum ChatTheme
 		{
 			return R.layout.participant_info_custom;
 		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
 
 	};
 
@@ -2490,6 +2698,8 @@ public enum ChatTheme
 	public abstract int inLineUpdateBGResId();
 
 	public abstract int systemMessageLayoutId();
+	
+	public abstract int bubbleColor();
 
 	public static ChatTheme getThemeFromId(String bgId)
 	{

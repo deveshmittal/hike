@@ -10,13 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="240"
-        android:gravity="center"
         android:text="@string/tutorial1_header_title"
-        android:textColor="@color/phone_entering_header"
-        android:textSize="24sp"
-        android:layout_marginBottom="8dp"
         android:clickable="true" 
-        android:onClick="onHikeIconClicked" />
+        android:onClick="onHikeIconClicked"
+        style="@style/SignupHeader" />
 
     <LinearLayout
         android:layout_width="match_parent"
