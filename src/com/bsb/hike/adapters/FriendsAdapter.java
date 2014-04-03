@@ -219,8 +219,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			try
 			{
-				String regex = ".*?\\b" + textToBeFiltered + ".*?\\b";
-				Log.d(TAG, "filter list called and regex is " + regex);
+				// String regex = ".*?\\b" + textToBeFiltered + ".*?\\b";
+				// Log.d(TAG, "filter list called and regex is " + regex);
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
@@ -230,7 +230,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 						// for word boundary
 						try
 						{
-							if (name.matches(regex))
+							if (name.contains(textToBeFiltered))
 							{
 								listToUpdate.add(info);
 								continue;
@@ -329,7 +329,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			smsContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredSmsContactsList.size()), context.getString(R.string.sms_contacts), CONTACT_PHONE_NUM);
 			updateSMSContacts(smsContactsSection);
 		}
-		
+
 		notifyDataSetChanged();
 		setEmptyView();
 	}
