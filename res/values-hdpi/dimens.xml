@@ -22,5 +22,5 @@
 	<dimen name="addfriend_popup_content_margin_top">20dp</dimen>
 	<dimen name="addfriend_popup_title_padding_right">10dp</dimen>
 	<dimen name="addfriend_popup_title_margin_bottom">6dp</dimen>
-	<dimen name="addfriend_popup_btn_margin_bottom">15dp</dimen>
+	<dimen name="addfriend_popup_btn_margin_bottom">12dp</dimen>
 </resources>
