@@ -21,7 +21,6 @@
         android:gravity="center"
         android:paddingLeft="15dp"
         android:text="@string/scanning_your_contacts"
-        android:textColor="@color/phone_entering_header"
-        android:textSize="24sp" />
+        style="@style/SignupHeader" />
 
 </LinearLayout>

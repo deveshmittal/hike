@@ -13,8 +13,7 @@
         android:layout_weight="127"
         android:gravity="center"
         android:text="@string/pick_one"
-        android:textColor="@color/phone_entering_header"
-        android:textSize="24sp" />
+        style="@style/SignupHeader" />
 
     <LinearLayout
         android:layout_width="match_parent"

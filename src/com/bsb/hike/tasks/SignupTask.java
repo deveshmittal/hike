@@ -363,28 +363,29 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				while (this.data == null);
-			}
-			
-			if(canPullInSms)
-			{
-				this.context.getApplicationContext().unregisterReceiver(receiver);
-				receiver = null;
-			}
-			
-			if(getDisplayChild() == SignupActivity.PIN)
-			{
-				publishProgress(new StateValue(State.PIN_VERIFIED, null));
-				synchronized (this)
+				
+				if(canPullInSms && receiver != null)
 				{
-					try
+					this.context.getApplicationContext().unregisterReceiver(receiver);
+					receiver = null;
+				}
+				
+				if(getDisplayChild() == SignupActivity.PIN)
+				{
+					publishProgress(new StateValue(State.PIN_VERIFIED, null));
+					synchronized (this)
 					{
-						this.wait();
-					}
-					catch (InterruptedException e)
-					{
-						Log.e("SignupTask", "Task was interrupted while taking the pin", e);
+						try
+						{
+							this.wait();
+						}
+						catch (InterruptedException e)
+						{
+							Log.e("SignupTask", "Task was interrupted while taking the pin", e);
+						}
 					}
 				}
+				
 			}
 
 			Log.d("SignupTask", "saving MSISDN/Token");
@@ -411,18 +412,18 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			Log.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
+		if(userName != null)
+		{
+			publishProgress(new StateValue(State.GENDER, ""));
+			if(isFemale != null)
+			{
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			}
+		}
+
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
-			if(userName != null)
-			{
-				publishProgress(new StateValue(State.GENDER, ""));
-				if(isFemale != null)
-				{
-					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
-				}
-			}
-			
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
 			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
@@ -515,7 +516,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
-				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
+				{
+					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				}
 				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 			}
 			catch (InterruptedException e)

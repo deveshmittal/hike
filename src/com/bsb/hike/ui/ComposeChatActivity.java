@@ -140,7 +140,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		listView = (ListView) findViewById(R.id.list);
 
 		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId);
-		adapter.setShowExtraAtFirst(true);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
@@ -264,6 +263,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			else
 			{
 				Utils.startChatThread(this, contactInfo);
+				finish();
 			}
 		}
 	}
@@ -287,7 +287,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		adapter.addContact((ContactInfo) data);
 		int selectedCount = adapter.getSelectedContactCount();
-		setupMultiSelectActionBar();
+		if (adapter.getSelectedContactCount() == 1)
+		{
+			setupMultiSelectActionBar();
+		}
+		else
+		{
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
+		}
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
 	}
 
@@ -486,7 +493,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			multiSelectActionBar = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 		}
-		Button sendBtn = (Button) multiSelectActionBar.findViewById(R.id.save);
+		View sendBtn = multiSelectActionBar.findViewById(R.id.done_container);
 		View closeBtn = multiSelectActionBar.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 

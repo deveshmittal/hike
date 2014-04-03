@@ -70,17 +70,19 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private Map<String, Boolean> toggleBlockMap;
 
-	private ViewGroup doneContainer;
+	private View doneBtn;
 
-	private TextView doneText;
+	private ImageView arrow;
 
-	private Button doneBtn;
+	private TextView postText;
 
 	private TextView title;
 
 	private ImageView backIcon;
 	
 	List<Pair<AtomicBoolean, ContactInfo>> firstSectionList;
+	
+	private boolean calledFromFTUE = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -95,6 +97,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		else
 		{
 			type = Type.INVITE;
+		}
+		
+		if (getIntent().getBooleanExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, false))
+		{
+			calledFromFTUE = true;
 		}
 
 		selectedContacts = new HashSet<String>();
@@ -125,7 +132,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		if (type != Type.BLOCK)
 		{
 			selectedContacts.clear();
-			doneContainer.setVisibility(View.GONE);
+			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
 		setLabel();
@@ -143,21 +150,17 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+
+		doneBtn.setVisibility(View.VISIBLE);
+		
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
+
 		if (type != Type.BLOCK)
 		{
-			doneContainer = (ViewGroup) actionBarView.findViewById(R.id.done_container);
-
-			int padding = (int) (7 * Utils.densityMultiplier);
-			doneContainer.setPadding(padding, 0, padding, 0);
-
-			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
-			doneText.setTextSize(14);
-			doneText.setTypeface(doneText.getTypeface(), Typeface.BOLD);
-
-			View tickView = actionBarView.findViewById(R.id.ic_tick);
-			tickView.setVisibility(View.GONE);
-
-			doneContainer.setOnClickListener(new OnClickListener()
+			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
@@ -169,11 +172,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		}
 		else
 		{
-			doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
-			doneBtn.setVisibility(View.VISIBLE);
-			doneBtn.setText(R.string.save);
-			doneBtn.setEnabled(false);
-
+			postText.setText(R.string.save);
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
@@ -467,6 +466,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				data.put(HikeConstants.LIST, inviteArray);
 
 				mqttPacket.put(HikeConstants.DATA, data);
+				
+				if(calledFromFTUE)
+				{
+					JSONObject ftueData = new JSONObject();
+					ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
+					mqttPacket.put(HikeConstants.METADATA, ftueData);
+				}
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
 
@@ -501,11 +507,12 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		if (!selectedContacts.isEmpty())
 		{
-			doneContainer.setVisibility(View.VISIBLE);
-			doneText.setText(getString(R.string.send_invite, selectedContacts.size()));
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
+			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		else
 		{
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 			init();
 		}
 	}
@@ -574,7 +581,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 			else
 			{
-				doneBtn.setEnabled(true);
+				Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
 				boolean blocked = pair.first.get();
 				toggleBlockMap.put(msisdn, blocked);
 			}

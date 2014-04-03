@@ -121,6 +121,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -137,8 +138,8 @@ import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -962,7 +963,6 @@ public class Utils
 
 		ContactInfo contactInfo = new ContactInfo(myName, myMsisdn, myName, myMsisdn, true);
 		contactInfo.setHikeJoinTime(userJoinTime);
-		contactInfo.setHasCustomPhoto(HikeUserDatabase.getInstance().hasIcon(myMsisdn));
 
 		return contactInfo;
 	}
@@ -2782,6 +2782,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
@@ -3730,5 +3731,12 @@ public class Utils
 			return true;
 		}
 		return false;
+	}
+
+	public static void toggleActionBarElementsEnable(View doneBtn, ImageView arrow, TextView postText, boolean enabled)
+	{
+		doneBtn.setEnabled(enabled);
+		arrow.setEnabled(enabled);
+		postText.setEnabled(enabled);
 	}
 }

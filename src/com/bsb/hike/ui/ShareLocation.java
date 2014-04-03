@@ -125,7 +125,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 			// 16ms = 60fps
 			.setSmallestDisplacement(4).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-	private Button doneBtn;
+	private View doneBtn;
 
 	private TextView title;
 
@@ -312,9 +312,11 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(R.string.share_location);
 
-		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
 		doneBtn.setVisibility(View.VISIBLE);
-		doneBtn.setText(R.string.send);
+
+		TextView postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		postText.setText(R.string.send);
 
 		backContainer.setOnClickListener(new OnClickListener()
 		{

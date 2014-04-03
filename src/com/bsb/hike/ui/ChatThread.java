@@ -310,7 +310,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.SHOWN_UNDELIVERED_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.ICON_REMOVED };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
 
 	private EmoticonType emoticonType;
 
@@ -2017,8 +2017,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 		Utils.showTip(this, TipType.CHAT_BG_FTUE, tipView);
-		Animation chatBgFtueAnimation = AnimationUtils.loadAnimation(this, R.anim.chat_bg_ftue_anim);
-		tipView.startAnimation(chatBgFtueAnimation);
 	}
 
 	private void closeChatBgFtueTip()
@@ -2050,8 +2048,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 		Utils.showTip(this, TipType.EMOTICON, tipView);
-		Animation stickerFtueAnimation = AnimationUtils.loadAnimation(this, R.anim.sticker_ftue_anim);
-		findViewById(R.id.sticker_image_icon).startAnimation(stickerFtueAnimation);
 	}
 
 	private void setupActionBar(boolean initialising)
@@ -2251,7 +2247,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			removeSMSToggle();
 
-			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
 			if ((mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).hasSmsUser())
 			{
@@ -2272,7 +2267,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.bg_overflow_menu_selector);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
@@ -2641,7 +2635,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
-		else if (HikePubSub.ICON_CHANGED.equals(type) || HikePubSub.ICON_REMOVED.equals(type))
+		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
 			String msisdn = (String) object;
 			if (mContactNumber.equals(msisdn))
@@ -3387,11 +3381,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		indicatorText.setVisibility(View.VISIBLE);
 		if (unreadMessageCount == 1)
 		{
-			indicatorText.setText(getResources().getString(R.string.one_unread_message));
+			indicatorText.setText(getResources().getString(R.string.one_new_message));
 		}
 		else
 		{
-			indicatorText.setText(getResources().getString(R.string.num_unread_messages, unreadMessageCount));
+			indicatorText.setText(getResources().getString(R.string.num_new_messages, unreadMessageCount));
 		}
 	}
 
@@ -3695,7 +3689,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
-			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.MATRIX);
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
 			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
 		}
 		else
@@ -3776,7 +3770,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 
-		Button saveThemeBtn = (Button) actionBarView.findViewById(R.id.save);
+		View saveThemeBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
@@ -3884,7 +3878,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.contact), 5, R.drawable.ic_attach_contact));
 		}
-		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_contact));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
 
 		dismissPopupWindow();
 

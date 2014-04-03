@@ -2,44 +2,48 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1134"
+    android:weightSum="1038"
     android:background="@color/white"
     android:orientation="vertical" >
 
-    <View
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:layout_weight="14"/>
-    
     <LinearLayout
-        android:id="@+id/terms_and_conditions"
         android:layout_width="70dp"
-        android:layout_height="0dp"
+        android:layout_height="48dp"
         android:layout_gravity="right|top"
-        android:layout_weight="62"
         android:orientation="horizontal" >
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:background="#eaeced" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:gravity="center"
-            android:text="@string/terms"
-            android:textColor="#adb2b9"
-            android:textSize="16sp" />
+        
+	    <View
+	        android:layout_width="1dp"
+	        android:layout_height="match_parent"
+	        android:layout_gravity="bottom"
+	        android:layout_marginTop="8dp"
+	        android:layout_marginBottom="8dp"
+	        android:background="#eaeced" />
+	        
+	    <LinearLayout
+	        android:id="@+id/terms_and_conditions"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_gravity="right|top"
+	        android:orientation="horizontal"
+	        android:background="@drawable/bg_overflow_menu_selector" >
+	
+	        <com.bsb.hike.view.CustomFontTextView
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:layout_gravity="bottom"
+	            android:gravity="center"
+	            android:text="@string/terms"
+	            android:textColor="#adb2b9"
+	            android:textSize="16sp" />
+	    </LinearLayout>
     </LinearLayout>
     
     <LinearLayout
         android:id="@+id/hike_logo_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="866"
+        android:layout_weight="846"
         android:clickable="true"
         android:orientation="vertical"
         android:visibility="visible" >
@@ -73,12 +77,9 @@
             android:layout_centerHorizontal="true"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
-            android:shadowColor="@color/black"
-            android:shadowDy="0.7"
-            android:shadowRadius="0.7"
             android:text="@string/get_started"
             android:textColor="@drawable/signup_btn_text"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold|italic" />
 
         <LinearLayout
@@ -106,11 +107,8 @@
                 android:paddingLeft="10dp"
                 android:layout_marginLeft="3dp"
                 android:singleLine="true"
-                android:shadowColor="@color/black"
-            	android:shadowDy="0.7"
-            	android:shadowRadius="0.7"
             	android:textColor="@drawable/signup_btn_text"
-            	android:textSize="14sp"
+            	android:textSize="15sp"
             	android:textStyle="bold|italic"
                 android:text="@string/pulling_digits_signup" />
         </LinearLayout>
