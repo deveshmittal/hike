@@ -102,17 +102,11 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v)
 			{
-				boolean isChecked = togglePreference(HikeConstants.RECEIVE_SMS_PREF, (CheckBox) v.findViewById(R.id.checkbox));
+				boolean isChecked = togglePreference(HikeConstants.RECEIVE_SMS_PREF, (CheckBox) v.findViewById(R.id.receive_sms_checkbox));
 
 				Utils.sendDefaultSMSClientLogEvent(isChecked);
 
-				if (!isChecked)
-				{
-					Editor editor = PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).edit();
-					editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, false);
-					editor.commit();
-				}
-				else
+				if (isChecked)
 				{
 					if (!CreditsActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
 					{
@@ -128,7 +122,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v)
 			{
-				boolean isChecked = togglePreference(HikeConstants.FREE_SMS_PREF, (CheckBox) v.findViewById(R.id.checkbox));
+				boolean isChecked = togglePreference(HikeConstants.FREE_SMS_PREF, (CheckBox) v.findViewById(R.id.free_sms_checkbox));
 
 				freeSmsContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
 
@@ -154,10 +148,10 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void setupPreferenceLayout(View parent, boolean receiveSmsPref)
 	{
-		TextView title = (TextView) parent.findViewById(R.id.title);
-		TextView summary = (TextView) parent.findViewById(R.id.summary);
-		ImageView icon = (ImageView) parent.findViewById(R.id.icon);
-		CheckBox checkBox = (CheckBox) parent.findViewById(R.id.checkbox);
+		TextView title = (TextView) parent.findViewById(receiveSmsPref ? R.id.receive_sms_title : R.id.free_sms_title);
+		TextView summary = (TextView) parent.findViewById(receiveSmsPref ? R.id.receive_sms_summary : R.id.free_sms_summary);
+		ImageView icon = (ImageView) parent.findViewById(receiveSmsPref ? R.id.receive_sms_icon : R.id.free_sms_icon);
+		CheckBox checkBox = (CheckBox) parent.findViewById(receiveSmsPref ? R.id.receive_sms_checkbox : R.id.free_sms_checkbox);
 
 		title.setText(receiveSmsPref ? R.string.default_client_header : R.string.free_sms);
 		summary.setText(receiveSmsPref ? R.string.default_client_info : R.string.free_sms_msg);
