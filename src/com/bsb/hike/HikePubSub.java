@@ -303,6 +303,8 @@ public class HikePubSub implements Runnable
 
 	public static final String CONTACT_SYNCED = "contactSynced";
 
+	public static final String MQTT_CONNECTED = "mqttConnected";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
