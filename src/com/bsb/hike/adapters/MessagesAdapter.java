@@ -3041,14 +3041,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		container.setOnClickListener(this);
 
 		container.setOnLongClickListener(this);
-
-		/*
-		 * Make the list scroll to the end to show the text.
-		 */
-		if (fromHandler)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOWN_UNDELIVERED_MESSAGE, null);
-		}
 	}
 
 	private String getUndeliveredTextRes()

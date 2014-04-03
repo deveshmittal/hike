@@ -235,8 +235,6 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_SMS_SYNC_DIALOG = "showSMSSyncDialog";
 
-	public static final String SHOWN_UNDELIVERED_MESSAGE = "shownUndeliveredMessage";
-
 	public static final String STICKER_DOWNLOADED = "stickerDownloaded";
 
 	public static final String STICKER_CATEGORY_DOWNLOADED = "stickerCategoryDownloaded";
