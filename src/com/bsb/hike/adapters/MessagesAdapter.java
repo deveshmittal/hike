@@ -2291,24 +2291,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
-		fileThumb.setBackgroundResource(R.drawable.bg_grey);
+		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
 		fileThumb.setImageResource(0);
 	}
-
-	// private void createFileThumbWide(ImageView fileThumb)
-	// {
-	// // TODO Auto-generated method stub
-	// Log.d(getClass().getSimpleName(), "creating default thumb wide. . . ");
-	// int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
-	// Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
-	// fileThumb.getLayoutParams().height = pixels;
-	// pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_wide_size);
-	// Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
-	// fileThumb.getLayoutParams().width = pixels;
-	// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
-	// fileThumb.setImageResource(0);
-	// }
 
 	// View.OnClickListener fileClick = new OnClickListener()
 	// {
