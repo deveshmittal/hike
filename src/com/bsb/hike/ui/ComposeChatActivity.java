@@ -318,6 +318,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		case CREATE_GROUP_MODE:
 			// createGroupHeader.setVisibility(View.GONE);
 			adapter.showCheckBoxAgainstItems(true);
+			adapter.setShowExtraAtFirst(false);
 			tagEditText.clear(false);
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
@@ -327,6 +328,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// createGroupHeader.setVisibility(View.VISIBLE);
 			tagEditText.clear(false);
 			adapter.clearAllSelection(false);
+			adapter.setShowExtraAtFirst(true);
 			adapter.removeFilter();
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
 			setActionBar();
@@ -446,14 +448,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (existingGroupId != null || createGroup)
-				{
-					ComposeChatActivity.this.finish();
-				}
-				else
-				{
-					onBackPressed();
-				}
+
+				onBackPressed();
 			}
 		});
 		setTitle();
@@ -667,6 +663,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		if (composeMode == CREATE_GROUP_MODE)
 		{
+			if (existingGroupId != null || createGroup)
+			{
+				ComposeChatActivity.this.finish();
+				return;
+			}
 			setMode(START_CHAT_MODE);
 			return;
 		}
