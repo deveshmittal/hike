@@ -718,6 +718,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_num);
 			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
 			infoTxt.setVisibility(View.VISIBLE);
+			verifiedPin = layout.findViewById(R.id.verified_pin);
 			break;
 		case R.id.pin_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);

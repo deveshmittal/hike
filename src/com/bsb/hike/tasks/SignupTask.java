@@ -370,19 +370,16 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					receiver = null;
 				}
 				
-				if(getDisplayChild() == SignupActivity.PIN)
+				publishProgress(new StateValue(State.PIN_VERIFIED, null));
+				synchronized (this)
 				{
-					publishProgress(new StateValue(State.PIN_VERIFIED, null));
-					synchronized (this)
+					try
 					{
-						try
-						{
-							this.wait();
-						}
-						catch (InterruptedException e)
-						{
-							Logger.e("SignupTask", "Task was interrupted while taking the pin", e);
-						}
+						this.wait();
+					}
+					catch (InterruptedException e)
+					{
+						Logger.e("SignupTask", "Task was interrupted while taking the pin", e);
 					}
 				}
 				
