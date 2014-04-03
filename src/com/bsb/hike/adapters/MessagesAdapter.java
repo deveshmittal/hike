@@ -256,7 +256,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private VoiceMessagePlayer voiceMessagePlayer;
 
 	private String statusIdForTip;
-	
+
 	private long msgIdForSdrTip = -1;
 
 	private SharedPreferences preferences;
@@ -296,7 +296,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.chatTheme = ChatTheme.DEFAULT;
 		this.mSelectedItemsIds = new HashSet<Integer>();
 		setLastSentMessagePosition();
-		this.shownSdrIntroTip  = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
+		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -877,16 +877,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.stickerImage.setVisibility(View.VISIBLE);
 					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
 					{
-						//TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 						int idx = sticker.getStickerIndex();
-						if(idx >= 0)
+						if (idx >= 0)
 							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
 					}
 					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 					{
-						//TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 						int idx = sticker.getStickerIndex();
-						if(idx >= 0)
+						if (idx >= 0)
 							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
 					}
 				}
@@ -989,12 +989,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-				
+
 				boolean showTip = false;
 
-				if( viewType == ViewType.SEND_HIKE )
+				if (viewType == ViewType.SEND_HIKE)
 				{
-					if (!shownSdrIntroTip && convMessage.getState() == State.SENT_DELIVERED_READ )
+					if (!shownSdrIntroTip && convMessage.getState() == State.SENT_DELIVERED_READ)
 					{
 						if (msgIdForSdrTip == -1)
 						{
@@ -1005,7 +1005,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							showTip = true;
 						}
 					}
-	
+
 					if (showTip)
 					{
 						msgIdForSdrTip = convMessage.getMsgID();
@@ -1017,7 +1017,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 			}
-			
 
 			// if(isDefaultTheme)
 			// {
@@ -1041,19 +1040,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			HikeFileType hikeFileType = hikeFile.getHikeFileType();
 			File file = hikeFile.getFile();
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			if (convMessage.isSent())
 			{
-				if (convMessage.isSent())
-				{
-					fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
-				}
-				else
-				{
-					fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
-				}
-				Log.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
-				Log.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
+				fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
 			}
+			else
+			{
+				fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+			}
+			Log.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
+			Log.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
 
 			if (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING)
 				holder.messageContainer.setVisibility(View.VISIBLE);
@@ -1114,7 +1110,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			{
-				
+
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
 				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
 				circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
@@ -1167,7 +1163,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					createFileThumb(holder.fileThumb);
+					createMediaThumb(holder.fileThumb);
+					holder.fileThumb.setImageResource(R.drawable.ic_video_play);
 				}
 
 				holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
@@ -1204,14 +1201,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if (hikeFileType == HikeFileType.IMAGE)
 				{
-					createFileThumb(holder.fileThumb);
-					// holder.fileThumb.setImageResource(R.drawable.ic_default_image);
-					holder.fileThumb.setVisibility(View.VISIBLE);
+					createMediaThumb(holder.fileThumb);
+					holder.fileThumb.setImageResource(R.drawable.ic_default_image);
 				}
-				else if (hikeFileType == HikeFileType.LOCATION)
+				else
 				{
-					holder.loadingThumb.setVisibility(View.VISIBLE);
+					createMediaThumb(holder.fileThumb);
+					holder.fileThumb.setBackgroundResource(R.drawable.ic_loading_img);
 				}
+				holder.fileThumb.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.OTHER)
 			{
@@ -1233,8 +1231,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 
 			}
+			else if ((!showThumbnail) && (hikeFileType == HikeFileType.LOCATION))
+			{
+				holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
+			}
 			else if ((!showThumbnail)
-					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT))
+					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO
+					|| hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
 			{
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
@@ -1330,12 +1333,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.recAction.setVisibility(View.VISIBLE);
 				}
 			}
-			else if (hikeFileType == HikeFileType.CONTACT)
-			{
-				// holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_pressed);
-				// holder.mediaAction.setImageResource(R.drawable.ic_default_contact);
-				// holder.mediaAction.setVisibility(View.VISIBLE);
-			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Margin View
 			// if (holder.marginView != null)
@@ -1421,73 +1418,141 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// }
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT)
-					&& (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING))
+			if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
 			{
-				Log.d(getClass().getSimpleName(), "updating button visibility : " + convMessage.isSent() + hikeFile.getHikeFileType().toString() + fss.getFTState().toString());
-
-				ImageView ftAction;
-				View bg;
-				if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO))
+				if((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					ftAction = holder.ftAction;
-					bg = holder.circularProgressBg;
+					
 				}
-				else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
 				{
-					ftAction = holder.recAction;
-					bg = holder.recPlaceholder;
+					
 				}
 				else
 				{
-					ftAction = holder.ftActionExt;
-					bg = holder.circularProgressBgExt;
+					if (hikeFileType == HikeFileType.LOCATION)
+					{
+						holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
+						holder.ftAction.setVisibility(View.VISIBLE);
+						holder.circularProgressBg.setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+						holder.ftActionExt.setVisibility(View.VISIBLE);
+						holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					}
 				}
-				ftAction.setScaleType(ScaleType.CENTER_INSIDE);
+			}
+			else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+			{
 				switch (fss.getFTState())
 				{
 				case NOT_STARTED:
 					if (!convMessage.isSent())
 					{
-						ftAction.setImageResource(R.drawable.ic_download_image_video);
-						ftAction.setVisibility(View.VISIBLE);
-						bg.setVisibility(View.VISIBLE);
+						holder.ftAction.setImageResource(R.drawable.ic_download_image_video);
+						holder.ftAction.setVisibility(View.VISIBLE);
+						holder.circularProgressBg.setVisibility(View.VISIBLE);
 					}
 					else if (TextUtils.isEmpty(hikeFile.getFileKey()))
 					{
-						ftAction.setImageResource(R.drawable.ic_retry_image_video);
-						ftAction.setVisibility(View.VISIBLE);
-						bg.setVisibility(View.VISIBLE);
+						holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
+						holder.ftAction.setVisibility(View.VISIBLE);
+						holder.circularProgressBg.setVisibility(View.VISIBLE);
 					}
 					break;
 				case INITIALIZED:
 					break;
 				case IN_PROGRESS:
-					ftAction.setImageResource(R.drawable.ic_pause_image_video);
-					ftAction.setVisibility(View.VISIBLE);
-					bg.setVisibility(View.VISIBLE);
+					holder.ftAction.setImageResource(R.drawable.ic_pause_image_video);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				case PAUSING:
-					ftAction.setImageResource(0);
-					ftAction.setVisibility(View.VISIBLE);
-					bg.setVisibility(View.VISIBLE);
+					holder.ftAction.setImageResource(0);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				case PAUSED:
-					ftAction.setImageResource(R.drawable.ic_retry_image_video);
-					ftAction.setVisibility(View.VISIBLE);
-					bg.setVisibility(View.VISIBLE);
+					holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				case ERROR:
-					ftAction.setImageResource(R.drawable.ic_retry_image_video);
-					ftAction.setVisibility(View.VISIBLE);
-					bg.setVisibility(View.VISIBLE);
+					holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				default:
 					break;
 				}
+				holder.ftAction.setScaleType(ScaleType.CENTER);
+			}
+			else if (hikeFileType != HikeFileType.AUDIO_RECORDING)
+			{
+				switch (fss.getFTState())
+				{
+				case NOT_STARTED:
+					if (!convMessage.isSent())
+					{
+						holder.ftActionExt.setImageResource(R.drawable.ic_download_other);
+						holder.ftActionExt.setVisibility(View.VISIBLE);
+						holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					}
+					else if (TextUtils.isEmpty(hikeFile.getFileKey()))
+					{
+						holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+						holder.ftActionExt.setVisibility(View.VISIBLE);
+						holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					}
+					break;
+				case INITIALIZED:
+					break;
+				case IN_PROGRESS:
+					holder.ftActionExt.setImageResource(R.drawable.ic_pause_other);
+					holder.ftActionExt.setVisibility(View.VISIBLE);
+					holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					break;
+				case PAUSING:
+					holder.ftActionExt.setImageResource(0);
+					holder.ftActionExt.setVisibility(View.VISIBLE);
+					holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					break;
+				case PAUSED:
+					holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+					holder.ftActionExt.setVisibility(View.VISIBLE);
+					holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					break;
+				case ERROR:
+					holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+					holder.ftActionExt.setVisibility(View.VISIBLE);
+					holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+					break;
+				default:
+					break;
+				}
+				holder.ftActionExt.setScaleType(ScaleType.CENTER);
 			}
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up Overlay Contents
-			if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION) && (hikeFile.getHikeFileType() != HikeFileType.CONTACT))
+			
+			if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
+			{
+				if(hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				{
+					
+				}
+				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
+				{
+					showTransferInitialization(holder, hikeFile);
+				}
+				else
+				{
+					
+				}
+			}
+			//else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+			else
 			{
 				if (convMessage.isSent()) // File is being sent
 				{
@@ -1546,18 +1611,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					default:
 						break;
 
-					}
-				}
-			}
-			else
-			{
-				if (convMessage.isSent())
-				{
-					if (TextUtils.isEmpty(hikeFile.getFileKey()) && !FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID())) // Cancelled/Not_Started(Not
-					// Completed)
-					{
-						holder.image.setVisibility(View.VISIBLE);
-						holder.image.setImageResource(getDownloadFailedResIcon());
 					}
 				}
 			}
@@ -2139,7 +2192,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile)
 	{
-		if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO))
+		if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+				|| (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
 		{
 			holder.wating.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2211,6 +2265,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		// TODO Auto-generated method stub
 		Log.d(getClass().getSimpleName(), "creating default thumb. . . ");
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
+		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
+		fileThumb.getLayoutParams().height = pixels;
+		fileThumb.getLayoutParams().width = pixels;
+		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
+		fileThumb.setBackgroundResource(R.drawable.bg_grey);
+		fileThumb.setImageResource(0);
+	}
+	
+	private void createMediaThumb(ImageView fileThumb)
+	{
+		// TODO Auto-generated method stub
+		Log.d(getClass().getSimpleName(), "creating default thumb. . . ");
+		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
+		//int pixels = (int) (250 * Utils.densityMultiplier);
 		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
@@ -3623,7 +3691,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		isActionModeOn = isOn;
 	}
-	
+
 	public boolean shownSdrToolTip()
 	{
 		return msgIdForSdrTip != -1;
