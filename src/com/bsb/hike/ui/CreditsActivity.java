@@ -267,9 +267,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v)
 			{
-				Intent intent = new Intent(CreditsActivity.this, HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				onBackPressed();
 			}
 
 		});
