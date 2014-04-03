@@ -35,7 +35,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -70,8 +69,6 @@ public abstract class ImageWorker
 	private final Object mPauseWorkLock = new Object();
 
 	protected Resources mResources;
-
-	private boolean isProfilePic = false;
 
 	private boolean setDefaultAvatarIfNoCustomIcon = false;
 
@@ -155,7 +152,6 @@ public abstract class ImageWorker
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
-			Log.d("debug ", "Starting async task ");
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
 			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, task);
 			imageView.setImageDrawable(asyncDrawable);
@@ -376,10 +372,6 @@ public abstract class ImageWorker
 			data = params[0];
 			final String dataString = data;
 
-			int idx = dataString.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
-			if (idx > 0)
-				isProfilePic = true;
-
 			Bitmap bitmap = null;
 			BitmapDrawable drawable = null;
 
@@ -442,8 +434,6 @@ public abstract class ImageWorker
 			if (value != null && imageView != null)
 			{
 				setImageDrawable(imageView, value);
-				if (isProfilePic)
-					HikeMessengerApp.getPubSub().publish(HikePubSub.LARGER_IMAGE_DOWNLOADED, null);
 			}
 			else if (value == null && imageView != null && setDefaultAvatarIfNoCustomIcon)
 			{
@@ -515,7 +505,6 @@ public abstract class ImageWorker
 		{
 			if (mFadeInBitmap)
 			{
-				Log.d("debug ", "mfadeinbitmap called imageworker");
 				// Transition drawable with a transparent drawable and the final drawable
 				final TransitionDrawable td = new TransitionDrawable(new Drawable[] { new ColorDrawable(android.R.color.transparent), drawable });
 				if (!dontSetBackground)
@@ -529,7 +518,6 @@ public abstract class ImageWorker
 			}
 			else
 			{
-				Log.d("debug ", "setimagedrawable called imageworker");
 				imageView.setImageDrawable(drawable);
 			}
 		}
