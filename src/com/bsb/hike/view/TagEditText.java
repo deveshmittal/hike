@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import android.content.Context;
 import android.text.Editable;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.EditText;
 
 import com.bsb.hike.R;
@@ -20,11 +25,17 @@ public class TagEditText extends EditText
 {
 	private static final String TOKEN = "!`!";
 
+	private static final String SPAN_REPLACEMENT = "<";
+
 	public static final String SEPARATOR_COMMA = ",";
 
 	public static final String SEPARATOR_SPACE = " ";
 
 	private Map<String, Object> addedTags;
+
+	private Map<String, ImageSpan> addedSpans;
+
+	private Map<ImageSpan, String> spanToUniqueness;
 
 	private int minCharacterChangeThreshold;
 
@@ -60,6 +71,8 @@ public class TagEditText extends EditText
 	private void init()
 	{
 		addedTags = new HashMap<String, Object>();
+		addedSpans = new HashMap<String, ImageSpan>();
+		spanToUniqueness = new LinkedHashMap<ImageSpan, String>();
 	}
 
 	/**
@@ -69,47 +82,60 @@ public class TagEditText extends EditText
 	 */
 	public void appendTag(String text, String uniqueness, Object data)
 	{
-		Editable editable = getText();
-		String textS = editable.toString();
-		String afterSep = getCharAfterSeparator(textS);
-		if (afterSep != null)
-		{
-			int lastIndex = textS.lastIndexOf(afterSep);
-			editable.replace(lastIndex, textS.length(), "");
-		}
-		int length = editable.length();
+
 		String customuniqueness = generateUniqueness(uniqueness);
 		addedTags.put(customuniqueness, data);
-		editable.append(customuniqueness + this.separator);
-		// if(afterSep!=null){
-		// editable.append(afterSep);
-		// }
-		editable.setSpan(SpanUtil.getImageSpanFromTextView(getContext(), R.layout.tag, R.id.tagTV, text), length, length + customuniqueness.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ImageSpan span = SpanUtil.getImageSpanFromTextView(getContext(), R.layout.tag, R.id.tagTV, text);
+		addedSpans.put(customuniqueness, span);
+		spanToUniqueness.put(span, uniqueness);
+		SpannableStringBuilder ssb = new SpannableStringBuilder();
+		Set<ImageSpan> allSpans = spanToUniqueness.keySet();
+		for (ImageSpan ispan : allSpans)
+		{
+			ssb.append(SPAN_REPLACEMENT);
+			int length = ssb.length();
+			ssb.setSpan(ispan, length - SPAN_REPLACEMENT.length(), length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		needCallback = false;
+		setText(ssb);
+
 		if (listener != null)
 		{
 			listener.tagAdded(data, uniqueness);
+			listener.charResetAfterSeperator();
 		}
 	}
 
 	public void removeTag(String text, String uniqueness, Object data)
 	{
 		Editable editable = getText();
-		String curentText = editable.toString();
-		uniqueness = generateUniqueness(uniqueness);
-		int index = curentText.lastIndexOf(uniqueness);
-		Log.i("tagedit", uniqueness + " index of removable tag " + index);
-		if (index != -1)
+		SpannableStringBuilder ssb = new SpannableStringBuilder(editable);
+
+		String genUniqueNess = generateUniqueness(uniqueness);
+		ImageSpan span = addedSpans.get(genUniqueNess);
+
+		if (span != null && ssb.getSpanStart(span) != -1)
 		{
-			editable.replace(index, index + uniqueness.length(), "");
-			if (length() > index)
-			{
-				if (separator.equals(Character.toString(editable.charAt(index))))
-				{
-					editable.replace(index, index + separator.length(), "");
-				}
-			}
+			// client only invoked , so no callback on text changed
+			needCallback = false;
+			editable.delete(ssb.getSpanStart(span), ssb.getSpanEnd(span));
+			setSelection(editable.length());
+			tagRemoved(uniqueness, span);
+
 		}
+
+	}
+
+	private void tagRemoved(String uniqueness, ImageSpan span)
+	{
+		String genUniqueNess = generateUniqueness(uniqueness);
+		if (listener != null)
+		{
+			listener.tagRemoved(addedTags.get(genUniqueNess), uniqueness);
+		}
+		addedTags.remove(genUniqueNess);
+		addedSpans.remove(genUniqueNess);
+		spanToUniqueness.remove(span);
 	}
 
 	public void toggleTag(String text, String uniqueness, Object data)
@@ -197,69 +223,68 @@ public class TagEditText extends EditText
 	protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
 	{
 		super.onTextChanged(text, start, lengthBefore, lengthAfter);
+		Log.e("tagedit", "text changed , before " + lengthBefore + " and after " + lengthAfter);
 		// caller has to set needcallback to false and change edit text value if no call back required
 		// this has to be performed every time callback not required , for example clear edit text
 		if (needCallback)
 		{
-			String textS = text.toString();
-			Log.i("tagedit", "length before : " + lengthBefore + " and lengthAfter " + lengthAfter);
-			int charChanged = Math.abs((lengthAfter - lengthBefore));
-			if (charChanged > minCharacterChangeThresholdForTag)
+			performTagsProcessing();
+
+			String afterSep = getCharAfterSeparator();
+			if (afterSep != null)
 			{
-				performTagsProcessing(textS);
-			}
-			if (listener != null)
-			{
-				String afterSep = getCharAfterSeparator(textS);
-				if (afterSep != null && afterSep.length() >= minCharacterChangeThreshold)
+				if (afterSep.length() >= minCharacterChangeThreshold)
 				{
+
 					if (!afterSep.equals(lastAfterSepCallback))
-						listener.characterAddedAfterSeparator(lastAfterSepCallback = afterSep);
-				}
-				else
-				{
-					if (null != lastAfterSepCallback)
 					{
-						listener.charResetAfterSeperator();
-						lastAfterSepCallback = null;
+						listener.characterAddedAfterSeparator(lastAfterSepCallback = afterSep);
+					}
+					else
+					{
+						giveResetCallback();
 					}
 				}
+			}
+			else
+			{
+				giveResetCallback();
 			}
 		}
 		else
 		{
 			needCallback = true;
+
 		}
 	}
 
-	private void performTagsProcessing(String text)
+	private void giveResetCallback()
 	{
-		String[] possibleUniqueness = text.split(TOKEN);
-		HashSet<String> temp = new HashSet<String>();
-
-		for (String uniqueNess : possibleUniqueness)
+		if (null != lastAfterSepCallback)
 		{
-			if (!separator.equals(uniqueNess.trim()))
-			{
-				temp.add(generateUniqueness(uniqueNess));
-			}
+			listener.charResetAfterSeperator();
+			lastAfterSepCallback = null;
 		}
-		Iterator<String> iterator = addedTags.keySet().iterator();
-		while (iterator.hasNext())
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event)
+	{
+		Log.e("tagedit", "onkey up , " + event.getKeyCode());
+		return super.onKeyUp(keyCode, event);
+	}
+
+	private void performTagsProcessing()
+	{
+		Editable editText = getText();
+		SpannableStringBuilder ssb = new SpannableStringBuilder(editText);
+		Set<ImageSpan> spans = new HashSet<ImageSpan>(spanToUniqueness.keySet());
+		for (ImageSpan span : spans)
 		{
-			String uniqueNess = iterator.next();
-
-			if (!temp.contains((uniqueNess)))
+			if (ssb.getSpanStart(span) == -1)
 			{
-
-				// give callback
-				Log.e("tagedit", "key " + uniqueNess + " removed");
-
-				if (listener != null)
-				{
-					listener.tagRemoved(addedTags.get(uniqueNess), generateOrigUniqueNess(uniqueNess));
-				}
-				iterator.remove();
+				// tag removed
+				tagRemoved(spanToUniqueness.get(span), span);
 			}
 		}
 	}
@@ -267,14 +292,14 @@ public class TagEditText extends EditText
 	/*
 	 * This tries all possibilities to give you text after separator, Note: This text is not exact logical but from users perspective
 	 */
-	private String getCharAfterSeparator(String textS)
+	private String getCharAfterSeparator()
 	{
-		textS = textS.trim();
+		String textS = getText().toString().trim();
 
-		int lastTokenIndex = textS.lastIndexOf(TOKEN);
+		int lastTokenIndex = textS.lastIndexOf(SPAN_REPLACEMENT);
 		if (lastTokenIndex != -1)
 		{
-			return textS.substring(lastTokenIndex + TOKEN.length()).trim();
+			return textS.substring(lastTokenIndex + SPAN_REPLACEMENT.length()).trim();
 		}
 
 		else
