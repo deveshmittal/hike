@@ -1338,7 +1338,7 @@
     <string name="wrong_country">Invalid country code</string>
     <string name="no_internet_msg">Looks like there’s no internet\nconnection! Try fixing it and\nproceed.</string>
     <string name="hang_on">Hang on...</string>
-    <string name="call_me_for_the_pin">Call me for the pin %1$s</string>
+    <string name="call_me_for_the_pin">Call me %1$s</string>
     <string name="wrong_pin">Sorry, that\'s a wrong PIN!</string>
     <string name="verifying">Verifying...</string>
     <string name="pick_one">Pick One...</string>
