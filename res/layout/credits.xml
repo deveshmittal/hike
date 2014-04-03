@@ -233,7 +233,7 @@
                      android:layout_height="wrap_content"
                      android:layout_marginTop="2dp"
                      android:layout_toRightOf="@id/free_sms_icon"
-                     android:text="@string/free_sms_left" />
+                     android:text="@string/free_hike_to_sms" />
 
                  <com.bsb.hike.view.CustomFontTextView
                      android:id="@+id/credits_num"

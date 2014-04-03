@@ -153,7 +153,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		ImageView icon = (ImageView) parent.findViewById(receiveSmsPref ? R.id.receive_sms_icon : R.id.free_sms_icon);
 		CheckBox checkBox = (CheckBox) parent.findViewById(receiveSmsPref ? R.id.receive_sms_checkbox : R.id.free_sms_checkbox);
 
-		title.setText(receiveSmsPref ? R.string.default_client_header : R.string.free_sms);
+		title.setText(receiveSmsPref ? R.string.default_client_header : R.string.free_hike_to_sms);
 		summary.setText(receiveSmsPref ? R.string.default_client_info : R.string.free_sms_msg);
 		icon.setImageResource(receiveSmsPref ? R.drawable.preference_default_client : R.drawable.preference_free_sms);
 		checkBox.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(receiveSmsPref ? HikeConstants.RECEIVE_SMS_PREF : HikeConstants.FREE_SMS_PREF,

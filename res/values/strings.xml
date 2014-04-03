@@ -1402,4 +1402,6 @@
 	<string name="no_results">No results</string>
 	<string name="num_unread_messages">%1$s Unread Messages</string>
 	<string name="one_unread_message">1 Unread Message</string>
+	<string name="free_hike_to_sms">Free hike to SMS</string>
+	<string name="sms_with_credits">SMS (Free SMS: %1$d)</string>
 </resources>
