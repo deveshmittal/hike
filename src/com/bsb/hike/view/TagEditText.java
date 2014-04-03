@@ -3,7 +3,6 @@ package com.bsb.hike.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +24,7 @@ public class TagEditText extends EditText
 {
 	private static final String TOKEN = "!`!";
 
-	private static final String SPAN_REPLACEMENT = "<";
+	private static final String SPAN_REPLACEMENT = "|";
 
 	public static final String SEPARATOR_COMMA = ",";
 
@@ -245,6 +244,10 @@ public class TagEditText extends EditText
 					{
 						giveResetCallback();
 					}
+				}
+				else
+				{
+					giveResetCallback();
 				}
 			}
 			else
