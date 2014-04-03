@@ -98,7 +98,7 @@ public class TagEditText extends EditText
 		}
 		needCallback = false;
 		setText(ssb);
-
+		setSelection(ssb.length());
 		if (listener != null)
 		{
 			listener.tagAdded(data, uniqueness);
