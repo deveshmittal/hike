@@ -1382,7 +1382,7 @@
     <string name="compose_chat_friends_on_hike">Friends on Hike</string>
     <string name="compose_chat_contacts_on_hike">Contacts on Hike</string>
     <string name="compose_chat_all_contacts">SMS Contacts</string>
-    <string name="compose_chat_other_contacts">Other Contacts</string>
+    <string name="compose_chat_other_contacts">OTHER CONTACTS</string>
     <string name="compose_chat_action_bar_group_mode_title">Select members (min 2)</string>
     <string name="compose_chat_action_bar_title">New Chat</string>
     <string name="name_group">Name the group</string>
