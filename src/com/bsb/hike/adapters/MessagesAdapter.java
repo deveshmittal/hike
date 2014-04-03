@@ -1159,12 +1159,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (showThumbnail && thumbnail != null)
 				{
 					holder.fileThumb.setBackgroundDrawable(thumbnail);
-					// holder.fileThumb.setImageResource(R.drawable.ic_video_play);
 				}
 				else
 				{
 					createMediaThumb(holder.fileThumb);
-					holder.fileThumb.setImageResource(R.drawable.ic_video_play);
 				}
 
 				holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
@@ -1202,7 +1200,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else if (hikeFileType == HikeFileType.IMAGE)
 				{
 					createMediaThumb(holder.fileThumb);
-					holder.fileThumb.setImageResource(R.drawable.ic_default_image);
 				}
 				else
 				{
