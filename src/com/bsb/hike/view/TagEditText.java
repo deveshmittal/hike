@@ -92,9 +92,10 @@ public class TagEditText extends EditText
 		Set<ImageSpan> allSpans = spanToUniqueness.keySet();
 		for (ImageSpan ispan : allSpans)
 		{
-			ssb.append(SPAN_REPLACEMENT);
+			ssb.append(SPAN_REPLACEMENT + " ");
 			int length = ssb.length();
-			ssb.setSpan(ispan, length - SPAN_REPLACEMENT.length(), length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			// -1 for space
+			ssb.setSpan(ispan, length - SPAN_REPLACEMENT.length() - 1, length - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		needCallback = false;
 		setText(ssb);
@@ -331,6 +332,8 @@ public class TagEditText extends EditText
 	public void clear(boolean callbackRequired)
 	{
 		addedTags.clear();
+		spanToUniqueness.clear();
+		addedSpans.clear();
 		setText("", callbackRequired);
 	}
 
