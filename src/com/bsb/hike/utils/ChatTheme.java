@@ -64,7 +64,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -140,7 +140,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -217,7 +217,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_3x;
 		}
 
 		@Override
@@ -294,7 +294,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_2x;
 		}
 
 		@Override
@@ -371,7 +371,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -448,7 +448,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_2x;
 		}
 
 		@Override
@@ -525,7 +525,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_3x;
 		}
 
 		@Override
@@ -602,7 +602,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -679,7 +679,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -756,7 +756,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -833,7 +833,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -910,7 +910,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
