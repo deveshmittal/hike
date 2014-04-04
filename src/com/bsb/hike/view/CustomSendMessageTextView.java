@@ -90,6 +90,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				parentHeight = viewHeight;
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
+				linesMaxWidth += (int) (3 * Utils.densityMultiplier);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 			else
@@ -99,6 +100,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = (int) (viewHeight + (heightAddition * Utils.densityMultiplier));
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				linesMaxWidth += (int) (3 * Utils.densityMultiplier);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 		}
