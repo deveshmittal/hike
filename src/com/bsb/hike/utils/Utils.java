@@ -3154,8 +3154,10 @@ public class Utils
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
-		// Drawable d = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
-		Bitmap bitmap = HikeMessengerApp.getLruCache().getIconFromCache(conv.getMsisdn()).getBitmap();
+
+		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
+
+		Bitmap bitmap = Utils.drawableToBitmap(avatarDrawable);
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
