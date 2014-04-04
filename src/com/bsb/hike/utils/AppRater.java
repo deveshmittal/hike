@@ -8,7 +8,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -67,7 +66,7 @@ public class AppRater
 				}
 				catch (ActivityNotFoundException e)
 				{
-					Log.e("AppRater", "Unable to open market");
+					Logger.e("AppRater", "Unable to open market");
 				}
 				dialog.dismiss();
 				editor.putBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER, true);

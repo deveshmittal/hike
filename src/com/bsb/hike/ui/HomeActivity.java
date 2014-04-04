@@ -33,7 +33,6 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -79,6 +78,7 @@ import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
@@ -817,7 +817,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			catch (ActivityNotFoundException e)
 			{
-				Log.e(HomeActivity.class.getSimpleName(), "Unable to open market");
+				Logger.e(HomeActivity.class.getSimpleName(), "Unable to open market");
 			}
 			if (updateType == HikeConstants.NORMAL_UPDATE)
 			{
@@ -1389,7 +1389,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		if (networkErrorPopUp == null)
 			return;
-		Log.d(getClass().getSimpleName(), "visiblity for: " + HikeMessengerApp.networkError);
+		Logger.d(getClass().getSimpleName(), "visiblity for: " + HikeMessengerApp.networkError);
 		// networkErrorPopUp.clearAnimation();
 		if (HikeMessengerApp.networkError)
 		{
@@ -1407,7 +1407,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		if (networkErrorPopUp == null)
 			return;
-		Log.d(getClass().getSimpleName(), "animation for: " + HikeMessengerApp.networkError);
+		Logger.d(getClass().getSimpleName(), "animation for: " + HikeMessengerApp.networkError);
 		if (HikeMessengerApp.networkError)
 		{
 			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up_noalpha);
@@ -1537,7 +1537,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 			{
-				Log.d(getClass().getSimpleName(), "Onclick: " + position);
+				Logger.d(getClass().getSimpleName(), "Onclick: " + position);
 
 				overFlowWindow.dismiss();
 				OverFlowMenuItem item = (OverFlowMenuItem) adapterView.getItemAtPosition(position);
@@ -1596,7 +1596,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		catch (BadTokenException e)
 		{
-			Log.e(getClass().getSimpleName(), "Excepetion in HomeActivity Overflow popup", e);
+			Logger.e(getClass().getSimpleName(), "Excepetion in HomeActivity Overflow popup", e);
 		}
 		overFlowWindow.getContentView().setFocusableInTouchMode(true);
 		overFlowWindow.getContentView().setOnKeyListener(new View.OnKeyListener()

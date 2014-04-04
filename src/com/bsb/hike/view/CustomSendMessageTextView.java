@@ -1,11 +1,10 @@
 package com.bsb.hike.view;
 
-import com.bsb.hike.utils.Utils;
-
-import android.text.Layout;
 import android.content.Context;
+import android.text.Layout;
 import android.util.AttributeSet;
-import android.util.Log;
+
+import com.bsb.hike.utils.Utils;
 
 public class CustomSendMessageTextView extends CustomFontTextView
 {
@@ -51,7 +50,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 
 			linesMaxWidth = lastLineWidth = (int) Math.ceil(lastLine);
 
-			//Log.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
+			//Logger.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
 
 			for (int n = 0; n < lines; ++n)
 			{
@@ -62,7 +61,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 					lineWidth = layout.getLineWidth(n);
 					lineHeight = (layout.getLineTop(n+1) - layout.getLineTop(n));
 					viewHeight += lineHeight;
-					//Log.d(TAG, "LINE NO. " + n + ", Width: " + lineWidth + ", Height: " + lineHeight + ", Height in dp: " + lineHeight/Utils.densityMultiplier);
+					//Logger.d(TAG, "LINE NO. " + n + ", Width: " + lineWidth + ", Height: " + lineHeight + ", Height in dp: " + lineHeight/Utils.densityMultiplier);
 				}
 				catch (Exception e)
 				{
@@ -87,9 +86,9 @@ public class CustomSendMessageTextView extends CustomFontTextView
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = viewHeight;
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
@@ -97,9 +96,9 @@ public class CustomSendMessageTextView extends CustomFontTextView
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = (int) (viewHeight + (heightAddition * Utils.densityMultiplier));
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 		}

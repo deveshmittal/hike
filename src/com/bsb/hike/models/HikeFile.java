@@ -11,10 +11,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -258,7 +258,7 @@ public class HikeFile
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		return null;
 	}

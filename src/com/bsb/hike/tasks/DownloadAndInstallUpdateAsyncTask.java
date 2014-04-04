@@ -17,12 +17,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.Logger;
 
 public class DownloadAndInstallUpdateAsyncTask extends AsyncTask<Void, Integer, Boolean>
 {
@@ -115,7 +115,7 @@ public class DownloadAndInstallUpdateAsyncTask extends AsyncTask<Void, Integer, 
 	@Override
 	protected void onProgressUpdate(Integer... values)
 	{
-		Log.d(getClass().getSimpleName(), "Progress: " + values[0]);
+		Logger.d(getClass().getSimpleName(), "Progress: " + values[0]);
 		notification.contentView.setProgressBar(R.id.download_progress, 100, values[0], false);
 		notificationManager.notify(notificationId, notification);
 	}

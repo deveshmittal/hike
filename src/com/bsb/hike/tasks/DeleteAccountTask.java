@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -18,6 +17,7 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
@@ -66,7 +66,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			// IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			appPrefEditor.clear();
-			Log.d("DeleteAccountTask", "account deleted");
+			Logger.d("DeleteAccountTask", "account deleted");
 
 			Session session = Session.getActiveSession();
 			if (session != null)
@@ -80,7 +80,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		}
 		catch (Exception e)
 		{
-			Log.e("DeleteAccountTask", "error deleting account", e);
+			Logger.e("DeleteAccountTask", "error deleting account", e);
 			return false;
 		}
 		finally

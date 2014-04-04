@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -507,7 +506,7 @@ public class StickerManager
 		}
 		catch (JSONException e)
 		{
-			Log.w("HikeMessengerApp", "Invalid JSON", e);
+			Logger.w("HikeMessengerApp", "Invalid JSON", e);
 		}
 	}
 
@@ -863,11 +862,11 @@ public class StickerManager
 			in.close();
 			fileIn.close();
 			long t2 = System.currentTimeMillis();
-			Log.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
+			Logger.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			Logger.e(getClass().getSimpleName(), "Exception while reading category file.", e);
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
@@ -908,11 +907,11 @@ public class StickerManager
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
-			Log.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
+			Logger.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while saving category file.", e);
+			Logger.e(getClass().getSimpleName(), "Exception while saving category file.", e);
 		}
 	}
 

@@ -8,9 +8,9 @@ import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.utils.Logger;
 
 public class HikeMqttPersistence extends SQLiteOpenHelper
 {
@@ -61,7 +61,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 		InsertHelper ih = null;
 		try
 		{
-			Log.d("HikeMqttPersistence", "Persisting message data: " + new String(packet.getMessage()));
+			Logger.d("HikeMqttPersistence", "Persisting message data: " + new String(packet.getMessage()));
 			ih = new InsertHelper(mDb, MQTT_DATABASE_TABLE);
 			ih.prepareForReplace();
 			ih.bind(ih.getColumnIndex(MQTT_MESSAGE), packet.getMessage());
@@ -142,13 +142,13 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 	{
 		String[] bindArgs = new String[] { Long.toString(msgId) };
 		int numRows = mDb.delete(MQTT_DATABASE_TABLE, MQTT_MESSAGE_ID + "=?", bindArgs);
-		Log.d("HikeMqttPersistence", "Removed " + numRows + " Rows from " + MQTT_DATABASE_TABLE + " with Msg ID: " + msgId);
+		Logger.d("HikeMqttPersistence", "Removed " + numRows + " Rows from " + MQTT_DATABASE_TABLE + " with Msg ID: " + msgId);
 	}
 
 	public void removeMessageForPacketId(long packetId)
 	{
 		String[] bindArgs = new String[] { Long.toString(packetId) };
 		int numRows = mDb.delete(MQTT_DATABASE_TABLE, MQTT_PACKET_ID + "=?", bindArgs);
-		Log.d("HikeMqttPersistence", "Removed " + numRows + " Rows from " + MQTT_DATABASE_TABLE + " with Packet ID: " + packetId);
+		Logger.d("HikeMqttPersistence", "Removed " + numRows + " Rows from " + MQTT_DATABASE_TABLE + " with Packet ID: " + packetId);
 	}
 }

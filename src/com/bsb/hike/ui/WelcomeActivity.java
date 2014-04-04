@@ -10,13 +10,10 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,6 +27,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPageIndicator;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -126,7 +124,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void changeHost()
 	{
-		Log.d(getClass().getSimpleName(), "Hike Icon CLicked");
+		Logger.d(getClass().getSimpleName(), "Hike Icon CLicked");
 
 		SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		boolean production = sharedPreferences.getBoolean(HikeMessengerApp.PRODUCTION, true);
@@ -167,7 +165,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void showError()
 	{
-		Log.d("WelcomeActivity", "showError");
+		Logger.d("WelcomeActivity", "showError");
 		loadingLayout.setVisibility(View.GONE);
 		mAcceptButton.setVisibility(View.VISIBLE);
 		showNetworkErrorPopup();
@@ -307,7 +305,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object)
 		{
-			Log.d(getClass().getSimpleName(), "Item removed from position : " + position);
+			Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 			((ViewPager) container).removeView((View) object);
 		}
 

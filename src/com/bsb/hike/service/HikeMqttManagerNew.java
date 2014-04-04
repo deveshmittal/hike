@@ -36,7 +36,6 @@ import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -46,6 +45,7 @@ import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -210,10 +210,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		public void run()
 		{
 			final List<HikePacket> packets = persistence.getAllSentMessages();
-			Log.w(TAG, "Retrying to send " + packets.size() + " messages");
+			Logger.w(TAG, "Retrying to send " + packets.size() + " messages");
 			for (HikePacket hikePacket : packets)
 			{
-				Log.d(TAG, "Resending message " + new String(hikePacket.getMessage()));
+				Logger.d(TAG, "Resending message " + new String(hikePacket.getMessage()));
 				send(hikePacket, 1);
 				try
 				{
@@ -261,7 +261,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "Exception", e);
+				Logger.e(TAG, "Exception", e);
 			}
 		}
 	}
@@ -307,7 +307,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		if (context == null)
 		{
-			Log.e(TAG, "Hike service is null!!");
+			Logger.e(TAG, "Hike service is null!!");
 			return false;
 		}
 		/*
@@ -325,7 +325,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private void setBrokerHostPort(boolean ssl)
 	{
-		Log.d("SSL", "Switching broker port/host. SSL? " + ssl);
+		Logger.d("SSL", "Switching broker port/host. SSL? " + ssl);
 		String brokerHost = settings.getString(HikeMessengerApp.BROKER_HOST, "");
 
 		/*
@@ -345,8 +345,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
 				: STAGING_BROKER_PORT_NUMBER);
 
-		Log.d(TAG, "Broker host name: " + brokerHostName);
-		Log.d(TAG, "Broker port: " + brokerPortNumber);
+		Logger.d(TAG, "Broker host name: " + brokerHostName);
+		Logger.d(TAG, "Broker port: " + brokerPortNumber);
 	}
 
 	public void finish()
@@ -375,13 +375,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		Long id = Thread.currentThread().getId();
 		String thName = Thread.currentThread().getName();
-		Log.d(TAG, obj + " is running on thread : " + thName + " id : " + id);
+		Logger.d(TAG, obj + " is running on thread : " + thName + " id : " + id);
 	}
 
 	// delete the token and send a message to the app to send the user back to the main screen
 	private void clearSettings()
 	{
-		Log.e(TAG, "Invalid account credentials, so clear settings and move to welcome screen.");
+		Logger.e(TAG, "Invalid account credentials, so clear settings and move to welcome screen.");
 		SharedPreferences.Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.clear();
 		editor.commit();
@@ -440,7 +440,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		else
 			acquireWakeLock();
-		Log.d(TAG, "Wakelock Acquired");
+		Logger.d(TAG, "Wakelock Acquired");
 	}
 
 	private void releaseWakeLock()
@@ -448,7 +448,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		if (wakelock.isHeld())
 		{
 			wakelock.release();
-			Log.d(TAG, "Wakelock Released");
+			Logger.d(TAG, "Wakelock Released");
 		}
 	}
 
@@ -491,7 +491,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in MQTT connect handler: " + e.getMessage());
+			Logger.e(TAG, "Exception in MQTT connect handler: " + e.getMessage());
 		}
 	}
 
@@ -505,7 +505,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in MQTT connect handler: " + e.getMessage());
+			Logger.e(TAG, "Exception in MQTT connect handler: " + e.getMessage());
 		}
 	}
 	
@@ -570,7 +570,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		{
 			if (!isNetworkAvailable())
 			{
-				Log.d(TAG, "No Network Connection so should not connect");
+				Logger.d(TAG, "No Network Connection so should not connect");
 				return;
 			}
 
@@ -596,7 +596,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				// Here I am using my modified MQTT PAHO library
 				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
-				Log.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
+				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
 
 			if (isConnected())
@@ -624,14 +624,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		catch (MqttException e)
 		{
-			Log.e(TAG, "Connect exception : " + e.getReasonCode());
+			Logger.e(TAG, "Connect exception : " + e.getReasonCode());
 			handleMqttException(e, true);
 			releaseWakeLock();
 		}
 		catch (Exception e) // this exception cannot be thrown on connect
 		{
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON;
-			Log.e(TAG, "Connect exception : " + e.getMessage());
+			Logger.e(TAG, "Connect exception : " + e.getMessage());
 			e.printStackTrace();
 			scheduleNextConnectionCheck();
 			releaseWakeLock();
@@ -650,7 +650,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in MQTT connect : " + e.getMessage());
+			Logger.e(TAG, "Exception in MQTT connect : " + e.getMessage());
 		}
 	}
 
@@ -734,7 +734,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
-					Log.d(TAG, "Client Connected ....");
+					Logger.d(TAG, "Client Connected ....");
 					cancelNetworkErrorTimer();
 
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
@@ -746,9 +746,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 						 * String[] topics = new String[3]; topics[0] = uid + "/s"; topics[1] = uid + "/a"; topics[2] = uid + "/u"; int[] qos = new int[] { 1, 1, 1 };
 						 * mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener() {
 						 * 
-						 * @Override public void onSuccess(IMqttToken arg0) { Log.d(TAG, "Successfully subscribed to topics."); }
+						 * @Override public void onSuccess(IMqttToken arg0) { Logger.d(TAG, "Successfully subscribed to topics."); }
 						 * 
-						 * @Override public void onFailure(IMqttToken arg0, Throwable arg1) { Log.e(TAG, "Error subscribing to topics : " + arg1.getMessage()); } });
+						 * @Override public void onFailure(IMqttToken arg0, Throwable arg1) { Logger.e(TAG, "Error subscribing to topics : " + arg1.getMessage()); } });
 						 */
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
@@ -769,14 +769,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				{
 					MqttException ex = arg0.getException();
 					if (ex != null)
-						Log.e(TAG, "Exception : " + ex.getReasonCode());
+						Logger.e(TAG, "Exception : " + ex.getReasonCode());
 					ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
 					scheduleNetworkErrorTimer();
 					if (value != null)
 					{
-						Log.e(TAG, "Connection failed : " + value.getMessage());
+						Logger.e(TAG, "Connection failed : " + value.getMessage());
 						String msg = value.getMessage();
-						Log.e("(TAG", "Hike Unable to connect", value);
+						Logger.e("(TAG", "Hike Unable to connect", value);
 						connectionStatus = getServerStatusCode(msg);
 
 						if (connectionStatus == ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD || connectionStatus == ServerConnectionStatus.IDENTIFIER_REJECTED
@@ -796,7 +796,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
 					{
 						int reConnTime = getConnRetryTime();
-						Log.d(TAG, "Reconnect time (sec): " + reConnTime);
+						Logger.d(TAG, "Reconnect time (sec): " + reConnTime);
 						scheduleNextConnectionCheck(reConnTime);
 					}
 					else
@@ -826,17 +826,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					{
 						cancelNetworkErrorTimer();
 						String messageBody = new String(arg1.getPayload(), "UTF-8");
-						Log.i(TAG, "messageArrived called " + messageBody);
+						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
 					}
 					catch (JSONException e)
 					{
-						Log.e(TAG, "invalid JSON message", e);
+						Logger.e(TAG, "invalid JSON message", e);
 					}
 					catch (Exception e)
 					{
-						Log.e(TAG, "Exception when msg arrived : ", e);
+						Logger.e(TAG, "Exception when msg arrived : ", e);
 					}
 				}
 
@@ -849,7 +849,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				@Override
 				public void connectionLost(Throwable arg0)
 				{
-					Log.w(TAG, "Connection Lost : " + arg0.getMessage());
+					Logger.w(TAG, "Connection Lost : " + arg0.getMessage());
 					scheduleNetworkErrorTimer();
 					connectOnMqttThread();
 				}
@@ -870,11 +870,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			}
 			catch (MqttPersistenceException e)
 			{
-				Log.e(TAG, "Unable to persist message", e);
+				Logger.e(TAG, "Unable to persist message", e);
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "Unable to persist message", e);
+				Logger.e(TAG, "Unable to persist message", e);
 			}
 		}
 
@@ -888,15 +888,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			return;
 		}
 
-		Log.d(TAG, "About to send message " + new String(packet.getMessage()));
+		Logger.d(TAG, "About to send message " + new String(packet.getMessage()));
 		try
 		{
-			Log.d(TAG, "Current inflight msg count : " + mqtt.getInflightMessages());
+			Logger.d(TAG, "Current inflight msg count : " + mqtt.getInflightMessages());
 			while (mqtt.getInflightMessages() + 1 >= mqtt.getMaxflightMessages())
 			{
 				try
 				{
-					Log.w(TAG, String.format("Inflight msgs : %d , MaxInflight count : %d .... Waiting for sometime", mqtt.getInflightMessages(), mqtt.getMaxflightMessages()));
+					Logger.w(TAG, String.format("Inflight msgs : %d , MaxInflight count : %d .... Waiting for sometime", mqtt.getInflightMessages(), mqtt.getMaxflightMessages()));
 					Thread.sleep(30);
 				}
 				catch (InterruptedException e)
@@ -920,7 +920,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 							if (packet.getMsgId() > 0)
 							{
 								Long msgId = packet.getMsgId();
-								Log.d(TAG, "Recieved S status for msg with id : " + msgId);
+								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
 								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}
 						}
@@ -931,7 +931,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					}
 					catch (Exception e)
 					{
-						Log.e(TAG, "Exception in publish success : " + e.getMessage());
+						Logger.e(TAG, "Exception in publish success : " + e.getMessage());
 						e.printStackTrace();
 					}
 				}
@@ -939,7 +939,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				@Override
 				public void onFailure(IMqttToken arg0, Throwable arg1)
 				{
-					Log.e(TAG, "Message delivery failed for : " + arg0.getMessageId() + ", exception : " + arg1.getMessage());
+					Logger.e(TAG, "Message delivery failed for : " + arg0.getMessageId() + ", exception : " + arg1.getMessage());
 					haveUnsentMessages.set(true);
 					connectOnMqttThread();
 				}
@@ -966,12 +966,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		switch (e.getReasonCode())
 		{
 		case MqttException.REASON_CODE_BROKER_UNAVAILABLE:
-			Log.e(TAG, "Server Unavailable, try reconnecting later");
+			Logger.e(TAG, "Server Unavailable, try reconnecting later");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			scheduleNextConnectionCheck(getConnRetryTime());// exponential retry for connection
 			break;
 		case MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED:
-			Log.e(TAG, "Client already disconnected.");
+			Logger.e(TAG, "Client already disconnected.");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			if (reConnect)
 				connectOnMqttThread();
@@ -991,13 +991,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				scheduleNextConnectionCheck(1); // try reconnect after 1 sec, so that disconnect happens properly
 			break;
 		case MqttException.REASON_CODE_CLIENT_EXCEPTION:
-			Log.e(TAG, "Exception : " + e.getCause().getMessage());
+			Logger.e(TAG, "Exception : " + e.getCause().getMessage());
 			// Till this point disconnect has already happened due to exception (This is as per lib)
 			if (reConnect)
 				connectOnMqttThread(20);
 			break;
 		case MqttException.REASON_CODE_CLIENT_NOT_CONNECTED:
-			Log.e(TAG, "Client not connected retry connection");
+			Logger.e(TAG, "Client not connected retry connection");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			if (reConnect)
 				connectOnMqttThread();
@@ -1008,10 +1008,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				connectOnMqttThread();
 			break;
 		case MqttException.REASON_CODE_CONNECT_IN_PROGRESS:
-			Log.e(TAG, "Client already in connecting state");
+			Logger.e(TAG, "Client already in connecting state");
 			break;
 		case MqttException.REASON_CODE_CONNECTION_LOST:
-			Log.e(TAG, "Client not connected retry connection");
+			Logger.e(TAG, "Client not connected retry connection");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			if (reConnect)
 				connectOnMqttThread();
@@ -1030,7 +1030,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			clearSettings();
 			break;
 		case MqttException.REASON_CODE_MAX_INFLIGHT:
-			Log.e(TAG, "There are already to many messages in publish. Exception : " + e.getMessage());
+			Logger.e(TAG, "There are already to many messages in publish. Exception : " + e.getMessage());
 			break;
 		case MqttException.REASON_CODE_NO_MESSAGE_IDS_AVAILABLE:
 			// simply ignore as message is invalid due to no msgIds
@@ -1059,7 +1059,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			connectOnMqttThread();
 			break;
 		}
-		Log.e(TAG, "Exception : " + e.getMessage());
+		Logger.e(TAG, "Exception : " + e.getMessage());
 		e.printStackTrace();
 	}
 
@@ -1067,14 +1067,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		try
 		{
-			Log.w(TAG, "Destroying mqtt connection.");
+			Logger.w(TAG, "Destroying mqtt connection.");
 			context.unregisterReceiver(this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
 			disconnectOnMqttThread(false);
 			if (mMqttHandlerLooper != null)
 				mMqttHandlerLooper.quit();
 			mqttMessageManager.close();
-			Log.w(TAG, "Mqtt connection destroyed.");
+			Logger.w(TAG, "Mqtt connection destroyed.");
 		}
 		catch (Exception e)
 		{
@@ -1094,13 +1094,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		else if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
 		{
 			boolean isNetwork = isNetworkAvailable();
-			Log.d(TAG, "Network change event happened. Network connected : " + isNetwork);
+			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
 				connectOnMqttThread();
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
-			Log.d(TAG, "Connection check happened from GCM");
+			Logger.d(TAG, "Connection check happened from GCM");
 			connectOnMqttThread();
 		}
 	}
@@ -1127,7 +1127,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		@Override
 		public void run()
 		{
-			Log.w(TAG, "Starting testing thread .....");
+			Logger.w(TAG, "Starting testing thread .....");
 			Thread t = new Thread(new Runnable()
 			{
 				@Override
@@ -1139,7 +1139,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 						count++;
 						String data = String.format("{\"t\": \"m\",\"to\": \"+918826670738\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", count + 10, count,
 								System.currentTimeMillis());
-						Log.d(TAG, "Sending msg : " + data);
+						Logger.d(TAG, "Sending msg : " + data);
 						Message msg = Message.obtain();
 						msg.what = 12341;
 						Bundle bundle = new Bundle();

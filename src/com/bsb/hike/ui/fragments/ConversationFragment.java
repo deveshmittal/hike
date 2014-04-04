@@ -19,7 +19,6 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +57,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, Runnable
@@ -408,7 +408,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		if (conv == null)
 		{
-			Log.d(getClass().getSimpleName(), "Invalid conversation");
+			Logger.d(getClass().getSimpleName(), "Invalid conversation");
 			return;
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
@@ -431,13 +431,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
 		if (conversation == null)
 		{
-			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
+			Logger.d(getClass().getSimpleName(), "Conversation Does not exist");
 			return;
 		}
 		List<ConvMessage> messageList = conversation.getMessages();
 		if (messageList.isEmpty())
 		{
-			Log.d(getClass().getSimpleName(), "Conversation is empty");
+			Logger.d(getClass().getSimpleName(), "Conversation is empty");
 			return;
 		}
 		ConvMessage message;
@@ -486,10 +486,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			return;
 		}
-		Log.d(getClass().getSimpleName(), "Event received: " + type);
+		Logger.d(getClass().getSimpleName(), "Event received: " + type);
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
 		{
-			Log.d(getClass().getSimpleName(), "New msg event sent or received.");
+			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
 			ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
@@ -618,7 +618,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				conversation.setContactName(HikeMessengerApp.hikeBotNamesMap.get(conversation.getMsisdn()));
 			}
-			Log.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (conversation instanceof GroupConversation));
+			Logger.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (conversation instanceof GroupConversation));
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
 			if (conversation.getMessages().isEmpty() && !(conversation instanceof GroupConversation))
 			{
@@ -950,7 +950,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			mAdapter.add(conv);
 		}
 		conv.addMessage(convMessage);
-		Log.d(getClass().getSimpleName(), "new message is " + convMessage);
+		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 		mAdapter.sort(mConversationsComparator);
 
 		if (messageRefreshHandler == null)

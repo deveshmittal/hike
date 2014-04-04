@@ -14,11 +14,9 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,6 +29,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
@@ -201,7 +200,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
 		case HikeConstants.GALLERY_RESULT:
-			Log.d("ProfileActivity", "The activity is " + this);
+			Logger.d("ProfileActivity", "The activity is " + this);
 			if (requestCode == HikeConstants.CAMERA_RESULT)
 			{
 				String filePath = preferences.getString(HikeMessengerApp.FILE_PATH, "");

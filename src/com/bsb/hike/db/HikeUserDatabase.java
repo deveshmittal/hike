@@ -33,7 +33,6 @@ import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -42,6 +41,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class HikeUserDatabase extends SQLiteOpenHelper
@@ -122,7 +122,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		Log.d(getClass().getSimpleName(), "Upgrading users table from " + oldVersion + " to " + newVersion);
+		Logger.d(getClass().getSimpleName(), "Upgrading users table from " + oldVersion + " to " + newVersion);
 		if (oldVersion < 3)
 		{
 			String alter1 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.MSISDN_TYPE + " STRING";
@@ -133,7 +133,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		// Changing the datatype of the name column
 		if (oldVersion < 4)
 		{
-			Log.d(getClass().getSimpleName(), "Updating table");
+			Logger.d(getClass().getSimpleName(), "Updating table");
 			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " RENAME TO " + "temp_table";
 
 			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.USERS_TABLE + " ( " + DBConstants.ID + " STRING , " + DBConstants.NAME + " TEXT, " + DBConstants.MSISDN
@@ -349,7 +349,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 		catch (Exception e)
 		{
-			Log.e("HikeUserDatabase", "Unable to insert contacts", e);
+			Logger.e("HikeUserDatabase", "Unable to insert contacts", e);
 			throw new DbException(e);
 		}
 		finally
@@ -387,7 +387,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 		catch (Exception e)
 		{
-			Log.e("HikeUserDatabase", "Unable to insert contacts", e);
+			Logger.e("HikeUserDatabase", "Unable to insert contacts", e);
 			throw new DbException(e);
 		}
 		finally
@@ -439,7 +439,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		if (contactInfos != null && contactInfos.isEmpty())
 		{
-			Log.d(getClass().getSimpleName(), "No contact found");
+			Logger.d(getClass().getSimpleName(), "No contact found");
 			if (ifNotFoundReturnNull)
 			{
 				return null;
@@ -1414,7 +1414,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		String whereClause = DBConstants.MSISDN + "=?";
 		int rows = mDb.update(DBConstants.USERS_TABLE, updatedTime, whereClause, new String[] { msisdn });
-		Log.d(getClass().getSimpleName(), "Row has been updated: " + rows);
+		Logger.d(getClass().getSimpleName(), "Row has been updated: " + rows);
 	}
 
 	public void syncContactExtraInfo()

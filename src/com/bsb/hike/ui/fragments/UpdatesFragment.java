@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class UpdatesFragment extends SherlockListFragment implements OnScrollListener, Listener
@@ -174,7 +174,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				&& (firstVisibleItem + visibleItemCount) >= (statusMessages.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
 
-			Log.d(getClass().getSimpleName(), "Loading more items");
+			Logger.d(getClass().getSimpleName(), "Loading more items");
 			loadingMoreMessages = true;
 
 			AsyncTask<Void, Void, List<StatusMessage>> asyncTask = new AsyncTask<Void, Void, List<StatusMessage>>()
@@ -228,7 +228,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
+		Logger.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
 		centralTimelineAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		/*
 		 * // Pause fetcher to ensure smoother scrolling when flinging if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) { // Before Honeycomb pause image loading
@@ -414,7 +414,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		{
 			if (!isAdded())
 			{
-				Log.d(getClass().getSimpleName(), "Not added");
+				Logger.d(getClass().getSimpleName(), "Not added");
 				return;
 			}
 
@@ -458,7 +458,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			}
 
 			statusMessages.addAll(result);
-			Log.d(getClass().getSimpleName(), "Updating...");
+			Logger.d(getClass().getSimpleName(), "Updating...");
 			/*
 			 * added this to delay updating the adapter while the viewpager is swiping since it break that animation.
 			 */
