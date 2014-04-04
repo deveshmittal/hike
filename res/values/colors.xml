@@ -272,4 +272,5 @@
     <color name="delete_file_selection">#B3565656</color>
     <color name="group_chat_tip_bg">#f1f1f1</color>
     <color name="group_chat_tip_bg_pressed">#dfdfdf</color>
+    <color name="file_transfer_pop_up_button">#ebebeb</color>
 </resources>

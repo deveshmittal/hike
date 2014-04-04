@@ -1404,6 +1404,14 @@
     <string name="enter_pin_signup">Please enter the 4 digit PIN we sent you via SMS.</string>
     <string name="setting_profile">Setting up your profile...</string>
     <string name="you_are_all_set">You are all set...</string>
-    <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs\nupto 100mb each. You can \nalso send multiple files in one go!</string>
     <string name="tap_top_right_group_chat">Tap * on top right to start a new group chat</string>
+    <string name="tap_hold_multi_select">Tap and hold to select multiple</string>
+    <string name="verified">Verified</string>
+    <string name="sent_txt">Sent</string>
+    <string name="delivered_txt">Delivered</string>
+    <string name="read_txt">Read</string>
+    <string name="no_results">No results</string>
+    <string name="num_unread_messages">%1$s Unread Messages</string>
+    <string name="one_unread_message">1 Unread Message</string>
+    <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs upto <b>100MB</b> each. You can also send multiple files in one go!</string>
 </resources>

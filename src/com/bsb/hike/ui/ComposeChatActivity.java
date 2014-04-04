@@ -235,12 +235,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if (isSharingFile)
 				{
 					forwardConfirmDialog.setHeader(R.string.share);
-					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
 				}
 				else
 				{
 					forwardConfirmDialog.setHeader(R.string.forward);
-					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
 				}
 				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 				{
