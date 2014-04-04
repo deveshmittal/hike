@@ -1441,8 +1441,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		checkNShowNetworkError();
 	}
 
-	private void showOverFlowMenu()
+	public void showOverFlowMenu()
 	{
+
+		final boolean shownGroupChatTip = accountPrefs.getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false);
+		if (!shownGroupChatTip)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_GROUP_CHAT_TIP, null);
+		}
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
@@ -1511,6 +1517,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				else
 				{
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+				}
+
+				View arrow = convertView.findViewById(R.id.arrow);
+				if (item.getKey() == 6)
+				{
+					arrow.setVisibility(shownGroupChatTip ? View.GONE : View.VISIBLE);
+				}
+				else
+				{
+					arrow.setVisibility(View.GONE);
 				}
 
 				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);

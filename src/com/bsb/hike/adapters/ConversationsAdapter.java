@@ -5,9 +5,13 @@ import java.util.List;
 import org.json.JSONArray;
 
 import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -15,6 +19,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -36,6 +41,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	private int mIconImageSize;
 
+	private enum ViewType
+	{
+		CONVERSATION, GROUP_CHAT_TIP
+	}
+
 	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
 	{
 		super(context, textViewResourceId, objects);
@@ -46,16 +56,69 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	}
 
 	@Override
+	public int getViewTypeCount()
+	{
+		return ViewType.values().length;
+	}
+
+	@Override
+	public int getItemViewType(int position)
+	{
+		Conversation conversation = getItem(position);
+		if (conversation == null)
+		{
+			return ViewType.GROUP_CHAT_TIP.ordinal();
+		}
+		return ViewType.CONVERSATION.ordinal();
+	}
+
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		Conversation conversation = getItem(position);
+		final Conversation conversation = getItem(position);
+
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		View v = convertView;
 		if (v == null)
 		{
-			v = inflater.inflate(mResourceId, parent, false);
+			if (viewType == ViewType.GROUP_CHAT_TIP)
+			{
+				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
+			}
+			else
+			{
+				v = inflater.inflate(mResourceId, parent, false);
+			}
+		}
+
+		if (viewType == ViewType.GROUP_CHAT_TIP)
+		{
+			TextView tip = (TextView) v.findViewById(R.id.tip);
+
+			String tipString = context.getString(R.string.tap_top_right_group_chat);
+			String tipReplaceString = "*";
+
+			SpannableStringBuilder ssb = new SpannableStringBuilder(tipString);
+			ssb.setSpan(new ImageSpan(context, R.drawable.ic_group_tip_menu), tipString.indexOf(tipReplaceString), tipString.indexOf(tipReplaceString) + tipReplaceString.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			tip.setText(ssb);
+
+			View close = v.findViewById(R.id.close);
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_GROUP_CHAT_TIP, null);
+				}
+			});
+
+			return v;
 		}
 
 		TextView contactView = (TextView) v.findViewById(R.id.contact);

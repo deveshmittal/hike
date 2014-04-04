@@ -325,6 +325,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_FILE_TRANSFER_POP_UP = "shownFileTransferPopUp";
 
+	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
