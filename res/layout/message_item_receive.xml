@@ -163,6 +163,28 @@
 	                    android:layout_height="100dp"
 	                    android:layout_gravity="center"
 	                    android:visibility="gone" />
+	                
+	               <ImageView
+                        android:id="@+id/filmstrip_left"
+                        android:layout_height="wrap_content"
+                        android:layout_width="10dp"
+                        android:layout_alignLeft="@id/file_thumb"
+                        android:layout_alignTop="@id/file_thumb" 
+                        android:layout_alignBottom="@id/file_thumb"
+                        android:src="@drawable/filmstrip"
+                        android:scaleType="fitXY"
+                        android:visibility="gone" />
+                    
+                    <ImageView
+                        android:id="@+id/filmstrip_right"
+                        android:layout_height="wrap_content"
+                        android:layout_width="10dp"
+                        android:layout_alignRight="@id/file_thumb"
+                        android:layout_alignTop="@id/file_thumb" 
+                        android:layout_alignBottom="@id/file_thumb"
+                        android:src="@drawable/filmstrip"
+                        android:scaleType="fitXY"
+                        android:visibility="gone" />
                     
 	                <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/file_extension"
@@ -190,8 +212,8 @@
 			            
 	                    <ProgressBar
 				            android:id="@+id/initializing"
-				            android:layout_width="56dp"
-				            android:layout_height="56dp"
+				            android:layout_width="52dp"
+				            android:layout_height="52dp"
 				            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				            android:layout_centerInParent="true" />
 			            <com.bsb.hike.view.HoloCircularProgress
@@ -199,7 +221,7 @@
 			               android:id="@+id/circular_progress"
 			               android:layout_width="56dp"
 			               android:layout_height="56dp"
-			               app:progress_color="@color/white_65"
+			               app:progress_color="@color/white_85"
 			               app:progress_background_color="@color/white_45"
 			               android:gravity="center"
 			               app:progress="0.4"
@@ -209,8 +231,8 @@
 			               android:layout_centerInParent="true" />
 			            <ImageView
 			                android:id="@+id/ft_action"
-			                android:layout_height="20dp"
-			                android:layout_width="20dp"
+			                android:layout_height="40dp"
+			                android:layout_width="40dp"
 			                android:layout_centerInParent="true" />
             		</RelativeLayout>
             		
@@ -234,8 +256,9 @@
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			      	        android:text="00:00"
-			      	        android:textColor="@color/white_60"
-			                android:textSize="12sp" />
+			      	        android:textColor="@color/white_85"
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
 			         </LinearLayout>
 			         
 	                <LinearLayout
@@ -258,8 +281,9 @@
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			      	        android:text="0B"
-			      	        android:textColor="@color/white_60"
-			                android:textSize="12sp" />
+			      	        android:textColor="@color/white_85"
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
 			         </LinearLayout>
                     
                     <!-- <ProgressBar
@@ -305,14 +329,15 @@
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
                         android:textSize="12sp"
-                        android:maxLines="2"
+                        android:maxLines="1"
                         android:ellipsize="end" />
                     <com.bsb.hike.view.CustomFontTextView
                         android:id="@+id/file_size_ext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
-                        android:maxLines="2"
+                        android:textColor="@color/file_size"
+                        android:maxLines="1"
                         android:ellipsize="end" />
                 	</LinearLayout>
 
@@ -367,8 +392,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_70"
+                android:textColor="@color/black_45"
                 android:textSize="12sp"
+                android:textStyle="italic"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/receive_message_inner_container" />
 			
@@ -377,8 +403,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_70"
+                android:textColor="@color/black_45"
                 android:textSize="12sp"
+                android:textStyle="italic"
                 android:layout_marginTop="3dp"
                 android:layout_below="@id/receive_message_inner_container"
                 android:layout_alignRight="@id/receive_message_inner_container"
@@ -399,8 +426,8 @@
 			
 	            <ProgressBar
 		            android:id="@+id/initializing_ext"
-		            android:layout_width="46dp"
-		            android:layout_height="46dp"
+		            android:layout_width="42dp"
+		            android:layout_height="42dp"
 		            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				    android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress
@@ -408,7 +435,7 @@
 			       android:id="@+id/circular_progress_ext"
 	               android:layout_width="46dp"
 	               android:layout_height="46dp"
-	               app:progress_color="@color/white_65"
+	               app:progress_color="@color/white_85"
 	               app:progress_background_color="@color/white_45"
 	               android:gravity="center"
 	               app:progress="0.4"
@@ -418,8 +445,8 @@
 	               android:layout_centerInParent="true" />
 	            <ImageView
 	                android:id="@+id/ft_action_ext"
-	                android:layout_height="15dp"
-	                android:layout_width="15dp"
+	                android:layout_height="30dp"
+	                android:layout_width="30dp"
 	                android:layout_centerInParent="true" />
             </RelativeLayout>
             
@@ -503,7 +530,7 @@
 		            android:id="@+id/rec_initializing"
 		            android:layout_width="64dp"
 		            android:layout_height="64dp"
-		            android:indeterminateDrawable="@drawable/circular_double_spinner"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner_dark"
 		            android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress
 	               xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
@@ -551,8 +578,9 @@
             android:paddingRight="5dp"
   	        android:text="00:00"
   	        android:background="@drawable/bg_msg_time_status"
-  	        android:textColor="@color/white_60"
+  	        android:textColor="@color/white_85"
             android:textSize="12sp"
+            android:textStyle="italic"
             android:visibility="gone" />
            
 
