@@ -520,6 +520,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				{
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
+				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
 				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 			}
 			catch (InterruptedException e)
@@ -567,8 +568,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				HikeUserDatabase db = HikeUserDatabase.getInstance();
 				db.setIcon(msisdn, bytes, false);
 		}
-		publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-
+		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
 		Logger.d("SignupTask", "Publishing Token_Created");

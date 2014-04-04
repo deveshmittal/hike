@@ -1285,10 +1285,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					@Override
 					public void run()
 					{
-						if(loadingText !=null)
-						{
-							loadingText.setText(R.string.setting_profile);
-						}
+						 if(loadingText != null)
+						 {
+							 loadingText.setText(R.string.setting_profile);
+						 }
 					}
 				}, 500);
 			}
@@ -1305,7 +1305,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							loadingText.setText(R.string.you_are_all_set);
 						}
 					}
-				}, 500);
+				}, 1000);
 			}
 			break;
 		case ERROR:
