@@ -82,22 +82,36 @@
         android:textSize="18sp"
         android:visibility="visible" />
     
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/invalid_pin"
+    <RelativeLayout 
         android:layout_width="wrap_content"
-        android:layout_height="56dp"
-        android:layout_gravity="center"
-        android:gravity="bottom"
-        android:paddingBottom="12dp"
-        android:text="@string/wrong_pin"
-        android:textSize="15sp"
-        android:textColor="#f16c67"
-        android:textStyle="bold|italic"
-	    android:shadowColor="#fbdedd"
-	    android:shadowDy="0.5"
-	    android:shadowRadius="0.5"
-	    android:visibility="visible"/>
-
+        android:layout_height="56dp" >
+        
+    	<com.bsb.hike.view.CustomFontTextView
+        	android:id="@+id/invalid_pin"
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentTop="true"
+        	android:gravity="center_horizontal"
+        	android:paddingTop="9dp"
+        	android:text="@string/wrong_pin"
+        	android:textSize="13sp"
+        	android:textStyle="bold"
+        	android:textColor="#f16c67"
+	    	android:visibility="visible"/>
+    
+    	<com.bsb.hike.view.CustomFontTextView
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:gravity="center_horizontal"
+        	android:layout_alignParentBottom="true"
+        	android:paddingBottom="9dp"
+        	android:text="@string/didnt_get_pin"
+        	android:textSize="13sp"
+        	android:textColor="#6d767b"
+	    	android:visibility="visible"/>
+        
+    </RelativeLayout>
+    
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
