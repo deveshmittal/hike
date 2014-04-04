@@ -1404,4 +1404,5 @@
     <string name="enter_pin_signup">Please enter the 4 digit PIN we sent you via SMS.</string>
     <string name="setting_profile">Setting up your profile...</string>
     <string name="you_are_all_set">You are all set...</string>
+    <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs\nupto 100mb each. You can \nalso send multiple files in one go!</string>
 </resources>
