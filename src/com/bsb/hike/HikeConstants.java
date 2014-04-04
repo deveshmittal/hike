@@ -104,6 +104,8 @@ public class HikeConstants
 	public static final String FILE_NAME = "fn";
 
 	public static final String FILE_KEY = "fk";
+	
+	public static final String FILE_PATH = "fp";
 
 	public static final String CREDITS = "credits";
 

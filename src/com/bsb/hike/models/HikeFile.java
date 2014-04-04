@@ -159,6 +159,10 @@ public class HikeFile
 		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL, null);
 		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
+		if(isSent)
+		{
+			this.file = new File(fileJSON.optString(HikeConstants.FILE_PATH));
+		}
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
@@ -230,6 +234,10 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
+			if(isSent)
+			{
+				fileJSON.putOpt(HikeConstants.FILE_PATH, getFile().getPath());
+			}
 			if (sourceFilePath != null)
 			{
 				fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
