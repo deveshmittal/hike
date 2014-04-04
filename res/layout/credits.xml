@@ -166,6 +166,7 @@
                      android:layout_alignParentLeft="true"
                      android:layout_centerVertical="true"
                      android:layout_marginRight="16dp"
+                     android:layout_marginLeft="16dp"
                      android:src="@drawable/ic_free_sms_hike" />
 
                  <LinearLayout
@@ -196,8 +197,8 @@
                      android:layout_centerVertical="true"
                      android:gravity="center"
                      android:paddingLeft="10dp"
-                     android:paddingRight="10dp"
-                     android:text="@string/unlimited"
+                     android:paddingRight="2dp"
+                     android:text="Unlimited"
                      android:textColor="@color/signup_bg"
                      android:textSize="16sp"
                      android:textStyle="bold" />
@@ -221,6 +222,7 @@
                      android:layout_height="wrap_content"
                      android:layout_alignParentLeft="true"
                      android:layout_marginRight="16dp"
+                     android:layout_marginLeft="16dp"
                      android:layout_marginTop="7dp"
                      android:background="@drawable/ic_green_circle"
                      android:scaleType="centerInside"
@@ -318,6 +320,7 @@
                      android:layout_height="wrap_content"
                      android:layout_alignParentLeft="true"
                      android:layout_marginRight="16dp"
+                     android:layout_marginLeft="16dp"
                      android:layout_marginTop="4dp"
                      android:background="@drawable/ic_green_circle"
                      android:scaleType="centerInside"
@@ -326,6 +329,7 @@
                  <LinearLayout
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
+                     android:layout_marginRight="5dp"
                      android:layout_centerVertical="true"
                      android:layout_toRightOf="@id/invite_icon"
                      android:orientation="vertical" >
