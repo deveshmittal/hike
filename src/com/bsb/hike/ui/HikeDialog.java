@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 
 import com.bsb.hike.R;
 
@@ -29,7 +28,7 @@ public class HikeDialog
 		dialog.setContentView(R.layout.file_transfer_tutorial_pop_up);
 		dialog.setCancelable(true);
 
-		Button okBtn = (Button) dialog.findViewById(R.id.awesomeButton);
+		View okBtn = dialog.findViewById(R.id.awesomeButton);
 		okBtn.setOnClickListener(new OnClickListener()
 		{
 
