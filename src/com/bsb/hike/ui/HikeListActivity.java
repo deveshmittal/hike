@@ -239,7 +239,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 		};
 
-		confirmDialog.setOkButton(R.string.confirm, dialogOkClickListener);
+		confirmDialog.setOkButton(R.string.invite_1, dialogOkClickListener);
 		confirmDialog.setCancelButton(R.string.cancel);
 		confirmDialog.show();
 	}

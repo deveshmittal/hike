@@ -1406,6 +1406,6 @@
     <string name="female_selected_string_3">I am size awesome.</string>
     <string name="female_selected_string_4">Getting married before 20 is like leaving a party before 8!</string>
     <string name="female_selected_string_5">Girls speak about 7,000 words a day!</string>
-    <string name="invite_friends_confirmation_msg">This will invite %1$s of you friends. Do you want to continue?</string>
+    <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
 </resources>
