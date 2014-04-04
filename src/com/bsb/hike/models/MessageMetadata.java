@@ -127,8 +127,7 @@ public class MessageMetadata
 			else
 			// this is the case when you receive a sticker from another user
 			{
-				String val = metadata.optString(StickerManager.CATEGORY_ID);
-				StickerCategory cat = StickerManager.getInstance().getCategoryForName(val);
+				String cat = metadata.optString(StickerManager.CATEGORY_ID);
 				this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
 			}
 		}
