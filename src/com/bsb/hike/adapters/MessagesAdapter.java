@@ -233,6 +233,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View selectedStateOverlay;
 
 		View sdrFtueTip;
+		
+		ImageView filmstripLeft;
+		
+		ImageView filmstripRight;
 	}
 
 	private Conversation conversation;
@@ -552,6 +556,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.recProgress = (HoloCircularProgress) v.findViewById(R.id.rec_circular_progress);
 				holder.watingRec = (ProgressBar) v.findViewById(R.id.rec_initializing);
 				holder.recAction = (ImageView) v.findViewById(R.id.rec_action);
+				holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
+				holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null)
@@ -621,6 +627,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.watingRec = (ProgressBar) v.findViewById(R.id.rec_initializing);
 				holder.recAction = (ImageView) v.findViewById(R.id.rec_action);
 				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
+				holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
 			case RECEIVE:
 				if (v == null)
 				{
@@ -1172,6 +1180,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.fileSize.setVisibility(View.VISIBLE);
 				holder.messageSize.setVisibility(View.VISIBLE);
 				holder.fileThumb.setVisibility(View.VISIBLE);
+				holder.filmstripLeft.setVisibility(View.VISIBLE);
+				holder.filmstripRight.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
 			{

@@ -163,6 +163,30 @@
 	                    android:layout_height="100dp"
 	                    android:layout_gravity="center"
 	                    android:visibility="gone" />
+	                
+	                <LinearLayout
+                        android:id="@+id/filmstrip_left"
+                        android:layout_height="wrap_content"
+                        android:layout_width="10dp"
+                        android:layout_alignLeft="@id/file_thumb"
+                        android:layout_alignTop="@id/file_thumb" 
+                        android:layout_alignBottom="@id/file_thumb"
+                        android:src="@drawable/filmstrip"
+                        android:orientation="vertical" >
+                        
+	                </LinearLayout>
+                    
+                    <LinearLayout
+                        android:id="@+id/filmstrip_right"
+                        android:layout_height="wrap_content"
+                        android:layout_width="10dp"
+                        android:layout_alignRight="@id/file_thumb"
+                        android:layout_alignTop="@id/file_thumb" 
+                        android:layout_alignBottom="@id/file_thumb"
+                        android:src="@drawable/filmstrip"
+                        android:orientation="vertical" >
+                        
+                    </LinearLayout>
                     
 	                <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/file_extension"
