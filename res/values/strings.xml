@@ -1395,11 +1395,13 @@
     <string name="compose_chat_empty_contact_status_chat_mode">Tap to start chat</string>
     <string name="chatThreadNudgeTutorialText">Double tap anywhere to nudge your friend</string>
     <string name="tap_hold_multi_select">Tap and hold to select multiple</string>
-	<string name="verified">Verified</string>
-	<string name="sent_txt">Sent</string>
-	<string name="delivered_txt">Delivered</string>
-	<string name="read_txt">Read</string>
-	<string name="no_results">No results</string>
-	<string name="num_unread_messages">%1$s Unread Messages</string>
-	<string name="one_unread_message">1 Unread Message</string>
+    <string name="verified">Verified</string>
+    <string name="sent_txt">Sent</string>
+    <string name="delivered_txt">Delivered</string>
+    <string name="read_txt">Read</string>
+    <string name="no_results">No results</string>
+    <string name="num_unread_messages">%1$s Unread Messages</string>
+    <string name="one_unread_message">1 Unread Message</string>
+    <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs\nupto 100mb each. You can \nalso send multiple files in one go!</string>
+
 </resources>

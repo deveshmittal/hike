@@ -3721,7 +3721,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
 			tv.setText(R.string.chatThreadNudgeTutorialText);
-			tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_left_chat, 0, 0, 0);
+			tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_nudge, 0, 0, 0);
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
