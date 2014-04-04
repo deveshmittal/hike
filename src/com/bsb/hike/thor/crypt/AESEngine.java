@@ -1,8 +1,6 @@
 package com.bsb.hike.thor.crypt;
 
 import java.util.concurrent.locks.Lock;
-
-
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.crypto.BlockCipher;

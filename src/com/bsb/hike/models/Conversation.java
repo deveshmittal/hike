@@ -8,9 +8,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.Logger;
 
 public class Conversation implements Comparable<Conversation>
 {
@@ -221,7 +221,7 @@ public class Conversation implements Comparable<Conversation>
 		}
 		catch (JSONException e)
 		{
-			Log.e("ConvMessage", "invalid json message", e);
+			Logger.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
 	}

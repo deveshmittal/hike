@@ -30,8 +30,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
@@ -39,6 +37,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /* 
@@ -183,7 +182,7 @@ public class FileTransferManager extends BroadcastReceiver
 			// This approach reduces resource competition between the Runnable object's thread and the UI thread.
 			t.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 			t.setName("FT Thread-" + threadCount);
-			Log.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
+			Logger.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
 			return t;
 		}
 	}
@@ -206,7 +205,7 @@ public class FileTransferManager extends BroadcastReceiver
 		@Override
 		public void run()
 		{
-			Log.d(getClass().getSimpleName(), "TimeCheck: Starting time : " + System.currentTimeMillis());
+			Logger.d(getClass().getSimpleName(), "TimeCheck: Starting time : " + System.currentTimeMillis());
 			super.run();
 		}
 
@@ -235,7 +234,7 @@ public class FileTransferManager extends BroadcastReceiver
 			else
 				((UploadContactOrLocationTask) task).postExecute(result);
 
-			Log.d(getClass().getSimpleName(), "TimeCheck: Exiting  time : " + System.currentTimeMillis());
+			Logger.d(getClass().getSimpleName(), "TimeCheck: Exiting  time : " + System.currentTimeMillis());
 		}
 	}
 
@@ -404,11 +403,11 @@ public class FileTransferManager extends BroadcastReceiver
 			{
 				((MyFutureTask) obj).getTask().setState(FTState.CANCELLED);
 			}
-			Log.d(getClass().getSimpleName(), "deleting state file" + msgId);
+			Logger.d(getClass().getSimpleName(), "deleting state file" + msgId);
 			deleteStateFile(msgId, mFile);
 			if (!sent)
 			{
-				Log.d(getClass().getSimpleName(), "deleting tempFile" + msgId);
+				Logger.d(getClass().getSimpleName(), "deleting tempFile" + msgId);
 				File tempDownloadedFile = new File(getHikeTempDir(), mFile.getName() + ".part");
 				if (tempDownloadedFile != null && tempDownloadedFile.exists())
 					tempDownloadedFile.delete();
@@ -423,7 +422,7 @@ public class FileTransferManager extends BroadcastReceiver
 		if (obj != null)
 		{
 			((MyFutureTask) obj).getTask().setState(FTState.PAUSING);
-			Log.d(getClass().getSimpleName(), "pausing the task....");
+			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
 
@@ -450,7 +449,7 @@ public class FileTransferManager extends BroadcastReceiver
 					}
 					catch (Exception e)
 					{
-						Log.e(getClass().getSimpleName(), "Exception while deleting state file : ", e);
+						Logger.e(getClass().getSimpleName(), "Exception while deleting state file : ", e);
 					}
 				}
 			}
@@ -518,18 +517,18 @@ public class FileTransferManager extends BroadcastReceiver
 	// this function gives the state of uploading for a file
 	public FileSavedState getUploadFileState(long msgId, File mFile)
 	{
-		Log.d(getClass().getSimpleName(), "Returning state for message ID : " + msgId);
+		Logger.d(getClass().getSimpleName(), "Returning state for message ID : " + msgId);
 		if (isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
-				Log.d(getClass().getSimpleName(), "Returning: " + ((MyFutureTask) obj).getTask()._state.toString());
+				Logger.d(getClass().getSimpleName(), "Returning: " + ((MyFutureTask) obj).getTask()._state.toString());
 				return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
 			}
 			else
 			{
-				Log.d(getClass().getSimpleName(), "Returning: in_prog");
+				Logger.d(getClass().getSimpleName(), "Returning: in_prog");
 				return new FileSavedState(FTState.IN_PROGRESS, 0, 0);
 			}
 		}
@@ -539,7 +538,7 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public FileSavedState getUploadFileState(File mFile, long msgId)
 	{
-		Log.d(getClass().getSimpleName(), "Returning from second call");
+		Logger.d(getClass().getSimpleName(), "Returning from second call");
 		if (mFile == null) // @GM only for now. Has to be handled properly
 			return new FileSavedState();
 
@@ -548,7 +547,7 @@ public class FileTransferManager extends BroadcastReceiver
 		try
 		{
 			String fName = mFile.getName() + ".bin." + msgId;
-			Log.d(getClass().getSimpleName(), fName);
+			Logger.d(getClass().getSimpleName(), fName);
 			File f = new File(HIKE_TEMP_DIR, fName);
 			if (!f.exists())
 			{
@@ -572,7 +571,7 @@ public class FileTransferManager extends BroadcastReceiver
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Log.e(getClass().getSimpleName(), "Exception while reading state file : ", e);
+			Logger.e(getClass().getSimpleName(), "Exception while reading state file : ", e);
 		}
 		return fss != null ? fss : new FileSavedState();
 
@@ -642,7 +641,7 @@ public class FileTransferManager extends BroadcastReceiver
 					{
 						if (t.getState() == State.TIMED_WAITING)
 						{
-							Log.d(getClass().getSimpleName(), "interrupting the task: " + t.toString());
+							Logger.d(getClass().getSimpleName(), "interrupting the task: " + t.toString());
 							t.interrupt();
 						}
 					}
@@ -727,7 +726,7 @@ public class FileTransferManager extends BroadcastReceiver
 	{
 		if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
 		{
-			Log.d(getClass().getSimpleName(), "Connectivity Change Occured");
+			Logger.d(getClass().getSimpleName(), "Connectivity Change Occured");
 			// if network available then proceed
 			if (Utils.isUserOnline(context))
 			{

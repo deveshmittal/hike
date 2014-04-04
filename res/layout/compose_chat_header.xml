@@ -15,14 +15,10 @@
         android:gravity="center_vertical"
         android:paddingLeft="12dp"
         android:singleLine="true"
-        android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
         android:textColor="@color/selected_msg_item_bg_lines"
         android:textSize="16sp"
         android:textStyle="bold|italic" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/light_gray_hike" />
+    
 
 </LinearLayout>

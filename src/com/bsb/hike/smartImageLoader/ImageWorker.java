@@ -31,7 +31,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -40,6 +39,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 
@@ -135,7 +135,7 @@ public abstract class ImageWorker
 
 		if (value != null)
 		{
-			Log.d(TAG, data + " Bitmap found in cache and is not recycled.");
+			Logger.d(TAG, data + " Bitmap found in cache and is not recycled.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
@@ -155,7 +155,7 @@ public abstract class ImageWorker
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
-			Log.d("debug ", "Starting async task ");
+			Logger.d("debug ", "Starting async task ");
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
 			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, task);
 			imageView.setImageDrawable(asyncDrawable);
@@ -304,7 +304,7 @@ public abstract class ImageWorker
 		{
 			bitmapWorkerTask.cancel(true);
 			final Object bitmapData = bitmapWorkerTask.data;
-			Log.d(TAG, "cancelWork - cancelled work for " + bitmapData);
+			Logger.d(TAG, "cancelWork - cancelled work for " + bitmapData);
 		}
 	}
 
@@ -322,7 +322,7 @@ public abstract class ImageWorker
 			if (bitmapData == null || !bitmapData.equals(data))
 			{
 				bitmapWorkerTask.cancel(true);
-				Log.d(TAG, "cancelPotentialWork - cancelled work for " + data);
+				Logger.d(TAG, "cancelPotentialWork - cancelled work for " + data);
 			}
 			else
 			{
@@ -372,7 +372,7 @@ public abstract class ImageWorker
 		@Override
 		protected BitmapDrawable doInBackground(String... params)
 		{
-			Log.d(TAG, "doInBackground - starting work");
+			Logger.d(TAG, "doInBackground - starting work");
 			data = params[0];
 			final String dataString = data;
 
@@ -418,7 +418,7 @@ public abstract class ImageWorker
 
 				if (mImageCache != null)
 				{
-					Log.d(TAG, "Putting data in cache : " + dataString);
+					Logger.d(TAG, "Putting data in cache : " + dataString);
 					mImageCache.putInCache(dataString, drawable);
 				}
 			}
@@ -508,14 +508,14 @@ public abstract class ImageWorker
 	{
 		if (drawable != null && ((BitmapDrawable) drawable).getBitmap().isRecycled())
 		{
-			Log.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
+			Logger.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
 			return;
 		}
 		try
 		{
 			if (mFadeInBitmap)
 			{
-				Log.d("debug ", "mfadeinbitmap called imageworker");
+				Logger.d("debug ", "mfadeinbitmap called imageworker");
 				// Transition drawable with a transparent drawable and the final drawable
 				final TransitionDrawable td = new TransitionDrawable(new Drawable[] { new ColorDrawable(android.R.color.transparent), drawable });
 				if (!dontSetBackground)
@@ -529,13 +529,13 @@ public abstract class ImageWorker
 			}
 			else
 			{
-				Log.d("debug ", "setimagedrawable called imageworker");
+				Logger.d("debug ", "setimagedrawable called imageworker");
 				imageView.setImageDrawable(drawable);
 			}
 		}
 		catch (Exception e)
 		{
-			Log.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
+			Logger.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
 		}
 	}
 
@@ -603,7 +603,7 @@ public abstract class ImageWorker
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in decoding Bitmap from resources: ", e);
+			Logger.e(TAG, "Exception in decoding Bitmap from resources: ", e);
 		}
 		return result;
 	}
@@ -651,7 +651,7 @@ public abstract class ImageWorker
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in decoding Bitmap from file: ", e);
+			Logger.e(TAG, "Exception in decoding Bitmap from file: ", e);
 		}
 		return result;
 	}
@@ -702,7 +702,7 @@ public abstract class ImageWorker
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
+			Logger.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
 		}
 		return result;
 	}
@@ -721,7 +721,7 @@ public abstract class ImageWorker
 
 			if (inBitmap != null)
 			{
-				Log.d(TAG, "Found a bitmap in reusable set.");
+				Logger.d(TAG, "Found a bitmap in reusable set.");
 				options.inBitmap = inBitmap;
 			}
 		}

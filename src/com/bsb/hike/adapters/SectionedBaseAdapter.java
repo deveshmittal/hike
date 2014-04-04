@@ -3,7 +3,6 @@ package com.bsb.hike.adapters;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 
 public abstract class SectionedBaseAdapter extends BaseFragmentAdapter implements PinnedHeaderListView.PinnedSectionedHeaderAdapter
 {

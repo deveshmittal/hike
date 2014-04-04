@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
@@ -31,6 +30,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends FileTransferBase
@@ -72,7 +72,7 @@ public class DownloadFileTask extends FileTransferBase
 		}
 
 		_state = FTState.IN_PROGRESS;
-		Log.d(getClass().getSimpleName(), "Instantiating download ....");
+		Logger.d(getClass().getSimpleName(), "Instantiating download ....");
 		RandomAccessFile raf = null;
 		try
 		{
@@ -82,7 +82,7 @@ public class DownloadFileTask extends FileTransferBase
 			/* represents this file is either not started or unrecovered error has happened */
 			if (fst.getFTState().equals(FTState.NOT_STARTED) || fst.getFTState().equals(FTState.CANCELLED))
 			{
-				Log.d(getClass().getSimpleName(), "File state : " + fst.getFTState());
+				Logger.d(getClass().getSimpleName(), "File state : " + fst.getFTState());
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// TransferredBytes should always be set. It might be need for calculating percentage
 				setBytesTransferred(0);
@@ -90,7 +90,7 @@ public class DownloadFileTask extends FileTransferBase
 			}
 			else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 			{
-				Log.d(getClass().getSimpleName(), "File state : " + fst.getFTState());
+				Logger.d(getClass().getSimpleName(), "File state : " + fst.getFTState());
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// Restoring the bytes transferred(downloaded) previously.
 				setBytesTransferred((int) raf.length());
@@ -103,17 +103,17 @@ public class DownloadFileTask extends FileTransferBase
 		}
 		catch (MalformedURLException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid URL", e);
+			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e(getClass().getSimpleName(), "No SD Card", e);
+			Logger.e(getClass().getSimpleName(), "No SD Card", e);
 			return FTResult.NO_SD_CARD;
 		}
 		catch (IOException e)
 		{
-			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
+			Logger.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		return FTResult.DOWNLOAD_FAILED;
@@ -161,7 +161,7 @@ public class DownloadFileTask extends FileTransferBase
 				// Make sure the response code is in the 200 range.
 				if (resCode / 100 != 2)
 				{
-					Log.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
+					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();
 					res = FTResult.SERVER_ERROR;
 				}
@@ -179,7 +179,7 @@ public class DownloadFileTask extends FileTransferBase
 						closeStreams(raf, in);
 						return FTResult.FILE_TOO_LARGE;
 					}
-					Log.d(getClass().getSimpleName(), "bytes=" + byteRange);
+					Logger.d(getClass().getSimpleName(), "bytes=" + byteRange);
 					setFileTotalSize(contentLength + (int) mStart);
 
 					long temp = _bytesTransferred;
@@ -218,10 +218,10 @@ public class DownloadFileTask extends FileTransferBase
 						}
 						catch (IOException e)
 						{
-							Log.e(getClass().getSimpleName(), "Exception", e);
+							Logger.e(getClass().getSimpleName(), "Exception", e);
 							return FTResult.CARD_UNMOUNT;
 						}
-						Log.d(getClass().getSimpleName(), "ChunkSize : " + chunkSize + "Bytes");
+						Logger.d(getClass().getSimpleName(), "ChunkSize : " + chunkSize + "Bytes");
 						setChunkSize();
 						// ChunkSize is increased within the limits
 //						chunkSize *= 2;
@@ -258,20 +258,20 @@ public class DownloadFileTask extends FileTransferBase
 					switch (_state)
 					{
 					case CANCELLED:
-						Log.d(getClass().getSimpleName(), "FT Cancelled");
+						Logger.d(getClass().getSimpleName(), "FT Cancelled");
 						deleteTempFile();
 						deleteStateFile();
 						closeStreams(raf, in);
 						return FTResult.CANCELLED;
 					case IN_PROGRESS:
-						Log.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
+						Logger.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
 						String file_md5Hash = Utils.fileToMD5(tempDownloadedFile.getPath());
 						if (md5Hash != null)
 						{
-							Log.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
+							Logger.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
 							if (!md5Hash.equals(file_md5Hash))
 							{
-								Log.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
+								Logger.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
 								sendCrcLog(file_md5Hash);
 //								deleteTempFile();
 //								deleteStateFile();
@@ -288,14 +288,14 @@ public class DownloadFileTask extends FileTransferBase
 						}
 						if (!tempDownloadedFile.renameTo(mFile)) // if failed
 						{
-							Log.d(getClass().getSimpleName(), "FT failed");
+							Logger.d(getClass().getSimpleName(), "FT failed");
 							error();
 							closeStreams(raf, in);
 							return FTResult.READ_FAIL;
 						}
 						else
 						{
-							Log.d(getClass().getSimpleName(), "FT Completed");
+							Logger.d(getClass().getSimpleName(), "FT Completed");
 							// temp file is already deleted
 							_state = FTState.COMPLETED;
 							deleteStateFile();
@@ -304,7 +304,7 @@ public class DownloadFileTask extends FileTransferBase
 						break;
 					case PAUSING:
 						_state = FTState.PAUSED;
-						Log.d(getClass().getSimpleName(), "FT PAUSED");
+						Logger.d(getClass().getSimpleName(), "FT PAUSED");
 						saveFileState();
 						retry = false;
 						break;
@@ -315,7 +315,7 @@ public class DownloadFileTask extends FileTransferBase
 			}
 			catch (IOException e)
 			{
-				Log.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
+				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
 				if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)))
 				{
 					// here we should retry
@@ -337,7 +337,7 @@ public class DownloadFileTask extends FileTransferBase
 			}
 			catch (Exception e)
 			{
-				Log.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
+				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
 			}
 		}
 		if (res == FTResult.SUCCESS)
@@ -359,7 +359,7 @@ public class DownloadFileTask extends FileTransferBase
 			{
 				deleteTempFile();
 				deleteStateFile();
-				Log.e(getClass().getSimpleName(), "Error while closing file", e);
+				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
 				return FTResult.DOWNLOAD_FAILED;
 			}
 		}
@@ -390,7 +390,7 @@ public class DownloadFileTask extends FileTransferBase
 
 	private void sendProgress()
 	{
-		Log.d(getClass().getSimpleName(), "sending progress to publish...");
+		Logger.d(getClass().getSimpleName(), "sending progress to publish...");
 		Intent intent = new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 	}
