@@ -60,6 +60,11 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return name;
 	}
 
+	public String getNameOrMsisdn()
+	{
+		return name != null ? name : msisdn;
+	}
+
 	public String getFirstName()
 	{
 		if (TextUtils.isEmpty(name))
@@ -313,7 +318,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		json.put("phone_no", this.phoneNum);
 		json.put("name", this.name);
 		json.put("id", this.id);
-		
+
 		return json;
 	}
 
