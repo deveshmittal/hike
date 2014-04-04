@@ -1302,7 +1302,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					{
 						if(loadingText !=null)
 						{
-							loadingText.setText(R.string.getting_in_signup);
+							loadingText.setText(R.string.you_are_all_set);
 						}
 					}
 				}, 500);

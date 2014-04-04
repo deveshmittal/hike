@@ -323,7 +323,6 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="fb_app_id">425850510764995</string>
-    <string name="setting_profile">Setting up profile...</string>
     <string name="choose_picture">Choose a picture</string>
     <string name="number_confirm_title">Confirm your number</string>
     <string name="native_jingle_info">Play hike\'s jingle on notifications</string>
@@ -1344,7 +1343,6 @@
     <string name="pick_one">Pick One...</string>
     <string name="i_am_a_boy">I am a boy</string>
     <string name="i_am_a_girl">I am a girl</string>
-    <string name="scanning_your_contacts">You are all set!\nScanning your contacts...</string>
     <string name="about_you">About you</string>
     <string name="tell_us_more">Tell us more</string>
     <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
@@ -1401,4 +1399,7 @@
     <string name="confirm_delete_msgs">Are you sure you want to delete these %1$s messages?</string>
     <string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation?</string>
     <string name="enter_pin_signup">Please enter the 4 digit PIN we sent you via SMS.</string>
+    <string name="scanning_your_contacts">Scanning your contacts...</string>
+    <string name="setting_profile">Setting up your profile...</string>
+    <string name="you_are_all_set">You are all set...</string>
 </resources>
