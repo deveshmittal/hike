@@ -276,7 +276,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private void initStickers(StickerPageObjects spo, final StickerCategory category)
 	{
-		final StickerLoader worker = new StickerLoader(activity);
+		final StickerLoader worker = new StickerLoader(activity.getApplicationContext());
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);
@@ -286,7 +286,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			Set<Sticker> lhs = StickerManager.getInstance().getRecentStickerList();
 
 			/*
-			 * here using LinkedList as in recents we have to remove the sticker frequently to move it to front and in linked list remove operation is faster compared to arraylist
+			 * here using LinkedList as in recents we have to remove the sticker frequently to move it to front and in linked list 
+			 * remove operation is faster compared to arraylist
 			 */
 			stickersList = new LinkedList<Sticker>();
 			Iterator<Sticker> it = lhs.iterator();
@@ -419,7 +420,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private void addDefaultStickers(List<Sticker> stickerList, StickerCategory cat, String[] stickerIds)
 	{
-		for (int i = 0; i < stickerIds.length; i++)
+		int count = stickerIds.length;
+		for (int i = 0; i < count; i++)
 		{
 			stickerList.add(new Sticker(cat, stickerIds[i], i));
 		}

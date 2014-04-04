@@ -97,9 +97,9 @@ public class DownloadStickerTask extends StickerTaskBase
 			}
 		}
 
-		if (largeStickerDir.exists())
+		if (smallStickerDir.exists())
 		{
-			String[] stickerIds = largeStickerDir.list();
+			String[] stickerIds = smallStickerDir.list();
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
@@ -108,10 +108,11 @@ public class DownloadStickerTask extends StickerTaskBase
 		}
 		else
 		{
-			largeStickerDir.mkdirs();
+			smallStickerDir.mkdirs();
 			Logger.d(getClass().getSimpleName(), "No existing sticker");
 		}
-		smallStickerDir.mkdirs();
+		if(!largeStickerDir.exists())
+			largeStickerDir.mkdirs();
 
 		Utils.makeNoMediaFile(largeStickerDir);
 		Utils.makeNoMediaFile(smallStickerDir);

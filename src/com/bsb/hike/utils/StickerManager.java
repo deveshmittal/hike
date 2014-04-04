@@ -21,6 +21,7 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
@@ -543,11 +544,11 @@ public class StickerManager
 		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.categoryId.name());
 		if (categoryDirPath != null)
 		{
-			File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+			File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
 			File bigCatDir = new File(categoryDirPath);
-			if (categoryDir.exists())
+			if (smallCatDir.exists())
 			{
-				String[] stickerIds = categoryDir.list();
+				String[] stickerIds = smallCatDir.list();
 				for (String stickerId : stickerIds)
 				{
 					recentStickers.remove(new Sticker(category, stickerId));
@@ -689,7 +690,10 @@ public class StickerManager
 
 	public void removeStickerFromRecents(Sticker st)
 	{
-		recentStickers.remove(st);
+		boolean rem = recentStickers.remove(st);
+		Log.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+		// remove the sticker from cache too, recycling stuff is handled by the cache itself
+		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context)); 
 	}
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)

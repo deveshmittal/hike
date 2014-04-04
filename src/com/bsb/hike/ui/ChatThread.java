@@ -1490,13 +1490,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 						else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
 						{
-							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
-							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
-							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
+							String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
+							String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
+							int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
 							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
 							sendSticker(sticker);
-							// add this sticker to recents
-							StickerManager.getInstance().addRecentSticker(sticker);
+							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
+							// add this sticker to recents if this sticker is not disabled
+							if(!isDis)
+								StickerManager.getInstance().addRecentSticker(sticker);
+							/*
+							 * Making sure the sticker is not forwarded again on orientation change
+							 */
+							intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 						}
 						/*
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
