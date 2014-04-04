@@ -208,10 +208,12 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				completeList.addAll(filteredGroupsList);
 			}
 		}
-
-		ContactInfo friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
-		updateFriendsList(friendsSection, true);
-
+		ContactInfo friendsSection = null;
+		if (!filteredFriendsList.isEmpty())
+		{
+			friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
+		}
+		updateFriendsList(friendsSection, false, false);
 		if (isHikeContactsPresent())
 		{
 			ContactInfo hikeContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredHikeContactsList.size()), context.getString(R.string.hike_contacts),
