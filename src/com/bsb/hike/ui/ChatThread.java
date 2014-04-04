@@ -3272,7 +3272,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
 			{
-				if (convMessage.getTypingNotification() == null)
+				if (convMessage.getTypingNotification() == null && (convMessage.getParticipantInfoState()== ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState()== ParticipantInfoState.STATUS_MESSAGE) )
 				{
 					showUnreadCountIndicator();
 				}
