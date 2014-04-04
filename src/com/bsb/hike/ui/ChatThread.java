@@ -1362,10 +1362,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
 				String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
 				int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
+				Log.d("test",String.format("Sticker forward , cat : %s , stId : %s , index : %d",categoryId,stickerId,stickerIdx));
 				Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
 				sendSticker(sticker);
+				boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
+				Log.d("test","Is sticker disabled : " + isDis);
 				// add this sticker to recents if this sticker is not disabled
-				if(!sticker.isDisabled(sticker, this.getApplicationContext()));
+				if(!isDis)
 					StickerManager.getInstance().addRecentSticker(sticker);
 				/*
 				 * Making sure the sticker is not forwarded again on orientation change
