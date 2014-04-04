@@ -121,6 +121,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	protected ListView listView;
 
+	private boolean isFiltered;
+
 	public FriendsAdapter(Context context, ListView listView)
 	{
 		this.listView = listView;
@@ -205,10 +207,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				}
 
 				results.values = resultList;
+				isFiltered = true;
 			}
 			else
 			{
 				results.values = makeOriginalList();
+				isFiltered = false;
 			}
 			results.count = 1;
 			return results;
@@ -378,9 +382,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 		boolean hideSuggestions = true;
 
-		if (!filteredFriendsList.isEmpty() && section != null)
+		if (section != null)
 		{
-			completeList.add(section);
+			// either not filtered or if filtered then list should not be empty
+			if (!filteredFriendsList.isEmpty() || !isFiltered)
+				completeList.add(section);
 		}
 		if (dontAddFTUE && !HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText) && friendsList.size() < HikeConstants.FTUE_LIMIT)
 		{
