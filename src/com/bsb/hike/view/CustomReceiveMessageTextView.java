@@ -10,9 +10,9 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 {
 	private String TAG = "CustomSendMessageTextView";
 	
-	private static final int widthTime12Hour = 48;
+	private static final int widthTime12Hour = 50;
 	
-	private static final int widthTime24Hour = 28;
+	private static final int widthTime24Hour = 30;
 	
 	private static final int widthMargin = 100;
 	
