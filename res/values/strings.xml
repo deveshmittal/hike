@@ -1274,6 +1274,7 @@
     <string name="chat_themes_popup_msg">Personalise your chats\nwith gorgeous themes.</string>
     <string name="give_it_a_spin">Give it a spin</string>
     <string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
+    <string name="chat_bg_ftue_tip">Check out the stunning new Chat Themes!</string>
     <string name="last_seen_today_ct">today, %1$s</string>
     <string name="last_seen_yesterday_ct">yesterday, %1$s</string>
     <string name="last_seen_more_ct">%1$s</string>
@@ -1302,7 +1303,6 @@
     <string name="confirm_delete_msg_header">Delete message</string>
     <string name="confirm_delete_msgs_header">Delete messages.</string>
     <string name="selected_count">%1$s selected</string>
-    <string name="chat_bg_ftue_tip">Placeholder</string>
     <string name="clear_conversation">Clear Conversation</string>
     <string name="gallery_num_selected">%1$d selected</string>
     <string name="select_file">Select File</string>
