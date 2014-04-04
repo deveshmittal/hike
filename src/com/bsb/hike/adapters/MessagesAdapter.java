@@ -3036,6 +3036,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			tv.setVisibility(View.VISIBLE);
 			tv.setText(undeliveredText);
 		}
+		tv.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);

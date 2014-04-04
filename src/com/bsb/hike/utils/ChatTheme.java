@@ -90,6 +90,12 @@ public enum ChatTheme
 		{
 			return R.color.light_blue_transparent;
 		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
 		
 	},
 
@@ -178,6 +184,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -269,6 +281,12 @@ public enum ChatTheme
 			return R.color.action_bar_item_pressed;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
+		}
+
 	},
 
 	BEACH_2
@@ -356,6 +374,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -447,6 +471,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	FRIENDS
@@ -534,6 +564,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -625,6 +661,12 @@ public enum ChatTheme
 			return R.color.action_bar_item_pressed;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
+		}
+
 	},
 
 	MUSIC
@@ -712,6 +754,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -803,6 +851,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	HIKIN_COUPLE
@@ -890,6 +944,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -981,6 +1041,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	ANXIETY
@@ -1070,6 +1136,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	VALENTINES_2
@@ -1156,6 +1228,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1247,6 +1325,12 @@ public enum ChatTheme
 			return R.color.light_blue_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	NIGHT
@@ -1334,6 +1418,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1425,6 +1515,12 @@ public enum ChatTheme
 			return R.color.light_blue_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	LOVE
@@ -1512,6 +1608,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1602,6 +1704,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	GIRLY
 	{
@@ -1688,6 +1796,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1778,6 +1892,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	CHEERS
 	{
@@ -1864,6 +1984,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1953,6 +2079,12 @@ public enum ChatTheme
 		{
 			return R.color.light_black_transparent;
 		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
 	},
 	SMILEY
 	{
@@ -2039,6 +2171,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2129,6 +2267,12 @@ public enum ChatTheme
 			return R.color.light_blue_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	CELEBRATION
 	{
@@ -2215,6 +2359,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2305,6 +2455,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	FOREST
 	{
@@ -2391,6 +2547,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2481,6 +2643,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	TECHY
 	{
@@ -2567,6 +2735,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2657,6 +2831,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	BEACH
 	{
@@ -2743,6 +2923,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2833,6 +3019,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	STUDY
 	{
@@ -2919,6 +3111,12 @@ public enum ChatTheme
 		public int multiSelectBubbleColor()
 		{
 			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -3008,6 +3206,12 @@ public enum ChatTheme
 		{
 			return R.color.light_black_transparent;
 		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
 	},
 	BIKER
 	{
@@ -3096,6 +3300,12 @@ public enum ChatTheme
 			return R.color.light_black_transparent;
 		}
 
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	};
 
 	public abstract String bgId();
@@ -3125,6 +3335,8 @@ public enum ChatTheme
 	public abstract int smsToggleBgRes();
 	
 	public abstract int multiSelectBubbleColor();
+	
+	public abstract int offlineMsgTextColor();
 
 	public static ChatTheme getThemeFromId(String bgId)
 	{
