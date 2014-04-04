@@ -587,21 +587,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			}
 		}
-		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
-		{
-			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
-			Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			intent.putExtra(HikeConstants.Extras.MSG, msg);
-		}
 		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
 				|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 		{
 			intent.putExtras(presentIntent);
 		}
-		else if (type != null)
+		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
 			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-			Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+
 			fileUri = Utils.makePicasaUri(fileUri);
 			String fileUriStart = "file:";
 			String fileUriString = fileUri.toString();
@@ -622,8 +616,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				filePath = Utils.getRealPathFromUri(fileUri, this);
 			}
+
+			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+
 			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
+		}
+		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+		{
+			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+			Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
 		}
 		startActivity(intent);
 		finish();
