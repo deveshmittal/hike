@@ -12,6 +12,29 @@
         android:layout_height="@dimen/signup_header_height"
         android:text="@string/whats_your_number"
         style="@style/SignupHeader" />
+    
+    <LinearLayout 
+        android:id="@+id/verified_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        
+        <ImageView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_pin_verified"
+            android:layout_marginRight="12dp"
+            android:layout_gravity="center"/>
+        
+	    <com.bsb.hike.view.CustomFontTextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="@dimen/signup_header_height"
+	        android:gravity="center"
+	        android:text="@string/verified"
+        	style="@style/SignupHeader" />
+	</LinearLayout>
 
     <LinearLayout
             android:id="@+id/loading_layout"

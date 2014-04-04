@@ -18,7 +18,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
-import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -412,14 +411,7 @@ public class HikeNotification
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
-		if (drawable == null)
-		{
-			Drawable background = context.getResources().getDrawable(Utils.getDefaultAvatarResourceId(msisdn, false));
-			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
-		}
-		final Drawable avatarDrawable = drawable;
+		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn);
 
 		final int smallIconId = returnSmallIcon();
 

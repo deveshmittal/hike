@@ -46,7 +46,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.FREE_SMS_PREF, true))
 		{
 			int credits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
-			items.add(getString(R.string.sms) + "(" + credits + ")");
+			items.add(getString(R.string.sms_with_credits, credits));
 		}
 		else
 		{

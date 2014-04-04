@@ -270,4 +270,7 @@
     <color name="action_bar_btn_disable">#0965a0</color>
     <color name="compose_view_btn_selected">#33000000</color>
     <color name="file_size">#787878</color>
+    <color name="light_blue_transparent">#3e33ccff</color>
+    <color name="light_black_transparent">#3e000000</color>
+>>>>>>> abe1062a49e853e60abe99f3254555741eb10d4f
 </resources>

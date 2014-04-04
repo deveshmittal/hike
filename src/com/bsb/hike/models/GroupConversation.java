@@ -10,10 +10,10 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class GroupConversation extends Conversation
@@ -52,7 +52,7 @@ public class GroupConversation extends Conversation
 			boolean onHike = nameMsisdn.optBoolean(HikeConstants.ON_HIKE);
 			boolean onDnd = nameMsisdn.optBoolean(HikeConstants.DND);
 			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
-			Log.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
+			Logger.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
 			this.groupParticipantList.put(contactNum, groupParticipant);
 		}
 
@@ -152,7 +152,7 @@ public class GroupConversation extends Conversation
 		}
 		catch (JSONException e)
 		{
-			Log.e("ConvMessage", "invalid json message", e);
+			Logger.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
 	}

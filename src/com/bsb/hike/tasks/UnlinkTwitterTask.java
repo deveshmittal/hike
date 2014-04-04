@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
@@ -12,6 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
 
 public class UnlinkTwitterTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
 {
@@ -45,7 +45,7 @@ public class UnlinkTwitterTask extends AsyncTask<Void, Void, Boolean> implements
 		}
 		catch (Exception e)
 		{
-			Log.e("UnlinkTwitterTask", "error unlinking account", e);
+			Logger.e("UnlinkTwitterTask", "error unlinking account", e);
 			return false;
 		}
 

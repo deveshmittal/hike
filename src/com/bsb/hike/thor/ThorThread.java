@@ -1,7 +1,6 @@
 package com.bsb.hike.thor;
 
 import java.io.ByteArrayOutputStream;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -19,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
-import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.Utils;

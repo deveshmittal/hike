@@ -64,7 +64,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
@@ -78,6 +78,25 @@ public enum ChatTheme
 		{
 			return R.color.bubble_blue;
 		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+		
 	},
 
 	SPRING
@@ -140,19 +159,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_forest_study_sporty;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -217,19 +254,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_3x;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_3x;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_hikin_couple_mountain;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.action_bar_item_pressed;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -294,19 +349,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_2x;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_3x;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_rains_beach_2;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -371,19 +444,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_forest_study_sporty;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -448,19 +539,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_2x;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_2x;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_chatty_bechy_techy;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -477,7 +586,7 @@ public enum ChatTheme
 		@Override
 		public int headerBgResId()
 		{
-			return R.drawable.bg_header_transparent;
+			return R.drawable.bg_header_transparent_3x;
 		}
 
 		@Override
@@ -525,19 +634,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme_3x;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom_3x;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_rains_beach_2;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme_3x;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.action_bar_item_pressed;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -554,7 +681,7 @@ public enum ChatTheme
 		@Override
 		public int headerBgResId()
 		{
-			return R.drawable.bg_header_transparent;
+			return R.drawable.bg_header_transparent_2x;
 		}
 
 		@Override
@@ -584,7 +711,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_music;
+			return R.drawable.ic_nudge_sent_white;
 		}
 
 		@Override
@@ -602,19 +729,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_music;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme_2x;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
 		}
 
 	},
@@ -679,19 +824,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_mr_right_exam;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -708,7 +871,7 @@ public enum ChatTheme
 		@Override
 		public int headerBgResId()
 		{
-			return R.drawable.bg_header_transparent;
+			return R.drawable.bg_header_transparent_2x;
 		}
 
 		@Override
@@ -756,19 +919,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_hikin_couple_mountain;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme_2x;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -833,19 +1014,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_mr_right_exam;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -910,19 +1109,37 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme_dark;
+			return R.drawable.bg_status_chat_thread_custom_theme;
 		}
 
 		@Override
 		public int systemMessageLayoutId()
 		{
-			return R.layout.participant_info_custom_dark;
+			return R.layout.participant_info_custom;
 		}
 		
 		@Override
 		public int bubbleColor()
 		{
 			return R.color.bubble_stary_Space;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -999,6 +1216,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1078,6 +1313,24 @@ public enum ChatTheme
 			return R.color.bubble_night;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	NIGHT
@@ -1153,6 +1406,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_night;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1232,6 +1503,24 @@ public enum ChatTheme
 			return R.color.bubble_owl;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 
 	LOVE
@@ -1307,6 +1596,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1385,6 +1692,24 @@ public enum ChatTheme
 			return R.color.bubble_chatty_bechy_techy;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	GIRLY
 	{
@@ -1459,6 +1784,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1537,6 +1880,24 @@ public enum ChatTheme
 			return R.color.bubble_stary_Space;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	CHEERS
 	{
@@ -1611,6 +1972,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1688,6 +2067,24 @@ public enum ChatTheme
 		{
 			return R.color.bubble_forest_study_sporty;
 		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
 	},
 	SMILEY
 	{
@@ -1762,6 +2159,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1840,6 +2255,24 @@ public enum ChatTheme
 			return R.color.bubble_creepy;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_blue_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	CELEBRATION
 	{
@@ -1914,6 +2347,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_celebration_space;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -1992,6 +2443,24 @@ public enum ChatTheme
 			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	FOREST
 	{
@@ -2066,6 +2535,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_forest_study_sporty;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2144,6 +2631,24 @@ public enum ChatTheme
 			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	TECHY
 	{
@@ -2218,6 +2723,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_chatty_bechy_techy;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2296,6 +2819,24 @@ public enum ChatTheme
 			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	BEACH
 	{
@@ -2370,6 +2911,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_chatty_bechy_techy;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2448,6 +3007,24 @@ public enum ChatTheme
 			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	},
 	STUDY
 	{
@@ -2522,6 +3099,24 @@ public enum ChatTheme
 		public int bubbleColor()
 		{
 			return R.color.bubble_forest_study_sporty;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
 		}
 
 	},
@@ -2599,6 +3194,24 @@ public enum ChatTheme
 		{
 			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
 		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
 	},
 	BIKER
 	{
@@ -2675,6 +3288,24 @@ public enum ChatTheme
 			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
 		}
 
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.list_item_subtext;
+		}
+
 	};
 
 	public abstract String bgId();
@@ -2700,6 +3331,12 @@ public enum ChatTheme
 	public abstract int systemMessageLayoutId();
 	
 	public abstract int bubbleColor();
+	
+	public abstract int smsToggleBgRes();
+	
+	public abstract int multiSelectBubbleColor();
+	
+	public abstract int offlineMsgTextColor();
 
 	public static ChatTheme getThemeFromId(String bgId)
 	{

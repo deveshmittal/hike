@@ -42,7 +42,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -79,6 +78,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Request;
@@ -298,6 +298,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			mTask = SignupTask.startTask(this,mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 		}
 		else
 		{
@@ -311,10 +312,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForFetchingNumber();
 			}
 
+			mTask = SignupTask.startTask(this);
 		}
 		setAnimation();
 		setListeners();
-		mTask = SignupTask.startTask(this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
 		setWindowSoftInputState();
@@ -466,7 +467,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			hikeHttpRequest.setJSONData(request);
 
@@ -717,6 +718,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_num);
 			infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
 			infoTxt.setVisibility(View.VISIBLE);
+			verifiedPin = layout.findViewById(R.id.verified_pin);
 			break;
 		case R.id.pin_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
@@ -901,7 +903,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			else
 			{
 				mIconView.setScaleType(ScaleType.CENTER_INSIDE);
-				mIconView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+				mIconView.setBackgroundResource(R.drawable.avatar_03_rounded);
 				mIconView.setImageResource(R.drawable.ic_default_avatar);
 			}
 			// mIconView.setImageDrawable(IconCacheManager.getInstance()
@@ -1179,7 +1181,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		String value = stateValue.value;
 		mCurrentState = stateValue;
-		Log.d("SignupActivity", "Current State " + mCurrentState.state.name() + " VALUE: " + value);
+		Logger.d("SignupActivity", "Current State " + mCurrentState.state.name() + " VALUE: " + value);
 
 		showingSecondLoadingTxt = false;
 		switch (stateValue.state)
@@ -1251,7 +1253,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							mTask.addUserInput("");
 						}
 					}
-				}, 2000);
+				}, 1500);
 			}
 			break;
 		case NAME:
@@ -1300,7 +1302,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					{
 						if(loadingText !=null)
 						{
-							loadingText.setText(R.string.getting_in_signup);
+							loadingText.setText(R.string.you_are_all_set);
 						}
 					}
 				}, 500);
@@ -1327,12 +1329,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event)
 	{
-		if ((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && !TextUtils.isEmpty(enterEditText.getText().toString().trim())
-				&& loadingLayout != null && loadingLayout.getVisibility() != View.VISIBLE)
+		if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) 
+				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim())
+				&& (loadingLayout == null || loadingLayout.getVisibility() != View.VISIBLE))
 		{
 			if (viewFlipper.getDisplayedChild() == NAME)
 			{
-				Utils.hideSoftKeyboard(this, enterEditText);
+				if(enterEditText.isFocused())
+				{
+					birthdayText.requestFocus();
+				}
+				else 
+				{
+					Utils.hideSoftKeyboard(this, enterEditText);
+				}
 			}
 			else
 			{
@@ -1345,7 +1355,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public void onCancel(DialogInterface dialog)
 	{
-		Log.d(getClass().getSimpleName(), "Dialog cancelled");
+		Logger.d(getClass().getSimpleName(), "Dialog cancelled");
 		if (mActivityState.task != null)
 		{
 			mActivityState.task.setActivity(null);
@@ -1389,17 +1399,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			return;
 		}
 
-		Log.d(getClass().getSimpleName(), "FB CLICKED");
+		Logger.d(getClass().getSimpleName(), "FB CLICKED");
 		if (!session.isOpened() && !session.isClosed())
 		{
 			session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback).setPermissions(Arrays.asList("basic_info", "user_birthday")));
-			Log.d(getClass().getSimpleName(), "Opening for read");
+			Logger.d(getClass().getSimpleName(), "Opening for read");
 			fbAuthing = true;
 		}
 		else
 		{
 			Session.openActiveSession(this, true, statusCallback);
-			Log.d(getClass().getSimpleName(), "Opening active session");
+			Logger.d(getClass().getSimpleName(), "Opening active session");
 		}
 	}
 
@@ -1420,13 +1430,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	protected void onResume()
 	{
 		super.onResume();
-		Log.d(getClass().getSimpleName(), "OnResume Called");
+		Logger.d(getClass().getSimpleName(), "OnResume Called");
 		if (fbAuthing)
 		{
 			Session session = Session.getActiveSession();
 			if (session != null)
 			{
-				Log.d(getClass().getSimpleName(), "Clearing token");
+				Logger.d(getClass().getSimpleName(), "Clearing token");
 				session.closeAndClearTokenInformation();
 			}
 		}
@@ -1457,7 +1467,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						}
 						catch (Exception e)
 						{
-							Log.w(getClass().getSimpleName(), "Exception while fetching gender", e);
+							Logger.w(getClass().getSimpleName(), "Exception while fetching gender", e);
 						}
 						try
 						{
@@ -1478,7 +1488,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						}
 						catch (Exception e)
 						{
-							Log.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
+							Logger.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
 						}
 
 						final File destFile = new File(directory, fileName);
@@ -1550,7 +1560,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void run()
 		{
-			Log.d(getClass().getSimpleName(), "Downloading profileImage");
+			Logger.d(getClass().getSimpleName(), "Downloading profileImage");
 			try
 			{
 				Utils.downloadAndSaveFile(context, destFile, imageUri);
@@ -1558,7 +1568,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			catch (Exception e)
 			{
-				Log.e(getClass().getSimpleName(), "Error while fetching image", e);
+				Logger.e(getClass().getSimpleName(), "Error while fetching image", e);
 				imageDownloadResult.downloadFinished(false);
 			}
 		}
@@ -1598,7 +1608,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
 		case HikeConstants.GALLERY_RESULT:
-			Log.d("ProfileActivity", "The activity is " + this);
+			Logger.d("ProfileActivity", "The activity is " + this);
 			if (requestCode == HikeConstants.CAMERA_RESULT)
 			{
 				String filePath = accountPrefs.getString(HikeMessengerApp.FILE_PATH, "");
@@ -1728,6 +1738,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		mActivityState.profileBitmap = Utils.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
+		mIconView.setBackgroundResource(R.color.transparent);
 		profilePicCamIcon.setImageResource(R.drawable.ic_signup_editphoto);
 		
 		tempBitmap.recycle();

@@ -34,7 +34,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
+
+import com.bsb.hike.utils.Logger;
 
 /**
  * <p>
@@ -199,8 +200,8 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		public Thread newThread(Runnable r)
 		{
 			int threadCount = mCount.getAndIncrement();
-			Log.d(LOG_TAG, String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT, CORE_POOL_SIZE, MAXIMUM_POOL_SIZE));
-			Log.d(LOG_TAG, "Creating a new thread # " + threadCount);
+			Logger.d(LOG_TAG, String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT, CORE_POOL_SIZE, MAXIMUM_POOL_SIZE));
+			Logger.d(LOG_TAG, "Creating a new thread # " + threadCount);
 			return new Thread(r, "AsyncTask #" + threadCount);
 		}
 	};
@@ -330,7 +331,7 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 				}
 				catch (InterruptedException e)
 				{
-					android.util.Log.w(LOG_TAG, e);
+					Logger.w(LOG_TAG, e);
 				}
 				catch (ExecutionException e)
 				{
@@ -629,7 +630,7 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 
 		mWorker.mParams = params;
 		if (sPoolWorkQueue.size() > 2)
-			Log.d(LOG_TAG, "Thread pool size : " + sPoolWorkQueue.size());
+			Logger.d(LOG_TAG, "Thread pool size : " + sPoolWorkQueue.size());
 		exec.execute(mFuture);
 
 		return this;

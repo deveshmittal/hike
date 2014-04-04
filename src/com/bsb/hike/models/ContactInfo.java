@@ -2,7 +2,6 @@ package com.bsb.hike.models;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
 import java.util.Date;
 
 import org.json.JSONException;

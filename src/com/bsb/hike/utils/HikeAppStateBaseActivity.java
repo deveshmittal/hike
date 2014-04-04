@@ -3,7 +3,6 @@ package com.bsb.hike.utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -22,7 +21,7 @@ public abstract class HikeAppStateBaseActivity extends Activity
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was opened");
+			Logger.d(TAG + getClass().getSimpleName(), "App was opened");
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.sendAppState(this);
 		}
@@ -42,7 +41,7 @@ public abstract class HikeAppStateBaseActivity extends Activity
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was resumed");
+			Logger.d(TAG + getClass().getSimpleName(), "App was resumed");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.sendAppState(this);
 		}
@@ -59,10 +58,10 @@ public abstract class HikeAppStateBaseActivity extends Activity
 	@Override
 	protected void onStop()
 	{
-		Log.d(TAG + getClass().getSimpleName(), "OnStop");
+		Logger.d(TAG + getClass().getSimpleName(), "OnStop");
 		if (HikeMessengerApp.currentState == CurrentState.NEW_ACTIVITY)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was going to another activity");
+			Logger.d(TAG + getClass().getSimpleName(), "App was going to another activity");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 		}
 		else if (HikeMessengerApp.currentState == CurrentState.BACK_PRESSED)
@@ -71,7 +70,7 @@ public abstract class HikeAppStateBaseActivity extends Activity
 		}
 		else
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was backgrounded");
+			Logger.d(TAG + getClass().getSimpleName(), "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
 			Utils.sendAppState(this);
 		}
@@ -99,7 +98,7 @@ public abstract class HikeAppStateBaseActivity extends Activity
 		super.onActivityResult(requestCode, resultCode, data);
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
+			Logger.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.sendAppState(this);
 		}

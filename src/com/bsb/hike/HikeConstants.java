@@ -745,7 +745,7 @@ public class HikeConstants
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
 	/* In seconds */
-	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 20;
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
 
 	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
 
@@ -797,7 +797,11 @@ public class HikeConstants
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
+	
+	public static final String SCREEN = "screen";
 
+	public static final String FTUE = "ftue";
+	
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -1071,6 +1075,8 @@ public class HikeConstants
 		public static final String GROUP_ID = "groupId";
 
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
+
+		public static final String CALLED_FROM_FTUE_POPUP = "calledFromFtuePopUP";
 	}
 
 	public static final class LogEvent
@@ -1443,7 +1449,7 @@ public class HikeConstants
 	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3 };
 
 	//TODO need to finalize this with AM
-	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 6;
+	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 	
 	public static enum WelcomeTutorial
 	{

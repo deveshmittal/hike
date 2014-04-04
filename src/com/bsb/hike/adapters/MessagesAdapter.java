@@ -37,7 +37,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -90,6 +89,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -317,7 +317,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void addMessage(ConvMessage convMessage)
 	{
-		Log.d(getClass().getSimpleName(), "received convMsg" + convMessage.getMsgID());
+		Logger.d(getClass().getSimpleName(), "received convMsg" + convMessage.getMsgID());
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent())
 		{
@@ -403,7 +403,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			@Override
 			protected void onPostExecute(Void result)
 			{
-				Log.d(getClass().getSimpleName(), "Last Postion: " + lastSentMessagePosition);
+				Logger.d(getClass().getSimpleName(), "Last Postion: " + lastSentMessagePosition);
 				if (lastSentMessagePosition == -1)
 				{
 					return;
@@ -781,7 +781,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.regularSmsText.setTextColor(context.getResources().getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
 				holder.smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
-				v.setBackgroundResource(R.drawable.bg_sms_toggle_custom_theme);
+				v.setBackgroundResource(chatTheme.smsToggleBgRes());
 			}
 
 			boolean smsToggleOn = Utils.getSendSmsPref(context);
@@ -1056,8 +1056,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
 			}
-			Log.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
-			Log.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
+			Logger.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
+			Logger.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
 
 			if (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING)
 				holder.messageContainer.setVisibility(View.VISIBLE);
@@ -1574,7 +1574,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (convMessage.isSent()) // File is being sent
 				{
-					Log.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
+					Logger.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
 					switch (fss.getFTState())
 					{
 					case COMPLETED:
@@ -1588,7 +1588,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// holder.fileType.setVisibility(View.VISIBLE);
 						break;
 					case ERROR:
-						// Log.d(getClass().getSimpleName(), "error display");
+						// Logger.d(getClass().getSimpleName(), "error display");
 						// holder.image.setVisibility(View.VISIBLE);
 						// holder.image.setImageResource(getDownloadFailedResIcon());
 						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
@@ -1608,7 +1608,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else
 				// File is being received
 				{
-					Log.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
+					Logger.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
 					switch (fss.getFTState())
 					{
 					case INITIALIZED:
@@ -2116,7 +2116,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				/*
 				 * If a message has been selected then background of selected state overlay will change to selected state color. otherwise this overlay will be transparent
 				 */
-				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.action_bar_item_pressed));
+				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(chatTheme.multiSelectBubbleColor()));
 			}
 			else
 			{
@@ -2149,7 +2149,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	// The following methods returns the user readable size when passed the bytes in size
 	private String dataDisplay(int bytes)
 	{
-		Log.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
+		Logger.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
 		if (bytes < 0)
 			return ("");
 		if (bytes >= (1000 * 1024))
@@ -2282,9 +2282,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void createFileThumb(ImageView fileThumb)
 	{
 		// TODO Auto-generated method stub
-		Log.d(getClass().getSimpleName(), "creating default thumb. . . ");
+		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
-		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
+		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
 		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
@@ -2295,10 +2295,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void createMediaThumb(ImageView fileThumb)
 	{
 		// TODO Auto-generated method stub
-		Log.d(getClass().getSimpleName(), "creating default thumb. . . ");
+		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
 		//int pixels = (int) (250 * Utils.densityMultiplier);
-		Log.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
+		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
 		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
@@ -2328,7 +2328,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	// ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
 	// // convMessage.setResumeButtonVisibility(false);
 	//
-	// Log.d("Upload- button pressed", fss.getFTState().toString());
+	// Logger.d("Upload- button pressed", fss.getFTState().toString());
 	//
 	// // If the file is complete or has not started yet overlay should not be in action
 	// if (fss.getFTState() == FTState.NOT_STARTED || fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
@@ -2355,7 +2355,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	// ImageView resumeButton = (ImageView) v.getTag(R.string.Two);
 	// // convMessage.setResumeButtonVisibility(false);
 	//
-	// Log.d("Download- button pressed", fss.getFTState().toString());
+	// Logger.d("Download- button pressed", fss.getFTState().toString());
 	//
 	// // If the file is complete or has not started yet overlay should not be in action
 	// if (fss.getFTState() == FTState.COMPLETED || fss.getFTState() == FTState.PAUSING)
@@ -2793,7 +2793,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			return;
 		}
-		Log.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
+		Logger.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
 
 		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
 				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
@@ -2855,7 +2855,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			if (convMessage.isSent())
 			{
-				Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
+				Logger.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
 
 				if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
@@ -2895,7 +2895,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					FileSavedState fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), receivedFile);
 
-					Log.d(getClass().getSimpleName(), fss.getFTState().toString());
+					Logger.d(getClass().getSimpleName(), fss.getFTState().toString());
 
 					if (fss.getFTState() == FTState.COMPLETED)
 					{
@@ -2929,7 +2929,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void openFile(HikeFile hikeFile, ConvMessage convMessage, View parent)
 	{
 		File receivedFile = hikeFile.getFile();
-		Log.d(getClass().getSimpleName(), "Opening file");
+		Logger.d(getClass().getSimpleName(), "Opening file");
 		Intent openFile = new Intent(Intent.ACTION_VIEW);
 		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 		{
@@ -2998,7 +2998,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		catch (ActivityNotFoundException e)
 		{
-			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
+			Logger.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
 			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 		}
 
@@ -3109,19 +3109,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			tv.setVisibility(View.VISIBLE);
 			tv.setText(undeliveredText);
 		}
+		tv.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
 
 		container.setOnLongClickListener(this);
-
-		/*
-		 * Make the list scroll to the end to show the text.
-		 */
-		if (fromHandler)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOWN_UNDELIVERED_MESSAGE, null);
-		}
 	}
 
 	private String getUndeliveredTextRes()
@@ -3374,7 +3367,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS)
 	{
 		List<ConvMessage> unsentMessages = getAllUnsentMessages(true);
-		Log.d(getClass().getSimpleName(), "Unsent messages: " + unsentMessages.size());
+		Logger.d(getClass().getSimpleName(), "Unsent messages: " + unsentMessages.size());
 
 		if (nativeSMS)
 		{
@@ -3469,15 +3462,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			catch (IllegalArgumentException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 			catch (IllegalStateException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 			catch (IOException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 		}
 
@@ -3612,7 +3605,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				/*
 				 * This can be thrown if we try to get the duration of the media player when it has already stopped.
 				 */
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 		}
 	}
