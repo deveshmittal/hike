@@ -172,6 +172,7 @@
                         android:layout_alignTop="@id/file_thumb" 
                         android:layout_alignBottom="@id/file_thumb"
                         android:src="@drawable/filmstrip"
+                        android:scaleType="fitXY"
                         android:visibility="gone" />
                     
                     <ImageView
@@ -182,6 +183,7 @@
                         android:layout_alignTop="@id/file_thumb" 
                         android:layout_alignBottom="@id/file_thumb"
                         android:src="@drawable/filmstrip"
+                        android:scaleType="fitXY"
                         android:visibility="gone" />
                     
 	                <com.bsb.hike.view.CustomFontTextView
