@@ -773,7 +773,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.regularSmsText.setTextColor(context.getResources().getColor(R.color.white));
 				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
 				holder.smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
-				v.setBackgroundResource(R.drawable.bg_sms_toggle_custom_theme);
+				v.setBackgroundResource(chatTheme.smsToggleBgRes());
 			}
 
 			boolean smsToggleOn = Utils.getSendSmsPref(context);
