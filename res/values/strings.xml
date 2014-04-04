@@ -879,7 +879,6 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="fb_app_id">425850510764995</string>
-    <string name="setting_profile">Setting up profile...</string>
     <string name="choose_picture">Choose a picture</string>
     <string name="number_confirm_title">Confirm your number</string>
     <string name="native_jingle_info">Play hike\'s jingle on notifications</string>
@@ -1274,6 +1273,7 @@
     <string name="chat_themes_popup_msg">Personalise your chats\nwith gorgeous themes.</string>
     <string name="give_it_a_spin">Give it a spin</string>
     <string name="chat_bg_ftue_tip_1">And loads of themes here...</string>
+    <string name="chat_bg_ftue_tip">Check out the stunning new Chat Themes!</string>
     <string name="last_seen_today_ct">today, %1$s</string>
     <string name="last_seen_yesterday_ct">yesterday, %1$s</string>
     <string name="last_seen_more_ct">%1$s</string>
@@ -1302,7 +1302,6 @@
     <string name="confirm_delete_msg_header">Delete message</string>
     <string name="confirm_delete_msgs_header">Delete messages.</string>
     <string name="selected_count">%1$s selected</string>
-    <string name="chat_bg_ftue_tip">Placeholder</string>
     <string name="clear_conversation">Clear Conversation</string>
     <string name="gallery_num_selected">%1$d selected</string>
     <string name="select_file">Select File</string>
@@ -1343,19 +1342,12 @@
     <string name="pick_one">Pick One...</string>
     <string name="i_am_a_boy">I am a boy</string>
     <string name="i_am_a_girl">I am a girl</string>
-    <string name="scanning_your_contacts">You are all set!\nScanning your contacts...</string>
     <string name="about_you">About you</string>
     <string name="tell_us_more">Tell us more</string>
     <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
     <string name="start_adding">Start adding friends</string>
     <string name="how_young_are_you">How young are you?</string>
     <string name="your_name">Your name</string>
-    <string name="male_selected_string_1">male string 1</string>
-    <string name="male_selected_string_2">male string 2</string>
-    <string name="male_selected_string_3">male string 3</string>
-    <string name="female_selected_string_1">female string 1</string>
-    <string name="female_selected_string_2">female string 2</string>
-    <string name="female_selected_string_3">female string 3</string>
     <string name="sync_contacts">Sync contacts</string>
     <string name="sync_contacts_hinttext">Tap to start a manual sync of contacts</string>
     <string name="contacts_synced">Contacts synced</string>
@@ -1402,6 +1394,7 @@
     <string name="confirm_delete_msgs">Are you sure you want to delete these %1$s messages?</string>
     <string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation?</string>
     <string name="enter_pin_signup">Please enter the 4 digit PIN we sent you via SMS.</string>
+    <string name="scanning_your_contacts">Scanning your contacts...</string>
     <string name="setting_profile">Setting up your profile...</string>
     <string name="you_are_all_set">You are all set...</string>
     <string name="tap_top_right_group_chat">Tap * on top right to start a new group chat</string>
@@ -1414,4 +1407,16 @@
     <string name="num_unread_messages">%1$s Unread Messages</string>
     <string name="one_unread_message">1 Unread Message</string>
     <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs upto <b>100MB</b> each. You can also send multiple files in one go!</string>
+    <string name="male_selected_string_1">I haven\'t been this excited about Friday, since last Friday.</string>
+    <string name="male_selected_string_2">Getting married before 20 is like leaving a party before 8!</string>
+    <string name="male_selected_string_3">Listen, smile, agree and do whatever the hell you were gonna do!</string>
+    <string name="male_selected_string_4">Boys speak about 2000 words a day!</string>
+    <string name="male_selected_string_5">Is there an autocorrect that works on life decisions?</string>
+    <string name="female_selected_string_1">My way or the highway!</string>
+    <string name="female_selected_string_2">Well behaved girls rarely make history.</string>
+    <string name="female_selected_string_3">I am size awesome.</string>
+    <string name="female_selected_string_4">Getting married before 20 is like leaving a party before 8!</string>
+    <string name="female_selected_string_5">Girls speak about 7,000 words a day!</string>
+    <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
+    <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
 </resources>

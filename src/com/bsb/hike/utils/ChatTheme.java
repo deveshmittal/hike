@@ -189,7 +189,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -474,7 +474,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -854,7 +854,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -949,7 +949,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1044,7 +1044,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1139,7 +1139,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1233,7 +1233,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1328,7 +1328,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1423,7 +1423,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1518,7 +1518,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1613,7 +1613,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1707,7 +1707,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1801,7 +1801,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1895,7 +1895,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -1989,7 +1989,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2083,7 +2083,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 	},
 	SMILEY
@@ -2176,7 +2176,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2270,7 +2270,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2364,7 +2364,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2458,7 +2458,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2552,7 +2552,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2646,7 +2646,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2740,7 +2740,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2834,7 +2834,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -2928,7 +2928,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -3022,7 +3022,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -3116,7 +3116,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	},
@@ -3210,7 +3210,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 	},
 	BIKER
@@ -3303,7 +3303,7 @@ public enum ChatTheme
 		@Override
 		public int offlineMsgTextColor()
 		{
-			return R.color.list_item_subtext;
+			return R.color.white;
 		}
 
 	};

@@ -2660,10 +2660,6 @@ public class Utils
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(activity.getString(R.string.status_tip, name));
 			break;
-		case WALKIE_TALKIE:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
-			tipText.setText(R.string.walkie_talkie_tip);
-			break;
 		case CHAT_BG_FTUE:
 			container.setBackgroundResource(R.drawable.bg_tip_top_right);
 			tipText.setText(R.string.chat_bg_ftue_tip);
@@ -2704,9 +2700,6 @@ public class Utils
 			break;
 		case STATUS:
 			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case WALKIE_TALKIE:
-			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
 			break;
 		case CHAT_BG_FTUE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);

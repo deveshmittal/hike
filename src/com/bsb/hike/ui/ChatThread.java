@@ -1275,24 +1275,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 				return;
 			}
-			if (tipView != null)
-			{
-				TipType viewTipType = (TipType) tipView.getTag();
-				if (viewTipType == TipType.WALKIE_TALKIE)
-				{
-					Utils.closeTip(TipType.WALKIE_TALKIE, tipView, prefs);
-					tipView = null;
-				}
-			}
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false))
-			{
-				/*
-				 * The user has already tapped on the walkie talkie button without seeing the tip no need to show it now.
-				 */
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
-				editor.commit();
-			}
 			showRecordingDialog();
 			return;
 		}
@@ -1773,11 +1755,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			selectedTheme = mConversationDb.getChatThemeForMsisdn(mContactNumber);
 			setChatTheme(selectedTheme);
-
-			if (selectedTheme == ChatTheme.VALENTINES_2)
-			{
-				showValentineNudgeTip();
-			}
 		}
 
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN))
@@ -1887,21 +1864,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 				{
 					showStickerFtueTip();
-				}
-				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false))
-				{
-					/*
-					 * Only show the tip if we currently do not have any drafts
-					 */
-					if (TextUtils.isEmpty(getSharedPreferences(HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(mContactNumber, "")))
-					{
-						tipView = findViewById(R.id.walkie_talkie_tip);
-						Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
-					}
-				}
-				if (tipView == null && !(mConversation instanceof GroupConversation) && !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false))
-				{
-					showNudgeDialog();
 				}
 			}
 		}
@@ -2211,39 +2173,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		}
 		return false;
-	}
-
-	private void showNudgeDialog()
-	{
-
-		final Dialog nudgeAlert = new Dialog(this, R.style.Theme_CustomDialog);
-		nudgeAlert.setCancelable(true);
-		nudgeAlert.setContentView(R.layout.nudge_dialog);
-
-		nudgeAlert.setCancelable(true);
-
-		Button okBtn = (Button) nudgeAlert.findViewById(R.id.ok_btn);
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				nudgeAlert.cancel();
-			}
-		});
-		nudgeAlert.setOnCancelListener(new OnCancelListener()
-		{
-
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, true);
-				editor.commit();
-			}
-		});
-		nudgeAlert.show();
 	}
 
 	/*
@@ -3343,7 +3272,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
 			{
-				if (convMessage.getTypingNotification() == null)
+				if (convMessage.getTypingNotification() == null && (convMessage.getParticipantInfoState()== ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState()== ParticipantInfoState.STATUS_MESSAGE) )
 				{
 					showUnreadCountIndicator();
 				}
@@ -3805,13 +3734,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				dismissPopupWindow();
 
-				/*
-				 * If we select the new valentines theme, we need to show the nudge tut.
-				 */
-				if (selectedTheme == ChatTheme.VALENTINES_2)
-				{
-					showValentineNudgeTip();
-				}
 			}
 		});
 
@@ -3822,41 +3744,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		slideIn.setDuration(200);
 		closeBtn.startAnimation(slideIn);
 		saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
-	}
-
-	private void showValentineNudgeTip()
-	{
-		if (prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, false))
-		{
-			return;
-		}
-
-		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.valentine_nudge_dialog);
-		dialog.setCancelable(false);
-
-		View container = dialog.findViewById(R.id.container);
-
-		Drawable bg = new RoundedRepeatingDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_valentine_dialog), getResources().getDimension(
-				R.dimen.preview_corner_radius));
-		container.setBackgroundDrawable(bg);
-
-		Button done = (Button) dialog.findViewById(R.id.ok_btn);
-		done.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View view)
-			{
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_NUDGE_TIP, true);
-				editor.commit();
-
-				dialog.dismiss();
-			}
-		});
-
-		dialog.show();
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState)

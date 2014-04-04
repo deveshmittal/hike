@@ -314,8 +314,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			};
 
-			firstConfirmDialog.setOkButton(R.string.cancel, firstDialogOnCancelListener);
-			firstConfirmDialog.setCancelButton(R.string.continue_txt, firstDialogContinueClickListener);
+			firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
+			firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
 			firstConfirmDialog.show();
 
 			secondConfirmDialog.setHeader(R.string.please_confirm);
