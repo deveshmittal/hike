@@ -691,7 +691,7 @@ public class StickerManager
 	public void removeStickerFromRecents(Sticker st)
 	{
 		boolean rem = recentStickers.remove(st);
-		Log.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+		Logger.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
 		// remove the sticker from cache too, recycling stuff is handled by the cache itself
 		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context)); 
 	}
