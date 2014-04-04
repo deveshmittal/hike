@@ -2665,6 +2665,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					break;
 				}
 			}
+			status.setScaleType(ScaleType.CENTER);
 			status.setVisibility(View.VISIBLE);
 		}
 
