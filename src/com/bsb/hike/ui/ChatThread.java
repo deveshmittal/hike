@@ -1275,24 +1275,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 				return;
 			}
-			if (tipView != null)
-			{
-				TipType viewTipType = (TipType) tipView.getTag();
-				if (viewTipType == TipType.WALKIE_TALKIE)
-				{
-					Utils.closeTip(TipType.WALKIE_TALKIE, tipView, prefs);
-					tipView = null;
-				}
-			}
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false))
-			{
-				/*
-				 * The user has already tapped on the walkie talkie button without seeing the tip no need to show it now.
-				 */
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
-				editor.commit();
-			}
 			showRecordingDialog();
 			return;
 		}
@@ -1870,17 +1852,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 				{
 					showStickerFtueTip();
-				}
-				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false))
-				{
-					/*
-					 * Only show the tip if we currently do not have any drafts
-					 */
-					if (TextUtils.isEmpty(getSharedPreferences(HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(mContactNumber, "")))
-					{
-						tipView = findViewById(R.id.walkie_talkie_tip);
-						Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
-					}
 				}
 			}
 		}
