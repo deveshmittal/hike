@@ -298,7 +298,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
-			mTask = SignupTask.startTask(this,mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
+			mTask = SignupTask.startTask(this,mActivityState.userName, mActivityState.isFemale, mActivityState.birthday, mActivityState.profileBitmap);
 		}
 		else
 		{
@@ -1022,7 +1022,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private void restartTask(String userName, Boolean isFemale, Birthday birthday)
 	{
 		resetViewFlipper();
-		mTask = SignupTask.restartTask(this, userName, isFemale, birthday);
+		mTask = SignupTask.restartTask(this, userName, isFemale, birthday, mActivityState.profileBitmap);
 	}
 
 	private void showErrorMsg()

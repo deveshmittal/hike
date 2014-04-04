@@ -168,9 +168,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public void addProfilePicPath(String path, Bitmap profilePic)
 	{
-		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, path);
-		editor.commit();
+		if(path != null)
+		{
+			Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, path);
+			editor.commit();
+		}
 		this.profilePicSmall = profilePic;
 	}
 
@@ -661,7 +664,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday)
+	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
@@ -669,6 +672,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			signupTask.addGender(isFemale);
 			signupTask.addUserName(userName);
 			signupTask.addBirthdate(birthday);
+			signupTask.addProfilePicPath(null, profilePicSmall);
 			Utils.executeSignupTask(signupTask);
 		}
 		return signupTask;
@@ -684,13 +688,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday)
+	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, isFemale, birthday);
+		startTask(activity, userName, isFemale, birthday, profilePicSmall);
 		return signupTask;
 	}
 }
