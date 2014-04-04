@@ -1661,7 +1661,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabel = mConversation.getLabel();
 
 		if (showKeyboard && !wasOrientationChanged)
+		{
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+		}
+		else if (!showKeyboard)
+		{
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+		}
 
 		setupActionBar(true);
 
