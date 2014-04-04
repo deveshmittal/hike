@@ -970,10 +970,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		
 		selectGender(mActivityState.isFemale);
-		if (mTask != null)
-		{
-			mTask.addGender(mActivityState.isFemale);
-		}
 	}
 
 	private void selectGender(Boolean isFemale)
