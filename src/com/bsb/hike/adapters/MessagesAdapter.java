@@ -2044,7 +2044,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				/*
 				 * If a message has been selected then background of selected state overlay will change to selected state color. otherwise this overlay will be transparent
 				 */
-				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.action_bar_item_pressed));
+				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(chatTheme.multiSelectBubbleColor()));
 			}
 			else
 			{
