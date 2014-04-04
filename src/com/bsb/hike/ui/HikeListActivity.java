@@ -45,6 +45,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -165,7 +166,14 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				@Override
 				public void onClick(View v)
 				{
-					showNativeSMSPopup();
+					if(calledFromFTUE)
+					{
+						showInviteConfirmationPopup();
+					}
+					else
+					{
+						showNativeSMSPopup();
+					}
 				}
 			});
 		}
@@ -214,6 +222,26 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		actionBar.setCustomView(actionBarView);
 
 		init();
+	}
+	
+	private void showInviteConfirmationPopup()
+	{
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
+		confirmDialog.setHeader(R.string.invite_friends);
+		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg));
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				showNativeSMSPopup();
+			}
+		};
+
+		confirmDialog.setOkButton(R.string.confirm, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.cancel);
+		confirmDialog.show();
 	}
 
 	private void setLabel()
@@ -374,6 +402,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 			listView.setAdapter(adapter);
 			listView.setEmptyView(findViewById(android.R.id.empty));
+			setupActionBarElements();
 		}
 	}
 
@@ -548,6 +577,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			ContactInfo contactInfo = pair.second;
 			if(recommendedContactList.contains(contactInfo)){
+				if(calledFromFTUE)
+				{
+					pair.first.set(true);
+					selectedContacts.add(contactInfo.getMsisdn());
+				}
 				firstSectionList.add(pair);
 			}
 		}
