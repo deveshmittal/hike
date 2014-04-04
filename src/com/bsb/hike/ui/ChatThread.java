@@ -1882,10 +1882,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
 					}
 				}
-				if (tipView == null && !(mConversation instanceof GroupConversation) && !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false))
-				{
-					showNudgeDialog();
-				}
 			}
 		}
 	}
@@ -2194,39 +2190,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		}
 		return false;
-	}
-
-	private void showNudgeDialog()
-	{
-
-		final Dialog nudgeAlert = new Dialog(this, R.style.Theme_CustomDialog);
-		nudgeAlert.setCancelable(true);
-		nudgeAlert.setContentView(R.layout.nudge_dialog);
-
-		nudgeAlert.setCancelable(true);
-
-		Button okBtn = (Button) nudgeAlert.findViewById(R.id.ok_btn);
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				nudgeAlert.cancel();
-			}
-		});
-		nudgeAlert.setOnCancelListener(new OnCancelListener()
-		{
-
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				Editor editor = prefs.edit();
-				editor.putBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, true);
-				editor.commit();
-			}
-		});
-		nudgeAlert.show();
 	}
 
 	/*
