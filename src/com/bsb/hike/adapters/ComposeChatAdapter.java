@@ -189,7 +189,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	@Override
 	public void makeCompleteList(boolean filtered)
 	{
-		
+
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
 		if (!shouldContinue)
@@ -332,7 +332,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public int getItemViewType(int position)
 	{
 		ContactInfo info = getItem(position);
-		if (info.isUnknownContact())
+		if (info.isUnknownContact() && info.getFavoriteType() == null)
 		{
 			return ViewType.NEW_CONTACT.ordinal();
 		}
