@@ -78,6 +78,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
@@ -3738,5 +3739,17 @@ public class Utils
 		doneBtn.setEnabled(enabled);
 		arrow.setEnabled(enabled);
 		postText.setEnabled(enabled);
+	}
+
+	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn)
+	{
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+		if (drawable == null)
+		{
+			Drawable background = context.getResources().getDrawable(Utils.getDefaultAvatarResourceId(msisdn, false));
+			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
+		}
+		return drawable;
 	}
 }
