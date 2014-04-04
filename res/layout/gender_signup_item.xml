@@ -65,6 +65,8 @@
         android:layout_weight="104"
         android:text="@string/feeling_lazy"
         android:gravity="center"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         android:textColor="#566167"
         android:textSize="15sp" />
     
