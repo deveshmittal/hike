@@ -1402,6 +1402,6 @@
     <string name="no_results">No results</string>
     <string name="num_unread_messages">%1$s Unread Messages</string>
     <string name="one_unread_message">1 Unread Message</string>
-    <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs\nupto 100mb each. You can \nalso send multiple files in one go!</string>
+    <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs upto <b>100MB</b> each. You can also send multiple files in one go!</string>
 
 </resources>
