@@ -279,6 +279,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isActionModeOn = false;
 
 	private boolean shownSdrIntroTip = true;
+	
+	private boolean sdrTipFadeInShown = false;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
@@ -1009,7 +1011,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					if (showTip)
 					{
 						msgIdForSdrTip = convMessage.getMsgID();
-						holder.sdrFtueTip.setVisibility(View.VISIBLE);
+						showSdrTip(holder.sdrFtueTip);
 					}
 					else
 					{
@@ -2056,6 +2058,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.selectedStateOverlay.setVisibility(View.GONE);
 		}
 		return v;
+	}
+
+	private void showSdrTip(View sdrFtueTip)
+	{
+		sdrFtueTip.setVisibility(View.VISIBLE);
+		if(!sdrTipFadeInShown)
+		{
+			Animation anim =  AnimationUtils.loadAnimation(context, R.anim.fade_in_animation);
+			anim.setDuration(1000);
+			sdrFtueTip.startAnimation(anim);
+			sdrTipFadeInShown= true;
+		}
 	}
 
 	private void setAvatar(String msisdn, ImageView imageView)
