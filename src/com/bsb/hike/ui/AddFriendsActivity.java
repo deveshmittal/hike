@@ -106,8 +106,8 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		List<ContactInfo> hikeContacts = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false);
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
-		hikeContactsCount = hikeContacts.size();
 		hikeContacts.removeAll(recommendedContacts);
+		hikeContactsCount = hikeContacts.size() + recommendedContacts.size();
 		Collections.sort(hikeContacts);
 		sectionsData.put(sectionsData.size(), hikeContacts);
 		
