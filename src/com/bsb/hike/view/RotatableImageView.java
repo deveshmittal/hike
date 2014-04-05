@@ -3,8 +3,9 @@ package com.bsb.hike.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
+
+import com.bsb.hike.utils.Logger;
 
 public class RotatableImageView extends ImageView
 {
@@ -51,7 +52,7 @@ public class RotatableImageView extends ImageView
 	public void setCredits(int credits)
 	{
 		mAngle = creditsToAngle(credits);
-		Log.d(getClass().getSimpleName(), "ANGLE: " + mAngle + " CREADITS: " + credits);
+		Logger.d(getClass().getSimpleName(), "ANGLE: " + mAngle + " CREADITS: " + credits);
 		invalidate();
 	}
 

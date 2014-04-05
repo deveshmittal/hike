@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
@@ -26,7 +26,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver
 	{
 		if (context.getPackageName().equals(intent.getData().getSchemeSpecificPart()))
 		{
-			Log.d(getClass().getSimpleName(), "App has been updated");
+			Logger.d(getClass().getSimpleName(), "App has been updated");
 
 			final SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 

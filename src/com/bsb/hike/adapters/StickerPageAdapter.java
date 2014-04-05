@@ -1,12 +1,10 @@
 package com.bsb.hike.adapters;
 
-import java.io.File;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;

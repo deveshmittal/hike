@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -25,6 +24,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
@@ -82,7 +82,7 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
 
 			String result = responseSB.toString();
 
-			Log.d(getClass().getSimpleName(), "Response is: " + result);
+			Logger.d(getClass().getSimpleName(), "Response is: " + result);
 			if (TextUtils.isEmpty(result))
 			{
 				return false;
@@ -107,7 +107,7 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
 					{
 						if (Utils.isUpdateRequired(criticalVersion, hikeService))
 						{
-							Log.d(getClass().getSimpleName(), "Critical update");
+							Logger.d(getClass().getSimpleName(), "Critical update");
 							editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.CRITICAL_UPDATE);
 							editor.putString(HikeConstants.Extras.LATEST_VERSION, criticalVersion);
 							editor.commit();
@@ -122,7 +122,7 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
 					{
 						if (Utils.isUpdateRequired(latestVersion, hikeService))
 						{
-							Log.d(getClass().getSimpleName(), "Normal update");
+							Logger.d(getClass().getSimpleName(), "Normal update");
 							editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NORMAL_UPDATE);
 							editor.putString(HikeConstants.Extras.LATEST_VERSION, latestVersion);
 							editor.commit();
@@ -134,21 +134,21 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
 				}
 				catch (JSONException e)
 				{
-					Log.d(getClass().getSimpleName(), "Invalid JSON", e);
+					Logger.d(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
 		}
 		catch (MalformedURLException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid URL", e);
+			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
 		}
 		catch (SocketTimeoutException e)
 		{
-			Log.e(getClass().getSimpleName(), "SocketTimeoutException", e);
+			Logger.e(getClass().getSimpleName(), "SocketTimeoutException", e);
 		}
 		catch (IOException e)
 		{
-			Log.e(getClass().getSimpleName(), "IO Exception", e);
+			Logger.e(getClass().getSimpleName(), "IO Exception", e);
 		}
 		return false;
 	}
@@ -156,7 +156,7 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
-		Log.d(getClass().getSimpleName(), "Was update successful? " + result);
+		Logger.d(getClass().getSimpleName(), "Was update successful? " + result);
 		// hikeService.scheduleNextUpdateCheck();
 	}
 }

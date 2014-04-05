@@ -14,11 +14,9 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,6 +29,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
@@ -49,6 +48,8 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 	private ImageView arrow;
 
 	private TextView postText;
+
+	private Bitmap groupBitmap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -86,6 +87,39 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 		String uid = preferences.getString(HikeMessengerApp.UID_SETTING, "");
 		groupId = uid + ":" + System.currentTimeMillis();
+
+		Object object = getLastCustomNonConfigurationInstance();
+		if (object != null && (object instanceof Bitmap))
+		{
+			groupBitmap = (Bitmap) object;
+			groupImage.setImageBitmap(groupBitmap);
+		}
+		else
+		{
+			groupImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(groupId, true));
+		}
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		/**
+		 * Deleting the temporary file, if it exists.
+		 */
+		File file = new File(Utils.getTempProfileImageFileName(groupId));
+		file.delete();
+
+		super.onBackPressed();
+	}
+
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		if (groupBitmap != null)
+		{
+			return groupBitmap;
+		}
+		return super.onRetainCustomNonConfigurationInstance();
 	}
 
 	private void setupActionBar()
@@ -166,7 +200,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
 		case HikeConstants.GALLERY_RESULT:
-			Log.d("ProfileActivity", "The activity is " + this);
+			Logger.d("ProfileActivity", "The activity is " + this);
 			if (requestCode == HikeConstants.CAMERA_RESULT)
 			{
 				String filePath = preferences.getString(HikeMessengerApp.FILE_PATH, "");
@@ -244,6 +278,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 			Bitmap tempBitmap = Utils.scaleDownImage(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
 
+			groupBitmap = Utils.getCircularBitmap(tempBitmap);
 			groupImage.setImageBitmap(Utils.getCircularBitmap(tempBitmap));
 
 			/*

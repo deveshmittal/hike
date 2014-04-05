@@ -3,8 +3,6 @@
  */
 package com.bsb.hike.view;
 
-import com.bsb.hike.R;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -18,6 +16,8 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+
+import com.bsb.hike.R;
 
 /**
  * The Class HoloCircularProgressBar.

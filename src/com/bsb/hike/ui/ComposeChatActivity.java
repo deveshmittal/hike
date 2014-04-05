@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,12 +45,11 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
-import com.google.android.gms.internal.ac;
-import com.google.android.gms.internal.ad;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
@@ -220,7 +217,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			Log.i("composeactivity", contactInfo.getId() + " - id of clicked");
+			Logger.i("composeactivity", contactInfo.getId() + " - id of clicked");
 			if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId()) || FriendsAdapter.EMPTY_ID.equals(contactInfo.getId()))
 			{
 				return;
@@ -238,12 +235,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if (isSharingFile)
 				{
 					forwardConfirmDialog.setHeader(R.string.share);
-					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
 				}
 				else
 				{
 					forwardConfirmDialog.setHeader(R.string.forward);
-					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
 				}
 				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 				{
@@ -366,7 +363,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		GroupConversation groupConversation = new GroupConversation(groupId, 0, null, userContactInfo.getMsisdn(), true);
 		groupConversation.setGroupParticipantList(participantList);
 
-		Log.d(getClass().getSimpleName(), "Creating group: " + groupId);
+		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
 		mConversationDb.addGroupParticipants(groupId, groupConversation.getGroupParticipantList());
 		if (newGroup)
@@ -446,14 +443,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (existingGroupId != null)
-				{
-					ComposeChatActivity.this.finish();
-				}
-				else
-				{
-					onBackPressed();
-				}
+
+				onBackPressed();
 			}
 		});
 		setTitle();
@@ -552,7 +543,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(imageUris.size());
 					for (Uri fileUri : imageUris)
 					{
-						Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+						Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
 						String fileUriStart = "file:";
 						String fileUriString = fileUri.toString();
 
@@ -587,21 +578,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			}
 		}
-		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
-		{
-			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
-			Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			intent.putExtra(HikeConstants.Extras.MSG, msg);
-		}
 		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
 				|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 		{
 			intent.putExtras(presentIntent);
 		}
-		else if (type != null)
+		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
 			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-			Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
 			fileUri = Utils.makePicasaUri(fileUri);
 			String fileUriStart = "file:";
 			String fileUriString = fileUri.toString();
@@ -622,8 +607,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				filePath = Utils.getRealPathFromUri(fileUri, this);
 			}
+
+			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+
 			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
+		}
+		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+		{
+			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
 		}
 		startActivity(intent);
 		finish();
@@ -667,6 +661,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		if (composeMode == CREATE_GROUP_MODE)
 		{
+			if (existingGroupId != null || createGroup)
+			{
+				ComposeChatActivity.this.finish();
+				return;
+			}
 			setMode(START_CHAT_MODE);
 			return;
 		}

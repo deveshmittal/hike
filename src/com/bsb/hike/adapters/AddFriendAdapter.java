@@ -9,8 +9,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -126,7 +124,6 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 			LayoutInflater li = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = li.inflate(R.layout.friends_group_view, parent, false);
 			convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
-			convertView.findViewById(R.id.home_list_divider).setVisibility(View.GONE);
 		}
 		TextView textView = (TextView) convertView.findViewById(R.id.name);
 		TextView countView = (TextView) convertView.findViewById(R.id.count);
