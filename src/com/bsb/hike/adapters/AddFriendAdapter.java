@@ -35,6 +35,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
+		iconloader.setDefaultAvatarIfNoCustomIcon(true);
 	}
 
 	@Override
