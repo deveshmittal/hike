@@ -3666,25 +3666,20 @@ public class Utils
 	/*
 	 * When Active Contacts >= 3 show the 'Add Friends' pop-up When Activate Contacts <3 show the 'Invite Friends' pop-up
 	 */
-	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
+	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString, String msisdn)
 	{
+		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(serverRecommendedArrayString, msisdn);
 		if (TextUtils.isEmpty(serverRecommendedArrayString))
 		{
 			return false;
 		}
-		try
+		List<ContactInfo> recommendedContacts = HikeUserDatabase.getInstance().getHikeContacts(-1, recommendedContactsSelection, null, msisdn);
+		Logger.d("AddFriendsActivity", " recommended array= "+recommendedContactsSelection+"  size= "+recommendedContacts.size());
+		if (recommendedContacts.size() > 2)
 		{
-			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
-			if (serverRecommendedArray.length() > 2)
-			{
-				return true;
-			}
-			return false;
+			return true;
 		}
-		catch (JSONException e)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	public static String getEmail(Context context)
@@ -3718,6 +3713,7 @@ public class Utils
 	public static boolean shouldShowAddOrInviteFTUE(String msisdn)
 	{
 		List<ContactInfo>  friendsList = HikeUserDatabase.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false);
+		Logger.d("AddFriendsActivity", " friends count= "+friendsList.size());
 		if(friendsList.size() < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
 		{
 			return true;

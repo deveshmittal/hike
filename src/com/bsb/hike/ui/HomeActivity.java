@@ -645,7 +645,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
 	    popupViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
 		{
-	    	boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null));
+	    	String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS,null), msisdn);
 			@Override
 			public void onInflate(ViewStub stub, View inflated)
 			{
