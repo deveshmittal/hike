@@ -1490,6 +1490,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
 					}
+					if(isActionModeOn)
+					{
+						destroyActionMode();
+					}
 				}
 				catch (JSONException e)
 				{
@@ -6224,8 +6228,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
-
-			destroyActionMode();
 			return true;
 		case R.id.copy_msgs:
 			Collections.sort(selectedMessagesIds);
