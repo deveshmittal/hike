@@ -50,6 +50,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import com.google.android.gms.internal.co;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
@@ -207,11 +208,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (adapter.isContactPresentInExistingParticipants(contactInfo))
 			{
 				// basicly it will work when you add participants to existing group via typing numbers
-				Toast.makeText(getBaseContext(), "You have already added this contact in group", Toast.LENGTH_SHORT).show();
+				showToast("You have already added this contact in group");
+
+				return;
+			}
+			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_GROUP)
+			{
+				showToast(getString(R.string.maxContactInGroupErr, HikeConstants.MAX_CONTACTS_IN_GROUP));
 				return;
 			}
 			// for SMS users, append SMS text with name
 			int viewtype = adapter.getItemViewType(arg2);
+			if (contactInfo.getName() == null)
+			{
+				contactInfo.setName(contactInfo.getMsisdn());
+			}
 			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 		}
@@ -326,8 +337,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.clearAllSelection(false);
 			adapter.removeFilter();
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
-			setActionBar();
-			title.setText(R.string.new_chat);
 			return;
 		}
 		setTitle();
@@ -496,7 +505,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (adapter.getSelectedContactCount() < MIN_MEMBERS_GROUP_CHAT)
+				int selected = adapter.getSelectedContactCount();
+				if (selected < MIN_MEMBERS_GROUP_CHAT)
 				{
 					Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
 					return;
@@ -670,5 +680,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			return;
 		}
 		super.onBackPressed();
+	}
+
+	private void showToast(String message)
+	{
+		Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
 	}
 }

@@ -126,7 +126,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 			else
 			{
-				iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+				String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
+				iconloader.loadImage(id, true, holder.userImage, true);
 			}
 			if (showCheckbox)
 			{
@@ -269,9 +270,14 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return new ArrayList<ContactInfo>(selectedPeople.values());
 	}
 
+	/**
+	 * It includes contact which are currently selected and existing to group (if applicable)
+	 * 
+	 * @return
+	 */
 	public int getSelectedContactCount()
 	{
-		return selectedPeople.size();
+		return selectedPeople.size() + existingParticipants.size();
 	}
 
 	public void setShowExtraAtFirst(boolean showExtraAtFirst)

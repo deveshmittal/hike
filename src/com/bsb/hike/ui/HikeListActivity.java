@@ -536,7 +536,10 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		if (!selectedContacts.isEmpty())
 		{
 			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
-			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
+			if(type != Type.BLOCK)
+			{
+				postText.setText(getString(R.string.send_invite, selectedContacts.size()));
+			}
 		}
 		else
 		{

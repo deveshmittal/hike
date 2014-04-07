@@ -21,7 +21,7 @@
         android:layout_marginBottom="14dp"
         android:layout_marginTop="14dp"
         android:layout_toLeftOf="@id/close"
-        android:background="#b7b7b7" />
+        android:background="#b6b6b6" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/tip"
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="14dp"
         android:layout_marginRight="10dp"
         android:layout_toLeftOf="@id/divider"
         android:text="@string/tap_top_right_group_chat"
@@ -37,4 +37,9 @@
         android:textSize="14sp"
         android:textStyle="bold|italic" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#bababa"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>

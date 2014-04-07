@@ -9,4 +9,9 @@
         android:id="@+id/addfriend_listview"
         style="@style/HomeList" />
 
+    <include
+        layout="@layout/spinner_center_screen"
+        android:visibility="visible" />
+
+    
 </RelativeLayout>
