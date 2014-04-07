@@ -337,8 +337,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.clearAllSelection(false);
 			adapter.removeFilter();
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
-			setActionBar();
-			title.setText(R.string.new_chat);
 			return;
 		}
 		setTitle();
