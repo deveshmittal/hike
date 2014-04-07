@@ -1472,9 +1472,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 						else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
 						{
-							String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
-							String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
-							int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
+							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
+							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
+							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
 							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
 							sendSticker(sticker);
 							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
