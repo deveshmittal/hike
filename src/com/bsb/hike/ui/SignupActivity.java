@@ -780,6 +780,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			number = number.replace("+91", "");
 			enterEditText.setText(number);
+			enterEditText.setSelection(number.length());
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
