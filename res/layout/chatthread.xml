@@ -243,11 +243,12 @@
                             android:hint="@string/type_to_compose"
                             android:imeOptions="actionSend"
                             android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
-                            android:lineSpacingExtra="3dp"
+                            android:lineSpacingExtra="2dp"
                             android:maxLength="@integer/max_length_message"
                             android:maxLines="4"
                             android:minHeight="30dp"
                             android:paddingLeft="5dp"
+                            android:paddingTop="3dp"
                             android:textColor="@color/chat_color"
                             android:textColorHint="#cdcdc8"
                             android:textSize="17sp" />
