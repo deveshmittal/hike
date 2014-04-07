@@ -1349,13 +1349,16 @@ public class Utils
 				tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
-				if (tempBmp == null)
+				if (tempBmp != null)
 				{
-					return false;
+					byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
+					tempBmp.recycle();
+					src = new ByteArrayInputStream(fileBytes);
 				}
-				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
-				tempBmp.recycle();
-				src = new ByteArrayInputStream(fileBytes);
+				else
+				{
+					src = new FileInputStream(new File(srcFilePath));
+				}
 			}
 			else
 			{

@@ -66,13 +66,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
 	{
 
+		Context context;
+
+		public DeleteConversationsAsyncTask(Context context)
+		{
+			/*
+			 * Using application context since that will never be null while the task is running.
+			 */
+			this.context = context.getApplicationContext();
+		}
+
 		@Override
 		protected Conversation[] doInBackground(Conversation... convs)
 		{
 			HikeConversationsDatabase db = null;
 			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
 			ArrayList<String> msisdns = new ArrayList<String>(convs.length);
-			Editor editor = getActivity().getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
+			Editor editor = context.getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
 			for (Conversation conv : convs)
 			{
 				ids.add(conv.getConvId());
@@ -344,7 +354,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.delete).equals(option))
 				{
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 					Utils.executeConvAsyncTask(task, conv);
 				}
 				else if (getString(R.string.delete_leave).equals(option))
@@ -443,7 +453,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void deleteConversation(Conversation conv)
 	{
-		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 		Utils.executeConvAsyncTask(task, conv);
 	}
 
@@ -1048,7 +1058,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 						}
 					}
-					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 					task.execute(convs);
 					deleteDialog.dismiss();
 				}
@@ -1084,7 +1094,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				editor.putInt(HikeConstants.HIKEBOT_CONV_STATE, hikeBotConvStat.DELETED.ordinal());
 				editor.commit();
 				Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 				Utils.executeConvAsyncTask(task, conv);
 			}
 		}

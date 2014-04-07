@@ -4,7 +4,6 @@ import java.io.File;
 
 import android.app.ProgressDialog;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -52,9 +51,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 	private IconLoader iconLoader;
 
-	private int reqWidth;
-
-	private int reqHeight;
+	private int imageSize;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -62,12 +59,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 		iconLoader = new IconLoader(getActivity(), 180);
-		reqWidth = this.getActivity().getResources().getDisplayMetrics().heightPixels;
-		reqHeight = this.getActivity().getResources().getDisplayMetrics().widthPixels;
-		if (reqHeight >= reqWidth)
-			reqHeight = reqWidth;
-		else
-			reqWidth = reqHeight;
+		imageSize = this.getActivity().getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 	}
 
 	@Override
@@ -116,17 +108,19 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				if (drawable == null)
 				{
 					drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
-							ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, reqWidth, reqHeight, HikeMessengerApp.getLruCache()));
+							ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize, HikeMessengerApp.getLruCache()));
 				}
 				if (drawable != null)
 				{
 					downloadImage = false;
+					HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
 					imageView.setImageDrawable(drawable);
 				}
 			}
 			if (downloadImage)
 			{
 				iconLoader.loadImage(mappedId, imageView);
+
 				// imageView.setImageDrawable(IconCacheManager.getInstance()
 				// .getIconForMSISDN(mappedId));
 
@@ -179,15 +173,18 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		if (file.exists())
 		{
 			drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
-					ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, reqWidth, reqHeight, HikeMessengerApp.getLruCache()));
+					ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize, HikeMessengerApp.getLruCache()));
 			imageView.setImageDrawable(drawable);
 		}
 
 		Log.d(getClass().getSimpleName(), "Putting in cache mappedId : " + mappedId);
 		/*
-		 * Removing the smaller icon in cache.
+		 * Putting downloaded image bitmap in cache.
 		 */
-		HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+		if (drawable != null)
+		{
+			HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+		}
 
 		if (isStatusImage)
 		{

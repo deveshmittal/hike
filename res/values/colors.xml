@@ -273,8 +273,8 @@
     <color name="light_blue_transparent">#3e33ccff</color>
     <color name="light_black_transparent">#3e000000</color>
     <color name="delete_file_selection">#B3565656</color>
-    <color name="group_chat_tip_bg">#f1f1f1</color>
-    <color name="group_chat_tip_bg_pressed">#dfdfdf</color>
+    <color name="group_chat_tip_bg">#efefef</color>
+    <color name="group_chat_tip_bg_pressed">#e5e5e5</color>
     <color name="file_transfer_pop_up_button">#ebebeb</color>
     <color name="dark_brown_divider_color">#120e0e</color>
 </resources>

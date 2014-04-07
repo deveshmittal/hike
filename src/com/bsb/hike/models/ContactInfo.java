@@ -181,6 +181,18 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return msisdn.equals(id);
 	}
 
+	public boolean isGroupConversationContact()
+	{
+		if (phoneNum == null)
+		{
+			return false;
+		}
+		/*
+		 * For group conversations, we make the phone number and id equal.
+		 */
+		return phoneNum.equals(id);
+	}
+
 	public long getLastSeenTime()
 	{
 		return lastSeenTime;
