@@ -1169,21 +1169,45 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
-				if (showThumbnail && thumbnail != null)
+				if(thumbnail != null)
 				{
-					holder.fileThumb.setBackgroundDrawable(thumbnail);
+					if (showThumbnail)
+					{
+						holder.fileThumb.setBackgroundDrawable(thumbnail);
+					}
+					else
+					{
+						createMediaThumb(holder.fileThumb);
+					}
+	
+					holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					holder.fileSize.setVisibility(View.VISIBLE);
+					holder.messageSize.setVisibility(View.VISIBLE);
+					holder.fileThumb.setVisibility(View.VISIBLE);
+					holder.filmstripLeft.setVisibility(View.VISIBLE);
+					holder.filmstripRight.setVisibility(View.VISIBLE);
 				}
 				else
 				{
-					createMediaThumb(holder.fileThumb);
+					createFileThumb(holder.fileThumb);
+					holder.fileName.setText(hikeFile.getFileName());
+					holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+					if(!TextUtils.isEmpty(ext))
+					{
+						holder.fileExtension.setText(ext);
+					}
+					else
+					{
+						holder.fileExtension.setText("?");
+					}
+					
+					holder.fileThumb.setVisibility(View.VISIBLE);
+					holder.fileName.setVisibility(View.VISIBLE);
+					holder.fileSizeExt.setVisibility(View.VISIBLE);
+					holder.fileExtension.setVisibility(View.VISIBLE);
+					holder.fileDetails.setVisibility(View.VISIBLE);
 				}
-
-				holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
-				holder.fileSize.setVisibility(View.VISIBLE);
-				holder.messageSize.setVisibility(View.VISIBLE);
-				holder.fileThumb.setVisibility(View.VISIBLE);
-				holder.filmstripLeft.setVisibility(View.VISIBLE);
-				holder.filmstripRight.setVisibility(View.VISIBLE);
 			}
 			else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
 			{
@@ -1207,6 +1231,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
+				if(thumbnail != null || hikeFileType == HikeFileType.LOCATION)
+				{
+				
 				if (showThumbnail)
 				{
 					holder.fileThumb.setBackgroundDrawable(thumbnail);
@@ -1222,6 +1249,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.fileThumb.setBackgroundResource(R.drawable.ic_loading_img);
 				}
 				holder.fileThumb.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					createFileThumb(holder.fileThumb);
+					holder.fileName.setText(hikeFile.getFileName());
+					holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+					if(!TextUtils.isEmpty(ext))
+					{
+						holder.fileExtension.setText(ext);
+					}
+					else
+					{
+						holder.fileExtension.setText("?");
+					}
+					
+					holder.fileThumb.setVisibility(View.VISIBLE);
+					holder.fileName.setVisibility(View.VISIBLE);
+					holder.fileSizeExt.setVisibility(View.VISIBLE);
+					holder.fileExtension.setVisibility(View.VISIBLE);
+					holder.fileDetails.setVisibility(View.VISIBLE);
+				}
 			}
 			else if (hikeFileType == HikeFileType.OTHER)
 			{
@@ -1641,10 +1690,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				// if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				// {
-				if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE)
-						|| (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
+				if(hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+				}
+				if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+				{
+					if(thumbnail != null)
+					{
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					}
+					else
+					{
+						setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					}
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
 						|| (hikeFile.getHikeFileType() == HikeFileType.OTHER))
@@ -1682,10 +1741,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
-					// if(fss.getFTState() == FTState.COMPLETED)
-					// {
-					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
-					// }
+					if(thumbnail != null)
+					{
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					}
+					else
+					{
+						setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+					}
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
 						|| (hikeFile.getHikeFileType() == HikeFileType.OTHER))
