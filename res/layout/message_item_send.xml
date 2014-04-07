@@ -145,7 +145,7 @@
                     <ImageView
                         android:id="@+id/filmstrip_left"
                         android:layout_height="wrap_content"
-                        android:layout_width="10dp"
+                        android:layout_width="wrap_content"
                         android:layout_alignLeft="@id/file_thumb"
                         android:layout_alignTop="@id/file_thumb" 
                         android:layout_alignBottom="@id/file_thumb"
@@ -156,7 +156,7 @@
                     <ImageView
                         android:id="@+id/filmstrip_right"
                         android:layout_height="wrap_content"
-                        android:layout_width="10dp"
+                        android:layout_width="wrap_content"
                         android:layout_alignRight="@id/file_thumb"
                         android:layout_alignTop="@id/file_thumb" 
                         android:layout_alignBottom="@id/file_thumb"
