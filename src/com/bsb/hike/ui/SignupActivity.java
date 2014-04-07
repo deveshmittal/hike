@@ -1347,6 +1347,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			else
 			{
 				submitClicked();
+				Utils.hideSoftKeyboard(this, enterEditText);
 			}
 		}
 		return true;
