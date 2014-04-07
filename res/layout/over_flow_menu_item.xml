@@ -25,6 +25,15 @@
                 style="@style/AvatarStyle" />
         </RelativeLayout>
         
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_group_tip_arrow"
+            android:visibility="gone" />
+
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/item_title"
             android:layout_width="fill_parent"

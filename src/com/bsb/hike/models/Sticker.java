@@ -8,9 +8,9 @@ import java.io.Serializable;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
@@ -37,7 +37,35 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	{
 		this.category = category;
 		this.stickerId = stickerId;
+		setupStickerindex(category, stickerId);
+	}
 
+	public Sticker(String categoryName, String stickerId)
+	{
+		this.stickerId = stickerId;
+		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
+		setupStickerindex(category, stickerId);
+	}
+
+	public Sticker()
+	{
+
+	}
+
+	public Sticker(String categoryName, String stickerId, int stickerIdx)
+	{
+		this.stickerId = stickerId;
+		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
+		this.stickerIndex = stickerIdx;
+	}
+
+	public boolean isUnknownSticker()
+	{
+		return category == null || (category.categoryId == StickerCategoryId.unknown);
+	}
+
+	private void setupStickerindex(StickerCategory category2, String stickerId2)
+	{
 		/*
 		 * Only set sticker index if the category is a local one
 		 */
@@ -56,41 +84,22 @@ public class Sticker implements Serializable, Comparable<Sticker>
 				}
 				catch (NumberFormatException e)
 				{
-					Log.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
+					Logger.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
 				}
 
-				if ((category != null && category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
+				if ((category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
 						|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
 				{
 					this.stickerIndex = stickerNumber - 1;
 				}
 			}
 		}
-
-	}
-
-	public Sticker(String categoryName, String stickerId)
-	{
-		this.stickerId = stickerId;
-		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
-	}
-
-	public Sticker()
-	{
-
-	}
-
-	public Sticker(String categoryName, String stickerId, int stickerIdx)
-	{
-		this.stickerId = stickerId;
-		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
-		this.stickerIndex = stickerIdx;
 	}
 
 	public boolean isDefaultSticker()
 	{
-		//TODO : change this logic to make it much more robust as searching in array is not good
-		
+		// TODO : change this logic to make it much more robust as searching in array is not good
+
 		if (category != null)
 		{
 			if (category.categoryId == StickerCategoryId.humanoid)
@@ -98,7 +107,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID.length;
 				for (int i = 0; i < count; i++)
 				{
-					if(StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID[i].equals(stickerId))
+					if (StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID[i].equals(stickerId))
 						return true;
 				}
 			}
@@ -107,7 +116,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY.length;
 				for (int i = 0; i < count; i++)
 				{
-					if(StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY[i].equals(stickerId))
+					if (StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY[i].equals(stickerId))
 						return true;
 				}
 			}
@@ -165,17 +174,26 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	@Override
 	public int compareTo(Sticker rhs)
 	{
+		final int BEFORE = -1;
+		final int EQUAL = 0;
+		final int AFTER = 1;
+		if (this == rhs)
+			return EQUAL;
+
+		if (rhs == null)
+			throw new NullPointerException();
+
 		if (TextUtils.isEmpty(this.stickerId) && TextUtils.isEmpty(rhs.stickerId))
 		{
-			return (0);
+			return (EQUAL);
 		}
 		else if (TextUtils.isEmpty(this.stickerId))
 		{
-			return 1;
+			return AFTER;
 		}
 		else if (TextUtils.isEmpty(rhs.stickerId))
 		{
-			return -1;
+			return BEFORE;
 		}
 		return (this.stickerId.toLowerCase().compareTo(rhs.stickerId.toLowerCase()));
 	}
@@ -184,20 +202,14 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	@Override
 	public boolean equals(Object object)
 	{
-		boolean result = false;
-		if (object == null || object.getClass() != getClass())
-		{
-			result = false;
-		}
-		else
-		{
-			Sticker st = (Sticker) object;
-			if (this.category != null && this.category.categoryId.equals(st.getCategory().categoryId) && this.stickerId.equals(st.getStickerId()))
-			{
-				result = true;
-			}
-		}
-		return result;
+		if (object == null)
+			return false;
+		if (object == this)
+			return true;
+		if (!(object instanceof Sticker))
+			return false;
+		Sticker st = (Sticker) object;
+		return ((this.stickerId.equals(st.getStickerId())) && (this.category != null && st.getCategory() != null && this.category.categoryId == st.getCategory().categoryId));
 	}
 
 	@Override
@@ -205,7 +217,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	{
 		int hash = 3;
 		if (category != null)
-			hash = 7 * hash + this.category.categoryId.hashCode();
+			hash = 7 * hash + this.category.categoryId.ordinal();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
 	}

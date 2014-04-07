@@ -39,6 +39,7 @@
             android:paddingRight="22dp"
             android:layout_marginBottom="24dp"
             android:text="@string/tutorial1_header_title"
+            android:gravity="left"
             style="@style/SignupHeader" />
 
         <ImageView

@@ -19,14 +19,13 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.utils.Utils;
 
 public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatcher
 {
@@ -295,7 +294,6 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			LayoutInflater li = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = li.inflate(R.layout.friends_group_view, parent, false);
 			convertView.setBackgroundColor(activity.getResources().getColor(R.color.white));
-			convertView.findViewById(R.id.home_list_divider).setVisibility(View.GONE);
 		}
 		TextView textView = (TextView) convertView.findViewById(R.id.name);
 		TextView countView = (TextView) convertView.findViewById(R.id.count);

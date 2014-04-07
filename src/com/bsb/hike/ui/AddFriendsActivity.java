@@ -17,10 +17,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -30,6 +30,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.AddFriendAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -160,8 +161,10 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				favoriteType = FavoriteType.REQUEST_SENT;
 			}
-
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+			
+			FtueContactInfo ftueContactInfo = new FtueContactInfo(contactInfo);
+			ftueContactInfo.setFromFtue(true);
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(ftueContactInfo, favoriteType);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);					
 		}
 		if(contacts.size() > 1)

@@ -104,6 +104,8 @@ public class HikeConstants
 	public static final String FILE_NAME = "fn";
 
 	public static final String FILE_KEY = "fk";
+	
+	public static final String FILE_PATH = "fp";
 
 	public static final String CREDITS = "credits";
 
@@ -544,7 +546,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
@@ -743,7 +745,7 @@ public class HikeConstants
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
 	/* In seconds */
-	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 20;
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
 
 	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
 
@@ -1432,7 +1434,7 @@ public class HikeConstants
 
 	public static enum TipType
 	{
-		EMOTICON, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
+		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
 	}
 
 	public static enum EmoticonType
@@ -1442,9 +1444,9 @@ public class HikeConstants
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
 	
-	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3 };
+	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3, R.string.male_selected_string_4, R.string.male_selected_string_5 };
 	
-	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3 };
+	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3, R.string.female_selected_string_4, R.string.female_selected_string_5 };
 
 	//TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;

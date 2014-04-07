@@ -29,7 +29,6 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -82,6 +81,7 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
@@ -184,7 +184,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
 	{
-		Log.d("ProfileActivity", "onRetainNonConfigurationinstance");
+		Logger.d("ProfileActivity", "onRetainNonConfigurationinstance");
 		return mActivityState;
 	}
 
@@ -496,7 +496,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void onSuccess(JSONObject response)
 				{
-					Log.d(getClass().getSimpleName(), "Response: " + response.toString());
+					Logger.d(getClass().getSimpleName(), "Response: " + response.toString());
 					try
 					{
 						JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
@@ -715,7 +715,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void onSuccess(JSONObject response)
 				{
-					Log.d(getClass().getSimpleName(), "Response: " + response.toString());
+					Logger.d(getClass().getSimpleName(), "Response: " + response.toString());
 					try
 					{
 						JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
@@ -765,7 +765,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				&& (firstVisibleItem + visibleItemCount) >= (profileItems.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
 
-			Log.d(getClass().getSimpleName(), "Loading more items");
+			Logger.d(getClass().getSimpleName(), "Loading more items");
 			loadingMoreMessages = true;
 
 			AsyncTask<Void, Void, List<StatusMessage>> asyncTask = new AsyncTask<Void, Void, List<StatusMessage>>()
@@ -837,7 +837,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if (profileAdapter != null)
 		{
-			Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
+			Logger.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
 			profileAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		}
 		/*
@@ -927,7 +927,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				catch (JSONException e)
 				{
-					Log.e("ProfileActivity", "Could not set name", e);
+					Logger.e("ProfileActivity", "Could not set name", e);
 				}
 				requests.add(request);
 			}
@@ -955,7 +955,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				public void onFailure()
 				{
-					Log.d("ProfileActivity", "resetting image");
+					Logger.d("ProfileActivity", "resetting image");
 					failureWhileSettingProfilePic();
 				}
 
@@ -1072,7 +1072,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			JSONObject obj = new JSONObject();
 			try
 			{
-				Log.d(getClass().getSimpleName(), "Profile details Email: " + mEmailEdit.getText() + " Gender: " + mActivityState.genderType);
+				Logger.d(getClass().getSimpleName(), "Profile details Email: " + mEmailEdit.getText() + " Gender: " + mActivityState.genderType);
 				if (!emailTxt.equals(mEmailEdit.getText().toString()))
 				{
 					obj.put(HikeConstants.EMAIL, mEmailEdit.getText());
@@ -1081,12 +1081,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : mActivityState.genderType == 2 ? "f" : "");
 				}
-				Log.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
+				Logger.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
 				request.setJSONData(obj);
 			}
 			catch (JSONException e)
 			{
-				Log.e("ProfileActivity", "Could not set email or gender", e);
+				Logger.e("ProfileActivity", "Could not set email or gender", e);
 			}
 			requests.add(request);
 		}
@@ -1184,7 +1184,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
 		case HikeConstants.GALLERY_RESULT:
-			Log.d("ProfileActivity", "The activity is " + this);
+			Logger.d("ProfileActivity", "The activity is " + this);
 			if (requestCode == HikeConstants.CAMERA_RESULT)
 			{
 				String filePath = preferences.getString(HikeMessengerApp.FILE_PATH, "");
@@ -1612,7 +1612,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		if (mLocalMSISDN == null)
 		{
-			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
+			Logger.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
 			return;
 		}
 		if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
@@ -2005,7 +2005,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				catch (JSONException e)
 				{
-					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 				confirmDialog.dismiss();

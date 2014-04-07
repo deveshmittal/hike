@@ -14,11 +14,11 @@ import javax.net.ssl.HttpsURLConnection;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
@@ -95,7 +95,7 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 				}
 			}
 
-			Log.d(getClass().getSimpleName(), "Downloading profile image: " + urlString);
+			Logger.d(getClass().getSimpleName(), "Downloading profile image: " + urlString);
 			URL url = new URL(urlString);
 
 			URLConnection connection = url.openConnection();
@@ -122,12 +122,12 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 		}
 		catch (MalformedURLException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid URL", e);
+			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
 			return Boolean.FALSE;
 		}
 		catch (IOException e)
 		{
-			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
+			Logger.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return Boolean.FALSE;
 		}
 		finally
@@ -145,7 +145,7 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 			}
 			catch (IOException e)
 			{
-				Log.e(getClass().getSimpleName(), "Error while closing file", e);
+				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
 				return Boolean.FALSE;
 			}
 		}

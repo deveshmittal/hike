@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
+
+import com.bsb.hike.utils.Logger;
 
 public class CustomTypeFace
 {
@@ -35,7 +36,7 @@ public class CustomTypeFace
 		}
 		catch (Exception e)
 		{
-			Log.w(getClass().getSimpleName(), "Font not found", e);
+			Logger.w(getClass().getSimpleName(), "Font not found", e);
 		}
 		try
 		{
@@ -43,7 +44,7 @@ public class CustomTypeFace
 		}
 		catch (Exception e)
 		{
-			Log.w(getClass().getSimpleName(), "Font not found", e);
+			Logger.w(getClass().getSimpleName(), "Font not found", e);
 		}
 		try
 		{
@@ -51,7 +52,7 @@ public class CustomTypeFace
 		}
 		catch (Exception e)
 		{
-			Log.w(getClass().getSimpleName(), "Font not found", e);
+			Logger.w(getClass().getSimpleName(), "Font not found", e);
 		}
 		try
 		{
@@ -59,7 +60,7 @@ public class CustomTypeFace
 		}
 		catch (Exception e)
 		{
-			Log.w(getClass().getSimpleName(), "Font not found", e);
+			Logger.w(getClass().getSimpleName(), "Font not found", e);
 		}
 	}
 

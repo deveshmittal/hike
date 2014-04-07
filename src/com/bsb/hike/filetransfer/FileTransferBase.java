@@ -13,11 +13,11 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public abstract class FileTransferBase implements Callable<FTResult>
@@ -195,17 +195,17 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
-				Log.d(getClass().getSimpleName(),"Sleep interrupted: " + mThread.toString());
+				Logger.d(getClass().getSimpleName(),"Sleep interrupted: " + mThread.toString());
 				e.printStackTrace();
 			}
 			retryAttempts++;
-			Log.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
+			Logger.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
 			return true;
 		}
 		else
 		{
 			retryAttempts++;
-			Log.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
+			Logger.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
 			return false;
 		}
 	}
