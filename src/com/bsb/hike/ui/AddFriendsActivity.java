@@ -126,11 +126,13 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		TextView actionBarTitle = (TextView) actionBarView.findViewById(R.id.title);
 		nextBtn = (TextView) actionBarView.findViewById(R.id.next_btn);
-
+		
+		View doneBtn = actionBarView.findViewById(R.id.done_container);
+		
 		actionBarTitle.setText(R.string.friends_ftue_item_label);
 		nextBtn.setText(R.string.skip);
 		
-		nextBtn.setOnClickListener(new OnClickListener()
+		doneBtn.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
