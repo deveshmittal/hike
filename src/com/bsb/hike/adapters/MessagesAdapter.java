@@ -1104,7 +1104,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
-				holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				//holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				if(convMessage.isSent())
+				{
+					holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+				}
+				else
+				{
+					holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				}
 				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
 				if(!TextUtils.isEmpty(ext))
 				{
@@ -1180,7 +1188,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						createMediaThumb(holder.fileThumb);
 					}
 	
-					holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					if(convMessage.isSent())
+					{
+						holder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					}
+					else
+					{
+						holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					}
+					
 					holder.fileSize.setVisibility(View.VISIBLE);
 					holder.messageSize.setVisibility(View.VISIBLE);
 					holder.fileThumb.setVisibility(View.VISIBLE);
@@ -1191,7 +1207,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					createFileThumb(holder.fileThumb);
 					holder.fileName.setText(hikeFile.getFileName());
-					holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+					if(convMessage.isSent())
+					{
+						holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+					}
+					else
+					{
+						holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+					}
 					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
 					if(!TextUtils.isEmpty(ext))
 					{
@@ -1254,7 +1277,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					createFileThumb(holder.fileThumb);
 					holder.fileName.setText(hikeFile.getFileName());
-					holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+					if(convMessage.isSent())
+					{
+						holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+					}
+					else
+					{
+						holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+					}
 					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
 					if(!TextUtils.isEmpty(ext))
 					{
@@ -1276,7 +1306,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
-				holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				if(convMessage.isSent())
+				{
+					holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+				}
+				else
+				{
+					holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				}
 				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
 				if(!TextUtils.isEmpty(ext))
 				{
