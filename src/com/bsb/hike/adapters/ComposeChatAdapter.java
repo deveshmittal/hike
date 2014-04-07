@@ -126,7 +126,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 			else
 			{
-				iconloader.loadImage(contactInfo.getMsisdn(), true, holder.userImage, true);
+				String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
+				iconloader.loadImage(id, true, holder.userImage, true);
 			}
 			if (showCheckbox)
 			{
