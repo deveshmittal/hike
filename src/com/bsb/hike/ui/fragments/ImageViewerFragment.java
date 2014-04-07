@@ -4,7 +4,6 @@ import java.io.File;
 
 import android.app.ProgressDialog;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -121,12 +120,14 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				if (drawable != null)
 				{
 					downloadImage = false;
+					HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
 					imageView.setImageDrawable(drawable);
 				}
 			}
 			if (downloadImage)
 			{
 				iconLoader.loadImage(mappedId, imageView);
+				
 				// imageView.setImageDrawable(IconCacheManager.getInstance()
 				// .getIconForMSISDN(mappedId));
 
@@ -185,10 +186,13 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 		Log.d(getClass().getSimpleName(), "Putting in cache mappedId : " + mappedId);
 		/*
-		 * Removing the smaller icon in cache.
+		 * Putting downloaded image bitmap in cache.
 		 */
-		HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
-
+		if (drawable != null)
+		{
+			HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+		}
+		
 		if (isStatusImage)
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
