@@ -80,6 +80,7 @@
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                 android:textColor="@color/list_item_subtext"
                 android:textSize="12sp"
+                android:textStyle="italic"
                 android:visibility="visible" />
         </LinearLayout>
     </RelativeLayout>

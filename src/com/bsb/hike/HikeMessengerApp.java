@@ -310,7 +310,7 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
 
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
-	
+
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
 
 	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
@@ -322,6 +322,10 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SIGNUP_PROFILE_PIC_PATH = "signupProfilePicSet";
 
 	public static final String LAST_BACK_OFF_TIME_SIGNUP_PRO_PIC = "lastBackOffTimeSignupProPic";
+
+	public static final String SHOWN_FILE_TRANSFER_POP_UP = "shownFileTransferPopUp";
+
+	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -354,7 +358,7 @@ public class HikeMessengerApp extends Application implements Listener
 	public static Map<String, Long> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
-	
+
 	public static volatile boolean networkError;
 
 	class IncomingHandler extends Handler
@@ -716,16 +720,16 @@ public class HikeMessengerApp extends Application implements Listener
 
 		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.AUDIO_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.OTHER_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
 	}

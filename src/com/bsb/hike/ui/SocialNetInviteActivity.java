@@ -170,6 +170,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 
 		doneBtn = actionBarView.findViewById(R.id.done_container);
+		doneBtn.setVisibility(View.VISIBLE);
+
 		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
 		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
 

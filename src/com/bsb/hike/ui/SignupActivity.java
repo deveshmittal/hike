@@ -345,7 +345,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.signup_activity_action_bar, null);
 		
 		mActionBarTitle = (TextView) actionBarView.findViewById(R.id.title);
-		nextBtn = actionBarView.findViewById(R.id.next_btn);
+		nextBtn = actionBarView.findViewById(R.id.done_container);
 		nextBtnContainer = actionBarView.findViewById(R.id.next_btn_container);
 
 		nextBtn.setOnClickListener(new OnClickListener()

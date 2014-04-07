@@ -49,6 +49,8 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 	private TextView postText;
 
+	private Bitmap groupBitmap;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -85,6 +87,39 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 		String uid = preferences.getString(HikeMessengerApp.UID_SETTING, "");
 		groupId = uid + ":" + System.currentTimeMillis();
+
+		Object object = getLastCustomNonConfigurationInstance();
+		if (object != null && (object instanceof Bitmap))
+		{
+			groupBitmap = (Bitmap) object;
+			groupImage.setImageBitmap(groupBitmap);
+		}
+		else
+		{
+			groupImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(groupId, true));
+		}
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		/**
+		 * Deleting the temporary file, if it exists.
+		 */
+		File file = new File(Utils.getTempProfileImageFileName(groupId));
+		file.delete();
+
+		super.onBackPressed();
+	}
+
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		if (groupBitmap != null)
+		{
+			return groupBitmap;
+		}
+		return super.onRetainCustomNonConfigurationInstance();
 	}
 
 	private void setupActionBar()
@@ -243,6 +278,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 			Bitmap tempBitmap = Utils.scaleDownImage(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
 
+			groupBitmap = Utils.getCircularBitmap(tempBitmap);
 			groupImage.setImageBitmap(Utils.getCircularBitmap(tempBitmap));
 
 			/*

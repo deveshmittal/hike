@@ -33,6 +33,7 @@ import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -66,6 +67,10 @@ public class FileTransferManager extends BroadcastReceiver
 	private static int minChunkSize = 8 * 1024;
 
 	private static int maxChunkSize = 128 * 1024;
+	
+	private final int TASK_LIMIT = 25;
+	
+	private final int TASK_OVERFLOW_LIMIT = 90;
 
 	private ExecutorService pool;
 
@@ -268,6 +273,9 @@ public class FileTransferManager extends BroadcastReceiver
 	{
 		if (isFileTaskExist(msgId))
 			return;
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast);
 		try
 		{
@@ -285,6 +293,9 @@ public class FileTransferManager extends BroadcastReceiver
 	public void uploadFile(String msisdn, File sourceFile, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
 			long recordingDuration)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -300,6 +311,9 @@ public class FileTransferManager extends BroadcastReceiver
 	{
 		if (isFileTaskExist(convMessage.getMsgID()))
 			return;
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -311,6 +325,9 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadFile(Uri picasaUri, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -322,6 +339,9 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadLocation(String msisdn, double latitude, double longitude, int zoomLevel, boolean isRecipientOnhike)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, latitude, longitude, zoomLevel, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -330,6 +350,9 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadContact(String msisdn, JSONObject contactJson, boolean isRecipientOnhike)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, contactJson, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -340,6 +363,9 @@ public class FileTransferManager extends BroadcastReceiver
 	{
 		if (isFileTaskExist(convMessage.getMsgID()))
 			return;
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, convMessage, uploadingContact, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -709,5 +735,21 @@ public class FileTransferManager extends BroadcastReceiver
 				resumeAllTasks();
 			}
 		}
+	}
+	
+	public int remainingTransfers()
+	{
+		if(TASK_LIMIT > fileTaskMap.size())
+			return (TASK_LIMIT - fileTaskMap.size());
+		else
+			return 0;
+	}
+	
+	public boolean taskOverflowLimitAchieved()
+	{
+		if(fileTaskMap.size() >= TASK_OVERFLOW_LIMIT)
+			return true;
+		else
+			return false;
 	}
 }

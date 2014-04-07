@@ -104,6 +104,8 @@ public class HikeConstants
 	public static final String FILE_NAME = "fn";
 
 	public static final String FILE_KEY = "fk";
+	
+	public static final String FILE_PATH = "fp";
 
 	public static final String CREDITS = "credits";
 
@@ -544,7 +546,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 
-	public static final int MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 	public static final int IMAGE_CAPTURE_CODE = 1187;
 
@@ -743,7 +745,7 @@ public class HikeConstants
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
 	/* In seconds */
-	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 20;
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
 
 	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
 

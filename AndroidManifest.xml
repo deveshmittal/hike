@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="355"
-    android:versionName="2.8.6.4" >
+    android:versionCode="356"
+    android:versionName="2.8.6.5" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -89,7 +89,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_label"
             android:theme="@style/AppTheme.Home"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="stateVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 

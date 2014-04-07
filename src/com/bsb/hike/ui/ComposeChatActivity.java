@@ -235,12 +235,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if (isSharingFile)
 				{
 					forwardConfirmDialog.setHeader(R.string.share);
-					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
 				}
 				else
 				{
 					forwardConfirmDialog.setHeader(R.string.forward);
-					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
 				}
 				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 				{
@@ -443,14 +443,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (existingGroupId != null)
-				{
-					ComposeChatActivity.this.finish();
-				}
-				else
-				{
-					onBackPressed();
-				}
+
+				onBackPressed();
 			}
 		});
 		setTitle();
@@ -584,18 +578,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			}
 		}
-		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
-		{
-			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
-			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			intent.putExtra(HikeConstants.Extras.MSG, msg);
-		}
 		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
 				|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 		{
 			intent.putExtras(presentIntent);
 		}
-		else if (type != null)
+		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
 			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
@@ -619,8 +607,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				filePath = Utils.getRealPathFromUri(fileUri, this);
 			}
+
+			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+
 			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
+		}
+		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+		{
+			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
 		}
 		startActivity(intent);
 		finish();
@@ -664,6 +661,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		if (composeMode == CREATE_GROUP_MODE)
 		{
+			if (existingGroupId != null || createGroup)
+			{
+				ComposeChatActivity.this.finish();
+				return;
+			}
 			setMode(START_CHAT_MODE);
 			return;
 		}

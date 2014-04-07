@@ -235,8 +235,6 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_SMS_SYNC_DIALOG = "showSMSSyncDialog";
 
-	public static final String SHOWN_UNDELIVERED_MESSAGE = "shownUndeliveredMessage";
-
 	public static final String STICKER_DOWNLOADED = "stickerDownloaded";
 
 	public static final String STICKER_CATEGORY_DOWNLOADED = "stickerCategoryDownloaded";
@@ -304,6 +302,10 @@ public class HikePubSub implements Runnable
 	public static final String CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE = "conversationClearedByDeletingLastMessage";
 
 	public static final String CONTACT_SYNCED = "contactSynced";
+
+	public static final String MQTT_CONNECTED = "mqttConnected";
+
+	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
 
 	private final Thread mThread;
 

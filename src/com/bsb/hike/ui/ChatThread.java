@@ -304,7 +304,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
-			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.SHOWN_UNDELIVERED_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
 			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
@@ -1472,13 +1472,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 						else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
 						{
-							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
-							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
-							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
+							String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
+							String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
+							int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
 							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
 							sendSticker(sticker);
-							// add this sticker to recents
-							StickerManager.getInstance().addRecentSticker(sticker);
+							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
+							// add this sticker to recents if this sticker is not disabled
+							if(!isDis)
+								StickerManager.getInstance().addRecentSticker(sticker);
+							/*
+							 * Making sure the sticker is not forwarded again on orientation change
+							 */
+							intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 						}
 						/*
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
@@ -1640,7 +1646,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabel = mConversation.getLabel();
 
 		if (showKeyboard && !wasOrientationChanged)
+		{
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+		}
+		else if (!showKeyboard)
+		{
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+		}
 
 		setupActionBar(true);
 
@@ -2844,18 +2856,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
 		}
-		else if (HikePubSub.SHOWN_UNDELIVERED_MESSAGE.equals(type))
-		{
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					mConversationsView.setSelection(messages.size() - 1);
-				}
-			});
-		}
 		else if (HikePubSub.STICKER_DOWNLOADED.equals(type))
 		{
 			updateAdapter();
@@ -3647,7 +3647,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
 			tv.setText(R.string.chatThreadNudgeTutorialText);
-			tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_left_chat, 0, 0, 0);
+			if(chatTheme == ChatTheme.DEFAULT){
+				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
+			}else{
+			tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_nudge, 0, 0, 0);
+			}
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;

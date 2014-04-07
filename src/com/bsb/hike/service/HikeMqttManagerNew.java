@@ -517,7 +517,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		if(isAirplaneModeOn(context))
 		{
 			HikeMessengerApp.networkError = true;
-			updateNetworkState(false);
+			updateNetworkState();
 			return;
 		}
 		if(myTimer != null)
@@ -533,7 +533,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				if(!isConnected())
 				{
 					HikeMessengerApp.networkError = true;
-					updateNetworkState(false);
+					updateNetworkState();
 				}
 			}
 		}, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
@@ -550,12 +550,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		if(HikeMessengerApp.networkError == false)
 			return;
 		HikeMessengerApp.networkError = false;
-		updateNetworkState(true);
+		updateNetworkState();
 	}
 
-	private void updateNetworkState(boolean connected)
+	private void updateNetworkState()
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, connected);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
 	}
 	
 	private static boolean isAirplaneModeOn(Context context)
@@ -736,6 +736,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 					Logger.d(TAG, "Client Connected ....");
 					cancelNetworkErrorTimer();
+
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
+
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{

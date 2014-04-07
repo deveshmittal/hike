@@ -1100,7 +1100,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 
 			List<ConvMessage> messages;
-			if (unreadCount > limit)
+			if (limit != -1 && unreadCount > limit)
 			{
 				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
 			}

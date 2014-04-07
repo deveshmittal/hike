@@ -294,7 +294,6 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 			LayoutInflater li = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = li.inflate(R.layout.friends_group_view, parent, false);
 			convertView.setBackgroundColor(activity.getResources().getColor(R.color.white));
-			convertView.findViewById(R.id.home_list_divider).setVisibility(View.GONE);
 		}
 		TextView textView = (TextView) convertView.findViewById(R.id.name);
 		TextView countView = (TextView) convertView.findViewById(R.id.count);
