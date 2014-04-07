@@ -101,10 +101,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		protected void onPostExecute(Void result)
 		{
 			findViewById(R.id.loading_progress).setVisibility(View.GONE);
-			if(recommendedContacts.size() > 0)
-			{
-				sectionsData.put(0, recommendedContacts);
-			}
+			sectionsData.put(0, recommendedContacts);
 			sectionsData.put(sectionsData.size(), hikeContacts);
 			mAdapter = new AddFriendAdapter(AddFriendsActivity.this, -1, sectionsData,listview);
 			hikeContactsCount = hikeContacts.size() + recommendedContacts.size();

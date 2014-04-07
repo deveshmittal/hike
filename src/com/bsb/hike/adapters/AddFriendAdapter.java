@@ -139,7 +139,17 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		default:
 			break;
 		}
-		countView.setText(getCountForSection(section)+"");
+		int sectionCount = getCountForSection(section);
+		countView.setText(sectionCount+"");
+		if(sectionCount > 0)
+		{
+			convertView.findViewById(R.id.section_view).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			convertView.findViewById(R.id.section_view).setVisibility(View.GONE);
+		}
+
 		return convertView;
 	}
 	
