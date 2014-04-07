@@ -1470,6 +1470,7 @@ public class MqttMessagesManager
 				Utils.renameTempProfileImage(groupId);
 			}
 		});
+		hikeHttpRequest.setFilePath(groupImageFile.getPath());
 
 		HikeHTTPTask task = new HikeHTTPTask(null, 0);
 		Utils.executeHttpTask(task, hikeHttpRequest);
