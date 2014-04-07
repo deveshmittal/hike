@@ -143,6 +143,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean isAddFriendFtueShowing = false;
 
+	private int hikeContactsCount = -1;
+	
+	private int friendsListCount = -1;
+	
+	private int recommendedCount = -1;
+	
+	private FetchContactsTask fetchContactsTask;
+	
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED, HikePubSub.MQTT_CONNECTED };
@@ -179,15 +187,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 
 		shouldShowAddFriendsPopup = false;
-		if (savedInstanceState != null)
-		{
-			shouldShowAddFriendsPopup = savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING);
-			isAddFriendFtueShowing = shouldShowAddFriendsPopup;
-		}
 
 		if (!showingProgress)
 		{
 			initialiseHomeScreen(savedInstanceState);
+		}
+		
+		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
+		{
+			if (savedInstanceState != null)
+			{
+				shouldShowAddFriendsPopup = savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING);
+				isAddFriendFtueShowing = shouldShowAddFriendsPopup;
+				friendsListCount = savedInstanceState.getInt(HikeConstants.Extras.FRIENDS_LIST_COUNT);
+				hikeContactsCount = savedInstanceState.getInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT);
+				recommendedCount = savedInstanceState.getInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT);
+				Object o = getLastCustomNonConfigurationInstance();
+				if(o instanceof FetchContactsTask)
+				{
+					fetchContactsTask = (FetchContactsTask) o;
+				}
+			}
+			if(friendsListCount == -1 && fetchContactsTask == null)
+			{
+				fetchContactsTask = new FetchContactsTask();
+				Utils.executeAsyncTask(fetchContactsTask);
+			}
 		}
 	}
 
@@ -619,6 +644,29 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		dialog.show();
 	}
 
+	private class FetchContactsTask extends AsyncTask<Void, Void, Void>
+	{
+		List<ContactInfo> hikeContacts = new ArrayList<ContactInfo>();
+		List<ContactInfo> friendsList = new ArrayList<ContactInfo>();
+		List<ContactInfo> recommendedContacts = new ArrayList<ContactInfo>();
+		
+		@Override
+		protected Void doInBackground(Void... arg0)
+		{
+			Utils.getRecommendedAndHikeContacts(HomeActivity.this, recommendedContacts, hikeContacts, friendsList);
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result)
+		{
+			hikeContactsCount = hikeContacts.size();
+			recommendedCount = recommendedContacts.size();
+			friendsListCount = friendsList.size();
+			super.onPostExecute(result);
+		}
+	}
+	
 	@Override
 	protected void onResume()
 	{
@@ -628,13 +676,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * We only show addfriends popup on second resume and also not on orientation changes
 		 */
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && friendsListCount!=-1 && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
-			String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 			/*
-			 * we only show ftue popups if user doesn't have both way friends over a certain limit
+			 * we only show ftue popups if user doesn't friends over a certain limit
 			 */
-			if (Utils.shouldShowAddOrInviteFTUE(msisdn))
+			if (friendsListCount < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
 			{
 				showFTUEAddFtriendsPopup();
 			}
@@ -654,8 +701,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
 		popupViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
 		{
-			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(accountPrefs.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null));
-
+			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(hikeContactsCount,recommendedCount);
 			@Override
 			public void onInflate(ViewStub stub, View inflated)
 			{
@@ -798,6 +844,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		outState.putBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING, overFlowWindow != null && overFlowWindow.isShowing());
 		outState.putBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING, ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE);
+		outState.putInt(HikeConstants.Extras.FRIENDS_LIST_COUNT, friendsListCount);
+		outState.putInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT, hikeContactsCount);
+		outState.putInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT, recommendedCount);
+
 		super.onSaveInstanceState(outState);
 	}
 
@@ -1663,5 +1713,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
 	}
+	
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		return fetchContactsTask;
+	}
+
 
 }

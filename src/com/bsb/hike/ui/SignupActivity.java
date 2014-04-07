@@ -780,6 +780,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			number = number.replace("+91", "");
 			enterEditText.setText(number);
+			enterEditText.setSelection(number.length());
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
@@ -1050,21 +1051,24 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			@Override
 			public void onClick(View v)
 			{
-				errorDialog.dismiss();
-				v.setEnabled(false);
-				restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
-				/*
-				 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
-				 */
-				SignupActivity.this.mHandler.postDelayed(new Runnable()
+				if(errorDialog != null)
 				{
-
-					@Override
-					public void run()
+					errorDialog.dismiss();
+					v.setEnabled(false);
+					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
+					/*
+					 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
+					 */
+					SignupActivity.this.mHandler.postDelayed(new Runnable()
 					{
-						submitClicked();
-					}
-				}, 100);
+
+						@Override
+						public void run()
+						{
+							submitClicked();
+						}
+					}, 100);
+				}
 			}
 		});
 		

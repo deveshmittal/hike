@@ -1490,6 +1490,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
 					}
+					if(isActionModeOn)
+					{
+						destroyActionMode();
+					}
 				}
 				catch (JSONException e)
 				{
@@ -5605,7 +5609,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hideUnreadCountIndicator();
 		}
 
-		if (view.getLastVisiblePosition() < messages.size() - 6)
+		if (view.getLastVisiblePosition() < messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 		{
 			if (currentFirstVisibleItem < firstVisibleItem)
 			{
@@ -5615,7 +5619,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			else if (currentFirstVisibleItem > firstVisibleItem)
 			{
 				hideFastScrollIndicator();
-				if(firstVisibleItem > 6)
+				/*
+				 * if user is viewing message less than certain position in chatthread
+				 * we should not show topfast scroll.
+				 */
+				if(firstVisibleItem > HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 				{
 					upFastScrollIndicator.setVisibility(View.VISIBLE);
 				}
@@ -5640,7 +5648,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
-			if (view.getLastVisiblePosition() >= messages.size() - 6)
+			if (view.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
 				hideFastScrollIndicator();
 			}
@@ -5659,7 +5667,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if(upFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
-			if(view.getFirstVisiblePosition() <= 6)
+			if(view.getFirstVisiblePosition() <= HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
 				hideUpFastScrollIndicator();
 			}
@@ -6224,8 +6232,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
-
-			destroyActionMode();
 			return true;
 		case R.id.copy_msgs:
 			Collections.sort(selectedMessagesIds);

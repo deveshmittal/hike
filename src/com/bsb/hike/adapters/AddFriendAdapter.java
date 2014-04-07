@@ -35,6 +35,7 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
+		iconloader.setDefaultAvatarIfNoCustomIcon(true);
 	}
 
 	@Override
@@ -138,7 +139,17 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 		default:
 			break;
 		}
-		countView.setText(getCountForSection(section)+"");
+		int sectionCount = getCountForSection(section);
+		countView.setText(sectionCount+"");
+		if(sectionCount > 0)
+		{
+			convertView.findViewById(R.id.section_view).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			convertView.findViewById(R.id.section_view).setVisibility(View.GONE);
+		}
+
 		return convertView;
 	}
 	

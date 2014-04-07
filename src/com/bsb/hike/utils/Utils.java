@@ -3672,25 +3672,21 @@ public class Utils
 	/*
 	 * When Active Contacts >= 3 show the 'Add Friends' pop-up When Activate Contacts <3 show the 'Invite Friends' pop-up
 	 */
-	public static boolean shouldShowAddFriendsFTUE(String serverRecommendedArrayString)
+	public static boolean shouldShowAddFriendsFTUE(int hikeContactsCount, int recommendedCount)
 	{
-		if (TextUtils.isEmpty(serverRecommendedArrayString))
+		Logger.d("AddFriendsActivity"," hikeContactsCount="+hikeContactsCount+" recommendedCount="+recommendedCount);
+		/*
+		 * also if all the recommended contacts are your friend we should not show add friends popup
+		 */
+		if (recommendedCount == 0 || hikeContactsCount == 0)
 		{
 			return false;
 		}
-		try
+		if (recommendedCount > 2)
 		{
-			JSONArray serverRecommendedArray = new JSONArray(serverRecommendedArrayString);
-			if (serverRecommendedArray.length() > 2)
-			{
-				return true;
-			}
-			return false;
+			return true;
 		}
-		catch (JSONException e)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	public static String getEmail(Context context)
@@ -3721,16 +3717,6 @@ public class Utils
 		context.startActivity(intent);
 	}
 	
-	public static boolean shouldShowAddOrInviteFTUE(String msisdn)
-	{
-		List<ContactInfo>  friendsList = HikeUserDatabase.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false);
-		if(friendsList.size() < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
-		{
-			return true;
-		}
-		return false;
-	}
-
 	public static void toggleActionBarElementsEnable(View doneBtn, ImageView arrow, TextView postText, boolean enabled)
 	{
 		doneBtn.setEnabled(enabled);
@@ -3748,5 +3734,31 @@ public class Utils
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
 		return drawable;
+	}
+	
+	public static void getRecommendedAndHikeContacts(Context context, List<ContactInfo> recommendedContacts, List<ContactInfo> hikeContacts, List<ContactInfo>  friendsList)
+	{
+		SharedPreferences settings = (SharedPreferences) context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING,
+				"");
+		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
+		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false));
+		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, msisdn, false));
+		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
+		
+		Logger.d("AddFriendsActivity", " friendsList size "+friendsList.size());
+		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(settings.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), msisdn);
+		Logger.d("AddFriendsActivity", " recommendedContactsSelection "+recommendedContactsSelection);
+		if (!TextUtils.isEmpty(recommendedContactsSelection))
+		{
+			recommendedContacts.addAll(HikeUserDatabase.getInstance().getHikeContacts(-1, recommendedContactsSelection, null, msisdn));
+		}
+		
+		Logger.d("AddFriendsActivity", " size recommendedContacts = "+recommendedContacts.size());
+		
+		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false));
+		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
+		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
 	}
 }
