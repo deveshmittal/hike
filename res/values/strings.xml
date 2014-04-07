@@ -1210,7 +1210,7 @@
     <string name="system_health_hinttext">See hike system status</string>
     <string name="sms_setting_hinttext">SMS settings</string>
     <string name="mute_status_notification_header">Status update notifications</string>
-    <string name="mute_status_notification_subtext">Show a notification for status updates posted by your friends</string>
+    <string name="mute_status_notification_subtext">Show notifications for status updates posted by your friends</string>
     <string name="app_version">Version %1$s</string>
     <string name="tap_plus_add_friends">Tap + to add some friends</string>
     <string name="work_in_progress">Updating Hike</string>
