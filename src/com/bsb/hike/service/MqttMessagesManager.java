@@ -689,23 +689,6 @@ public class MqttMessagesManager
 			if (data.has(HikeConstants.ACCOUNT))
 			{
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
-				if (account.has(HikeConstants.ICON))
-				{
-					String iconBase64 = account.getString(HikeConstants.ICON);
-					try
-					{
-						byte[] profileImageBytes = Base64.decode(iconBase64, Base64.DEFAULT);
-						this.userDb.setIcon(userMsisdn, profileImageBytes, false);
-
-						HikeMessengerApp.getLruCache().clearIconForMSISDN(userMsisdn);
-						// IconCacheManager.getInstance().clearIconForMSISDN(
-						// msisdn);
-					}
-					catch (Exception e)
-					{
-						Logger.w(getClass().getSimpleName(), "Invalid image bytes");
-					}
-				}
 				if (account.has(HikeConstants.ACCOUNTS))
 				{
 					JSONObject accounts = account.getJSONObject(HikeConstants.ACCOUNTS);
@@ -1470,6 +1453,7 @@ public class MqttMessagesManager
 				Utils.renameTempProfileImage(groupId);
 			}
 		});
+		hikeHttpRequest.setFilePath(groupImageFile.getPath());
 
 		HikeHTTPTask task = new HikeHTTPTask(null, 0);
 		Utils.executeHttpTask(task, hikeHttpRequest);

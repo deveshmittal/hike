@@ -125,7 +125,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED };
 
-	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED };
+	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED };
 
 	private GroupConversation groupConversation;
 
@@ -1019,18 +1019,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 							HikeMessengerApp.getPubSub().publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 							HikeMessengerApp.getPubSub().publish(HikePubSub.TIMELINE_UPDATE_RECIEVED, statusMessage);
 						}
+					}
 
-						if (profileAdapter != null)
-						{
-							profileItems.add(showingRequestItem ? 2 : 1, new ProfileItem.ProfileStatusItem(statusMessage));
-						}
-					}
-					if (profileAdapter != null)
-					{
-						HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
-						profileAdapter.notifyDataSetChanged();
-					}
+					HikeMessengerApp.getLruCache().clearIconForMSISDN(mLocalMSISDN);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, mLocalMSISDN);
+
 					if (isBackPressed)
 					{
 						finishEditing();

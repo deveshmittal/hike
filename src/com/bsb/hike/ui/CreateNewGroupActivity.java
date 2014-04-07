@@ -79,7 +79,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			@Override
 			public void afterTextChanged(Editable editable)
 			{
-				Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, !TextUtils.isEmpty(editable));
+				Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, !TextUtils.isEmpty(editable.toString().trim()));
 			}
 		});
 
@@ -159,7 +159,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			public void onClick(View v)
 			{
 				Intent intent = new Intent(CreateNewGroupActivity.this, ComposeChatActivity.class);
-				intent.putExtra(HikeConstants.Extras.GROUP_NAME, groupName.getText().toString());
+				intent.putExtra(HikeConstants.Extras.GROUP_NAME, groupName.getText().toString().trim());
 				intent.putExtra(HikeConstants.Extras.GROUP_ID, groupId);
 				intent.putExtra(HikeConstants.Extras.CREATE_GROUP, true);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

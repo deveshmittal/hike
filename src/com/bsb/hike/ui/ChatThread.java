@@ -1472,9 +1472,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 						else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
 						{
-							String categoryId = intent.getStringExtra(StickerManager.FWD_CATEGORY_ID);
-							String stickerId = intent.getStringExtra(StickerManager.FWD_STICKER_ID);
-							int stickerIdx = intent.getIntExtra(StickerManager.FWD_STICKER_INDEX, -1);
+							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
+							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
+							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
 							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
 							sendSticker(sticker);
 							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
@@ -1489,6 +1489,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						/*
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
+					}
+					if(isActionModeOn)
+					{
+						destroyActionMode();
 					}
 				}
 				catch (JSONException e)
@@ -3646,7 +3650,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			tv.setText(R.string.chatThreadNudgeTutorialText);
+			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
 			if(chatTheme == ChatTheme.DEFAULT){
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
 			}else{
@@ -5605,7 +5609,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hideUnreadCountIndicator();
 		}
 
-		if (view.getLastVisiblePosition() < messages.size() - 6)
+		if (view.getLastVisiblePosition() < messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 		{
 			if (currentFirstVisibleItem < firstVisibleItem)
 			{
@@ -5615,7 +5619,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			else if (currentFirstVisibleItem > firstVisibleItem)
 			{
 				hideFastScrollIndicator();
-				if(firstVisibleItem > 6)
+				/*
+				 * if user is viewing message less than certain position in chatthread
+				 * we should not show topfast scroll.
+				 */
+				if(firstVisibleItem > HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 				{
 					upFastScrollIndicator.setVisibility(View.VISIBLE);
 				}
@@ -5640,7 +5648,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
-			if (view.getLastVisiblePosition() >= messages.size() - 6)
+			if (view.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
 				hideFastScrollIndicator();
 			}
@@ -5659,7 +5667,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if(upFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
-			if(view.getFirstVisiblePosition() <= 6)
+			if(view.getFirstVisiblePosition() <= HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
 				hideUpFastScrollIndicator();
 			}
@@ -6224,8 +6232,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
-
-			destroyActionMode();
 			return true;
 		case R.id.copy_msgs:
 			Collections.sort(selectedMessagesIds);

@@ -259,7 +259,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			{
 				ex.printStackTrace();
 			}
-			Logger.i("filterlist", "done");
 
 		}
 
@@ -601,7 +600,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 
 		ContactInfo contactInfo = getItem(position);
-		Logger.d(TAG, "in getitemviewtype position " + position + " and total " + completeList.size() + " and contactInfo " + contactInfo);
 		if (EMPTY_ID.equals(contactInfo.getId()))
 		{
 			return ViewType.EMPTY.ordinal();
