@@ -50,6 +50,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import com.google.android.gms.internal.co;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
@@ -218,6 +219,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			// for SMS users, append SMS text with name
 			int viewtype = adapter.getItemViewType(arg2);
+			if (contactInfo.getName() == null)
+			{
+				contactInfo.setName(contactInfo.getMsisdn());
+			}
 			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 		}
