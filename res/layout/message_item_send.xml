@@ -91,8 +91,8 @@
 	            android:visibility="gone" >
 	            <ProgressBar
 		            android:id="@+id/initializing_ext"
-		            android:layout_width="42dp"
-		            android:layout_height="42dp"
+		            android:layout_width="43dp"
+		            android:layout_height="43dp"
 		            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				    android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress
@@ -189,8 +189,8 @@
 			            android:visibility="gone" >
 			            <ProgressBar
 				            android:id="@+id/initializing"
-				            android:layout_width="52dp"
-				            android:layout_height="52dp"
+				            android:layout_width="51dp"
+				            android:layout_height="51dp"
 				            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				            android:layout_centerInParent="true" />
 			            <com.bsb.hike.view.HoloCircularProgress
