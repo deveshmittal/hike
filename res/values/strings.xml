@@ -1420,5 +1420,5 @@
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
-
+	<string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
 </resources>

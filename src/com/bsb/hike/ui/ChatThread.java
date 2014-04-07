@@ -3646,7 +3646,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			tv.setText(R.string.chatThreadNudgeTutorialText);
+			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
 			if(chatTheme == ChatTheme.DEFAULT){
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
 			}else{
