@@ -16,13 +16,13 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.View;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -127,8 +127,7 @@ public class MessageMetadata
 			else
 			// this is the case when you receive a sticker from another user
 			{
-				String val = metadata.optString(StickerManager.CATEGORY_ID);
-				StickerCategory cat = StickerManager.getInstance().getCategoryForName(val);
+				String cat = metadata.optString(StickerManager.CATEGORY_ID);
 				this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
 			}
 		}
@@ -272,7 +271,7 @@ public class MessageMetadata
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 		}
 		else

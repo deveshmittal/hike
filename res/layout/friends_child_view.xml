@@ -9,8 +9,8 @@
         android:layout_height="64dp"
         android:background="@drawable/list_item"
         android:orientation="horizontal"
-        android:paddingLeft="14dp"
-        android:paddingRight="14dp" >
+        android:paddingLeft="@dimen/contact_list_item_padding"
+        android:paddingRight="@dimen/contact_list_item_padding" >
 
         <FrameLayout
             android:id="@+id/avatar_container"
@@ -20,13 +20,11 @@
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
-                style="@style/AvatarStyle.Padding"
-                android:src="@drawable/ic_avatar1" />
+                style="@style/AvatarStyle.Padding" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle"
-                android:src="@drawable/frame_avatar_medium_selector" />
+                style="@style/AvatarStyle" />
         </FrameLayout>
 
         <com.bsb.hike.view.CustomFontTextView
@@ -82,6 +80,7 @@
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                 android:textColor="@color/list_item_subtext"
                 android:textSize="12sp"
+                android:textStyle="italic"
                 android:visibility="visible" />
         </LinearLayout>
     </RelativeLayout>

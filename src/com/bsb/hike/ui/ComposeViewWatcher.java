@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -16,6 +15,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.utils.EmoticonTextWatcher;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable, Listener
@@ -84,11 +84,11 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 		}
 		if (!canSend)
 		{
-			mButton.setImageResource(R.drawable.ic_msg_record);
+			mButton.setImageResource(R.drawable.ic_walkie_talkie);
 		}
 		else
 		{
-			mButton.setImageResource(R.drawable.ic_msg_btn);
+			mButton.setImageResource(R.drawable.ic_send);
 		}
 		if (mConversation instanceof GroupConversation)
 		{
@@ -104,7 +104,7 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 	{
 		if (!mInitialized)
 		{
-			Log.d("ComposeViewWatcher", "not initialized");
+			Logger.d("ComposeViewWatcher", "not initialized");
 			return;
 		}
 

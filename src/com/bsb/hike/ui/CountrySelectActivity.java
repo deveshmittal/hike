@@ -189,7 +189,6 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 
 		actionBar.setCustomView(actionBarView);
 
-		actionBarView.findViewById(R.id.done_container).setVisibility(View.GONE);
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		title.setText(R.string.select_country);
@@ -384,11 +383,13 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 			if (convertView == null)
 			{
 				LayoutInflater li = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				convertView = li.inflate(R.layout.settings_section_layout, parent, false);
+				convertView = li.inflate(R.layout.friends_group_view, parent, false);
 				convertView.setBackgroundColor(getResources().getColor(R.color.white));
 			}
-			TextView textView = (TextView) convertView.findViewById(R.id.settings_section_text);
+			TextView textView = (TextView) convertView.findViewById(R.id.name);
 			textView.setText(sortedCountries.get(section).toUpperCase());
+			TextView countView = (TextView) convertView.findViewById(R.id.count);
+			countView.setText(getCountForSection(section)+"");
 			return convertView;
 		}
 	}
@@ -411,7 +412,7 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 				listView.setVerticalScrollBarEnabled(true);
 			}
 			searching = true;
-			filter.filter(s);
+			filter.filter(query);
 		}
 		else
 		{

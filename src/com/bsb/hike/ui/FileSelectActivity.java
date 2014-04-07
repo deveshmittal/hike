@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +34,6 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -49,6 +47,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.FileImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class FileSelectActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, HikePubSub.Listener
@@ -153,6 +152,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private TextView multiSelectTitle;
 
+	private TextView subText;
+
 	@Override
 	public void onDestroy()
 	{
@@ -165,7 +166,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while unregistering receiver", e);
+			Logger.e(getClass().getSimpleName(), "Exception while unregistering receiver", e);
 		}
 		if (progressDialog != null)
 		{
@@ -347,6 +348,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
+		subText = (TextView) actionBarView.findViewById(R.id.subtext);
+
 		setTitle(titleString);
 		currentTitle = titleString;
 
@@ -370,7 +373,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 
-		Button sendBtn = (Button) actionBarView.findViewById(R.id.save);
+		View sendBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
 
@@ -437,6 +440,16 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	private void setTitle(String titleString)
 	{
 		title.setText(titleString);
+
+		if (!history.isEmpty())
+		{
+			subText.setVisibility(View.VISIBLE);
+			subText.setText(R.string.tap_hold_multi_select);
+		}
+		else
+		{
+			subText.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -623,14 +636,14 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 					}
 					catch (Exception e)
 					{
-						Log.e(getClass().getSimpleName(), "Exception while showing root", e);
+						Logger.e(getClass().getSimpleName(), "Exception while showing root", e);
 					}
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while showing root", e);
+			Logger.e(getClass().getSimpleName(), "Exception while showing root", e);
 		}
 		ListItem fs = new ListItem();
 		fs.title = "/";

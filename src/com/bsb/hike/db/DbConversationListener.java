@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -30,11 +29,13 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class DbConversationListener implements Listener
@@ -112,14 +113,14 @@ public class DbConversationListener implements Listener
 			if ((convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 					&& (!convMessage.isFileTransferMessage() || shouldSendMessage))
 			{
-				Log.d("DBCONVERSATION LISTENER", "Sending Message : " + convMessage.getMessage() + "	;	to : " + convMessage.getMsisdn());
+				Logger.d("DBCONVERSATION LISTENER", "Sending Message : " + convMessage.getMessage() + "	;	to : " + convMessage.getMsisdn());
 				if (!convMessage.isSMS() || !Utils.getSendSmsPref(context) || convMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 				{
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 				}
 				else
 				{
-					Log.d(getClass().getSimpleName(), "Messages Id: " + convMessage.getMsgID());
+					Logger.d(getClass().getSimpleName(), "Messages Id: " + convMessage.getMsgID());
 					sendNativeSMS(convMessage);
 				}
 				if (convMessage.isGroupChat())
@@ -174,7 +175,7 @@ public class DbConversationListener implements Listener
 		// received msg
 		// receipt
 		{
-			Log.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID -> " + (Long) object);
+			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID -> " + (Long) object);
 			updateDB(object, ConvMessage.State.SENT_CONFIRMED.ordinal());
 		}
 		else if (HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE.equals(type))
@@ -220,7 +221,7 @@ public class DbConversationListener implements Listener
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
@@ -260,8 +261,7 @@ public class DbConversationListener implements Listener
 				{
 					requestType = HikeConstants.MqttMessageTypes.REMOVE_FAVORITE;
 				}
-
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(requestType, contactInfo.getMsisdn()));
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(requestType, contactInfo.getMsisdn(), contactInfo instanceof FtueContactInfo));
 			}
 		}
 		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
@@ -336,7 +336,7 @@ public class DbConversationListener implements Listener
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), "Invalid json", e);
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
 			}
 
 		}
@@ -409,7 +409,7 @@ public class DbConversationListener implements Listener
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
 
@@ -429,7 +429,7 @@ public class DbConversationListener implements Listener
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
 
@@ -458,7 +458,7 @@ public class DbConversationListener implements Listener
 		}
 		catch (NullPointerException e)
 		{
-			Log.d(getClass().getSimpleName(), "NPE while trying to send SMS", e);
+			Logger.d(getClass().getSimpleName(), "NPE while trying to send SMS", e);
 		}
 
 		writeToNativeSMSDb(convMessage);
@@ -481,6 +481,11 @@ public class DbConversationListener implements Listener
 
 	private JSONObject serializeMsg(String type, String id)
 	{
+		return serializeMsg(type, id, false);
+	}
+	
+	private JSONObject serializeMsg(String type, String id, boolean isFromFtue)
+	{
 		JSONObject obj = new JSONObject();
 		JSONObject data = new JSONObject();
 		try
@@ -491,11 +496,18 @@ public class DbConversationListener implements Listener
 			}
 			obj.put(HikeConstants.TYPE, type);
 			data.put(HikeConstants.ID, id);
+			if(isFromFtue)
+			{
+				JSONObject ftueData = new JSONObject();
+				ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
+				data.put(HikeConstants.METADATA, ftueData);
+			}
 			obj.put(HikeConstants.DATA, data);
+			Logger.d(getClass().getSimpleName(), "Sending add friends packet, Object: "+obj.toString());
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid json", e);
+			Logger.e(getClass().getSimpleName(), "Invalid json", e);
 		}
 		return obj;
 	}

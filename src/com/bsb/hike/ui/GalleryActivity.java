@@ -22,7 +22,6 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -87,6 +86,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		GalleryItem selectedBucket = data.getParcelable(HikeConstants.Extras.SELECTED_BUCKET);
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
 
+		String sortBy;
 		if (selectedBucket != null)
 		{
 			selection = MediaStore.Images.Media.BUCKET_ID + "=?";
@@ -114,15 +114,19 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 				}
 				setMultiSelectTitle();
 			}
+
+			sortBy = MediaStore.Images.Media.DATE_MODIFIED + " DESC";
 		}
 		else
 		{
 			selection = "1) GROUP BY (" + MediaStore.Images.Media.BUCKET_ID;
 
 			isInsideAlbum = false;
+
+			sortBy = MediaStore.Images.Media.DATE_ADDED + " ASC";
 		}
 
-		Cursor cursor = getContentResolver().query(uri, projection, selection, args, MediaStore.Images.Media.DATE_MODIFIED + " DESC");
+		Cursor cursor = getContentResolver().query(uri, projection, selection, args, sortBy);
 
 		if (cursor != null)
 		{
@@ -207,6 +211,14 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(titleString == null ? getString(R.string.gallery) : titleString);
+
+		if (isInsideAlbum)
+		{
+			TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
+			subText.setVisibility(View.VISIBLE);
+			subText.setText(R.string.tap_hold_multi_select);
+		}
+
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 
@@ -227,7 +239,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 
-		Button sendBtn = (Button) actionBarView.findViewById(R.id.save);
+		View sendBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
 

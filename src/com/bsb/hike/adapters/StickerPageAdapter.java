@@ -1,6 +1,5 @@
 package com.bsb.hike.adapters;
 
-import java.io.File;
 import java.util.List;
 
 import android.app.Activity;
@@ -229,18 +228,15 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				}
 
 				Sticker sticker = stickerList.get(index);
-
-				if (sticker.getStickerIndex() != -1)
+				if (sticker.getStickerIndex() >= 0) // for already copied stickers this will be > -1
 				{
 					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
 					{
 						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()], imageView, isListFlinging);
-						// imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_DOGGY[sticker.getStickerIndex()]);
 					}
 					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 					{
 						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
-						// imageView.setImageResource(StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()]);
 					}
 				}
 				else
@@ -248,7 +244,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
 				}
 				imageView.setTag(sticker);
-
 				imageView.setOnClickListener(this);
 			}
 			break;
@@ -317,18 +312,12 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		int currentIdx = ((ChatThread) activity).getCurrentPage();
 		StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 
-		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI*/
-		if (!StickerCategoryId.recent.equals(sc.categoryId) && !stickerDisabled(sticker))
+		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
+		if (!StickerCategoryId.recent.equals(sc.categoryId))
 		{
 			StickerManager.getInstance().addRecentSticker(sticker);
 			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
 		}
-	}
-
-	private boolean stickerDisabled(Sticker sticker)
-	{
-		File f = new File(sticker.getSmallStickerPath(activity.getApplicationContext()));
-		return !f.exists();
 	}
 
 	public void setIsListFlinging(boolean b)

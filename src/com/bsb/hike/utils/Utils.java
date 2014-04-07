@@ -78,6 +78,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
@@ -103,7 +104,6 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.MotionEvent;
@@ -121,6 +121,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -137,8 +138,8 @@ import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -213,7 +214,7 @@ public class Utils
 			}
 			builder.append(delimiter);
 		}
-		Log.d("Utils", "Joined string is: " + builder.toString());
+		Logger.d("Utils", "Joined string is: " + builder.toString());
 		return builder.toString();
 	}
 
@@ -231,7 +232,7 @@ public class Utils
 			}
 			catch (JSONException e)
 			{
-				Log.e("Utils", "error json serializing", e);
+				Logger.e("Utils", "error json serializing", e);
 			}
 		}
 		return arr;
@@ -349,7 +350,7 @@ public class Utils
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn, boolean rounded)
 	{
-		return context.getResources().getDrawable(getId(msisdn, rounded));
+		return context.getResources().getDrawable(getDefaultAvatarResourceId(msisdn, rounded));
 	}
 
 	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn)
@@ -359,140 +360,36 @@ public class Utils
 
 	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn, boolean rounded)
 	{
-		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getId(msisdn, rounded)));
+		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getDefaultAvatarResourceId(msisdn, rounded)));
 	}
 
-	public static int getId(String msisdn, boolean rounded)
+	public static int getDefaultAvatarResourceId(String msisdn, boolean rounded)
 	{
-		if (isGroupConversation(msisdn))
-		{
-			int count = 6;
-			int id;
-			switch (iconHash(msisdn) % count)
-			{
-			case 0:
-				id = rounded ? R.drawable.ic_group_avatar1_rounded : R.drawable.ic_group_avatar1;
-				break;
-			case 1:
-				id = rounded ? R.drawable.ic_group_avatar2_rounded : R.drawable.ic_group_avatar2;
-				break;
-			case 2:
-				id = rounded ? R.drawable.ic_group_avatar4_rounded : R.drawable.ic_group_avatar4;
-				break;
-			case 3:
-				id = rounded ? R.drawable.ic_group_avatar5_rounded : R.drawable.ic_group_avatar5;
-				break;
-			case 4:
-				id = rounded ? R.drawable.ic_group_avatar6_rounded : R.drawable.ic_group_avatar6;
-				break;
-			case 5:
-				id = rounded ? R.drawable.ic_group_avatar7_rounded : R.drawable.ic_group_avatar7;
-				break;
-			default:
-				id = rounded ? R.drawable.ic_group_avatar1_rounded : R.drawable.ic_group_avatar1;
-				break;
-			}
-			return id;
-		}
-		int count = 7;
+		int count = 5;
 		int id;
 		switch (iconHash(msisdn) % count)
 		{
 		case 0:
-			id = rounded ? R.drawable.ic_avatar1_rounded : R.drawable.ic_avatar1;
+			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
 			break;
 		case 1:
-			id = rounded ? R.drawable.ic_avatar2_rounded : R.drawable.ic_avatar2;
+			id = rounded ? R.drawable.avatar_02_rounded : R.drawable.avatar_02;
 			break;
 		case 2:
-			id = rounded ? R.drawable.ic_avatar3_rounded : R.drawable.ic_avatar3;
+			id = rounded ? R.drawable.avatar_03_rounded : R.drawable.avatar_03;
 			break;
 		case 3:
-			id = rounded ? R.drawable.ic_avatar4_rounded : R.drawable.ic_avatar4;
+			id = rounded ? R.drawable.avatar_04_rounded : R.drawable.avatar_04;
 			break;
 		case 4:
-			id = rounded ? R.drawable.ic_avatar5_rounded : R.drawable.ic_avatar5;
-			break;
-		case 5:
-			id = rounded ? R.drawable.ic_avatar6_rounded : R.drawable.ic_avatar6;
-			break;
-		case 6:
-			id = rounded ? R.drawable.ic_avatar7_rounded : R.drawable.ic_avatar7;
+			id = rounded ? R.drawable.avatar_05_rounded : R.drawable.avatar_05;
 			break;
 		default:
-			id = rounded ? R.drawable.ic_avatar1_rounded : R.drawable.ic_avatar1;
+			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
 			break;
 		}
 
 		return id;
-	}
-
-	public static String getDefaultAvatarServerName(String msisdn)
-	{
-		String name;
-		int count = 7;
-		int id = iconHash(msisdn) % count;
-		if (isGroupConversation(msisdn))
-		{
-			switch (id)
-			{
-			case 0:
-				name = "GreenPeople";
-				break;
-			case 1:
-				name = "RedPeople";
-				break;
-			case 2:
-				name = "BluePeople";
-				break;
-			case 3:
-				name = "CoffeePeople";
-				break;
-			case 4:
-				name = "EarthyPeople";
-				break;
-			case 5:
-				name = "PinkPeople";
-				break;
-			case 6:
-				name = "TealPeople";
-				break;
-			default:
-				name = "GreenPeople";
-				break;
-			}
-		}
-		else
-		{
-			switch (id)
-			{
-			case 0:
-				name = "Beach";
-				break;
-			case 1:
-				name = "Candy";
-				break;
-			case 2:
-				name = "Cocktail";
-				break;
-			case 3:
-				name = "Coffee";
-				break;
-			case 4:
-				name = "Digital";
-				break;
-			case 5:
-				name = "Sneakers";
-				break;
-			case 6:
-				name = "Space";
-				break;
-			default:
-				name = "Beach";
-				break;
-			}
-		}
-		return name + ".jpg";
 	}
 
 	/** Create a File for saving an image or video */
@@ -516,7 +413,7 @@ public class Utils
 		{
 			if (!mediaStorageDir.mkdirs())
 			{
-				Log.d("Hike", "failed to create directory");
+				Logger.d("Hike", "failed to create directory");
 				return null;
 			}
 		}
@@ -762,7 +659,7 @@ public class Utils
 		StringBuilder sb = new StringBuilder(msisdn);
 		sb.insert(msisdn.length() - 4, '-');
 		sb.insert(msisdn.length() - 7, '-');
-		Log.d("Fomat MSISD", "Fomatted number is:" + sb.toString());
+		Logger.d("Fomat MSISD", "Fomatted number is:" + sb.toString());
 
 		return sb.toString();
 	}
@@ -806,7 +703,7 @@ public class Utils
 			do
 			{
 				contacts.add(matcher.group().substring(1, matcher.group().length() - 1));
-				Log.d("Utils", "Adding: " + matcher.group().substring(1, matcher.group().length() - 1));
+				Logger.d("Utils", "Adding: " + matcher.group().substring(1, matcher.group().length() - 1));
 			}
 			while (matcher.find(matcher.end()));
 		}
@@ -946,12 +843,12 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.e("Utils", "Invalid JSON", e);
+			Logger.e("Utils", "Invalid JSON", e);
 			return null;
 		}
 		catch (NameNotFoundException e)
 		{
-			Log.e("Utils", "Package not found", e);
+			Logger.e("Utils", "Package not found", e);
 			return null;
 		}
 
@@ -976,7 +873,7 @@ public class Utils
 			{
 				for (String key : keys.keySet())
 				{
-					Log.d("Utils", "Getting keys: " + key);
+					Logger.d("Utils", "Getting keys: " + key);
 					data.put(key, prefs.getLong(key, 0));
 					editor.remove(key);
 				}
@@ -989,7 +886,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.e("Utils", "Invalid JSON", e);
+			Logger.e("Utils", "Invalid JSON", e);
 		}
 
 		return obj;
@@ -1118,7 +1015,7 @@ public class Utils
 		}
 		catch (NameNotFoundException e)
 		{
-			Log.e("Utils", "Package not found...", e);
+			Logger.e("Utils", "Package not found...", e);
 			return false;
 		}
 	}
@@ -1170,7 +1067,7 @@ public class Utils
 		{
 			if (context == null)
 			{
-				Log.e("HikeService", "Hike service is null!!");
+				Logger.e("HikeService", "Hike service is null!!");
 				return false;
 			}
 			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -1190,7 +1087,7 @@ public class Utils
 	 */
 	public static void requestAccountInfo(boolean upgrade, boolean sendbot)
 	{
-		Log.d("Utils", "Requesting account info");
+		Logger.d("Utils", "Requesting account info");
 		JSONObject requestAccountInfo = new JSONObject();
 		try
 		{
@@ -1205,7 +1102,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.e("Utils", "Invalid JSON", e);
+			Logger.e("Utils", "Invalid JSON", e);
 		}
 	}
 
@@ -1242,7 +1139,7 @@ public class Utils
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "Excecption while copying the file", e);
+			Logger.e("Utils", "Excecption while copying the file", e);
 		}
 		finally
 		{
@@ -1254,7 +1151,7 @@ public class Utils
 				}
 				catch (IOException e)
 				{
-					Log.e("Utils", "Excecption while closing the stream", e);
+					Logger.e("Utils", "Excecption while closing the stream", e);
 				}
 			}
 		}
@@ -1272,7 +1169,7 @@ public class Utils
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "Excecption while reading the file " + file.getName(), e);
+			Logger.e("Utils", "Excecption while reading the file " + file.getName(), e);
 			return null;
 		}
 		finally
@@ -1285,7 +1182,7 @@ public class Utils
 				}
 				catch (IOException e)
 				{
-					Log.e("Utils", "Excecption while closing the file " + file.getName(), e);
+					Logger.e("Utils", "Excecption while closing the file " + file.getName(), e);
 				}
 			}
 		}
@@ -1346,7 +1243,7 @@ public class Utils
 		int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail.getWidth() - dimensionLimit) / 2) : 0;
 		int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail.getHeight() - dimensionLimit) / 2) : 0;
 
-		Log.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
+		Logger.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
 		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
 
 		if (squareThumbnail != thumbnail)
@@ -1481,12 +1378,12 @@ public class Utils
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("Utils", "File not found while copying", e);
+			Logger.e("Utils", "File not found while copying", e);
 			return false;
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "Error while reading/writing/closing file", e);
+			Logger.e("Utils", "Error while reading/writing/closing file", e);
 			return false;
 		}
 	}
@@ -1501,7 +1398,7 @@ public class Utils
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "Error while opening file", e);
+			Logger.e("Utils", "Error while opening file", e);
 			return null;
 		}
 	}
@@ -1540,7 +1437,7 @@ public class Utils
 			}
 			catch (OutOfMemoryError e)
 			{
-				Log.e("Utils", "Out of memory", e);
+				Logger.e("Utils", "Out of memory", e);
 			}
 		}
 		return b;
@@ -1548,7 +1445,7 @@ public class Utils
 
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
 	{
-		Log.d("SSL", "Switching SSL on? " + ssl);
+		Logger.d("SSL", "Switching SSL on? " + ssl);
 
 		AccountUtils.ssl = ssl;
 		AccountUtils.mClient = null;
@@ -1580,12 +1477,12 @@ public class Utils
 		AccountUtils.rewardsUrl = httpString + (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
 		AccountUtils.gamesUrl = httpString + (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
-		Log.d("SSL", "Base: " + AccountUtils.base);
-		Log.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
-		Log.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
-		Log.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
-		Log.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
-		Log.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
+		Logger.d("SSL", "Base: " + AccountUtils.base);
+		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
+		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
+		Logger.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
+		Logger.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
+		Logger.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
 	}
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
@@ -1678,7 +1575,7 @@ public class Utils
 			}
 			catch (NullPointerException e)
 			{
-				Log.d("Send invite", "NPE while trying to send SMS", e);
+				Logger.d("Send invite", "NPE while trying to send SMS", e);
 			}
 		}
 
@@ -1812,7 +1709,7 @@ public class Utils
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "IOException", e);
+			Logger.e("Utils", "IOException", e);
 			return "";
 		}
 	}
@@ -1825,14 +1722,14 @@ public class Utils
 
 		if (currentFiles == null)
 		{
-			Log.d("Utils", "File did not exist. Will create a new one");
+			Logger.d("Utils", "File did not exist. Will create a new one");
 			currentFiles = new JSONObject();
 		}
 		FileOutputStream fileOutputStream = null;
 		ByteArrayInputStream byteArrayInputStream = null;
 		try
 		{
-			Log.d("Utils", "Adding data : " + "File Name: " + fileName + " File Key: " + fileKey);
+			Logger.d("Utils", "Adding data : " + "File Name: " + fileName + " File Key: " + fileKey);
 			currentFiles.put(fileName, fileKey);
 			fileOutputStream = new FileOutputStream(hikeFileList);
 			byteArrayInputStream = new ByteArrayInputStream(currentFiles.toString().getBytes("UTF-8"));
@@ -1846,19 +1743,19 @@ public class Utils
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("Utils", "File not found", e);
+			Logger.e("Utils", "File not found", e);
 		}
 		catch (JSONException e)
 		{
-			Log.e("Utils", "Invalid JSON", e);
+			Logger.e("Utils", "Invalid JSON", e);
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.e("Utils", "Unsupported Encoding Exception", e);
+			Logger.e("Utils", "Unsupported Encoding Exception", e);
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "IOException", e);
+			Logger.e("Utils", "IOException", e);
 		}
 		finally
 		{
@@ -1870,7 +1767,7 @@ public class Utils
 				}
 				catch (IOException e)
 				{
-					Log.e("Utils", "Exception while closing the output stream", e);
+					Logger.e("Utils", "Exception while closing the output stream", e);
 				}
 			}
 		}
@@ -1882,7 +1779,7 @@ public class Utils
 		JSONObject currentFiles = getHikeFileListData(hikeFileList);
 		if (currentFiles == null || !currentFiles.has(orgFileName))
 		{
-			Log.d("Utils", "File with this name does not exist");
+			Logger.d("Utils", "File with this name does not exist");
 			return orgFileName;
 		}
 
@@ -1892,7 +1789,7 @@ public class Utils
 
 		String currentNameToCheck = orgFileName;
 		int i = 1;
-		Log.d("Utils", "File name: " + newFileName.toString() + " Extension: " + fileExtension);
+		Logger.d("Utils", "File name: " + newFileName.toString() + " Extension: " + fileExtension);
 		while (true)
 		{
 			String existingFileKey = currentFiles.optString(currentNameToCheck);
@@ -1906,7 +1803,7 @@ public class Utils
 				currentNameToCheck = newFileName + fileExtension;
 			}
 		}
-		Log.d("Utils", "NewFile name: " + newFileName.toString() + " Extension: " + fileExtension);
+		Logger.d("Utils", "NewFile name: " + newFileName.toString() + " Extension: " + fileExtension);
 		newFileName.append(fileExtension);
 		return newFileName.toString();
 	}
@@ -1915,7 +1812,7 @@ public class Utils
 	{
 		File hikeFileList = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT, HikeConstants.HIKE_FILE_LIST_NAME);
 
-		Log.d("Utils", "Writing data: " + data.toString());
+		Logger.d("Utils", "Writing data: " + data.toString());
 
 		FileOutputStream fileOutputStream = null;
 		ByteArrayInputStream byteArrayInputStream = null;
@@ -1933,15 +1830,15 @@ public class Utils
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("Utils", "File not found", e);
+			Logger.e("Utils", "File not found", e);
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.e("Utils", "Unsupported Encoding Exception", e);
+			Logger.e("Utils", "Unsupported Encoding Exception", e);
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "IOException", e);
+			Logger.e("Utils", "IOException", e);
 		}
 		finally
 		{
@@ -1953,7 +1850,7 @@ public class Utils
 				}
 				catch (IOException e)
 				{
-					Log.e("Utils", "Exception while closing the output stream", e);
+					Logger.e("Utils", "Exception while closing the output stream", e);
 				}
 			}
 		}
@@ -1984,21 +1881,21 @@ public class Utils
 			}
 
 			currentFiles = new JSONObject(builder.toString());
-			Log.d("Utils", "File found: Current data: " + builder.toString());
+			Logger.d("Utils", "File found: Current data: " + builder.toString());
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("Utils", "File not found", e);
+			Logger.e("Utils", "File not found", e);
 			hikeFileList.delete();
 		}
 		catch (IOException e)
 		{
-			Log.e("Utils", "IOException", e);
+			Logger.e("Utils", "IOException", e);
 			hikeFileList.delete();
 		}
 		catch (JSONException e)
 		{
-			Log.e("Utils", "Invalid JSON", e);
+			Logger.e("Utils", "Invalid JSON", e);
 			hikeFileList.delete();
 		}
 		finally
@@ -2011,7 +1908,7 @@ public class Utils
 				}
 				catch (IOException e)
 				{
-					Log.e("Utils", "Exception while closing the input stream", e);
+					Logger.e("Utils", "Exception while closing the input stream", e);
 				}
 			}
 		}
@@ -2360,7 +2257,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("Locale", "Invalid JSON", e);
+			Logger.w("Locale", "Invalid JSON", e);
 		}
 	}
 
@@ -2461,7 +2358,7 @@ public class Utils
 	public static int getResolutionId()
 	{
 		int densityMultiplierX100 = (int) (densityMultiplier * 100);
-		Log.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
+		Logger.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
 
 		if (densityMultiplierX100 > 200)
 		{
@@ -2563,7 +2460,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("AppState", "Invalid json", e);
+			Logger.w("AppState", "Invalid json", e);
 		}
 
 	}
@@ -2763,10 +2660,6 @@ public class Utils
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(activity.getString(R.string.status_tip, name));
 			break;
-		case WALKIE_TALKIE:
-			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
-			tipText.setText(R.string.walkie_talkie_tip);
-			break;
 		case CHAT_BG_FTUE:
 			container.setBackgroundResource(R.drawable.bg_tip_top_right);
 			tipText.setText(R.string.chat_bg_ftue_tip);
@@ -2807,9 +2700,6 @@ public class Utils
 			break;
 		case STATUS:
 			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case WALKIE_TALKIE:
-			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
 			break;
 		case CHAT_BG_FTUE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
@@ -2885,6 +2775,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
@@ -2893,7 +2784,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LogEvent", e);
+			Logger.w("LogEvent", e);
 		}
 	}
 
@@ -2913,7 +2804,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LogEvent", e);
+			Logger.w("LogEvent", e);
 		}
 
 	}
@@ -2934,7 +2825,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LogEvent", e);
+			Logger.w("LogEvent", e);
 		}
 
 	}
@@ -2955,7 +2846,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LogEvent", e);
+			Logger.w("LogEvent", e);
 		}
 
 	}
@@ -2976,7 +2867,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LogEvent", e);
+			Logger.w("LogEvent", e);
 		}
 
 	}
@@ -3010,7 +2901,7 @@ public class Utils
 		}
 		catch (Exception e)
 		{
-			Log.e("LogEvent", "Error converting result " + e.toString());
+			Logger.e("LogEvent", "Error converting result " + e.toString());
 		}
 
 		// try parse the string to a JSON object
@@ -3020,7 +2911,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.e("LogEvent", "Error parsing data " + e.toString());
+			Logger.e("LogEvent", "Error parsing data " + e.toString());
 		}
 
 		return jObject;
@@ -3255,8 +3146,10 @@ public class Utils
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
-		// Drawable d = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
-		Bitmap bitmap = HikeMessengerApp.getLruCache().getIconFromCache(conv.getMsisdn()).getBitmap();
+
+		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
+
+		Bitmap bitmap = Utils.drawableToBitmap(avatarDrawable);
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
@@ -3378,7 +3271,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LE", "Invalid json");
+			Logger.w("LE", "Invalid json");
 		}
 	}
 
@@ -3402,7 +3295,7 @@ public class Utils
 		}
 		catch (JSONException e)
 		{
-			Log.w("LE", "Invalid json");
+			Logger.w("LE", "Invalid json");
 		}
 	}
 
@@ -3435,9 +3328,8 @@ public class Utils
 			/*
 			 * If this is the first category, then the sticker are a part of the app bundle itself
 			 */
-			if (sticker.getStickerIndex() != -1)
+			if (sticker.isDefaultSticker())
 			{
-
 				int resourceId = 0;
 
 				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
@@ -3729,7 +3621,7 @@ public class Utils
 			}
 			catch (IOException e)
 			{
-				Log.d("NoMedia", "failed to make nomedia file");
+				Logger.d("NoMedia", "failed to make nomedia file");
 			}
 		}
 	}
@@ -3834,5 +3726,24 @@ public class Utils
 			return true;
 		}
 		return false;
+	}
+
+	public static void toggleActionBarElementsEnable(View doneBtn, ImageView arrow, TextView postText, boolean enabled)
+	{
+		doneBtn.setEnabled(enabled);
+		arrow.setEnabled(enabled);
+		postText.setEnabled(enabled);
+	}
+
+	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn)
+	{
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+		if (drawable == null)
+		{
+			Drawable background = context.getResources().getDrawable(Utils.getDefaultAvatarResourceId(msisdn, false));
+			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
+		}
+		return drawable;
 	}
 }

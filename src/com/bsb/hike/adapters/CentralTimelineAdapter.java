@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +39,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -92,6 +92,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		this.userMsisdn = userMsisdn;
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
 		this.iconImageLoader = new IconLoader(context, mIconImageSize);
+		this.iconImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
 	}
@@ -257,8 +258,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			}
 			else
 			{
-				iconImageLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.avatar, true);
-				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
+				setAvatar(statusMessage.getMsisdn(), viewHolder.avatar);
 			}
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 
@@ -402,7 +402,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			iconImageLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.avatar, true);
+			setAvatar(statusMessage.getMsisdn(), viewHolder.avatar);
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 			viewHolder.mainInfo.setText(R.string.status_profile_pic_notification);
 
@@ -445,7 +445,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView addBtn = (TextView) parentView.findViewById(R.id.invite_btn);
 
-				iconImageLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+				setAvatar(contactInfo.getMsisdn(), avatar);
+
 				name.setText(contactInfo.getName());
 
 				addBtn.setTag(contactInfo);
@@ -478,6 +479,11 @@ public class CentralTimelineAdapter extends BaseAdapter
 		}
 
 		return convertView;
+	}
+
+	private void setAvatar(String msisdn, ImageView avatar)
+	{
+		iconImageLoader.loadImage(msisdn, true, avatar, true);
 	}
 
 	private void addMoods(ViewGroup container, int[] moods)
@@ -573,7 +579,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				}
 				catch (ActivityNotFoundException e)
 				{
-					Log.e(CentralTimelineAdapter.class.getSimpleName(), "Unable to open market");
+					Logger.e(CentralTimelineAdapter.class.getSimpleName(), "Unable to open market");
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.GAMING_PROTIP_DOWNLOADED, protip);
 			}

@@ -19,7 +19,6 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +57,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, Runnable
@@ -117,6 +117,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			super(context, textViewResourceId, objects);
 			iconLoader = new IconLoader(context, 180);
+			iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		}
 
 		@Override
@@ -133,7 +134,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ImageView avatarFrame = (ImageView) convertView.findViewById(R.id.avatar_frame);
 			TextView contactName = (TextView) convertView.findViewById(R.id.name);
 
-			avatarFrame.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_ftue_hike : R.drawable.frame_avatar_ftue_sms);
+			avatarFrame.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_highlight : R.drawable.frame_avatar_highlight_green);
 			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage, true);
 			// avatarImage.setImageDrawable(IconCacheManager.getInstance()
 			// .getIconForMSISDN(contactInfo.getMsisdn(), true));
@@ -148,7 +149,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP };
 
 	private ConversationsAdapter mAdapter;
 
@@ -271,10 +272,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
 		Conversation conv = (Conversation) mAdapter.getItem(position);
+
+		/*
+		 * The item will be null only for group chat tip.
+		 */
 		if (conv == null)
 		{
+			((HomeActivity) getActivity()).showOverFlowMenu();
+			removeGroupChatTip(conv);
 			return;
 		}
+
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
 		startActivity(intent);
 
@@ -298,6 +306,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		final Conversation conv = (Conversation) mAdapter.getItem(position);
+		if (conv == null)
+		{
+			return false;
+		}
 
 		optionsList.add(getString(R.string.shortcut));
 		optionsList.add(getString(R.string.email_conversation));
@@ -362,7 +374,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private void fetchConversations()
 	{
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-		List<Conversation> conversations = db.getConversations();
+		List<Conversation> conversations = new ArrayList<Conversation>();
+
+		/*
+		 * Add item for group chat tip.
+		 */
+		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
+		{
+			conversations.add(null);
+		}
+
+		conversations.addAll(db.getConversations());
 
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
 		mConversationsAdded = new HashSet<String>();
@@ -372,7 +394,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 */
 		for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
 		{
-			Conversation conv = (Conversation) iter.next();
+			Object object = iter.next();
+			if (object == null)
+			{
+				continue;
+			}
+			Conversation conv = (Conversation) object;
 			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
 			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
 			{
@@ -407,7 +434,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		if (conv == null)
 		{
-			Log.d(getClass().getSimpleName(), "Invalid conversation");
+			Logger.d(getClass().getSimpleName(), "Invalid conversation");
 			return;
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
@@ -430,13 +457,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
 		if (conversation == null)
 		{
-			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
+			Logger.d(getClass().getSimpleName(), "Conversation Does not exist");
 			return;
 		}
 		List<ConvMessage> messageList = conversation.getMessages();
 		if (messageList.isEmpty())
 		{
-			Log.d(getClass().getSimpleName(), "Conversation is empty");
+			Logger.d(getClass().getSimpleName(), "Conversation is empty");
 			return;
 		}
 		ConvMessage message;
@@ -485,10 +512,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			return;
 		}
-		Log.d(getClass().getSimpleName(), "Event received: " + type);
+		Logger.d(getClass().getSimpleName(), "Event received: " + type);
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
 		{
-			Log.d(getClass().getSimpleName(), "New msg event sent or received.");
+			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
 			ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
@@ -617,7 +644,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				conversation.setContactName(HikeMessengerApp.hikeBotNamesMap.get(conversation.getMsisdn()));
 			}
-			Log.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (conversation instanceof GroupConversation));
+			Logger.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (conversation instanceof GroupConversation));
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
 			if (conversation.getMessages().isEmpty() && !(conversation instanceof GroupConversation))
 			{
@@ -877,6 +904,46 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			String msisdn = (String) object;
 			clearConversation(msisdn);
 		}
+		else if (HikePubSub.DISMISS_GROUP_CHAT_TIP.equals(type))
+		{
+			if (mAdapter == null || mAdapter.isEmpty())
+			{
+				return;
+			}
+			final Conversation conversation = mAdapter.getItem(0);
+			if (conversation != null)
+			{
+				return;
+			}
+
+			if (getActivity() == null)
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeGroupChatTip(conversation);
+				}
+			});
+
+		}
+	}
+
+	private void removeGroupChatTip(Conversation conversation)
+	{
+		/*
+		 * If conversation is null, it is the group chat tip
+		 */
+		mAdapter.remove(conversation);
+		ConversationFragment.this.run();
+
+		Editor editor = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, true);
+		editor.commit();
 	}
 
 	private void clearConversation(String msisdn)
@@ -949,7 +1016,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			mAdapter.add(conv);
 		}
 		conv.addMessage(convMessage);
-		Log.d(getClass().getSimpleName(), "new message is " + convMessage);
+		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 		mAdapter.sort(mConversationsComparator);
 
 		if (messageRefreshHandler == null)

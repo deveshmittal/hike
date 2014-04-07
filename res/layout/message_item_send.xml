@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:minHeight="30dp" 
     android:paddingBottom="2dp"
-    android:descendantFocusability="blocksDescendants">
+    android:descendantFocusability="blocksDescendants" xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike">
 
     <LinearLayout
 		android:layout_marginBottom="5dp"
@@ -79,12 +79,46 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_download_failed"
                 android:visibility="invisible" />
-
+            
+            <RelativeLayout
+                android:id="@+id/circular_bg_ext"
+                android:layout_width="46dp"
+	            android:layout_height="46dp"
+	            android:background="@drawable/bg_ft_progress"
+	            android:layout_centerVertical="true"
+	            android:layout_marginRight="13dp"
+	            android:gravity="center"
+	            android:visibility="gone" >
+	            <ProgressBar
+		            android:id="@+id/initializing_ext"
+		            android:layout_width="42dp"
+		            android:layout_height="42dp"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner"
+				    android:layout_centerInParent="true" />
+	            <com.bsb.hike.view.HoloCircularProgress
+	               android:id="@+id/circular_progress_ext"
+	               android:layout_width="46dp"
+	               android:layout_height="46dp"
+	               app:progress_color="@color/white_85"
+	               app:progress_background_color="@color/white_45"
+	               android:gravity="center"
+	               app:progress="0.4"
+	               app:stroke_width="3dp"
+	               app:marker_visible="false"
+	               app:thumb_visible="false"
+	               android:layout_centerInParent="true" />
+	            <ImageView
+	                android:id="@+id/ft_action_ext"
+	                android:layout_height="30dp"
+	                android:layout_width="30dp"
+	               	android:layout_centerInParent="true" />
+            </RelativeLayout>
+          
             <RelativeLayout
                 android:id="@+id/sent_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
+                android:layout_toRightOf="@id/circular_bg_ext"
                 android:background="@drawable/ic_bubble_green_selector" >
 
                 <LinearLayout
@@ -92,7 +126,9 @@
                     android:layout_width="wrap_content"
                 	android:layout_height="wrap_content"
                 	android:gravity="center_vertical"
-                	android:orientation="horizontal" >
+                	android:orientation="horizontal"
+                	android:layout_marginLeft="2dp"
+                	android:layout_marginRight="2dp" >
                 <RelativeLayout 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
@@ -106,160 +142,136 @@
                         android:scaleType="centerInside"
                         android:visibility="gone" />
                     
+                    <ImageView
+                        android:id="@+id/filmstrip_left"
+                        android:layout_height="wrap_content"
+                        android:layout_width="10dp"
+                        android:layout_alignLeft="@id/file_thumb"
+                        android:layout_alignTop="@id/file_thumb" 
+                        android:layout_alignBottom="@id/file_thumb"
+                        android:src="@drawable/filmstrip"
+                        android:scaleType="fitXY"
+                        android:visibility="gone" />
+                    
+                    <ImageView
+                        android:id="@+id/filmstrip_right"
+                        android:layout_height="wrap_content"
+                        android:layout_width="10dp"
+                        android:layout_alignRight="@id/file_thumb"
+                        android:layout_alignTop="@id/file_thumb" 
+                        android:layout_alignBottom="@id/file_thumb"
+                        android:src="@drawable/filmstrip"
+                        android:scaleType="fitXY"
+                        android:visibility="gone" />
+                    
                     <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/file_extension"
 	                    android:layout_width="@dimen/file_message_item_size"
-	                    android:layout_height="@dimen/file_message_item_size"
-	                    android:layout_gravity="center"
-	                    android:background="@color/file_message_item_bg"
+	                    android:layout_height="wrap_content"
+	                    android:layout_alignLeft="@id/file_thumb"
+	                    android:layout_alignTop="@id/file_thumb"
+	                    android:layout_marginTop="17dp"
 	                    android:gravity="center"
 	                    android:singleLine="true"
-	                    android:text="PNG"
+	                    android:text=".pdf"
 	                    android:textColor="@color/white"
-	                    android:textSize="24sp"
+	                    android:textSize="15sp"
 	                    android:textStyle="bold"
 	                    android:visibility="gone" />
+                    
+                     <RelativeLayout
+		                android:id="@+id/circular_bg"
+		                android:layout_width="56dp"
+			            android:layout_height="56dp"
+			            android:background="@drawable/bg_ft_progress"
+			            android:gravity="center"
+			            android:layout_centerInParent="true"
+			            android:visibility="gone" >
+			            <ProgressBar
+				            android:id="@+id/initializing"
+				            android:layout_width="52dp"
+				            android:layout_height="52dp"
+				            android:indeterminateDrawable="@drawable/circular_double_spinner"
+				            android:layout_centerInParent="true" />
+			            <com.bsb.hike.view.HoloCircularProgress
+			               android:id="@+id/circular_progress"
+			               android:layout_width="56dp"
+			               android:layout_height="56dp"
+			               app:progress_color="@color/white_85"
+			               app:progress_background_color="@color/white_45"
+			               android:gravity="center"
+			               app:progress="0.4"
+			               app:stroke_width="3dp"
+			               app:marker_visible="false"
+			               app:thumb_visible="false"
+			               android:layout_centerInParent="true" />
+			            <ImageView
+			                android:id="@+id/ft_action"
+			                android:layout_height="40dp"
+			                android:layout_width="40dp"
+			                android:layout_centerInParent="true" />
+            			</RelativeLayout>
 
-                    <ImageView
-                        android:id="@+id/file_ic"
-                        android:layout_width="47dp"
-                        android:layout_height="39dp"
-                        android:layout_gravity="center"
-                        android:background="@drawable/bg_blue_btn"
-                        android:scaleType="centerInside"
-                        android:visibility="gone" />
-
-                    <RelativeLayout
-                        android:id="@+id/overlayBg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignLeft="@id/file_thumb"
-                        android:layout_alignParentBottom="true"
-                        android:layout_alignRight="@id/file_thumb"
-                        android:layout_gravity="bottom"
-                        android:background="#6E000000"
-                        android:padding="4dp"
-                        android:visibility="gone" >
-                        
-                        <ImageView
-			                android:id="@+id/message_status_ft"
-			                android:layout_width="21dp"
-			                android:layout_height="wrap_content"
-			                android:layout_alignParentRight="true"
-                           	android:layout_centerVertical="true"
-			                android:layout_marginLeft="2dp"
-			                android:visibility="gone" />
-				            
+					<LinearLayout
+			           	android:id="@+id/message_time_status_ft"
+			            android:layout_width="wrap_content"
+			            android:layout_height="wrap_content"
+			            android:layout_alignRight="@id/file_thumb"
+			            android:layout_alignBottom="@id/file_thumb"
+			            android:layout_marginRight="4dp"
+			            android:layout_marginBottom="3dp"
+			            android:paddingLeft="5dp"
+			            android:paddingRight="5dp"
+			            android:background="@drawable/bg_msg_time_status"
+			            android:orientation="horizontal"
+			            android:gravity="center"
+			            android:visibility="gone" >
+			                
 			            <com.bsb.hike.view.CustomFontTextView
 			                android:id="@+id/message_time_ft"
 			                android:layout_width="wrap_content"
 			                android:layout_height="wrap_content"
 			      	        android:text="00:00"
-			                android:textColor="@color/white_80"
+			      	        android:textColor="@color/white_85"
 			                android:textSize="12sp"
-			                android:layout_centerVertical="true"
-			                android:layout_toLeftOf="@id/message_status_ft"
+			                android:visibility="gone"
 			                android:textStyle="italic" />
-                        
-                        <ProgressBar
-				            android:id="@+id/initializing"
-				            android:layout_width="20dp"
-				            android:layout_height="20dp"
-				            android:layout_alignParentRight="true"
-				            android:layout_marginRight="6dp"
-                            android:layout_centerVertical="true"
-				            android:indeterminateDrawable="@drawable/custom_progress_bar_drawable"
-				            android:visibility="gone" />
-                        
-                        <ImageView
-                            android:id="@+id/ft_action_button"
-                            android:layout_width="40dp"
-                            android:layout_height="32dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/ic_pause_ftr"
-                            android:padding="2dp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_alignParentLeft="true"
-                            android:gravity="left|center_vertical"
-                            android:layout_toLeftOf="@id/ft_action_button" >
-                        
-                        <ImageView
-                            android:id="@+id/audio_rec_ic"
-                            android:layout_width="15dp"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/ic_default_audio_r"
-                            android:scaleType="center"
-                            android:gravity="center_vertical"
-                            android:visibility="gone" />
-                        
-                       <LinearLayout
-                            android:id="@+id/file_detail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="8dp"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical" >
-
-                            <com.bsb.hike.view.CustomFontTextView
-                                android:id="@+id/file_type"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#00000000"
-                                android:gravity="left"
-                                android:textColor="@color/white"
-                                android:textSize="10dp"
-                                android:textStyle="bold"
-                                android:visibility="gone" />
-
-                            <!-- <com.bsb.hike.view.CustomFontTextView
-                                android:id="@+id/file_size"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#00000000"
-                                android:gravity="left"
-                                android:layout_marginTop="4dp"
-                                android:textColor="@color/white"
-                                android:textSize="10dp"
-                                android:visibility="gone" /> -->
-
-                            <com.bsb.hike.view.CustomFontTextView
-                                android:id="@+id/data_transferred"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#00000000"
-                                android:ellipsize="end"
-                                android:gravity="left"
-                                android:maxLines="2"
-                                android:text=""
-                                android:textColor="@color/white"
-                                android:textSize="9dp"
-                                android:visibility="gone" />
-
-                            <com.bsb.hike.view.CustomProgressBar
-                                android:id="@+id/pbTransfer"
-                                style="?android:attr/progressBarStyleHorizontal"
-                                android:layout_width="match_parent"
-                                android:layout_height="2dp"
-                                android:layout_marginTop="6dp"
-                                android:progressDrawable="@drawable/file_transfer_progress_bar"
-                                android:visibility="gone" />
-                           
-                        </LinearLayout>
-                        </LinearLayout>
-				</RelativeLayout>
+			            
+			            <ImageView
+			                android:id="@+id/message_status_ft"
+			                android:layout_width="21dp"
+			                android:layout_height="wrap_content"
+			                android:layout_marginLeft="2dp"
+			                android:visibility="gone" />
+	            
+        			</LinearLayout>
+        			
+					<LinearLayout
+			           	android:id="@+id/message_size_ft"
+			            android:layout_width="wrap_content"
+			            android:layout_height="wrap_content"
+			            android:layout_alignLeft="@id/file_thumb"
+			            android:layout_alignBottom="@id/file_thumb"
+			            android:layout_marginLeft="4dp"
+			            android:layout_marginBottom="3dp"
+			            android:paddingLeft="5dp"
+			            android:paddingRight="5dp"
+			            android:background="@drawable/bg_msg_time_status"
+			            android:orientation="horizontal"
+			            android:gravity="center"
+			            android:visibility="gone" >
+			                
+			            <com.bsb.hike.view.CustomFontTextView
+			                android:id="@+id/file_size"
+			                android:layout_width="wrap_content"
+			                android:layout_height="wrap_content"
+			      	        android:text="0B"
+			      	        android:textColor="@color/white_85"
+			                android:textSize="12sp"
+			                android:textStyle="italic" />
+        			</LinearLayout>
 				
-               <!--  <com.bsb.hike.view.CustomProgress 
-	                 android:id="@+id/audio_rec_progress"
-	                 android:layout_gravity="center"
-                     android:layout_height="32dp"
-                     android:layout_width="108dp"
-	                 android:visibility="gone" /> -->
-                
-                <ProgressBar
+                <!-- <ProgressBar
                     android:id="@+id/audio_rec_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_gravity="center"
@@ -283,10 +295,40 @@
                     android:textColor="@color/white"
                     android:textSize="10dp"
                     android:textStyle="bold"
-                    android:visibility="gone" />
+                    android:visibility="gone" /> -->
+                
+                	<LinearLayout
+                    android:id="@+id/file_details"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="left|top"
+                    android:padding="6dp"
+                    android:layout_toRightOf="@id/file_thumb"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone" >
+                    
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/file_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/file_size_ext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/file_size"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                	</LinearLayout>
                 
                 </RelativeLayout>
-
+                
                 <ImageView
                     android:id="@+id/loading_thumb"
                     android:layout_width="wrap_content"
@@ -294,12 +336,6 @@
                     android:layout_gravity="center"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_loading_img"
-                    android:visibility="gone" />
-
-                <View
-                    android:id="@+id/margin_view"
-                    android:layout_width="5dp"
-                    android:layout_height="1dp"
                     android:visibility="gone" />
 
                 <com.bsb.hike.view.CustomFontTextView
@@ -329,22 +365,11 @@
                     android:textColor="@color/chat_color"
                     android:textSize="16sp" />
                 
-                  <ImageView
-                    android:id="@+id/btn_media_action"
-                    android:layout_width="40dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="4dp"
-                    android:background="@drawable/bg_audio_btn"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_play_audio"
-                    android:visibility="gone" />
-
                 <ImageView
                     android:id="@+id/poke_sent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@id/msg_status_indicator"
+                    android:layout_toRightOf="@id/circular_bg_ext"
                     android:gravity="center_vertical"
                     android:src="@drawable/ic_nudge_hike_sent"
                     android:layout_marginTop="1dp"
@@ -359,7 +384,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/sent_message_inner_container"
-                android:layout_marginRight="5dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|right" >
                 
@@ -368,9 +392,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_40"
+                android:textColor="@color/black_45"
                 android:textSize="12sp"
-                android:textStyle="italic" />
+                android:textStyle="italic"
+                android:visibility="gone" />
             
             <ImageView
                 android:id="@+id/message_status"
@@ -388,7 +413,6 @@
                 android:layout_below="@id/sent_message_inner_container"
                 android:layout_alignRight="@id/sent_message_inner_container"
                 android:layout_marginTop="3dp"
-                android:layout_marginRight="5dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|right" >
                 
@@ -397,9 +421,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-                android:textColor="@color/black_40"
+                android:textColor="@color/black_45"
                 android:textSize="12sp"
-                android:textStyle="italic" />
+                android:textStyle="italic"
+                android:visibility="gone" />
             
             <ImageView
                 android:id="@+id/message_status_int"
@@ -419,14 +444,13 @@
                 android:gravity="center_vertical"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="6dp"
-                android:paddingBottom="4dp"
                 android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/sticker_placeholder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
+                android:layout_toRightOf="@id/circular_bg_ext"
                 android:background="@drawable/bg_sticker_placeholder"
                 android:gravity="center"
                 android:visibility="gone" >
@@ -454,7 +478,65 @@
                     android:src="@drawable/sticker_1_hi"
                     android:visibility="gone" />
             </LinearLayout>
+            
+            <RelativeLayout
+                android:id="@+id/rec_placeholder"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_toRightOf="@id/circular_bg_ext"
+                android:background="@drawable/bg_ft_progress"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="6dp"
+                android:gravity="center"
+                android:visibility="gone" >
+                
+                <ProgressBar
+		            android:id="@+id/rec_initializing"
+		            android:layout_width="64dp"
+		            android:layout_height="64dp"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner_dark"
+		            android:layout_centerInParent="true" />
+	            <com.bsb.hike.view.HoloCircularProgress
+	               android:id="@+id/rec_circular_progress"
+	               android:layout_width="64dp"
+	               android:layout_height="64dp"
+	               app:progress_color="@color/rec_progress"
+	               app:progress_background_color="#00000000"
+	               android:gravity="center"
+	               app:progress="0.00"
+	               app:stroke_width="2dp"
+	               app:marker_visible="false"
+	               app:thumb_visible="false"
+	               android:layout_centerInParent="true" />
+	            <ImageView
+	                android:id="@+id/rec_action"
+	                android:layout_height="20dp"
+	                android:layout_width="16dp"
+	                android:layout_centerInParent="true" />
+	            <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/rec_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/black"
+                    android:textSize="10sp"
+                    android:visibility="gone" />              
+            </RelativeLayout>
         </RelativeLayout>
+        <LinearLayout
+			android:id="@+id/sdr_ftue_tip"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:layout_marginRight="6dp"
+	        android:layout_below="@id/bubble_container"
+	        android:visibility="gone" >
+	    	
+	    	<include layout="@layout/sdr_tool_tip" />
+	    </LinearLayout>
 
         <LinearLayout
            	android:id="@+id/message_time_status_ext"
@@ -462,7 +544,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
           	android:layout_below="@id/bubble_container"
-            android:layout_marginRight="6dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="4dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:background="@drawable/bg_msg_time_status"
@@ -474,7 +557,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
       	        android:text="00:00"
-      	        android:textColor="@color/white_80"
+      	        android:textColor="@color/white_85"
                 android:textSize="12sp"
                 android:textStyle="italic" />
             

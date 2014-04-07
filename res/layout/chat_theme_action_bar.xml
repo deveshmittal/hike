@@ -9,49 +9,67 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_overflow_menu_selector"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingRight="5dp" >
+        android:orientation="horizontal" >
 
         <ImageView
             android:id="@+id/close_action_mode"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginLeft="9dp"
+            android:scaleType="centerInside"
             android:src="@drawable/ic_close_chat_bg_palette" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/title"
-            style="@style/ActionBarText.Shadow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginBottom="1dp"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@id/close_action_mode"
-            android:text="@string/chat_theme" />
     </LinearLayout>
+    
+    <View
+        style="@style/ActionBarDivider"
+        android:background="@color/transparent_white_ab"
+        android:layout_toRightOf="@id/close_container" />
 
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/save"
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/title"
+        style="@style/ActionBarText.Shadow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="1dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="5dp"
+        android:layout_toRightOf="@id/close_container"
+        android:layout_toLeftOf="@+id/save"
+        android:text="@string/chat_theme" />
+
+    <LinearLayout
+        android:id="@+id/done_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:background="@drawable/bg_overflow_menu_selector"
-        android:textColor="@drawable/action_bar_btn_text"
         android:gravity="center"
-        android:minWidth="56dp"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:text="@string/done"
-        android:textSize="16sp" />
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:orientation="horizontal" >
+
+		<ImageView
+		    android:id="@+id/arrow"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:src="@drawable/action_bar_arrow"
+		    android:layout_marginRight="8dp" />        
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/done"
+            android:textColor="@drawable/action_bar_btn_text"
+            android:textSize="16sp" />
+    </LinearLayout>
 
     <View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
+        style="@style/ActionBarDivider"
         android:background="@color/transparent_white_ab"
-        android:layout_toLeftOf="@id/save" />
+        android:layout_toLeftOf="@id/done_container" />
     
 </RelativeLayout>

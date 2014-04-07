@@ -11,10 +11,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -159,6 +159,10 @@ public class HikeFile
 		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL, null);
 		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
+		if(isSent)
+		{
+			this.file = new File(fileJSON.optString(HikeConstants.FILE_PATH));
+		}
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
@@ -193,7 +197,7 @@ public class HikeFile
 		this.isSent = isSent;
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, boolean isSent)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, int fileSize, boolean isSent)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
@@ -203,6 +207,7 @@ public class HikeFile
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
+		this.fileSize = fileSize;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail, boolean isSent)
@@ -229,6 +234,10 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
+			if(isSent)
+			{
+				fileJSON.putOpt(HikeConstants.FILE_PATH, getFile().getPath());
+			}
 			if (sourceFilePath != null)
 			{
 				fileJSON.putOpt(HikeConstants.SOURCE_FILE_PATH, sourceFilePath);
@@ -257,7 +266,7 @@ public class HikeFile
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		return null;
 	}

@@ -32,7 +32,6 @@ import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
@@ -55,12 +54,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		View parent = inflater.inflate(R.layout.friends, null);
 
 		ListView friendsList = (ListView) parent.findViewById(android.R.id.list);
-		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
 
-		friendsAdapter = new FriendsAdapter(getActivity());
-		friendsAdapter.executeFetchTask();
+		friendsAdapter = new FriendsAdapter(getActivity(), friendsList);
+		friendsAdapter.setLoadingView(parent.findViewById(R.id.spinner));
+		friendsAdapter.setEmptyView(parent.findViewById(R.id.noResultView));
+
 		friendsList.setAdapter(friendsAdapter);
-
+		friendsAdapter.executeFetchTask();
 		friendsList.setOnItemLongClickListener(this);
 		return parent;
 	}

@@ -13,10 +13,12 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public abstract class FileTransferBase implements Callable<FTResult>
 {
@@ -38,7 +40,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected short retryAttempts = 0;
 
-	protected short MAX_RETRY_ATTEMPTS = 5;
+	protected short MAX_RETRY_ATTEMPTS = 10;
 
 	protected int reconnectTime = 0;
 
@@ -72,6 +74,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile int _bytesTransferred = 0;
 
 	protected int chunkSize = 0;
+	
+	protected volatile Thread mThread = null;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 
@@ -191,17 +195,48 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
+				Logger.d(getClass().getSimpleName(),"Sleep interrupted: " + mThread.toString());
 				e.printStackTrace();
 			}
 			retryAttempts++;
-			Log.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
+			Logger.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
 			return true;
 		}
 		else
 		{
 			retryAttempts++;
-			Log.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
+			Logger.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
 			return false;
 		}
 	}
+	
+	Thread getThread()
+	{
+		return mThread;
+	}
+	
+	protected void setChunkSize()
+	{
+		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+		if (Utils.densityMultiplier > 1)
+			chunkSize = networkType.getMaxChunkSize();
+		else if (Utils.densityMultiplier == 1)
+			chunkSize = networkType.getMinChunkSize() * 2;
+		else
+			chunkSize = networkType.getMinChunkSize();
+		//chunkSize = NetworkType.WIFI.getMaxChunkSize();
+
+		try
+		{
+			long mem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
+			if (chunkSize > (int) (mem / 8))
+				chunkSize = (int) (mem / 8);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
 }

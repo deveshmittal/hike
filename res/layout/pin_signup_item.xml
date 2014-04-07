@@ -12,9 +12,33 @@
         android:layout_height="@dimen/signup_header_height"
         android:gravity="center"
         android:text="@string/whats_your_number"
-        android:textColor="@color/phone_entering_header"
-        android:textSize="24sp" />
-
+        style="@style/SignupHeader"
+        android:paddingLeft="42dp"
+		android:paddingRight="42dp" />
+    
+    <LinearLayout 
+        android:id="@+id/verified_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        
+        <ImageView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_pin_verified"
+            android:layout_marginRight="12dp"
+            android:layout_gravity="center"/>
+        
+	    <com.bsb.hike.view.CustomFontTextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="@dimen/signup_header_height"
+	        android:gravity="center"
+	        android:text="@string/verified"
+        	style="@style/SignupHeader" />
+	</LinearLayout>
+	
         <LinearLayout
             android:id="@+id/loading_layout"
             android:layout_width="match_parent"
@@ -37,7 +61,8 @@
 		        android:gravity="center"
 		        android:text="@string/hang_on"
 		        android:textColor="@color/phone_entering_header"
-		        android:textSize="24sp" />
+		        android:textSize="24sp"
+		        style="@style/SignupHeader" />
     </LinearLayout>
     
     <com.bsb.hike.view.CustomFontEditText
@@ -54,25 +79,39 @@
         android:imeOptions="actionDone"
         android:inputType="number"
         android:singleLine="true"
-        android:textSize="15sp"
+        android:textSize="18sp"
         android:visibility="visible" />
     
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/invalid_pin"
+    <RelativeLayout 
         android:layout_width="wrap_content"
-        android:layout_height="56dp"
-        android:layout_gravity="center"
-        android:gravity="bottom"
-        android:paddingBottom="12dp"
-        android:text="@string/wrong_pin"
-        android:textSize="15sp"
-        android:textColor="#f16c67"
-        android:textStyle="bold|italic"
-	    android:shadowColor="#fbdedd"
-	    android:shadowDy="0.5"
-	    android:shadowRadius="0.5"
-	    android:visibility="visible"/>
-
+        android:layout_height="56dp" >
+        
+    	<com.bsb.hike.view.CustomFontTextView
+        	android:id="@+id/invalid_pin"
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentTop="true"
+        	android:gravity="center_horizontal"
+        	android:paddingTop="9dp"
+        	android:text="@string/wrong_pin"
+        	android:textSize="13sp"
+        	android:textStyle="bold"
+        	android:textColor="#f16c67"
+	    	android:visibility="visible"/>
+    
+    	<com.bsb.hike.view.CustomFontTextView
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:gravity="center_horizontal"
+        	android:layout_alignParentBottom="true"
+        	android:paddingBottom="9dp"
+        	android:text="@string/didnt_get_pin"
+        	android:textSize="13sp"
+        	android:textColor="#6d767b"
+	    	android:visibility="visible"/>
+        
+    </RelativeLayout>
+    
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
@@ -87,11 +126,8 @@
                 android:id="@+id/btn_call_me"
                 android:layout_width="match_parent"
                 android:layout_height="41dp"
-                android:textSize="14sp"
+                android:textSize="15sp"
 	    		android:textStyle="bold|italic"
-		    	android:shadowColor="@color/black"
-	    		android:shadowDy="0.7"
-	    		android:shadowRadius="0.7"
 	    		android:layout_margin="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/signup_button"

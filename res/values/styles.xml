@@ -447,11 +447,11 @@
 	</style>
 
 	<style name="AvatarStyle.Padding">
-	    <item name="android:padding">1dp</item>
+	    <item name="android:padding">0dp</item>
 	</style>
 	
 	<style name="AvatarStyle.MorePadding">
-	    <item name="android:padding">2dp</item>
+	    <item name="android:padding">0dp</item>
 	</style>
 	
 	<style name="UndeliveredPopup">
@@ -578,4 +578,17 @@
 	    <item name="android:shadowRadius">0.6</item>
 	</style>
 	
+	<style name="SignupHeader">
+	    <item name="android:gravity">center</item>
+	    <item name="android:textColor">@color/phone_entering_header</item>
+	    <item name="android:textSize">24sp</item>
+	    <item name="android:textStyle">italic</item>
+	</style>
+	
+	<style name="ActionBarDivider">
+	    <item name="android:layout_width">1dp</item>
+	    <item name="android:layout_height">match_parent</item>
+	    <item name="android:layout_marginBottom">8dp</item>
+	    <item name="android:layout_marginTop">8dp</item>
+	</style>
 </resources>

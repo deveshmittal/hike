@@ -8,8 +8,7 @@
         android:id="@+id/popup_black_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.48"
-        android:background="@color/transparent_black" />
+        android:background="@color/light_transparent_black" />
     
     <LinearLayout
         android:id="@+id/popup"
@@ -56,6 +55,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/add_friend_popup_msg"
                     android:textColor="#535e6d"
+                    android:layout_gravity="center"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
@@ -64,8 +64,8 @@
             android:id="@+id/add_btn"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/addfriend_popup_btn_margin_bottom"
             android:background="@drawable/signup_button"

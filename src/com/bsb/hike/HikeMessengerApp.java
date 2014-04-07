@@ -36,7 +36,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.DbConversationListener;
@@ -54,6 +53,7 @@ import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
@@ -310,10 +310,22 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
 
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
-	
+
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
 
 	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
+
+	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
+
+	public static final String SHOWN_SDR_INTRO_TIP = "shownSdrIntroTip";
+
+	public static final String SIGNUP_PROFILE_PIC_PATH = "signupProfilePicSet";
+
+	public static final String LAST_BACK_OFF_TIME_SIGNUP_PRO_PIC = "lastBackOffTimeSignupProPic";
+
+	public static final String SHOWN_FILE_TRANSFER_POP_UP = "shownFileTransferPopUp";
+
+	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -346,33 +358,33 @@ public class HikeMessengerApp extends Application implements Listener
 	public static Map<String, Long> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
-	
-	public static boolean networkError;
+
+	public static volatile boolean networkError;
 
 	class IncomingHandler extends Handler
 	{
 		@Override
 		public void handleMessage(Message msg)
 		{
-			Log.d("HikeMessengerApp", "In handleMessage " + msg.what);
+			Logger.d("HikeMessengerApp", "In handleMessage " + msg.what);
 			switch (msg.what)
 			{
 			case HikeService.MSG_APP_MESSAGE_STATUS:
 				boolean success = msg.arg1 != 0;
 				Long msgId = (Long) msg.obj;
-				Log.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
+				Logger.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
 				// TODO handle this where we are saving all the mqtt messages
 				String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
 				mPubSubInstance.publish(event, msgId);
 				break;
 			case HikeService.MSG_APP_CONN_STATUS:
-				Log.d("HikeMessengerApp", "received connection status " + msg.arg1);
+				Logger.d("HikeMessengerApp", "received connection status " + msg.arg1);
 				int s = msg.arg1;
 				MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
 				mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
 				break;
 			case HikeService.MSG_APP_INVALID_TOKEN:
-				Log.d("HikeMessengerApp", "received invalid token message from service");
+				Logger.d("HikeMessengerApp", "received invalid token message from service");
 				HikeMessengerApp.this.disconnectFromService();
 				HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
 				HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
@@ -397,7 +409,7 @@ public class HikeMessengerApp extends Application implements Listener
 		}
 		catch (RemoteException e)
 		{
-			Log.e("HikeMessengerApp", "Unable to connect to service", e);
+			Logger.e("HikeMessengerApp", "Unable to connect to service", e);
 		}
 	}
 
@@ -419,7 +431,7 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public void connectToService()
 	{
-		Log.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
+		Logger.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
 		if (!mInitialized)
 		{
 			synchronized (HikeMessengerApp.class)
@@ -427,7 +439,7 @@ public class HikeMessengerApp extends Application implements Listener
 				if (!mInitialized)
 				{
 					mInitialized = true;
-					Log.d("HikeMessengerApp", "Initializing service");
+					Logger.d("HikeMessengerApp", "Initializing service");
 					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
 				}
 			}
@@ -451,7 +463,7 @@ public class HikeMessengerApp extends Application implements Listener
 			try
 			{
 				final String reportUrl = AccountUtils.base + "/logs/android";
-				Log.d(HikeMessengerApp.this.getClass().getSimpleName(), "Connect to " + reportUrl.toString());
+				Logger.d(HikeMessengerApp.this.getClass().getSimpleName(), "Connect to " + reportUrl.toString());
 
 				final String login = msisdn;
 				final String password = token;
@@ -462,13 +474,13 @@ public class HikeMessengerApp extends Application implements Listener
 					request.setLogin(login);
 					request.setPassword(password);
 					String paramsAsString = getParamsAsString(crashReportData);
-					Log.e(HikeMessengerApp.this.getClass().getSimpleName(), "Params: " + paramsAsString);
+					Logger.e(HikeMessengerApp.this.getClass().getSimpleName(), "Params: " + paramsAsString);
 					request.send(new URL(reportUrl), HttpSender.Method.POST, paramsAsString, HttpSender.Type.FORM);
 				}
 			}
 			catch (IOException e)
 			{
-				Log.e(HikeMessengerApp.this.getClass().getSimpleName(), "IOException", e);
+				Logger.e(HikeMessengerApp.this.getClass().getSimpleName(), "IOException", e);
 			}
 		}
 
@@ -545,7 +557,7 @@ public class HikeMessengerApp extends Application implements Listener
 		}
 		catch (NameNotFoundException e)
 		{
-			Log.e("AccountUtils", "Unable to get app version");
+			Logger.e("AccountUtils", "Unable to get app version");
 		}
 
 		if (!currentAppVersion.equals(actualAppVersion))
@@ -599,7 +611,7 @@ public class HikeMessengerApp extends Application implements Listener
 		if (tUtil != null)
 		{
 			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Log.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
+			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
 		}
 
 		if (!preferenceManager.contains(HikeConstants.SSL_PREF))
@@ -645,7 +657,7 @@ public class HikeMessengerApp extends Application implements Listener
 		}
 		catch (NameNotFoundException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid package", e);
+			Logger.e(getClass().getSimpleName(), "Invalid package", e);
 		}
 
 		/*
@@ -708,16 +720,16 @@ public class HikeMessengerApp extends Application implements Listener
 
 		folder = new File(root + HikeConstants.IMAGE_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.VIDEO_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.AUDIO_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.AUDIO_RECORDING_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
-		
+
 		folder = new File(root + HikeConstants.OTHER_ROOT + HikeConstants.SENT_ROOT);
 		Utils.makeNoMediaFile(folder);
 	}
@@ -752,7 +764,7 @@ public class HikeMessengerApp extends Application implements Listener
 		}
 		catch (IllegalArgumentException e)
 		{
-			Log.w("HikeMessengerApp", "Invalid format", e);
+			Logger.w("HikeMessengerApp", "Invalid format", e);
 			return;
 		}
 	}
@@ -768,7 +780,7 @@ public class HikeMessengerApp extends Application implements Listener
 		}
 		catch (IllegalArgumentException e)
 		{
-			Log.w("HikeMessengerApp", "Invalid format", e);
+			Logger.w("HikeMessengerApp", "Invalid format", e);
 			return null;
 		}
 	}

@@ -19,7 +19,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -56,6 +55,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -289,9 +289,9 @@ public class MqttMessagesManager
 			if (!this.convDb.isGroupAlive(groupConversation.getMsisdn()))
 			{
 
-				Log.d(getClass().getSimpleName(), "Group is not alive");
+				Logger.d(getClass().getSimpleName(), "Group is not alive");
 				int updated = this.convDb.toggleGroupDeadOrAlive(groupConversation.getMsisdn(), true);
-				Log.d(getClass().getSimpleName(), "Group revived? " + updated);
+				Logger.d(getClass().getSimpleName(), "Group revived? " + updated);
 				groupRevived = updated > 0;
 
 				if (groupRevived)
@@ -304,16 +304,16 @@ public class MqttMessagesManager
 			if (!groupRevived && this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT)
 			{
 
-				Log.d(getClass().getSimpleName(), "GCJ Message was already received");
+				Logger.d(getClass().getSimpleName(), "GCJ Message was already received");
 				return;
 			}
-			Log.d(getClass().getSimpleName(), "GCJ Message is new");
+			Logger.d(getClass().getSimpleName(), "GCJ Message is new");
 
 			JSONObject metadata = jsonObj.optJSONObject(HikeConstants.METADATA);
 
 			if (!groupRevived && !this.convDb.doesConversationExist(groupConversation.getMsisdn()))
 			{
-				Log.d(getClass().getSimpleName(), "The group conversation does not exists");
+				Logger.d(getClass().getSimpleName(), "The group conversation does not exists");
 				groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
 
 				if (metadata != null)
@@ -411,7 +411,7 @@ public class MqttMessagesManager
 		// from
 		// server
 		{
-			Log.d(getClass().getSimpleName(), "Checking if message exists");
+			Logger.d(getClass().getSimpleName(), "Checking if message exists");
 			ConvMessage convMessage = new ConvMessage(jsonObj);
 			if (convMessage.isStickerMessage())
 			{
@@ -422,7 +422,7 @@ public class MqttMessagesManager
 			// received by
 			// the receiver
 			{
-				Log.d(getClass().getSimpleName(), "Message already exists");
+				Logger.d(getClass().getSimpleName(), "Message already exists");
 				return;
 			}
 			/*
@@ -439,10 +439,10 @@ public class MqttMessagesManager
 				for (int i = 0; i < fileArray.length(); i++)
 				{
 					JSONObject fileJson = fileArray.getJSONObject(i);
-					Log.d(getClass().getSimpleName(), "Previous json: " + fileJson);
+					Logger.d(getClass().getSimpleName(), "Previous json: " + fileJson);
 					if (hikeFile.getHikeFileType() != HikeFileType.CONTACT && hikeFile.getHikeFileType() != HikeFileType.LOCATION) // dont change name for contact or location
 						fileJson.put(HikeConstants.FILE_NAME, Utils.getFinalFileName(hikeFile.getHikeFileType(), hikeFile.getFileName()));
-					Log.d(getClass().getSimpleName(), "New json: " + fileJson);
+					Logger.d(getClass().getSimpleName(), "New json: " + fileJson);
 				}
 				/*
 				 * Resetting the metadata
@@ -470,7 +470,7 @@ public class MqttMessagesManager
 			if (convMessage.isFileTransferMessage())
 			{
 				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-				Log.d(getClass().getSimpleName(), "FT MESSAGE: " + " NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey());
+				Logger.d(getClass().getSimpleName(), "FT MESSAGE: " + " NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey());
 				Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			}
 
@@ -500,7 +500,7 @@ public class MqttMessagesManager
 					}
 				}
 			}
-			Log.d(getClass().getSimpleName(), "Receiver received Message : " + convMessage.getMessage() + "		;	Receiver Msg ID : " + convMessage.getMsgID() + "	; Mapped msgID : "
+			Logger.d(getClass().getSimpleName(), "Receiver received Message : " + convMessage.getMessage() + "		;	Receiver Msg ID : " + convMessage.getMsgID() + "	; Mapped msgID : "
 					+ convMessage.getMappedMsgID());
 			// We have to do publish this here since we are adding the message
 			// to the db here, and the id is set after inserting into the db.
@@ -563,15 +563,15 @@ public class MqttMessagesManager
 			}
 			catch (NumberFormatException e)
 			{
-				Log.e(getClass().getSimpleName(), "Exception occured while parsing msgId. Exception : " + e);
+				Logger.e(getClass().getSimpleName(), "Exception occured while parsing msgId. Exception : " + e);
 				msgID = -1;
 			}
-			Log.d(getClass().getSimpleName(), "Delivery report received for msgid : " + msgID + "	;	REPORT : DELIVERED");
+			Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + msgID + "	;	REPORT : DELIVERED");
 			int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 			if (rowsUpdated == 0)
 			{
-				Log.d(getClass().getSimpleName(), "No rows updated");
+				Logger.d(getClass().getSimpleName(), "No rows updated");
 				return;
 			}
 
@@ -591,7 +591,7 @@ public class MqttMessagesManager
 
 			if (msgIds == null)
 			{
-				Log.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
+				Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 				return;
 			}
 
@@ -703,7 +703,7 @@ public class MqttMessagesManager
 					}
 					catch (Exception e)
 					{
-						Log.w(getClass().getSimpleName(), "Invalid image bytes");
+						Logger.w(getClass().getSimpleName(), "Invalid image bytes");
 					}
 				}
 				if (account.has(HikeConstants.ACCOUNTS))
@@ -724,7 +724,7 @@ public class MqttMessagesManager
 						}
 						catch (JSONException e)
 						{
-							Log.w(getClass().getSimpleName(), "Unknown format for twitter", e);
+							Logger.w(getClass().getSimpleName(), "Unknown format for twitter", e);
 						}
 					}
 				}
@@ -914,7 +914,7 @@ public class MqttMessagesManager
 				 */
 				if (currentId.equals(newId))
 				{
-					Log.d(getClass().getSimpleName(), "Duplicate enable free invite packet");
+					Logger.d(getClass().getSimpleName(), "Duplicate enable free invite packet");
 					return;
 				}
 
@@ -971,11 +971,11 @@ public class MqttMessagesManager
 				}
 				catch (IllegalStateException e)
 				{
-					Log.w(getClass().getSimpleName(), "Exception while posting ab", e);
+					Logger.w(getClass().getSimpleName(), "Exception while posting ab", e);
 				}
 				catch (IOException e)
 				{
-					Log.w(getClass().getSimpleName(), "Exception while posting ab", e);
+					Logger.w(getClass().getSimpleName(), "Exception while posting ab", e);
 				}
 			}
 			if (data.optBoolean(HikeConstants.PUSH))
@@ -1023,7 +1023,7 @@ public class MqttMessagesManager
 
 			if (id == -1)
 			{
-				Log.d(getClass().getSimpleName(), "This status message was already added");
+				Logger.d(getClass().getSimpleName(), "This status message was already added");
 				return;
 			}
 
@@ -1226,7 +1226,7 @@ public class MqttMessagesManager
 			long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
 			long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
 
-			Log.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
+			Logger.d(getClass().getSimpleName(), "Diff b/w server and client: " + diff);
 
 			Editor editor = settings.edit();
 			editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
@@ -1258,7 +1258,7 @@ public class MqttMessagesManager
 				long id = convDb.addProtip(protip);
 				if (id == -1)
 				{
-					Log.d(getClass().getSimpleName(), "Error adding this protip");
+					Logger.d(getClass().getSimpleName(), "Error adding this protip");
 					return; // for some reason the insertion failed,
 				}
 				// delete all pro tips before these.
@@ -1432,36 +1432,47 @@ public class MqttMessagesManager
 		else if (HikeConstants.MqttMessageTypes.REQUEST_DP.equals(type))
 		{
 			final String groupId = jsonObj.getString(HikeConstants.TO);
+			uploadGroupProfileImage(groupId, true);
+		}
+	}
 
-			String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-			String fileName = Utils.getTempProfileImageFileName(groupId);
+	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
+	{
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+		String fileName = Utils.getTempProfileImageFileName(groupId);
 
-			File groupImageFile = new File(directory, fileName);
-			if (!groupImageFile.exists())
+		File groupImageFile = new File(directory, fileName);
+		if (!groupImageFile.exists())
+		{
+			return;
+		}
+
+		String path = "/group/" + groupId + "/avatar";
+
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(path, RequestType.PROFILE_PIC, new HikeHttpCallback()
+		{
+			public void onFailure()
 			{
-				return;
-			}
-
-			String path = "/group/" + groupId + "/avatar";
-
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(path, RequestType.PROFILE_PIC, new HikeHttpCallback()
-			{
-				public void onFailure()
+				if (retryOnce)
+				{
+					uploadGroupProfileImage(groupId, false);
+				}
+				else
 				{
 					Utils.removeTempProfileImage(groupId);
 					HikeMessengerApp.getLruCache().deleteIconForMSISDN(groupId);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
 				}
+			}
 
-				public void onSuccess(JSONObject response)
-				{
-					Utils.renameTempProfileImage(groupId);
-				}
-			});
+			public void onSuccess(JSONObject response)
+			{
+				Utils.renameTempProfileImage(groupId);
+			}
+		});
 
-			HikeHTTPTask task = new HikeHTTPTask(null, 0);
-			Utils.executeHttpTask(task, hikeHttpRequest);
-		}
+		HikeHTTPTask task = new HikeHTTPTask(null, 0);
+		Utils.executeHttpTask(task, hikeHttpRequest);
 	}
 
 	private void handleSendNativeInviteKey(boolean sendNativeInvite, boolean showFreeSmsPopup, String header, String body, Editor editor)
@@ -1689,7 +1700,7 @@ public class MqttMessagesManager
 			{
 				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) typingNotification;
 				groupTypingNotification.removeParticipant(participant);
-				Log.d("TypingNotification", "Particpant size: " + groupTypingNotification.getGroupParticipantList().size());
+				Logger.d("TypingNotification", "Particpant size: " + groupTypingNotification.getGroupParticipantList().size());
 				if (groupTypingNotification.getGroupParticipantList().isEmpty())
 				{
 					typingNotificationMap.remove(id);

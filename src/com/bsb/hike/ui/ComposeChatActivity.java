@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +45,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
@@ -54,7 +53,7 @@ import com.bsb.hike.view.TagEditText.TagEditorListener;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
-	private static final int MIN_MEMBERS_GROUP_CHAT = 2;
+	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
 	private static final int CREATE_GROUP_MODE = 1;
 
@@ -137,16 +136,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		listView = (ListView) findViewById(R.id.list);
 
-		adapter = new ComposeChatAdapter(this, isForwardingMessage, existingGroupId);
-		adapter.executeFetchTask();
-
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId);
+		adapter.setEmptyView(findViewById(android.R.id.empty));
+		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
+		adapter.executeFetchTask();
 		listView.setOnItemClickListener(this);
+
 		originalAdapterLength = adapter.getCount();
 
 		initTagEditText();
 
-		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) ? CREATE_GROUP_MODE : START_CHAT_MODE);
+		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+		if (existingGroupId != null)
+		{
+			MIN_MEMBERS_GROUP_CHAT = 1;
+		}
 	}
 
 	private void initTagEditText()
@@ -188,6 +193,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
 	{
 		final ContactInfo contactInfo = adapter.getItem(arg2);
+
 		// jugaad , coz of pinned listview , discussed with team
 		if (ComposeChatAdapter.EXTRA_ID.equals(contactInfo.getId()))
 		{
@@ -198,12 +204,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (composeMode == CREATE_GROUP_MODE)
 		{
 
+			if (adapter.isContactPresentInExistingParticipants(contactInfo))
+			{
+				// basicly it will work when you add participants to existing group via typing numbers
+				Toast.makeText(getBaseContext(), "You have already added this contact in group", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			// for SMS users, append SMS text with name
-			String name = adapter.getViewTypebasedOnFavType(contactInfo) == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
+			int viewtype = adapter.getItemViewType(arg2);
+			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 		}
 		else
 		{
+			Logger.i("composeactivity", contactInfo.getId() + " - id of clicked");
 			if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId()) || FriendsAdapter.EMPTY_ID.equals(contactInfo.getId()))
 			{
 				return;
@@ -221,12 +235,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if (isSharingFile)
 				{
 					forwardConfirmDialog.setHeader(R.string.share);
-					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
 				}
 				else
 				{
 					forwardConfirmDialog.setHeader(R.string.forward);
-					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getName()));
+					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
 				}
 				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 				{
@@ -246,6 +260,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			else
 			{
 				Utils.startChatThread(this, contactInfo);
+				finish();
 			}
 		}
 	}
@@ -258,6 +273,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			setActionBar();
 		}
+		else
+		{
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
+		}
 	}
 
 	@Override
@@ -265,10 +284,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		adapter.addContact((ContactInfo) data);
 		int selectedCount = adapter.getSelectedContactCount();
-		// so we add it only first time
-		if (selectedCount == 1)
+		if (adapter.getSelectedContactCount() == 1)
 		{
 			setupMultiSelectActionBar();
+		}
+		else
+		{
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
 		}
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
 	}
@@ -282,10 +304,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void charResetAfterSeperator()
 	{
-		if (adapter.getCount() != originalAdapterLength)
-		{
-			adapter.removeFilter();
-		}
+		adapter.removeFilter();
 	}
 
 	private void setMode(int mode)
@@ -295,18 +314,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 		case CREATE_GROUP_MODE:
 			// createGroupHeader.setVisibility(View.GONE);
-			adapter.setShowExtraAtFirst(false);
 			adapter.showCheckBoxAgainstItems(true);
 			tagEditText.clear(false);
 			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			break;
 		case START_CHAT_MODE:
 			// createGroupHeader.setVisibility(View.VISIBLE);
-			adapter.setShowExtraAtFirst(!isForwardingMessage);
 			tagEditText.clear(false);
 			adapter.clearAllSelection(false);
 			adapter.removeFilter();
-			break;
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
+			setActionBar();
+			title.setText(R.string.new_chat);
+			return;
 		}
 		setTitle();
 	}
@@ -341,7 +363,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		GroupConversation groupConversation = new GroupConversation(groupId, 0, null, userContactInfo.getMsisdn(), true);
 		groupConversation.setGroupParticipantList(participantList);
 
-		Log.d(getClass().getSimpleName(), "Creating group: " + groupId);
+		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
 		mConversationDb.addGroupParticipants(groupId, groupConversation.getGroupParticipantList());
 		if (newGroup)
@@ -408,6 +430,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			groupChatActionBar = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 		}
+		if (actionBar.getCustomView() == groupChatActionBar)
+		{
+			return;
+		}
 		View backContainer = groupChatActionBar.findViewById(R.id.back);
 
 		title = (TextView) groupChatActionBar.findViewById(R.id.title);
@@ -417,6 +443,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
+
 				onBackPressed();
 			}
 		});
@@ -457,7 +484,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			multiSelectActionBar = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
 		}
-		Button sendBtn = (Button) multiSelectActionBar.findViewById(R.id.save);
+		View sendBtn = multiSelectActionBar.findViewById(R.id.done_container);
 		View closeBtn = multiSelectActionBar.findViewById(R.id.close_action_mode);
 		ViewGroup closeContainer = (ViewGroup) multiSelectActionBar.findViewById(R.id.close_container);
 
@@ -471,7 +498,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				if (adapter.getSelectedContactCount() < MIN_MEMBERS_GROUP_CHAT)
 				{
-					Toast.makeText(getApplicationContext(), "Select Min 2 members to start group chat", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
 					return;
 				}
 				createGroup(adapter.getAllSelectedContacts());
@@ -484,7 +511,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				onBackPressed();
+				setMode(CREATE_GROUP_MODE);
+				setActionBar();
 			}
 		});
 		actionBar.setCustomView(multiSelectActionBar);
@@ -515,7 +543,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(imageUris.size());
 					for (Uri fileUri : imageUris)
 					{
-						Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+						Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
 						String fileUriStart = "file:";
 						String fileUriString = fileUri.toString();
 
@@ -550,21 +578,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			}
 		}
-		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
-		{
-			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
-			Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			intent.putExtra(HikeConstants.Extras.MSG, msg);
-		}
 		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
 				|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 		{
 			intent.putExtras(presentIntent);
 		}
-		else if (type != null)
+		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
 			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-			Log.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
 			fileUri = Utils.makePicasaUri(fileUri);
 			String fileUriStart = "file:";
 			String fileUriString = fileUri.toString();
@@ -585,18 +607,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				filePath = Utils.getRealPathFromUri(fileUri, this);
 			}
+
+			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+
 			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 		}
+		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+		{
+			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
+		}
 		startActivity(intent);
 		finish();
-	}
-
-	private String getNormalisedMsisdn()
-	{
-		String textEntered = tagEditText.getText().toString();
-		return Utils.normalizeNumber(textEntered,
-				getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE));
 	}
 
 	@Override
@@ -630,5 +654,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			});
 		}
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		if (composeMode == CREATE_GROUP_MODE)
+		{
+			if (existingGroupId != null || createGroup)
+			{
+				ComposeChatActivity.this.finish();
+				return;
+			}
+			setMode(START_CHAT_MODE);
+			return;
+		}
+		super.onBackPressed();
 	}
 }

@@ -18,10 +18,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +45,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class HikeListActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
@@ -70,17 +70,19 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private Map<String, Boolean> toggleBlockMap;
 
-	private ViewGroup doneContainer;
+	private View doneBtn;
 
-	private TextView doneText;
+	private ImageView arrow;
 
-	private Button doneBtn;
+	private TextView postText;
 
 	private TextView title;
 
 	private ImageView backIcon;
 	
 	List<Pair<AtomicBoolean, ContactInfo>> firstSectionList;
+	
+	private boolean calledFromFTUE = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -96,6 +98,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			type = Type.INVITE;
 		}
+		
+		if (getIntent().getBooleanExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, false))
+		{
+			calledFromFTUE = true;
+		}
 
 		selectedContacts = new HashSet<String>();
 
@@ -105,6 +112,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
+
+		findViewById(android.R.id.empty).setVisibility(View.GONE);
 
 		switch (type)
 		{
@@ -123,7 +132,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		if (type != Type.BLOCK)
 		{
 			selectedContacts.clear();
-			doneContainer.setVisibility(View.GONE);
+			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
 		setLabel();
@@ -141,37 +150,36 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+
+		doneBtn.setVisibility(View.VISIBLE);
+		
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
+
 		if (type != Type.BLOCK)
 		{
-			doneContainer = (ViewGroup) actionBarView.findViewById(R.id.done_container);
-
-			int padding = (int) (7 * Utils.densityMultiplier);
-			doneContainer.setPadding(padding, 0, padding, 0);
-
-			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
-			doneText.setTextSize(14);
-			doneText.setTypeface(doneText.getTypeface(), Typeface.BOLD);
-
-			View tickView = actionBarView.findViewById(R.id.ic_tick);
-			tickView.setVisibility(View.GONE);
-
-			doneContainer.setOnClickListener(new OnClickListener()
+			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
 				public void onClick(View v)
 				{
-					showNativeSMSPopup();
+					if(calledFromFTUE)
+					{
+						showInviteConfirmationPopup();
+					}
+					else
+					{
+						showNativeSMSPopup();
+					}
 				}
 			});
 		}
 		else
 		{
-			doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
-			doneBtn.setVisibility(View.VISIBLE);
-			doneBtn.setText(R.string.save);
-			doneBtn.setEnabled(false);
-
+			postText.setText(R.string.save);
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
@@ -214,6 +222,26 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		actionBar.setCustomView(actionBarView);
 
 		init();
+	}
+	
+	private void showInviteConfirmationPopup()
+	{
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
+		confirmDialog.setHeader(R.string.invite_friends);
+		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg));
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				showNativeSMSPopup();
+			}
+		};
+
+		confirmDialog.setOkButton(R.string.invite_1, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.cancel);
+		confirmDialog.show();
 	}
 
 	private void setLabel()
@@ -373,6 +401,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			input.addTextChangedListener(adapter);
 
 			listView.setAdapter(adapter);
+			listView.setEmptyView(findViewById(android.R.id.empty));
+			setupActionBarElements();
 		}
 	}
 
@@ -455,7 +485,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				while (iterator.hasNext())
 				{
 					String msisdn = iterator.next();
-					Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+					Logger.d(getClass().getSimpleName(), "Inviting " + msisdn);
 					Utils.sendInvite(msisdn, this, false, true);
 
 					inviteArray.put(msisdn);
@@ -464,6 +494,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				data.put(HikeConstants.LIST, inviteArray);
 
 				mqttPacket.put(HikeConstants.DATA, data);
+				
+				if(calledFromFTUE)
+				{
+					JSONObject ftueData = new JSONObject();
+					ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
+					mqttPacket.put(HikeConstants.METADATA, ftueData);
+				}
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
 
@@ -498,11 +535,12 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		if (!selectedContacts.isEmpty())
 		{
-			doneContainer.setVisibility(View.VISIBLE);
-			doneText.setText(getString(R.string.send_invite, selectedContacts.size()));
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
+			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		else
 		{
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 			init();
 		}
 	}
@@ -539,6 +577,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			ContactInfo contactInfo = pair.second;
 			if(recommendedContactList.contains(contactInfo)){
+				if(calledFromFTUE)
+				{
+					pair.first.set(true);
+					selectedContacts.add(contactInfo.getMsisdn());
+				}
 				firstSectionList.add(pair);
 			}
 		}
@@ -571,7 +614,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 			else
 			{
-				doneBtn.setEnabled(true);
+				Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
 				boolean blocked = pair.first.get();
 				toggleBlockMap.put(msisdn, blocked);
 			}
@@ -590,7 +633,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			{
 				msisdn = Utils.normalizeNumber(msisdn,
 						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE));
-				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+				Logger.d(getClass().getSimpleName(), "Inviting " + msisdn);
 				Utils.sendInvite(msisdn, this);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT).show();
 			}

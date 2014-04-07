@@ -21,8 +21,8 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -507,7 +507,7 @@ public class StickerManager
 		}
 		catch (JSONException e)
 		{
-			Log.w("HikeMessengerApp", "Invalid JSON", e);
+			Logger.w("HikeMessengerApp", "Invalid JSON", e);
 		}
 	}
 
@@ -544,11 +544,11 @@ public class StickerManager
 		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.categoryId.name());
 		if (categoryDirPath != null)
 		{
-			File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+			File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
 			File bigCatDir = new File(categoryDirPath);
-			if (categoryDir.exists())
+			if (smallCatDir.exists())
 			{
-				String[] stickerIds = categoryDir.list();
+				String[] stickerIds = smallCatDir.list();
 				for (String stickerId : stickerIds)
 				{
 					recentStickers.remove(new Sticker(category, stickerId));
@@ -690,7 +690,10 @@ public class StickerManager
 
 	public void removeStickerFromRecents(Sticker st)
 	{
-		recentStickers.remove(st);
+		boolean rem = recentStickers.remove(st);
+		Logger.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+		// remove the sticker from cache too, recycling stuff is handled by the cache itself
+		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context)); 
 	}
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
@@ -863,11 +866,11 @@ public class StickerManager
 			in.close();
 			fileIn.close();
 			long t2 = System.currentTimeMillis();
-			Log.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
+			Logger.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			Logger.e(getClass().getSimpleName(), "Exception while reading category file.", e);
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
@@ -908,11 +911,11 @@ public class StickerManager
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
-			Log.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
+			Logger.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while saving category file.", e);
+			Logger.e(getClass().getSimpleName(), "Exception while saving category file.", e);
 		}
 	}
 

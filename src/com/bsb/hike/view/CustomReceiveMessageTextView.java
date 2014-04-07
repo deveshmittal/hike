@@ -1,21 +1,22 @@
 package com.bsb.hike.view;
 
-import com.bsb.hike.utils.Utils;
-
-import android.text.Layout;
 import android.content.Context;
+import android.text.Layout;
 import android.util.AttributeSet;
-import android.util.Log;
+
+import com.bsb.hike.utils.Utils;
 
 public class CustomReceiveMessageTextView extends CustomFontTextView
 {
 	private String TAG = "CustomSendMessageTextView";
 	
-	private static final int widthAdditon = 50;
+	private static final int widthTime12Hour = 50;
+	
+	private static final int widthTime24Hour = 30;
 	
 	private static final int widthMargin = 100;
 	
-	private static final int heightAddition = 14;
+	private static final int heightTime = 14;
 
 	public CustomReceiveMessageTextView(Context context)
 	{
@@ -49,7 +50,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 
 			linesMaxWidth = lastLineWidth = (int) Math.ceil(lastLine);
 
-			//Log.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
+			//Logger.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
 
 			for (int n = 0; n < lines; ++n)
 			{
@@ -60,7 +61,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 					lineWidth = layout.getLineWidth(n);
 					lineHeight = (layout.getLineTop(n+1) - layout.getLineTop(n));
 					viewHeight += lineHeight;
-					//Log.d(TAG, "LINE NO. " + n + ", Width: " + lineWidth + ", Height: " + lineHeight + ", Height in dp: " + lineHeight/Utils.densityMultiplier);
+					//Logger.d(TAG, "LINE NO. " + n + ", Width: " + lineWidth + ", Height: " + lineHeight + ", Height in dp: " + lineHeight/Utils.densityMultiplier);
 				}
 				catch (Exception e)
 				{
@@ -70,23 +71,34 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 				linesMaxWidth = Math.max(linesMaxWidth, (int) Math.ceil(lineWidth));
 			}
 
-			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAdditon + widthMargin) * Utils.densityMultiplier))
+			int heightAddition = heightTime;
+			int widthAddition;
+			if (android.text.format.DateFormat.is24HourFormat(getContext()))
+			{
+				widthAddition = widthTime24Hour;
+			}
+			else
+			{
+				widthAddition = widthTime12Hour;
+			}
+			
+			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = viewHeight;
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
-				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAdditon * Utils.densityMultiplier) + lastLineWidth));
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 			else
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = (int) (viewHeight + (heightAddition * Utils.densityMultiplier));
-				//Log.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 		}
