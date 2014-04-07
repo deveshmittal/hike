@@ -224,7 +224,7 @@ public class TagEditText extends EditText
 	protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
 	{
 		super.onTextChanged(text, start, lengthBefore, lengthAfter);
-		Log.e("tagedit", "text changed , before " + lengthBefore + " and after " + lengthAfter);
+		Log.i("tagedit", "text changed , before " + lengthBefore + " and after " + lengthAfter);
 		// caller has to set needcallback to false and change edit text value if no call back required
 		// this has to be performed every time callback not required , for example clear edit text
 		if (needCallback)
@@ -234,6 +234,7 @@ public class TagEditText extends EditText
 			String afterSep = getCharAfterSeparator();
 			if (afterSep != null)
 			{
+				Log.i("tagedit", "afterSep is " + afterSep);
 				if (afterSep.length() >= minCharacterChangeThreshold)
 				{
 
@@ -241,10 +242,7 @@ public class TagEditText extends EditText
 					{
 						listener.characterAddedAfterSeparator(lastAfterSepCallback = afterSep);
 					}
-					else
-					{
-						giveResetCallback();
-					}
+
 				}
 				else
 				{

@@ -1381,16 +1381,16 @@
     <string name="compose_chat_empty_contact_status_chat_mode">Tap to start chat</string>
     <string name="chatThreadNudgeTutorialText">Double tap anywhere to nudge your friend</string>
     <string name="tap_hold_multi_select">Tap and hold to select multiple files</string>
-	<string name="verified">Verified</string>
-	<string name="sent_txt">Sent</string>
-	<string name="delivered_txt">Delivered</string>
-	<string name="read_txt">Read</string>
-	<string name="no_results">No results</string>
-	<string name="num_unread_messages">%1$s Unread Messages</string>
-	<string name="one_unread_message">1 Unread Message</string>
-	<string name="free_hike_to_sms">Free hike to SMS</string>
-	<string name="sms_with_credits">SMS (Free SMS: %1$d)</string>
-	<string name="confirm_delete_msg">Are you sure you want to delete this message?</string>
+    <string name="verified">Verified</string>
+    <string name="sent_txt">Sent</string>
+    <string name="delivered_txt">Delivered</string>
+    <string name="read_txt">Read</string>
+    <string name="no_results">No results</string>
+    <string name="num_unread_messages">%1$s Unread Messages</string>
+    <string name="one_unread_message">1 Unread Message</string>
+    <string name="free_hike_to_sms">Free hike to SMS</string>
+    <string name="sms_with_credits">SMS (Free SMS: %1$d)</string>
+    <string name="confirm_delete_msg">Are you sure you want to delete this message?</string>
     <string name="confirm_delete_msgs">Are you sure you want to delete these %1$s messages?</string>
     <string name="confirm_clear_conversation">Are you sure you want to clear all messages in this conversation?</string>
     <string name="enter_pin_signup">Please enter the 4 digit PIN we sent you via SMS.</string>
@@ -1419,4 +1419,6 @@
     <string name="female_selected_string_5">Girls speak about 7,000 words a day!</string>
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
+    <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
+
 </resources>
