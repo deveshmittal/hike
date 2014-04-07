@@ -924,18 +924,24 @@ public class StickerManager
 			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.doggy.name());
 			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			if(largeStickerDir.exists())
-				Utils.deleteFile(largeStickerDir);
-			if(smallStickerDir.exists())
-				Utils.deleteFile(smallStickerDir);
-
+				for(String stId : LOCAL_STICKER_IDS_DOGGY)
+				{
+					File st = new File(largeStickerDir,stId);
+					Utils.deleteFile(st);
+					st = new File(smallStickerDir,stId);
+					Utils.deleteFile(st);
+				}
+			
 			dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
 			largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			if(largeStickerDir.exists())
-				Utils.deleteFile(largeStickerDir);
-			if(smallStickerDir.exists())
-				Utils.deleteFile(smallStickerDir);
+			for(String stId : LOCAL_STICKER_IDS_HUMANOID)
+			{
+				File st = new File(largeStickerDir,stId);
+				Utils.deleteFile(st);
+				st = new File(smallStickerDir,stId);
+				Utils.deleteFile(st);
+			}
 		}
 		catch (Exception e)
 		{
