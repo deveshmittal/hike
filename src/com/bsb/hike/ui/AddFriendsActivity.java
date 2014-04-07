@@ -89,32 +89,11 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		@Override
 		protected Void doInBackground(Void... arg0)
 		{
-			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
-			SharedPreferences settings = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING,
-					"");
-			
-			List<ContactInfo>  friendsList = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false);
-			friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, msisdn, false));
-			friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
-			
-			String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(settings.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), msisdn);
-			Logger.d("AddFriendsActivity", " recommendedContactsSelection "+recommendedContactsSelection);
-			if (!TextUtils.isEmpty(recommendedContactsSelection))
-			{
-				recommendedContacts = HikeUserDatabase.getInstance().getHikeContacts(-1, recommendedContactsSelection, null, msisdn);
-				recommendedContacts.removeAll(friendsList);
-			}
-			
-			Logger.d("AddFriendsActivity", " size recommendedContacts = "+recommendedContacts.size());
-			
-			hikeContacts = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false);
-			hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
-			hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
+			List<ContactInfo> friendsList = new ArrayList<ContactInfo>();
+			Utils.getRecommendedAndHikeContacts(AddFriendsActivity.this, recommendedContacts, hikeContacts, friendsList);
+			recommendedContacts.removeAll(friendsList);
 			hikeContacts.removeAll(recommendedContacts);
 			Collections.sort(hikeContacts);
-			
 			return null;
 		}
 		
@@ -129,7 +108,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 			sectionsData.put(sectionsData.size(), hikeContacts);
 			mAdapter = new AddFriendAdapter(AddFriendsActivity.this, -1, sectionsData,listview);
 			hikeContactsCount = hikeContacts.size() + recommendedContacts.size();
-			Logger.d("AddFriendsActivity", " size  hike contacts = "+hikeContacts.size());
+			Logger.d("AddFriendsActivity", " size hike contacts = "+hikeContacts.size());
 			Logger.d("AddFriendsActivity", " size recommendedContacts = "+recommendedContacts.size());
 			init();
 			super.onPostExecute(result);

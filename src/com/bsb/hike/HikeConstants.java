@@ -1077,6 +1077,12 @@ public class HikeConstants
 		public static final String SHOWING_INVALID_PIN_ERROR = "showingInvalidPinError";
 
 		public static final String CALLED_FROM_FTUE_POPUP = "calledFromFtuePopUP";
+
+		public static final String FRIENDS_LIST_COUNT = "friendsListCount";
+
+		public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
+
+		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
 	}
 
 	public static final class LogEvent
