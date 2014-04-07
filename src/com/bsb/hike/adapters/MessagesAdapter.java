@@ -123,7 +123,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		ImageView fileThumb;
 
-		View participantDetails;
+		View participantDetailsFT;
 
 		TextView participantNameFT;
 
@@ -149,7 +149,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		ProgressBar stickerLoader;
 
+		View stickerParticipantDetails;
+		
 		TextView stickerParticipantName;
+		
+		TextView stickerParticipantNameUnsaved;
 
 		ImageView stickerImage;
 
@@ -636,7 +640,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					v = inflater.inflate(R.layout.message_item_receive, parent, false);
 				}
-				holder.participantDetails = (View) v.findViewById(R.id.participant_details);
+				holder.participantDetailsFT = (View) v.findViewById(R.id.participant_details_ft);
 				holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
 				holder.participantNameFTUnsaved = (TextView) v.findViewById(R.id.participant_name_ft_unsaved);
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
@@ -656,7 +660,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
 				holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
 				holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
+				holder.stickerParticipantDetails = (View) v.findViewById(R.id.participant_details);
 				holder.stickerParticipantName = (TextView) v.findViewById(R.id.participant_name);
+				holder.stickerParticipantNameUnsaved = (TextView) v.findViewById(R.id.participant_name_unsaved);
 				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 				holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
@@ -830,8 +836,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if (metadata != null && metadata.isPokeMessage())
 			{
-				setGroupParticipantName(convMessage, holder.participantDetails, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
-
+				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+				holder.stickerPlaceholder.setBackgroundResource(0);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				
 				// if (isDefaultTheme)
 				// {
 				// holder.poke.setVisibility(View.VISIBLE);
@@ -864,20 +873,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setBackgroundResource(0);
 
 				Sticker sticker = metadata.getSticker();
-
-				if (!convMessage.isSent())
-				{
-					if (firstMessageFromParticipant)
-					{
-						holder.stickerParticipantName.setVisibility(View.VISIBLE);
-						holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-						holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-					}
-					else
-					{
-						holder.stickerParticipantName.setVisibility(View.GONE);
-					}
-				}
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				
+//				if (!convMessage.isSent())
+//				{
+//					
+//					if (firstMessageFromParticipant)
+//					{
+//						holder.stickerParticipantName.setVisibility(View.VISIBLE);
+//						holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+//						holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+//					}
+//					else
+//					{
+//						holder.stickerParticipantName.setVisibility(View.GONE);
+//					}
+//				}
 
 				/*
 				 * If this is the default category, then the sticker are part of the app bundle itself
@@ -969,7 +981,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				CharSequence markedUp = convMessage.getMessage();
 				// Fix for bug where if a participant leaves the group chat, the
 				// participant's name is never shown
-				setGroupParticipantName(convMessage, holder.participantDetails, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
 
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
@@ -1123,7 +1135,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
 			{
-
+				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+				holder.stickerPlaceholder.setBackgroundResource(0);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
 				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
 				circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
@@ -1359,7 +1375,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// {
 			// holder.marginView.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE : View.GONE);
 			// }
-			setGroupParticipantName(convMessage, holder.participantDetails, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+			setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
 
 			// if (!convMessage.isSent())
 			// {
@@ -2186,13 +2202,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 
-	private void setGroupParticipantName(ConvMessage convMessage, View participantDetails, TextView participantNameFT, TextView participantNameFTUnsaved,
+	private void setGroupParticipantName(ConvMessage convMessage, View participantDetails, TextView participantName, TextView participantNameUnsaved,
 			boolean firstMessageFromParticipant)
 	{
-		if (participantNameFT != null)
-		{
-			participantNameFT.setClickable(false);
-		}
 		if (!convMessage.isSent())
 		{
 			if (firstMessageFromParticipant)
@@ -2206,19 +2218,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (number != null)
 				{
-					participantNameFT.setText(number);
-					participantNameFTUnsaved.setText("| " + name + " >>");
-					participantNameFTUnsaved.setVisibility(View.VISIBLE);
-					participantNameFT.setClickable(true);
+					participantName.setText(number);
+					participantNameUnsaved.setText("| " + name + " >>");
+					participantNameUnsaved.setVisibility(View.VISIBLE);
 				}
 				else
 				{
-					participantNameFT.setText(name);
+					participantName.setText(name);
 				}
 				participantDetails.setTag(convMessage);
 				participantDetails.setOnClickListener(contactClick);
 				participantDetails.setVisibility(View.VISIBLE);
-				participantNameFT.setVisibility(View.VISIBLE);
+				participantName.setVisibility(View.VISIBLE);
 			}
 		}
 	}
