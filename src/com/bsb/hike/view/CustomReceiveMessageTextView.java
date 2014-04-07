@@ -42,7 +42,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			int linesMaxWidth = 0;
 			int lines = 0;
 			
-			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+			//super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 			Layout layout = getLayout();
 			lines = layout.getLineCount();
 			float lastLine = layout.getLineWidth(lines - 1);
