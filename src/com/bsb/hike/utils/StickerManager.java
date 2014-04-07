@@ -83,6 +83,8 @@ public class StickerManager
 
 	public static final String STICKERS_UPDATED = "stickersUpdated";
 
+	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
+
 	public static int RECENT_STICKERS_COUNT = 30;
 
 	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1, R.drawable.sticker_10_love2, R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
@@ -654,9 +656,9 @@ public class StickerManager
 	public void removeStickerFromRecents(Sticker st)
 	{
 		boolean rem = recentStickers.remove(st);
-		Log.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+		Log.d(getClass().getSimpleName(), "Sticker removed from recents : " + rem);
 		// remove the sticker from cache too, recycling stuff is handled by the cache itself
-		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context)); 
+		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context));
 	}
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
@@ -913,5 +915,31 @@ public class StickerManager
 		File rDir = new File(recentsDir);
 		if (rDir.exists())
 			Utils.deleteFile(rDir);
+	}
+
+	public void deleteDefaultDownloadedStickers()
+	{
+		try
+		{
+			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.doggy.name());
+			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+			if(largeStickerDir.exists())
+				Utils.deleteFile(largeStickerDir);
+			if(smallStickerDir.exists())
+				Utils.deleteFile(smallStickerDir);
+
+			dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
+			largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+			if(largeStickerDir.exists())
+				Utils.deleteFile(largeStickerDir);
+			if(smallStickerDir.exists())
+				Utils.deleteFile(smallStickerDir);
+		}
+		catch (Exception e)
+		{
+
+		}
 	}
 }

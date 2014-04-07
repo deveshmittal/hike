@@ -292,6 +292,12 @@ public class HikeService extends Service
 			sm.setDialoguePref();
 		}
 
+		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, false))
+		{
+			sm.deleteDefaultDownloadedStickers();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true);
+			settings.edit().commit();
+		}
 	}
 
 	@Override
