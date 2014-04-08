@@ -1421,4 +1421,5 @@
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
 	<string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
+	<string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
 </resources>
