@@ -6,6 +6,8 @@
             <stroke
                 android:width="2dp"
                 android:color="@color/selected_msg_item_bg_lines" />
+            <solid
+                android:color="@android:color/transparent" />
         </shape>
     </item>
 
