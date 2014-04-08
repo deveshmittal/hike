@@ -10,9 +10,9 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 {
 	private String TAG = "CustomSendMessageTextView";
 	
-	private static final int widthTime12Hour = 56;
+	private static final int widthTime12Hour = 50;
 	
-	private static final int widthTime24Hour = 35;
+	private static final int widthTime24Hour = 30;
 	
 	private static final int widthMargin = 100;
 	
@@ -90,7 +90,6 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 				parentHeight = viewHeight;
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
-				linesMaxWidth += (int)(3 * Utils.densityMultiplier);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 			else
@@ -100,7 +99,6 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = (int) (viewHeight + (heightAddition * Utils.densityMultiplier));
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
-				linesMaxWidth += (int)(3 * Utils.densityMultiplier);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 		}

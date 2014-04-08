@@ -356,10 +356,10 @@
                     android:id="@+id/message_send"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="2.5dp"
-                    android:layout_marginLeft="7dp"
-                    android:layout_marginRight="3dp"
-                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="2dp"
                     android:gravity="left"
                     android:text="This is the message a much"
                     android:textColor="@color/chat_color"
@@ -384,7 +384,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignRight="@id/sent_message_inner_container"
-                android:layout_marginRight="3dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|right" >
                 
@@ -402,7 +401,7 @@
                 android:id="@+id/message_status"
                 android:layout_width="21dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
+                android:layout_marginLeft="2dp"
                 android:visibility="gone" />
             
             </LinearLayout>
@@ -413,7 +412,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/sent_message_inner_container"
                 android:layout_alignRight="@id/sent_message_inner_container"
-                android:layout_marginRight="3dp"
                 android:layout_marginTop="3dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|right" >
