@@ -573,10 +573,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-		if (Utils.hasHoneycomb())
-		{
-			// addInBitmapOptions(options, cache);
-		}
+//		if (Utils.hasHoneycomb())
+//		{
+//			 addInBitmapOptions(options, cache);
+//		}
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -621,10 +621,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-		if (Utils.hasHoneycomb())
-		{
-			addInBitmapOptions(options, cache);
-		}
+//		if (Utils.hasHoneycomb())
+//		{
+//			addInBitmapOptions(options, cache);
+//		}
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -672,10 +672,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-		if (Utils.hasHoneycomb())
-		{
-			addInBitmapOptions(options, cache);
-		}
+//		if (Utils.hasHoneycomb())
+//		{
+//			addInBitmapOptions(options, cache);
+//		}
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
