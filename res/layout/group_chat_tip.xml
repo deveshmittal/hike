@@ -34,8 +34,7 @@
         android:layout_toLeftOf="@id/divider"
         android:text="@string/tap_top_right_group_chat"
         android:textColor="#262D30"
-        android:textSize="14sp"
-        android:textStyle="bold|italic" />
+        android:textSize="14sp" />
 
     <View
         android:layout_width="match_parent"
