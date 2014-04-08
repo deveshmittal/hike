@@ -295,7 +295,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		adapter.addContact((ContactInfo) data);
 		int selectedCount = adapter.getSelectedContactCount();
-		if (adapter.getSelectedContactCount() == 1)
+		if (adapter.getSelectedContactCount() == 1 || multiSelectTitle == null)
 		{
 			setupMultiSelectActionBar();
 		}
