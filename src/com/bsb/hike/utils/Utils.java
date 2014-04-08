@@ -3580,6 +3580,9 @@ public class Utils
 
 	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
 	{
+		if(bitmap == null)
+			return null;
+		
 		if (Utils.hasHoneycomb())
 		{
 			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
