@@ -30,6 +30,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
@@ -327,6 +328,18 @@ public class FileTransferManager extends BroadcastReceiver
 	{
 		if(taskOverflowLimitAchieved())
 			return;
+		if(hikeFileType != HikeFileType.IMAGE)
+		{
+			handler.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				}
+			});
+			return;
+		}
 		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
