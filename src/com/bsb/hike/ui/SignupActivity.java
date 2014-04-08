@@ -1633,6 +1633,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			else
 			{
+				if (data == null)
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				selectedFileUri = data.getData();
 				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{

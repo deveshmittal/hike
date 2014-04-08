@@ -1203,6 +1203,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			else
 			{
+				if (data == null)
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				selectedFileUri = data.getData();
 				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{
