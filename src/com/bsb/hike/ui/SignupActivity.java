@@ -81,6 +81,7 @@ import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserCallback;
 import com.facebook.Response;
@@ -1191,18 +1192,26 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				prepareLayoutForFetchingNumber();
 			}
-			else if (value.equals(HikeConstants.DONE))
+			else 
 			{
-				removeAnimation();
-				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(null, false);
-				setAnimation();
-			}
-			else
-			{
+				if(Utils.getExternalStorageState() == ExternalStorageState.WRITEABLE)
+				{
+					//we should delete old profile image of the returning user
+					String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+					Utils.removeLargerProfileImageForMsisdn(msisdn);
+				}
+				if (value.equals(HikeConstants.DONE))
+				{
+					removeAnimation();
+				}
 				/* yay, got the actual MSISDN */
 				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName(null, false);
+				if (value.equals(HikeConstants.DONE))
+				{
+					setAnimation();
+				}
+
 			}
 			break;
 		case PULLING_PIN:
@@ -1633,6 +1642,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			else
 			{
+				if (data == null)
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				selectedFileUri = data.getData();
 				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{

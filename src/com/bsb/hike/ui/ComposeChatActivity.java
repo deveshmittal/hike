@@ -50,7 +50,6 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
-import com.google.android.gms.internal.co;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
@@ -295,7 +294,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		adapter.addContact((ContactInfo) data);
 		int selectedCount = adapter.getSelectedContactCount();
-		if (adapter.getSelectedContactCount() == 1)
+		if (adapter.getSelectedContactCount() == 1 || multiSelectTitle == null)
 		{
 			setupMultiSelectActionBar();
 		}

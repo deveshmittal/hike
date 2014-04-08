@@ -3117,6 +3117,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			findViewById(R.id.group_info_layout).setVisibility(View.VISIBLE);
 		}
+		findViewById(R.id.emo_btn).setVisibility(View.GONE);
 
 		boolean show = mConversationDb.wasOverlayDismissed(mConversation.getMsisdn());
 		if (!show)
@@ -3154,6 +3155,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeView.setEnabled(true);
 		}
 		findViewById((mConversation instanceof GroupConversation) ? R.id.group_info_layout : R.id.info_layout).setVisibility(View.GONE);
+		findViewById(R.id.emo_btn).setVisibility(View.VISIBLE);
 
 		findViewById(R.id.emo_btn).setEnabled(true);
 		findViewById(R.id.sticker_btn).setEnabled(true);

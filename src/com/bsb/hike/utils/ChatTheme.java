@@ -794,7 +794,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_mr_right_exam;
+			return R.drawable.ic_bubble_hikin_couple_mountain;
 		}
 
 		@Override
@@ -806,7 +806,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_mr_right_exam;
+			return R.drawable.ic_nudge_sent_custom_hikin_couple_mountain;
 		}
 
 		@Override
@@ -836,7 +836,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_mr_right_exam;
+			return R.color.bubble_hikin_couple_mountain;
 		}
 
 		@Override
@@ -889,7 +889,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_hikin_couple_mountain;
+			return R.drawable.ic_bubble_mr_right_exam;
 		}
 
 		@Override
@@ -901,7 +901,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_hikin_couple_mountain;
+			return R.drawable.ic_nudge_sent_custom_mr_right_exam;
 		}
 
 		@Override
@@ -931,7 +931,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_hikin_couple_mountain;
+			return R.color.bubble_mr_right_exam;
 		}
 
 		@Override

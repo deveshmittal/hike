@@ -1016,7 +1016,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (viewType == ViewType.SEND_HIKE)
 				{
-					if (!shownSdrIntroTip && convMessage.getState() == State.SENT_DELIVERED_READ)
+					if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
 					{
 						if (msgIdForSdrTip == -1)
 						{
