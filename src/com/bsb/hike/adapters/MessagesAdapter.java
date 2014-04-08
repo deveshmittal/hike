@@ -2786,7 +2786,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		time.setVisibility(View.VISIBLE);
 		if (message.isSent())
 		{
-			if (ext)
+			if(message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
+			{
+				if(ext)
+				{
+					status.setImageResource(R.drawable.ic_clock_white);
+				}
+				else
+				{
+					status.setImageResource(R.drawable.ic_clock);
+				}
+			}
+			else if (ext)
 			{
 				switch (message.getState())
 				{
