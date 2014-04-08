@@ -73,7 +73,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private ArrayList<HistoryEntry> history = new ArrayList<HistoryEntry>();
 
-	private long sizeLimit = 1024 * 1024 * 1024;
+	private long sizeLimit = HikeConstants.MAX_FILE_SIZE;
 
 	public DocumentSelectActivityDelegate delegate;
 
