@@ -575,7 +575,7 @@ public abstract class ImageWorker
 		// If we're running on Honeycomb or newer, try to use inBitmap
 		if (Utils.hasHoneycomb())
 		{
-			//addInBitmapOptions(options, cache);
+			// addInBitmapOptions(options, cache);
 		}
 
 		// Decode bitmap with inSampleSize set
@@ -686,7 +686,7 @@ public abstract class ImageWorker
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length);
 		}
 		catch (Exception e)
 		{

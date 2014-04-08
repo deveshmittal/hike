@@ -3,6 +3,7 @@ package com.bsb.hike.ui.fragments;
 import java.io.File;
 
 import android.app.ProgressDialog;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -26,6 +27,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.ProfileImageLoader;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ImageViewerFragment extends SherlockFragment implements LoaderCallbacks<Boolean>, OnClickListener
@@ -107,15 +109,25 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				BitmapDrawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
 				if (drawable == null)
 				{
-					drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
-							ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize, HikeMessengerApp.getLruCache()));
+					Bitmap b = ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize, HikeMessengerApp.getLruCache());
+					if (b != null)
+					{
+						drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
+						Logger.e(getClass().getSimpleName(), "Decode from file is returning null bitmap.");
+					}
+					else
+					{
+						// as bitmap is drawable, this means big image is either not downloaded or is corrupt or is currently in the downloading state,
+						// till then show blurred image if present
+						
+						//TODO : Sid
+					}
 				}
-				if (drawable != null)
-				{
-					downloadImage = false;
-					HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
-					imageView.setImageDrawable(drawable);
-				}
+
+				downloadImage = false;
+				HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+				imageView.setImageDrawable(drawable);
+
 			}
 			if (downloadImage)
 			{
