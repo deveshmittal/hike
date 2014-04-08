@@ -26,6 +26,7 @@ import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.ProfileImageLoader;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -103,7 +104,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 			File file = new File(basePath, fileName);
 
-			boolean downloadImage = true;
+			boolean downloadImage = false;
 			if (file.exists())
 			{
 				BitmapDrawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
@@ -114,24 +115,39 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 					{
 						drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
 						Logger.e(getClass().getSimpleName(), "Decode from file is returning null bitmap.");
+						if (drawable != null)
+						{
+							HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+						}
 					}
 					else
 					{
-						// as bitmap is drawable, this means big image is either not downloaded or is corrupt or is currently in the downloading state,
-						// till then show blurred image if present
-						
-						//TODO : Sid
+						Utils.removeLargerProfileImageForMsisdn(key);
+						drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
+						downloadImage = true;
 					}
 				}
 
-				downloadImage = false;
-				HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
 				imageView.setImageDrawable(drawable);
-
 			}
+			else
+			{
+				File f = new File(basePath, Utils.getTempProfileImageFileName(key));
+				if (f.exists())
+				{
+					BitmapDrawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
+					imageView.setImageDrawable(drawable);
+				}
+				else
+				{
+					downloadImage = true;
+				}
+			}
+
 			if (downloadImage)
 			{
-				iconLoader.loadImage(mappedId, imageView);
+				BitmapDrawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
+				imageView.setImageDrawable(drawable);
 
 				// imageView.setImageDrawable(IconCacheManager.getInstance()
 				// .getIconForMSISDN(mappedId));
