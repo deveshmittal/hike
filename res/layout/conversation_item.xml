@@ -122,4 +122,9 @@
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/home_list_divider"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>
