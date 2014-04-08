@@ -1568,48 +1568,60 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
 			{
+				ImageView ftAction;
+				View circularProgressBg;
+				if(thumbnail != null)
+				{
+					ftAction = holder.ftAction;
+					circularProgressBg = holder.circularProgressBg;
+				}
+				else
+				{
+					ftAction = holder.ftActionExt;
+					circularProgressBg = holder.circularProgressBgExt;
+				}
 				switch (fss.getFTState())
 				{
 				case NOT_STARTED:
 					if (!convMessage.isSent())
 					{
-						holder.ftAction.setImageResource(R.drawable.ic_download_image_video);
-						holder.ftAction.setVisibility(View.VISIBLE);
-						holder.circularProgressBg.setVisibility(View.VISIBLE);
+						ftAction.setImageResource(R.drawable.ic_download_image_video);
+						ftAction.setVisibility(View.VISIBLE);
+						circularProgressBg.setVisibility(View.VISIBLE);
 					}
 					else if (TextUtils.isEmpty(hikeFile.getFileKey()))
 					{
-						holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
-						holder.ftAction.setVisibility(View.VISIBLE);
-						holder.circularProgressBg.setVisibility(View.VISIBLE);
+						ftAction.setImageResource(R.drawable.ic_retry_image_video);
+						ftAction.setVisibility(View.VISIBLE);
+						circularProgressBg.setVisibility(View.VISIBLE);
 					}
 					break;
 				case INITIALIZED:
 					break;
 				case IN_PROGRESS:
-					holder.ftAction.setImageResource(R.drawable.ic_pause_image_video);
-					holder.ftAction.setVisibility(View.VISIBLE);
-					holder.circularProgressBg.setVisibility(View.VISIBLE);
+					ftAction.setImageResource(R.drawable.ic_pause_image_video);
+					ftAction.setVisibility(View.VISIBLE);
+					circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				case PAUSING:
-					holder.ftAction.setImageResource(0);
-					holder.ftAction.setVisibility(View.VISIBLE);
-					holder.circularProgressBg.setVisibility(View.VISIBLE);
+					ftAction.setImageResource(0);
+					ftAction.setVisibility(View.VISIBLE);
+					circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				case PAUSED:
-					holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
-					holder.ftAction.setVisibility(View.VISIBLE);
-					holder.circularProgressBg.setVisibility(View.VISIBLE);
+					ftAction.setImageResource(R.drawable.ic_retry_image_video);
+					ftAction.setVisibility(View.VISIBLE);
+					circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				case ERROR:
-					holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
-					holder.ftAction.setVisibility(View.VISIBLE);
-					holder.circularProgressBg.setVisibility(View.VISIBLE);
+					ftAction.setImageResource(R.drawable.ic_retry_image_video);
+					ftAction.setVisibility(View.VISIBLE);
+					circularProgressBg.setVisibility(View.VISIBLE);
 					break;
 				default:
 					break;
 				}
-				holder.ftAction.setScaleType(ScaleType.CENTER);
+				ftAction.setScaleType(ScaleType.CENTER);
 			}
 			else if (hikeFileType != HikeFileType.AUDIO_RECORDING)
 			{
@@ -1666,7 +1678,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
 				{
-					showTransferInitialization(holder, hikeFile);
+					showTransferInitialization(holder, hikeFile, thumbnail);
 				}
 				else
 				{
@@ -1687,7 +1699,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					case CANCELLED:
 						break;
 					case INITIALIZED:
-						showTransferInitialization(holder, hikeFile);
+						showTransferInitialization(holder, hikeFile, thumbnail);
 						// setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
 						// holder.fileType.setVisibility(View.VISIBLE);
 						break;
@@ -1695,16 +1707,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						// Logger.d(getClass().getSimpleName(), "error display");
 						// holder.image.setVisibility(View.VISIBLE);
 						// holder.image.setImageResource(getDownloadFailedResIcon());
-						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
 						break;
 					case PAUSING:
-						showTransferInitialization(holder, hikeFile);
+						showTransferInitialization(holder, hikeFile, thumbnail);
 						break;
 					case PAUSED:
-						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
 						break;
 					case IN_PROGRESS:
-						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
 						break;
 					default:
 					}
@@ -1716,17 +1728,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					switch (fss.getFTState())
 					{
 					case INITIALIZED:
-						showTransferInitialization(holder, hikeFile);
+						showTransferInitialization(holder, hikeFile, thumbnail);
 						break;
 					case PAUSING:
-						showTransferInitialization(holder, hikeFile);
+						showTransferInitialization(holder, hikeFile, thumbnail);
 						break;
 					case PAUSED:
 					case ERROR:
-						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
 						break;
 					case IN_PROGRESS:
-						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent());
+						showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
 						break;
 					case NOT_STARTED:
 					case CANCELLED:
@@ -2334,10 +2346,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile)
+	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile, Drawable thumbnail)
 	{
-		if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO)
-				|| (hikeFile.getHikeFileType() == HikeFileType.LOCATION))
+		if (((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO)) && thumbnail != null)
+		{
+			holder.wating.setVisibility(View.VISIBLE);
+			holder.circularProgressBg.setVisibility(View.VISIBLE);
+		}
+		else if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 		{
 			holder.wating.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2353,17 +2369,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void showTransferProgress(ViewHolder holder, FileSavedState fss, long msgId, HikeFile hikeFile, boolean isSent)
+	private void showTransferProgress(ViewHolder holder, FileSavedState fss, long msgId, HikeFile hikeFile, boolean isSent, Drawable thumbnail)
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
 		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
 		{
-			showTransferInitialization(holder, hikeFile);
+			showTransferInitialization(holder, hikeFile, thumbnail);
 		}
 		else
 		{
-			if ((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO))
+			if (((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO)) && (thumbnail != null))
 			{
 				holder.circularProgress.setProgress(progress * 0.01f);
 				holder.circularProgress.setVisibility(View.VISIBLE);
@@ -2371,7 +2387,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
 			{
-				showTransferInitialization(holder, hikeFile);
+				showTransferInitialization(holder, hikeFile, thumbnail);
 			}
 			else
 			{
