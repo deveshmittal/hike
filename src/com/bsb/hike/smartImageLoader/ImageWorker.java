@@ -119,6 +119,7 @@ public abstract class ImageWorker
 
 		BitmapDrawable value = null;
 
+		imageView.setImageDrawable(null);
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
@@ -161,10 +162,10 @@ public abstract class ImageWorker
 			// for more info on what was changed.
 			task.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, data);
 		}
-		else
-		{
-			imageView.setImageDrawable(null);
-		}
+		// else
+		// {
+		// imageView.setImageDrawable(null);
+		// }
 	}
 
 	private void setDefaultAvatar(ImageView imageView, String data)
@@ -573,10 +574,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-//		if (Utils.hasHoneycomb())
-//		{
-//			 addInBitmapOptions(options, cache);
-//		}
+		// if (Utils.hasHoneycomb())
+		// {
+		// addInBitmapOptions(options, cache);
+		// }
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -611,7 +612,6 @@ public abstract class ImageWorker
 	 */
 	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight, HikeLruCache cache)
 	{
-
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
@@ -621,10 +621,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-//		if (Utils.hasHoneycomb())
-//		{
-//			addInBitmapOptions(options, cache);
-//		}
+		// if (Utils.hasHoneycomb())
+		// {
+		// addInBitmapOptions(options, cache);
+		// }
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -672,10 +672,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-//		if (Utils.hasHoneycomb())
-//		{
-//			addInBitmapOptions(options, cache);
-//		}
+		// if (Utils.hasHoneycomb())
+		// {
+		// addInBitmapOptions(options, cache);
+		// }
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
