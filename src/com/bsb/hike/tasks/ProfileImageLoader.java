@@ -12,10 +12,17 @@ import java.net.URLConnection;
 import javax.net.ssl.HttpsURLConnection;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.adapters.ProfileAdapter;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -32,6 +39,10 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 
 	private String fileName;
 
+	private String key;
+
+	private boolean isStatusImage;
+
 	public ProfileImageLoader(Context context, String id, String fileName, boolean hasCustomIcon, boolean statusImage)
 	{
 		this(context, id, fileName, hasCustomIcon, statusImage, null);
@@ -40,6 +51,9 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 	public ProfileImageLoader(Context context, String id, String fileName, boolean hasCustomIcon, boolean statusImage, String url)
 	{
 		super(context);
+
+		this.isStatusImage = statusImage;
+		this.key = id;
 
 		if (TextUtils.isEmpty(url))
 		{
@@ -70,7 +84,7 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 		}
 
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-		this.fileName = filePath + "/" + fileName;
+		this.fileName = filePath + "/" + Utils.getTempProfileImageFileName(key);
 	}
 
 	@Override
@@ -123,11 +137,13 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 		catch (MalformedURLException e)
 		{
 			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
+			Utils.removeTempProfileImage(key);
 			return Boolean.FALSE;
 		}
 		catch (IOException e)
 		{
 			Logger.e(getClass().getSimpleName(), "Error while downloding file", e);
+			Utils.removeTempProfileImage(key);
 			return Boolean.FALSE;
 		}
 		finally
@@ -146,9 +162,21 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 			catch (IOException e)
 			{
 				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
+				Utils.removeTempProfileImage(key);
 				return Boolean.FALSE;
 			}
 		}
+
+		Utils.renameTempProfileImage(key);
+
+		String keypp = key;
+
+		if (!isStatusImage)
+			keypp = key + ProfileAdapter.PROFILE_PIC_SUFFIX;
+
+		HikeMessengerApp.getLruCache().remove(keypp);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, key);
 		return Boolean.TRUE;
 	}
 
