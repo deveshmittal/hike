@@ -619,7 +619,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 
 			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
-
+			if(type == null)
+				type = presentIntent.getType();
+			
 			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 		}
