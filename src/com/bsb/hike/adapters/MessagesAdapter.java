@@ -1586,20 +1586,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 			}
-			else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+			else if (((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO)) && (thumbnail != null))
 			{
 				ImageView ftAction;
 				View circularProgressBg;
-				if(thumbnail != null)
-				{
-					ftAction = holder.ftAction;
-					circularProgressBg = holder.circularProgressBg;
-				}
-				else
-				{
-					ftAction = holder.ftActionExt;
-					circularProgressBg = holder.circularProgressBgExt;
-				}
+				ftAction = holder.ftAction;
+				circularProgressBg = holder.circularProgressBg;
 				switch (fss.getFTState())
 				{
 				case NOT_STARTED:

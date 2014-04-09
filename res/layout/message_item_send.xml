@@ -86,7 +86,7 @@
 	            android:layout_height="46dp"
 	            android:background="@drawable/bg_ft_progress"
 	            android:layout_centerVertical="true"
-	            android:layout_marginRight="13dp"
+	            android:layout_marginRight="8dp"
 	            android:gravity="center"
 	            android:visibility="gone" >
 	            <ProgressBar
@@ -299,7 +299,7 @@
                 
                 	<LinearLayout
                     android:id="@+id/file_details"
-                    android:layout_width="140dp"
+                    android:layout_width="137dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="left|top"

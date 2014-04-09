@@ -316,7 +316,7 @@
                 
 	                <LinearLayout
                     android:id="@+id/file_details"
-                    android:layout_width="140dp"
+                    android:layout_width="137dp"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="left|top"
@@ -419,7 +419,7 @@
 	            android:layout_height="46dp"
 	            android:background="@drawable/bg_ft_progress"
 	            android:layout_centerVertical="true"
-	            android:layout_marginLeft="13dp"
+	            android:layout_marginLeft="8dp"
 	            android:layout_toRightOf="@id/receive_message_container"
 	            android:visibility="gone"
 	            android:gravity="center" >
