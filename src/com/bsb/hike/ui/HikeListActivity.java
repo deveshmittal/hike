@@ -233,6 +233,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			@Override
 			public void onClick(View v)
 			{
+				confirmDialog.dismiss();
 				showNativeSMSPopup();
 			}
 		};
