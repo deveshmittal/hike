@@ -328,7 +328,10 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 				errorDialog.dismiss();
 			}
 		});
-		errorDialog.show();
+		if(!this.isFinishing())
+		{
+			errorDialog.show();
+		}
 	}
 
 }
