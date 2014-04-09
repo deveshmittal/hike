@@ -135,8 +135,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View messageContainer;
 
-		View messageItem;
-
 		TextView messageInfo;
 
 		CheckBox smsToggle;
@@ -577,7 +575,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
 				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_sent_custom);
 				holder.messageContainer = v.findViewById(R.id.sent_message_container);
-				holder.messageItem = v.findViewById(R.id.bubble_container);
 				if (holder.messageTextView == null)
 				{
 					holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
@@ -652,7 +649,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
 				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_receive_custom);
 				holder.messageContainer = v.findViewById(R.id.receive_message_container);
-				holder.messageItem = v.findViewById(R.id.bubble_container);
 				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.dayLeft = v.findViewById(R.id.day_left);
@@ -1505,13 +1501,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// holder.participantNameFT.setVisibility(View.GONE);
 			// }
 			// }
-			// holder.messageContainer.setTag(convMessage);
-			// holder.messageContainer.setOnClickListener(this);
-			// holder.messageContainer.setOnLongClickListener(this);
+			holder.messageContainer.setTag(convMessage);
+			holder.messageContainer.setOnClickListener(this);
+			holder.messageContainer.setOnLongClickListener(this);
 
-			holder.messageItem.setTag(convMessage);
-			holder.messageItem.setOnClickListener(this);
-			holder.messageItem.setOnLongClickListener(this);
+			if(holder.circularProgressBgExt != null)
+			{
+				holder.circularProgressBgExt.setTag(convMessage);
+				holder.circularProgressBgExt.setOnClickListener(this);
+				holder.circularProgressBgExt.setOnLongClickListener(this);
+			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay Visibility
 			// Tap overlay will be there only in case of image and video.
