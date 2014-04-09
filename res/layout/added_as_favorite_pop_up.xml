@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="315dp"
+    android:layout_width="270dp"
     android:layout_height="match_parent" >
 
     <LinearLayout
@@ -14,11 +14,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="33dp"
-            android:layout_marginTop="33dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
             android:src="@drawable/icon_favorites" />
 
         <com.bsb.hike.view.CustomFontTextView
+            android:gravity="center"
             android:id="@+id/addedYouAsFavHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,7 +29,8 @@
             android:layout_marginRight="30dp"
             android:text="@string/addedYouAsFavorite"
             android:textColor="#33312e"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/addedYouAsFavDescription"
