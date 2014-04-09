@@ -1423,7 +1423,7 @@
     <string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
     <string name="addedYouAsFavorite">%1$s added you as Favorite</string>
     <string name="addedYouFrindDescription">
-<![CDATA[ You\'ll now be sharing your <font color="vi#ef554e">last seen</font> and <font color="#0f8fe1">status updates</font> with %1$s. Would you like to request %2$s to do the same?
+<![CDATA[ You\'ll now be sharing your <font color="#ef554e">last seen</font> and <font color="#0f8fe1">status updates</font> with %1$s. Would you like to request %2$s to do the same?
 	    ]]>
     </string>
 
