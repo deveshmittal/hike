@@ -227,7 +227,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
 		confirmDialog.setHeader(R.string.invite_friends);
-		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg));
+		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg, selectedContacts.size()));
 		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 		{
 
