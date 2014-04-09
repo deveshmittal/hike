@@ -208,14 +208,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 					{
 						intent = new Intent(HikeListActivity.this, TellAFriend.class);
 					}
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
 				}
 				else
 				{
-					intent = new Intent(HikeListActivity.this, SettingsActivity.class);
+					onBackPressed();
 				}
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-
 			}
 		});
 

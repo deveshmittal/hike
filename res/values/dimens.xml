@@ -117,4 +117,5 @@
 	<dimen name="contact_list_item_padding">14dp</dimen>
 	<dimen name="contact_list_divider_padding">8dp</dimen>
 	<dimen name="contact_list_header_padding">12dp</dimen>
+	<dimen name="gallery_selection_padding">20dp</dimen>
 </resources>

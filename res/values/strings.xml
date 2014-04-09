@@ -1426,5 +1426,5 @@
 <![CDATA[ You\'ll now be sharing your <font color="#ef554e">last seen</font> and <font color="#0f8fe1">status updates</font> with %1$s. Would you like to request %2$s to do the same?
 	    ]]>
     </string>
-
+	<string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
 </resources>

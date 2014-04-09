@@ -54,7 +54,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private boolean loadingMoreMessages;
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.PROTIP_ADDED };
+			HikePubSub.PROTIP_ADDED, HikePubSub.ICON_CHANGED };
 
 	private String[] friendMsisdns;
 
@@ -168,7 +168,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			previousFirstVisibleItem = firstVisibleItem;
 			previousEventTime = currTime;
 		}
-
 
 		if (!reachedEnd && !loadingMoreMessages && !statusMessages.isEmpty()
 				&& (firstVisibleItem + visibleItemCount) >= (statusMessages.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
@@ -326,6 +325,21 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				public void run()
 				{
 					addProtip((Protip) object);
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
