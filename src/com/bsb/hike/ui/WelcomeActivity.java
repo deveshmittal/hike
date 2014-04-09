@@ -189,7 +189,10 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			{
 				intent.putExtra(HikeConstants.Extras.MSISDN, true);
 			}
-			startActivity(intent);
+			if(!this.isFinishing())
+			{
+				startActivity(intent);
+			}
 			finish();
 		}
 	}
