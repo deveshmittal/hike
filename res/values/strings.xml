@@ -1421,9 +1421,9 @@
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
 	<string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
     <string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
-    <string name="addedYouAsFavorite">%1$s added you as Favorite</string>
+    <string name="addedYouAsFavorite">Added %1$s to Favorites</string>
     <string name="addedYouFrindDescription">
-<![CDATA[ You\'ll now be sharing your <font color="#ef554e">last seen</font> and <font color="#0f8fe1">status updates</font> with %1$s. Would you like to request %2$s to do the same?
+<![CDATA[ You are now sharing your <font color="#ef554e">Last Seen</font> and <font color="#0f8fe1">Status Updates</font> with %1$s. Would you like to request him to do the same?
 	    ]]>
     </string>
 	<string name="contacts_upper_case">CONTACTS</string>
@@ -1434,7 +1434,7 @@
 	<string name="sent_you_favorite_request_detailed">%1$s is sharing his Last Seen and Status Updates with you. Would you like to do the same? Add %1$s to your Favorites List.</string>
 	<string name="you_accepted_favorite_request_details">Great! %1$s will now able to see your Last Seen and Status Updates.</string>
 	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
-	<string name="add_as_favorites_profile">Would you like to add %1$s as a favorite to share your Last Seen and Status Updates?</string>
+	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
 	<string name="add_as_favorite_menu">Add as a favorite</string>
 	<string name="remove_from_favorites">Remove from favorites</string>
 	<string name="favorite_request_sent">Added as a favorite</string>
