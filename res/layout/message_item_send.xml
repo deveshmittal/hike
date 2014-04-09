@@ -93,7 +93,7 @@
 		            android:id="@+id/initializing_ext"
 		            android:layout_width="43dp"
 		            android:layout_height="43dp"
-		            android:indeterminateDrawable="@drawable/circular_double_spinner"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner_thin"
 				    android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress
 	               android:id="@+id/circular_progress_ext"
