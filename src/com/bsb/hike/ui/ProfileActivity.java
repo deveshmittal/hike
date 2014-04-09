@@ -1921,14 +1921,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			final ContactInfo contactInfo = tempContactInfo;
 
+			if (tempContactInfo.isUnknownContact())
+			{
+				optionsList.add(getString(R.string.add_to_contacts));
+			}
 			optionsList.add(getString(R.string.send_message));
 			if (!tempContactInfo.isOnhike())
 			{
 				optionsList.add(getString(R.string.invite_to_hike));
-			}
-			if (tempContactInfo.isUnknownContact())
-			{
-				optionsList.add(getString(R.string.add_to_contacts));
 			}
 			if (isGroupOwner)
 			{

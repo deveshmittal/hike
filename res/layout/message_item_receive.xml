@@ -212,15 +212,15 @@
 			            
 	                    <ProgressBar
 				            android:id="@+id/initializing"
-				            android:layout_width="51dp"
-				            android:layout_height="51dp"
+				            android:layout_width="47dp"
+				            android:layout_height="47dp"
 				            android:indeterminateDrawable="@drawable/circular_double_spinner"
 				            android:layout_centerInParent="true" />
 			            <com.bsb.hike.view.HoloCircularProgress
 			               xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
 			               android:id="@+id/circular_progress"
-			               android:layout_width="64dp"
-			               android:layout_height="64dp"
+			               android:layout_width="56dp"
+			               android:layout_height="56dp"
 			               app:progress_color="@color/white_85"
 			               app:progress_background_color="@color/white_45"
 			               android:gravity="center"
@@ -316,7 +316,7 @@
                 
 	                <LinearLayout
                     android:id="@+id/file_details"
-                    android:layout_width="140dp"
+                    android:layout_width="137dp"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="left|top"
@@ -419,16 +419,16 @@
 	            android:layout_height="46dp"
 	            android:background="@drawable/bg_ft_progress"
 	            android:layout_centerVertical="true"
-	            android:layout_marginLeft="13dp"
+	            android:layout_marginLeft="8dp"
 	            android:layout_toRightOf="@id/receive_message_container"
 	            android:visibility="gone"
 	            android:gravity="center" >
 			
 	            <ProgressBar
 		            android:id="@+id/initializing_ext"
-		            android:layout_width="43dp"
-		            android:layout_height="43dp"
-		            android:indeterminateDrawable="@drawable/circular_double_spinner"
+		            android:layout_width="37dp"
+		            android:layout_height="37dp"
+		            android:indeterminateDrawable="@drawable/circular_double_spinner_thin"
 				    android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress
 	               xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
@@ -551,8 +551,8 @@
                 
                 <ProgressBar
 		            android:id="@+id/rec_initializing"
-		            android:layout_width="64dp"
-		            android:layout_height="64dp"
+		            android:layout_width="54dp"
+		            android:layout_height="54dp"
 		            android:indeterminateDrawable="@drawable/circular_double_spinner_dark"
 		            android:layout_centerInParent="true" />
 	            <com.bsb.hike.view.HoloCircularProgress

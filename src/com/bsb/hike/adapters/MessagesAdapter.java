@@ -135,8 +135,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View messageContainer;
 
-		View messageItem;
-
 		TextView messageInfo;
 
 		CheckBox smsToggle;
@@ -577,7 +575,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
 				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_sent_custom);
 				holder.messageContainer = v.findViewById(R.id.sent_message_container);
-				holder.messageItem = v.findViewById(R.id.bubble_container);
 				if (holder.messageTextView == null)
 				{
 					holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
@@ -652,7 +649,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
 				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_receive_custom);
 				holder.messageContainer = v.findViewById(R.id.receive_message_container);
-				holder.messageItem = v.findViewById(R.id.bubble_container);
 				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.dayLeft = v.findViewById(R.id.day_left);
@@ -839,8 +835,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
 				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-				
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				if (holder.stickerParticipantNameUnsaved != null)
+				{
+					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
 				// if (isDefaultTheme)
 				// {
 				// holder.poke.setVisibility(View.VISIBLE);
@@ -874,8 +873,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				Sticker sticker = metadata.getSticker();
 				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-				
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				if (holder.stickerParticipantNameUnsaved != null)
+				{
+					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
 //				if (!convMessage.isSent())
 //				{
 //					
@@ -1150,7 +1152,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
 				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				if (holder.stickerParticipantNameUnsaved != null)
+				{
+					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
 				
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
 				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
@@ -1495,13 +1501,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// holder.participantNameFT.setVisibility(View.GONE);
 			// }
 			// }
-			// holder.messageContainer.setTag(convMessage);
-			// holder.messageContainer.setOnClickListener(this);
-			// holder.messageContainer.setOnLongClickListener(this);
+			holder.messageContainer.setTag(convMessage);
+			holder.messageContainer.setOnClickListener(this);
+			holder.messageContainer.setOnLongClickListener(this);
 
-			holder.messageItem.setTag(convMessage);
-			holder.messageItem.setOnClickListener(this);
-			holder.messageItem.setOnLongClickListener(this);
+			if(holder.circularProgressBgExt != null)
+			{
+				holder.circularProgressBgExt.setTag(convMessage);
+				holder.circularProgressBgExt.setOnClickListener(this);
+				holder.circularProgressBgExt.setOnLongClickListener(this);
+			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay Visibility
 			// Tap overlay will be there only in case of image and video.
@@ -1586,20 +1595,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 			}
-			else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+			else if (((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO)) && (thumbnail != null))
 			{
 				ImageView ftAction;
 				View circularProgressBg;
-				if(thumbnail != null)
-				{
-					ftAction = holder.ftAction;
-					circularProgressBg = holder.circularProgressBg;
-				}
-				else
-				{
-					ftAction = holder.ftActionExt;
-					circularProgressBg = holder.circularProgressBgExt;
-				}
+				ftAction = holder.ftAction;
+				circularProgressBg = holder.circularProgressBg;
 				switch (fss.getFTState())
 				{
 				case NOT_STARTED:
@@ -1779,7 +1780,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
-				if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
 					if(thumbnail != null)
 					{
@@ -2551,9 +2552,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
 			{
 				number = message.getGroupParticipantMsisdn();
-				optionsList.add("Add to contacts");
+				optionsList.add(context.getString(R.string.add_to_contacts));
 			}
-			optionsList.add("Message contact");
+			optionsList.add(context.getString(R.string.send_message));
 			final String[] options = new String[optionsList.size()];
 			optionsList.toArray(options);
 
@@ -2576,13 +2577,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				public void onClick(DialogInterface dialog, int which)
 				{
 					String option = options[which];
-					if (("Add to contacts").equals(option))
+					if ((context.getString(R.string.add_to_contacts)).equals(option))
 					{
 						List<ContactInfoData> items = new ArrayList<ContactInfoData>();
 						items.add(new ContactInfoData(DataType.PHONE_NUMBER, message.getGroupParticipantMsisdn(), "Mobile"));
 						Utils.addToContacts(items, name, context);
 					}
-					else if (("Message contact").equals(option))
+					else if ((context.getString(R.string.send_message)).equals(option))
 					{
 						Intent intent = new Intent();
 						// If the contact info was made using a group conversation, then the
