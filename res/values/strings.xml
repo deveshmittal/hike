@@ -1447,4 +1447,5 @@
     <string name="favorites_on_hike_tut">Favorites on hike</string>
     <string name="start_adding_favorites">Start adding favorites</string>
     <string name="favorites_upper_case">FAVORITES</string>
+    <string name="sent_favorite_request_tab">is now sharing Last Seen and Status Updates. Would you like to do the same?</string>
 </resources>

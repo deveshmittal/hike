@@ -746,7 +746,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					else if (viewType == ViewType.FRIEND_REQUEST)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.sent_you_favorite_request);
+						lastSeen.setText(R.string.sent_favorite_request_tab);
 
 						ImageView acceptBtn = (ImageView) convertView.findViewById(R.id.accept);
 						ImageView rejectBtn = (ImageView) convertView.findViewById(R.id.reject);
