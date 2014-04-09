@@ -839,8 +839,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
 				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-				
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				if (holder.stickerParticipantNameUnsaved != null)
+				{
+					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
 				// if (isDefaultTheme)
 				// {
 				// holder.poke.setVisibility(View.VISIBLE);
@@ -874,8 +877,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				Sticker sticker = metadata.getSticker();
 				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-				
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				if (holder.stickerParticipantNameUnsaved != null)
+				{
+					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
 //				if (!convMessage.isSent())
 //				{
 //					
@@ -1150,7 +1156,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
 				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				if (holder.stickerParticipantNameUnsaved != null)
+				{
+					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
 				
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
 				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
