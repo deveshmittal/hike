@@ -142,6 +142,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	{
 		this.onSignupTaskProgressUpdate = (OnSignupTaskProgressUpdate) activity;
 		this.context = activity;
+		SignupTask.isAlreadyFetchingNumber = false; 
 	}
 
 	public static SignupTask getSignupTask(Activity activity)
