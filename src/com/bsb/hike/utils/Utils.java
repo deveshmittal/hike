@@ -3766,9 +3766,9 @@ public class Utils
 
 	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
 	{
+		toggleFavorite(context, contactInfo, isFtueContact);
 		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
 		{
-			toggleFavorite(context, contactInfo, isFtueContact);
 			return;
 		}
 
@@ -3778,7 +3778,6 @@ public class Utils
 			@Override
 			public void positiveClicked(Dialog dialog)
 			{
-				toggleFavorite(context, contactInfo, isFtueContact);
 				dialog.dismiss();
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
