@@ -628,11 +628,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public void cancelTask()
 	{
 		this.cancel(true);
-		if (signupTask != null)
-		{
-			signupTask.isRunning = false;
-		}
-		signupTask = null;
 		Logger.d("SignupTask", "cancelling it manually");
 		unregisterReceiver();
 	}
