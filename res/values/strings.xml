@@ -1448,4 +1448,6 @@
     <string name="start_adding_favorites">Start adding favorites</string>
     <string name="favorites_upper_case">FAVORITES</string>
     <string name="sent_favorite_request_tab">is now sharing Last Seen and Status Updates. Would you like to do the same?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">Tap here to dismiss favorite suggestions</string>
+    <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
 </resources>
