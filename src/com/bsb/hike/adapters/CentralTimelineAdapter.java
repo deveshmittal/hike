@@ -657,24 +657,9 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
-			FavoriteType favoriteType;
-			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-			{
-				favoriteType = FavoriteType.FRIEND;
-			}
-			else
-			{
-				favoriteType = FavoriteType.REQUEST_SENT;
-				Toast.makeText(context, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
-			}
+			Utils.addFavorite(context, contactInfo, true);
 
-			/*
-			 * Cloning the object since we don't want to send the ftue reference.
-			 */
 			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
-
-			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo2, favoriteType);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK, contactInfo2.getMsisdn());
 

@@ -1342,10 +1342,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if (contactInfo.isOnhike())
 		{
-			contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
-
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			Utils.addFavorite(this, contactInfo, false);
 		}
 		else
 		{

@@ -156,6 +156,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -3763,5 +3764,68 @@ public class Utils
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false));
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
+	}
+
+	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
+	{
+		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
+		{
+			toggleFavorite(context, contactInfo, isFtueContact);
+			return;
+		}
+
+		HikeDialog.showDialog(context, HikeDialog.FAVORITE_ADDED_DIALOG, new HikeDialog.HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+				toggleFavorite(context, contactInfo, isFtueContact);
+				dialog.dismiss();
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+				dialog.dismiss();
+			}
+		}, contactInfo.getFirstName());
+	}
+
+	private static void toggleFavorite(Context context, ContactInfo contactInfo, boolean isFtueContact)
+	{
+		FavoriteType favoriteType;
+		if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+		{
+			favoriteType = FavoriteType.FRIEND;
+		}
+		else
+		{
+			favoriteType = FavoriteType.REQUEST_SENT;
+			Toast.makeText(context, R.string.favorite_request_sent, Toast.LENGTH_SHORT).show();
+		}
+
+		Pair<ContactInfo, FavoriteType> favoriteAdded;
+
+		if (isFtueContact)
+		{
+			/*
+			 * Cloning the object since we don't want to send the ftue reference.
+			 */
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
+			favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo2, favoriteType);
+		}
+		else
+		{
+			favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 }
