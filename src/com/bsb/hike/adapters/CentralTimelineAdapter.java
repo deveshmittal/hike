@@ -426,8 +426,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case FTUE_ITEM:
-			viewHolder.name.setText(R.string.friends_ftue_item_label);
-			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_friends);
+			viewHolder.name.setText(R.string.favorites_ftue_item_label);
+			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_favorites);
 
 			viewHolder.contactsContainer.removeAllViews();
 

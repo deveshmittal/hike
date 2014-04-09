@@ -1427,7 +1427,7 @@
 	    ]]>
     </string>
 	<string name="contacts_upper_case">CONTACTS</string>
-	<string name="tap_plus_add_favorites">Tap + to add as favorites</string>
+	<string name="tap_plus_add_favorites">Tap + to add to Favorites</string>
 	<string name="favorite_request_pending">Added as a favorite</string>
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
@@ -1450,4 +1450,6 @@
     <string name="sent_favorite_request_tab">is now sharing Last Seen and Status Updates. Would you like to do the same?</string>
     <string name="ftue_favorites_tap_dismiss_favorite_suggest">Tap here to dismiss favorite suggestions</string>
     <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
+    <string name="favorites_ftue_item_label">Add Favorites</string>
+    <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
 </resources>
