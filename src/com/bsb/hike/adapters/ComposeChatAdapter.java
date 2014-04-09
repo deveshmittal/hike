@@ -210,7 +210,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		ContactInfo friendsSection = null;
 		if (!filteredFriendsList.isEmpty())
 		{
-			friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
+			friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.favorites_upper_case), FRIEND_PHONE_NUM);
 		}
 		updateFriendsList(friendsSection, false, false);
 		if (isHikeContactsPresent())
@@ -278,6 +278,16 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public int getSelectedContactCount()
 	{
 		return selectedPeople.size() + existingParticipants.size();
+	}
+
+	public int getCurrentSelection()
+	{
+		return selectedPeople.size();
+	}
+
+	public int getExistingSelection()
+	{
+		return existingParticipants.size();
 	}
 
 	public void setShowExtraAtFirst(boolean showExtraAtFirst)

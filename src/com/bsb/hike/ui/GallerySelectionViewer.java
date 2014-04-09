@@ -51,7 +51,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private ArrayList<GalleryItem> galleryGridItems;
 
-	private InitiateMultiFileTransferTask fileTransferTask;
+	private volatile InitiateMultiFileTransferTask fileTransferTask;
 
 	private ProgressDialog progressDialog;
 
@@ -65,6 +65,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		if (object instanceof InitiateMultiFileTransferTask)
 		{
+			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
 

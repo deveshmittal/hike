@@ -95,8 +95,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
-                android:textColor="@color/profile_small_text"
-                android:textSize="12sp" />
+                android:textColor="@color/updates_text"
+                android:textSize="16sp"
+                android:textStyle="italic" />
         </LinearLayout>
 
         <com.bsb.hike.view.CustomFontTextView

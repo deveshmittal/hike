@@ -107,7 +107,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private DialogShowing dialogShowing;
 
-	private int[] headers = { R.string.updates, R.string.chats, R.string.friends };
+	private int[] headers = { R.string.updates, R.string.chats, R.string.contacts_upper_case };
 
 	private int[] tabIcons = { R.drawable.updates_tab, R.drawable.chats_tab, R.drawable.friends_tab };
 
@@ -715,7 +715,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
 
-					String titleString = getResources().getString(R.string.add_friend_popup_msg);
+					String titleString = getResources().getString(R.string.add_favorites_popup_msg);
 					Spannable titleStringSpan = new SpannableString(titleString);
 
 					String statusUpdatesString = getResources().getString(R.string.blue_status_updates);
@@ -734,9 +734,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.red_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
 
-					popUpTitle.setText(R.string.friends_on_hike_tut);
+					popUpTitle.setText(R.string.favorites_on_hike_tut);
 					popUpMsg.setText(titleStringSpan);
-					popUpAddButton.setText(R.string.start_adding);
+					popUpAddButton.setText(R.string.start_adding_favorites);
 					/*
 					 * This tag value true represents weather this popup is Add Friends popup and false represents that this popup is invite Friends popup
 					 */

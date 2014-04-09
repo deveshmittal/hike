@@ -327,6 +327,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
+	public static final String SHOWN_ADD_FAVORITE_TIP = "shownAddFavoriteTip";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

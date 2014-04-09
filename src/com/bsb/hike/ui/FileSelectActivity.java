@@ -83,7 +83,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private String currentTitle;
 
-	private InitiateMultiFileTransferTask fileTransferTask;
+	private volatile InitiateMultiFileTransferTask fileTransferTask;
 
 	private ProgressDialog progressDialog;
 
@@ -205,6 +205,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 		if (object instanceof InitiateMultiFileTransferTask)
 		{
+			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
 
@@ -309,6 +310,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 				if (listItem.file.isDirectory())
 				{
+					return false;
+				}
+				if(listItem.file.length() == 0)
+				{
+					Toast.makeText(FileSelectActivity.this, R.string.cannot_select_zero_byte_file, Toast.LENGTH_SHORT).show();
 					return false;
 				}
 

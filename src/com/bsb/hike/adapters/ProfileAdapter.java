@@ -440,8 +440,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			StatusMessage statusMessage = ((ProfileStatusItem) profileItem).getStatusMessage();
 			viewHolder.text.setText(myProfile ? context.getString(R.string.me) : statusMessage.getNotNullName());
 
-			SmileyParser smileyParser = SmileyParser.getInstance();
-			viewHolder.subText.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			if(statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED || statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST)
+			{
+				boolean friendRequestAccepted = statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED;
+
+				viewHolder.subText.setText(context.getString(friendRequestAccepted ? R.string.accepted_your_favorite_request_details
+						: R.string.you_accepted_favorite_request_details, Utils.getFirstName(statusMessage.getNotNullName())));
+			}
+			else
+			{
+				SmileyParser smileyParser = SmileyParser.getInstance();
+				viewHolder.subText.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			}
 
 			Linkify.addLinks(viewHolder.text, Linkify.ALL);
 			viewHolder.text.setMovementMethod(null);
@@ -543,12 +553,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.btn1.setBackgroundResource(R.drawable.bg_blue_btn_selector);
 
 					viewHolder.extraInfo.setVisibility(View.VISIBLE);
-					viewHolder.extraInfo.setText(context.getString(R.string.add_as_friend_profile, contactFirstName));
+					viewHolder.extraInfo.setText(context.getString(R.string.add_as_favorites_profile, contactFirstName));
 					break;
 				case REQUEST_RECEIVED:
 					viewHolder.infoContainer.setVisibility(View.VISIBLE);
 
-					viewHolder.subText.setText(R.string.sent_you_friend_request);
+					viewHolder.subText.setText(context.getString(R.string.sent_you_favorite_request_detailed, mContactInfo.getFirstName()));
 
 					viewHolder.imageBtn1.setVisibility(View.VISIBLE);
 					viewHolder.imageBtn2.setVisibility(View.VISIBLE);
@@ -559,7 +569,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					break;
 
 				case REQUEST_SENT:
-					viewHolder.subText.setText(R.string.request_pending);
+					viewHolder.subText.setText(R.string.favorite_request_pending);
 
 					viewHolder.imageBtn1.setVisibility(View.GONE);
 					viewHolder.imageBtn2.setVisibility(View.GONE);
