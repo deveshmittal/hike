@@ -50,7 +50,6 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
-import com.google.android.gms.internal.co;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener
 {
@@ -280,7 +279,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void tagRemoved(Object data, String uniqueNess)
 	{
 		adapter.removeContact((ContactInfo) data);
-		if (adapter.getSelectedContactCount() == 0)
+		if (adapter.getCurrentSelection() == 0)
 		{
 			setActionBar();
 		}
@@ -294,15 +293,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void tagAdded(Object data, String uniqueNess)
 	{
 		adapter.addContact((ContactInfo) data);
-		int selectedCount = adapter.getSelectedContactCount();
-		if (adapter.getSelectedContactCount() == 1)
-		{
-			setupMultiSelectActionBar();
-		}
-		else
-		{
-			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
-		}
+		int selectedCount = adapter.getCurrentSelection();
+		setupMultiSelectActionBar();
+
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
 	}
 
@@ -505,7 +498,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				int selected = adapter.getSelectedContactCount();
+				int selected = adapter.getCurrentSelection();
 				if (selected < MIN_MEMBERS_GROUP_CHAT)
 				{
 					Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
@@ -619,6 +612,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 
 			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+			if (type == null)
+				type = presentIntent.getType();
 
 			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
