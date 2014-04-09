@@ -131,7 +131,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		if (type != Type.BLOCK)
 		{
-			selectedContacts.clear();
 			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
