@@ -2553,9 +2553,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
 			{
 				number = message.getGroupParticipantMsisdn();
-				optionsList.add("Add to contacts");
+				optionsList.add(context.getString(R.string.add_to_contacts));
 			}
-			optionsList.add("Message contact");
+			optionsList.add(context.getString(R.string.send_message));
 			final String[] options = new String[optionsList.size()];
 			optionsList.toArray(options);
 
@@ -2578,13 +2578,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				public void onClick(DialogInterface dialog, int which)
 				{
 					String option = options[which];
-					if (("Add to contacts").equals(option))
+					if ((context.getString(R.string.add_to_contacts)).equals(option))
 					{
 						List<ContactInfoData> items = new ArrayList<ContactInfoData>();
 						items.add(new ContactInfoData(DataType.PHONE_NUMBER, message.getGroupParticipantMsisdn(), "Mobile"));
 						Utils.addToContacts(items, name, context);
 					}
-					else if (("Message contact").equals(option))
+					else if ((context.getString(R.string.send_message)).equals(option))
 					{
 						Intent intent = new Intent();
 						// If the contact info was made using a group conversation, then the
