@@ -269,9 +269,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			layoutInflater = LayoutInflater.from(GallerySelectionViewer.this);
 			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this);
 
-			viewerWidth = getResources().getDisplayMetrics().widthPixels;
+			int padding = 2 * getResources().getDimensionPixelSize(R.dimen.gallery_selection_padding);
+
+			viewerWidth = getResources().getDisplayMetrics().widthPixels - padding;
 			viewerHeight = getResources().getDisplayMetrics().heightPixels - getResources().getDimensionPixelSize(R.dimen.st__action_bar_default_height)
-					- getResources().getDimensionPixelSize(R.dimen.notification_bar_height) - getResources().getDimensionPixelSize(R.dimen.gallery_selected_grid_height);
+					- getResources().getDimensionPixelSize(R.dimen.notification_bar_height) - getResources().getDimensionPixelSize(R.dimen.gallery_selected_grid_height) - padding;
 		}
 
 		@Override
@@ -341,11 +343,9 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				imageWidth = viewerWidth;
 			}
 
-			int buttonSize = removeImage.getDrawable().getIntrinsicHeight() + (2 * getResources().getDimensionPixelSize(R.dimen.remove_selection_padding));
-
 			LayoutParams layoutParams = (LayoutParams) removeImage.getLayoutParams();
-			layoutParams.leftMargin = imageWidth - buttonSize;
-			layoutParams.bottomMargin = (imageHeight - buttonSize) / 2;
+			layoutParams.leftMargin = imageWidth;
+			layoutParams.bottomMargin = imageHeight/2;
 		}
 	}
 
