@@ -2,8 +2,10 @@ package com.bsb.hike.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.R.id;
@@ -57,9 +59,10 @@ public class HikeDialog
 
 	private static Dialog showAddedAsFavoriteDialog(Activity context, final HikeDialogListener listener, Object... data)
 	{
+		String name = "";
 		try
 		{
-			String name = (String) data[0];
+			name = (String) data[0];
 		}
 		catch (ClassCastException ex)
 		{
@@ -68,6 +71,10 @@ public class HikeDialog
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.added_as_favorite_pop_up);
 		dialog.setCancelable(true);
+		TextView heading = (TextView) dialog.findViewById(R.id.addedYouAsFavHeading);
+		heading.setText(context.getString(R.string.addedYouAsFavorite, name));
+		TextView des = (TextView) dialog.findViewById(R.id.addedYouAsFavDescription);
+		des.setText(Html.fromHtml(context.getString(R.string.addedYouFrindDescription, name, name)));
 		View no = dialog.findViewById(R.id.noButton);
 		View yes = dialog.findViewById(R.id.yesButton);
 		OnClickListener clickListener = new OnClickListener()
@@ -104,6 +111,7 @@ public class HikeDialog
 		};
 		no.setOnClickListener(clickListener);
 		yes.setOnClickListener(clickListener);
+		dialog.show();
 		return dialog;
 	}
 
