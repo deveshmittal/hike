@@ -37,6 +37,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -72,7 +73,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private ArrayList<HistoryEntry> history = new ArrayList<HistoryEntry>();
 
-	private long sizeLimit = 1024 * 1024 * 1024;
+	private long sizeLimit = HikeConstants.MAX_FILE_SIZE;
 
 	public DocumentSelectActivityDelegate delegate;
 
@@ -225,6 +226,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					if (!file.isDirectory())
 					{
+						if(file.length() == 0)
+						{
+							Toast.makeText(FileSelectActivity.this, R.string.cannot_select_zero_byte_file, Toast.LENGTH_SHORT).show();
+							return;
+						}
 						if (selectedFileMap.containsKey(item.title))
 						{
 							selectedFileMap.remove(item.title);
