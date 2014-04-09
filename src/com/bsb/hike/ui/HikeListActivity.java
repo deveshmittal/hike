@@ -131,7 +131,6 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		if (type != Type.BLOCK)
 		{
-			selectedContacts.clear();
 			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
@@ -227,13 +226,14 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
 		confirmDialog.setHeader(R.string.invite_friends);
-		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg));
+		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg, selectedContacts.size()));
 		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 		{
 
 			@Override
 			public void onClick(View v)
 			{
+				confirmDialog.dismiss();
 				showNativeSMSPopup();
 			}
 		};
@@ -492,14 +492,14 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				data.put(HikeConstants.MESSAGE_ID, time);
 				data.put(HikeConstants.LIST, inviteArray);
 
-				mqttPacket.put(HikeConstants.DATA, data);
-				
 				if(calledFromFTUE)
 				{
 					JSONObject ftueData = new JSONObject();
 					ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
-					mqttPacket.put(HikeConstants.METADATA, ftueData);
+					data.put(HikeConstants.METADATA, ftueData);
 				}
+				
+				mqttPacket.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
 
