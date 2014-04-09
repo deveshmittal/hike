@@ -402,11 +402,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					friendItem.setVisible(true);
 					if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
 					{
-						friendItem.setTitle(R.string.add_as_friend_menu);
+						friendItem.setTitle(R.string.add_as_favorite_menu);
 					}
 					else
 					{
-						friendItem.setTitle(R.string.unfriend);
+						friendItem.setTitle(R.string.remove_from_favorites);
 					}
 				}
 			}

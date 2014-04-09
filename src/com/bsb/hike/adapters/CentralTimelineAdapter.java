@@ -336,7 +336,10 @@ public class CentralTimelineAdapter extends BaseAdapter
 				viewHolder.noBtn.setVisibility(View.GONE);
 				viewHolder.extraInfo.setVisibility(View.GONE);
 
-				viewHolder.mainInfo.setText(context.getString(R.string.friend_request_accepted_name, Utils.getFirstName(statusMessage.getNotNullName())));
+				boolean friendRequestAccepted = statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED;
+
+				viewHolder.mainInfo.setText(context.getString(friendRequestAccepted ? R.string.accepted_your_favorite_request_details
+						: R.string.you_accepted_favorite_request_details, Utils.getFirstName(statusMessage.getNotNullName())));
 				break;
 			case PROTIP:
 				Protip protip = statusMessage.getProtip();

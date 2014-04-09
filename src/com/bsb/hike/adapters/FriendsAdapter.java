@@ -318,7 +318,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 		updateExtraList();
 
-		friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
+		friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.favorites_upper_case), FRIEND_PHONE_NUM);
 		updateFriendsList(friendsSection, true, true);
 		if (isHikeContactsPresent())
 		{
@@ -736,7 +736,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.request_pending);
+						lastSeen.setText(R.string.favorite_request_pending);
 
 						if (!contactInfo.isOnhike())
 						{
@@ -746,7 +746,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					else if (viewType == ViewType.FRIEND_REQUEST)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.sent_friend_request);
+						lastSeen.setText(R.string.sent_you_favorite_request);
 
 						ImageView acceptBtn = (ImageView) convertView.findViewById(R.id.accept);
 						ImageView rejectBtn = (ImageView) convertView.findViewById(R.id.reject);
@@ -761,7 +761,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					else if (viewType == ViewType.FTUE_CONTACT)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.ftue_friends_subtext);
+						lastSeen.setText(R.string.ftue_favorite_subtext);
 
 						TextView addBtn = (TextView) convertView.findViewById(R.id.invite_btn);
 
@@ -831,7 +831,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		case EMPTY:
 			TextView emptyText = (TextView) convertView.findViewById(R.id.empty_text);
 
-			String text = context.getString(R.string.tap_plus_add_friends);
+			String text = context.getString(R.string.tap_plus_add_favorites);
 			int index = text.indexOf("+");
 
 			SpannableStringBuilder ssb = new SpannableStringBuilder(text);

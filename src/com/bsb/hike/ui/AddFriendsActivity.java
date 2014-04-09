@@ -129,7 +129,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		View doneBtn = actionBarView.findViewById(R.id.done_container);
 		
-		actionBarTitle.setText(R.string.friends_ftue_item_label);
+		actionBarTitle.setText(R.string.favorites_ftue_item_label);
 		nextBtn.setText(R.string.skip);
 		
 		doneBtn.setOnClickListener(new OnClickListener()
@@ -169,11 +169,11 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 		if(contacts.size() > 1)
 		{
-			Toast.makeText(this, R.string.friend_requests_sent, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.favorite_request_sent_multiple, Toast.LENGTH_SHORT).show();
 		}
 		else
 		{
-			Toast.makeText(this, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.favorite_request_sent, Toast.LENGTH_SHORT).show();
 		}
 
 	}
