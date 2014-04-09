@@ -1511,6 +1511,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.circularProgressBgExt.setOnClickListener(this);
 				holder.circularProgressBgExt.setOnLongClickListener(this);
 			}
+			
+			if(holder.recPlaceholder != null)
+			{
+				holder.recPlaceholder.setTag(convMessage);
+				holder.recPlaceholder.setOnClickListener(this);
+				holder.recPlaceholder.setOnLongClickListener(this);
+			}
 
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay Visibility
 			// Tap overlay will be there only in case of image and video.
