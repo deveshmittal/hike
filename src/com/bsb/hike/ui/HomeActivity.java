@@ -1704,7 +1704,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public void updateOverFlowMenuNotification()
 	{
-		if (accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true))
+		if (accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true) && topBarIndicator != null)
 		{
 			topBarIndicator.setVisibility(View.INVISIBLE);
 		}

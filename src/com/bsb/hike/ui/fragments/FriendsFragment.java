@@ -250,10 +250,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		{
 			String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			if (!isAdded())
-			{
-				return;
-			}
 			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
 
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
@@ -263,6 +259,10 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
+			if (!isAdded())
+			{
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable()
 			{
 

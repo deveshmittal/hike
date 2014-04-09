@@ -203,7 +203,7 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public void onBackPressed()
 	{
-		if(mAdapter.getSelectedFriendsCount()>0)
+		if(mAdapter!= null && mAdapter.getSelectedFriendsCount()>0)
 		{
 			mAdapter.unSelectAllFriends();
 			nextBtn.setText(R.string.skip);

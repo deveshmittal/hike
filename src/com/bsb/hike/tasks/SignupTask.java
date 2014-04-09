@@ -402,16 +402,17 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.data = null;
 		// We're doing this to prevent the WelcomeScreen from being shown the
 		// next time we start the app.
-		Editor ed = signupTask.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		ed.putBoolean(HikeMessengerApp.ACCEPT_TERMS, true);
-		ed.commit();
-
 		if (isCancelled())
 		{
 			/* just gtfo */
 			Logger.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
+
+		Editor ed = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		ed.putBoolean(HikeMessengerApp.ACCEPT_TERMS, true);
+		ed.commit();
+		
 		if(userName != null)
 		{
 			publishProgress(new StateValue(State.GENDER, ""));
