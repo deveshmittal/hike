@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="315dp"
     android:layout_height="match_parent" >
 
     <LinearLayout
-        android:layout_width="315dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:background="#ffffff"
@@ -19,6 +19,7 @@
             android:src="@drawable/icon_favorites" />
 
         <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/addedYouAsFavHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -30,6 +31,7 @@
             android:textSize="18sp" />
 
         <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/addedYouAsFavDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -61,8 +63,7 @@
                 android:gravity="center"
                 android:padding="14dp"
                 android:text="No"
-                android:textSize="16sp"
-                />
+                android:textSize="16sp" />
 
             <View
                 android:layout_width="1.25dp"
@@ -79,6 +80,7 @@
                 android:gravity="center"
                 android:padding="14dp"
                 android:text="Yes"
+                android:textColor="#33312e"
                 android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
