@@ -312,6 +312,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					return false;
 				}
+				if(listItem.file.length() == 0)
+				{
+					Toast.makeText(FileSelectActivity.this, R.string.cannot_select_zero_byte_file, Toast.LENGTH_SHORT).show();
+					return false;
+				}
 
 				if (!multiSelectMode)
 				{
