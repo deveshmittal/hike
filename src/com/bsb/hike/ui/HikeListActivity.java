@@ -492,14 +492,14 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				data.put(HikeConstants.MESSAGE_ID, time);
 				data.put(HikeConstants.LIST, inviteArray);
 
-				mqttPacket.put(HikeConstants.DATA, data);
-				
 				if(calledFromFTUE)
 				{
 					JSONObject ftueData = new JSONObject();
 					ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
-					mqttPacket.put(HikeConstants.METADATA, ftueData);
+					data.put(HikeConstants.METADATA, ftueData);
 				}
+				
+				mqttPacket.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
 
