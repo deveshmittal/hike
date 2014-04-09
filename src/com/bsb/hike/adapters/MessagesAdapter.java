@@ -1781,7 +1781,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
-				if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
 					if(thumbnail != null)
 					{
