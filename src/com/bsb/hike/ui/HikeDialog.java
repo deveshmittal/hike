@@ -1,14 +1,13 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.R.id;
 
 public class HikeDialog
 {
@@ -16,12 +15,12 @@ public class HikeDialog
 
 	public static final int FAVORITE_ADDED_DIALOG = 2;
 
-	public static Dialog showDialog(Activity context, int whichDialog, Object... data)
+	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
 		return showDialog(context, whichDialog, null, data);
 	}
 
-	public static Dialog showDialog(Activity context, int whichDialog, HikeDialogListener listener, Object... data)
+	public static Dialog showDialog(Context context, int whichDialog, HikeDialogListener listener, Object... data)
 	{
 
 		switch (whichDialog)
@@ -36,7 +35,7 @@ public class HikeDialog
 
 	}
 
-	private static Dialog showFileTransferPOPUp(Activity context)
+	private static Dialog showFileTransferPOPUp(Context context)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.file_transfer_tutorial_pop_up);
@@ -57,7 +56,7 @@ public class HikeDialog
 		return dialog;
 	}
 
-	private static Dialog showAddedAsFavoriteDialog(Activity context, final HikeDialogListener listener, Object... data)
+	private static Dialog showAddedAsFavoriteDialog(Context context, final HikeDialogListener listener, Object... data)
 	{
 		String name = "";
 		try
