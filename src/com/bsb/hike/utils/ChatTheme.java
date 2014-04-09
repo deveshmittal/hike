@@ -2586,7 +2586,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_smiley_cheers_pets_sporty_cupcakes;
+			return R.drawable.ic_bubble_love_floral_bikers_kisses_valentines_girly;
 		}
 
 		@Override
@@ -2628,7 +2628,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
 		}
 
 		@Override
