@@ -1147,7 +1147,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if (mTask != null)
 		{
 			mTask.cancelTask();
-			mTask = null;
 		}
 		SignupTask.isAlreadyFetchingNumber = false;
 		super.onBackPressed();
