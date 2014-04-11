@@ -1452,4 +1452,5 @@
     <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
     <string name="favorites_ftue_item_label">Add Favorites</string>
     <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
+    <string name="group_chats_upper_case">GROUP CHATS</string>
 </resources>

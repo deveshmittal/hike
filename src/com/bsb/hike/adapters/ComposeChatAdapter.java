@@ -200,7 +200,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		if (fetchGroups && !groupsList.isEmpty())
 		{
-			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats), FRIEND_PHONE_NUM);
+			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats_upper_case), FRIEND_PHONE_NUM);
 			if (filteredGroupsList.size() > 0)
 			{
 				completeList.add(groupSection);
