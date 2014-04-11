@@ -326,14 +326,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 				if (categoryDir.exists())
 				{
-					String[] stickerIds = categoryDir.list(new FilenameFilter()
-					{
-						@Override
-						public boolean accept(File file, String fileName)
-						{
-							return !".nomedia".equalsIgnoreCase(fileName);
-						}
-					});
+					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
 					for (String stickerId : stickerIds)
 					{
 						stickersList.add(new Sticker(category, stickerId));
