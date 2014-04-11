@@ -161,6 +161,7 @@ public class UploadFileTask extends FileTransferBase
 		try
 		{
 			// TODO Auto-generated method stub
+			System.gc();
 			File destinationFile;
 			String fileName = Utils.getFinalFileName(hikeFileType);
 			JSONObject metadata;
