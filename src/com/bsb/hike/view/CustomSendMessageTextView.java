@@ -10,11 +10,13 @@ public class CustomSendMessageTextView extends CustomFontTextView
 {
 	//private String TAG = "CustomSendMessageTextView";
 	
-	private static final int widthTime12Hour = 75;
+	private static final int maxWidth = 265;
 	
-	private static final int widthTime24Hour = 56;
+	private static final int widthTime12Hour = 78;
 	
-	private static final int widthMargin = 80;
+	private static final int widthTime24Hour = 59;
+	
+	private static final int widthMargin = 5;
 	
 	private static final int heightTime = 14;
 
@@ -82,7 +84,8 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				widthAddition = widthTime12Hour;
 			}
 
-			if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
+			if((int) (((widthAddition + widthMargin) * Utils.densityMultiplier) + lastLineWidth) < (int)(maxWidth * Utils.densityMultiplier))
+			//if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
