@@ -1592,12 +1592,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
 						holder.ftAction.setVisibility(View.VISIBLE);
+						holder.ftAction.setScaleType(ScaleType.CENTER);
 						holder.circularProgressBg.setVisibility(View.VISIBLE);
 					}
 					else
 					{
 						holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
 						holder.ftActionExt.setVisibility(View.VISIBLE);
+						holder.ftActionExt.setScaleType(ScaleType.CENTER);
 						holder.circularProgressBgExt.setVisibility(View.VISIBLE);
 					}
 				}
