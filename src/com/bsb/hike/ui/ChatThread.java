@@ -943,7 +943,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		case R.id.chat_bg:
 			setupThemePicker(null);
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, false))
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
 			{
 				closeChatBgFtueTip();
 			}
@@ -1861,7 +1861,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
 			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, false))
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
 				{
 					showChatBgFtueTip();
 				}
