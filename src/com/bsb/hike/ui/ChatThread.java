@@ -3612,7 +3612,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setChatTheme(ChatTheme chatTheme)
 	{
-
+		System.gc();
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
 			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
