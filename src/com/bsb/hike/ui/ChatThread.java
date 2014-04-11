@@ -949,6 +949,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			break;
 		case R.id.attachment:
+			if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
+			{
+				Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+				return false;
+			}
 			showFilePicker(Utils.getExternalStorageState());
 			break;
 		case R.id.overflow_menu:
@@ -1275,6 +1280,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 				return;
 			}
+			if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
+			{
+				Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+				return;
+			}
+
 			showRecordingDialog();
 			return;
 		}

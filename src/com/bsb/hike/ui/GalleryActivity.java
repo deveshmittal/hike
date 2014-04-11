@@ -24,11 +24,13 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.GalleryAdapter;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -342,6 +344,11 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 				}
 				else
 				{
+					if (selectedGalleryItems.size() >= FileTransferManager.getInstance(this).remainingTransfers())
+					{
+						Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+						return;
+					}
 					selectedGalleryItems.put(galleryItem.getId(), galleryItem);
 					setMultiSelectTitle();
 				}
@@ -366,6 +373,12 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 		{
 			multiSelectMode = true;
 			setupMultiSelectActionBar();
+		}
+
+		if (selectedGalleryItems.size() >= FileTransferManager.getInstance(this).remainingTransfers())
+		{
+			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+			return false;
 		}
 
 		GalleryItem galleryItem = galleryItemList.get(position);

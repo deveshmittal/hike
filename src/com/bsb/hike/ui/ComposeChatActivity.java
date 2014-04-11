@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,6 +39,7 @@ import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
@@ -103,6 +105,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 
+		createGroup = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_GROUP, false);
+		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
+		isSharingFile = getIntent().getType() != null;
+
+		// Getting the group id. This will be a valid value if the intent
+		// was passed to add group participants.
+		existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
+		if (!shouldInitiateFileTransfer())
+		{
+			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+			finish();
+			return;
+		}
+
 		setContentView(R.layout.compose_chat);
 
 		Object object = getLastCustomNonConfigurationInstance();
@@ -112,13 +129,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
-
-		createGroup = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_GROUP, false);
-		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
-		isSharingFile = getIntent().getType() != null;
-		// Getting the group id. This will be a valid value if the intent
-		// was passed to add group participants.
-		existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		if (Intent.ACTION_SEND.equals(getIntent().getAction()) || Intent.ACTION_SENDTO.equals(getIntent().getAction())
 				|| Intent.ACTION_SEND_MULTIPLE.equals(getIntent().getAction()))
@@ -131,6 +141,60 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		init();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+	}
+
+	private boolean shouldInitiateFileTransfer()
+	{
+		if (isSharingFile)
+		{
+			if (Intent.ACTION_SEND_MULTIPLE.equals(getIntent().getAction()))
+			{
+				ArrayList<Uri> imageUris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+				if (imageUris.size() > FileTransferManager.getInstance(this).remainingTransfers())
+				{
+					return false;
+				}
+			}
+			else if (getIntent().hasExtra(Intent.EXTRA_STREAM))
+			{
+				if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
+				{
+					return false;
+				}
+			}
+		}
+		else if (isForwardingMessage)
+		{
+			if (getIntent().hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
+			{
+				String jsonString = getIntent().getStringExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
+				try
+				{
+					JSONArray multipleMsgFwdArray = new JSONArray(jsonString);
+
+					int fileCount = 0;
+
+					for (int i = 0; i < multipleMsgFwdArray.length(); i++)
+					{
+						JSONObject msgExtrasJson = (JSONObject) multipleMsgFwdArray.get(i);
+
+						if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
+						{
+							fileCount++;
+						}
+					}
+
+					if (fileCount > FileTransferManager.getInstance(this).remainingTransfers())
+					{
+						return false;
+					}
+				}
+				catch (JSONException e)
+				{
+				}
+			}
+		}
+		return true;
 	}
 
 	private void init()
@@ -544,6 +608,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				ArrayList<Uri> imageUris = presentIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
 				if (imageUris != null)
 				{
+					boolean showMaxFileToast = false;
+
 					ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(imageUris.size());
 					for (Uri fileUri : imageUris)
 					{

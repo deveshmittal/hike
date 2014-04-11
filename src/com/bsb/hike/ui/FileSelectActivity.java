@@ -44,6 +44,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.FileImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -247,6 +248,13 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						}
 						else
 						{
+							if (selectedFileMap.size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
+							{
+								Toast.makeText(FileSelectActivity.this,
+										getString(R.string.max_num_files_reached, FileTransferManager.getInstance(FileSelectActivity.this).getTaskLimit()), Toast.LENGTH_SHORT)
+										.show();
+								return;
+							}
 							selectedFileMap.put(item.title, item);
 							setMultiSelectTitle();
 						}
@@ -322,6 +330,14 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					multiSelectMode = true;
 					setupMultiSelectActionBar();
+				}
+
+				if (selectedFileMap.size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
+				{
+					Toast.makeText(FileSelectActivity.this,
+							getString(R.string.max_num_files_reached, FileTransferManager.getInstance(FileSelectActivity.this).getTaskLimit()), Toast.LENGTH_SHORT)
+							.show();
+					return false;
 				}
 
 				selectedFileMap.put(listItem.title, listItem);
