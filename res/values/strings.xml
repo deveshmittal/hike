@@ -1398,7 +1398,6 @@
     <string name="setting_profile">Setting up your profile...</string>
     <string name="you_are_all_set">You are all set...</string>
     <string name="tap_top_right_group_chat">Tap * on top right to start a new group chat</string>
-    <string name="tap_hold_multi_select">Tap and hold to select multiple</string>
     <string name="verified">Verified</string>
     <string name="sent_txt">Sent</string>
     <string name="delivered_txt">Delivered</string>
@@ -1420,6 +1419,37 @@
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
-	<string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
 	<string name="cannot_select_zero_byte_file">Cannot select a 0 byte file</string>
+    <string name="chatThreadNudgeTutorialText_group">Double tap anywhere to nudge your friends</string>
+    <string name="addedYouAsFavorite">Added %1$s to Favorites</string>
+    <string name="addedYouFrindDescription">
+<![CDATA[ You are now sharing your <font color="#ef554e">Last Seen</font> and <font color="#0f8fe1">Status Updates</font> with %1$s. Would you like to request him to do the same?
+	    ]]>
+    </string>
+	<string name="contacts_upper_case">CONTACTS</string>
+	<string name="tap_plus_add_favorites">Tap + to add to Favorites</string>
+	<string name="favorite_request_pending">Added as a favorite</string>
+	<string name="ftue_favorite_subtext">Add as a favorite</string>
+	<string name="sent_you_favorite_request">Added you as favorite</string>
+	<string name="sent_you_favorite_request_detailed">%1$s is sharing his Last Seen and Status Updates with you. Would you like to do the same? Add %1$s to your Favorites List.</string>
+	<string name="you_accepted_favorite_request_details">Great! %1$s will now able to see your Last Seen and Status Updates.</string>
+	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
+	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
+	<string name="add_as_favorite_menu">Add as a favorite</string>
+	<string name="remove_from_favorites">Remove from favorites</string>
+	<string name="favorite_request_sent">Added as a favorite</string>
+	<string name="favorite_request_sent_multiple">Added as favorites</string>
+	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
+    <string name="add_as_favorite_notification_line">Added you as a favorite</string>
+    <string name="favorite_confirmed_notification">You can now see %1$s\'s Last Seen and Status Updates</string>
+    <string name="favorites_ftue_item_label">Add favorites</string>
+    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
+    <string name="favorites_on_hike_tut">Favorites on hike</string>
+    <string name="start_adding_favorites">Start adding favorites</string>
+    <string name="favorites_upper_case">FAVORITES</string>
+    <string name="sent_favorite_request_tab">is now sharing Last Seen and Status Updates. Would you like to do the same?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">Tap here to dismiss favorite suggestions</string>
+    <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
+    <string name="favorites_ftue_item_label">Add Favorites</string>
+    <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
 </resources>

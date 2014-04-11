@@ -336,7 +336,10 @@ public class CentralTimelineAdapter extends BaseAdapter
 				viewHolder.noBtn.setVisibility(View.GONE);
 				viewHolder.extraInfo.setVisibility(View.GONE);
 
-				viewHolder.mainInfo.setText(context.getString(R.string.friend_request_accepted_name, Utils.getFirstName(statusMessage.getNotNullName())));
+				boolean friendRequestAccepted = statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED;
+
+				viewHolder.mainInfo.setText(context.getString(friendRequestAccepted ? R.string.accepted_your_favorite_request_details
+						: R.string.you_accepted_favorite_request_details, Utils.getFirstName(statusMessage.getNotNullName())));
 				break;
 			case PROTIP:
 				Protip protip = statusMessage.getProtip();
@@ -423,8 +426,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case FTUE_ITEM:
-			viewHolder.name.setText(R.string.friends_ftue_item_label);
-			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_friends);
+			viewHolder.name.setText(R.string.favorites_ftue_item_label);
+			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_favorites);
 
 			viewHolder.contactsContainer.removeAllViews();
 
@@ -654,24 +657,9 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
-			FavoriteType favoriteType;
-			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-			{
-				favoriteType = FavoriteType.FRIEND;
-			}
-			else
-			{
-				favoriteType = FavoriteType.REQUEST_SENT;
-				Toast.makeText(context, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
-			}
+			Utils.addFavorite(context, contactInfo, true);
 
-			/*
-			 * Cloning the object since we don't want to send the ftue reference.
-			 */
 			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
-
-			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo2, favoriteType);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK, contactInfo2.getMsisdn());
 

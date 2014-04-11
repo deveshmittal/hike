@@ -318,7 +318,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 		updateExtraList();
 
-		friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.friends), FRIEND_PHONE_NUM);
+		friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.favorites_upper_case), FRIEND_PHONE_NUM);
 		updateFriendsList(friendsSection, true, true);
 		if (isHikeContactsPresent())
 		{
@@ -736,7 +736,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.request_pending);
+						lastSeen.setText(R.string.favorite_request_pending);
 
 						if (!contactInfo.isOnhike())
 						{
@@ -746,7 +746,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					else if (viewType == ViewType.FRIEND_REQUEST)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.sent_friend_request);
+						lastSeen.setText(R.string.sent_favorite_request_tab);
 
 						ImageView acceptBtn = (ImageView) convertView.findViewById(R.id.accept);
 						ImageView rejectBtn = (ImageView) convertView.findViewById(R.id.reject);
@@ -761,7 +761,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					else if (viewType == ViewType.FTUE_CONTACT)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.ftue_friends_subtext);
+						lastSeen.setText(R.string.ftue_favorite_subtext);
 
 						TextView addBtn = (TextView) convertView.findViewById(R.id.invite_btn);
 
@@ -831,7 +831,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		case EMPTY:
 			TextView emptyText = (TextView) convertView.findViewById(R.id.empty_text);
 
-			String text = context.getString(R.string.tap_plus_add_friends);
+			String text = context.getString(R.string.tap_plus_add_favorites);
 			int index = text.indexOf("+");
 
 			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
@@ -910,20 +910,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			contactInfo = (ContactInfo) tag;
 		}
-
-		FavoriteType favoriteType;
-		if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-		{
-			favoriteType = FavoriteType.FRIEND;
-		}
 		else
 		{
-			favoriteType = FavoriteType.REQUEST_SENT;
-			Toast.makeText(context, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
+			return;
 		}
 
-		Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+		Utils.addFavorite(context, contactInfo, false);
 	}
 
 	@Override
@@ -988,24 +980,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
-			FavoriteType favoriteType;
-			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-			{
-				favoriteType = FavoriteType.FRIEND;
-			}
-			else
-			{
-				favoriteType = FavoriteType.REQUEST_SENT;
-				Toast.makeText(context, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
-			}
+			Utils.addFavorite(context, contactInfo, true);
 
-			/*
-			 * Cloning the object since we don't want to send the ftue reference.
-			 */
 			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
-
-			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo2, favoriteType);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_FRIENDS_CLICK, contactInfo2.getMsisdn());
 

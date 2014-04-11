@@ -156,6 +156,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -3580,9 +3581,9 @@ public class Utils
 
 	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
 	{
-		if(bitmap == null)
+		if (bitmap == null)
 			return null;
-		
+
 		if (Utils.hasHoneycomb())
 		{
 			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
@@ -3677,7 +3678,7 @@ public class Utils
 	 */
 	public static boolean shouldShowAddFriendsFTUE(int hikeContactsCount, int recommendedCount)
 	{
-		Logger.d("AddFriendsActivity"," hikeContactsCount="+hikeContactsCount+" recommendedCount="+recommendedCount);
+		Logger.d("AddFriendsActivity", " hikeContactsCount=" + hikeContactsCount + " recommendedCount=" + recommendedCount);
 		/*
 		 * also if all the recommended contacts are your friend we should not show add friends popup
 		 */
@@ -3719,7 +3720,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		context.startActivity(intent);
 	}
-	
+
 	public static void toggleActionBarElementsEnable(View doneBtn, ImageView arrow, TextView postText, boolean enabled)
 	{
 		doneBtn.setEnabled(enabled);
@@ -3738,30 +3739,90 @@ public class Utils
 		}
 		return drawable;
 	}
-	
-	public static void getRecommendedAndHikeContacts(Context context, List<ContactInfo> recommendedContacts, List<ContactInfo> hikeContacts, List<ContactInfo>  friendsList)
+
+	public static void getRecommendedAndHikeContacts(Context context, List<ContactInfo> recommendedContacts, List<ContactInfo> hikeContacts, List<ContactInfo> friendsList)
 	{
-		SharedPreferences settings = (SharedPreferences) context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING,
-				"");
+		SharedPreferences settings = (SharedPreferences) context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false));
 		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, msisdn, false));
 		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
-		
-		Logger.d("AddFriendsActivity", " friendsList size "+friendsList.size());
+
+		Logger.d("AddFriendsActivity", " friendsList size " + friendsList.size());
 		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(settings.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), msisdn);
-		Logger.d("AddFriendsActivity", " recommendedContactsSelection "+recommendedContactsSelection);
+		Logger.d("AddFriendsActivity", " recommendedContactsSelection " + recommendedContactsSelection);
 		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
 			recommendedContacts.addAll(HikeUserDatabase.getInstance().getHikeContacts(-1, recommendedContactsSelection, null, msisdn));
 		}
-		
-		Logger.d("AddFriendsActivity", " size recommendedContacts = "+recommendedContacts.size());
-		
+
+		Logger.d("AddFriendsActivity", " size recommendedContacts = " + recommendedContacts.size());
+
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false));
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
 		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
+	}
+
+	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
+	{
+		toggleFavorite(context, contactInfo, isFtueContact);
+		if (!contactInfo.isOnhike() || HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, false))
+		{
+			return;
+		}
+
+		HikeDialog.showDialog(context, HikeDialog.FAVORITE_ADDED_DIALOG, new HikeDialog.HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+				dialog.dismiss();
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+				dialog.dismiss();
+			}
+		}, contactInfo.getFirstName());
+	}
+
+	private static void toggleFavorite(Context context, ContactInfo contactInfo, boolean isFtueContact)
+	{
+		FavoriteType favoriteType;
+		if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+		{
+			favoriteType = FavoriteType.FRIEND;
+		}
+		else
+		{
+			favoriteType = FavoriteType.REQUEST_SENT;
+			Toast.makeText(context, R.string.favorite_request_sent, Toast.LENGTH_SHORT).show();
+		}
+
+		Pair<ContactInfo, FavoriteType> favoriteAdded;
+
+		if (isFtueContact)
+		{
+			/*
+			 * Cloning the object since we don't want to send the ftue reference.
+			 */
+			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
+			favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo2, favoriteType);
+		}
+		else
+		{
+			favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 }
