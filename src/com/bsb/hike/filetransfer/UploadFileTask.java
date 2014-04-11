@@ -462,13 +462,10 @@ public class UploadFileTask extends FileTransferBase
 
 			((ConvMessage) userContext).setMetadata(metadata);
 
-			// If the file was just uploaded to the servers, we want to publish
+			// The file was just uploaded to the servers, we want to publish
 			// this event
-			if (!fileWasAlreadyUploaded)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
-			}
-
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
+			
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
 
