@@ -307,7 +307,7 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
-	public static final String SHOWN_VALENTINE_CHAT_BG_TOOL_TIP = "shownValentineChatBgToolTip";
+	public static final String SHOWN_NEW_CHAT_BG_TOOL_TIP = "shownNewChatBgToolTip";
 
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
 

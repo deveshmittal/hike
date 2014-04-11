@@ -349,6 +349,7 @@
 	                    android:layout_marginBottom="1.7dp"
 	                    android:layout_marginLeft="5dp"
 						android:layout_marginRight="2dp"
+						android:maxWidth="265dp"
 	                    android:gravity="left"
 	                    android:text="Thanks lksad jfljasldkf alsdf lkasfdalskdfjlaslkfjalksdfjlas lf asdflasdf lasdjflkasdj flasdjfldsfl"
 	                    android:textColor="@color/chat_color"

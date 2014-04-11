@@ -49,6 +49,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Logger;
@@ -160,6 +161,7 @@ public class UploadFileTask extends FileTransferBase
 		try
 		{
 			// TODO Auto-generated method stub
+			System.gc();
 			File destinationFile;
 			String fileName = Utils.getFinalFileName(hikeFileType);
 			JSONObject metadata;
@@ -171,7 +173,7 @@ public class UploadFileTask extends FileTransferBase
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
-					thumbnail = Utils.scaleDownImage(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
+					thumbnail = Utils.scaleDownImage(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
@@ -336,7 +338,7 @@ public class UploadFileTask extends FileTransferBase
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
-				thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
+				thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
 			{
