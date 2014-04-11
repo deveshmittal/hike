@@ -23,6 +23,7 @@ import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.ChatTheme;
@@ -416,14 +417,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (bd != null)
 			return bd;
 
-		if (Utils.hasHoneycomb())
-		{
-			bd = new BitmapDrawable(mResources, BitmapFactory.decodeResource(mResources, chatTheme.bgResId()));
-		}
-		else
-		{
-			bd = new RecyclingBitmapDrawable(mResources, BitmapFactory.decodeResource(mResources, chatTheme.bgResId()));
-		}
+		bd = Utils.getBitmapDrawable(mResources, ImageWorker.decodeSampledBitmapFromResource(mResources, chatTheme.bgResId(), mResources.getDisplayMetrics().widthPixels, mResources.getDisplayMetrics().heightPixels, this));
 
 		if (chatTheme.isTiled())
 		{
