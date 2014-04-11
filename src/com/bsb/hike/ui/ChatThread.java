@@ -47,6 +47,8 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -171,6 +173,9 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.service.HikeService;
+import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -3616,7 +3621,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
 			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
-			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
+			backgroundImage.setImageDrawable(getChatTheme(chatTheme));
 		}
 		else
 		{
@@ -6378,4 +6383,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}, 2000);
 	}
+	
+	public Drawable getChatTheme(ChatTheme chatTheme)
+	{
+		BitmapDrawable bd = Utils.getBitmapDrawable(getResources(), ImageWorker.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels, HikeMessengerApp.getLruCache()));
+
+		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= "+Utils.getBitmapSize(bd.getBitmap()));
+		
+		if (chatTheme.isTiled())
+		{
+			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		}
+
+		return bd;
+	}
+
 }
