@@ -701,8 +701,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		else
 		{
-			showErrorMsg();
-			addressBookError = false;
+			if(viewFlipper.getDisplayedChild() != NAME)
+			{
+				showErrorMsg();
+				addressBookError = false;
+			}
 		}
 	}
 
