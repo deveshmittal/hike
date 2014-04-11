@@ -280,7 +280,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				break;
 			case FILE_TRANSFER_POP_Up:
 				HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG);
-				HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+				
 				break;
 			}
 		}
