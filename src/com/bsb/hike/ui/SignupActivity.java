@@ -1058,7 +1058,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					v.setEnabled(false);
 					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 					/*
-					 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
+					 * Delaying this by 230 ms to allow the signup task to setup to the last input point.
 					 */
 					SignupActivity.this.mHandler.postDelayed(new Runnable()
 					{
@@ -1068,7 +1068,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						{
 							submitClicked();
 						}
-					}, 100);
+					}, 230);
 				}
 			}
 		});
