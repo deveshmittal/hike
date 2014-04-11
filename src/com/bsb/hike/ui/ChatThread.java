@@ -1731,17 +1731,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
 		}
 
-		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0)
+		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
-			long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
-			long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
-			if ((messages.size() - mConversation.getUnreadCount()) > 0)
+			ConvMessage message = messages.get(messages.size() - 1);
+			if(message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
 			{
-				messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
-			}
-			else
-			{
-				messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
+				long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
+				long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
+				if ((messages.size() - mConversation.getUnreadCount()) > 0)
+				{
+					messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
+				}
+				else
+				{
+					messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
+				}
 			}
 		}
 

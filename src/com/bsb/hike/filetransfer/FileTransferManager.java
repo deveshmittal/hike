@@ -69,7 +69,7 @@ public class FileTransferManager extends BroadcastReceiver
 
 	private static int maxChunkSize = 128 * 1024;
 	
-	private final int TASK_LIMIT = 25;
+	private final int taskLimit;
 	
 	private final int TASK_OVERFLOW_LIMIT = 90;
 
@@ -169,6 +169,7 @@ public class FileTransferManager extends BroadcastReceiver
 
 	private FileTransferManager()
 	{
+		taskLimit = context.getResources().getInteger(R.integer.ft_limit);
 	}
 
 	private class MyThreadFactory implements ThreadFactory
@@ -250,7 +251,9 @@ public class FileTransferManager extends BroadcastReceiver
 		handler = new Handler(context.getMainLooper());
 		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		context.registerReceiver(this, filter);
+		taskLimit = context.getResources().getInteger(R.integer.ft_limit);
 	}
+	
 
 	public static FileTransferManager getInstance(Context context)
 	{
@@ -752,8 +755,8 @@ public class FileTransferManager extends BroadcastReceiver
 	
 	public int remainingTransfers()
 	{
-		if(TASK_LIMIT > fileTaskMap.size())
-			return (TASK_LIMIT - fileTaskMap.size());
+		if(taskLimit > fileTaskMap.size())
+			return (taskLimit - fileTaskMap.size());
 		else
 			return 0;
 	}
