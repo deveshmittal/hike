@@ -6386,10 +6386,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	public Drawable getChatTheme(ChatTheme chatTheme)
 	{
-		BitmapDrawable bd = Utils.getBitmapDrawable(getResources(), ImageWorker.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels, HikeMessengerApp.getLruCache()));
+		/*
+		 * for xhdpi and above we should not scale down the chat theme nodpi asset
+		 * for hdpi and below to save memory we should scale it down
+		 */
+		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
+		BitmapDrawable bd = Utils.getBitmapDrawable(getResources(), ImageWorker.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize));
 
-		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= "+Utils.getBitmapSize(bd.getBitmap()));
-		
+		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + Utils.getBitmapSize(bd.getBitmap()));
+
 		if (chatTheme.isTiled())
 		{
 			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
