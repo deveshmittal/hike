@@ -19,6 +19,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -671,9 +672,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				public void run()
 				{
+					Log.e("conver", "new conv runnable");
 					mAdapter.add(conversation);
 					if (conversation instanceof GroupConversation)
 					{
+						Log.e("conver", "group conver runnable");
 						mAdapter.notifyDataSetChanged();
 					}
 					mAdapter.setNotifyOnChange(false);
@@ -1020,14 +1023,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void addMessage(Conversation conv, ConvMessage convMessage)
 	{
-		if (!mConversationsAdded.contains(conv.getMsisdn()))
-		{
-			mConversationsAdded.add(conv.getMsisdn());
-			mAdapter.add(conv);
-		}
-		conv.addMessage(convMessage);
-		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
-		mAdapter.sort(mConversationsComparator);
+//		if (!mConversationsAdded.contains(conv.getMsisdn()))
+//		{
+//			mConversationsAdded.add(conv.getMsisdn());
+//			mAdapter.add(conv);
+//		}
+//		conv.addMessage(convMessage);
+//		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
+//		mAdapter.sort(mConversationsComparator);
 
 		if (messageRefreshHandler == null)
 		{

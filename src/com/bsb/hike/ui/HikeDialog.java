@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.R.id;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 
 public class HikeDialog
 {
@@ -36,7 +38,7 @@ public class HikeDialog
 
 	}
 
-	private static Dialog showFileTransferPOPUp(Activity context)
+	private static Dialog showFileTransferPOPUp(final Activity context)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.file_transfer_tutorial_pop_up);
@@ -49,6 +51,7 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
 				dialog.dismiss();
 			}
 		});
