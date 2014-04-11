@@ -289,7 +289,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						{
 							if (file.length() > sizeLimit)
 							{
-								showErrorBox(getString(R.string.file_upload_limit, formatFileSize(sizeLimit)));
+								Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 								return;
 							}
 						}
@@ -316,13 +316,20 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				ListItem listItem = items.get(position);
 
-				if (listItem.file.isDirectory())
+				File file = listItem.file;
+
+				if (file.isDirectory())
 				{
 					return false;
 				}
-				if(listItem.file.length() == 0)
+				if (file.length() == 0)
 				{
 					Toast.makeText(FileSelectActivity.this, R.string.cannot_select_zero_byte_file, Toast.LENGTH_SHORT).show();
+					return false;
+				}
+				else if (file.length() > sizeLimit)
+				{
+					Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 					return false;
 				}
 

@@ -631,13 +631,30 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 							filePath = Utils.getRealPathFromUri(fileUri, this);
 						}
 
+						File file = new File(filePath);
+						if (file.length() > HikeConstants.MAX_FILE_SIZE)
+						{
+							showMaxFileToast = true;
+							continue;
+						}
+
 						String fileType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
 
 						fileDetails.add(new Pair<String, String>(filePath, fileType));
 					}
 
+					if (showMaxFileToast)
+					{
+						Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
+					}
+
 					String msisdn = Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn();
 					boolean onHike = contactInfo.isOnhike();
+
+					if (fileDetails.isEmpty())
+					{
+						return;
+					}
 
 					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
 					Utils.executeAsyncTask(fileTransferTask);
@@ -676,6 +693,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			else
 			{
 				filePath = Utils.getRealPathFromUri(fileUri, this);
+			}
+
+			File file = new File(filePath);
+			if (file.length() > HikeConstants.MAX_FILE_SIZE)
+			{
+				Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
+				return;
 			}
 
 			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
