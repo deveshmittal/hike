@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -417,6 +418,15 @@ public class StickerManager
 		public abstract String downloadPref();
 	};
 
+	public FilenameFilter stickerFileFilter = new FilenameFilter()
+	{
+		@Override
+		public boolean accept(File file, String fileName)
+		{
+			return !".nomedia".equalsIgnoreCase(fileName);
+		}
+	};
+	
 	public Map<String, StickerTaskBase> stickerTaskMap;
 
 	private Set<Sticker> recentStickers;
@@ -782,13 +792,16 @@ public class StickerManager
 	{
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
 		if (path == null)
-		{
 			return false;
-		}
-		File category = new File(path + HikeConstants.LARGE_STICKER_ROOT);
-		if (category.exists() && category.list().length > 0)
+		
+		File categoryDir = new File(path + HikeConstants.SMALL_STICKER_ROOT);
+		if (categoryDir.exists())
 		{
-			return true;
+			String[] stickerIds = categoryDir.list(stickerFileFilter);
+			if(stickerIds.length > 0)
+				return true;
+			else 
+				return false;
 		}
 		return false;
 	}
