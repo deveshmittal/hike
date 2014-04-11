@@ -85,6 +85,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			Editor editor = context.getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
 			for (Conversation conv : convs)
 			{
+				/*
+				 * Added to check for the null conversation item we add for the group chat tip.
+				 */
+				if (conv == null)
+				{
+					continue;
+				}
 				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
@@ -107,6 +114,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			NotificationManager mgr = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 			for (Conversation conversation : deleted)
 			{
+				/*
+				 * Added to check for the null conversation item we add for the group chat tip.
+				 */
+				if (conversation == null)
+				{
+					continue;
+				}
 				mgr.cancel((int) conversation.getConvId());
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
