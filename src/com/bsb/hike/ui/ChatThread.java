@@ -47,6 +47,8 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -171,6 +173,9 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.service.HikeService;
+import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -943,7 +948,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		case R.id.chat_bg:
 			setupThemePicker(null);
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, false))
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
 			{
 				closeChatBgFtueTip();
 			}
@@ -1865,7 +1870,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
 			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, false))
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
 				{
 					showChatBgFtueTip();
 				}
@@ -3616,11 +3621,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setChatTheme(ChatTheme chatTheme)
 	{
-
+		System.gc();
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
 			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
-			backgroundImage.setImageDrawable(HikeMessengerApp.getLruCache().getChatTheme(chatTheme));
+			backgroundImage.setImageDrawable(getChatTheme(chatTheme));
 		}
 		else
 		{
@@ -6382,4 +6387,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}, 2000);
 	}
+	
+	public Drawable getChatTheme(ChatTheme chatTheme)
+	{
+		/*
+		 * for xhdpi and above we should not scale down the chat theme nodpi asset
+		 * for hdpi and below to save memory we should scale it down
+		 */
+		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
+		BitmapDrawable bd = Utils.getBitmapDrawable(getResources(), ImageWorker.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize));
+
+		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + Utils.getBitmapSize(bd.getBitmap()));
+
+		if (chatTheme.isTiled())
+		{
+			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		}
+
+		return bd;
+	}
+
 }

@@ -2749,7 +2749,7 @@ public class Utils
 			break;
 		case CHAT_BG_FTUE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-			editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, true);
+			editor.putBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, true);
 			break;
 		}
 
