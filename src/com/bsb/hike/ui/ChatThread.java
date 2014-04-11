@@ -2898,12 +2898,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						mLastSeenView.setText(lastSeenString);
 						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
-
-						if (tipView == null && !prefs.getBoolean(HikeMessengerApp.SHOWN_LAST_SEEN_TIP, false))
-						{
-							tipView = findViewById(R.id.last_seen_tip);
-							Utils.showTip(ChatThread.this, TipType.LAST_SEEN, tipView);
-						}
 					}
 				}
 			});

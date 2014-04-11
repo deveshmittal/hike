@@ -402,11 +402,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					friendItem.setVisible(true);
 					if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
 					{
-						friendItem.setTitle(R.string.add_as_friend_menu);
+						friendItem.setTitle(R.string.add_as_favorite_menu);
 					}
 					else
 					{
-						friendItem.setTitle(R.string.unfriend);
+						friendItem.setTitle(R.string.remove_from_favorites);
 					}
 				}
 			}
@@ -1342,10 +1342,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if (contactInfo.isOnhike())
 		{
-			contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
-
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			Utils.addFavorite(this, contactInfo, false);
 		}
 		else
 		{
@@ -1921,14 +1918,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			final ContactInfo contactInfo = tempContactInfo;
 
+			if (tempContactInfo.isUnknownContact())
+			{
+				optionsList.add(getString(R.string.add_to_contacts));
+			}
 			optionsList.add(getString(R.string.send_message));
 			if (!tempContactInfo.isOnhike())
 			{
 				optionsList.add(getString(R.string.invite_to_hike));
-			}
-			if (tempContactInfo.isUnknownContact())
-			{
-				optionsList.add(getString(R.string.add_to_contacts));
 			}
 			if (isGroupOwner)
 			{
