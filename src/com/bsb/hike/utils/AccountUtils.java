@@ -519,8 +519,14 @@ public class AccountUtils
 			if (birthdate != null)
 			{
 				JSONObject bday = new JSONObject();
-				bday.put("day", birthdate.day);
-				bday.put("month", birthdate.month);
+				if(birthdate.day != 0)
+				{
+					bday.put("day", birthdate.day);
+				}
+				if(birthdate.month != 0)
+				{
+					bday.put("month", birthdate.month);
+				}
 				bday.put("year", birthdate.year);
 				data.put("dob", bday);
 			}

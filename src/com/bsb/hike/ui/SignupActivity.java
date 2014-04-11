@@ -693,7 +693,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					{
 						Calendar calendar = Calendar.getInstance();
 						int currentYear = calendar.get(Calendar.YEAR);
-						mActivityState.birthday = new Birthday(1, 1, currentYear - Integer.valueOf(birthdayText.getText().toString()));
+						mActivityState.birthday = new Birthday(0, 0, currentYear - Integer.valueOf(birthdayText.getText().toString()));
 						mTask.addBirthdate(mActivityState.birthday);
 					}
 				}
