@@ -399,16 +399,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		List<Conversation> conversations = new ArrayList<Conversation>();
+		List<Conversation> conversationList = db.getConversations();
 
 		/*
 		 * Add item for group chat tip.
 		 */
-		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
+		if (!conversationList.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
 		{
 			conversations.add(null);
 		}
 
-		conversations.addAll(db.getConversations());
+		conversations.addAll(conversationList);
 
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
 		mConversationsAdded = new HashSet<String>();
