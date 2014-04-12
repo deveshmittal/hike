@@ -163,16 +163,17 @@ public class HikeService extends Service
 
 		Logger.d("TestUpdate", "Service started");
 
+		if (sendGCMIdToServerTrigger == null)
+		{
+			sendGCMIdToServerTrigger = new SendGCMIdToServerTrigger();
+			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(SEND_TO_SERVER_ACTION));
+		}
+
 		if (registerToGCMTrigger == null)
 		{
 			registerToGCMTrigger = new RegisterToGCMTrigger();
 			registerReceiver(registerToGCMTrigger, new IntentFilter(REGISTER_TO_GCM_ACTION));
 			sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
-		}
-		if (sendGCMIdToServerTrigger == null)
-		{
-			sendGCMIdToServerTrigger = new SendGCMIdToServerTrigger();
-			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(SEND_TO_SERVER_ACTION));
 		}
 
 		Logger.d("HikeService", "onCreate called");
