@@ -1236,6 +1236,48 @@ public class Utils
 
 		return thumbnail;
 	}
+	
+	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
+	{
+		Bitmap thumbnail = null;
+
+		int currentWidth = 0;
+		int currentHeight = 0;
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+
+		BitmapFactory.decodeFile(filePath, options);
+		currentHeight = options.outHeight;
+		currentWidth = options.outWidth;
+
+		if (dimensionLimit == -1)
+		{
+			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
+		}
+
+		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
+		options.inJustDecodeBounds = false;
+		if(applyBitmapConfig)
+		{
+			options.inPreferredConfig = Config.RGB_565;
+		}
+		
+		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		/*
+		 * Should only happen when the external storage does not have enough free space
+		 */
+		if (thumbnail == null)
+		{
+			return null;
+		}
+		if (makeSquareThumbnail)
+		{
+			return makeSquareThumbnail(thumbnail, dimensionLimit);
+		}
+
+		return thumbnail;
+}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
@@ -2707,7 +2749,7 @@ public class Utils
 			break;
 		case CHAT_BG_FTUE:
 			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-			editor.putBoolean(HikeMessengerApp.SHOWN_VALENTINE_CHAT_BG_TOOL_TIP, true);
+			editor.putBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, true);
 			break;
 		}
 

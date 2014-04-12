@@ -768,6 +768,41 @@ public abstract class ImageWorker
 		return inSampleSize;
 	}
 
+	/**
+	 * Decode and sample down a bitmap from resources to the requested inSampleSize.
+	 * 
+	 * @param res
+	 *            The resources object containing the image data
+	 * @param resId
+	 *            The resource id of the image data
+	 * @param inSampleSize
+	 *            The value to be used for inSampleSize
+	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
+	 */
+	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int inSampleSize)
+	{
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+
+		options.inSampleSize = inSampleSize;
+
+		options.inJustDecodeBounds = false;
+		Bitmap result = null;
+		try
+		{
+			result = BitmapFactory.decodeResource(res, resId, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = BitmapFactory.decodeResource(res, resId);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from resources: ", e);
+		}
+		return result;
+	}
+
 	public HikeLruCache getLruCache()
 	{
 		return this.mImageCache;

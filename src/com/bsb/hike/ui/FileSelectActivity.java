@@ -44,6 +44,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.FileImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -247,6 +248,13 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						}
 						else
 						{
+							if (selectedFileMap.size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
+							{
+								Toast.makeText(FileSelectActivity.this,
+										getString(R.string.max_num_files_reached, FileTransferManager.getInstance(FileSelectActivity.this).getTaskLimit()), Toast.LENGTH_SHORT)
+										.show();
+								return;
+							}
 							selectedFileMap.put(item.title, item);
 							setMultiSelectTitle();
 						}
@@ -281,7 +289,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						{
 							if (file.length() > sizeLimit)
 							{
-								showErrorBox(getString(R.string.file_upload_limit, formatFileSize(sizeLimit)));
+								Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 								return;
 							}
 						}
@@ -308,13 +316,20 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				ListItem listItem = items.get(position);
 
-				if (listItem.file.isDirectory())
+				File file = listItem.file;
+
+				if (file.isDirectory())
 				{
 					return false;
 				}
-				if(listItem.file.length() == 0)
+				if (file.length() == 0)
 				{
 					Toast.makeText(FileSelectActivity.this, R.string.cannot_select_zero_byte_file, Toast.LENGTH_SHORT).show();
+					return false;
+				}
+				else if (file.length() > sizeLimit)
+				{
+					Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 					return false;
 				}
 
@@ -322,6 +337,14 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				{
 					multiSelectMode = true;
 					setupMultiSelectActionBar();
+				}
+
+				if (selectedFileMap.size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
+				{
+					Toast.makeText(FileSelectActivity.this,
+							getString(R.string.max_num_files_reached, FileTransferManager.getInstance(FileSelectActivity.this).getTaskLimit()), Toast.LENGTH_SHORT)
+							.show();
+					return false;
 				}
 
 				selectedFileMap.put(listItem.title, listItem);
