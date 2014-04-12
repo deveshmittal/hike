@@ -262,7 +262,7 @@ public class FileTransferManager extends BroadcastReceiver
 			synchronized (FileTransferManager.class)
 			{
 				if (_instance == null)
-					_instance = new FileTransferManager(context);
+					_instance = new FileTransferManager(context.getApplicationContext());
 			}
 		}
 		return _instance;
