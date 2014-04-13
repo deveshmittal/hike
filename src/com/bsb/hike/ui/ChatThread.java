@@ -1787,7 +1787,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (mConversation.getUnreadCount() > 0)
 		{
-			mConversationsView.setSelection(messages.size() - mConversation.getUnreadCount() - 1);
+			ConvMessage message = messages.get(messages.size() - 1);
+			if(message.getTypingNotification() != null)
+			{
+				message = messages.get(messages.size() - 2);
+			}
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				mConversationsView.setSelection(messages.size() - mConversation.getUnreadCount() - 1);
+			}
+			else if (!wasOrientationChanged)
+			{
+				mConversationsView.setSelection(messages.size() - 1);
+			}
 		}
 		// Scroll to the bottom if we just opened a new conversation
 		else if (!wasOrientationChanged)
