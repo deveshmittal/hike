@@ -1432,7 +1432,7 @@
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
 	<string name="sent_you_favorite_request_detailed">%1$s is sharing his Last Seen and Status Updates with you. Would you like to do the same? Add %1$s to your Favorites List.</string>
-	<string name="you_accepted_favorite_request_details">Great! %1$s will now able to see your Last Seen and Status Updates.</string>
+	<string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
 	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
 	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
 	<string name="add_as_favorite_menu">Add as a favorite</string>
