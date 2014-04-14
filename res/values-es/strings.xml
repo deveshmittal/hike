@@ -843,5 +843,42 @@
     <string name="female_selected_string_5">¡Las chicas dicen unas 7000 palabras al día!</string>
     <string name="invite_friends_confirmation_msg">¿Quieres invitar a %1$s amigos a hike?</string>
     <string name="didnt_get_pin">Si no has recibido el PIN, te llamamos.</string>
-			
+     <string name="maxContactInGroupErr">Se permite un máximo de %1$s contactos en un grupo</string>
+	<string name="cannot_select_zero_byte_file">No se puede seleccionar un archivo de 0 bytes</string>
+    <string name="chatThreadNudgeTutorialText_group">Toca dos veces en cualquier sitio para darles un toque a tus amigos.</string>
+    <string name="addedYouAsFavorite">%1$s se ha añadido a Favoritos</string>
+    <string name="addedYouFrindDescription">
+<![CDATA[ Ahora compartes tu <font color="#ef554e">Última conexión</font> y tus <font color="#0f8fe1">Actualizaciones de estado</font> con %1$s. ¿Quieres pedirle que haga lo mismo?
+    ]]>
+	</string>
+	<string name="contacts_upper_case">CONTACTOS</string>
+	<string name="favorite_request_pending">Añadido como favorito</string>
+	<string name="ftue_favorite_subtext">Añadir como favorito</string>
+	<string name="sent_you_favorite_request">Te ha añadido como favorito</string>
+	<string name="sent_you_favorite_request_detailed">%1$s comparte su Última conexión y sus Actualizaciones de estado contigo. ¿Quieres hacer lo mismo? Añade %1$s a tu Lista de favoritos.</string>
+	<string name="you_accepted_favorite_request_details">¡Genial! %1$s ahora podrá ver tu Última conexión y tus actualizaciones de estado.</string>
+	<string name="accepted_your_favorite_request_details">Ahora puedes ver la Última conexión y las Actualizaciones de estado de %1$s\</string>
+	<string name="add_as_favorites_profile">Añade a %1$s a tus Favoritos.\nComparte tu Última conexión y tus Actualizaciones de estado solo con tus Contactos favoritos.</string>
+	<string name="add_as_favorite_menu">Añadir como favorito</string>
+	<string name="remove_from_favorites">Quitar de favoritos</string>
+	<string name="favorite_request_sent">Añadido como favorito</string>
+	<string name="favorite_request_sent_multiple">Añadido como favoritos</string>
+	<string name="add_as_favorite_notification">%1$s te ha añadido como favorito</string>
+    <string name="add_as_favorite_notification_line">Te ha añadido como favorito</string>
+    <string name="favorite_confirmed_notification">Ahora puedes ver la Última conexión y las Actualizaciones de estado de %1$s\</string>
+    <string name="favorites_ftue_item_label">Añadir favoritos</string>
+    <string name="add_favorites_popup_msg">Puedes enviar mensajes a cualquier persona pero tus Favoritos son los únicos que pueden ver tus Actualizaciones de estado y tu Última conexión. ¡Elígelos bien!</string>
+    <string name="favorites_on_hike_tut">Favoritos en hike</string>
+    <string name="start_adding_favorites">Empieza a añadir favoritos</string>
+    <string name="favorites_upper_case">FAVORITOS</string>
+    <string name="sent_favorite_request_tab">ahora comparte su Última conexión y sus Actualizaciones de estado. ¿Quieres hacer lo mismo?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">Toca aquí para descartar las sugerencias de favoritos</string>
+    <string name="last_seen_favorite_info">Si desactivas "Última conexión" tampoco verás el estado de esta opción de tus favoritos</string>
+    <string name="favorites_ftue_item_label">Añadir Favoritos</string>
+    <string name="updates_are_fun_with_favorites">Las actualizaciones son mejores con favoritos. Hemos encontrado varios favoritos a los que puedes añadir a hike.</string>
+    <string name="group_chats_upper_case">CHATS EN GRUPO</string>
+    <string name="max_num_files_reached">No se pueden compartir más de %1$s archivos</string>
+    <string name="tap_plus_add_favorites">Sólo tus favoritos pueden ver su "Último visto" y "Actualizaciones de estado". Pulse en \'+\' para añadir a favoritos.</string>
+    <string name="last_seen_proper_casing">Último visto</string>
+    <string name="status_updates_proper_casing">Actualizaciones de estado</string>
 </resources>

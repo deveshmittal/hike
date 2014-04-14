@@ -842,4 +842,43 @@
     <string name="female_selected_string_5">As mulheres falam cerca de 7.000 palavras por dia!</string>
     <string name="invite_friends_confirmation_msg">Deseja convidar %1$s de seus amigos para o hike?</string>
     <string name="didnt_get_pin">Se não recebeu o PIN, vamos ligar para você</string>
+    <string name="maxContactInGroupErr">Máx.%1$s contatos pemitidos por grupo</string>
+	<string name="cannot_select_zero_byte_file">Não foi possível selecionar um arquivo de 0 bytes</string>
+    <string name="chatThreadNudgeTutorialText_group">Dê um toque duplo em qualquer lugar para cutucar seus amigos</string>
+    <string name="addedYouAsFavorite">Adicionou %1$s aos favoritos</string>
+    <string name="addedYouFrindDescription">
+<![CDATA[ Você está compartilhando <font color="#ef554e">Vistos pela última vez</font> e <font color="#0f8fe1">Atualizações de status</font> com %1$s. Você gostaria de solicitar o mesmo?
+    ]]>
+</string>
+	<string name="contacts_upper_case">CONTATOS</string>
+	<string name="favorite_request_pending">Adicionado como favorito</string>
+	<string name="ftue_favorite_subtext">Adicione como favorito</string>
+	<string name="sent_you_favorite_request">Adicionou você como favorito</string>
+	<string name="sent_you_favorite_request_detailed">%1$s está compartilhando os Vistos pela última vez e as Atualizações de Status com você. Gostaria de fazer o mesmo? Adicione %1$s a sua Lista de favoritos.</string>
+	<string name="you_accepted_favorite_request_details">Excelente! %1$s conseguirá ver os Vistos pela última vez e suas Atualizações de Status.</string>
+	<string name="accepted_your_favorite_request_details">Agora você pode ver os Vistos pela última vez e as Atualizações de Status de %1$s</string>
+	<string name="add_as_favorites_profile">Adicione %1$s aos Favoritos agora.\nCompartilhe os Vistos pela última vez e as Atualizações de Status apenas com os contatos favoritos.</string>
+	<string name="add_as_favorite_menu">Adicione como favorito</string>
+	<string name="remove_from_favorites">Remover de favoritos</string>
+	<string name="favorite_request_sent">Adicionado como favorito</string>
+	<string name="favorite_request_sent_multiple">Adicionado como favorito</string>
+	<string name="add_as_favorite_notification">%1$s adicionou você como favorito</string>
+    <string name="add_as_favorite_notification_line">Adicionou você como favorito</string>
+    <string name="favorite_confirmed_notification">Agora você pode ver os Vistos pela última vez e as Atualizações de Status de %1$s</string>
+    <string name="favorites_ftue_item_label">Adicionar aos favoritos</string>
+    <string name="add_favorites_popup_msg">Você pode enviar mensagens para qualquer pessoa, mas apenas seus favoritos poderão ver as atualizações de status e os vistos pela última vez. Escolha-os sabiamente!</string>
+    <string name="favorites_on_hike_tut">Favoritos no hike</string>
+    <string name="start_adding_favorites">Comece adicionando favoritos</string>
+    <string name="favorites_upper_case">FAVORITOS</string>
+    <string name="sent_favorite_request_tab">está compartilhando os vistos pela última vez e as atualizações de status. Gostaria de fazer o mesmo?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">Toque aqui para ignorar as sugestões de favoritos</string>
+    <string name="last_seen_favorite_info">Ao desligar os vistos pela última vez, você também ocultará o status de vistos pela última vez de seus favoritos</string>
+    <string name="favorites_ftue_item_label">Adicionar favoritos</string>
+    <string name="updates_are_fun_with_favorites">As atualizações são mais divertidas com favoritos. Encontramos alguns deles que você pode adicionar ao hike.</string>
+    <string name="group_chats_upper_case">CONVERSAS EM GRUPO</string>
+    <string name="max_num_files_reached">Não é possível compartilhar mais de %1$s arquivos</string>
+    <string name="tap_plus_add_favorites">Somente seus favoritos podem ver seu "Último visto" e "Atualizações de Status". Toque em \'+\' para adicionar aos favoritos.</string>
+    <string name="last_seen_proper_casing">Último visto</string>
+    <string name="status_updates_proper_casing">Atualizações de Status</string>
+    
 </resources>
