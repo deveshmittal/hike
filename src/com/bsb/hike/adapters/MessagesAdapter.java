@@ -1301,7 +1301,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else
 				{
 					createMediaThumb(holder.fileThumb);
-					holder.fileThumb.setBackgroundResource(R.drawable.ic_loading_img);
+					holder.fileThumb.setImageResource(R.drawable.ic_default_location);
+					holder.fileThumb.setScaleType(ScaleType.CENTER);
 				}
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				}
