@@ -589,7 +589,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			startLoading();
 		}
-		if (!addressBookError)
+		if (!addressBookError || viewFlipper.getDisplayedChild() == NAME)
 		{
 			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX))
 			{
@@ -701,11 +701,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		else
 		{
-			if(viewFlipper.getDisplayedChild() != NAME)
-			{
-				showErrorMsg();
-				addressBookError = false;
-			}
+			showErrorMsg();
+			addressBookError = false;
 		}
 	}
 
