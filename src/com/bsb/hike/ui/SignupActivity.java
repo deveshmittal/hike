@@ -589,7 +589,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			startLoading();
 		}
-		if (!addressBookError)
+		if (!addressBookError || viewFlipper.getDisplayedChild() == NAME)
 		{
 			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX))
 			{
@@ -701,11 +701,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		else
 		{
-			if(viewFlipper.getDisplayedChild() != NAME)
-			{
-				showErrorMsg();
-				addressBookError = false;
-			}
+			showErrorMsg();
+			addressBookError = false;
 		}
 	}
 
@@ -1059,19 +1056,24 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				{
 					errorDialog.dismiss();
 					v.setEnabled(false);
-					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
-					/*
-					 * Delaying this by 230 ms to allow the signup task to setup to the last input point.
-					 */
-					SignupActivity.this.mHandler.postDelayed(new Runnable()
+					if(viewFlipper.getDisplayedChild() != SCANNING_CONTACTS)
 					{
-
-						@Override
-						public void run()
+						/*
+						 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
+						 */
+						SignupActivity.this.mHandler.postDelayed(new Runnable()
 						{
-							submitClicked();
-						}
-					}, 230);
+
+							@Override
+							public void run()
+							{
+								Logger.d("tesst","submit clicked");
+								submitClicked();
+							}
+						}, 100);
+					}
+					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
+					
 				}
 			}
 		});
