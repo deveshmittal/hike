@@ -3057,7 +3057,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 						}
-						else
+						else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
 						{
 							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
@@ -3086,7 +3086,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else
+					else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
 					{
 						FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
 								true);
