@@ -250,6 +250,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
+
+		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
+
 		initialiseViewPager();
 		initialiseTabs();
 

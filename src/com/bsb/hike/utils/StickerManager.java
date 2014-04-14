@@ -640,17 +640,23 @@ public class StickerManager
 
 	private void addNoMedia(File directory)
 	{
-		String path = directory.getPath();
-		if (path.endsWith(HikeConstants.LARGE_STICKER_ROOT) || path.endsWith(HikeConstants.SMALL_STICKER_ROOT))
+		try
 		{
-			Utils.makeNoMediaFile(directory);
-		}
-		else if (directory.isDirectory())
-		{
-			for (File file : directory.listFiles())
+			String path = directory.getPath();
+			if (path.endsWith(HikeConstants.LARGE_STICKER_ROOT) || path.endsWith(HikeConstants.SMALL_STICKER_ROOT))
 			{
-				addNoMedia(file);
+				Utils.makeNoMediaFile(directory);
 			}
+			else if (directory.isDirectory())
+			{
+				for (File file : directory.listFiles())
+				{
+					addNoMedia(file);
+				}
+			}
+		}
+		catch (Exception e)
+		{
 		}
 	}
 
