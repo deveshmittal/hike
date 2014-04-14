@@ -9,7 +9,10 @@
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img1"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/signup_header_height"
+        android:layout_height="wrap_content"
+        android:paddingLeft="42dp"
+		android:paddingRight="42dp" 
+        android:minHeight="@dimen/signup_header_height"
         android:text="@string/whats_your_number"
         style="@style/SignupHeader" />
     

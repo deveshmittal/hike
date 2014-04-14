@@ -1301,7 +1301,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else
 				{
 					createMediaThumb(holder.fileThumb);
-					holder.fileThumb.setBackgroundResource(R.drawable.ic_loading_img);
+					holder.fileThumb.setImageResource(R.drawable.ic_default_location);
+					holder.fileThumb.setScaleType(ScaleType.CENTER);
 				}
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				}
@@ -1892,8 +1893,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			setAvatar(conversation.getMsisdn(), holder.image);
-
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
@@ -1910,11 +1909,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			if (statusMessage.hasMood())
 			{
+				holder.image.setBackgroundDrawable(null);
 				holder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
 				holder.avatarFrame.setVisibility(View.GONE);
 			}
 			else
 			{
+				setAvatar(conversation.getMsisdn(), holder.image);
 				holder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 
@@ -3056,7 +3057,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 						}
-						else
+						else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
 						{
 							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
@@ -3085,7 +3086,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else
+					else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
 					{
 						FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
 								true);

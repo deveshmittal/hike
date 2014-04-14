@@ -1427,7 +1427,6 @@
 	    ]]>
     </string>
 	<string name="contacts_upper_case">CONTACTS</string>
-	<string name="tap_plus_add_favorites">Tap + to add to Favorites</string>
 	<string name="favorite_request_pending">Added as a favorite</string>
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
@@ -1454,4 +1453,7 @@
     <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
     <string name="group_chats_upper_case">GROUP CHATS</string>
     <string name="max_num_files_reached">Cannot share more than %1$s files</string>
+    <string name="tap_plus_add_favorites">Only your Favorites can see your Last Seen and Status Updates.\n\nTap + to add to Favorites.</string>
+    <string name="last_seen_proper_casing">Last Seen</string>
+    <string name="status_updates_proper_casing">Status Updates</string>
 </resources>

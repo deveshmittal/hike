@@ -120,6 +120,8 @@ public abstract class ImageWorker
 		BitmapDrawable value = null;
 
 		imageView.setImageDrawable(null);
+		imageView.setBackgroundDrawable(null);
+
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
