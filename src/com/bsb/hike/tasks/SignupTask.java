@@ -670,6 +670,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			signupTask.addUserName(userName);
 			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
+			/*
+			 * if we are on signupActivity we should not anymore try to
+			 * auto auth
+			 */
+			SignupTask.isAlreadyFetchingNumber = true;
 			Utils.executeSignupTask(signupTask);
 		}
 		return signupTask;
