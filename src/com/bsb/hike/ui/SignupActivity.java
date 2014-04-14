@@ -1056,19 +1056,24 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				{
 					errorDialog.dismiss();
 					v.setEnabled(false);
-					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
-					/*
-					 * Delaying this by 230 ms to allow the signup task to setup to the last input point.
-					 */
-					SignupActivity.this.mHandler.postDelayed(new Runnable()
+					if(viewFlipper.getDisplayedChild() != SCANNING_CONTACTS)
 					{
-
-						@Override
-						public void run()
+						/*
+						 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
+						 */
+						SignupActivity.this.mHandler.postDelayed(new Runnable()
 						{
-							submitClicked();
-						}
-					}, 230);
+
+							@Override
+							public void run()
+							{
+								Logger.d("tesst","submit clicked");
+								submitClicked();
+							}
+						}, 100);
+					}
+					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
+					
 				}
 			}
 		});
