@@ -262,7 +262,7 @@ public class FileTransferManager extends BroadcastReceiver
 			synchronized (FileTransferManager.class)
 			{
 				if (_instance == null)
-					_instance = new FileTransferManager(context);
+					_instance = new FileTransferManager(context.getApplicationContext());
 			}
 		}
 		return _instance;
@@ -760,7 +760,12 @@ public class FileTransferManager extends BroadcastReceiver
 		else
 			return 0;
 	}
-	
+
+	public int getTaskLimit()
+	{
+		return taskLimit;
+	}
+
 	public boolean taskOverflowLimitAchieved()
 	{
 		if(fileTaskMap.size() >= TASK_OVERFLOW_LIMIT)

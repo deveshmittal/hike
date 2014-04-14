@@ -250,6 +250,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
+
+		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
+
 		initialiseViewPager();
 		initialiseTabs();
 
@@ -280,7 +283,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				break;
 			case FILE_TRANSFER_POP_Up:
 				HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG);
-				HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+				
 				break;
 			}
 		}

@@ -693,7 +693,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					{
 						Calendar calendar = Calendar.getInstance();
 						int currentYear = calendar.get(Calendar.YEAR);
-						mActivityState.birthday = new Birthday(1, 1, currentYear - Integer.valueOf(birthdayText.getText().toString()));
+						mActivityState.birthday = new Birthday(0, 0, currentYear - Integer.valueOf(birthdayText.getText().toString()));
 						mTask.addBirthdate(mActivityState.birthday);
 					}
 				}
@@ -701,8 +701,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		else
 		{
-			showErrorMsg();
-			addressBookError = false;
+			if(viewFlipper.getDisplayedChild() != NAME)
+			{
+				showErrorMsg();
+				addressBookError = false;
+			}
 		}
 	}
 
@@ -1058,7 +1061,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					v.setEnabled(false);
 					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
 					/*
-					 * Delaying this by 100 ms to allow the signup task to setup to the last input point.
+					 * Delaying this by 230 ms to allow the signup task to setup to the last input point.
 					 */
 					SignupActivity.this.mHandler.postDelayed(new Runnable()
 					{
@@ -1068,7 +1071,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						{
 							submitClicked();
 						}
-					}, 100);
+					}, 230);
 				}
 			}
 		});
@@ -1147,7 +1150,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if (mTask != null)
 		{
 			mTask.cancelTask();
-			mTask = null;
 		}
 		SignupTask.isAlreadyFetchingNumber = false;
 		super.onBackPressed();

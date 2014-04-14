@@ -278,8 +278,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	// private StickerLoader largeStickerLoader;
 	private int mIconImageSize;
 
-	private boolean isListFlinging;
-
 	private Set<Integer> mSelectedItemsIds;
 
 	private boolean isActionModeOn = false;
@@ -3795,20 +3793,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void resetPlayerIfRunning()
 	{
 		voiceMessagePlayer.resetPlayer();
-	}
-
-	public void setIsListFlinging(boolean b)
-	{
-		boolean notify = b != isListFlinging;
-
-		isListFlinging = b;
-		// largeStickerLoader.setPauseWork(isListFlinging);
-		iconLoader.setPauseWork(isListFlinging);
-
-		if (notify && !isListFlinging)
-		{
-			notifyDataSetChanged();
-		}
 	}
 
 	// public StickerLoader getStickerLoader()

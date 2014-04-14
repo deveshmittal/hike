@@ -20,8 +20,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/addfriend_popup_content_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/addfriend_popup_content_margin_top"
+            android:layout_marginBottom="@dimen/addfriend_popup_content_margin_top"
             android:orientation="horizontal"
             android:weightSum="5" >
 
@@ -29,7 +30,7 @@
                 android:id="@+id/popup_img"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="2"
                 android:src="@drawable/signup_intro_add_friends_img" />
 

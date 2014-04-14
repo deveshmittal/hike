@@ -50,6 +50,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	
 	private Dialog errorDialog;
 
+	SignupTask mTask; 
+	
 	@Override
 	public void onCreate(Bundle savedState)
 	{
@@ -154,7 +156,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			tcText.setEnabled(false);
 			loadingLayout.setVisibility(View.VISIBLE);
 			mAcceptButton.setVisibility(View.GONE);
-			SignupTask.startTask(this);
+			mTask = SignupTask.startTask(this);
 		}
 	}
 
@@ -199,11 +201,9 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public void onBackPressed()
 	{
-		SignupTask mTask = SignupTask.getSignupTask(this);
 		if (mTask != null)
 		{
 			mTask.cancelTask();
-			mTask = null;
 		}
 		super.onBackPressed();
 	}

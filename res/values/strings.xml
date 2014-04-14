@@ -1432,7 +1432,7 @@
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
 	<string name="sent_you_favorite_request_detailed">%1$s is sharing his Last Seen and Status Updates with you. Would you like to do the same? Add %1$s to your Favorites List.</string>
-	<string name="you_accepted_favorite_request_details">Great! %1$s will now able to see your Last Seen and Status Updates.</string>
+	<string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
 	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
 	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
 	<string name="add_as_favorite_menu">Add as a favorite</string>
@@ -1452,4 +1452,6 @@
     <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
     <string name="favorites_ftue_item_label">Add Favorites</string>
     <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
+    <string name="group_chats_upper_case">GROUP CHATS</string>
+    <string name="max_num_files_reached">Cannot share more than %1$s files</string>
 </resources>

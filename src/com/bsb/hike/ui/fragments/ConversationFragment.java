@@ -19,6 +19,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,6 +86,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			Editor editor = context.getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
 			for (Conversation conv : convs)
 			{
+				/*
+				 * Added to check for the null conversation item we add for the group chat tip.
+				 */
+				if (conv == null)
+				{
+					continue;
+				}
 				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
@@ -107,6 +115,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			NotificationManager mgr = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 			for (Conversation conversation : deleted)
 			{
+				/*
+				 * Added to check for the null conversation item we add for the group chat tip.
+				 */
+				if (conversation == null)
+				{
+					continue;
+				}
 				mgr.cancel((int) conversation.getConvId());
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
@@ -385,16 +400,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		List<Conversation> conversations = new ArrayList<Conversation>();
+		List<Conversation> conversationList = db.getConversations();
 
 		/*
 		 * Add item for group chat tip.
 		 */
-		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
+		if (!conversationList.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
 		{
 			conversations.add(null);
 		}
 
-		conversations.addAll(db.getConversations());
+		conversations.addAll(conversationList);
 
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
 		mConversationsAdded = new HashSet<String>();
