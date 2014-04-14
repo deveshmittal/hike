@@ -5661,7 +5661,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 		Logger.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
-		mAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
 		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
 		{
 			if (view.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
