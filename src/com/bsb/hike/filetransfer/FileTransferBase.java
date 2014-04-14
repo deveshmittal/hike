@@ -28,7 +28,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		PAUSED, CANCELLED, COMPLETED, ERROR, PAUSING
 	}
 
-	protected static String NETWORK_ERROR_1 = "Connection timed out";
+	protected static String NETWORK_ERROR_1 = "timed out";
 
 	protected static String NETWORK_ERROR_2 = "Unable to resolve host";
 
