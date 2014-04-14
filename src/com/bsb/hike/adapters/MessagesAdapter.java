@@ -1892,8 +1892,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			setAvatar(conversation.getMsisdn(), holder.image);
-
 			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
@@ -1910,11 +1908,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			if (statusMessage.hasMood())
 			{
+				holder.image.setBackgroundDrawable(null);
 				holder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
 				holder.avatarFrame.setVisibility(View.GONE);
 			}
 			else
 			{
+				setAvatar(conversation.getMsisdn(), holder.image);
 				holder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 
