@@ -750,8 +750,8 @@
     <string name="one_new_message">1 nouveau message</string>
     <string name="terms">Conditions</string>
     <string name="tutorial1_header_title">Bienvenue sur Hike Messenger</string>
-    <string name="tutorial2_header_title">De magnifiques stickers\npour plus de fun !</string>
-    <string name="tutorial3_header_title">Donnes des couleurs à\ntes conversations.</string>
+    <string name="tutorial2_header_title">De magnifiques stickers pour plus de fun !</string>
+    <string name="tutorial3_header_title">Donnes des couleurs à tes conversations.</string>
     <string name="get_started">Premiers pas</string>
     <string name="whats_your_number">Salut ! Quel est ton numéro ?</string>
     <string name="select_country">Choisir pays</string>
