@@ -197,7 +197,7 @@ public class ToastListener implements Listener
 			toaster.notifyBigPictureStatusNotification(notifyBundle.getString(HikeConstants.Extras.IMAGE_PATH), notifyBundle.getString(HikeConstants.Extras.MSISDN),
 					notifyBundle.getString(HikeConstants.Extras.NAME));
 		}
-		else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type) | HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type))
+		else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type) || HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type))
 		{
 			if (object == null)
 				return;
