@@ -4,46 +4,53 @@
     android:layout_height="230dp"
     android:background="#ffffff" >
 
-    <ImageView
-        android:id="@+id/fileTypeImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_gravity="center"
-        android:layout_marginBottom="33dp"
-        android:layout_marginLeft="26dp"
-        android:layout_marginRight="26dp"
-        android:layout_marginTop="47dp"
-        android:src="@drawable/filtype" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/divider" >
 
-    <LinearLayout
-        android:layout_marginTop="36dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/fileTypeImageView"
-        android:orientation="vertical" >
-
-        <com.bsb.hike.view.CustomFontTextView
+        <ImageView
+            android:id="@+id/fileTypeImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="10dp"
-            android:text="Bigger, better attachments"
-            android:textColor="#33312e"
-            android:textSize="18sp" />
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="33dp"
+            android:layout_marginLeft="26dp"
+            android:layout_marginRight="26dp"
+            android:layout_marginTop="47dp"
+            android:src="@drawable/filtype" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_marginRight="14dp"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="left"
-            android:text="@string/file_transfer_pop_up_text"
-            android:textColor="#566167"
-            android:textSize="14sp" />
-    </LinearLayout>
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/fileTypeImageView"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:text="Bigger, better attachments"
+                android:textColor="#33312e"
+                android:textSize="18sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="14dp"
+                android:gravity="left"
+                android:text="@string/file_transfer_pop_up_text"
+                android:textColor="#566167"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </RelativeLayout>
 
     <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="0.7dp"
         android:layout_above="@+id/awesomeButton"

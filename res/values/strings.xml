@@ -1456,4 +1456,5 @@
     <string name="tap_plus_add_favorites">Only your Favorites can see your Last Seen and Status Updates.\n\nTap + to add to Favorites.</string>
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
+    <string name="bigger_better_attachments">Bigger, better attachments</string>
 </resources>
