@@ -27,7 +27,7 @@
         android:layout_weight="509"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:paddingLeft="20dp" >
+        android:paddingLeft="@dimen/tutorial_fragment_header_padding_left" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tutorial_title"
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:onClick="onHikeIconClicked"
-            android:paddingRight="22dp"
+            android:paddingRight="@dimen/tutorial_fragment_title_padding_Right"
             android:layout_marginBottom="24dp"
             android:text="@string/tutorial1_header_title"
             android:gravity="left"
