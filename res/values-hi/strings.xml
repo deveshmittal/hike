@@ -849,4 +849,43 @@
     <string name="female_selected_string_5">लड़कियाँ प्रतिदिन लगभग 7,000 शब्द बोलती हैं!</string>
     <string name="invite_friends_confirmation_msg">क्या आप अपने %1$s दोस्तों को hike पर आमंत्रित करना चाहते हैं?</string>
     <string name="didnt_get_pin">पिन नहीं मिला, हम आपको कॉल करेंगे</string>
+    <string name="maxContactInGroupErr">समूह में अधिकतम %1$s संपर्कों की अनुमति दी जाती है	 </string>
+	<string name="cannot_select_zero_byte_file">0 बाइट फ़ाइल का चयन नहीं हो सकता </string>
+    <string name="chatThreadNudgeTutorialText_group">अपने मित्रों को टहोकने के लिए कहीं भी दोहरा टैप करें</string>
+    <string name="addedYouAsFavorite">%1$s को पसंदीदा में जोड़ा गया </string>
+    <string name="addedYouFrindDescription">
+<![CDATA[ अब आप %1$s के साथ अपने <font color="#ef554e">अंतिम बार देखे गए</font> and <font color="#0f8fe1">स्थिति अद्यतन</font> साझा कर रहे हैं। क्या आप उसे भी ऐसा ही करने के लिए अनुरोध करना चाहेंगे?
+    ]]>
+    </string>
+	<string name="contacts_upper_case">संपर्क</string>
+	<string name="favorite_request_pending">पसंदीदा के रूप में जोड़ा गया</string>
+	<string name="ftue_favorite_subtext">पसंदीदा के रूप में जोड़ें</string>
+	<string name="sent_you_favorite_request">आपको पसंदीदा के रूप में जोड़ा है</string>
+	<string name="sent_you_favorite_request_detailed">%1$s आपके साथ अंतिम बार देखे गए और स्थिति अद्यतन साझा कर रहे हैं आप भी ऐसा ही करना चाहेंगे? %1$s को अपनी पसंदीदा सूची में जोड़ें।</string>
+	<string name="you_accepted_favorite_request_details">शानदार! %1$s अब आपके अंतिम बार देखे गए और स्थिति अद्यतन देख सकेंगे।</string>
+	<string name="accepted_your_favorite_request_details">अब आप %1$s के अंतिम बार देखे गए और स्थिति अद्यतन देख सकते हैं</string>
+	<string name="add_as_favorites_profile">%1$s को अब पसंदीदा में जोड़ें।\nअपने अंतिम बार देखे गए और स्थिति अद्यतन केवल पसंदीदा के साथ साझा करें।</string>
+	<string name="add_as_favorite_menu">पसंदीदा के रूप में जोड़ें</string>
+	<string name="remove_from_favorites">पसंदीदा से हटाएं</string>
+	<string name="favorite_request_sent">पसंदीदा के रूप में जोड़ा गया</string>
+	<string name="favorite_request_sent_multiple">पसंदीदा के रूप में जोड़ा गया</string>
+	<string name="add_as_favorite_notification">%1$s ने आपको पसंदीदा के रूप में जोड़ा है</string>
+    <string name="add_as_favorite_notification_line">आपको पसंदीदा के रूप में जोड़ा है</string>
+    <string name="favorite_confirmed_notification">अब आप %1$s के अंतिम बार देखे गए और स्थिति अद्यतन देख सकते हैं</string>
+    <string name="favorites_ftue_item_label">पसंदीदा में जोड़ें</string>
+    <string name="add_favorites_popup_msg">आप किसी को भी संदेश भेज सकते हैं, लेकिन केवल आपके पसंदीदा ही आपके स्थिति अद्यतन और अंतिम बार देखे गए देख सकते हैं। उन्हें बुद्धिमानी से चुनें!</string>
+    <string name="favorites_on_hike_tut">hike पर पसंदीदा</string>
+    <string name="start_adding_favorites">पसंदीदा जोड़ना प्रारंभ करें</string>
+    <string name="favorites_upper_case">पसंदीदा</string>
+    <string name="sent_favorite_request_tab">अब अंतिम बार देखे गए और स्थिति अद्यतन साझा कर रहे हैं। आप भी ऐसा ही करना चाहेंगे?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">पसंदीदा के लिए सुझाव खारिज करने के लिए यहाँ टैप करें</string>
+    <string name="last_seen_favorite_info">अंतिम बार देखे गए बंद करने से आपके पसंदीदा के अंतिम बार देखे गए स्थिति भी आपसे छिप जाएगी</string>
+    <string name="favorites_ftue_item_label">पसंदीदा जोड़ें</string>
+    <string name="updates_are_fun_with_favorites">अद्यतन पसंदीदा के साथ ज़्यादा मज़ेदार होते हैं। हम उनमें से कुछ ढूँढ़ें हैं जिन्हें आप hike में जोड़ सकते हैं।</string>
+    <string name="group_chats_upper_case">समूह वार्तालाप</string>
+    <string name="max_num_files_reached">%1$s से ज़्यादा फ़ाइलें साझा नहीं की जा सकतीं</string>
+    <string name="tap_plus_add_favorites">केवल अपने पसंदीदा आपकी "अंतिम देखा" और "स्थिति अद्यतन" देख सकते हैं। क्लिक करें \'+\', पसंदीदा बनाने के लिए|</string>
+    <string name="last_seen_proper_casing">अंतिम देखा</string>
+    <string name="status_updates_proper_casing">स्थिति अद्यतन</string>
+    <string name="bigger_better_attachments">बड़ा, बेहतर अटैचमेंटस</string>
 </resources>

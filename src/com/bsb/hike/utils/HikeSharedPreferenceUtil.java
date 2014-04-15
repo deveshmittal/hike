@@ -31,7 +31,7 @@ public class HikeSharedPreferenceUtil
 	{
 		if (hikeSharedPreferenceUtil == null)
 		{
-			initializeHikeSharedPref(context);
+			initializeHikeSharedPref(context.getApplicationContext());
 		}
 		return hikeSharedPreferenceUtil;
 	}
