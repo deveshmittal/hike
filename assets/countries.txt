@@ -58,6 +58,8 @@ DK;Denmark;45
 DJ;Djibouti;253
 DM;Dominica;1767
 DO;Dominican Republic;1809
+DO;Dominican Republic;1849
+DO;Dominican Republic;1829
 TL;Timor-Leste;670
 EC;Ecuador;593
 EG;Egypt;20
