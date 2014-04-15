@@ -778,7 +778,6 @@
     <string name="contacts_sync_started">"La sincronización de los contactos ha comenzado"</string>
     <string name="add_friends_listview_header">"Tienes %1$s contactos \n en hike. ¡Muy bien!"</string>
     <string name="recommended_contacts_section">CONTACTOS RECOMENDADOS</string>
-    <string name="ftue_invite_friends_msg">¡Si tus amigos se apuntan a hike tendrán mensajes gratis para siempre! Además, tú te llevas 20 SMS gratis por cada amigo que se apunte a hike.</string>
     <string name="start_inviting_friends">Empieza a invitar a amigos</string>
     <string name="add_count_btn">Añadir a (%1$s)</string>
     <string name="all_contacts">TODOS LOS CONTACTOS</string>
