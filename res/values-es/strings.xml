@@ -880,4 +880,5 @@
     <string name="tap_plus_add_favorites">Sólo tus favoritos pueden ver su "Último visto" y "Actualizaciones de estado". Pulse en \'+\' para añadir a favoritos.</string>
     <string name="last_seen_proper_casing">Último visto</string>
     <string name="status_updates_proper_casing">Actualizaciones de estado</string>
+    <string name="bigger_better_attachments">Más grande, mejor adjuntos</string>
 </resources>

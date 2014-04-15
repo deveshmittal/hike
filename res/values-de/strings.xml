@@ -871,4 +871,5 @@
     <string name="tap_plus_add_favorites">Nur Ihre Favoriten sehen Ihre "Zuletzt gesehen" und "Status-Updates". Tippen Sie auf \'+\' zu Favoriten hinzufügen.</string>
     <string name="last_seen_proper_casing">Zuletzt gesehen</string>
     <string name="status_updates_proper_casing">Status-Updates</string>
+    <string name="bigger_better_attachments">Größer, besser Anhänge</string>
 </resources>

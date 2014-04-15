@@ -878,4 +878,5 @@
     <string name="tap_plus_add_favorites">eulement vos favoris peuvent voir votre "Dernier vu"et le "Status Updates". Appuyez sur "+" pour ajouter à vos favoris.</string>
     <string name="last_seen_proper_casing">Dernier vu</string>
     <string name="status_updates_proper_casing">Status Updates</string>
+    <string name="bigger_better_attachments">Plus grand, meilleur pièces jointes</string>
 </resources>

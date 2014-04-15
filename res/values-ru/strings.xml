@@ -887,4 +887,5 @@
     <string name="tap_plus_add_favorites">Только избранное можно увидеть ваши «Последний видел» и «Состояние обновлений». Нажмите на «+», чтобы добавить в избранное.</string>
     <string name="last_seen_proper_casing">Последний видел</string>
     <string name="status_updates_proper_casing">Состояние обновлений</string>
+    <string name="bigger_better_attachments">Больше, лучше вложения</string>
 </resources>
