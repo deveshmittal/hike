@@ -695,6 +695,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				filePath = Utils.getRealPathFromUri(fileUri, this);
 			}
 
+			if(TextUtils.isEmpty(filePath))
+			{
+				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				return;
+			}
+
 			File file = new File(filePath);
 			if (file.length() > HikeConstants.MAX_FILE_SIZE)
 			{
