@@ -741,7 +741,7 @@
     <string name="one_new_message">1 neue Nachricht</string>
     <string name="terms">Geschäftsbedingungen</string>
     <string name="tutorial1_header_title">Willkommen beim\nHike Messenger!</string>
-    <string name="tutorial2_header_title">Jede Menge lustige, farbenfrohe\nSticker!</string>
+    <string name="tutorial2_header_title">Jede Menge lustige, farbenfrohe Sticker!</string>
     <string name="tutorial3_header_title">Gestalte Konversationen\nfarbenfroh.</string>
     <string name="get_started">Erste Schritte</string>
     <string name="whats_your_number">Hi" Wie lautet deine Nummer?</string>
@@ -832,4 +832,43 @@
     <string name="female_selected_string_5">Mädchen sagen ungefähr 7000 Wörter pro Tag!</string>
     <string name="invite_friends_confirmation_msg">Möchtest du %1$s deiner Freunde zu hike einladen?</string>
     <string name="didnt_get_pin">Falls du die PIN nicht erhalten hast, rufen wir dich an</string>
+    
+    <string name="maxContactInGroupErr">In einer Gruppe dürfen höchstens %1$s Kontakte sein</string>
+	<string name="cannot_select_zero_byte_file">Eine Datei mit 0 Byte kann nicht ausgewählt werden</string>
+    <string name="chatThreadNudgeTutorialText_group">Einfach irgendwo doppeltippen, um deine Freunde anzustupsen</string>
+   <string name="addedYouAsFavorite">%1$s zu Favoriten hinzugefügt</string>
+    <string name="addedYouFrindDescription">
+<![CDATA[ Du teilst jetzt <font color="#ef554e">zuletzt online</font> und <font color="#0f8fe1">Status</font> mit %1$s. Möchtest du, dass er/sie das auch macht?
+    ]]>
+    </string>
+	<string name="contacts_upper_case">KONTAKTE</string>
+	<string name="favorite_request_pending">wurde als Favorit hinzugefügt</string>
+	<string name="ftue_favorite_subtext">Als Favorit hinzufügen</string>
+	<string name="sent_you_favorite_request">hat dich als Favorit hinzugefügt</string>
+	<string name="sent_you_favorite_request_detailed">%1$s teilt die Statusmeldung und wann er/sie zuletzt online war mit dir. Möchtest du dasselbe machen? Füge %1$s zu deiner Favoritenliste hinzu.</string>
+	<string name="you_accepted_favorite_request_details">Großartig! %1$s kann jetzt deine Statusmeldung sehen und wann du zuletzt online warst.</string>
+	<string name="accepted_your_favorite_request_details">Du kannst jetzt den Status von %1$s\ sehen und wann er/sie zuletzt online war</string>
+	<string name="add_as_favorites_profile">Füge %1$s jetzt zu Favoriten hinzu.\nTeile deine Statusmeldung und wann du zuletzt online warst nur mit deinen Favoriten.</string>
+	<string name="add_as_favorite_menu">Als Favorit hinzufügen</string>
+	<string name="remove_from_favorites">Aus Favoriten entfernen</string>
+	<string name="favorite_request_sent">wurde als Favorit hinzugefügt</string>
+	<string name="favorite_request_sent_multiple">Als Favoriten hinzugefügt</string>
+	<string name="add_as_favorite_notification">%1$s hat dich als Favorit hinzugefügt</string>
+    <string name="add_as_favorite_notification_line">hat dich als Favorit hinzugefügt</string>
+    <string name="favorite_confirmed_notification">Du kannst jetzt den Status von %1$s\ sehen und wann er/sie zuletzt online war</string>
+    <string name="favorites_ftue_item_label">Favoriten hinzufügen</string>
+    <string name="add_favorites_popup_msg">Du kannst beliebigen Personen Mitteilungen senden, aber nur deine Favoriten können deine Statusmeldung sehen und wann du zuletzt online warst. Überlege dir gut, wen du auswählst!</string>
+    <string name="favorites_on_hike_tut">Favoriten bei hike</string>
+    <string name="start_adding_favorites">Jetzt beginnen, Favoriten hinzuzufügen</string>
+    <string name="favorites_upper_case">FAVORITEN</string>
+    <string name="sent_favorite_request_tab">teilt jetzt die Statusmeldung und wann er/sie zuletzt online war. Möchtest du dasselbe machen?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">Hier tippen, um Vorschläge für Favoriten zu verwerfen</string>
+    <string name="last_seen_favorite_info">Wenn du ‚zuletzt online‘ ausschaltest, kannst du auch nicht mehr sehen, wann deine Favoriten zuletzt online waren</string>
+    <string name="favorites_ftue_item_label">Favoriten hinzufügen</string>
+    <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
+    <string name="group_chats_upper_case">GRUPPENCHAT</string>
+    <string name="max_num_files_reached">Es können nicht mehr als %1$s Dateien geteilt werden</string>
+    <string name="tap_plus_add_favorites">Nur Ihre Favoriten sehen Ihre "Zuletzt gesehen" und "Status-Updates". Tippen Sie auf \'+\' zu Favoriten hinzufügen.</string>
+    <string name="last_seen_proper_casing">Zuletzt gesehen</string>
+    <string name="status_updates_proper_casing">Status-Updates</string>
 </resources>

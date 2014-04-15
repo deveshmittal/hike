@@ -750,7 +750,7 @@
     <string name="one_new_message">1 nouveau message</string>
     <string name="terms">Conditions</string>
     <string name="tutorial1_header_title">Bienvenue sur\nHike Messenger</string>
-    <string name="tutorial2_header_title">De magnifiques stickers pour\nplus de fun !</string>
+    <string name="tutorial2_header_title">De magnifiques stickers\npour plus de fun !</string>
     <string name="tutorial3_header_title">Donnes des couleurs à\ntes conversations.</string>
     <string name="get_started">Premiers pas</string>
     <string name="whats_your_number">Salut ! Quel est ton numéro ?</string>
@@ -776,7 +776,6 @@
     <string name="contacts_sync_started">"Synchronisation des contacts démarrée"</string>
     <string name="add_friends_listview_header">"Tu as %1$s contacts \n sur hike. Super !"</string>
     <string name="recommended_contacts_section">CONTACTS SUGGÉRÉS</string>
-    <string name="ftue_invite_friends_msg">Fais venir tes amis sur hike et envoie des SMS gratuits à vie ! Tu reçois également 20 SMS gratuit pour chaque nouvel ami inscrit.</string>
     <string name="start_inviting_friends">Invite tes premiers amis</string>
     <string name="add_count_btn">Ajouter(%1$s)</string>
     <string name="all_contacts">TOUS LES CONTACTS</string>
@@ -841,4 +840,42 @@
     <string name="female_selected_string_5">Les femmes prononcent environ 7 000 mots par jour !</string>
     <string name="invite_friends_confirmation_msg">Tu veux inviter %1$s de tes amis dans hike ?</string>
     <string name="didnt_get_pin">Si tu n\'as pas reçu le code PIN, on t\'appellera</string>		
+    <string name="maxContactInGroupErr">La limite est de %1$s contacts par groupe"</string>
+	<string name="cannot_select_zero_byte_file">Impossible de sélectionner un fichier de 0 octet"</string>
+    <string name="chatThreadNudgeTutorialText_group">"Touche deux fois n'importe où pour hiker tes amis"</string>
+    <string name="addedYouAsFavorite">"A ajouté %1$s à ses favoris"</string>
+	<string name="addedYouFrindDescription">
+<![CDATA[ Tu partages désormais ta <font color="#ef554e">Dernière connexion</font> et tes <font color="#0f8fe1">Mises à jour du statut</font> avec %1$s. Veux-tu lui demander de faire de même ?
+    ]]>
+	</string>
+    <string name="contacts_upper_case">"CONTACTS"</string>
+	<string name="favorite_request_pending">A été ajouté(e) aux favoris"</string>
+	<string name="ftue_favorite_subtext">Ajouter aux favoris"</string>
+	<string name="sent_you_favorite_request">T\'a ajouté(e) à ses favoris"</string>
+	<string name="sent_you_favorite_request_detailed">%1$s partage sa Dernière connexion et ses Mises à jour avec toi. Veux-tu faire de même ? Ajoute %1$s à ta Liste de favoris."</string>
+	<string name="you_accepted_favorite_request_details">Super ! %1$s voit désormais ta Dernière connexion et tes Mises à jour du statut."</string>
+	<string name="accepted_your_favorite_request_details">Tu vois désormais la Dernière connexion et les Mises à jour de %1$s"</string>
+	<string name="add_as_favorites_profile">Ajoute %1$s à tes favoris.\nPartage ta Dernière connexion et tes Mises à jour avec tes Contacts favoris uniquement."</string>
+	<string name="add_as_favorite_menu">Ajouter aux favoris"</string>
+	<string name="remove_from_favorites">Retirer des favoris"</string>
+	<string name="favorite_request_sent">A été ajouté(e) aux favoris"</string>
+	<string name="favorite_request_sent_multiple">Ajoutés aux favoris"</string>
+	<string name="add_as_favorite_notification">%1$s t\'a ajouté(e) à ses favoris"</string>
+    <string name="add_as_favorite_notification_line">"T'a ajouté(e) à ses favoris"</string>
+    <string name="favorite_confirmed_notification">"Tu vois désormais la Dernière connexion et les Mises à jour de %1$s"</string>
+    <string name="favorites_ftue_item_label">"Ajouter des favoris"</string>
+    <string name="add_favorites_popup_msg">"Tu peux écrire à qui tu veux mais tes favoris sont les seuls à voir tes mises à jour de statut et ta dernière connexion. Choisis-les bien !"</string>
+    <string name="favorites_on_hike_tut">"Favoris sur hike"</string>
+    <string name="start_adding_favorites">"Ajoute tes premiers favoris"</string>
+    <string name="favorites_upper_case">"FAVORIS"</string>
+    <string name="sent_favorite_request_tab">"partage désormais sa Dernière connexion et ses Mises à jour du statut. Veux-tu faire de même ?"</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">"Touche ici pour rejeter les suggestions de favoris"</string>
+    <string name="last_seen_favorite_info">"En désactivant la dernière connexion, tu masqueras aussi la dernière connexion de tes favoris."</string>
+    <string name="favorites_ftue_item_label">"Ajouter des favoris"</string>
+    <string name="updates_are_fun_with_favorites">"Les mises à jour sont plus fun avec des favoris. Nous t'avons trouvé des personnes à ajouter dans hike."</string>
+    <string name="group_chats_upper_case">"TCHATS GROUPÉS"</string>
+    <string name="max_num_files_reached">"Impossible de partager plus de %1$s fichiers"</string>
+    <string name="tap_plus_add_favorites">eulement vos favoris peuvent voir votre "Dernier vu"et le "Status Updates". Appuyez sur "+" pour ajouter à vos favoris.</string>
+    <string name="last_seen_proper_casing">Dernier vu</string>
+    <string name="status_updates_proper_casing">Status Updates</string>
 </resources>
