@@ -21,4 +21,7 @@
 	<dimen name="addfriend_popup_btn_margin_bottom">8dp</dimen>
     <dimen name="gallery_cover_item_size">140dp</dimen>
     <dimen name="timeine_big_picture_size">380dp</dimen>
+    <dimen name="tutorial_fragment_header_padding_left">16dp</dimen>
+	<dimen name="tutorial_fragment_title_padding_Right">18dp</dimen>
+    
 </resources>

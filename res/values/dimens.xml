@@ -119,4 +119,6 @@
 	<dimen name="contact_list_divider_padding">8dp</dimen>
 	<dimen name="contact_list_header_padding">12dp</dimen>
 	<dimen name="gallery_selection_padding">20dp</dimen>
+	<dimen name="tutorial_fragment_header_padding_left">20dp</dimen>
+	<dimen name="tutorial_fragment_title_padding_Right">22dp</dimen>
 </resources>
