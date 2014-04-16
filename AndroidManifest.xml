@@ -195,7 +195,8 @@
         </activity>
         <activity android:name=".ui.CountrySelectActivity" >
         </activity>
-        <activity android:name=".ui.FileSelectActivity" >
+        <activity android:name=".ui.FileSelectActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"  >
         </activity>
         <activity android:name=".ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
