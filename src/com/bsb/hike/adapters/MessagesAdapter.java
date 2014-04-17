@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT, STICKER_SENT
 	};
 
 	private class ViewHolder
@@ -424,7 +424,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.getUnreadCount() > 0)
+		if(convMessage.isStickerMessage() && convMessage.isSent())
+		{
+			type = ViewType.STICKER_SENT;
+		}
+		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
 		}
@@ -491,6 +495,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			switch (viewType)
 			{
+			case STICKER_SENT:
+				v = inflater.inflate(R.layout.message_sent_sticker, parent, false);
+				holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
+				holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
+				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
+				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
+				holder.extMessageStatus = (ImageView) v.findViewById(R.id.message_status_ext);
+				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
+				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				break;
 			case LAST_READ:
 				v = inflater.inflate(R.layout.last_read_line, null);
 				break;
