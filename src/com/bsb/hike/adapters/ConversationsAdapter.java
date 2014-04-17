@@ -5,9 +5,13 @@ import java.util.List;
 import org.json.JSONArray;
 
 import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -15,6 +19,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -27,84 +32,153 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
-public class ConversationsAdapter extends ArrayAdapter<Conversation> {
+public class ConversationsAdapter extends ArrayAdapter<Conversation>
+{
 
 	private IconLoader iconLoader;
+
 	private int mResourceId;
+
 	private int mIconImageSize;
 
-	public ConversationsAdapter(Context context, int textViewResourceId,
-			List<Conversation> objects) {
+	private enum ViewType
+	{
+		CONVERSATION, GROUP_CHAT_TIP
+	}
+
+	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
+	{
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
-		iconLoader = new IconLoader(context,mIconImageSize);
+		iconLoader = new IconLoader(context, mIconImageSize);
+		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		Context context = getContext();
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	public int getViewTypeCount()
+	{
+		return ViewType.values().length;
+	}
+
+	@Override
+	public int getItemViewType(int position)
+	{
 		Conversation conversation = getItem(position);
+		if (conversation == null)
+		{
+			return ViewType.GROUP_CHAT_TIP.ordinal();
+		}
+		return ViewType.CONVERSATION.ordinal();
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent)
+	{
+		Context context = getContext();
+		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final Conversation conversation = getItem(position);
+
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		View v = convertView;
-		if (v == null) {
-			v = inflater.inflate(mResourceId, parent, false);
+		if (v == null)
+		{
+			if (viewType == ViewType.GROUP_CHAT_TIP)
+			{
+				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
+			}
+			else
+			{
+				v = inflater.inflate(mResourceId, parent, false);
+			}
+		}
+
+		if (viewType == ViewType.GROUP_CHAT_TIP)
+		{
+			TextView tip = (TextView) v.findViewById(R.id.tip);
+
+			String tipString = context.getString(R.string.tap_top_right_group_chat);
+			String tipReplaceString = "*";
+
+			SpannableStringBuilder ssb = new SpannableStringBuilder(tipString);
+			ssb.setSpan(new ImageSpan(context, R.drawable.ic_group_tip_menu), tipString.indexOf(tipReplaceString), tipString.indexOf(tipReplaceString) + tipReplaceString.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			tip.setText(ssb);
+
+			View close = v.findViewById(R.id.close);
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_GROUP_CHAT_TIP, null);
+				}
+			});
+
+			return v;
 		}
 
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
 		String name = conversation.getLabel();
 
 		contactView.setText(name);
-		if (conversation instanceof GroupConversation) {
-			contactView.setCompoundDrawablesWithIntrinsicBounds(
-					R.drawable.ic_group, 0, 0, 0);
-		} else {
+		if (conversation instanceof GroupConversation)
+		{
+			contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
+		}
+		else
+		{
 			contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
 		List<ConvMessage> messages = conversation.getMessages();
-		if (!messages.isEmpty()) {
+		if (!messages.isEmpty())
+		{
 			ConvMessage message = messages.get(messages.size() - 1);
 
-			ImageView avatarframe = (ImageView) v
-					.findViewById(R.id.avatar_frame);
+			ImageView avatarframe = (ImageView) v.findViewById(R.id.avatar_frame);
 
-			ImageView imgStatus = (ImageView) v
-					.findViewById(R.id.msg_status_indicator);
+			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
 
-			TextView unreadIndicator = (TextView) v
-					.findViewById(R.id.unread_indicator);
+			TextView unreadIndicator = (TextView) v.findViewById(R.id.unread_indicator);
 			unreadIndicator.setVisibility(View.GONE);
 			imgStatus.setVisibility(View.GONE);
 			/*
-			 * If the message is a status message, we only show an indicator if
-			 * the status of the message is unread.
+			 * If the message is a status message, we only show an indicator if the status of the message is unread.
 			 */
-			if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE
-					|| message.getState() == State.RECEIVED_UNREAD) {
+			if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
+			{
 				int resId = message.getImageState();
-				if (resId > 0) {
-					avatarframe
-							.setImageResource(R.drawable.frame_avatar_large_selector);
+				if (resId > 0)
+				{
+					avatarframe.setImageDrawable(null);
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
-				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
-						&& (message.getTypingNotification() == null)) {
-					avatarframe
-							.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
+				}
+				else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
+				{
+					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
 					unreadIndicator.setVisibility(View.VISIBLE);
 
-					if (conversation.getUnreadCount() == 0) {
+					if (conversation.getUnreadCount() == 0)
+					{
 						unreadIndicator.setText("");
-					} else {
-						unreadIndicator.setText(Integer.toString(conversation
-								.getUnreadCount()));
 					}
-				} else {
-					avatarframe
-							.setImageResource(R.drawable.frame_avatar_large_selector);
+					else
+					{
+						unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
+					}
 				}
+				else
+				{
+					avatarframe.setImageDrawable(null);
+				}
+			}
+			else
+			{
+				avatarframe.setImageDrawable(null);
 			}
 
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
@@ -112,172 +186,168 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			MessageMetadata metadata = message.getMetadata();
 
 			CharSequence markedUp = null;
-			if (message.isFileTransferMessage()) {
-				markedUp = HikeFileType.getFileTypeMessage(context, metadata
-						.getHikeFiles().get(0).getHikeFileType(),
-						message.isSent());
-				if ((conversation instanceof GroupConversation)
-						&& !message.isSent()) {
-					markedUp = Utils.addContactName(
-							((GroupConversation) conversation)
-									.getGroupParticipantFirstName(message
-											.getGroupParticipantMsisdn()),
-							markedUp);
+			if (message.isFileTransferMessage())
+			{
+				markedUp = HikeFileType.getFileTypeMessage(context, metadata.getHikeFiles().get(0).getHikeFileType(), message.isSent());
+				if ((conversation instanceof GroupConversation) && !message.isSent())
+				{
+					markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn()), markedUp);
 				}
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
-				JSONArray participantInfoArray = metadata
-						.getGcjParticipantInfo();
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+			{
+				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
 
-				String highlight = Utils.getGroupJoinHighlightText(
-						participantInfoArray, (GroupConversation) conversation);
+				String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
 
-				if (metadata.isNewGroup()) {
-					markedUp = String.format(
-							context.getString(R.string.new_group_message),
-							highlight);
-				} else {
-					markedUp = String.format(
-							context.getString(R.string.add_to_group_message),
-							highlight);
+				if (metadata.isNewGroup())
+				{
+					markedUp = String.format(context.getString(R.string.new_group_message), highlight);
 				}
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER) {
+				else
+				{
+					markedUp = String.format(context.getString(R.string.add_to_group_message), highlight);
+				}
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
+			{
 				JSONArray dndNumbers = metadata.getDndNumbers();
-				if (dndNumbers != null && dndNumbers.length() > 0) {
+				if (dndNumbers != null && dndNumbers.length() > 0)
+				{
 					StringBuilder dndNames = new StringBuilder();
-					for (int i = 0; i < dndNumbers.length(); i++) {
+					for (int i = 0; i < dndNumbers.length(); i++)
+					{
 						String dndName;
-						dndName = conversation instanceof GroupConversation ? ((GroupConversation) conversation)
-								.getGroupParticipantFirstName(dndNumbers
-										.optString(i)) : Utils
+						dndName = conversation instanceof GroupConversation ? ((GroupConversation) conversation).getGroupParticipantFirstName(dndNumbers.optString(i)) : Utils
 								.getFirstName(conversation.getLabel());
-						if (i < dndNumbers.length() - 2) {
+						if (i < dndNumbers.length() - 2)
+						{
 							dndNames.append(dndName + ", ");
-						} else if (i < dndNumbers.length() - 1) {
+						}
+						else if (i < dndNumbers.length() - 1)
+						{
 							dndNames.append(dndName + " and ");
-						} else {
+						}
+						else
+						{
 							dndNames.append(dndName);
 						}
 					}
-					markedUp = String
-							.format(context
-									.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc
-											: R.string.dnd_one_to_one),
-									dndNames.toString());
+					markedUp = String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString());
 				}
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE) {
-				if (conversation.isOnhike()) {
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE)
+			{
+				if (conversation.isOnhike())
+				{
 					boolean firstIntro = conversation.getMsisdn().hashCode() % 2 == 0;
-					markedUp = String.format(context
-							.getString(firstIntro ? R.string.start_thread1
-									: R.string.start_thread1), Utils
-							.getFirstName(conversation.getLabel()));
-				} else {
-					markedUp = String.format(
-							context.getString(R.string.intro_sms_thread),
-							Utils.getFirstName(conversation.getLabel()));
+					markedUp = String.format(context.getString(firstIntro ? R.string.start_thread1 : R.string.start_thread1), Utils.getFirstName(conversation.getLabel()));
 				}
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
+				else
+				{
+					markedUp = String.format(context.getString(R.string.intro_sms_thread), Utils.getFirstName(conversation.getLabel()));
+				}
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+			{
 				String participantName;
-				if (conversation instanceof GroupConversation) {
+				if (conversation instanceof GroupConversation)
+				{
 					String participantMsisdn = metadata.getMsisdn();
-					participantName = ((GroupConversation) conversation)
-							.getGroupParticipantFirstName(participantMsisdn);
-				} else {
-					participantName = Utils.getFirstName(conversation
-							.getLabel());
+					participantName = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
 				}
-				markedUp = context.getString(
-						metadata.isOldUser() ? R.string.user_back_on_hike
-								: R.string.joined_hike_new, participantName);
+				else
+				{
+					participantName = Utils.getFirstName(conversation.getLabel());
+				}
+				markedUp = context.getString(metadata.isOldUser() ? R.string.user_back_on_hike : R.string.joined_hike_new, participantName);
 
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
-					|| message.getParticipantInfoState() == ParticipantInfoState.GROUP_END) {
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || message.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
+			{
 
-				if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) {
+				if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT)
+				{
 					// Showing the block internation sms message if the user was
 					// booted because of that reason
 					String participantMsisdn = metadata.getMsisdn();
-					String participantName = ((GroupConversation) conversation)
-							.getGroupParticipantFirstName(participantMsisdn);
-					markedUp = String.format(
-							context.getString(R.string.left_conversation),
-							participantName);
-				} else {
+					String participantName = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
+					markedUp = String.format(context.getString(R.string.left_conversation), participantName);
+				}
+				else
+				{
 					markedUp = context.getString(R.string.group_chat_end);
 				}
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+			{
 				String msisdn = metadata.getMsisdn();
 
-				String userMsisdn = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-						HikeMessengerApp.MSISDN_SETTING, "");
+				String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-				String participantName = userMsisdn.equals(msisdn) ? context
-						.getString(R.string.you)
-						: ((GroupConversation) conversation)
-								.getGroupParticipantFirstName(msisdn);
+				String participantName = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
 
-				markedUp = String.format(
-						context.getString(R.string.change_group_name),
-						participantName);
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
+				markedUp = String.format(context.getString(R.string.change_group_name), participantName);
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
+			{
 				markedUp = context.getString(R.string.block_internation_sms);
-			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) {
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+			{
 				String msisdn = metadata.getMsisdn();
-				String userMsisdn = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-						HikeMessengerApp.MSISDN_SETTING, "");
+				String userMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 				String nameString;
-				if (conversation instanceof GroupConversation) {
-					nameString = userMsisdn.equals(msisdn) ? context
-							.getString(R.string.you)
-							: ((GroupConversation) conversation)
-									.getGroupParticipantFirstName(msisdn);
-				} else {
-					nameString = userMsisdn.equals(msisdn) ? context
-							.getString(R.string.you) : Utils
-							.getFirstName(conversation.getLabel());
+				if (conversation instanceof GroupConversation)
+				{
+					nameString = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				}
+				else
+				{
+					nameString = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : Utils.getFirstName(conversation.getLabel());
 				}
 
-				markedUp = context.getString(R.string.chat_bg_changed,
-						nameString);
-			} else {
+				markedUp = context.getString(R.string.chat_bg_changed, nameString);
+			}
+			else
+			{
 				String msg = message.getMessage();
-				markedUp = msg.substring(0, Math.min(msg.length(),
-						HikeConstants.MAX_MESSAGE_PREVIEW_LENGTH));
+				/*
+				 * Making sure this string is never null.
+				 */
+				if (msg == null)
+				{
+					msg = "";
+				}
+				markedUp = msg.substring(0, Math.min(msg.length(), HikeConstants.MAX_MESSAGE_PREVIEW_LENGTH));
 				// For showing the name of the contact that sent the message in
 				// a group chat
-				if (conversation instanceof GroupConversation
-						&& !TextUtils.isEmpty(message
-								.getGroupParticipantMsisdn())
-						&& message.getParticipantInfoState() == ParticipantInfoState.NO_INFO) {
-					markedUp = Utils.addContactName(
-							((GroupConversation) conversation)
-									.getGroupParticipantFirstName(message
-											.getGroupParticipantMsisdn()),
-							markedUp);
+				if (conversation instanceof GroupConversation && !TextUtils.isEmpty(message.getGroupParticipantMsisdn())
+						&& message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+				{
+					markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipantFirstName(message.getGroupParticipantMsisdn()), markedUp);
 				}
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, true);
 			}
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);
-			TextView tsView = (TextView) v
-					.findViewById(R.id.last_message_timestamp);
+			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted(true, context));
-			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD) {
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
 				/* set unread messages to BLUE */
-				messageView.setTextColor(context.getResources().getColor(
-						R.color.unread_message));
-			} else {
-				messageView.setTextColor(context.getResources().getColor(
-						R.color.list_item_header));
+				messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
+			}
+			else
+			{
+				messageView.setTextColor(context.getResources().getColor(R.color.list_item_header));
 			}
 		}
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView,true);
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
 		return v;
 	}
 

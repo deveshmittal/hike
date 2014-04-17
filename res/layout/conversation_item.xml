@@ -19,13 +19,12 @@
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
-                style="@style/AvatarStyle.MorePadding"
-                android:src="@drawable/ic_avatar1" />
+                style="@style/AvatarStyle.MorePadding" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
                 style="@style/AvatarStyle"
-                android:src="@drawable/frame_avatar_large_selector" />
+                android:src="@drawable/frame_avatar_highlight" />
         </FrameLayout>
 
         <LinearLayout
@@ -46,8 +45,7 @@
                     android:layout_centerVertical="true"
                     android:text="9:35AM"
                     android:textColor="@color/timestamp"
-                    android:textSize="12sp"
-                    android:textStyle="bold|italic" />
+                    android:textSize="12sp" />
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/contact"
@@ -61,7 +59,7 @@
                     android:singleLine="true"
                     android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
                     android:textColor="@color/list_item_header"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:drawablePadding="3dp"
                     android:textStyle="bold|italic" />
             </RelativeLayout>
@@ -117,11 +115,16 @@
                     android:layout_marginTop="1dp"
                     android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                     android:textColor="@color/list_item_header"
-                    android:textSize="15sp"
+                    android:textSize="14sp"
                     android:textStyle="italic"
                     android:visibility="invisible" />
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/home_list_divider"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>

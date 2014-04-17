@@ -8,7 +8,6 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,120 +21,138 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.smartImageLoader.SocialIconLoader;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class SocialNetInviteAdapter extends
-		ArrayAdapter<Pair<AtomicBoolean, SocialNetFriendInfo>> implements
-		TextWatcher {
+public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, SocialNetFriendInfo>> implements TextWatcher
+{
 
 	private ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> completeFriendsList;
-	private ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> filteredList;
-	private ContactFilter filter;
-	private Context context;
-	private LayoutInflater l_Inflater;
-	private SocialIconLoader imgLoader;
-	private int mIconImageSize; 
 
-	public SocialNetInviteAdapter(
-			Context context,
-			int viewItemId,
-			ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> completeFbFriendsList) {
+	private ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> filteredList;
+
+	private ContactFilter filter;
+
+	private Context context;
+
+	private LayoutInflater l_Inflater;
+
+	private SocialIconLoader imgLoader;
+
+	private int mIconImageSize;
+
+	private boolean isListFlinging;
+
+	public SocialNetInviteAdapter(Context context, int viewItemId, ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> completeFbFriendsList)
+	{
 		super(context, viewItemId, completeFbFriendsList);
 		l_Inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.filteredList = completeFbFriendsList;
-		this.completeFriendsList = new ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>(
-				completeFbFriendsList.size());
+		this.completeFriendsList = new ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>(completeFbFriendsList.size());
 		this.completeFriendsList.addAll(completeFbFriendsList);
 		this.filter = new ContactFilter();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
-		imgLoader = new SocialIconLoader(context,mIconImageSize);
+		imgLoader = new SocialIconLoader(context, mIconImageSize);
 
 	}
 
-	public int getCount() {
+	public int getCount()
+	{
 		return filteredList.size();
 	}
 
-	public long getItemId(int position) {
+	public long getItemId(int position)
+	{
 		return position;
 	}
 
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, ViewGroup parent)
+	{
 		ViewHolder holder;
 
 		SocialNetFriendInfo currFriend = getItem(position).second;
-		if (convertView == null) {
+		if (convertView == null)
+		{
 			convertView = l_Inflater.inflate(R.layout.invite_list_item, null);
 			holder = new ViewHolder();
-			holder.txt_itemName = (TextView) convertView
-					.findViewById(R.id.name);
-			convertView.findViewById(R.id.avatar_frame).setVisibility(View.GONE);
+			holder.txt_itemName = (TextView) convertView.findViewById(R.id.name);
 			// holder.txt_itemDescription = (TextView)
 			// convertView.findViewById(R.id.itemDescription);
-			holder.itemImage = (ImageView) convertView
-					.findViewById(R.id.contact_image);
+			holder.itemImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			convertView.setTag(holder);
 
-		} else {
+		}
+		else
+		{
 			holder = (ViewHolder) convertView.getTag();
 		}
 		// if(position < getCount()){
-		Log.d("getView", currFriend.getName());
+		Logger.d("getView", currFriend.getName());
 		holder.txt_itemName.setText(currFriend.getName());
 		CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
 		checkBox.setChecked(getItem(position).first.get());
-		holder.itemImage.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context,
-				"+" + currFriend.getId()));
+		holder.itemImage.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context, "+" + currFriend.getId()));
 		holder.itemImage.setTag(currFriend.getImageUrl());
-		imgLoader.loadImage(currFriend.getImageUrl(), holder.itemImage);
+		imgLoader.loadImage(currFriend.getImageUrl(), holder.itemImage, isListFlinging);
 		// }
 		return convertView;
 	}
 
-	class ViewHolder {
+	class ViewHolder
+	{
 		TextView txt_itemName;
+
 		TextView txt_itemDescription;
+
 		ImageView itemImage;
+
 		boolean downloadImageRequestSent;
 	}
 
-	public String getTitle() {
+	public String getTitle()
+	{
 		return context.getResources().getString(R.string.invite);
 	}
 
 	@Override
-	public void afterTextChanged(Editable s) {
-		Log.d("after Text change", s.toString());
+	public void afterTextChanged(Editable s)
+	{
+		Logger.d("after Text change", s.toString());
 		filter.filter(s);
 	}
 
 	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
+	public void beforeTextChanged(CharSequence s, int start, int count, int after)
+	{
 	}
 
 	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
+	public void onTextChanged(CharSequence s, int start, int before, int count)
+	{
 	}
 
-	private class ContactFilter extends Filter {
+	private class ContactFilter extends Filter
+	{
 		@Override
-		protected FilterResults performFiltering(CharSequence constraint) {
+		protected FilterResults performFiltering(CharSequence constraint)
+		{
 			FilterResults results = new FilterResults();
 
-			String textToBeFiltered = TextUtils.isEmpty(constraint) ? ""
-					: constraint.toString().toLowerCase();
+			String textToBeFiltered = TextUtils.isEmpty(constraint) ? "" : constraint.toString().toLowerCase();
 
-			if (!TextUtils.isEmpty(textToBeFiltered)) {
+			if (!TextUtils.isEmpty(textToBeFiltered))
+			{
 
 				List<Pair<AtomicBoolean, SocialNetFriendInfo>> filteredContacts = new ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>();
 
-				for (Pair<AtomicBoolean, SocialNetFriendInfo> info : SocialNetInviteAdapter.this.completeFriendsList) {
-					if (info != null) {
+				for (Pair<AtomicBoolean, SocialNetFriendInfo> info : SocialNetInviteAdapter.this.completeFriendsList)
+				{
+					if (info != null)
+					{
 						SocialNetFriendInfo fbFriendInfo = info.second;
-						if (fbFriendInfo.getName().toLowerCase()
-								.contains(textToBeFiltered)) {
+						if (fbFriendInfo.getName().toLowerCase().contains(textToBeFiltered))
+						{
 							filteredContacts.add(info);
 						}
 					}
@@ -143,9 +160,10 @@ public class SocialNetInviteAdapter extends
 				results.count = filteredContacts.size();
 				results.values = filteredContacts;
 
-			} else {
-				results.count = SocialNetInviteAdapter.this.completeFriendsList
-						.size();
+			}
+			else
+			{
+				results.count = SocialNetInviteAdapter.this.completeFriendsList.size();
 				results.values = SocialNetInviteAdapter.this.completeFriendsList;
 			}
 			return results;
@@ -153,13 +171,14 @@ public class SocialNetInviteAdapter extends
 
 		@SuppressWarnings("unchecked")
 		@Override
-		protected void publishResults(CharSequence constraint,
-				FilterResults results) {
+		protected void publishResults(CharSequence constraint, FilterResults results)
+		{
 			filteredList = (ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>) results.values;
 			notifyDataSetChanged();
 			clear();
-			for (Pair<AtomicBoolean, SocialNetFriendInfo> pair : filteredList) {
-				Log.d("filtered", pair.second.getName());
+			for (Pair<AtomicBoolean, SocialNetFriendInfo> pair : filteredList)
+			{
+				Logger.d("filtered", pair.second.getName());
 				add(pair);
 			}
 			notifyDataSetInvalidated();
@@ -167,13 +186,32 @@ public class SocialNetInviteAdapter extends
 	}
 
 	@Override
-	public boolean areAllItemsEnabled() {
+	public boolean areAllItemsEnabled()
+	{
 		return false;
 	}
 
 	@Override
-	public boolean isEnabled(int position) {
+	public boolean isEnabled(int position)
+	{
 		return super.isEnabled(position);
 	}
 
+	public SocialIconLoader getSocialIconLoader()
+	{
+		return imgLoader;
+	}
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		imgLoader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			notifyDataSetChanged();
+		}
+	}
 }

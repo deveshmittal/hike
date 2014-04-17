@@ -2,27 +2,31 @@ package com.bsb.hike.models;
 
 import com.bsb.hike.utils.ClearTypingNotification;
 
-public class TypingNotification {
+public class TypingNotification
+{
 
 	private String id;
 
 	private ClearTypingNotification clearTypingNotification;
 
-	public TypingNotification(String id) {
+	public TypingNotification(String id)
+	{
 		this.id = id;
 	}
 
-	public TypingNotification(String id,
-			ClearTypingNotification clearTypingNotification) {
+	public TypingNotification(String id, ClearTypingNotification clearTypingNotification)
+	{
 		this.id = id;
 		this.clearTypingNotification = clearTypingNotification;
 	}
 
-	public ClearTypingNotification getClearTypingNotification() {
+	public ClearTypingNotification getClearTypingNotification()
+	{
 		return clearTypingNotification;
 	}
 
-	public String getId() {
+	public String getId()
+	{
 		return id;
 	}
 }

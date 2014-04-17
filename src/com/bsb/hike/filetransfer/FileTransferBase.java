@@ -13,35 +13,38 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public abstract class FileTransferBase implements Callable<FTResult>
 {
 	public enum FTState
 	{
 		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
-		PAUSED, CANCELLED, COMPLETED, ERROR,
-		PAUSING
+		PAUSED, CANCELLED, COMPLETED, ERROR, PAUSING
 	}
 
-	protected static String NETWORK_ERROR_1 = "Connection timed out";
+	protected static String NETWORK_ERROR_1 = "timed out";
 
 	protected static String NETWORK_ERROR_2 = "Unable to resolve host";
-	
+
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
+	
+	protected static String ETAG = "Etag";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
 
 	protected short retryAttempts = 0;
 
-	protected short MAX_RETRY_ATTEMPTS = 5;
+	protected short MAX_RETRY_ATTEMPTS = 10;
 
 	protected int reconnectTime = 0;
 
-	protected int MAX_RECONNECT_TIME = 30; // in seconds
+	protected int MAX_RECONNECT_TIME = 20; // in seconds
 
 	protected Handler handler;
 
@@ -55,6 +58,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected File mFile;
 
 	protected String fileKey; // this is used for download from server , and in upload too
+	
+	protected int fileSize;
 
 	protected File stateFile; // this represents state file in which file state will be saved
 
@@ -67,8 +72,10 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile int _totalSize = 0;
 
 	protected volatile int _bytesTransferred = 0;
-	
+
 	protected int chunkSize = 0;
+	
+	protected volatile Thread mThread = null;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
 
@@ -92,6 +99,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		_bytesTransferred += value;
 	}
+
 	protected void setBytesTransferred(int value)
 	{
 		_bytesTransferred = value;
@@ -99,7 +107,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState()
 	{
-		if(_totalSize <= 0)
+		if (_totalSize <= 0)
 			return;
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred);
 		try
@@ -118,7 +126,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void saveFileState(String uuid)
 	{
-		if(_totalSize <= 0)
+		if (_totalSize <= 0)
 			return;
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
 		try
@@ -134,7 +142,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			i.printStackTrace();
 		}
 	}
-	
+
 	protected void saveFileState(JSONObject response)
 	{
 		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, response);
@@ -187,17 +195,48 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
+				Logger.d(getClass().getSimpleName(),"Sleep interrupted: " + mThread.toString());
 				e.printStackTrace();
 			}
 			retryAttempts++;
-			Log.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
+			Logger.d(getClass().getSimpleName(), "FTR retry # : " + retryAttempts + " for msgId : " + msgId);
 			return true;
 		}
 		else
 		{
 			retryAttempts++;
-			Log.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
+			Logger.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryAttempts);
 			return false;
 		}
 	}
+	
+	Thread getThread()
+	{
+		return mThread;
+	}
+	
+	protected void setChunkSize()
+	{
+		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+		if (Utils.densityMultiplier > 1)
+			chunkSize = networkType.getMaxChunkSize();
+		else if (Utils.densityMultiplier == 1)
+			chunkSize = networkType.getMinChunkSize() * 2;
+		else
+			chunkSize = networkType.getMinChunkSize();
+		//chunkSize = NetworkType.WIFI.getMaxChunkSize();
+
+		try
+		{
+			long mem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
+			if (chunkSize > (int) (mem / 8))
+				chunkSize = (int) (mem / 8);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
 }

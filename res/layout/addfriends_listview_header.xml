@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/header_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/signup_header_height"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="@string/add_friends_listview_header"
+        style="@style/SignupHeader" />
+
+</LinearLayout>

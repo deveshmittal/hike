@@ -22,6 +22,7 @@
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/post_fb_btn"
                 style="@style/StatusSocialButtons"
+                android:background="@drawable/fb_status_btn"
                 android:onClick="onFacebookClick"
                 android:layout_marginRight="5dp"
                 android:text="@string/facebook"
@@ -30,6 +31,7 @@
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/post_twitter_btn"
                 style="@style/StatusSocialButtons"
+                android:background="@drawable/twitter_status_btn"
                 android:onClick="onTwitterClick"
                 android:layout_marginLeft="5dp"
                 android:text="@string/twitter"

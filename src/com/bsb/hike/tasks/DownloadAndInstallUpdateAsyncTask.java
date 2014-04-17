@@ -17,60 +17,62 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.Logger;
 
-public class DownloadAndInstallUpdateAsyncTask extends
-		AsyncTask<Void, Integer, Boolean> {
+public class DownloadAndInstallUpdateAsyncTask extends AsyncTask<Void, Integer, Boolean>
+{
 	private String filePath;
+
 	private Notification notification;
+
 	private NotificationManager notificationManager;
+
 	private int notificationId = 119;
+
 	private Context context;
+
 	private String downloadUrl;
 
-	public DownloadAndInstallUpdateAsyncTask(Context context, String downloadUrl) {
+	public DownloadAndInstallUpdateAsyncTask(Context context, String downloadUrl)
+	{
 		this.context = context;
 		this.downloadUrl = downloadUrl;
 	}
 
 	@Override
-	protected void onPreExecute() {
+	protected void onPreExecute()
+	{
 		// Show progress notification
 		Intent intent = new Intent(context, HomeActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-				intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		notification = new Notification(R.drawable.ic_contact_logo,
-				context.getString(R.string.downloading), System.currentTimeMillis());
-		notification.flags = notification.flags
-				| Notification.FLAG_ONGOING_EVENT;
+		notification = new Notification(R.drawable.ic_contact_logo, context.getString(R.string.downloading), System.currentTimeMillis());
+		notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
 		notification.contentIntent = pendingIntent;
-		notification.contentView = new RemoteViews(context.getPackageName(),
-				R.layout.download_notification);
-		notification.contentView.setProgressBar(R.id.download_progress, 100, 0,
-				false);
-		notificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
+		notification.contentView = new RemoteViews(context.getPackageName(), R.layout.download_notification);
+		notification.contentView.setProgressBar(R.id.download_progress, 100, 0, false);
+		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(notificationId, notification);
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... arg0) {
-		try {
+	protected Boolean doInBackground(Void... arg0)
+	{
+		try
+		{
 			URL url = new URL(downloadUrl);
 			URLConnection urlConnection = url.openConnection();
 
 			int length = urlConnection.getContentLength();
 
-			InputStream is = new BufferedInputStream(url.openConnection()
-					.getInputStream());
+			InputStream is = new BufferedInputStream(url.openConnection().getInputStream());
 
 			filePath = Environment.getExternalStorageDirectory() + "/hike/";
 			File file = new File(filePath);
@@ -84,11 +86,13 @@ public class DownloadAndInstallUpdateAsyncTask extends
 			int totProg = 0;
 			int progress;
 
-			while ((len = is.read(buffer)) != -1) {
+			while ((len = is.read(buffer)) != -1)
+			{
 				totProg += len;
 				fos.write(buffer, 0, len);
 				progress = (int) ((totProg * 100 / length));
-				if (progress % 10 == 0) {
+				if (progress % 10 == 0)
+				{
 					publishProgress(progress);
 				}
 			}
@@ -96,34 +100,39 @@ public class DownloadAndInstallUpdateAsyncTask extends
 			is.close();
 
 			return true;
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e)
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		return false;
 	}
 
 	@Override
-	protected void onProgressUpdate(Integer... values) {
-		Log.d(getClass().getSimpleName(), "Progress: " + values[0]);
-		notification.contentView.setProgressBar(R.id.download_progress, 100,
-				values[0], false);
+	protected void onProgressUpdate(Integer... values)
+	{
+		Logger.d(getClass().getSimpleName(), "Progress: " + values[0]);
+		notification.contentView.setProgressBar(R.id.download_progress, 100, values[0], false);
 		notificationManager.notify(notificationId, notification);
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result) {
+	protected void onPostExecute(Boolean result)
+	{
 		notificationManager.cancel(notificationId);
-		if (result) {
+		if (result)
+		{
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(
-					Uri.fromFile(new File(filePath + "hike.apk")),
-					"application/vnd.android.package-archive");
+			intent.setDataAndType(Uri.fromFile(new File(filePath + "hike.apk")), "application/vnd.android.package-archive");
 			context.startActivity(intent);
-		} else {
-			Toast.makeText(context, R.string.download_failed,
-					Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Toast.makeText(context, R.string.download_failed, Toast.LENGTH_SHORT).show();
 		}
 	}
 }

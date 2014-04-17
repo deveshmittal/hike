@@ -19,9 +19,9 @@ public class FileSavedState implements Serializable
 	private int _totalSize; // (in bytes)
 
 	private int _transferredSize;
-	
+
 	private String _sessionId;
-	
+
 	private String _responseJson;
 
 	public FileSavedState(FTState state, int totalSize, int transferredSize)
@@ -32,8 +32,8 @@ public class FileSavedState implements Serializable
 		_sessionId = null;
 		_responseJson = null;
 	}
-	
-	public FileSavedState(FTState state, int totalSize, int transferredSize,String sId)
+
+	public FileSavedState(FTState state, int totalSize, int transferredSize, String sId)
 	{
 		_currentState = state;
 		_totalSize = totalSize;
@@ -41,8 +41,8 @@ public class FileSavedState implements Serializable
 		_sessionId = sId;
 		_responseJson = null;
 	}
-	
-	public FileSavedState(FTState state, int totalSize, int transferredSize,JSONObject response)
+
+	public FileSavedState(FTState state, int totalSize, int transferredSize, JSONObject response)
 	{
 		_currentState = state;
 		_totalSize = totalSize;
@@ -50,7 +50,7 @@ public class FileSavedState implements Serializable
 		_sessionId = null;
 		_responseJson = response.toString();
 	}
-	
+
 	public FileSavedState()
 	{
 		_currentState = FTState.NOT_STARTED;
@@ -70,17 +70,17 @@ public class FileSavedState implements Serializable
 	{
 		return _currentState;
 	}
-	
+
 	public String getSessionId()
 	{
 		return _sessionId;
 	}
-	
+
 	public JSONObject getResponseJson()
 	{
 		try
 		{
-			if(_responseJson != null)
+			if (_responseJson != null)
 			{
 				return (new JSONObject(_responseJson));
 			}

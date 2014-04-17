@@ -5,22 +5,31 @@ import org.json.JSONObject;
 
 import com.bsb.hike.HikeConstants;
 
-public class Protip {
+public class Protip
+{
 
 	private long id;
+
 	private String mappedId;
+
 	private String header;
+
 	private String text;
+
 	private String imageURL;
+
 	private long waitTime;
+
 	private long timeStamp;
+
 	private String gameDownlodURL;
+
 	private boolean showPush;
 
-	public Protip(JSONObject jsonObject) throws JSONException {
+	public Protip(JSONObject jsonObject) throws JSONException
+	{
 
-		this.timeStamp = jsonObject.optLong(HikeConstants.TIMESTAMP,
-				System.currentTimeMillis() / 1000);
+		this.timeStamp = jsonObject.optLong(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000);
 		/* prevent us from receiving a message from the future */
 		long now = System.currentTimeMillis() / 1000;
 		this.timeStamp = (this.timeStamp > now) ? now : this.timeStamp;
@@ -35,8 +44,8 @@ public class Protip {
 		this.showPush = data.optBoolean(HikeConstants.PROTIP_SHOW_PUSH);
 	}
 
-	public Protip(long id, String mappedId, String header, String text,
-			String imageURL, long waitTime, long timeStamp, String gameDownlodURL) {
+	public Protip(long id, String mappedId, String header, String text, String imageURL, long waitTime, long timeStamp, String gameDownlodURL)
+	{
 		this.id = id;
 		this.mappedId = mappedId;
 		this.header = header;
@@ -47,53 +56,68 @@ public class Protip {
 		this.gameDownlodURL = gameDownlodURL;
 	}
 
-	public long getId() {
+	public long getId()
+	{
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(long id)
+	{
 		this.id = id;
 	}
 
-	public String getMappedId() {
+	public String getMappedId()
+	{
 		return mappedId;
 	}
 
-	public String getHeader() {
+	public String getHeader()
+	{
 		return header;
 	}
 
-	public String getText() {
+	public String getText()
+	{
 		return text;
 	}
 
-	public String getImageURL() {
+	public String getImageURL()
+	{
 		return imageURL;
 	}
 
-	public long getWaitTime() {
+	public long getWaitTime()
+	{
 		return waitTime;
 	}
 
-	public long getTimeStamp() {
+	public long getTimeStamp()
+	{
 		return timeStamp;
 	}
 
-	public void setTimeStamp(long timeStamp) {
+	public void setTimeStamp(long timeStamp)
+	{
 		this.timeStamp = timeStamp;
 	}
-	public String getGameDownlodURL() {
+
+	public String getGameDownlodURL()
+	{
 		return gameDownlodURL;
 	}
 
-	public void setGameDownlodURL(String gameDownlodURL) {
+	public void setGameDownlodURL(String gameDownlodURL)
+	{
 		this.gameDownlodURL = gameDownlodURL;
 	}
-	public boolean isShowPush() {
+
+	public boolean isShowPush()
+	{
 		return showPush;
 	}
 
-	public void setShowPush(boolean showPush) {
+	public void setShowPush(boolean showPush)
+	{
 		this.showPush = showPush;
 	}
 
