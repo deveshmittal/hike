@@ -11,16 +11,20 @@ import com.bsb.hike.R;
 import com.viewpagerindicator.IconPageIndicator;
 import com.viewpagerindicator.IconPagerAdapter;
 
-public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
+public class StickerEmoticonIconPageIndicator extends IconPageIndicator
+{
 
 	private int screenWidth;
+
 	private int minWidth;
 
-	public StickerEmoticonIconPageIndicator(Context context) {
+	public StickerEmoticonIconPageIndicator(Context context)
+	{
 		this(context, null);
 	}
 
-	public StickerEmoticonIconPageIndicator(Context context, AttributeSet attrs) {
+	public StickerEmoticonIconPageIndicator(Context context, AttributeSet attrs)
+	{
 		super(context, attrs);
 
 		screenWidth = context.getResources().getDisplayMetrics().widthPixels;
@@ -29,11 +33,16 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 		minWidth = (int) (48 * metrics.density);
 	}
 
+	/*
+	 * TODO : This function is called twice, it should be handled properly so that it should run just once. Also inorder to remove the red icon once stickers gets downloaded, we
+	 * should handle it properly instead of calling "notifyDataSetChanged" this again and again.
+	 */
+
 	@Override
-	public void notifyDataSetChanged() {
+	public void notifyDataSetChanged()
+	{
 		mIconsLayout.removeAllViews();
-		StickerEmoticonIconPagerAdapter iconAdapter = (StickerEmoticonIconPagerAdapter) mViewPager
-				.getAdapter();
+		StickerEmoticonIconPagerAdapter iconAdapter = (StickerEmoticonIconPagerAdapter) mViewPager.getAdapter();
 
 		LayoutInflater inflater = LayoutInflater.from(getContext());
 
@@ -41,45 +50,46 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator {
 
 		int itemWidth = (int) (screenWidth / count);
 
-		if (itemWidth < minWidth) {
+		if (itemWidth < minWidth)
+		{
 			itemWidth = minWidth;
 		}
 
-		for (int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++)
+		{
 			View stickerParent = inflater.inflate(R.layout.sticker_btn, null);
 
-			ImageView icon = (ImageView) stickerParent
-					.findViewById(R.id.category_btn);
-			ImageView updateAvailable = (ImageView) stickerParent
-					.findViewById(R.id.update_available);
+			ImageView icon = (ImageView) stickerParent.findViewById(R.id.category_btn);
+			ImageView updateAvailable = (ImageView) stickerParent.findViewById(R.id.update_available);
 
 			icon.setImageResource(iconAdapter.getIconResId(i));
-			updateAvailable
-					.setVisibility(iconAdapter.isUpdateAvailable(i) ? View.VISIBLE
-							: View.GONE);
+			updateAvailable.setVisibility(iconAdapter.isUpdateAvailable(i) ? View.VISIBLE : View.GONE);
 
 			stickerParent.setTag(i);
 			stickerParent.setOnClickListener(mTabClickListener);
 
-			LayoutParams layoutParams = new LayoutParams(itemWidth,
-					LayoutParams.MATCH_PARENT);
+			LayoutParams layoutParams = new LayoutParams(itemWidth, LayoutParams.MATCH_PARENT);
 			stickerParent.setLayoutParams(layoutParams);
 
 			mIconsLayout.addView(stickerParent);
 		}
-		if (mSelectedIndex > count) {
+		if (mSelectedIndex > count)
+		{
 			mSelectedIndex = count - 1;
 		}
 		setCurrentItem(mSelectedIndex);
 		requestLayout();
 	}
 
-	public interface StickerEmoticonIconPagerAdapter extends IconPagerAdapter {
+	public interface StickerEmoticonIconPagerAdapter extends IconPagerAdapter
+	{
 		boolean isUpdateAvailable(int index);
 	}
 
-	private final OnClickListener mTabClickListener = new OnClickListener() {
-		public void onClick(View view) {
+	private final OnClickListener mTabClickListener = new OnClickListener()
+	{
+		public void onClick(View view)
+		{
 			Integer currentIndex = (Integer) view.getTag();
 			final int newSelected = currentIndex;
 			setCurrentItem(newSelected);

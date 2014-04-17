@@ -29,7 +29,7 @@
             android:layout_marginRight="4dp"
             android:layout_marginTop="5dp" >
 
-            <ImageView
+            <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
                 style="@style/AvatarStyle.Padding"
                 android:src="@drawable/ic_avatar1" />
@@ -66,6 +66,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
+            android:drawableLeft="@drawable/ic_last_seen_clock"
+            android:drawablePadding="2dp"
+            android:gravity="center"
             android:layout_marginBottom="@dimen/abs__action_bar_subtitle_bottom_margin"
             android:layout_marginTop="@dimen/abs__action_bar_subtitle_top_margin"
             android:ellipsize="marquee"

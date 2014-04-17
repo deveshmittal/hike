@@ -2,9 +2,10 @@ package com.bsb.hike.db;
 
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 
-public class DBConstants {
+public class DBConstants
+{
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 21;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 23;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -104,11 +105,8 @@ public class DBConstants {
 
 	public static final String FAVORITE_TYPE = "favoriteType";
 
-	public static final String FAVORITE_TYPE_SELECTION = "COALESCE((SELECT "
-			+ FAVORITE_TYPE + " FROM " + FAVORITES_TABLE + " WHERE "
-			+ FAVORITES_TABLE + "." + MSISDN + " = " + USERS_TABLE + "."
-			+ MSISDN + "), + " + FavoriteType.NOT_FRIEND.ordinal() + ") AS "
-			+ FAVORITE_TYPE;
+	public static final String FAVORITE_TYPE_SELECTION = "COALESCE((SELECT " + FAVORITE_TYPE + " FROM " + FAVORITES_TABLE + " WHERE " + FAVORITES_TABLE + "." + MSISDN + " = "
+			+ USERS_TABLE + "." + MSISDN + "), + " + FavoriteType.NOT_FRIEND.ordinal() + ") AS " + FAVORITE_TYPE;
 
 	public static final String STATUS_TABLE = "statusTable";
 
@@ -163,7 +161,7 @@ public class DBConstants {
 	public static final String IMAGE_URL = "imageUrl";
 
 	public static final String WAIT_TIME = "waitTime";
-	
+
 	public static final String PROTIP_GAMING_DOWNLOAD_URL = "url";
 
 	public static final String IS_OFFLINE = "isOffline";
@@ -183,4 +181,10 @@ public class DBConstants {
 	public static final String FILE_THUMBNAIL_INDEX = "fileThumbnailIndex";
 
 	public static final String INVITE_TIMESTAMP = "inviteTimestamp";
+
+	public static final String CHAT_BG_TABLE = "chatBgTable";
+
+	public static final String BG_ID = "bgId";
+
+	public static final String CHAT_BG_INDEX = "chatBgIndex";
 }

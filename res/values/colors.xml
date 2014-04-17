@@ -93,6 +93,8 @@
 	<color name="doggy_text_shadow">#4D000000</color>
 	<color name="doggy_btn_text_shadow">#4DFFFFFF</color>
 	<color name="doggy_div">#a17233</color>
+	<color name="recent_btn_normal">#dcb36b</color>
+    <color name="recent_btn_pressed">#d5ac64</color>
 	<color name="kitty_bg">#f6b1b5</color>
 	<color name="kitty_btn_normal">#fcc4bd</color>
 	<color name="kitty_btn_pressed">#f8b9b1</color>
@@ -144,6 +146,7 @@
     
     <color name="sms_choice_unselected">#b8b6b0</color>
     <color name="sms_choice_selected">#73716d</color>
+    <color name="sms_choice_unselected_custom_theme">#80ffffff</color>
     <color name="home_tab_bg">#323638</color>
     <color name="list_item_header">#33312e</color>
     <color name="list_item_subtext">#73716d</color>
@@ -186,4 +189,36 @@
 	<color name="female_selected">#ff5874</color>
 	<color name="signup_disabled">#40ffffff</color>
 	<color name="free_sms_btn">#1891e1</color>
+	<color name="indian_bg">#9ce5bb</color>
+    <color name="indian_btn_normal">#b2f1cd</color>
+    <color name="indian_btn_pressed">#64e099</color>
+    <color name="indian_text">#1c8649</color>
+    <color name="indian_btn_text">#1c8649</color>
+    <color name="indian_text_shadow">#4D000000</color>
+    <color name="indian_btn_text_shadow">#4D000000</color>
+    <color name="indian_div">#00000000</color>
+    <color name="day_line">#1f73716d</color>
+	<color name="auto_download">#73716d</color>
+    <color name="chat_thread_indicator_bg_custom_theme">#B3000000</color>
+    <color name="progress_colour_default_theme">#FFAAAAAA</color>
+    <color name="webview_progress_bg">#CD000000</color>
+    <color name="webview_progress_fg">#009BFF</color>
+    <color name="love_bg">#e97598</color>
+    <color name="love_btn_normal">#f08dab</color>
+    <color name="love_btn_pressed">#d67290</color>
+    <color name="love_text">#ffffff</color>
+    <color name="love_btn_text">#ffffff</color>
+    <color name="love_text_shadow">#c44d71</color>
+    <color name="love_btn_text_shadow">#c44d71</color>
+    <color name="love_div">#c44d71</color>
+    <color name="angry_bg">#be251e</color>
+    <color name="angry_btn_normal">#c54943</color>
+    <color name="angry_btn_pressed">#ad3e39</color>
+    <color name="angry_text">#ffffff</color>
+    <color name="angry_btn_text">#ffffff</color>
+    <color name="angry_text_shadow">#a51d17</color>
+    <color name="angry_btn_text_shadow">#a51d17</color>
+    <color name="angry_div">#a51d17</color>
+    <color name="valentine_nudge_white">#ffffef</color>
+    <color name="valenting_nudge_button_pressed">#26000000</color>
 </resources>

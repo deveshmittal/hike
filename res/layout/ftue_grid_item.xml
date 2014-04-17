@@ -11,7 +11,7 @@
         android:layout_width="@dimen/ftue_avatar"
         android:layout_height="@dimen/ftue_avatar" >
 
-        <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/avatar"
             style="@style/AvatarStyle.MorePadding"
             android:src="@drawable/ic_avatar1_rounded" />

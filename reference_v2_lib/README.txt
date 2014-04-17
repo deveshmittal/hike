@@ -1,0 +1,1 @@
+Here lib: requires dependent JAR and native libraries to be loaded by teh framework

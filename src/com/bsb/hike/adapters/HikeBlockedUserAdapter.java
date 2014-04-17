@@ -18,36 +18,46 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Utils;
 
-public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
-		OnClickListener {
+public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickListener
+{
 
 	private Set<String> blockedUsers;
+
 	private Activity context;
 
-	private static List<ContactInfo> getItems(Activity activity) {
+	private IconLoader iconLoader;
+
+	private int mIconImageSize;
+
+	private static List<ContactInfo> getItems(Activity activity)
+	{
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		List<ContactInfo> contacts = db.getContacts();
 		Collections.sort(contacts);
 		return contacts;
 	}
 
-	public HikeBlockedUserAdapter(Activity activity, int viewItemId) {
+	public HikeBlockedUserAdapter(Activity activity, int viewItemId)
+	{
 		super(activity, viewItemId, getItems(activity));
 		this.context = activity;
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		this.blockedUsers = db.getBlockedUsers();
+		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
+		iconLoader = new IconLoader(context, mIconImageSize);
 	}
 
 	@Override
-	protected View getItemView(int position, View convertView, ViewGroup parent) {
+	protected View getItemView(int position, View convertView, ViewGroup parent)
+	{
 		ContactInfo contactInfo = (ContactInfo) getItem(position);
-		LayoutInflater inflater = (LayoutInflater) activity
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
-		if (v == null) {
+		if (v == null)
+		{
 			v = inflater.inflate(R.layout.contact_item, parent, false);
 		}
 
@@ -60,12 +70,14 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		imageView.setPadding(8, 8, 18, 8);
 
-		if (contactInfo.hasCustomPhoto()) {
-			imageView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
-		} else {
-			imageView.setImageDrawable(Utils.getDefaultIconForUser(context,
-					contactInfo.getMsisdn(), true));
+		if (contactInfo.hasCustomPhoto())
+		{
+			iconLoader.loadImage(contactInfo.getMsisdn(), true, imageView, true);
+
+		}
+		else
+		{
+			imageView.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context, contactInfo.getMsisdn(), true));
 		}
 
 		ImageView blockImg = (ImageView) v.findViewById(R.id.contact_button);
@@ -78,22 +90,19 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 	}
 
 	@Override
-	public void onClick(View view) {
+	public void onClick(View view)
+	{
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
 		String msisdn = (String) contactInfo.getMsisdn();
 		boolean block = !blockedUsers.contains(msisdn);
-		boolean b = (block) ? blockedUsers.add(msisdn) : blockedUsers
-				.remove(msisdn);
+		boolean b = (block) ? blockedUsers.add(msisdn) : blockedUsers.remove(msisdn);
 		this.notifyDataSetChanged();
-		HikeMessengerApp
-				.getPubSub()
-				.publish(
-						block ? HikePubSub.BLOCK_USER : HikePubSub.UNBLOCK_USER,
-						msisdn);
+		HikeMessengerApp.getPubSub().publish(block ? HikePubSub.BLOCK_USER : HikePubSub.UNBLOCK_USER, msisdn);
 	}
 
 	@Override
-	public String getTitle() {
+	public String getTitle()
+	{
 		return context.getResources().getString(R.string.block_users);
 	}
 }

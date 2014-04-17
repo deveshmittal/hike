@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="288dp" >
 
-    <ImageView
+    <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/profile"
         android:layout_width="match_parent"
         android:layout_height="288dp"

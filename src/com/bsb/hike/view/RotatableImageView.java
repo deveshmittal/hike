@@ -6,7 +6,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 
-public class RotatableImageView extends ImageView {
+public class RotatableImageView extends ImageView
+{
 	private int mAngle = START_ANGLE;
 
 	private static final int START_ANGLE = -71;
@@ -15,15 +16,18 @@ public class RotatableImageView extends ImageView {
 
 	private static final int MAX_ANGLE = 142;
 
-	public RotatableImageView(Context context) {
+	public RotatableImageView(Context context)
+	{
 		super(context);
 	}
 
-	public RotatableImageView(Context context, AttributeSet attrs) {
+	public RotatableImageView(Context context, AttributeSet attrs)
+	{
 		super(context, attrs);
 	}
 
-	public RotatableImageView(Context context, AttributeSet attrs, int defStyle) {
+	public RotatableImageView(Context context, AttributeSet attrs, int defStyle)
+	{
 		super(context, attrs, defStyle);
 	}
 
@@ -39,19 +43,22 @@ public class RotatableImageView extends ImageView {
 		canvas.restore();
 	}
 
-	public int getAngle() {
+	public int getAngle()
+	{
 		return mAngle;
 	}
 
-	public void setCredits(int credits) {
+	public void setCredits(int credits)
+	{
 		mAngle = creditsToAngle(credits);
-		Log.d(getClass().getSimpleName(), "ANGLE: " + mAngle + " CREADITS: "
-				+ credits);
+		Log.d(getClass().getSimpleName(), "ANGLE: " + mAngle + " CREADITS: " + credits);
 		invalidate();
 	}
 
-	private int creditsToAngle(int credits) {
-		if (credits >= MAX_CREDITS_TO_SHOW) {
+	private int creditsToAngle(int credits)
+	{
+		if (credits >= MAX_CREDITS_TO_SHOW)
+		{
 			return MAX_ANGLE + START_ANGLE;
 		}
 		float ratio = (credits * 100) / MAX_CREDITS_TO_SHOW;

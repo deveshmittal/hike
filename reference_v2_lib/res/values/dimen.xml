@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- For overlay buttons to be placed on MapView -->
+    <dimen name="ref_v2_overlay_button_margin">15dp</dimen>
+    <dimen name="ref_v2_zoom_button_height">40dp</dimen>
+    <dimen name="ref_v2_zoom_button_corner_radius">20dp</dimen>
+    <dimen name="ref_v2_zoom_button_divider_height">1dp</dimen>
+
+</resources>

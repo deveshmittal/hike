@@ -5,22 +5,30 @@ import android.content.Context;
 import com.bsb.hike.HikeConstants;
 import com.mobileapptracker.MobileAppTracker;
 
-public class TrackerUtil {
+public class TrackerUtil
+{
 
 	private MobileAppTracker _mobileAppTracker = null;
+
 	private MatResponse _matResponse = null;
+
 	private Context _ctx;
+
 	private boolean DEBUG = false; // toggle this field to switch between test
+
 	// mode and live mode
 	private static TrackerUtil _trackerUtil = null;
 
-	public TrackerUtil(Context context) {
+	public TrackerUtil(Context context)
+	{
 		this._ctx = context;
 		init(context);
 	}
 
-	public static TrackerUtil getInstance(Context context) {
-		if (_trackerUtil == null) {
+	public static TrackerUtil getInstance(Context context)
+	{
+		if (_trackerUtil == null)
+		{
 
 			_trackerUtil = new TrackerUtil(context);
 		}
@@ -28,26 +36,26 @@ public class TrackerUtil {
 		return _trackerUtil;
 	}
 
-	private void init(Context context) {
+	private void init(Context context)
+	{
 
 		// initialize the MobileAppTracker framework
-		_mobileAppTracker = new MobileAppTracker(this._ctx,
-				HikeConstants.MA_TRACKER_AD_ID, HikeConstants.MA_TRACKER_KEY,
-				true, false);
+		_mobileAppTracker = new MobileAppTracker(this._ctx, HikeConstants.MA_TRACKER_AD_ID, HikeConstants.MA_TRACKER_KEY, true, false);
 
 		_matResponse = new MatResponse();
 
 		_mobileAppTracker.setMATResponse(_matResponse);
-		_mobileAppTracker.setRefId(HikeConstants.MA_TRACKER_REF_ID_PREFIX
-				+ System.currentTimeMillis());
+		_mobileAppTracker.setRefId(HikeConstants.MA_TRACKER_REF_ID_PREFIX + System.currentTimeMillis());
 		_mobileAppTracker.setSiteId(HikeConstants.MA_SITE_ID);
 
 	}
 
-	public void setTrackOptions(boolean isNewInstall) {
+	public void setTrackOptions(boolean isNewInstall)
+	{
 
 		// Enable these options for debugging only
-		if (DEBUG) {
+		if (DEBUG)
+		{
 			_mobileAppTracker.setAllowDuplicates(true);
 			_mobileAppTracker.setDebugMode(true);
 		}
@@ -57,12 +65,15 @@ public class TrackerUtil {
 		// mobile app tracker SDK will pass a no-op internally.
 		// if there is no actual version update or new install. This is as per
 		// the email communication from mobileAppTracker team
-		if (!isNewInstall) {
+		if (!isNewInstall)
+		{
 			// the SDK will record an update for all versions including the
 			// current version
 			_mobileAppTracker.trackUpdate();
 
-		} else {
+		}
+		else
+		{
 			// the SDK will record an install for this version and an update for
 			// all subsequent versions.
 			_mobileAppTracker.trackInstall();

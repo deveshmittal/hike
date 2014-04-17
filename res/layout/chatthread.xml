@@ -6,15 +6,26 @@
     <View
         android:id="@+id/attachment_anchor"
         android:layout_width="1dp"
-        android:layout_height="1dp"
+        android:layout_height="@dimen/st__action_bar_default_height"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" />
+    
+    <View
+        android:id="@+id/cb_anchor"
+        android:layout_width="1dp"
+        android:layout_height="@dimen/st__action_bar_default_height"
+        android:layout_alignParentTop="true" />
+    
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@color/chat_thread_default_bg" />
     
     <com.bsb.hike.view.CustomLinearLayout
         android:id="@+id/chat_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/chat_thread_default_bg"
         android:orientation="vertical" >
 
         <View
@@ -26,7 +37,8 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="30" >
+            android:layout_weight="30"
+            android:layout_marginTop="@dimen/st__action_bar_default_height" >
 
             <ListView
                 android:id="@+id/conversations_list"
@@ -49,8 +61,8 @@
                 android:drawablePadding="10dp"
                 android:text="99 SMS left"
                 android:drawableLeft="@drawable/ic_sms_user"
-                android:textColor="#b3b2ae"
-                android:textSize="13sp"
+                android:textColor="@color/actionbar_text"
+                android:textSize="14sp"
                 android:visibility="invisible" />
 
             <com.bsb.hike.view.CustomFontTextView
@@ -58,12 +70,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:background="@color/updates_text"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:paddingLeft="18dp"
                 android:text="@string/group_mute"
                 android:textColor="@color/actionbar_text"
                 android:textSize="14sp"
                 android:visibility="gone" />
+            
+            <LinearLayout
+                android:id="@+id/chat_bg_ftue_tip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="100dp"
+                android:visibility="gone" >
+
+                <include layout="@layout/chat_bg_tool_tip" />
+            </LinearLayout>
             
             <LinearLayout
                 android:id="@+id/last_seen_tip"
@@ -245,4 +268,10 @@
 
     <include layout="@layout/dark_overlay" />
 
+    <View 
+        android:id="@+id/white_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:visibility="invisible"/>
 </RelativeLayout>

@@ -10,18 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <RelativeLayout
-        android:id="@+id/loading_layout"
+    <ProgressBar 
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible" >
-
-        <ProgressBar
-            android:id="@+id/loading_page"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_centerInParent="true"
-            android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
-    </RelativeLayout>
-
+        android:layout_height="4dp"
+        android:max="100"
+        android:progress="100"
+        android:progressDrawable="@drawable/webview_progress"/>
+    
 </RelativeLayout>
