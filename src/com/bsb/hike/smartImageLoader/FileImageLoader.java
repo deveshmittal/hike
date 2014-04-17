@@ -23,7 +23,7 @@ public class FileImageLoader extends ImageWorker
 	{
 		String filePath = new String(data.substring(FILE_KEY_PREFIX.length()));
 
-		return decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight, HikeMessengerApp.getLruCache());
+		return decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight);
 	}
 
 	@Override

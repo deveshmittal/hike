@@ -79,7 +79,7 @@ public class IconLoader extends ImageWorker
 			id = id.substring(0, idx);
 			rounded = true;
 		}
-		Bitmap bm = decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+		Bitmap bm = decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight);
 		return bm;
 	}
 
