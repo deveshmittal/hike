@@ -32,8 +32,7 @@ import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeActivity;
+import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
@@ -55,11 +54,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		View parent = inflater.inflate(R.layout.friends, null);
 
 		ListView friendsList = (ListView) parent.findViewById(android.R.id.list);
-		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
 
-		friendsAdapter = new FriendsAdapter(getActivity());
+		friendsAdapter = new FriendsAdapter(getActivity(), friendsList);
+		friendsAdapter.setLoadingView(parent.findViewById(R.id.spinner));
+		friendsAdapter.setEmptyView(parent.findViewById(R.id.noResultView));
+
 		friendsList.setAdapter(friendsAdapter);
-
+		friendsAdapter.executeFetchTask();
 		friendsList.setOnItemLongClickListener(this);
 		return parent;
 	}
@@ -115,21 +116,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			}
 			else
 			{
-				intent = new Intent(getActivity(), ComposeActivity.class);
-				intent.putExtra(HikeConstants.Extras.CREATE_GROUP, true);
+				intent = new Intent(getActivity(), CreateNewGroupActivity.class);
 			}
 			startActivity(intent);
 		}
 		else
 		{
-			Intent intent = new Intent(getActivity(), ChatThread.class);
-			if (contactInfo.getName() != null)
-			{
-				intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
-			}
-			intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
-			intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
-			startActivity(intent);
+			Utils.startChatThread(getActivity(), contactInfo);
 		}
 	}
 
@@ -257,10 +250,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		{
 			String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-			if (!isAdded())
-			{
-				return;
-			}
 			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
 
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
@@ -270,6 +259,10 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
+			if (!isAdded())
+			{
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable()
 			{
 
@@ -453,7 +446,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		ArrayList<String> optionsList = new ArrayList<String>();
 
-		optionsList.add(getString(R.string.remove_from_friends));
+		optionsList.add(getString(R.string.remove_from_favorites));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -468,7 +461,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			public void onClick(DialogInterface dialog, int which)
 			{
 				String option = options[which];
-				if (getString(R.string.remove_from_friends).equals(option))
+				if (getString(R.string.remove_from_favorites).equals(option))
 				{
 					FavoriteType favoriteType;
 					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)

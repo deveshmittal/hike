@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.Thread.State;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -18,27 +20,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /* 
  * This manager will manage the upload and download (File Transfers).
  * A general thread pool is maintained which will be used for both downloads and uploads.
  * The manager will run on main thread hence an executor is used to delegate task to thread pool threads.
  */
-public class FileTransferManager
+public class FileTransferManager extends BroadcastReceiver
 {
 	private Context context;
 
@@ -49,13 +57,21 @@ public class FileTransferManager
 	private File HIKE_TEMP_DIR;
 
 	// Constant variables
-	private int THREAD_POOL_SIZE = 10;
+	private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+
+	private final int CORE_POOL_SIZE = CPU_COUNT + 1;
+
+	private final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
 
 	private final short KEEP_ALIVE_TIME = 60; // in seconds
 
-	private static int minChunkSize = 10 * 1024;
+	private static int minChunkSize = 8 * 1024;
 
-	private static int maxChunkSize = 100 * 1024;
+	private static int maxChunkSize = 128 * 1024;
+	
+	private final int taskLimit;
+	
+	private final int TASK_OVERFLOW_LIMIT = 90;
 
 	private ExecutorService pool;
 
@@ -122,13 +138,27 @@ public class FileTransferManager
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 64 * 1024;
+				return 32 * 1024;
 			}
 
 			@Override
 			public int getMinChunkSize()
 			{
-				return 32 * 1024;
+				return 16 * 1024;
+			}
+		},
+		NO_NETWORK
+		{
+			@Override
+			public int getMaxChunkSize()
+			{
+				return 2 * 1024;
+			}
+
+			@Override
+			public int getMinChunkSize()
+			{
+				return 1 * 1024;
 			}
 		};
 
@@ -139,6 +169,7 @@ public class FileTransferManager
 
 	private FileTransferManager()
 	{
+		taskLimit = context.getResources().getInteger(R.integer.ft_limit);
 	}
 
 	private class MyThreadFactory implements ThreadFactory
@@ -148,11 +179,12 @@ public class FileTransferManager
 		@Override
 		public Thread newThread(Runnable r)
 		{
+			int threadCount = threadNumber.getAndIncrement();
 			Thread t = new Thread(r);
 			// This approach reduces resource competition between the Runnable object's thread and the UI thread.
 			t.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-			t.setName("FT Thread-" + threadNumber.getAndIncrement());
-			Log.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
+			t.setName("FT Thread-" + threadCount);
+			Logger.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
 			return t;
 		}
 	}
@@ -175,7 +207,7 @@ public class FileTransferManager
 		@Override
 		public void run()
 		{
-			Log.d(getClass().getSimpleName(), "TimeCheck: Starting time : " + System.currentTimeMillis());
+			Logger.d(getClass().getSimpleName(), "TimeCheck: Starting time : " + System.currentTimeMillis());
 			super.run();
 		}
 
@@ -204,7 +236,7 @@ public class FileTransferManager
 			else
 				((UploadContactOrLocationTask) task).postExecute(result);
 
-			Log.d(getClass().getSimpleName(), "TimeCheck: Exiting  time : " + System.currentTimeMillis());
+			Logger.d(getClass().getSimpleName(), "TimeCheck: Exiting  time : " + System.currentTimeMillis());
 		}
 	}
 
@@ -213,15 +245,15 @@ public class FileTransferManager
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
 		fileTaskMap = new ConcurrentHashMap<Long, FutureTask<FTResult>>();
 		// here choosing TimeUnit in seconds as minutes are added after api level 9
-		THREAD_POOL_SIZE = (Runtime.getRuntime().availableProcessors()) * 2;
-		if (THREAD_POOL_SIZE < 2)
-			THREAD_POOL_SIZE = 2;
-		pool = new ThreadPoolExecutor(2, THREAD_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
+		pool = new ThreadPoolExecutor(2, MAXIMUM_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, workQueue, new MyThreadFactory());
 		context = ctx;
 		HIKE_TEMP_DIR = context.getExternalFilesDir(HIKE_TEMP_DIR_NAME);
 		handler = new Handler(context.getMainLooper());
-		setChunkSize();
+		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+		context.registerReceiver(this, filter);
+		taskLimit = context.getResources().getInteger(R.integer.ft_limit);
 	}
+	
 
 	public static FileTransferManager getInstance(Context context)
 	{
@@ -230,7 +262,7 @@ public class FileTransferManager
 			synchronized (FileTransferManager.class)
 			{
 				if (_instance == null)
-					_instance = new FileTransferManager(context);
+					_instance = new FileTransferManager(context.getApplicationContext());
 			}
 		}
 		return _instance;
@@ -245,6 +277,9 @@ public class FileTransferManager
 	{
 		if (isFileTaskExist(msgId))
 			return;
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast);
 		try
 		{
@@ -262,6 +297,9 @@ public class FileTransferManager
 	public void uploadFile(String msisdn, File sourceFile, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
 			long recordingDuration)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -277,6 +315,9 @@ public class FileTransferManager
 	{
 		if (isFileTaskExist(convMessage.getMsgID()))
 			return;
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -288,6 +329,21 @@ public class FileTransferManager
 
 	public void uploadFile(Uri picasaUri, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		if(hikeFileType != HikeFileType.IMAGE)
+		{
+			handler.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				}
+			});
+			return;
+		}
+		
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -299,6 +355,9 @@ public class FileTransferManager
 
 	public void uploadLocation(String msisdn, double latitude, double longitude, int zoomLevel, boolean isRecipientOnhike)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, latitude, longitude, zoomLevel, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -307,6 +366,9 @@ public class FileTransferManager
 
 	public void uploadContact(String msisdn, JSONObject contactJson, boolean isRecipientOnhike)
 	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, contactJson, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -315,8 +377,11 @@ public class FileTransferManager
 
 	public void uploadContactOrLocation(ConvMessage convMessage, boolean uploadingContact, boolean isRecipientOnhike)
 	{
-		if(isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID()))
 			return;
+		if(taskOverflowLimitAchieved())
+			return;
+		
 		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, convMessage, uploadingContact, isRecipientOnhike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -354,11 +419,11 @@ public class FileTransferManager
 			{
 				((MyFutureTask) obj).getTask().setState(FTState.CANCELLED);
 			}
-			Log.d(getClass().getSimpleName(), "deleting state file" + msgId);
+			Logger.d(getClass().getSimpleName(), "deleting state file" + msgId);
 			deleteStateFile(msgId, mFile);
 			if (!sent)
 			{
-				Log.d(getClass().getSimpleName(), "deleting tempFile" + msgId);
+				Logger.d(getClass().getSimpleName(), "deleting tempFile" + msgId);
 				File tempDownloadedFile = new File(getHikeTempDir(), mFile.getName() + ".part");
 				if (tempDownloadedFile != null && tempDownloadedFile.exists())
 					tempDownloadedFile.delete();
@@ -373,7 +438,7 @@ public class FileTransferManager
 		if (obj != null)
 		{
 			((MyFutureTask) obj).getTask().setState(FTState.PAUSING);
-			Log.d(getClass().getSimpleName(), "pausing the task....");
+			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
 
@@ -400,7 +465,7 @@ public class FileTransferManager
 					}
 					catch (Exception e)
 					{
-						Log.e(getClass().getSimpleName(), "Exception while deleting state file : ", e);
+						Logger.e(getClass().getSimpleName(), "Exception while deleting state file : ", e);
 					}
 				}
 			}
@@ -468,18 +533,18 @@ public class FileTransferManager
 	// this function gives the state of uploading for a file
 	public FileSavedState getUploadFileState(long msgId, File mFile)
 	{
-		Log.d(getClass().getSimpleName(), "Returning state for message ID : " + msgId);
+		Logger.d(getClass().getSimpleName(), "Returning state for message ID : " + msgId);
 		if (isFileTaskExist(msgId))
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
 			{
-				Log.d(getClass().getSimpleName(), "Returning: " + ((MyFutureTask) obj).getTask()._state.toString());
+				Logger.d(getClass().getSimpleName(), "Returning: " + ((MyFutureTask) obj).getTask()._state.toString());
 				return new FileSavedState(((MyFutureTask) obj).getTask()._state, ((MyFutureTask) obj).getTask()._totalSize, ((MyFutureTask) obj).getTask()._bytesTransferred);
 			}
 			else
 			{
-				Log.d(getClass().getSimpleName(), "Returning: in_prog");
+				Logger.d(getClass().getSimpleName(), "Returning: in_prog");
 				return new FileSavedState(FTState.IN_PROGRESS, 0, 0);
 			}
 		}
@@ -489,7 +554,7 @@ public class FileTransferManager
 
 	public FileSavedState getUploadFileState(File mFile, long msgId)
 	{
-		Log.d(getClass().getSimpleName(), "Returning from second call");
+		Logger.d(getClass().getSimpleName(), "Returning from second call");
 		if (mFile == null) // @GM only for now. Has to be handled properly
 			return new FileSavedState();
 
@@ -498,7 +563,7 @@ public class FileTransferManager
 		try
 		{
 			String fName = mFile.getName() + ".bin." + msgId;
-			Log.d(getClass().getSimpleName(), fName);
+			Logger.d(getClass().getSimpleName(), fName);
 			File f = new File(HIKE_TEMP_DIR, fName);
 			if (!f.exists())
 			{
@@ -522,7 +587,7 @@ public class FileTransferManager
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Log.e(getClass().getSimpleName(), "Exception while reading state file : ", e);
+			Logger.e(getClass().getSimpleName(), "Exception while reading state file : ", e);
 		}
 		return fss != null ? fss : new FileSavedState();
 
@@ -537,6 +602,8 @@ public class FileTransferManager
 		NetworkInfo info = cm.getActiveNetworkInfo();
 		if (info != null)
 		{
+			if (!info.isConnected())
+				return NetworkType.NO_NETWORK;
 			// If device is connected via WiFi
 			if (info.getType() == ConnectivityManager.TYPE_WIFI)
 				return NetworkType.WIFI; // return 1024 * 1024;
@@ -570,12 +637,34 @@ public class FileTransferManager
 		}
 	}
 
-	// Set the limits of chunk sizes of files to transfer
-	public void setChunkSize()
+	private void setChunkSize(NetworkType networkType)
 	{
-		NetworkType networkType = getNetworkType();
 		maxChunkSize = networkType.getMaxChunkSize();
 		minChunkSize = networkType.getMinChunkSize();
+	}
+
+	private void resumeAllTasks()
+	{
+		for (Entry<Long, FutureTask<FTResult>> entry : fileTaskMap.entrySet())
+		{
+			if (entry != null)
+			{
+				FutureTask<FTResult> obj = entry.getValue();
+				if (obj != null)
+				{
+					Thread t = ((MyFutureTask) obj).getTask().getThread();
+					if (t != null)
+					{
+						if (t.getState() == State.TIMED_WAITING)
+						{
+							Logger.d(getClass().getSimpleName(), "interrupting the task: " + t.toString());
+							t.interrupt();
+						}
+					}
+				}
+			}
+
+		}
 	}
 
 	public int getMaxChunkSize()
@@ -646,5 +735,42 @@ public class FileTransferManager
 			}
 		}
 		return 0;
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent)
+	{
+		if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+		{
+			Logger.d(getClass().getSimpleName(), "Connectivity Change Occured");
+			// if network available then proceed
+			if (Utils.isUserOnline(context))
+			{
+				NetworkType networkType = getNetworkType();
+				setChunkSize(networkType);
+				resumeAllTasks();
+			}
+		}
+	}
+	
+	public int remainingTransfers()
+	{
+		if(taskLimit > fileTaskMap.size())
+			return (taskLimit - fileTaskMap.size());
+		else
+			return 0;
+	}
+
+	public int getTaskLimit()
+	{
+		return taskLimit;
+	}
+
+	public boolean taskOverflowLimitAchieved()
+	{
+		if(fileTaskMap.size() >= TASK_OVERFLOW_LIMIT)
+			return true;
+		else
+			return false;
 	}
 }

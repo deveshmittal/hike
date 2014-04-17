@@ -9,31 +9,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="15dp"
-        android:button="@drawable/compose_checkbox"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:button="@drawable/hike_list_item_checkbox"
         android:clickable="false"
         android:focusable="false" />
 
     <FrameLayout
         android:id="@+id/avatar_container"
-        android:layout_width="@dimen/small_avatar"
-        android:layout_height="@dimen/small_avatar"
+        android:layout_width="@dimen/hike_list_item_avtar"
+        android:layout_height="@dimen/hike_list_item_avtar"
         android:layout_centerVertical="true"
         android:layout_marginBottom="26dp"
         android:layout_marginLeft="11dp"
         android:layout_marginRight="11dp"
-        android:layout_marginTop="26dp"
-        android:layout_toRightOf="@id/checkbox" >
+        android:layout_marginTop="26dp" >
 
         <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/contact_image"
             style="@style/AvatarStyle.Padding"
-            android:src="@drawable/ic_avatar1" />
+            android:background="@drawable/social_profile_default_thumbnail" />
 
-        <ImageView
-            android:id="@+id/avatar_frame"
-            style="@style/AvatarStyle"
-            android:src="@drawable/frame_avatar_small_selector" />
     </FrameLayout>
 
     <LinearLayout
@@ -42,6 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/avatar_container"
+        android:layout_toLeftOf="@id/checkbox"
         android:orientation="vertical"
         android:paddingBottom="10dp"
         android:paddingRight="5dp"
@@ -55,7 +52,7 @@
             android:singleLine="true"
             android:text="Vijay Raghunathan dfasdfasdf adsfasfasdf asdfasdfasdf"
             android:textColor="@color/lightblack"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold|italic" />
 
      </LinearLayout>

@@ -5,8 +5,8 @@ import java.io.File;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class DownloadImageTask extends AsyncTask<Void, Void, Boolean>
@@ -43,7 +43,7 @@ public class DownloadImageTask extends AsyncTask<Void, Void, Boolean>
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Error while fetching image", e);
+			Logger.e(getClass().getSimpleName(), "Error while fetching image", e);
 			return Boolean.FALSE;
 		}
 	}

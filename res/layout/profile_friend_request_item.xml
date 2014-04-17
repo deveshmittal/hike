@@ -18,13 +18,11 @@
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
-                style="@style/AvatarStyle.Padding"
-                android:src="@drawable/ic_avatar1" />
+                style="@style/AvatarStyle.Padding" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle"
-                android:src="@drawable/frame_avatar_small_selector" />
+                style="@style/AvatarStyle" />
         </RelativeLayout>
 
         <LinearLayout
@@ -97,8 +95,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
-                android:textColor="@color/profile_small_text"
-                android:textSize="12sp" />
+                android:textColor="@color/updates_text"
+                android:textSize="16sp"
+                android:textStyle="italic" />
         </LinearLayout>
 
         <com.bsb.hike.view.CustomFontTextView

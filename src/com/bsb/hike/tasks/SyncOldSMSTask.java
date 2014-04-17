@@ -13,7 +13,6 @@ import java.util.Set;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.SMSSyncState;
@@ -24,6 +23,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
@@ -77,10 +77,10 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 				 */
 				if (hCDb.getConversationWithLastMessage(msisdn) != null)
 				{
-					Log.d(getClass().getSimpleName(), "Already have conversation: " + msisdn);
+					Logger.d(getClass().getSimpleName(), "Already have conversation: " + msisdn);
 					continue;
 				}
-				Log.d(getClass().getSimpleName(), "new conversation: " + msisdn);
+				Logger.d(getClass().getSimpleName(), "new conversation: " + msisdn);
 				List<ConvMessage> messages = smsMapEntry.getValue();
 				Collections.sort(messages, new Comparator<ConvMessage>()
 				{
@@ -103,7 +103,7 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 			/*
 			 * Since we are accessing an unsupported api, we might get an exception while doing this operation. So catching any exception here.
 			 */
-			Log.w(getClass().getSimpleName(), "Unable to sync", e);
+			Logger.w(getClass().getSimpleName(), "Unable to sync", e);
 
 			return SMSSyncState.UNSUCCESSFUL;
 		}
@@ -159,11 +159,11 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 
 				if (rejectedNumbers.contains(number))
 				{
-					Log.d(getClass().getSimpleName(), "Already rejected: " + number);
+					Logger.d(getClass().getSimpleName(), "Already rejected: " + number);
 					continue;
 				}
 
-				Log.d(getClass().getSimpleName(), "Checking contact: " + number);
+				Logger.d(getClass().getSimpleName(), "Checking contact: " + number);
 
 				/*
 				 * Check if contact exists
@@ -171,7 +171,7 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 				ContactInfo contactInfo = hUDb.getContactInfoFromPhoneNoOrMsisdn(number);
 				if (contactInfo == null)
 				{
-					Log.d(getClass().getSimpleName(), "Does not exist!!");
+					Logger.d(getClass().getSimpleName(), "Does not exist!!");
 					rejectedNumbers.add(number);
 					continue;
 				}

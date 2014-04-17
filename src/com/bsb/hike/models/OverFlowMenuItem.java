@@ -6,10 +6,18 @@ public class OverFlowMenuItem
 
 	private int key;
 
+	private int iconRes;
+
 	public OverFlowMenuItem(String name, int key)
+	{
+		this(name, key, 0);
+	}
+
+	public OverFlowMenuItem(String name, int key, int iconRes)
 	{
 		this.name = name;
 		this.key = key;
+		this.iconRes = iconRes;
 	}
 
 	public String getName()
@@ -20,5 +28,10 @@ public class OverFlowMenuItem
 	public int getKey()
 	{
 		return key;
+	}
+
+	public int getIconRes()
+	{
+		return iconRes;
 	}
 }

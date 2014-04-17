@@ -8,7 +8,6 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +21,7 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.smartImageLoader.SocialIconLoader;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, SocialNetFriendInfo>> implements TextWatcher
@@ -77,7 +77,6 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 			convertView = l_Inflater.inflate(R.layout.invite_list_item, null);
 			holder = new ViewHolder();
 			holder.txt_itemName = (TextView) convertView.findViewById(R.id.name);
-			convertView.findViewById(R.id.avatar_frame).setVisibility(View.GONE);
 			// holder.txt_itemDescription = (TextView)
 			// convertView.findViewById(R.id.itemDescription);
 			holder.itemImage = (ImageView) convertView.findViewById(R.id.contact_image);
@@ -89,7 +88,7 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 			holder = (ViewHolder) convertView.getTag();
 		}
 		// if(position < getCount()){
-		Log.d("getView", currFriend.getName());
+		Logger.d("getView", currFriend.getName());
 		holder.txt_itemName.setText(currFriend.getName());
 		CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
 		checkBox.setChecked(getItem(position).first.get());
@@ -119,7 +118,7 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 	@Override
 	public void afterTextChanged(Editable s)
 	{
-		Log.d("after Text change", s.toString());
+		Logger.d("after Text change", s.toString());
 		filter.filter(s);
 	}
 
@@ -179,7 +178,7 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 			clear();
 			for (Pair<AtomicBoolean, SocialNetFriendInfo> pair : filteredList)
 			{
-				Log.d("filtered", pair.second.getName());
+				Logger.d("filtered", pair.second.getName());
 				add(pair);
 			}
 			notifyDataSetInvalidated();
