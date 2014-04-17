@@ -16,7 +16,7 @@
         android:defaultValue="true"
         android:key="lastSeenPref"
         android:layout="@layout/icon_preference"
-        android:summary="@string/last_seen_info"
+        android:summary="@string/last_seen_favorite_info"
         android:title="@string/last_seen_header"
         android:widgetLayout="@layout/checkbox_widget" />
     

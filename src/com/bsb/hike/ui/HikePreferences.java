@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -17,7 +16,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -27,25 +25,21 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
 
-public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, Listener
+public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener
 {
 
-	private enum DialogShowing
-	{
-		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
-	}
-	
 	private enum BlockingTaskType
 	{
 		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER
@@ -58,12 +52,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	private boolean isDeleting;
 	
 	private BlockingTaskType blockingTaskType = BlockingTaskType.NONE;
-
-	private DialogShowing dialogShowing;
-
-	private Dialog smsDialog;
-
-	private String[] pubSubListeners = { HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -81,7 +69,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		int preferences = intent.getIntExtra(HikeConstants.Extras.PREF, -1);
 		int titleRes = intent.getIntExtra(HikeConstants.Extras.TITLE, 0);
 
-		Log.d(getClass().getSimpleName(), preferences + " + " + titleRes);
+		Logger.d(getClass().getSimpleName(), preferences + " + " + titleRes);
 		addPreferencesFromResource(preferences);
 
 		Object retained = getLastNonConfigurationInstance();
@@ -137,13 +125,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 		}
 
-		final IconCheckBoxPreference smsClientPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.RECEIVE_SMS_PREF);
-		if (smsClientPreference != null)
-		{
-			HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
-			smsClientPreference.setOnPreferenceChangeListener(this);
-		}
-
 		final IconCheckBoxPreference lastSeenPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.LAST_SEEN_PREF);
 		if (lastSeenPreference != null)
 		{
@@ -165,45 +146,45 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Preference blockedListPreference = getPreferenceScreen().findPreference(HikeConstants.BLOKED_LIST_PREF);
 		if (blockedListPreference != null)
 		{
-			Log.d(getClass().getSimpleName(), "blockedListPreference preference not null" + blockedListPreference.getKey());
+			Logger.d(getClass().getSimpleName(), "blockedListPreference preference not null" + blockedListPreference.getKey());
 			blockedListPreference.setOnPreferenceClickListener(this);
 		}
 		else
 		{
-			Log.d(getClass().getSimpleName(), "blockedListPreference preference is null");
+			Logger.d(getClass().getSimpleName(), "blockedListPreference preference is null");
 		}
 
 		Preference systemHealthPreference = getPreferenceScreen().findPreference(HikeConstants.SYSTEM_HEALTH_PREF);
 		if (systemHealthPreference != null)
 		{
-			Log.d(getClass().getSimpleName(), "systemHealthPreference preference is not null");
+			Logger.d(getClass().getSimpleName(), "systemHealthPreference preference is not null");
 			systemHealthPreference.setOnPreferenceClickListener(this);
 		}
 		else
 		{
-			Log.d(getClass().getSimpleName(), "systemHealthPreference preference is null");
+			Logger.d(getClass().getSimpleName(), "systemHealthPreference preference is null");
 		}
 
 		Preference helpFaqsPreference = getPreferenceScreen().findPreference(HikeConstants.HELP_FAQS_PREF);
 		if (helpFaqsPreference != null)
 		{
-			Log.d(getClass().getSimpleName(), "helpFaqsPreference preference is not null" + helpFaqsPreference.getKey());
+			Logger.d(getClass().getSimpleName(), "helpFaqsPreference preference is not null" + helpFaqsPreference.getKey());
 			helpFaqsPreference.setOnPreferenceClickListener(this);
 		}
 		else
 		{
-			Log.d(getClass().getSimpleName(), "helpFaqsPreference preference is null");
+			Logger.d(getClass().getSimpleName(), "helpFaqsPreference preference is null");
 		}
 
 		Preference helpContactPreference = getPreferenceScreen().findPreference(HikeConstants.HELP_FEEDBACK_PREF);
 		if (helpContactPreference != null)
 		{
-			Log.d(getClass().getSimpleName(), "helpContactPreference preference is not null");
+			Logger.d(getClass().getSimpleName(), "helpContactPreference preference is not null");
 			helpContactPreference.setOnPreferenceClickListener(this);
 		}
 		else
 		{
-			Log.d(getClass().getSimpleName(), "helpContactPreference preference is null");
+			Logger.d(getClass().getSimpleName(), "helpContactPreference preference is null");
 		}
 
 		Preference mutePreference = getPreferenceScreen().findPreference(HikeConstants.STATUS_BOOLEAN_PREF);
@@ -218,15 +199,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			muteChatBgPreference.setOnPreferenceClickListener(this);
 		}
 
-		if (savedInstanceState != null)
-		{
-			int dialogShowingOrdinal = savedInstanceState.getInt(HikeConstants.Extras.DIALOG_SHOWING, -1);
-			if (dialogShowingOrdinal != -1)
-			{
-				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
-				smsDialog = Utils.showSMSSyncDialog(this, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
-			}
-		}
 		setupActionBar(titleRes);
 
 	}
@@ -261,10 +233,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		outState.putInt(HikeConstants.Extras.BLOKING_TASK_TYPE, blockingTaskType.ordinal());
-		if (mDialog != null && mDialog.isShowing())
-		{
-			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
-		}
 		super.onSaveInstanceState(outState);
 	}
 
@@ -277,18 +245,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			mDialog.dismiss();
 			mDialog = null;
 		}
-		if (smsDialog != null)
-		{
-			smsDialog.cancel();
-			smsDialog = null;
-		}
-		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		mTask = null;
 	}
 
 	public void setBlockingTask(ActivityCallableTask task)
 	{
-		Log.d("HikePreferences", "setting task:" + task.isFinished());
+		Logger.d("HikePreferences", "setting task:" + task.isFinished());
 		if (!task.isFinished())
 		{
 			mTask = task;
@@ -324,7 +286,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	@Override
 	public boolean onPreferenceClick(final Preference preference)
 	{
-		Log.d("HikePreferences", "Preference clicked: " + preference.getKey());
+		Logger.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF))
 		{
 			final CustomAlertDialog secondConfirmDialog = new CustomAlertDialog(HikePreferences.this);
@@ -352,8 +314,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			};
 
-			firstConfirmDialog.setOkButton(R.string.cancel, firstDialogOnCancelListener);
-			firstConfirmDialog.setCancelButton(R.string.continue_txt, firstDialogContinueClickListener);
+			firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
+			firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
 			firstConfirmDialog.show();
 
 			secondConfirmDialog.setHeader(R.string.please_confirm);
@@ -464,7 +426,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.SYSTEM_HEALTH_PREF.equals(preference.getKey()))
 		{
-			Log.d(getClass().getSimpleName(), "system health preference selected");
+			Logger.d(getClass().getSimpleName(), "system health preference selected");
 			Intent intent = new Intent(Intent.ACTION_VIEW);
 			intent.setData(Uri.parse(HikeConstants.SYSTEM_HEALTH_URL));
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -479,7 +441,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey()))
 		{
-			Log.d(getClass().getSimpleName(), "FAQ preference selected");
+			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
 			Intent intent = new Intent(HikePreferences.this, WebViewActivity.class);
 			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
 			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
@@ -488,7 +450,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{
-			Log.d(getClass().getSimpleName(), "contact preference selected");
+			Logger.d(getClass().getSimpleName(), "contact preference selected");
 			Intent intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 
@@ -555,7 +517,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 		}
 		else if (HikeConstants.CHAT_BG_NOTIFICATION_PREF.equals(preference.getKey()))
@@ -576,7 +538,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 		}
 
@@ -595,44 +557,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Intent dltIntent = new Intent(this, HomeActivity.class);
 		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(dltIntent);
-	}
-
-	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		if (HikePubSub.SHOW_SMS_SYNC_DIALOG.equals(type))
-		{
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					smsDialog = Utils.showSMSSyncDialog(HikePreferences.this, true);
-					dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
-				}
-			});
-		}
-		else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type) || HikePubSub.SMS_SYNC_FAIL.equals(type))
-		{
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					if (smsDialog != null)
-					{
-						smsDialog.dismiss();
-					}
-					dialogShowing = null;
-				}
-			});
-		}
-		else if (HikePubSub.SMS_SYNC_START.equals(type))
-		{
-			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
-		}
 	}
 
 	@Override
@@ -672,15 +596,17 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+
+				ContactInfo.lastSeenTimeComparator.lastSeenPref = isChecked;
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), "Invalid json", e);
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
 			}
 		}
 		else if (HikeConstants.FREE_SMS_PREF.equals(preference.getKey()))
 		{
-			Log.d(getClass().getSimpleName(), "Free SMS toggled");
+			Logger.d(getClass().getSimpleName(), "Free SMS toggled");
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED, isChecked);
 
 			Utils.sendFreeSmsLogEvent(isChecked);

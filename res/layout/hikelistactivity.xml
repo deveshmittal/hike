@@ -2,39 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat"
+    android:background="@color/white"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/input_number_container"
+    <com.bsb.hike.view.CustomFontEditText
+        android:id="@+id/input_number"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_height="46dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/bg_country_search_bar"
         android:gravity="center_vertical"
-        android:minHeight="48dp"
-        android:orientation="horizontal" >
-
-        <com.bsb.hike.view.CustomFontEditText
-            android:id="@+id/input_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:drawableLeft="@drawable/ic_search_grey"
-            android:drawablePadding="7dp"
-            android:gravity="center_vertical"
-            android:hint="@string/search_hint"
-            android:imeOptions="actionNone"
-            android:minHeight="48dp"
-            android:paddingBottom="5dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="18dp"
-            android:paddingTop="5dp"
-            android:singleLine="true"
-            android:textColor="@color/lightblack"
-            android:textColorHint="#cdcdc8"
-            android:textSize="16sp"
-            android:visibility="visible" />
-    </LinearLayout>
+        android:hint="@string/search_hint"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="8dp"
+        android:singleLine="true" />
 
     <RelativeLayout
         android:id="@+id/select_all_container"
@@ -53,27 +37,30 @@
             android:id="@+id/select_all_cb"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
+            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
+            android:layout_marginRight="12dp"
             android:button="@drawable/select_all_checkbox" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/select_all_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
             android:text="@string/select_all"
             android:textColor="@color/actionbar_text"
             android:textSize="18sp"
             android:textStyle="bold|italic" />
     </RelativeLayout>
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/select_all_container"
-        android:layout_below="@id/input_number_container"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/input_number"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -100,42 +87,22 @@
             android:background="@drawable/ic_thread_divider_profile"
             android:visibility="gone" />
 
-        <ListView
+        <com.bsb.hike.adapters.PinnedHeaderListView
             android:id="@+id/contact_list"
+            style="@style/HomeList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1px"
-            android:background="@color/offwhite"
-            android:cacheColorHint="#00000000"
-            android:divider="@drawable/ic_thread_divider_profile"
-            android:dividerHeight="1dp"
+            android:background="@color/white"
             android:fadingEdge="none"
-            android:fadingEdgeLength="2dp"
-            android:fastScrollEnabled="true"
-            android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:scrollbars="vertical"
-            android:textFilterEnabled="true" />
+            android:fastScrollEnabled="true" />
 
-        <View
-            android:id="@+id/bottom_nav_bar_dropshadow"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@drawable/dropshadow" />
+        <include layout="@layout/list_empty_view" >
+        </include>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/progress_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="gone" >
-
-        <ProgressBar
-            android:id="@+id/loading_progress"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:indeterminateDrawable="@drawable/loading"
-            android:visibility="visible" />
-    </LinearLayout>
+    <include
+        layout="@layout/spinner_center_screen"
+        android:visibility="gone" />
 
 </RelativeLayout>

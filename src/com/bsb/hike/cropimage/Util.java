@@ -29,9 +29,10 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+
+import com.bsb.hike.utils.Logger;
 
 /**
  * Collection of utility functions used in this package.
@@ -274,16 +275,16 @@ public class Util
 
 	public static void debugWhere(String tag, String msg)
 	{
-		Log.d(tag, msg + " --- stack trace begins: ");
+		Logger.d(tag, msg + " --- stack trace begins: ");
 		StackTraceElement elements[] = Thread.currentThread().getStackTrace();
 		// skip first 3 element, they are not related to the caller
 		for (int i = 3, n = elements.length; i < n; ++i)
 		{
 			StackTraceElement st = elements[i];
 			String message = String.format("    at %s.%s(%s:%s)", st.getClassName(), st.getMethodName(), st.getFileName(), st.getLineNumber());
-			Log.d(tag, message);
+			Logger.d(tag, message);
 		}
-		Log.d(tag, msg + " --- stack trace ends.");
+		Logger.d(tag, msg + " --- stack trace ends.");
 	}
 
 	public static synchronized OnClickListener getNullOnClickListener()

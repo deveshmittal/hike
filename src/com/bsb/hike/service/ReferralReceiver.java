@@ -13,8 +13,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -46,11 +46,11 @@ public class ReferralReceiver extends BroadcastReceiver
 		String referrer = intent.getStringExtra("referrer");
 		if (TextUtils.isEmpty(referrer))
 		{
-			Log.w(getClass().getSimpleName(), "No referrer");
+			Logger.w(getClass().getSimpleName(), "No referrer");
 			return;
 		}
 
-		Log.d(getClass().getSimpleName(), "Referrer: " + referrer);
+		Logger.d(getClass().getSimpleName(), "Referrer: " + referrer);
 		Scanner referrerScanner = new Scanner(referrer);
 		URLEncodedUtils.parse(referralParams, referrerScanner, Charset.defaultCharset().displayName());
 

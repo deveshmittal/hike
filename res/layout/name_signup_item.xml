@@ -1,146 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/name_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:weightSum="520" >
+
+    <RelativeLayout
+        android:id="@+id/avatar_border"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@integer/profile_signup_weight1"
+        android:gravity="center" >
+
+        <include layout="@layout/signup_profile_pic" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/input_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@integer/profile_signup_weight2"
+        android:gravity="center_horizontal"
+        android:paddingLeft="7dp"
+        android:paddingRight="7dp" >
+
+        <com.bsb.hike.view.CustomFontEditText
+            android:id="@+id/et_enter_name"
+            style="@style/NameInput"
+            android:imeOptions="actionNext"
+            android:hint="@string/your_name" />
+
+        <com.bsb.hike.view.CustomFontEditText
+            android:id="@+id/birthday"
+            style="@style/NameInput"
+            android:clickable="true"
+            android:layout_alignParentBottom="true"
+            android:drawableLeft="@drawable/ic_birthday_common"
+            android:hint="@string/how_young_are_you"
+            android:inputType="number"
+            android:maxLength="2" />
+    </RelativeLayout>
 
     <LinearLayout
-        android:id="@+id/name_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        
-        android:gravity="center_horizontal"
+        android:layout_height="0dp"
+        android:layout_weight="@integer/profile_signup_weight3"
+        android:gravity="bottom|center_horizontal"
         android:orientation="vertical" >
 
-        <include layout="@layout/signup_profile_pic"/>
-
-        <LinearLayout
-            android:id="@+id/input_container"
-            style="@style/SignupButton.Input"
-            android:layout_marginTop="12dp"
-            android:orientation="vertical"
-            android:paddingLeft="7dp"
-            android:paddingRight="7dp" >
-
-            <com.bsb.hike.view.CustomFontEditText
-                android:id="@+id/et_enter_name"
-                style="@style/NameInput"
-                android:drawableLeft="@drawable/ic_name_male"
-                android:hint="@string/name"
-                android:imeOptions="actionDone"
-                android:inputType="textCapWords"
-                android:maxLength="@integer/max_length_name" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#f5f3ee" />
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/birthday"
-                style="@style/NameInput"
-                android:clickable="true"
-                android:drawableLeft="@drawable/ic_birthday_male"
-                android:gravity="center_vertical"
-                android:hint="@string/birthday"
-                android:onClick="onBirthdayClick" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#f5f3ee" />
-
-            <LinearLayout
-                style="@style/NameInput"
-                android:orientation="horizontal"
-                android:paddingLeft="6dp" >
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/male"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:drawableLeft="@drawable/ic_male_selector"
-                    android:drawablePadding="7dp"
-                    android:gravity="center_vertical"
-                    android:onClick="onGenderClick"
-                    android:text="@string/male"
-                    android:textColor="@drawable/male_text_selector" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/female"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:drawableLeft="@drawable/ic_female_selector"
-                    android:drawablePadding="7dp"
-                    android:gravity="center_vertical"
-                    android:onClick="onGenderClick"
-                    android:text="@string/female"
-                    android:textColor="@drawable/female_text_selector" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <RelativeLayout
-                android:id="@+id/loading_layout"
-                style="@style/SignupButton"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/signup_btn_loading"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:visibility="invisible" >
-
-                <ProgressBar
-                    android:id="@+id/loading_progress"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerVertical="true"
-                    android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/txt_loading"
-                    style="@style/SignupButton.Text.Bold.Loading"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/loading_progress"
-                    android:text="@string/scanning_contacts_signup" />
-            </RelativeLayout>
-
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/btn_try_again"
-                style="@style/SignupButton.Text.Bold.Button"
-                android:layout_height="48dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_network_error"
-                android:onClick="onClick"
-                android:text="@string/network_error"
-                android:textSize="14sp"
-                android:visibility="gone" />
-        </RelativeLayout>
-
-        <com.bsb.hike.view.CustomFontTextView
+		<com.bsb.hike.view.CustomFontTextView
             android:id="@+id/txt_other"
-            style="@style/SignupButton.Text.Info"
-            android:layout_marginTop="20dp"
-            android:text="@string/feeling_lazy" />
-
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feeling_lazy"
+            android:textColor="#566167"
+            android:textSize="15sp" />
+        
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/connect_fb"
             style="@style/SignupButton.Text.Bold.Button"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="55dp"
-            android:layout_marginRight="55dp"
-            android:layout_marginTop="10dp"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="38dp"
             android:background="@drawable/connect_fb_btn"
             android:onClick="onFacebookConnectClick"
             android:text="@string/connect_fb"
-            android:textSize="14sp" />
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
-</ScrollView>
+</LinearLayout>

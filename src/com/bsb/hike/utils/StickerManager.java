@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -81,6 +82,10 @@ public class StickerManager
 	public static final String FWD_STICKER_INDEX = "fwdStickerIdx";
 
 	public static final String STICKERS_UPDATED = "stickersUpdated";
+
+	public static final String ADD_NO_MEDIA_FILE_FOR_STICKERS = "addNoMediaFileForStickers";
+
+	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
 
 	public static int RECENT_STICKERS_COUNT = 30;
 
@@ -413,6 +418,15 @@ public class StickerManager
 		public abstract String downloadPref();
 	};
 
+	public FilenameFilter stickerFileFilter = new FilenameFilter()
+	{
+		@Override
+		public boolean accept(File file, String fileName)
+		{
+			return !".nomedia".equalsIgnoreCase(fileName);
+		}
+	};
+	
 	public Map<String, StickerTaskBase> stickerTaskMap;
 
 	private Set<Sticker> recentStickers;
@@ -505,7 +519,7 @@ public class StickerManager
 		}
 		catch (JSONException e)
 		{
-			Log.w("HikeMessengerApp", "Invalid JSON", e);
+			Logger.w("HikeMessengerApp", "Invalid JSON", e);
 		}
 	}
 
@@ -542,11 +556,11 @@ public class StickerManager
 		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.categoryId.name());
 		if (categoryDirPath != null)
 		{
-			File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+			File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
 			File bigCatDir = new File(categoryDirPath);
-			if (categoryDir.exists())
+			if (smallCatDir.exists())
 			{
-				String[] stickerIds = categoryDir.list();
+				String[] stickerIds = smallCatDir.list();
 				for (String stickerId : stickerIds)
 				{
 					recentStickers.remove(new Sticker(category, stickerId));
@@ -604,6 +618,48 @@ public class StickerManager
 		}
 	}
 
+	public void addNoMediaFilesToStickerDirectories()
+	{
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null)
+		{
+			return;
+		}
+		String rootPath = dir.getPath() + HikeConstants.STICKERS_ROOT;
+		File root = new File(rootPath);
+		if (!root.exists())
+		{
+			return;
+		}
+		addNoMedia(root);
+
+		Editor editor = preferenceManager.edit();
+		editor.putBoolean(ADD_NO_MEDIA_FILE_FOR_STICKERS, true);
+		editor.commit();
+	}
+
+	private void addNoMedia(File directory)
+	{
+		try
+		{
+			String path = directory.getPath();
+			if (path.endsWith(HikeConstants.LARGE_STICKER_ROOT) || path.endsWith(HikeConstants.SMALL_STICKER_ROOT))
+			{
+				Utils.makeNoMediaFile(directory);
+			}
+			else if (directory.isDirectory())
+			{
+				for (File file : directory.listFiles())
+				{
+					addNoMedia(file);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+		}
+	}
+
 	public static void setStickersForIndianUsers(boolean isIndianUser, SharedPreferences prefs)
 	{
 		HikeMessengerApp.isIndianUser = isIndianUser;
@@ -652,7 +708,12 @@ public class StickerManager
 
 	public void removeStickerFromRecents(Sticker st)
 	{
-		recentStickers.remove(st);
+		boolean rem = recentStickers.remove(st);
+
+		Logger.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+
+		// remove the sticker from cache too, recycling stuff is handled by the cache itself
+		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context));
 	}
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
@@ -737,13 +798,16 @@ public class StickerManager
 	{
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
 		if (path == null)
-		{
 			return false;
-		}
-		File category = new File(path + HikeConstants.LARGE_STICKER_ROOT);
-		if (category.exists() && category.list().length > 0)
+		
+		File categoryDir = new File(path + HikeConstants.SMALL_STICKER_ROOT);
+		if (categoryDir.exists())
 		{
-			return true;
+			String[] stickerIds = categoryDir.list(stickerFileFilter);
+			if(stickerIds.length > 0)
+				return true;
+			else 
+				return false;
 		}
 		return false;
 	}
@@ -825,11 +889,11 @@ public class StickerManager
 			in.close();
 			fileIn.close();
 			long t2 = System.currentTimeMillis();
-			Log.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
+			Logger.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			Logger.e(getClass().getSimpleName(), "Exception while reading category file.", e);
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
@@ -870,11 +934,11 @@ public class StickerManager
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
-			Log.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
+			Logger.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception while saving category file.", e);
+			Logger.e(getClass().getSimpleName(), "Exception while saving category file.", e);
 		}
 	}
 
@@ -909,5 +973,37 @@ public class StickerManager
 		File rDir = new File(recentsDir);
 		if (rDir.exists())
 			Utils.deleteFile(rDir);
+	}
+
+	public void deleteDefaultDownloadedStickers()
+	{
+		try
+		{
+			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.doggy.name());
+			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+				for(String stId : LOCAL_STICKER_IDS_DOGGY)
+				{
+					File st = new File(largeStickerDir,stId);
+					Utils.deleteFile(st);
+					st = new File(smallStickerDir,stId);
+					Utils.deleteFile(st);
+				}
+			
+			dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
+			largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+			for(String stId : LOCAL_STICKER_IDS_HUMANOID)
+			{
+				File st = new File(largeStickerDir,stId);
+				Utils.deleteFile(st);
+				st = new File(smallStickerDir,stId);
+				Utils.deleteFile(st);
+			}
+		}
+		catch (Exception e)
+		{
+
+		}
 	}
 }

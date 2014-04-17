@@ -12,12 +12,12 @@ import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class TwitterOAuthView extends WebView
@@ -228,10 +228,10 @@ public class TwitterOAuthView extends WebView
 			listener = (TwitterAuthListener) args[4];
 
 			{
-				Log.d(getClass().getSimpleName(), "CONSUMER KEY = " + consumerKey);
-				Log.d(getClass().getSimpleName(), "CONSUMER SECRET = " + consumerSecret);
-				Log.d(getClass().getSimpleName(), "CALLBACK URL = " + callbackUrl);
-				Log.d(getClass().getSimpleName(), "DUMMY CALLBACK URL = " + dummyCallbackUrl);
+				Logger.d(getClass().getSimpleName(), "CONSUMER KEY = " + consumerKey);
+				Logger.d(getClass().getSimpleName(), "CONSUMER SECRET = " + consumerSecret);
+				Logger.d(getClass().getSimpleName(), "CALLBACK URL = " + callbackUrl);
+				Logger.d(getClass().getSimpleName(), "DUMMY CALLBACK URL = " + dummyCallbackUrl);
 			}
 
 			System.setProperty("twitter4j.debug", "true");
@@ -287,7 +287,7 @@ public class TwitterOAuthView extends WebView
 			// The authorization URL.
 			String url = requestToken.getAuthorizationURL();
 
-			Log.d(getClass().getSimpleName(), "Loading the authorization URL: " + url);
+			Logger.d(getClass().getSimpleName(), "Loading the authorization URL: " + url);
 
 			// Load the authorization URL on the UI thread.
 			TwitterOAuthView.this.loadUrl(url);
@@ -297,7 +297,7 @@ public class TwitterOAuthView extends WebView
 		protected void onPostExecute(Result result)
 		{
 
-			Log.d(getClass().getSimpleName(), "onPostExecute: result = " + result);
+			Logger.d(getClass().getSimpleName(), "onPostExecute: result = " + result);
 
 			if (result == null)
 			{
@@ -324,7 +324,7 @@ public class TwitterOAuthView extends WebView
 				// Get a request token. This triggers network access.
 				RequestToken token = twitter.getOAuthRequestToken();
 
-				Log.d(getClass().getSimpleName(), "Got a request token.");
+				Logger.d(getClass().getSimpleName(), "Got a request token.");
 
 				return token;
 			}
@@ -332,7 +332,7 @@ public class TwitterOAuthView extends WebView
 			{
 				// Failed to get a request token.
 				e.printStackTrace();
-				Log.e(getClass().getSimpleName(), "Failed to get a request token.", e);
+				Logger.e(getClass().getSimpleName(), "Failed to get a request token.", e);
 
 				// No request token.
 				return null;
@@ -354,7 +354,7 @@ public class TwitterOAuthView extends WebView
 				{
 					try
 					{
-						Log.d(getClass().getSimpleName(), "Waiting for the authorization step to be done.");
+						Logger.d(getClass().getSimpleName(), "Waiting for the authorization step to be done.");
 						this.wait();
 					}
 					catch (InterruptedException e)
@@ -363,7 +363,7 @@ public class TwitterOAuthView extends WebView
 				}
 			}
 
-			Log.d(getClass().getSimpleName(), "Finished waiting for the authorization step to be done.");
+			Logger.d(getClass().getSimpleName(), "Finished waiting for the authorization step to be done.");
 		}
 
 		private void notifyAuthorization()
@@ -373,7 +373,7 @@ public class TwitterOAuthView extends WebView
 
 			synchronized (this)
 			{
-				Log.d(getClass().getSimpleName(), "Notifying that the authorization step was done.");
+				Logger.d(getClass().getSimpleName(), "Notifying that the authorization step was done.");
 				this.notify();
 			}
 		}
@@ -385,7 +385,7 @@ public class TwitterOAuthView extends WebView
 			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
 			{
 				// Something wrong happened during the authorization step.
-				Log.e(getClass().getSimpleName(), "onReceivedError: [" + errorCode + "] " + description);
+				Logger.e(getClass().getSimpleName(), "onReceivedError: [" + errorCode + "] " + description);
 
 				// Stop the authorization step.
 				notifyAuthorization();
@@ -428,7 +428,7 @@ public class TwitterOAuthView extends WebView
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url)
 			{
-				Log.d(getClass().getSimpleName(), "URL:  " + url + " callback: " + callbackUrl);
+				Logger.d(getClass().getSimpleName(), "URL:  " + url + " callback: " + callbackUrl);
 				// Check if the given URL is the callback URL.
 				if (url.startsWith(callbackUrl) == false)
 				{
@@ -438,7 +438,7 @@ public class TwitterOAuthView extends WebView
 
 				// This web view is about to be redirected to the callback URL.
 
-				Log.d(getClass().getSimpleName(), "Detected the callback URL: " + url);
+				Logger.d(getClass().getSimpleName(), "Detected the callback URL: " + url);
 
 				// Convert String to Uri.
 				Uri uri = Uri.parse(url);
@@ -447,7 +447,7 @@ public class TwitterOAuthView extends WebView
 				// A successful response should contain the parameter.
 				verifier = uri.getQueryParameter("oauth_verifier");
 
-				Log.d(getClass().getSimpleName(), "oauth_verifier = " + verifier);
+				Logger.d(getClass().getSimpleName(), "oauth_verifier = " + verifier);
 
 				// Notify that the the authorization step was done.
 				notifyAuthorization();
@@ -466,14 +466,14 @@ public class TwitterOAuthView extends WebView
 			{
 				// Get an access token. This triggers network access.
 				AccessToken token = twitter.getOAuthAccessToken(requestToken, verifier);
-				Log.d(getClass().getSimpleName(), "Got an access token for " + token.getScreenName());
+				Logger.d(getClass().getSimpleName(), "Got an access token for " + token.getScreenName());
 
 				return token;
 			}
 			catch (TwitterException e)
 			{
 				// Failed to get an access token.
-				Log.e(getClass().getSimpleName(), "Failed to get an access token.", e);
+				Logger.e(getClass().getSimpleName(), "Failed to get an access token.", e);
 				// No access token.
 				return null;
 			}

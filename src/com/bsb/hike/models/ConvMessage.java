@@ -11,12 +11,12 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
@@ -61,6 +61,7 @@ public class ConvMessage
 
 	private boolean shouldShowPush = true;
 
+	private int unreadCount = -1;
 	// private boolean showResumeButton = true;
 
 	public boolean isInvite()
@@ -179,6 +180,13 @@ public class ConvMessage
 		}
 	}
 
+	public ConvMessage(int unreadCount, long timestamp, long msgId)
+	{
+		this.unreadCount = unreadCount;
+		this.mTimestamp = timestamp;
+		this.msgID = msgId;
+	}
+	
 	public ConvMessage(TypingNotification typingNotification)
 	{
 		this.typingNotification = typingNotification;
@@ -251,7 +259,7 @@ public class ConvMessage
 		}
 		catch (NumberFormatException e)
 		{
-			Log.e("CONVMESSAGE", "Exception occured while parsing msgId. Exception : " + e);
+			Logger.e("CONVMESSAGE", "Exception occured while parsing msgId. Exception : " + e);
 			this.mappedMsgId = -1;
 			throw new JSONException("Problem in JSON while parsing msgID.");
 		}
@@ -387,7 +395,7 @@ public class ConvMessage
 	{
 		if (metadata != null)
 		{
-			this.metadata = new MessageMetadata(metadata);
+			this.metadata = new MessageMetadata(metadata, mIsSent);
 
 			isFileTransferMessage = this.metadata.getHikeFiles() != null;
 
@@ -580,7 +588,7 @@ public class ConvMessage
 		}
 		catch (JSONException e)
 		{
-			Log.e("ConvMessage", "invalid json message", e);
+			Logger.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
 	}
@@ -656,6 +664,11 @@ public class ConvMessage
 	{
 		return mappedMsgId;
 	}
+	
+	public int getUnreadCount()
+	{
+		return unreadCount;
+	}
 
 	public static State stateValue(int val)
 	{
@@ -689,7 +702,7 @@ public class ConvMessage
 		}
 		catch (JSONException e)
 		{
-			Log.e("ConvMessage", "invalid json message", e);
+			Logger.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
 	}
@@ -731,7 +744,7 @@ public class ConvMessage
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid JSON");
+			Logger.w(getClass().getSimpleName(), "Invalid JSON");
 		}
 	}
 
@@ -784,5 +797,9 @@ public class ConvMessage
 	public void setShouldShowPush(boolean shouldShowPush)
 	{
 		this.shouldShowPush = shouldShowPush;
+	}
+	
+	public boolean isSmsToggle(){
+		return msgID == ConvMessage.SMS_TOGGLE_ID;
 	}
 }

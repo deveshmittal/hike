@@ -12,7 +12,6 @@ import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,6 +35,7 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -191,7 +191,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 			}
 			else if (session != null && resultCode == RESULT_CANCELED)
 			{
-				Log.d("TellAFriend", "Facebook Permission Cancelled");
+				Logger.d("TellAFriend", "Facebook Permission Cancelled");
 				session.closeAndClearTokenInformation();
 				Session.setActiveSession(null);
 			}
@@ -243,7 +243,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		{
 			Intent intent = new Intent(this, SocialNetInviteActivity.class);
 			intent.putExtra(HikeConstants.Extras.IS_FACEBOOK, true);
-			Log.d("tell a friend", "calling socialNetInviteActivity");
+			Logger.d("tell a friend", "calling socialNetInviteActivity");
 			startActivity(intent);
 		}
 		else
@@ -254,12 +254,12 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 
 	private boolean ensureOpenSession()
 	{
-		Log.d("ensure Open Session", "entered in ensureOpenSession");
+		Logger.d("ensure Open Session", "entered in ensureOpenSession");
 
 		if (Session.getActiveSession() == null || !Session.getActiveSession().isOpened())
 		{
 
-			Log.d("ensure Open Session", "active session is either null or closed");
+			Logger.d("ensure Open Session", "active session is either null or closed");
 			Session.openActiveSession(this, true, new Session.StatusCallback()
 			{
 				@Override
@@ -276,7 +276,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 
 	private void onSessionStateChanged(Session session, SessionState state, Exception exception)
 	{
-		Log.d("calling session change ", "inside onSessionStateChanged");
+		Logger.d("calling session change ", "inside onSessionStateChanged");
 		if (pickFriendsWhenSessionOpened && state.isOpened())
 		{
 			pickFriendsWhenSessionOpened = false;
@@ -309,7 +309,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		{
 			data.put(facebook ? HikeConstants.FACEBOOK_STATUS : HikeConstants.TWITTER_STATUS, true);
 			hikeHttpRequest.setJSONData(data);
-			Log.d(getClass().getSimpleName(), "JSON: " + data);
+			Logger.d(getClass().getSimpleName(), "JSON: " + data);
 
 			progressDialog = ProgressDialog.show(this, null, getString(facebook ? R.string.posting_update_facebook : R.string.posting_update_twitter));
 
@@ -318,7 +318,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
 

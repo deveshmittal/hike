@@ -32,6 +32,7 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -40,6 +41,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
+
+	public static final String PROFILE_PIC_SUFFIX = "pp";
 
 	private static enum ViewType
 	{
@@ -67,6 +70,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private IconLoader iconLoader;
 
 	private TimelineImageLoader bigPicImageLoader;
+	
+	private ProfilePicImageLoader profileImageLoader;
 
 	private int mIconImageSize;
 
@@ -88,10 +93,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.isContactBlocked = isContactBlocked;
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
-		this.iconLoader = new IconLoader(context, mIconImageSize);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
+
+		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
+		profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
+		profileImageLoader.setHiResDefaultAvatar(true);
+
+		this.iconLoader = new IconLoader(context, mIconImageSize);
+		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 	}
+	
 
 	@Override
 	public int getItemViewType(int position)
@@ -265,11 +278,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 			viewHolder.text.setText(name);
 
-			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
+			String mappedId = msisdn + PROFILE_PIC_SUFFIX;
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)
 			{
-				bigPicImageLoader.loadImage(msisdn, viewHolder.image);
+				profileImageLoader.loadImage(mappedId, viewHolder.image, isListFlinging);
 			}
 			else
 			{
@@ -292,32 +306,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.subText.setVisibility(View.VISIBLE);
 					viewHolder.subText.setText(R.string.tap_to_save);
 				}
-				else if (mContactInfo.isOnhike())
-				{
-					String subText = null;
-					if (lastSeenPref
-							&& (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED || mContactInfo.getFavoriteType() == FavoriteType.FRIEND || mContactInfo
-									.getFavoriteType() == FavoriteType.REQUEST_RECEIVED))
-					{
-						subText = Utils.getLastSeenTimeAsString(context, mContactInfo.getLastSeenTime(), mContactInfo.getOffline());
-					}
-
-					if (TextUtils.isEmpty(subText) && mContactInfo.getHikeJoinTime() != 0)
-					{
-						subText = context.getString(R.string.on_hike_since, mContactInfo.getFormattedHikeJoinTime());
-					}
-					else if (TextUtils.isEmpty(subText))
-					{
-						subText = context.getString(R.string.on_hike);
-					}
-
-					viewHolder.subText.setVisibility(View.VISIBLE);
-					viewHolder.subText.setText(subText);
-
-				}
 				else
 				{
-					viewHolder.subText.setText(R.string.on_sms);
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(mContactInfo.getMsisdn());
+					if (!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
+					{
+						viewHolder.subText.append(" (" + mContactInfo.getMsisdnType() + ")");
+					}
 				}
 			}
 			else if (groupProfile)
@@ -406,14 +402,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					if (showingLastSeen && offline == 0)
 					{
 						mainInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
-						avatarFrame.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+						avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
 					}
 					else
 					{
 						mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-						avatarFrame.setImageResource(R.drawable.frame_avatar_medium_selector);
+						avatarFrame.setImageDrawable(null);
 					}
-					iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+					setAvatar(contactInfo.getMsisdn(), avatar);
 
 					groupParticipantParentView.setOnLongClickListener(profileActivity);
 				}
@@ -444,8 +440,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			StatusMessage statusMessage = ((ProfileStatusItem) profileItem).getStatusMessage();
 			viewHolder.text.setText(myProfile ? context.getString(R.string.me) : statusMessage.getNotNullName());
 
-			SmileyParser smileyParser = SmileyParser.getInstance();
-			viewHolder.subText.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			if(statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED || statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST)
+			{
+				boolean friendRequestAccepted = statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED;
+
+				viewHolder.subText.setText(context.getString(friendRequestAccepted ? R.string.accepted_your_favorite_request_details
+						: R.string.you_accepted_favorite_request_details, Utils.getFirstName(statusMessage.getNotNullName())));
+			}
+			else
+			{
+				SmileyParser smileyParser = SmileyParser.getInstance();
+				viewHolder.subText.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			}
 
 			Linkify.addLinks(viewHolder.text, Linkify.ALL);
 			viewHolder.text.setMovementMethod(null);
@@ -459,7 +465,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{
-				iconLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.icon, true);
+				setAvatar(statusMessage.getMsisdn(), viewHolder.icon);
 				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
@@ -469,13 +475,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(myProfile ? context.getString(R.string.me) : profilePicStatusUpdate.getNotNullName());
 
 			viewHolder.subText.setText(R.string.status_profile_pic_notification);
-			iconLoader.loadImage(profilePicStatusUpdate.getMsisdn(), true, viewHolder.icon, true);
+			setAvatar(profilePicStatusUpdate.getMsisdn(), viewHolder.icon);
 
 			ImageViewerInfo imageViewerInfo2 = new ImageViewerInfo(profilePicStatusUpdate.getMappedId(), null, true);
 
 			viewHolder.image.setTag(imageViewerInfo2);
 
-			bigPicImageLoader.loadImage(profilePicStatusUpdate.getMappedId(), viewHolder.image);
+			bigPicImageLoader.loadImage(profilePicStatusUpdate.getMappedId(), viewHolder.image, isListFlinging);
 
 			viewHolder.timeStamp.setText(profilePicStatusUpdate.getTimestampFormatted(true, context));
 
@@ -525,7 +531,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case REQUEST:
 			String contactFirstName = mContactInfo.getFirstName();
 
-			iconLoader.loadImage(mContactInfo.getMsisdn(), true, viewHolder.icon, true);
+			setAvatar(mContactInfo.getMsisdn(), viewHolder.icon);
 
 			viewHolder.text.setText(contactFirstName);
 
@@ -547,12 +553,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.btn1.setBackgroundResource(R.drawable.bg_blue_btn_selector);
 
 					viewHolder.extraInfo.setVisibility(View.VISIBLE);
-					viewHolder.extraInfo.setText(context.getString(R.string.add_as_friend_profile, contactFirstName));
+					viewHolder.extraInfo.setText(context.getString(R.string.add_as_favorites_profile, contactFirstName));
 					break;
 				case REQUEST_RECEIVED:
 					viewHolder.infoContainer.setVisibility(View.VISIBLE);
 
-					viewHolder.subText.setText(R.string.sent_you_friend_request);
+					viewHolder.subText.setText(context.getString(R.string.sent_you_favorite_request_detailed, mContactInfo.getFirstName()));
 
 					viewHolder.imageBtn1.setVisibility(View.VISIBLE);
 					viewHolder.imageBtn2.setVisibility(View.VISIBLE);
@@ -563,7 +569,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					break;
 
 				case REQUEST_SENT:
-					viewHolder.subText.setText(R.string.request_pending);
+					viewHolder.subText.setText(R.string.favorite_request_pending);
 
 					viewHolder.imageBtn1.setVisibility(View.GONE);
 					viewHolder.imageBtn2.setVisibility(View.GONE);
@@ -613,6 +619,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		}
 
 		return v;
+	}
+
+	private void setAvatar(String msisdn, ImageView avatarView)
+	{
+		iconLoader.loadImage(msisdn, true, avatarView, true);
 	}
 
 	private class ViewHolder
