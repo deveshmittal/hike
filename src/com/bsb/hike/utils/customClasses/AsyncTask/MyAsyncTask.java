@@ -19,8 +19,8 @@ package com.bsb.hike.utils.customClasses.AsyncTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -30,10 +30,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
+
+import com.bsb.hike.utils.Logger;
 
 /**
  * <p>
@@ -198,8 +200,8 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		public Thread newThread(Runnable r)
 		{
 			int threadCount = mCount.getAndIncrement();
-			Log.d(LOG_TAG,String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT,CORE_POOL_SIZE,MAXIMUM_POOL_SIZE));
-			Log.d(LOG_TAG,"Creating a new thread # " + threadCount);
+			Logger.d(LOG_TAG, String.format("Cpu Count : %s, Core Pool Size : %s, Max Pool Size : %s", CPU_COUNT, CORE_POOL_SIZE, MAXIMUM_POOL_SIZE));
+			Logger.d(LOG_TAG, "Creating a new thread # " + threadCount);
 			return new Thread(r, "AsyncTask #" + threadCount);
 		}
 	};
@@ -329,7 +331,7 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 				}
 				catch (InterruptedException e)
 				{
-					android.util.Log.w(LOG_TAG, e);
+					Logger.w(LOG_TAG, e);
 				}
 				catch (ExecutionException e)
 				{
@@ -627,8 +629,8 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		onPreExecute();
 
 		mWorker.mParams = params;
-		if(sPoolWorkQueue.size() > 2)
-			Log.d(LOG_TAG, "Thread pool size : "+ sPoolWorkQueue.size());
+		if (sPoolWorkQueue.size() > 2)
+			Logger.d(LOG_TAG, "Thread pool size : " + sPoolWorkQueue.size());
 		exec.execute(mFuture);
 
 		return this;

@@ -3,11 +3,10 @@ package com.bsb.hike.utils.customClasses;
 import java.lang.ref.SoftReference;
 
 /**
- * @author : GK
- *  This class is made to override equals and hashcode functions, as reference class does not override them
- *  and hence softreferences cannot be used in hash based datastructures.
+ * @author : GK This class is made to override equals and hashcode functions, as reference class does not override them and hence softreferences cannot be used in hash based
+ *         datastructures.
  * */
- 
+
 public class MySoftReference<T> extends SoftReference<T>
 {
 

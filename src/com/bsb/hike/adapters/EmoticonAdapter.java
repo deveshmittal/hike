@@ -17,8 +17,8 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
-public class EmoticonAdapter extends PagerAdapter implements
-		OnItemClickListener, StickerEmoticonIconPagerAdapter {
+public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener, StickerEmoticonIconPagerAdapter
+{
 
 	public final int MAX_EMOTICONS_PER_ROW;
 
@@ -29,67 +29,73 @@ public class EmoticonAdapter extends PagerAdapter implements
 	public static final int RECENTS_SUBCATEGORY_INDEX = -1;
 
 	private LayoutInflater inflater;
+
 	private Activity activity;
+
 	private EditText composeBox;
+
 	private int[] emoticonResIds;
+
 	private int[] emoticonSubCategories;
+
 	private int[] categoryResIds;
 
 	private int idOffset;
 
-	public EmoticonAdapter(Activity activity, EditText composeBox,
-			boolean isPortrait, int[] categoryResIds) {
+	public EmoticonAdapter(Activity activity, EditText composeBox, boolean isPortrait, int[] categoryResIds)
+	{
 		this(activity, composeBox, isPortrait, categoryResIds, false);
 	}
 
-	public EmoticonAdapter(Activity activity, EditText composeBox,
-			boolean isPortrait, int[] categoryResIds, boolean emojiOnly) {
-		MAX_EMOTICONS_PER_ROW = isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT
-				: MAX_EMOTICONS_PER_ROW_LANDSCAPE;
+	public EmoticonAdapter(Activity activity, EditText composeBox, boolean isPortrait, int[] categoryResIds, boolean emojiOnly)
+	{
+		MAX_EMOTICONS_PER_ROW = isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT : MAX_EMOTICONS_PER_ROW_LANDSCAPE;
 
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
 		this.composeBox = composeBox;
 		this.categoryResIds = categoryResIds;
 
-		emoticonResIds = emojiOnly ? EmoticonConstants.EMOJI_RES_IDS
-				: EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
-		emoticonSubCategories = emojiOnly ? SmileyParser.EMOJI_SUBCATEGORIES
-				: SmileyParser.EMOTICONS_SUBCATEGORIES;
+		emoticonResIds = emojiOnly ? EmoticonConstants.EMOJI_RES_IDS : EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
+		emoticonSubCategories = emojiOnly ? SmileyParser.EMOJI_SUBCATEGORIES : SmileyParser.EMOTICONS_SUBCATEGORIES;
 
-		if (emojiOnly) {
-			for (int i : SmileyParser.HIKE_SUBCATEGORIES) {
+		if (emojiOnly)
+		{
+			for (int i : SmileyParser.HIKE_SUBCATEGORIES)
+			{
 				idOffset += i;
 			}
 		}
 	}
 
 	@Override
-	public int getCount() {
+	public int getCount()
+	{
 		return emoticonSubCategories.length + 1;
 	}
 
 	@Override
-	public boolean isViewFromObject(View view, Object object) {
+	public boolean isViewFromObject(View view, Object object)
+	{
 		return view == object;
 	}
 
 	@Override
-	public void destroyItem(ViewGroup container, int position, Object object) {
+	public void destroyItem(ViewGroup container, int position, Object object)
+	{
 		((ViewPager) container).removeView((View) object);
 	}
 
 	@Override
-	public Object instantiateItem(ViewGroup container, int position) {
+	public Object instantiateItem(ViewGroup container, int position)
+	{
 		View emoticonPage = inflater.inflate(R.layout.emoticon_page, null);
 
-		GridView emoticonGrid = (GridView) emoticonPage
-				.findViewById(R.id.emoticon_grid);
+		GridView emoticonGrid = (GridView) emoticonPage.findViewById(R.id.emoticon_grid);
 		emoticonGrid.setNumColumns(MAX_EMOTICONS_PER_ROW);
 		emoticonGrid.setVerticalScrollBarEnabled(false);
 		emoticonGrid.setHorizontalScrollBarEnabled(false);
-		emoticonGrid.setAdapter(new EmoticonPageAdapter(activity,
-				emoticonSubCategories, emoticonResIds, position, idOffset));
+		emoticonGrid.setAdapter(new EmoticonPageAdapter(activity, emoticonSubCategories, emoticonResIds, position, idOffset));
 		emoticonGrid.setOnItemClickListener(this);
 
 		((ViewPager) container).addView(emoticonPage);
@@ -97,26 +103,28 @@ public class EmoticonAdapter extends PagerAdapter implements
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
+	{
 		int emoticonIndex = (Integer) arg1.getTag();
-		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(
-				emoticonIndex, System.currentTimeMillis());
+		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
 		// We don't add an emoticon if the compose box is near its maximum
 		// length of characters
-		if (composeBox.length() >= activity.getResources().getInteger(
-				R.integer.max_length_message) - 20) {
+		if (composeBox.length() >= activity.getResources().getInteger(R.integer.max_length_message) - 20)
+		{
 			return;
 		}
 		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
 
 	@Override
-	public int getIconResId(int index) {
+	public int getIconResId(int index)
+	{
 		return categoryResIds[index];
 	}
 
 	@Override
-	public boolean isUpdateAvailable(int index) {
+	public boolean isUpdateAvailable(int index)
+	{
 		return false;
 	}
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="icon_picture_size">65dp</dimen>
+    <dimen name="signup_header_height">96dp</dimen>
+    <dimen name="signup_gender_padding_top">56dp</dimen>
+    <dimen name="signup_profile_pic_dimen">76dp</dimen>
+    <dimen name="signup_profile_pic_icon_dimen">24dp</dimen>
+    <dimen name="addfriend_popup_content_margin_top">20dp</dimen>
+    <dimen name="addfriend_popup_title_padding_right">12dp</dimen>
+    <dimen name="addfriend_popup_title_margin_bottom">6dp</dimen>
+    <dimen name="addfriend_popup_btn_margin_bottom">12dp</dimen>
+    <dimen name="gallery_cover_item_size">140dp</dimen>
+    <dimen name="timeine_big_picture_size">285dp</dimen>
+</resources>

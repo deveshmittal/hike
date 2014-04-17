@@ -11,32 +11,32 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.utils.Logger;
 
-public class HikeServiceConnection implements HikePubSub.Listener,
-		ServiceConnection {
+public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnection
+{
 	private Messenger mService;
 
 	private HikeMessengerApp mApp;
 
 	private Messenger mMessenger;
 
-	public HikeServiceConnection(HikeMessengerApp app, Messenger messenger) {
+	public HikeServiceConnection(HikeMessengerApp app, Messenger messenger)
+	{
 		this.mApp = app;
 		this.mMessenger = messenger;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH_LOW,
-				this);
-		HikeMessengerApp.getPubSub()
-				.addListener(HikePubSub.TOKEN_CREATED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH_LOW, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.TOKEN_CREATED, this);
 	}
 
-	public void onServiceConnected(ComponentName className, IBinder service) {
-		Log.d("HikeServiceConnection", "connection established");
+	public void onServiceConnected(ComponentName className, IBinder service)
+	{
+		Logger.d("HikeServiceConnection", "connection established");
 		// This is called when the connection with the service has been
 		// established, giving us the service object we can use to
 		// interact with the service. We are communicating with our
@@ -45,17 +45,19 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 		mService = new Messenger(service);
 		mApp.setService(mService);
 
-		try {
+		try
+		{
 			Message msg = Message.obtain();
 			msg.what = HikeService.MSG_APP_CONNECTED;
 			msg.replyTo = this.mMessenger;
 			mService.send(msg);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED,
-					null);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
 
-		} catch (RemoteException e) {
-			Log.e("HikeServiceConncetion", "Couldn't connect to service", e);
+		}
+		catch (RemoteException e)
+		{
+			Logger.e("HikeServiceConncetion", "Couldn't connect to service", e);
 			// In this case the service has crashed before we could even
 			// do anything with it; we can count on soon being
 			// disconnected (and then reconnected if it can be restarted)
@@ -63,14 +65,14 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 		}
 
 		/*
-		 * Broadcasting this event to force an rai send check. This is
-		 * so that we send the rai packet after the app updates.
+		 * Broadcasting this event to force an rai send check. This is so that we send the rai packet after the app updates.
 		 */
 		mApp.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
 	}
 
-	public void onServiceDisconnected(ComponentName className) {
-		Log.d("HikeServiceConnection", "Connection disconnected");
+	public void onServiceDisconnected(ComponentName className)
+	{
+		Logger.d("HikeServiceConnection", "Connection disconnected");
 		// This is called when the connection with the service has been
 		// unexpectedly disconnected -- that is, its process crashed.
 		mService = null;
@@ -80,37 +82,41 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 
 	private static HikeServiceConnection mConnection;
 
-	public static HikeServiceConnection createConnection(
-			HikeMessengerApp hikeMessengerApp, Messenger mMessenger) {
-		synchronized (HikeServiceConnection.class) {
-			if (mConnection == null) {
-				Log.i("HikeserviceConnection", "creating connection");
-				mConnection = new HikeServiceConnection(hikeMessengerApp,
-						mMessenger);
+	public static HikeServiceConnection createConnection(HikeMessengerApp hikeMessengerApp, Messenger mMessenger)
+	{
+		synchronized (HikeServiceConnection.class)
+		{
+			if (mConnection == null)
+			{
+				Logger.i("HikeserviceConnection", "creating connection");
+				mConnection = new HikeServiceConnection(hikeMessengerApp, mMessenger);
 			}
 		}
 
-		Log.d("HikeServiceConnection", "binding to service");
-		hikeMessengerApp.startService(new Intent(hikeMessengerApp,
-				HikeService.class));
-		hikeMessengerApp.bindService(new Intent(hikeMessengerApp,
-				HikeService.class), mConnection, Context.BIND_AUTO_CREATE);
+		Logger.d("HikeServiceConnection", "binding to service");
+		hikeMessengerApp.startService(new Intent(hikeMessengerApp, HikeService.class));
+		hikeMessengerApp.bindService(new Intent(hikeMessengerApp, HikeService.class), mConnection, Context.BIND_AUTO_CREATE);
 		return mConnection;
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
-		if (mService == null) {
-			Log.e("HikeServiceConnection", "Unable to publish message ");
+	public void onEventReceived(String type, Object object)
+	{
+		if (mService == null)
+		{
+			Logger.e("HikeServiceConnection", "Unable to publish message ");
 			return;
 		}
 
 		Message msg;
-		if (HikePubSub.TOKEN_CREATED.equals(type)) {
+		if (HikePubSub.TOKEN_CREATED.equals(type))
+		{
 			msg = Message.obtain();
 			msg.what = HikeService.MSG_APP_TOKEN_CREATED;
 			msg.replyTo = this.mMessenger;
-		} else {
+		}
+		else
+		{
 			JSONObject o = (JSONObject) object;
 			String data = o.toString();
 			msg = Message.obtain();
@@ -122,16 +128,12 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 			msg.arg1 = HikePubSub.MQTT_PUBLISH_LOW.equals(type) ? 0 : 1;
 
 			/*
-			 * if this is a message, then grab the messageId out of the json
-			 * object so we can get confirmation of success/failure
+			 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
 			 */
-			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o
-					.optString(HikeConstants.TYPE))
-					|| (HikeConstants.MqttMessageTypes.INVITE.equals(o
-							.optString(HikeConstants.TYPE)))) {
+			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
+			{
 				JSONObject json = o.optJSONObject(HikeConstants.DATA);
-				long msgId = Long.parseLong(json
-						.optString(HikeConstants.MESSAGE_ID));
+				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
 				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
 			}
 
@@ -139,11 +141,14 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 			msg.replyTo = this.mMessenger;
 		}
 
-		try {
+		try
+		{
 			mService.send(msg);
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e)
+		{
 			/* Service is dead. What to do? */
-			Log.e("HikeServiceConnection", "Remote Service dead", e);
+			Logger.e("HikeServiceConnection", "Remote Service dead", e);
 		}
 	}
 };

@@ -31,13 +31,14 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
+import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 
@@ -57,6 +58,8 @@ public abstract class ImageWorker
 
 	private Bitmap mLoadingBitmap;
 
+	private boolean dontSetBackground = false;
+
 	private boolean mFadeInBitmap = true;
 
 	private AtomicBoolean mExitTasksEarly = new AtomicBoolean(false);
@@ -66,6 +69,10 @@ public abstract class ImageWorker
 	private final Object mPauseWorkLock = new Object();
 
 	protected Resources mResources;
+
+	private boolean setDefaultAvatarIfNoCustomIcon = false;
+
+	private boolean setHiResDefaultAvatar = false;
 
 	protected ImageWorker()
 	{
@@ -112,6 +119,9 @@ public abstract class ImageWorker
 
 		BitmapDrawable value = null;
 
+		imageView.setImageDrawable(null);
+		imageView.setBackgroundDrawable(null);
+
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
@@ -125,7 +135,7 @@ public abstract class ImageWorker
 
 		if (value != null)
 		{
-			Log.d(TAG, data + " Bitmap found in cache and is not recycled.");
+			Logger.d(TAG, data + " Bitmap found in cache and is not recycled.");
 			// Bitmap found in memory cache
 			imageView.setImageDrawable(value);
 		}
@@ -137,6 +147,10 @@ public abstract class ImageWorker
 				BitmapDrawable bd = Utils.getBitmapDrawable(mResources, b);
 				mImageCache.putInCache(data, bd);
 				imageView.setImageDrawable(bd);
+			}
+			else if (b == null && setDefaultAvatarIfNoCustomIcon)
+			{
+				setDefaultAvatar(imageView, data);
 			}
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
@@ -150,10 +164,48 @@ public abstract class ImageWorker
 			// for more info on what was changed.
 			task.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, data);
 		}
+		// else
+		// {
+		// imageView.setImageDrawable(null);
+		// }
+	}
+
+	private void setDefaultAvatar(ImageView imageView, String data)
+	{
+		int idx = data.indexOf(ROUND_SUFFIX);
+		boolean rounded = false;
+		if (idx > 0)
+		{
+			data = data.substring(0, idx);
+			rounded = true;
+		}
 		else
 		{
-			imageView.setImageDrawable(null);
+			int idx1 = data.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			if (idx1 > 0)
+				data = data.substring(0, idx1);
 		}
+		boolean isGroupConversation = Utils.isGroupConversation(data);
+
+		imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(data, rounded));
+		if (setHiResDefaultAvatar)
+		{
+			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
+		}
+		else
+		{
+			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+		}
+	}
+
+	/**
+	 * Flag which denotes whether the background was already set and should not be set by this worker.
+	 * 
+	 * @param b
+	 */
+	public void setDontSetBackground(boolean b)
+	{
+		this.dontSetBackground = b;
 	}
 
 	/**
@@ -202,6 +254,16 @@ public abstract class ImageWorker
 		setPauseWork(false);
 	}
 
+	public void setDefaultAvatarIfNoCustomIcon(boolean b)
+	{
+		this.setDefaultAvatarIfNoCustomIcon = b;
+	}
+
+	public void setHiResDefaultAvatar(boolean b)
+	{
+		this.setHiResDefaultAvatar = b;
+	}
+
 	/**
 	 * Subclasses should override this to define any processing or work that must happen to produce the final bitmap. This will be executed in a background thread and be long
 	 * running. For example, you could resize a large bitmap here, or pull down an image from the network.
@@ -241,7 +303,7 @@ public abstract class ImageWorker
 		{
 			bitmapWorkerTask.cancel(true);
 			final Object bitmapData = bitmapWorkerTask.data;
-			Log.d(TAG, "cancelWork - cancelled work for " + bitmapData);
+			Logger.d(TAG, "cancelWork - cancelled work for " + bitmapData);
 		}
 	}
 
@@ -259,7 +321,7 @@ public abstract class ImageWorker
 			if (bitmapData == null || !bitmapData.equals(data))
 			{
 				bitmapWorkerTask.cancel(true);
-				Log.d(TAG, "cancelPotentialWork - cancelled work for " + data);
+				Logger.d(TAG, "cancelPotentialWork - cancelled work for " + data);
 			}
 			else
 			{
@@ -309,9 +371,10 @@ public abstract class ImageWorker
 		@Override
 		protected BitmapDrawable doInBackground(String... params)
 		{
-			Log.d(TAG, "doInBackground - starting work");
+			Logger.d(TAG, "doInBackground - starting work");
 			data = params[0];
 			final String dataString = data;
+
 			Bitmap bitmap = null;
 			BitmapDrawable drawable = null;
 
@@ -350,7 +413,7 @@ public abstract class ImageWorker
 
 				if (mImageCache != null)
 				{
-					Log.d(TAG, "Putting data in cache : " + dataString);
+					Logger.d(TAG, "Putting data in cache : " + dataString);
 					mImageCache.putInCache(dataString, drawable);
 				}
 			}
@@ -374,6 +437,10 @@ public abstract class ImageWorker
 			if (value != null && imageView != null)
 			{
 				setImageDrawable(imageView, value);
+			}
+			else if (value == null && imageView != null && setDefaultAvatarIfNoCustomIcon)
+			{
+				setDefaultAvatar(imageView, data);
 			}
 		}
 
@@ -434,7 +501,7 @@ public abstract class ImageWorker
 	{
 		if (drawable != null && ((BitmapDrawable) drawable).getBitmap().isRecycled())
 		{
-			Log.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
+			Logger.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
 			return;
 		}
 		try
@@ -443,8 +510,11 @@ public abstract class ImageWorker
 			{
 				// Transition drawable with a transparent drawable and the final drawable
 				final TransitionDrawable td = new TransitionDrawable(new Drawable[] { new ColorDrawable(android.R.color.transparent), drawable });
-				// Set background to loading bitmap
-				imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+				if (!dontSetBackground)
+				{
+					// Set background to loading bitmap
+					imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+				}
 
 				imageView.setImageDrawable(td);
 				td.startTransition(FADE_IN_TIME);
@@ -456,7 +526,7 @@ public abstract class ImageWorker
 		}
 		catch (Exception e)
 		{
-			Log.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
+			Logger.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
 		}
 	}
 
@@ -506,10 +576,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-		if (Utils.hasHoneycomb())
-		{
-			addInBitmapOptions(options, cache);
-		}
+		// if (Utils.hasHoneycomb())
+		// {
+		// addInBitmapOptions(options, cache);
+		// }
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -524,7 +594,7 @@ public abstract class ImageWorker
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in decoding Bitmap from resources: ", e);
+			Logger.e(TAG, "Exception in decoding Bitmap from resources: ", e);
 		}
 		return result;
 	}
@@ -544,7 +614,6 @@ public abstract class ImageWorker
 	 */
 	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight, HikeLruCache cache)
 	{
-
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
@@ -554,10 +623,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-		if (Utils.hasHoneycomb())
-		{
-			addInBitmapOptions(options, cache);
-		}
+		// if (Utils.hasHoneycomb())
+		// {
+		// addInBitmapOptions(options, cache);
+		// }
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -572,7 +641,7 @@ public abstract class ImageWorker
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in decoding Bitmap from file: ", e);
+			Logger.e(TAG, "Exception in decoding Bitmap from file: ", e);
 		}
 		return result;
 	}
@@ -605,10 +674,10 @@ public abstract class ImageWorker
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
 		// If we're running on Honeycomb or newer, try to use inBitmap
-		if (Utils.hasHoneycomb())
-		{
-			addInBitmapOptions(options, cache);
-		}
+		// if (Utils.hasHoneycomb())
+		// {
+		// addInBitmapOptions(options, cache);
+		// }
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
@@ -619,11 +688,11 @@ public abstract class ImageWorker
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length);
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
+			Logger.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
 		}
 		return result;
 	}
@@ -642,7 +711,7 @@ public abstract class ImageWorker
 
 			if (inBitmap != null)
 			{
-				Log.d(TAG, "Found a bitmap in reusable set.");
+				Logger.d(TAG, "Found a bitmap in reusable set.");
 				options.inBitmap = inBitmap;
 			}
 		}
@@ -699,6 +768,41 @@ public abstract class ImageWorker
 			}
 		}
 		return inSampleSize;
+	}
+
+	/**
+	 * Decode and sample down a bitmap from resources to the requested inSampleSize.
+	 * 
+	 * @param res
+	 *            The resources object containing the image data
+	 * @param resId
+	 *            The resource id of the image data
+	 * @param inSampleSize
+	 *            The value to be used for inSampleSize
+	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
+	 */
+	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int inSampleSize)
+	{
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+
+		options.inSampleSize = inSampleSize;
+
+		options.inJustDecodeBounds = false;
+		Bitmap result = null;
+		try
+		{
+			result = BitmapFactory.decodeResource(res, resId, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = BitmapFactory.decodeResource(res, resId);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from resources: ", e);
+		}
+		return result;
 	}
 
 	public HikeLruCache getLruCache()

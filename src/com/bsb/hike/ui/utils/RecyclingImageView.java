@@ -3,9 +3,7 @@ package com.bsb.hike.ui.utils;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 /**
@@ -90,4 +88,3 @@ public class RecyclingImageView extends ImageView
 		}
 	}
 }
-

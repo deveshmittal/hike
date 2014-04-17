@@ -8,7 +8,6 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -28,36 +27,44 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
 
-public abstract class AuthSocialAccountBaseActivity extends
-		HikeAppStateBaseFragmentActivity implements TwitterAuthListener {
+public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseFragmentActivity implements TwitterAuthListener
+{
 
 	public static final int FB_AUTH_REQUEST_CODE = 64206;
+
 	private static final String CALLBACK_URL = "http://get.hike.in/";
 
 	private HikeHTTPTask hikeHTTPTask;
+
 	private ProgressDialog dialog;
+
 	private boolean shouldPost;
+
 	protected TwitterOAuthView twitterOAuthView;
+
 	protected boolean facebookAuthPopupShowing;
 
-	public void startTwitterAuth(boolean post) {
+	public void startTwitterAuth(boolean post)
+	{
 		shouldPost = post;
 		twitterOAuthView = new TwitterOAuthView(this);
-		twitterOAuthView.start(HikeConstants.APP_TWITTER_ID,
-				HikeConstants.APP_TWITTER_SECRET, CALLBACK_URL, true, this);
+		twitterOAuthView.start(HikeConstants.APP_TWITTER_ID, HikeConstants.APP_TWITTER_SECRET, CALLBACK_URL, true, this);
 
 		/*
-		 * Workaround for an android bug where the keyboard does not popup in
-		 * the web view. http://code.google.com/p/android/issues/detail?id=7189
+		 * Workaround for an android bug where the keyboard does not popup in the web view. http://code.google.com/p/android/issues/detail?id=7189
 		 */
 		twitterOAuthView.requestFocus(View.FOCUS_DOWN);
-		twitterOAuthView.setOnTouchListener(new View.OnTouchListener() {
+		twitterOAuthView.setOnTouchListener(new View.OnTouchListener()
+		{
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				switch (event.getAction())
+				{
 				case MotionEvent.ACTION_DOWN:
 				case MotionEvent.ACTION_UP:
-					if (!v.hasFocus()) {
+					if (!v.hasFocus())
+					{
 						v.requestFocus();
 					}
 					break;
@@ -70,28 +77,33 @@ public abstract class AuthSocialAccountBaseActivity extends
 	}
 
 	@Override
-	protected void onResume() {
+	protected void onResume()
+	{
 		super.onResume();
 		Object o = getLastCustomNonConfigurationInstance();
-		if (o instanceof HikeHTTPTask) {
-			dialog = ProgressDialog.show(this, null,
-					getString(R.string.saving_social));
+		if (o instanceof HikeHTTPTask)
+		{
+			dialog = ProgressDialog.show(this, null, getString(R.string.saving_social));
 		}
 	}
 
 	@Override
-	public void onBackPressed() {
+	public void onBackPressed()
+	{
 		super.onBackPressed();
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
+	protected void onSaveInstanceState(Bundle outState)
+	{
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
-	protected void onDestroy() {
-		if (dialog != null) {
+	protected void onDestroy()
+	{
+		if (dialog != null)
+		{
 			dialog.dismiss();
 			dialog = null;
 		}
@@ -100,45 +112,42 @@ public abstract class AuthSocialAccountBaseActivity extends
 	}
 
 	@Override
-	public Object onRetainCustomNonConfigurationInstance() {
-		if (hikeHTTPTask != null) {
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		if (hikeHTTPTask != null)
+		{
 			return hikeHTTPTask;
 		}
 		return super.onRetainNonConfigurationInstance();
 	}
 
 	@Override
-	public void onSuccess(TwitterOAuthView view, AccessToken accessToken) {
-		Log.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken()
-				+ " SECRET: " + accessToken.getTokenSecret());
+	public void onSuccess(TwitterOAuthView view, AccessToken accessToken)
+	{
+		Logger.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken() + " SECRET: " + accessToken.getTokenSecret());
 
-		SharedPreferences settings = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
 		editor.putString(HikeMessengerApp.TWITTER_TOKEN, accessToken.getToken());
-		editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET,
-				accessToken.getTokenSecret());
+		editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET, accessToken.getTokenSecret());
 		editor.commit();
 
-		HikeMessengerApp.makeTwitterInstance(accessToken.getToken(),
-				accessToken.getTokenSecret());
+		HikeMessengerApp.makeTwitterInstance(accessToken.getToken(), accessToken.getTokenSecret());
 
-		sendCredentialsToServer(accessToken.getToken(),
-				accessToken.getTokenSecret(), -1, false);
+		sendCredentialsToServer(accessToken.getToken(), accessToken.getTokenSecret(), -1, false);
 	}
 
 	@Override
-	public void onFailure(TwitterOAuthView view, Result result) {
-		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-				false);
+	public void onFailure(TwitterOAuthView view, Result result)
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED, false);
 	}
 
-	public void onCompleteFacebookAuth(String aToken, long expirationDate,
-			String userId) {
+	public void onCompleteFacebookAuth(String aToken, long expirationDate, String userId)
+	{
 		facebookAuthPopupShowing = false;
 
-		final Editor editor = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		final Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putString(HikeMessengerApp.FACEBOOK_TOKEN, aToken);
 		editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, expirationDate);
 
@@ -148,105 +157,108 @@ public abstract class AuthSocialAccountBaseActivity extends
 		return;
 	}
 
-	public void makeMeRequest(final Session session, final String aToken,
-			final long expirationDate) {
+	public void makeMeRequest(final Session session, final String aToken, final long expirationDate)
+	{
 		// Make an API call to get user data and define a
 		// new callback to handle the response.
-		Request request = Request.newMeRequest(session,
-				new Request.GraphUserCallback() {
-					@Override
-					public void onCompleted(GraphUser user, Response response) {
-						// If the response is successful
-						if (session == Session.getActiveSession()) {
-							if (user != null) {
-								onCompleteFacebookAuth(aToken, expirationDate,
-										user.getId());
-							}
-						}
-						if (response.getError() != null) {
-							Log.e(getClass().getSimpleName(),
-									"Facebook Get newMeRequest Failled",
-									response.getError().getException());
-							facebookError();
-						}
+		Request request = Request.newMeRequest(session, new Request.GraphUserCallback()
+		{
+			@Override
+			public void onCompleted(GraphUser user, Response response)
+			{
+				// If the response is successful
+				if (session == Session.getActiveSession())
+				{
+					if (user != null)
+					{
+						onCompleteFacebookAuth(aToken, expirationDate, user.getId());
 					}
-				});
+				}
+				if (response.getError() != null)
+				{
+					Logger.e(getClass().getSimpleName(), "Facebook Get newMeRequest Failled", response.getError().getException());
+					facebookError();
+				}
+			}
+		});
 		request.executeAsync();
 	}
 
-	public void facebookError() {
+	public void facebookError()
+	{
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
-		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
-				true);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED, true);
 	}
 
-	private void sendCredentialsToServer(String id, String token, long expires,
-			final boolean facebook) {
+	private void sendCredentialsToServer(String id, String token, long expires, final boolean facebook)
+	{
 		JSONObject request = new JSONObject();
-		try {
+		try
+		{
 			request.put(HikeConstants.ID, id);
 			request.put(HikeConstants.TOKEN, token);
-			if (expires != -1) {
+			if (expires != -1)
+			{
 				request.put(HikeConstants.EXPIRES, expires);
 			}
 			request.put(HikeConstants.POST, shouldPost);
-		} catch (JSONException e) {
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
-		Log.d(getClass().getSimpleName(), "Request: " + request.toString());
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-				facebook ? "/account/connect/fb" : "/account/connect/twitter",
-				RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
-					public void onSuccess(JSONObject response) {
-						if (dialog != null) {
+		catch (JSONException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		Logger.d(getClass().getSimpleName(), "Request: " + request.toString());
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(facebook ? "/account/connect/fb" : "/account/connect/twitter", RequestType.OTHER,
+				new HikeHttpRequest.HikeHttpCallback()
+				{
+					public void onSuccess(JSONObject response)
+					{
+						if (dialog != null)
+						{
 							dialog.dismiss();
 							dialog = null;
 						}
-						Editor editor = getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-								.edit();
-						if (facebook) {
-							editor.putBoolean(
-									HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
-									true);
-						} else {
-							editor.putBoolean(
-									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
-									true);
+						Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+						if (facebook)
+						{
+							editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, true);
+						}
+						else
+						{
+							editor.putBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, true);
 						}
 						editor.commit();
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.SOCIAL_AUTH_COMPLETED, facebook);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_COMPLETED, facebook);
 						hikeHTTPTask = null;
 					}
 
-					public void onFailure() {
-						if (dialog != null) {
+					public void onFailure()
+					{
+						if (dialog != null)
+						{
 							dialog.dismiss();
 							dialog = null;
 						}
-						Toast.makeText(AuthSocialAccountBaseActivity.this,
-								R.string.social_failed, Toast.LENGTH_SHORT)
-								.show();
-						Editor editor = getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-								.edit();
+						Toast.makeText(AuthSocialAccountBaseActivity.this, R.string.social_failed, Toast.LENGTH_SHORT).show();
+						Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 						// Fail the whole process if the request to our server
 						// fails.
-						if (facebook) {
+						if (facebook)
+						{
 							editor.remove(HikeMessengerApp.FACEBOOK_TOKEN);
 							editor.remove(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES);
 							editor.remove(HikeMessengerApp.FACEBOOK_USER_ID);
 							editor.remove(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE);
-						} else {
+						}
+						else
+						{
 							editor.remove(HikeMessengerApp.TWITTER_TOKEN);
 							editor.remove(HikeMessengerApp.TWITTER_TOKEN_SECRET);
 							editor.remove(HikeMessengerApp.TWITTER_AUTH_COMPLETE);
 						}
 						editor.commit();
 						hikeHTTPTask = null;
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.SOCIAL_AUTH_FAILED, facebook);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED, facebook);
 					}
 				});
 		hikeHttpRequest.setJSONData(request);
@@ -254,7 +266,6 @@ public abstract class AuthSocialAccountBaseActivity extends
 		Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 
 		if (!this.isFinishing())
-			dialog = ProgressDialog.show(this, null,
-					getString(R.string.saving_social));
+			dialog = ProgressDialog.show(this, null, getString(R.string.saving_social));
 	}
 }
