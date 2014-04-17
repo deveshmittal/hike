@@ -422,10 +422,9 @@ public class HoloCircularProgress extends View {
 	private void computeInsets(final int dx, final int dy) {
 		final int layoutDirection;
 		int absoluteGravity = mGravity;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-			layoutDirection = getLayoutDirection();
-			absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-		}
+		/*
+		 * Removed JELLY_BEAN and above specific code from here
+		 */
 
 		switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
 		case Gravity.LEFT:
