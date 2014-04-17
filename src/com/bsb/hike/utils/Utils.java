@@ -3833,6 +3833,7 @@ public class Utils
 			public void negativeClicked(Dialog dialog)
 			{
 				dialog.dismiss();
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
 		}, contactInfo.getFirstName());
 	}

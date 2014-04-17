@@ -35,7 +35,8 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="5dp"
         android:layout_toRightOf="@id/close_container"
-        android:layout_toLeftOf="@+id/save"
+        android:layout_toLeftOf="@+id/done_container"
+        android:ellipsize="end"
         android:text="@string/chat_theme" />
 
     <LinearLayout

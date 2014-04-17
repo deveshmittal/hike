@@ -758,7 +758,7 @@
     <string name="num_new_messages">Новых сообщений: %1$s</string>
     <string name="one_new_message">1 новое сообщение</string>
     <string name="terms">Условия</string>
-    <string name="tutorial1_header_title">Добро пожаловать в\nприложение-чат hike!</string>
+    <string name="tutorial1_header_title">Добро пожаловать в приложение-чат hike!</string>
     <string name="tutorial2_header_title">Море веселья,\nкрасивые стикеры!</string>
     <string name="tutorial3_header_title">Добавьте красок\nв чат!</string>
     <string name="get_started">Начало работы</string>
@@ -783,9 +783,8 @@
     <string name="sync_contacts_hinttext">Нажмите, чтобы начать синхронизацию контактов вручную</string>
     <string name="contacts_synced">Контакты синхронизированы</string>
     <string name="contacts_sync_started">"Запущена синхронизация контактов"</string>
-    <string name="add_friends_listview_header">"У вас уже немало контактов \n в hike (%1$s). Здорово!"</string>
+    <string name="add_friends_listview_header">"У вас уже немало контактов в hike (%1$s). Здорово!"</string>
     <string name="recommended_contacts_section">РЕКОМЕНДУЕМЫЕ КОНТАКТЫ</string>
-    <string name="ftue_invite_friends_msg">Приводите друзей в hike и отправляйте бесплатные сообщения бесконечно! Вы получите по 20 бесплатных SMS за каждого присоединившегося друга.</string>
     <string name="start_inviting_friends">Пригласить друзей</string>
     <string name="add_count_btn">Добавить (%1$s)</string>
     <string name="all_contacts">ВСЕ КОНТАКТЫ</string>
@@ -850,4 +849,43 @@
     <string name="female_selected_string_5">Девчонки произносят около 7000 слов в день!</string>
     <string name="invite_friends_confirmation_msg">Хотите пригласить друзей (%1$s) в hike?</string>
     <string name="didnt_get_pin">Если вы не получили PIN-код, мы позвоним вам</string>
+    <string name="maxContactInGroupErr">Максимальное количество контактов в группе: %1$s</string>
+	<string name="cannot_select_zero_byte_file">Невозможно выбрать файл размером 0 байт</string>
+    <string name="chatThreadNudgeTutorialText_group">Дважды коснитесь экрана, чтобы подтолкнуть друзей</string>
+    <string name="addedYouAsFavorite">добавил(а) пользователя %1$s в избранное</string>
+ 	<string name="addedYouFrindDescription">
+<![CDATA[ Вы открыли свое <font color="#ef554e">последнее появление в сети</font> и <font color="#0f8fe1">обновления статуса</font> пользователю %1$s. Попросить его сделать то же самое?
+    ]]>
+	</string>
+	<string name="contacts_upper_case">КОНТАКТЫ</string>
+	<string name="favorite_request_pending">добавлен(а) в избранное</string>
+	<string name="ftue_favorite_subtext">Добавить в избранное</string>
+	<string name="sent_you_favorite_request">добавил(а) вас в избранное</string>
+	<string name="sent_you_favorite_request_detailed">%1$s теперь показывает вам свое последнее появление в сети и обновления статуса Хотите сделать то же самое? Добавьте пользователя %1$s в список "Избранное".</string>
+	<string name="you_accepted_favorite_request_details">Отлично! %1$s теперь может просматривать ваше последнее появление в сети и обновления статуса.</string>
+	<string name="accepted_your_favorite_request_details">Теперь вы можете просматривать обновления статуса пользователя %1$s и когда он в последний раз был в сети.</string>
+	<string name="add_as_favorites_profile">Добавьте пользователя %1$s в избранное.\nПоказывайте  обновления своего статуса и свое последнее появление в сети только избранным контактам.</string>
+	<string name="add_as_favorite_menu">Добавить в избранное</string>
+	<string name="remove_from_favorites">Удалить из избранного</string>
+	<string name="favorite_request_sent">добавлен(а) в избранное</string>
+	<string name="favorite_request_sent_multiple">добавлены в избранное</string>
+	<string name="add_as_favorite_notification">%1$s добавил(а) вас в избранное</string>
+    <string name="add_as_favorite_notification_line">добавил(а) вас в избранное</string>
+    <string name="favorite_confirmed_notification">Теперь вы можете просматривать обновления статуса пользователя %1$s и когда он в последний раз был в сети.</string>
+    <string name="favorites_ftue_item_label">Добавить избранных</string>
+    <string name="add_favorites_popup_msg">Вы можете отправлять сообщения кому угодно, но только ваши друзья могут просматривать обновления вашего статуса и когда вы в последний раз были в сети.  Учтите это при выборе друзей!</string>
+    <string name="favorites_on_hike_tut">Избранное в hike</string>
+    <string name="start_adding_favorites">Добавить избранных</string>
+    <string name="favorites_upper_case">ИЗБРАННОЕ</string>
+    <string name="sent_favorite_request_tab">теперь показывает свое последнее появление в сети и обновления статуса. Хотите сделать то же самое?</string>
+    <string name="ftue_favorites_tap_dismiss_favorite_suggest">Коснитесь, чтобы пропустить предложения избранных.</string>
+    <string name="last_seen_favorite_info">Отключив показ своего последнего появления в сети, вы не сможете просматривать, когда ваши избранные контакты были в сети</string>
+    <string name="favorites_ftue_item_label">Добавить избранных</string>
+    <string name="updates_are_fun_with_favorites">Обновления станут интереснее с избранными. Мы нашли несколько людей, которых вы можете добавить в hike.</string>
+    <string name="group_chats_upper_case">ГРУППОВЫЕ ЧАТЫ</string>
+    <string name="max_num_files_reached">Невозможно отправить больше, чем столько файлов: %1$s</string>
+    <string name="tap_plus_add_favorites">Только избранное можно увидеть ваши «Последний видел» и «Состояние обновлений». Нажмите на «+», чтобы добавить в избранное.</string>
+    <string name="last_seen_proper_casing">Последний видел</string>
+    <string name="status_updates_proper_casing">Состояние обновлений</string>
+    <string name="bigger_better_attachments">Больше, лучше вложения</string>
 </resources>

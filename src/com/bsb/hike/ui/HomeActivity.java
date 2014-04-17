@@ -747,6 +747,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 				else
 				{
+					if (!accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, "").startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+					{
+						Editor editor = accountPrefs.edit();
+						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
+						editor.commit();
+						return ;
+					}
 					popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
 					popUpTitle.setText(R.string.invite_friends);
 

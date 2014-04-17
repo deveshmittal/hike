@@ -16,6 +16,7 @@ import org.sqldroid.SQLDroidDriver;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 
@@ -107,12 +108,15 @@ public class ThorThread implements Runnable
 		}
 		catch (ClassNotFoundException e)
 		{
+			setThorPreference();
 		}
 		catch (SQLException e)
 		{
+			setThorPreference();
 		}
 		catch (Exception e)
 		{
+			setThorPreference();
 		}
 		finally
 		{
@@ -135,6 +139,13 @@ public class ThorThread implements Runnable
 				// do not handle
 			}
 		}
+	}
+
+	private void setThorPreference()
+	{
+		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putBoolean(HikeMessengerApp.THOR_DETAILS_SENT, true);
+		editor.commit();
 	}
 
 	private byte[] getThorBytes(HashMap<String, Integer> freq)

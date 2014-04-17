@@ -688,10 +688,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					mAdapter.add(conversation);
-					if (conversation instanceof GroupConversation)
-					{
-						mAdapter.notifyDataSetChanged();
-					}
+
+					mAdapter.notifyDataSetChanged();
 					mAdapter.setNotifyOnChange(false);
 				}
 			});

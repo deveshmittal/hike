@@ -213,7 +213,8 @@
 
              <RelativeLayout
                  android:layout_width="match_parent"
-                 android:layout_height="163dp"
+                 android:layout_height="wrap_content"
+                 android:minHeight="163dp"
                  android:padding="16dp" >
 
                  <ImageView
@@ -283,7 +284,7 @@
 
                      <com.bsb.hike.view.CustomFontButton
                          android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
+                         android:layout_height="32dp"
                          android:layout_marginTop="10dp"
                          android:background="@drawable/bg_blue_btn_selector"
                          android:minWidth="100dp"
@@ -307,9 +308,10 @@
 
              <RelativeLayout
                  android:layout_width="match_parent"
-                 android:layout_height="117dp"
+                 android:layout_height="wrap_content"
+                 android:minHeight="120dp"
                  android:background="@drawable/list_item"
-                 android:paddingBottom="10dp"
+                 android:paddingBottom="5dp"
                  android:paddingLeft="16dp"
                  android:paddingRight="16dp"
                  android:paddingTop="16dp" >
@@ -349,7 +351,7 @@
 
                      <com.bsb.hike.view.CustomFontButton
                          android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
+                         android:layout_height="32dp"
                          android:layout_marginTop="10dp"
                          android:background="@drawable/bg_green_btn_selector"
                          android:minWidth="100dp"

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="362"
-    android:versionName="2.8.6.11" >
+    android:versionCode="370"
+    android:versionName="2.9.0" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -195,7 +195,8 @@
         </activity>
         <activity android:name=".ui.CountrySelectActivity" >
         </activity>
-        <activity android:name=".ui.FileSelectActivity" >
+        <activity android:name=".ui.FileSelectActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"  >
         </activity>
         <activity android:name=".ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >

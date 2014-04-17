@@ -85,8 +85,16 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 
-		String uid = preferences.getString(HikeMessengerApp.UID_SETTING, "");
-		groupId = uid + ":" + System.currentTimeMillis();
+		if (savedInstanceState != null)
+		{
+			groupId = savedInstanceState.getString(HikeConstants.Extras.GROUP_ID);
+		}
+
+		if (TextUtils.isEmpty(groupId))
+		{
+			String uid = preferences.getString(HikeMessengerApp.UID_SETTING, "");
+			groupId = uid + ":" + System.currentTimeMillis();
+		}
 
 		Object object = getLastCustomNonConfigurationInstance();
 		if (object != null && (object instanceof Bitmap))
@@ -120,6 +128,16 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			return groupBitmap;
 		}
 		return super.onRetainCustomNonConfigurationInstance();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		if (!TextUtils.isEmpty(groupId))
+		{
+			outState.putString(HikeConstants.Extras.GROUP_ID, groupId);
+		}
+		super.onSaveInstanceState(outState);
 	}
 
 	private void setupActionBar()

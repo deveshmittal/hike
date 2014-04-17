@@ -322,7 +322,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 			intent = new Intent(this, GalleryActivity.class);
 			intent.putExtra(HikeConstants.Extras.SELECTED_BUCKET, galleryItem);
 			intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
-			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.ON_HIKE, true));
+			intent.putExtra(HikeConstants.Extras.ON_HIKE, getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true));
 			startActivity(intent);
 		}
 		else

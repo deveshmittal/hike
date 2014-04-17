@@ -176,6 +176,8 @@ public class MqttMessagesManager
 			this.userDb.setIcon(groupId, Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			HikeMessengerApp.getLruCache().clearIconForMSISDN(groupId);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
+
 			// IconCacheManager.getInstance().clearIconForMSISDN(groupId);
 			autoDownloadGroupImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
