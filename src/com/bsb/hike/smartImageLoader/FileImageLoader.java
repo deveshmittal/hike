@@ -3,6 +3,7 @@ package com.bsb.hike.smartImageLoader;
 import android.graphics.Bitmap;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 
 public class FileImageLoader extends ImageWorker
 {
@@ -23,7 +24,7 @@ public class FileImageLoader extends ImageWorker
 	{
 		String filePath = new String(data.substring(FILE_KEY_PREFIX.length()));
 
-		return decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight);
+		return HikeBitmapFactory.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight);
 	}
 
 	@Override

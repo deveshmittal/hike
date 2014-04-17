@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -81,7 +82,7 @@ public class ProfilePicImageLoader extends ImageWorker
 		{
 			try
 			{
-				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight);
+				bitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight);
 				// Logger.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
 			}
 			catch (Exception e1)

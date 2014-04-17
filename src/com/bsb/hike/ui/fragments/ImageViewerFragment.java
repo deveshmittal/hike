@@ -22,6 +22,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -110,10 +112,10 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				BitmapDrawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
 				if (drawable == null)
 				{
-					Bitmap b = ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize);
+					Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize);
 					if (b != null)
 					{
-						drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
+						drawable = HikeBitmapFactory.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
 						Logger.e(getClass().getSimpleName(), "Decode from file is returning null bitmap.");
 						if (drawable != null)
 						{
@@ -160,7 +162,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		}
 		else
 		{
-			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(key, false));
+			imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(key, false));
 			imageView.setImageResource(Utils.isGroupConversation(mappedId) ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
 		}
 
@@ -200,8 +202,8 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		BitmapDrawable drawable = null;
 		if (file.exists())
 		{
-			drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
-					ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize));
+			drawable = HikeBitmapFactory.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
+					HikeBitmapFactory.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize));
 			imageView.setImageDrawable(drawable);
 		}
 

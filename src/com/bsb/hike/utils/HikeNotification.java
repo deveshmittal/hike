@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -477,7 +478,7 @@ public class HikeNotification
 
 		final boolean playNativeJingle = preferenceManager.getBoolean(HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final Bitmap avatarBitmap = Utils.returnScaledBitmap((Utils.drawableToBitmap(avatarDrawable)), context);
+		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setDefaults(vibrate).setPriority(Notification.PRIORITY_DEFAULT);

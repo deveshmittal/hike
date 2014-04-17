@@ -38,6 +38,8 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.utils.ContactUtils;
@@ -1267,11 +1269,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	{
 
 		Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-		Bitmap roundedBitmap = Utils.getCircularBitmap(tempBitmap);
+		Bitmap roundedBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 
 		try
 		{
-			return Utils.bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
+			return BitmapUtils.bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
 		}
 		finally
 		{

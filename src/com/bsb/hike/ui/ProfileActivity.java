@@ -59,6 +59,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -936,7 +938,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if (mActivityState.destFilePath != null)
 		{
 			/* the server only needs a smaller version */
-			final Bitmap smallerBitmap = Utils.scaleDownImage(mActivityState.destFilePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
+			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownImage(mActivityState.destFilePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
 
 			if (smallerBitmap == null)
 			{
@@ -944,7 +946,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				return;
 			}
 
-			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG, 100);
+			final byte[] bytes = BitmapUtils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG, 100);
 
 			if (profileAdapter != null)
 			{

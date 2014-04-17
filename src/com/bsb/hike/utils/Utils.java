@@ -2,7 +2,6 @@ package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -65,18 +64,8 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.location.Address;
@@ -134,6 +123,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -160,7 +151,6 @@ import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.maps.GeoPoint;
@@ -329,70 +319,6 @@ public class Utils
 		return intent;
 	}
 
-	static private int iconHash(String s)
-	{
-		/*
-		 * ignore everything after :: so that your large icon by default matches your msisdn
-		 */
-		s = s.split("::")[0];
-		int count = 0;
-		for (int i = 0; i < s.length(); ++i)
-		{
-			count += s.charAt(i);
-		}
-
-		return count;
-	}
-
-	public static Drawable getDefaultIconForUser(Context context, String msisdn)
-	{
-		return getDefaultIconForUser(context, msisdn, false);
-	}
-
-	public static Drawable getDefaultIconForUser(Context context, String msisdn, boolean rounded)
-	{
-		return context.getResources().getDrawable(getDefaultAvatarResourceId(msisdn, rounded));
-	}
-
-	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn)
-	{
-		return getDefaultIconForUserFromDecodingRes(context, msisdn, false);
-	}
-
-	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn, boolean rounded)
-	{
-		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getDefaultAvatarResourceId(msisdn, rounded)));
-	}
-
-	public static int getDefaultAvatarResourceId(String msisdn, boolean rounded)
-	{
-		int count = 5;
-		int id;
-		switch (iconHash(msisdn) % count)
-		{
-		case 0:
-			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
-			break;
-		case 1:
-			id = rounded ? R.drawable.avatar_02_rounded : R.drawable.avatar_02;
-			break;
-		case 2:
-			id = rounded ? R.drawable.avatar_03_rounded : R.drawable.avatar_03;
-			break;
-		case 3:
-			id = rounded ? R.drawable.avatar_04_rounded : R.drawable.avatar_04;
-			break;
-		case 4:
-			id = rounded ? R.drawable.avatar_05_rounded : R.drawable.avatar_05;
-			break;
-		default:
-			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
-			break;
-		}
-
-		return id;
-	}
-
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
 	{
@@ -559,45 +485,7 @@ public class Utils
 		return path.toString();
 	}
 
-	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
-	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(output);
-
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-		final RectF rectF = new RectF(rect);
-		final float roundPx = 4;
-
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-
-		return output;
-	}
-
-	public static Bitmap getCircularBitmap(Bitmap bitmap)
-	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(output);
-
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-		return output;
-	}
+	
 
 	public static void savedAccountCredentials(AccountInfo accountInfo, SharedPreferences.Editor editor)
 	{
@@ -1189,137 +1077,7 @@ public class Utils
 		}
 	}
 
-	public static Drawable stringToDrawable(String encodedString)
-	{
-		if (TextUtils.isEmpty(encodedString))
-		{
-			return null;
-		}
-		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
-		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-	}
 	
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-		if(applyBitmapConfig)
-		{
-			options.inPreferredConfig = Config.RGB_565;
-		}
-		
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-}
-
-	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
-	{
-		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
-
-		int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail.getWidth() - dimensionLimit) / 2) : 0;
-		int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail.getHeight() - dimensionLimit) / 2) : 0;
-
-		Logger.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
-		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
-
-		if (squareThumbnail != thumbnail)
-		{
-			thumbnail.recycle();
-		}
-		thumbnail = null;
-		return squareThumbnail;
-	}
-
-	public static Bitmap stringToBitmap(String thumbnailString)
-	{
-		byte[] encodeByte = Base64.decode(thumbnailString, Base64.DEFAULT);
-		return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-	}
-
-	public static boolean isThumbnailSquare(Bitmap thumbnail)
-	{
-		return (thumbnail.getWidth() == thumbnail.getHeight());
-	}
-
-	public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format)
-	{
-		return bitmapToBytes(bitmap, format, 50);
-	}
-
-	public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format, int quality)
-	{
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		bitmap.compress(format, quality, bao);
-		return bao.toByteArray();
-	}
-
 	public static String getRealPathFromUri(Uri contentUri, Activity activity)
 	{
 		String[] proj = { MediaStore.Images.Media.DATA };
@@ -1388,13 +1146,13 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
-				tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
+				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
 				if (tempBmp != null)
 				{
-					byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
+					byte[] fileBytes = BitmapUtils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
 					tempBmp.recycle();
 					src = new ByteArrayInputStream(fileBytes);
 				}
@@ -1464,29 +1222,6 @@ public class Utils
 			}
 		}
 		return 0;
-	}
-
-	public static Bitmap rotateBitmap(Bitmap b, int degrees)
-	{
-		if (degrees != 0 && b != null)
-		{
-			Matrix m = new Matrix();
-			m.setRotate(degrees, (float) b.getWidth() / 2, (float) b.getHeight() / 2);
-			try
-			{
-				Bitmap b2 = Bitmap.createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
-				if (b != b2)
-				{
-					b.recycle();
-					b = b2;
-				}
-			}
-			catch (OutOfMemoryError e)
-			{
-				Logger.e("Utils", "Out of memory", e);
-			}
-		}
-		return b;
 	}
 
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
@@ -1969,11 +1704,11 @@ public class Utils
 			return thumbnailString;
 		}
 
-		Bitmap thumbnailBmp = Utils.stringToBitmap(thumbnailString);
-		if (!Utils.isThumbnailSquare(thumbnailBmp))
+		Bitmap thumbnailBmp = HikeBitmapFactory.stringToBitmap(thumbnailString);
+		if (!BitmapUtils.isThumbnailSquare(thumbnailBmp))
 		{
-			Bitmap squareThumbnail = Utils.makeSquareThumbnail(thumbnailBmp, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
-			thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(squareThumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
+			Bitmap squareThumbnail = HikeBitmapFactory.makeSquareThumbnail(thumbnailBmp, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+			thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(squareThumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 			squareThumbnail.recycle();
 			squareThumbnail = null;
 		}
@@ -2433,25 +2168,6 @@ public class Utils
 		FileOutputStream fos = new FileOutputStream(file);
 
 		byte[] b = Base64.decode(base64String, Base64.DEFAULT);
-		if (b == null)
-		{
-			throw new IOException();
-		}
-		fos.write(b);
-		fos.flush();
-		fos.close();
-	}
-
-	public static void saveBitmapToFile(File file, Bitmap bitmap) throws IOException
-	{
-		saveBitmapToFile(file, bitmap, CompressFormat.PNG, 70);
-	}
-
-	public static void saveBitmapToFile(File file, Bitmap bitmap, CompressFormat compressFormat, int quality) throws IOException
-	{
-		FileOutputStream fos = new FileOutputStream(file);
-
-		byte[] b = bitmapToBytes(bitmap, compressFormat, quality);
 		if (b == null)
 		{
 			throw new IOException();
@@ -2963,23 +2679,6 @@ public class Utils
 		return jObject;
 	}
 
-	public static Bitmap drawableToBitmap(Drawable drawable)
-	{
-		if (drawable instanceof BitmapDrawable)
-		{
-			return ((BitmapDrawable) drawable).getBitmap();
-		}
-		/*
-		 * http://developer.android.com/reference/android/graphics/Bitmap.Config. html
-		 */
-		Bitmap bitmap = Bitmap.createBitmap((int) (48 * densityMultiplier), (int) (48 * densityMultiplier), Config.ARGB_8888);
-
-		Canvas canvas = new Canvas(bitmap);
-		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawable.draw(canvas);
-		return bitmap;
-	}
-
 	public static boolean isHoneycombOrHigher()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
@@ -3129,20 +2828,6 @@ public class Utils
 		}
 	}
 
-	public static Bitmap returnScaledBitmap(Bitmap src, Context context)
-	{
-		Resources res = context.getResources();
-		if (isHoneycombOrHigher())
-		{
-			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
-			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			return src = Bitmap.createScaledBitmap(src, width, height, false);
-		}
-		else
-			return src;
-
-	}
-
 	public static boolean getSendSmsPref(Context context)
 	{
 		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_SMS_PREF, false);
@@ -3195,7 +2880,7 @@ public class Utils
 
 		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
 
-		Bitmap bitmap = Utils.drawableToBitmap(avatarDrawable);
+		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable);
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
@@ -3390,7 +3075,7 @@ public class Utils
 				if (resourceId > 0)
 				{
 					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = Utils.drawableToBitmap(dr);
+					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr);
 				}
 
 			}
@@ -3520,11 +3205,6 @@ public class Utils
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
 	}
 
-	public static boolean hasHoneycomb()
-	{
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-	}
-
 	public static boolean hasHoneycombMR1()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1;
@@ -3544,26 +3224,6 @@ public class Utils
 	{
 		double freeSpaceAvailable = getFreeSpace();
 		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
-	}
-
-	public static int getBitmapSize(Bitmap bitmap)
-	{
-		if (bitmap == null)
-			return 0;
-		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
-		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
-		{
-			return bitmap.getAllocationByteCount();
-		}
-
-		if (Utils.hasHoneycombMR1())
-		{
-			return bitmap.getByteCount();
-		}
-
-		// Pre HC-MR1
-		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
 
 	public static void addToContacts(List<ContactInfoData> items, String name, Context context)
@@ -3619,24 +3279,6 @@ public class Utils
 
 		}
 		context.startActivity(i);
-	}
-
-	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
-	{
-		if (bitmap == null)
-			return null;
-
-		if (Utils.hasHoneycomb())
-		{
-			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
-			return new BitmapDrawable(mResources, bitmap);
-		}
-		else
-		{
-			// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-			// which will recycle automagically
-			return new RecyclingBitmapDrawable(mResources, bitmap);
-		}
 	}
 
 	public static int getNumColumnsForGallery(Resources resources, int sizeOfImage)
@@ -3775,7 +3417,7 @@ public class Utils
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 		if (drawable == null)
 		{
-			Drawable background = context.getResources().getDrawable(Utils.getDefaultAvatarResourceId(msisdn, false));
+			Drawable background = context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, false));
 			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}

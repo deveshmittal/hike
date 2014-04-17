@@ -17,11 +17,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
@@ -172,7 +172,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		{
 			// The removed entry is a standard BitmapDrawable
 
-			if (Utils.hasHoneycomb())
+			if (Utils.isHoneycombOrHigher())
 			{
 				// We're running on Honeycomb or later, so add the bitmap
 				// to a SoftReference set for possible use with inBitmap later
@@ -311,7 +311,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
 			if (bd != null)
 			{
-				if (!Utils.hasHoneycomb())
+				if (!Utils.isHoneycombOrHigher())
 				{
 					// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
 					// which will recycle automagically
@@ -331,7 +331,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
-			if (!Utils.hasHoneycomb())
+			if (!Utils.isHoneycombOrHigher())
 			{
 				if (bd == null)
 				{
@@ -379,7 +379,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			return null;
 		}
 
-		if (Utils.hasHoneycomb())
+		if (Utils.isHoneycombOrHigher())
 			bd = new BitmapDrawable(mResources, stickerBitmap);
 		else
 			bd = new RecyclingBitmapDrawable(mResources, stickerBitmap);

@@ -142,6 +142,8 @@ import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -2145,7 +2147,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			avatar.setScaleType(ScaleType.CENTER_INSIDE);
 			avatar.setImageResource((mConversation instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-			avatar.setBackgroundResource(Utils.getDefaultAvatarResourceId(mContactNumber, true));
+			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
 		}
 	}
 
@@ -6417,9 +6419,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
-		BitmapDrawable bd = Utils.getBitmapDrawable(getResources(), ImageWorker.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize));
+		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize));
 
-		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + Utils.getBitmapSize(bd.getBitmap()));
+		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(bd.getBitmap()));
 
 		if (chatTheme.isTiled())
 		{

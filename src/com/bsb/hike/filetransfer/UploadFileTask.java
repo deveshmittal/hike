@@ -45,6 +45,8 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
@@ -173,7 +175,7 @@ public class UploadFileTask extends FileTransferBase
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
-					thumbnail = Utils.scaleDownImage(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
+					thumbnail = HikeBitmapFactory.scaleDownImage(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
@@ -181,7 +183,7 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 				}
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(),(int) mFile.length());
 			}
@@ -338,7 +340,7 @@ public class UploadFileTask extends FileTransferBase
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
-				thumbnail = Utils.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
+				thumbnail = HikeBitmapFactory.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
 			{
@@ -346,7 +348,7 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 			}
 			else
 			{
