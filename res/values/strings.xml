@@ -1430,7 +1430,7 @@
 	<string name="favorite_request_pending">Added as a favorite</string>
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
-	<string name="sent_you_favorite_request_detailed">%1$s is sharing his Last Seen and Status Updates with you. Would you like to do the same? Add %1$s to your Favorites List.</string>
+	<string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
 	<string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
 	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
 	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
@@ -1446,7 +1446,7 @@
     <string name="favorites_on_hike_tut">Favorites on hike</string>
     <string name="start_adding_favorites">Start adding favorites</string>
     <string name="favorites_upper_case">FAVORITES</string>
-    <string name="sent_favorite_request_tab">is now sharing Last Seen and Status Updates. Would you like to do the same?</string>
+    <string name="sent_favorite_request_tab">Is now sharing Last Seen and Status Updates. Would you like to do the same?</string>
     <string name="ftue_favorites_tap_dismiss_favorite_suggest">Tap here to dismiss favorite suggestions</string>
     <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
     <string name="favorites_ftue_item_label">Add Favorites</string>
