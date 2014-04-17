@@ -18,14 +18,12 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -52,6 +50,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
@@ -104,7 +103,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private View tipView;
 
-	private Button doneBtn;
+	private View doneBtn;
+
+	private TextView postText;
+
+	private ImageView arrow;
 
 	private TextView title;
 
@@ -238,11 +241,15 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
-		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+
+		postText.setText(R.string.post);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		doneBtn.setText(R.string.post);
-		doneBtn.setEnabled(false);
+
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 
 		setTitle();
 
@@ -328,11 +335,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private boolean ensureOpenSession()
 	{
-		Log.d("StatusUpdate", "entered in ensureOpenSession");
+		Logger.d("StatusUpdate", "entered in ensureOpenSession");
 		if (Session.getActiveSession() == null || !Session.getActiveSession().isOpened())
 		{
 
-			Log.d("StatusUpdate", "active session is either null or closed");
+			Logger.d("StatusUpdate", "active session is either null or closed");
 			Session.openActiveSession(this, true, new Session.StatusCallback()
 			{
 				@Override
@@ -349,15 +356,15 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private void onSessionStateChanged(Session session, SessionState state, Exception exception)
 	{
-		Log.d("StatusUpdate", "inside onSessionStateChanged");
-		Log.d("StatusUpdate", "state = " + state.toString());
+		Logger.d("StatusUpdate", "inside onSessionStateChanged");
+		Logger.d("StatusUpdate", "state = " + state.toString());
 		if (state.isOpened())
 		{
 			startFbSession();
 		}
 		if (exception != null)
 		{
-			Log.e("StatusUpdate", "error trying to open the session", exception);
+			Logger.e("StatusUpdate", "error trying to open the session", exception);
 		}
 	}
 
@@ -370,10 +377,10 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	private void ensurePublishPermissions()
 	{
 		Session session = Session.getActiveSession();
-		Log.d("StatusUpdate", "ensurePublishPermissions");
+		Logger.d("StatusUpdate", "ensurePublishPermissions");
 		if (!hasPublishPermission())
 		{
-			Log.d("StatusUpdate", "not hasPublishPermission");
+			Logger.d("StatusUpdate", "not hasPublishPermission");
 			session.requestNewPublishPermissions(new Session.NewPermissionsRequest(this, Arrays.asList("basic_info", "publish_stream")).setCallback(new StatusCallback()
 			{
 
@@ -382,12 +389,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 				{
 					if (exception != null)
 					{
-						Log.e("StatusUpdate ", "Error Requesting NewPublishPermissions = " + exception.toString());
+						Logger.e("StatusUpdate ", "Error Requesting NewPublishPermissions = " + exception.toString());
 						return;
 					}
 					if (hasPublishPermission())
 					{
-						Log.d("StatusUpdate", session.getExpirationDate().toString());
+						Logger.d("StatusUpdate", session.getExpirationDate().toString());
 						makeMeRequest(session, session.getAccessToken(), session.getExpirationDate().getTime());
 					}
 					else
@@ -402,7 +409,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		else
 		{
-			Log.d("StatusUpdate", "time = " + Long.valueOf(session.getExpirationDate().getTime()).toString());
+			Logger.d("StatusUpdate", "time = " + Long.valueOf(session.getExpirationDate().getTime()).toString());
 			makeMeRequest(session, session.getAccessToken(), session.getExpirationDate().getTime());
 		}
 	}
@@ -552,7 +559,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		boolean facebook = findViewById(R.id.post_fb_btn).isSelected();
 		boolean twitter = findViewById(R.id.post_twitter_btn).isSelected();
 
-		Log.d(getClass().getSimpleName(), "Status: " + status);
+		Logger.d(getClass().getSimpleName(), "Status: " + status);
 		JSONObject data = new JSONObject();
 		try
 		{
@@ -567,9 +574,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
-		Log.d(getClass().getSimpleName(), "JSON: " + data);
+		Logger.d(getClass().getSimpleName(), "JSON: " + data);
 
 		hikeHttpRequest.setJSONData(data);
 		mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
@@ -768,7 +775,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			}
 			else if (session != null && resultCode == RESULT_CANCELED)
 			{
-				Log.d("StatusUpdate", "Facebook Permission Cancelled");
+				Logger.d("StatusUpdate", "Facebook Permission Cancelled");
 				// if we do not close the session here then requesting publish
 				// permission just after canceling the permission will
 				// throw an exception telling can not request publish
@@ -788,7 +795,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		 * Enabling if the text length is > 0 or if the user has selected a mood with some prefilled text.
 		 */
 		boolean enable = mActivityTask.moodId >= 0 || statusTxt.getText().toString().trim().length() > 0 || isEmojiOrMoodLayoutVisible();
-		doneBtn.setEnabled(enable);
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, enable);
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,7 +59,6 @@ import android.os.Build;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -164,7 +164,7 @@ public class AccountUtils
 		{
 			return mClient;
 		}
-		Log.d("SSL", "Initialising the HTTP CLIENT");
+		Logger.d("SSL", "Initialising the HTTP CLIENT");
 
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -219,13 +219,13 @@ public class AccountUtils
 		HttpResponse response;
 		try
 		{
-			Log.d("HTTP", "Performing HTTP Request " + request.getRequestLine());
-			Log.d("HTTP", "to host" + request);
+			Logger.d("HTTP", "Performing HTTP Request " + request.getRequestLine());
+			Logger.d("HTTP", "to host" + request);
 			response = client.execute(request);
-			Log.d("HTTP", "finished request");
+			Logger.d("HTTP", "finished request");
 			if (response.getStatusLine().getStatusCode() != 200)
 			{
-				Log.w("HTTP", "Request Failed: " + response.getStatusLine());
+				Logger.w("HTTP", "Request Failed: " + response.getStatusLine());
 				return null;
 			}
 
@@ -234,12 +234,12 @@ public class AccountUtils
 		}
 		catch (ClientProtocolException e)
 		{
-			Log.e("HTTP", "Invalid Response", e);
+			Logger.e("HTTP", "Invalid Response", e);
 			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
-			Log.e("HTTP", "Unable to perform request", e);
+			Logger.e("HTTP", "Unable to perform request", e);
 		}
 		return null;
 	}
@@ -256,14 +256,14 @@ public class AccountUtils
 			target.clear();
 			read = reader.read(target);
 		}
-		Log.d("HTTP", "request finished");
+		Logger.d("HTTP", "request finished");
 		try
 		{
 			return new JSONObject(builder.toString());
 		}
 		catch (JSONException e)
 		{
-			Log.e("HTTP", "Invalid JSON Response", e);
+			Logger.e("HTTP", "Invalid JSON Response", e);
 		}
 		return null;
 	}
@@ -282,14 +282,14 @@ public class AccountUtils
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.wtf("URL", "Unable to send message " + message);
+			Logger.wtf("URL", "Unable to send message " + message);
 			return -1;
 		}
 
 		JSONObject obj = executeRequest(httppost);
 		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
 		{
-			Log.w("HTTP", "Unable to send message");
+			Logger.w("HTTP", "Unable to send message");
 			return -1;
 		}
 
@@ -310,14 +310,14 @@ public class AccountUtils
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.wtf("AccountUtils", "encoding exception", e);
+			Logger.wtf("AccountUtils", "encoding exception", e);
 			throw new UserError("Invalid PhoneNumber", -2);
 		}
 
 		JSONObject obj = executeRequest(httppost);
 		if (((obj == null) || ("fail".equals(obj.optString("stat")))))
 		{
-			Log.i("Invite", "Couldn't invite friend: " + obj);
+			Logger.i("Invite", "Couldn't invite friend: " + obj);
 			if (obj == null)
 			{
 				throw new UserError("Unable to invite", -1);
@@ -370,8 +370,18 @@ public class AccountUtils
 			String deviceId = "";
 			
 			deviceId = Utils.getEncryptedDeviceId(context);
-			Log.d("AccountUtils", "Android ID is "+ Secure.ANDROID_ID);
+			Logger.d("AccountUtils", "Android ID is "+ Secure.ANDROID_ID);
 
+			try
+			{
+				deviceId = Utils.getHashedDeviceId(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+				Logger.d("AccountUtils", "Android ID is " + Secure.ANDROID_ID);
+			}
+			catch (NoSuchAlgorithmException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			String os = HikeConstants.ANDROID;
 			String carrier = manager.getNetworkOperatorName();
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
@@ -382,7 +392,7 @@ public class AccountUtils
 			}
 			catch (NameNotFoundException e)
 			{
-				Log.e("AccountUtils", "Unable to get app version");
+				Logger.e("AccountUtils", "Unable to get app version");
 			}
 
 			String deviceKey = manager.getDeviceId();
@@ -411,21 +421,21 @@ public class AccountUtils
 			}
 			Utils.addCommonDeviceDetails(data, context);
 
-			Log.d("AccountUtils", "Creating Account " + data.toString());
+			Logger.d("AccountUtils", "Creating Account " + data.toString());
 			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
+			Logger.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
 		}
 		catch (JSONException e)
 		{
-			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
+			Logger.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
 		}
 		catch(Exception e){
-			Log.wtf("AccountUtils",
+			Logger.wtf("AccountUtils",
 					"generic exception while using SYSTEM FLAGS !", e);
 		}
 		
@@ -434,12 +444,12 @@ public class AccountUtils
 		JSONObject obj = executeRequest(httppost);
 		if ((obj == null))
 		{
-			Log.w("HTTP", "Unable to create account");
+			Logger.w("HTTP", "Unable to create account");
 			// raise an exception?
 			return null;
 		}
 
-		Log.d("AccountUtils", "AccountCreation " + obj.toString());
+		Logger.d("AccountUtils", "AccountCreation " + obj.toString());
 		if ("fail".equals(obj.optString("stat")))
 		{
 			if (pin != null)
@@ -457,7 +467,7 @@ public class AccountUtils
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 		String country_code = obj.optString("country_code");
 
-		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
+		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
 		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits, all_invitee, all_invitee_joined, country_code);
 	}
 
@@ -505,19 +515,19 @@ public class AccountUtils
 		}
 		catch (JSONException e)
 		{
-			Log.e("AccountUtils", "creating a string entity from an entry string threw!", e);
+			Logger.e("AccountUtils", "creating a string entity from an entry string threw!", e);
 		}
 
 		JSONObject obj = executeRequest(httppost);
 		if (obj == null)
 		{
-			Log.w("HTTP", "Unable to Validate Phone Number.");
+			Logger.w("HTTP", "Unable to Validate Phone Number.");
 			// raise an exception?
 			return null;
 		}
 
 		String msisdn = obj.optString("msisdn");
-		Log.d("HTTP", "Successfully validated phone number.");
+		Logger.d("HTTP", "Successfully validated phone number.");
 		return msisdn;
 	}
 
@@ -549,8 +559,14 @@ public class AccountUtils
 			if (birthdate != null)
 			{
 				JSONObject bday = new JSONObject();
-				bday.put("day", birthdate.day);
-				bday.put("month", birthdate.month);
+				if(birthdate.day != 0)
+				{
+					bday.put("day", birthdate.day);
+				}
+				if(birthdate.month != 0)
+				{
+					bday.put("month", birthdate.month);
+				}
 				bday.put("year", birthdate.year);
 				data.put("dob", bday);
 			}
@@ -567,11 +583,11 @@ public class AccountUtils
 		}
 		catch (JSONException e)
 		{
-			Log.wtf("AccountUtils", "Unable to encode name as JSON");
+			Logger.wtf("AccountUtils", "Unable to encode name as JSON");
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.wtf("AccountUtils", "Unable to encode name");
+			Logger.wtf("AccountUtils", "Unable to encode name");
 		}
 	}
 
@@ -587,7 +603,7 @@ public class AccountUtils
 		}
 		String encoded = data.toString();
 
-		Log.d("ACCOUNT UTILS", "Json data is : " + encoded);
+		Logger.d("ACCOUNT UTILS", "Json data is : " + encoded);
 		AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 		entity.setContentType("application/json");
 		httppost.setEntity(entity);
@@ -616,7 +632,7 @@ public class AccountUtils
 		}
 		catch (JSONException e)
 		{
-			Log.e("AccountUtils", "Invalid JSON put", e);
+			Logger.e("AccountUtils", "Invalid JSON put", e);
 			return null;
 		}
 
@@ -654,7 +670,7 @@ public class AccountUtils
 			}
 			catch (JSONException e)
 			{
-				Log.d("ACCOUNT UTILS", "Json exception while getting contact list.");
+				Logger.d("ACCOUNT UTILS", "Json exception while getting contact list.");
 				e.printStackTrace();
 			}
 		}
@@ -676,7 +692,7 @@ public class AccountUtils
 		}
 		catch (JSONException e)
 		{
-			Log.d("ACCOUNT UTILS", "Json exception while getting WA info list.");
+			Logger.d("ACCOUNT UTILS", "Json exception while getting WA info list.");
 			e.printStackTrace();
 		}
 		return contactsJson;
@@ -690,16 +706,16 @@ public class AccountUtils
 		{
 			if ((obj == null) || ("fail".equals(obj.optString("stat"))))
 			{
-				Log.w("HTTP", "Unable to upload address book");
+				Logger.w("HTTP", "Unable to upload address book");
 				// TODO raise a real exception here
 				return null;
 			}
-			Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
+			Logger.d("AccountUtils", "Reply from addressbook:" + obj.toString());
 			addressbook = obj.getJSONObject("addressbook");
 		}
 		catch (JSONException e)
 		{
-			Log.e("AccountUtils", "Invalid json object", e);
+			Logger.e("AccountUtils", "Invalid json object", e);
 			return null;
 		}
 
@@ -726,15 +742,15 @@ public class AccountUtils
 		List<String> blockListMsisdns = new ArrayList<String>();
 		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
 		{
-			Log.w("HTTP", "Unable to upload address book");
+			Logger.w("HTTP", "Unable to upload address book");
 			// TODO raise a real exception here
 			return null;
 		}
-		Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
+		Logger.d("AccountUtils", "Reply from addressbook:" + obj.toString());
 		blocklist = obj.optJSONArray("blocklist");
 		if (blocklist == null)
 		{
-			Log.e("AccountUtils", "Received blocklist as null");
+			Logger.e("AccountUtils", "Received blocklist as null");
 			return null;
 		}
 
@@ -746,7 +762,7 @@ public class AccountUtils
 			}
 			catch (JSONException e)
 			{
-				Log.e("AccountUtils", "Invalid json object", e);
+				Logger.e("AccountUtils", "Invalid json object", e);
 				return null;
 			}
 		}
@@ -803,7 +819,7 @@ public class AccountUtils
 				((HttpPost) requestBase).setEntity(entity);
 			}
 			JSONObject obj = executeRequest(requestBase);
-			Log.d("AccountUtils", "Response: " + obj);
+			Logger.d("AccountUtils", "Response: " + obj);
 			if (((obj == null) || (!"ok".equals(obj.optString("stat"))) && requestType != RequestType.HIKE_JOIN_TIME))
 			{
 				throw new NetworkErrorException("Unable to perform request");
@@ -819,7 +835,7 @@ public class AccountUtils
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.wtf("AccountUtils", "Unable to encode name");
+			Logger.wtf("AccountUtils", "Unable to encode name");
 		}
 	}
 
@@ -849,7 +865,7 @@ public class AccountUtils
 		request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 		request.put(HikeConstants.NUMBER_OF_STICKERS, HikeConstants.MAX_NUM_STICKER_REQUEST);
 
-		Log.d("Stickers", "Request: " + request);
+		Logger.d("Stickers", "Request: " + request);
 		GzipByteArrayEntity entity;
 		try
 		{
@@ -860,7 +876,7 @@ public class AccountUtils
 			httpPost.setEntity(entity);
 
 			JSONObject obj = executeRequest(httpPost);
-			Log.d("Stickers", "Response: " + obj);
+			Logger.d("Stickers", "Response: " + obj);
 
 			if (((obj == null) || (!"ok".equals(obj.optString("stat")))))
 			{

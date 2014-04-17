@@ -19,8 +19,8 @@ package com.bsb.hike.ui.utils;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -59,7 +59,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		synchronized (this)
 		{
-			Log.d(LOG_TAG, "Is Displayed : " + isDisplayed);
+			Logger.d(LOG_TAG, "Is Displayed : " + isDisplayed);
 			if (isDisplayed)
 			{
 				mDisplayRefCount++;
@@ -69,7 +69,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 			{
 				mDisplayRefCount--;
 			}
-			Log.d(LOG_TAG, "IsDisplayed Count : " + mDisplayRefCount);
+			Logger.d(LOG_TAG, "IsDisplayed Count : " + mDisplayRefCount);
 		}
 
 		// Check to see if recycle() can be called
@@ -86,7 +86,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 	{
 		synchronized (this)
 		{
-			Log.d(LOG_TAG, "Is Cached : " + isCached);
+			Logger.d(LOG_TAG, "Is Cached : " + isCached);
 			if (isCached)
 			{
 				mCacheRefCount++;
@@ -95,7 +95,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 			{
 				mCacheRefCount--;
 			}
-			Log.d(LOG_TAG, "Is Cached Count : " + mCacheRefCount);
+			Logger.d(LOG_TAG, "Is Cached Count : " + mCacheRefCount);
 		}
 
 		// Check to see if recycle() can be called
@@ -108,7 +108,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 		// has been displayed, then recycle
 		if (mCacheRefCount <= 0 && mDisplayRefCount <= 0 && mHasBeenDisplayed && isBitmapValid())
 		{
-			Log.d(LOG_TAG, "No longer being used or cached so recycling. " + toString());
+			Logger.d(LOG_TAG, "No longer being used or cached so recycling. " + toString());
 			getBitmap().recycle();
 		}
 	}

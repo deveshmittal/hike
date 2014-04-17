@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_centerVertical="true">
+
+    <ImageView
+        android:id="@+id/hike_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:src="@drawable/hike_logo_top_bar" />
+
+    <LinearLayout
+        android:id="@+id/next_btn_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:orientation="horizontal" >
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="#48aae8" />
+
+        <LinearLayout
+            android:id="@+id/done_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_overflow_menu_selector"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp" >
+
+            <ImageView
+                android:id="@+id/arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:src="@drawable/action_bar_arrow" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/next_btn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:shadowColor="#40000000"
+                android:shadowDy="1.0"
+                android:shadowRadius="1.0"
+                android:text="@string/next_signup"
+                android:textColor="@drawable/signup_next_btn_selector"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+    
+	<com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/title"
+        style="@style/ActionBarText.Shadow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="19dp"
+        android:ellipsize="end"
+        android:layout_toRightOf="@id/hike_logo"
+        android:layout_toLeftOf="@id/next_btn_container"
+        android:text="Phone Number" />
+
+</RelativeLayout>
