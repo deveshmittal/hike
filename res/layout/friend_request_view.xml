@@ -47,8 +47,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="12dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:layout_toLeftOf="@id/reject"
             android:layout_toRightOf="@id/avatar_container"
             android:orientation="vertical" >
@@ -73,6 +73,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:ellipsize="end"
+                android:lineSpacingExtra="2dp"
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                 android:textColor="@color/conversation_timestamp"
                 android:textSize="13sp"
