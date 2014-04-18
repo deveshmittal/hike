@@ -1457,4 +1457,11 @@
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
+    <string name="introducing_stealth_mode">Introducing Stealth Mode</string>
+    <string name="stealth_mode_popup_msg">Worry about personal chats? You can now mark them as Stealth and access them all in Stealth Mode (passcode protected).</string>
+    <string name="quick_setup">Quick setup</string>
+    <string name="stealth_setup_later">
+<![CDATA[ You can setup later under <font color="#fdf0e1">Settings > Privacy</font> 
+	    ]]>
+    </string>
 </resources>

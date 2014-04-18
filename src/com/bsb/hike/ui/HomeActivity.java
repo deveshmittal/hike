@@ -100,7 +100,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -283,6 +283,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				break;
 			case FILE_TRANSFER_POP_Up:
 				HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG);
+			case STEALTH_FTUE_POPUP:
+				HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG);	
 				
 				break;
 			}
