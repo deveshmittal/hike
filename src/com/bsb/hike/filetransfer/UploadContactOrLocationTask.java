@@ -293,7 +293,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel, HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Logger.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 
-		Bitmap thumbnail = BitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
+		Bitmap thumbnail = HikeBitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
 		String thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 
 		JSONObject metadata = getFileTransferMetadataForLocation(latitude, longitude, zoomLevel, address, thumbnailString);

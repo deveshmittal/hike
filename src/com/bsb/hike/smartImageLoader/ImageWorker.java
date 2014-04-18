@@ -227,7 +227,7 @@ public abstract class ImageWorker
 	 */
 	public void setLoadingImage(int resId)
 	{
-		mLoadingBitmap = BitmapFactory.decodeResource(mResources, resId);
+		mLoadingBitmap = HikeBitmapFactory.decodeResource(mResources, resId);
 	}
 
 	/**

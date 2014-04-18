@@ -1,5 +1,7 @@
 package com.bsb.hike.BitmapModule;
 
+import java.io.InputStream;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,7 +30,7 @@ import com.bsb.hike.utils.Utils;
 public class HikeBitmapFactory
 {
 	private static final String TAG = "HikeBitmapFactory";
-	
+
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
 	{
 		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
@@ -68,7 +70,7 @@ public class HikeBitmapFactory
 		canvas.drawBitmap(bitmap, rect, rect, paint);
 		return output;
 	}
-	
+
 	public static BitmapDrawable stringToDrawable(String encodedString)
 	{
 		if (TextUtils.isEmpty(encodedString))
@@ -78,7 +80,7 @@ public class HikeBitmapFactory
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
-	
+
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
 	{
 		Bitmap thumbnail = null;
@@ -116,7 +118,7 @@ public class HikeBitmapFactory
 
 		return thumbnail;
 	}
-	
+
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
 	{
 		Bitmap thumbnail = null;
@@ -138,11 +140,11 @@ public class HikeBitmapFactory
 
 		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
 		options.inJustDecodeBounds = false;
-		if(applyBitmapConfig)
+		if (applyBitmapConfig)
 		{
 			options.inPreferredConfig = Config.RGB_565;
 		}
-		
+
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
@@ -157,7 +159,7 @@ public class HikeBitmapFactory
 		}
 
 		return thumbnail;
-}
+	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
@@ -199,7 +201,7 @@ public class HikeBitmapFactory
 		drawable.draw(canvas);
 		return bitmap;
 	}
-	
+
 	public static Bitmap rotateBitmap(Bitmap b, int degrees)
 	{
 		if (degrees != 0 && b != null)
@@ -222,7 +224,7 @@ public class HikeBitmapFactory
 		}
 		return b;
 	}
-	
+
 	public static Bitmap returnScaledBitmap(Bitmap src, Context context)
 	{
 		Resources res = context.getResources();
@@ -236,6 +238,7 @@ public class HikeBitmapFactory
 			return src;
 
 	}
+
 	public static Drawable getDefaultIconForUser(Context context, String msisdn)
 	{
 		return getDefaultIconForUser(context, msisdn, false);
@@ -255,7 +258,7 @@ public class HikeBitmapFactory
 	{
 		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), BitmapUtils.getDefaultAvatarResourceId(msisdn, rounded)));
 	}
-	
+
 	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
 	{
 		if (bitmap == null)
@@ -273,7 +276,7 @@ public class HikeBitmapFactory
 			return new RecyclingBitmapDrawable(mResources, bitmap);
 		}
 	}
-	
+
 	/**
 	 * Decode and sample down a bitmap from resources to the requested width and height.
 	 * 
@@ -530,4 +533,23 @@ public class HikeBitmapFactory
 		return result;
 	}
 
+	public static Bitmap decodeFile(String path)
+	{
+		return BitmapFactory.decodeFile(path);
+	}
+
+	public static Bitmap decodeStream(InputStream is)
+	{
+		return BitmapFactory.decodeStream(is);
+	}
+
+	public static Bitmap decodeResource(Resources res, int id)
+	{
+		return BitmapFactory.decodeResource(res, id);
+	}
+
+	public static Bitmap decodeByteArray(byte[] data, int offset, int length)
+	{
+		return BitmapFactory.decodeByteArray(data, offset, length);
+	}
 }

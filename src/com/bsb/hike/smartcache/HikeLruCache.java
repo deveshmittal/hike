@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -373,7 +374,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (bd != null)
 			return bd;
 
-		Bitmap stickerBitmap = BitmapFactory.decodeFile(path);
+		Bitmap stickerBitmap = HikeBitmapFactory.decodeFile(path);
 		if (stickerBitmap == null)
 		{
 			return null;

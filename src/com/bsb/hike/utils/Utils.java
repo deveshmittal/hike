@@ -3030,66 +3030,7 @@ public class Utils
 		}
 	}
 
-	public static Bitmap returnBigPicture(ConvMessage convMessage, Context context)
-	{
-
-		HikeFile hikeFile = null;
-		Bitmap bigPictureImage = null;
-
-		// Check if this is a file transfer message of image type
-		// construct a bitmap only if the big picture condition matches
-		if (convMessage.isFileTransferMessage())
-		{
-			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			if (hikeFile != null)
-			{
-				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
-				{
-					final String filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = BitmapFactory.decodeFile(filePath);
-				}
-			}
-
-		}
-		// check if this is a sticker message and find if its non-downloaded or
-		// non present.
-		if (convMessage.isStickerMessage())
-		{
-			final Sticker sticker = convMessage.getMetadata().getSticker();
-			/*
-			 * If this is the first category, then the sticker are a part of the app bundle itself
-			 */
-			if (sticker.isDefaultSticker())
-			{
-				int resourceId = 0;
-
-				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()];
-				}
-				else if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker.getStickerIndex()];
-				}
-
-				if (resourceId > 0)
-				{
-					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr);
-				}
-
-			}
-			else
-			{
-				final String filePath = sticker.getStickerPath(context);
-				if (!TextUtils.isEmpty(filePath))
-				{
-					bigPictureImage = BitmapFactory.decodeFile(filePath);
-				}
-			}
-		}
-		return bigPictureImage;
-	}
+	
 
 	public static void resetUpdateParams(SharedPreferences prefs)
 	{

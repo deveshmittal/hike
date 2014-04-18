@@ -1268,7 +1268,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	private byte[] getRoundedBitmapBytes(byte[] data)
 	{
 
-		Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+		Bitmap tempBitmap = HikeBitmapFactory.decodeByteArray(data, 0, data.length);
 		Bitmap roundedBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 
 		try
