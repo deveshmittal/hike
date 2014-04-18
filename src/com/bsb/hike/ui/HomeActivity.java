@@ -78,6 +78,8 @@ import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
@@ -308,6 +310,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
 	}
+	private void showStealthDoubleTapTip()
+	{
+		ViewStub stealthTipViewStub = (ViewStub) findViewById(R.id.stealth_double_tap_tip_viewstub);
+		stealthTipViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		{
+			@Override
+			public void onInflate(ViewStub stub, View inflated)
+			{
+				HikeTip.showTip(HomeActivity.this, TipType.STEALTH_FTUE_TIP_2, inflated);
+			}
+		});
+		stealthTipViewStub.inflate();
+    }
 
 	@Override
 	protected void onDestroy()

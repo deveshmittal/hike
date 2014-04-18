@@ -1464,4 +1464,5 @@
 <![CDATA[ You can setup later under <font color="#fdf0e1">Settings > Privacy</font> 
 	    ]]>
     </string>
+    <string name="stealth_double_tap_tip">Whoosh! It\'s hidden. Now double tap to access Stealth Mode.</string>
 </resources>
