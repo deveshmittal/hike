@@ -49,6 +49,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -87,9 +88,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			for (Conversation conv : convs)
 			{
 				/*
-				 * Added to check for the null conversation item we add for the group chat tip.
+				 * Added to check for the Conversation tip item we add for the group chat tip and other.
 				 */
-				if (conv == null)
+				if (conv instanceof ConversationTip)
 				{
 					continue;
 				}
@@ -116,9 +117,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			for (Conversation conversation : deleted)
 			{
 				/*
-				 * Added to check for the null conversation item we add for the group chat tip.
+				 * Added to check for the Conversation tip item we add for the group chat tip and other.
 				 */
-				if (conversation == null)
+				if (conversation instanceof ConversationTip)
 				{
 					continue;
 				}
@@ -299,13 +300,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		Conversation conv = (Conversation) mAdapter.getItem(position);
 
 		/*
-		 * The item will be null only for group chat tip.
+		 * The item will be instance ConversationTip only for tips we show on ConversationFragment.
 		 */
-		if (conv == null)
+		if (conv instanceof ConversationTip)
 		{
-			((HomeActivity) getActivity()).showOverFlowMenu();
-			removeGroupChatTip(conv);
-			return;
+			switch (((ConversationTip)conv).getTipType())
+			{
+			case ConversationTip.GROUP_CHAT_TIP:
+				((HomeActivity) getActivity()).showOverFlowMenu();
+				removeGroupChatTip(conv);
+				return;
+
+			default:
+				break;
+			}
 		}
 
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
@@ -331,7 +339,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		final Conversation conv = (Conversation) mAdapter.getItem(position);
-		if (conv == null)
+		
+		if (conv instanceof ConversationTip)
 		{
 			return false;
 		}
@@ -407,7 +416,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 */
 		if (!conversationList.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
 		{
-			conversations.add(null);
+			conversations.add(new ConversationTip(ConversationTip.GROUP_CHAT_TIP));
 		}
 
 		conversations.addAll(conversationList);
@@ -421,11 +430,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
 		{
 			Object object = iter.next();
-			if (object == null)
+			Conversation conv = (Conversation) object;
+			if (conv instanceof ConversationTip)
 			{
 				continue;
 			}
-			Conversation conv = (Conversation) object;
+			
 			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
 			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
 			{
@@ -935,7 +945,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 			final Conversation conversation = mAdapter.getItem(0);
-			if (conversation != null)
+			if (!(conversation instanceof ConversationTip && ((ConversationTip)conversation).isGroupChatTip()))
 			{
 				return;
 			}

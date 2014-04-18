@@ -25,6 +25,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
@@ -65,9 +66,16 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	public int getItemViewType(int position)
 	{
 		Conversation conversation = getItem(position);
-		if (conversation == null)
+		if (conversation instanceof ConversationTip)
 		{
-			return ViewType.GROUP_CHAT_TIP.ordinal();
+			switch (((ConversationTip)conversation).getTipType())
+			{
+			case ConversationTip.GROUP_CHAT_TIP:
+				return ViewType.GROUP_CHAT_TIP.ordinal();
+
+			default:
+				break;
+			}
 		}
 		return ViewType.CONVERSATION.ordinal();
 	}
