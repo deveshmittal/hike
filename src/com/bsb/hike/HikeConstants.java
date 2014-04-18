@@ -1440,11 +1440,6 @@ public class HikeConstants
 		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
 	}
 
-	public static enum TipType
-	{
-		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
-	}
-
 	public static enum EmoticonType
 	{
 		EMOTICON, STICKERS

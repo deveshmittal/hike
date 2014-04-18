@@ -61,7 +61,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.TipType;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -89,6 +89,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
@@ -1953,7 +1954,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				chatThread.tipView = v.findViewById(R.id.status_tip);
 				statusIdForTip = statusMessage.getMappedId();
-				Utils.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
+				HikeTip.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
 			}
 			else
 			{

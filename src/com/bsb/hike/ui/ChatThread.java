@@ -138,7 +138,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.HikeConstants.TipType;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -189,6 +189,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.RoundedRepeatingDrawable;
 import com.bsb.hike.utils.SmileyParser;
@@ -2023,7 +2024,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return true;
 			}
 		});
-		Utils.showTip(this, TipType.CHAT_BG_FTUE, tipView);
+		HikeTip.showTip(this, TipType.CHAT_BG_FTUE, tipView);
 	}
 
 	private void closeChatBgFtueTip()
@@ -2034,7 +2035,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (viewTipType == TipType.CHAT_BG_FTUE)
 			{
 				tipView.clearAnimation();
-				Utils.closeTip(TipType.CHAT_BG_FTUE, tipView, prefs);
+				HikeTip.closeTip(TipType.CHAT_BG_FTUE, tipView, prefs);
 				tipView = null;
 			}
 		}
@@ -2054,7 +2055,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return true;
 			}
 		});
-		Utils.showTip(this, TipType.EMOTICON, tipView);
+		HikeTip.showTip(this, TipType.EMOTICON, tipView);
 	}
 
 	private void setupActionBar(boolean initialising)
@@ -4975,7 +4976,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					TipType viewTipType = (TipType) tipView.getTag();
 					if (viewTipType == TipType.EMOTICON)
 					{
-						Utils.closeTip(TipType.EMOTICON, tipView, prefs);
+						HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
 						Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
 						tipView = null;
 					}
