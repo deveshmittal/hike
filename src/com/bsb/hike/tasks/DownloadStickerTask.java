@@ -48,6 +48,8 @@ public class DownloadStickerTask extends StickerTaskBase
 	private DownloadType downloadType;
 
 	private StickerPageAdapter stickerPageAdapter;
+	
+	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
 
 	public DownloadStickerTask(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st)
 	{
@@ -113,7 +115,7 @@ public class DownloadStickerTask extends StickerTaskBase
 			smallStickerDir.mkdirs();
 			Logger.d(getClass().getSimpleName(), "No existing sticker");
 		}
-		if(!largeStickerDir.exists())
+		if (!largeStickerDir.exists())
 			largeStickerDir.mkdirs();
 
 		Utils.makeNoMediaFile(largeStickerDir);
@@ -152,13 +154,7 @@ public class DownloadStickerTask extends StickerTaskBase
 					{
 						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
 					}
-					File f = new File(largeStickerDir, stickerId);
-					Utils.saveBase64StringToFile(f, stickerData);
-
-					Bitmap thumbnail = HikeBitmapFactory.scaleDownImage(f.getPath(), -1, false);
-
-					File smallImage = new File(smallStickerDir, stickerId);
-					BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
+					saveStickers(largeStickerDir, smallStickerDir, stickerId, stickerData);
 				}
 				catch (FileNotFoundException e)
 				{
@@ -190,6 +186,18 @@ public class DownloadStickerTask extends StickerTaskBase
 		category.setReachedEnd(reachedEnd);
 		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.categoryId.name(), totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
+	}
+
+	private void saveStickers(File largeStickerDir, File smallStickerDir, String stickerId, String stickerData) throws IOException
+	{
+		File f = new File(largeStickerDir, stickerId);
+		Utils.saveBase64StringToFile(f, stickerData);
+
+		Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE);
+		Bitmap thumbnail = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, SIZE_IMAGE, SIZE_IMAGE);
+
+		File smallImage = new File(smallStickerDir, stickerId);
+		BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
 	}
 
 	@Override
