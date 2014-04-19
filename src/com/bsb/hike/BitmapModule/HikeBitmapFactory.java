@@ -460,20 +460,24 @@ public class HikeBitmapFactory
 	 */
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight)
 	{
-		final int srcHeight = options.outHeight;
-		final int srcWidth = options.outWidth;
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		int inSampleSize = 1;
 
-		final float srcAspect = (float) srcWidth / (float) srcHeight;
-		final float dstAspect = (float) reqWidth / (float) reqHeight;
+		if (height > reqHeight || width > reqWidth)
+		{
 
-		if (srcAspect > dstAspect)
-		{
-			return srcWidth / reqWidth;
+			final int halfHeight = height / 2;
+			final int halfWidth = width / 2;
+
+			// Calculate the largest inSampleSize value that is a power of 2 and keeps both
+			// height and width larger than the requested height and width.
+			while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth)
+			{
+				inSampleSize *= 2;
+			}
 		}
-		else
-		{
-			return srcHeight / reqHeight;
-		}
+		return inSampleSize;
 	}
 
 	/**
