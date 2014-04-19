@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
-    android:gravity="right"
+    android:gravity="center_vertical"
     android:minHeight="30dp"
-    android:paddingBottom="20dp" >
+    android:paddingBottom="2dp" >
 
     <LinearLayout
-        android:id="@+id/sticker_placeholder"
+        android:id="@+id/placeholder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/circular_bg_ext"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:background="@drawable/bg_sticker_placeholder"
         android:gravity="center_vertical|right"
-        android:visibility="gone" >
+        android:orientation="vertical" >
 
         <ProgressBar
             android:id="@+id/loading_progress"
@@ -25,46 +26,20 @@
             android:visibility="gone" />
 
         <ImageView
-            android:id="@+id/sticker_image"
+            android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/sticker_1_hi"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/message_time_status_ext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/bg_msg_time_status"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp" >
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/message_time_ext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="00:00"
-                android:textColor="@color/white_85"
-                android:textSize="12sp"
-                android:textStyle="italic" />
-
-            <ImageView
-                android:id="@+id/message_status_ext"
-                android:layout_width="21dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
-                android:visibility="gone" />
-        </LinearLayout>
+        <include layout="@layout/message_time_status_ext" />
     </LinearLayout>
 
-    <View
-        android:id="@+id/selected_state_overlay"
+    <include
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hapticFeedbackEnabled="false"
-        android:visibility="gone" />
+        android:layout_alignBottom="@id/placeholder"
+        android:layout_alignTop="@id/placeholder"
+        layout="@layout/message_overlay" />
 
 </RelativeLayout>

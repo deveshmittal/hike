@@ -107,6 +107,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT, STICKER_SENT
 	};
 
+	private class StickerViewHolder
+	{
+		View placeHolder;
+
+		ProgressBar loader;
+
+		ImageView image;
+
+		ImageView status;
+
+		TextView time;
+
+		View timeStatus;
+
+		View selectedStateOverlay;
+	}
+
 	private class ViewHolder
 	{
 		LinearLayout dayContainer;
@@ -148,9 +165,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ProgressBar stickerLoader;
 
 		View stickerParticipantDetails;
-		
+
 		TextView stickerParticipantName;
-		
+
 		TextView stickerParticipantNameUnsaved;
 
 		ImageView stickerImage;
@@ -235,9 +252,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View selectedStateOverlay;
 
 		View sdrFtueTip;
-		
+
 		ImageView filmstripLeft;
-		
+
 		ImageView filmstripRight;
 	}
 
@@ -283,7 +300,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isActionModeOn = false;
 
 	private boolean shownSdrIntroTip = true;
-	
+
 	private boolean sdrTipFadeInShown = false;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
@@ -424,7 +441,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if(convMessage.isStickerMessage() && convMessage.isSent())
+		if (convMessage.isStickerMessage() && convMessage.isSent())
 		{
 			type = ViewType.STICKER_SENT;
 		}
@@ -488,251 +505,267 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		final ConvMessage convMessage = getItem(position);
 
 		ViewHolder holder = null;
+		StickerViewHolder stickerHolder = null;
 		View v = convertView;
-		if (v == null)
+		if (viewType == ViewType.STICKER_SENT)
 		{
-			holder = new ViewHolder();
-
-			switch (viewType)
+			if (v == null)
 			{
-			case STICKER_SENT:
+				stickerHolder = new StickerViewHolder();
 				v = inflater.inflate(R.layout.message_sent_sticker, parent, false);
-				holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
-				holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
-				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
-				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
-				holder.extMessageStatus = (ImageView) v.findViewById(R.id.message_status_ext);
-				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
-				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				break;
-			case LAST_READ:
-				v = inflater.inflate(R.layout.last_read_line, null);
-				break;
-			case UNREAD_COUNT:
-				v = inflater.inflate(R.layout.message_item_receive, null);
-				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
-				holder.dayTextView = (TextView) v.findViewById(R.id.day);
-				holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
-				holder.dayLeft = v.findViewById(R.id.day_left);
-				holder.dayRight = v.findViewById(R.id.day_right);
-				v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
-				break;
-			case STATUS_MESSAGE:
-				v = inflater.inflate(R.layout.in_thread_status_update, null);
-
-				holder.image = (ImageView) v.findViewById(R.id.avatar);
-				holder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
-				holder.messageTextView = (TextView) v.findViewById(R.id.status_text);
-				holder.dayTextView = (TextView) v.findViewById(R.id.status_info);
-				holder.container = (ViewGroup) v.findViewById(R.id.content_container);
-				holder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
-				break;
-			case PARTICIPANT_INFO:
-				v = inflater.inflate(R.layout.message_item_receive, null);
-
-				holder.image = (ImageView) v.findViewById(R.id.avatar);
-				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
-				holder.dayTextView = (TextView) v.findViewById(R.id.day);
-				holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
-				holder.dayLeft = v.findViewById(R.id.day_left);
-				holder.dayRight = v.findViewById(R.id.day_right);
-
-				holder.image.setVisibility(View.GONE);
-				v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
-				break;
-
-			case FILE_TRANSFER_SEND:
-				v = inflater.inflate(R.layout.message_item_send, parent, false);
-
-				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
-				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
-				holder.image = (ImageView) v.findViewById(R.id.msg_status_indicator);
-				holder.messageTextView = (TextView) v.findViewById(R.id.message_send_ft);
-				v.findViewById(R.id.message_send).setVisibility(View.GONE);
-				holder.messageSize = (View) v.findViewById(R.id.message_size_ft);
-				holder.fileSize = (TextView) v.findViewById(R.id.file_size);
-				holder.fileDetails = (View) v.findViewById(R.id.file_details);
-				holder.fileSizeExt = (TextView) v.findViewById(R.id.file_size_ext);
-				holder.fileName = (TextView) v.findViewById(R.id.file_name);
-				holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
-				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
-				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
-				holder.ftMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ft);
-				holder.circularProgress = (HoloCircularProgress) v.findViewById(R.id.circular_progress);
-				holder.circularProgressExt = (HoloCircularProgress) v.findViewById(R.id.circular_progress_ext);
-				holder.circularProgressBg = (View) v.findViewById(R.id.circular_bg);
-				holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_bg_ext);
-				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
-				holder.watingExt = (ProgressBar) v.findViewById(R.id.initializing_ext);
-				holder.ftAction = (ImageView) v.findViewById(R.id.ft_action);
-				holder.ftActionExt = (ImageView) v.findViewById(R.id.ft_action_ext);
-				holder.recPlaceholder = (View) v.findViewById(R.id.rec_placeholder);
-				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
-				holder.recProgress = (HoloCircularProgress) v.findViewById(R.id.rec_circular_progress);
-				holder.watingRec = (ProgressBar) v.findViewById(R.id.rec_initializing);
-				holder.recAction = (ImageView) v.findViewById(R.id.rec_action);
-				holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
-				holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
-			case SEND_HIKE:
-			case SEND_SMS:
-				if (v == null)
-				{
-					v = inflater.inflate(R.layout.message_item_send, parent, false);
-				}
-				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
-				holder.dayLeft = v.findViewById(R.id.day_left);
-				holder.dayRight = v.findViewById(R.id.day_right);
-				holder.dayTextView = (TextView) v.findViewById(R.id.day);
-				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
-				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_sent_custom);
-				holder.messageContainer = v.findViewById(R.id.sent_message_container);
-				if (holder.messageTextView == null)
-				{
-					holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
-				}
-
-				holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
-
-				holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
-				holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
-				holder.stickerParticipantName = (TextView) v.findViewById(R.id.participant_name);
-				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
-				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
-				holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
-				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
-				holder.messageStatus = (ImageView) v.findViewById(R.id.message_status);
-				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
-				holder.extMessageStatus = (ImageView) v.findViewById(R.id.message_status_ext);
-				holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
-				holder.intMessageStatus = (ImageView) v.findViewById(R.id.message_status_int);
-				holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
-				holder.intMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_int);
-				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				holder.sdrFtueTip = v.findViewById(R.id.sdr_ftue_tip);
-				break;
-
-			case FILE_TRANSFER_RECEIVE:
-				v = inflater.inflate(R.layout.message_item_receive, parent, false);
-
-				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
-				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive_ft);
-				holder.messageSize = (View) v.findViewById(R.id.message_size_ft);
-				holder.fileSize = (TextView) v.findViewById(R.id.file_size);
-				holder.messageTextView.setVisibility(View.VISIBLE);
-				holder.fileDetails = (View) v.findViewById(R.id.file_details);
-				holder.fileSizeExt = (TextView) v.findViewById(R.id.file_size_ext);
-				holder.fileName = (TextView) v.findViewById(R.id.file_name);
-				holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
-				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
-				holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
-				holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
-				holder.ftMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ft);
-				holder.circularProgress = (HoloCircularProgress) v.findViewById(R.id.circular_progress);
-				holder.circularProgressExt = (HoloCircularProgress) v.findViewById(R.id.circular_progress_ext);
-				holder.circularProgressBg = (View) v.findViewById(R.id.circular_bg);
-				holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_bg_ext);
-				holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
-				holder.watingExt = (ProgressBar) v.findViewById(R.id.initializing_ext);
-				holder.ftAction = (ImageView) v.findViewById(R.id.ft_action);
-				holder.ftActionExt = (ImageView) v.findViewById(R.id.ft_action_ext);
-				holder.recPlaceholder = (View) v.findViewById(R.id.rec_placeholder);
-				holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
-				holder.recProgress = (HoloCircularProgress) v.findViewById(R.id.rec_circular_progress);
-				holder.watingRec = (ProgressBar) v.findViewById(R.id.rec_initializing);
-				holder.recAction = (ImageView) v.findViewById(R.id.rec_action);
-				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
-				holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
-			case RECEIVE:
-				if (v == null)
-				{
-					v = inflater.inflate(R.layout.message_item_receive, parent, false);
-				}
-				holder.participantDetailsFT = (View) v.findViewById(R.id.participant_details_ft);
-				holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
-				holder.participantNameFTUnsaved = (TextView) v.findViewById(R.id.participant_name_ft_unsaved);
-				holder.image = (ImageView) v.findViewById(R.id.avatar);
-				holder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
-				if (holder.messageTextView == null)
-				{
-					holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
-				}
-				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
-				holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_receive_custom);
-				holder.messageContainer = v.findViewById(R.id.receive_message_container);
-				holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
-				holder.dayTextView = (TextView) v.findViewById(R.id.day);
-				holder.dayLeft = v.findViewById(R.id.day_left);
-				holder.dayRight = v.findViewById(R.id.day_right);
-				holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
-				holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
-				holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
-				holder.stickerParticipantDetails = (View) v.findViewById(R.id.participant_details);
-				holder.stickerParticipantName = (TextView) v.findViewById(R.id.participant_name);
-				holder.stickerParticipantNameUnsaved = (TextView) v.findViewById(R.id.participant_name_unsaved);
-				holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
-				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
-				holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
-				holder.typing = (ImageView) v.findViewById(R.id.typing);
-				holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
-				holder.messageTime = (TextView) v.findViewById(R.id.message_time);
-				holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
-				holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
-				holder.container.setVisibility(View.GONE);
-				holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				break;
-			case SMS_TOGGLE:
-				v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
-
-				holder.messageTextView = (TextView) v.findViewById(R.id.sms_toggle_subtext);
-				holder.smsToggle = (CheckBox) v.findViewById(R.id.checkbox);
-				holder.hikeSmsText = (TextView) v.findViewById(R.id.hike_text);
-				holder.regularSmsText = (TextView) v.findViewById(R.id.sms_text);
+				stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
+				stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
+				stickerHolder.image = (ImageView) v.findViewById(R.id.image);
+				stickerHolder.time = (TextView) v.findViewById(R.id.time);
+				stickerHolder.status = (ImageView) v.findViewById(R.id.status);
+				stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+				stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				v.setTag(stickerHolder);
 			}
-			v.setTag(holder);
+			else
+			{
+				stickerHolder = (StickerViewHolder) v.getTag();
+			}
 		}
 		else
 		{
-			holder = (ViewHolder) v.getTag();
+			if (v == null)
+			{
+				holder = new ViewHolder();
+				switch (viewType)
+				{
+				case LAST_READ:
+					v = inflater.inflate(R.layout.last_read_line, null);
+					break;
+				case UNREAD_COUNT:
+					v = inflater.inflate(R.layout.message_item_receive, null);
+					holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
+					holder.dayTextView = (TextView) v.findViewById(R.id.day);
+					holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
+					holder.dayLeft = v.findViewById(R.id.day_left);
+					holder.dayRight = v.findViewById(R.id.day_right);
+					v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
+					break;
+				case STATUS_MESSAGE:
+					v = inflater.inflate(R.layout.in_thread_status_update, null);
+
+					holder.image = (ImageView) v.findViewById(R.id.avatar);
+					holder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
+					holder.messageTextView = (TextView) v.findViewById(R.id.status_text);
+					holder.dayTextView = (TextView) v.findViewById(R.id.status_info);
+					holder.container = (ViewGroup) v.findViewById(R.id.content_container);
+					holder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
+					break;
+				case PARTICIPANT_INFO:
+					v = inflater.inflate(R.layout.message_item_receive, null);
+
+					holder.image = (ImageView) v.findViewById(R.id.avatar);
+					holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
+					holder.dayTextView = (TextView) v.findViewById(R.id.day);
+					holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
+					holder.dayLeft = v.findViewById(R.id.day_left);
+					holder.dayRight = v.findViewById(R.id.day_right);
+
+					holder.image.setVisibility(View.GONE);
+					v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
+					break;
+
+				case FILE_TRANSFER_SEND:
+					v = inflater.inflate(R.layout.message_item_send, parent, false);
+
+					holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
+					holder.loadingThumb = v.findViewById(R.id.loading_thumb);
+					holder.image = (ImageView) v.findViewById(R.id.msg_status_indicator);
+					holder.messageTextView = (TextView) v.findViewById(R.id.message_send_ft);
+					v.findViewById(R.id.message_send).setVisibility(View.GONE);
+					holder.messageSize = (View) v.findViewById(R.id.message_size_ft);
+					holder.fileSize = (TextView) v.findViewById(R.id.file_size);
+					holder.fileDetails = (View) v.findViewById(R.id.file_details);
+					holder.fileSizeExt = (TextView) v.findViewById(R.id.file_size_ext);
+					holder.fileName = (TextView) v.findViewById(R.id.file_name);
+					holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
+					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
+					holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
+					holder.ftMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ft);
+					holder.circularProgress = (HoloCircularProgress) v.findViewById(R.id.circular_progress);
+					holder.circularProgressExt = (HoloCircularProgress) v.findViewById(R.id.circular_progress_ext);
+					holder.circularProgressBg = (View) v.findViewById(R.id.circular_bg);
+					holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_bg_ext);
+					holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
+					holder.watingExt = (ProgressBar) v.findViewById(R.id.initializing_ext);
+					holder.ftAction = (ImageView) v.findViewById(R.id.ft_action);
+					holder.ftActionExt = (ImageView) v.findViewById(R.id.ft_action_ext);
+					holder.recPlaceholder = (View) v.findViewById(R.id.rec_placeholder);
+					holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
+					holder.recProgress = (HoloCircularProgress) v.findViewById(R.id.rec_circular_progress);
+					holder.watingRec = (ProgressBar) v.findViewById(R.id.rec_initializing);
+					holder.recAction = (ImageView) v.findViewById(R.id.rec_action);
+					holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
+					holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
+				case SEND_HIKE:
+				case SEND_SMS:
+					if (v == null)
+					{
+						v = inflater.inflate(R.layout.message_item_send, parent, false);
+					}
+					holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
+					holder.dayLeft = v.findViewById(R.id.day_left);
+					holder.dayRight = v.findViewById(R.id.day_right);
+					holder.dayTextView = (TextView) v.findViewById(R.id.day);
+					holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
+					holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_sent_custom);
+					holder.messageContainer = v.findViewById(R.id.sent_message_container);
+					if (holder.messageTextView == null)
+					{
+						holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
+					}
+
+					holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
+
+					holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
+					holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
+					holder.stickerParticipantName = (TextView) v.findViewById(R.id.participant_name);
+					holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
+					holder.bubbleContainer = v.findViewById(R.id.bubble_container);
+					holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
+					holder.messageTime = (TextView) v.findViewById(R.id.message_time);
+					holder.messageStatus = (ImageView) v.findViewById(R.id.message_status);
+					holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
+					holder.extMessageStatus = (ImageView) v.findViewById(R.id.message_status_ext);
+					holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
+					holder.intMessageStatus = (ImageView) v.findViewById(R.id.message_status_int);
+					holder.extMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ext);
+					holder.intMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_int);
+					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					holder.sdrFtueTip = v.findViewById(R.id.sdr_ftue_tip);
+					break;
+
+				case FILE_TRANSFER_RECEIVE:
+					v = inflater.inflate(R.layout.message_item_receive, parent, false);
+
+					holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
+					holder.messageTextView = (TextView) v.findViewById(R.id.message_receive_ft);
+					holder.messageSize = (View) v.findViewById(R.id.message_size_ft);
+					holder.fileSize = (TextView) v.findViewById(R.id.file_size);
+					holder.messageTextView.setVisibility(View.VISIBLE);
+					holder.fileDetails = (View) v.findViewById(R.id.file_details);
+					holder.fileSizeExt = (TextView) v.findViewById(R.id.file_size_ext);
+					holder.fileName = (TextView) v.findViewById(R.id.file_name);
+					holder.fileExtension = (TextView) v.findViewById(R.id.file_extension);
+					v.findViewById(R.id.message_receive).setVisibility(View.GONE);
+					holder.ftMessageTime = (TextView) v.findViewById(R.id.message_time_ft);
+					holder.ftMessageStatus = (ImageView) v.findViewById(R.id.message_status_ft);
+					holder.ftMessageTimeStatus = (View) v.findViewById(R.id.message_time_status_ft);
+					holder.circularProgress = (HoloCircularProgress) v.findViewById(R.id.circular_progress);
+					holder.circularProgressExt = (HoloCircularProgress) v.findViewById(R.id.circular_progress_ext);
+					holder.circularProgressBg = (View) v.findViewById(R.id.circular_bg);
+					holder.circularProgressBgExt = (View) v.findViewById(R.id.circular_bg_ext);
+					holder.wating = (ProgressBar) v.findViewById(R.id.initializing);
+					holder.watingExt = (ProgressBar) v.findViewById(R.id.initializing_ext);
+					holder.ftAction = (ImageView) v.findViewById(R.id.ft_action);
+					holder.ftActionExt = (ImageView) v.findViewById(R.id.ft_action_ext);
+					holder.recPlaceholder = (View) v.findViewById(R.id.rec_placeholder);
+					holder.recDuration = (TextView) v.findViewById(R.id.rec_duration);
+					holder.recProgress = (HoloCircularProgress) v.findViewById(R.id.rec_circular_progress);
+					holder.watingRec = (ProgressBar) v.findViewById(R.id.rec_initializing);
+					holder.recAction = (ImageView) v.findViewById(R.id.rec_action);
+					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
+					holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
+				case RECEIVE:
+					if (v == null)
+					{
+						v = inflater.inflate(R.layout.message_item_receive, parent, false);
+					}
+					holder.participantDetailsFT = (View) v.findViewById(R.id.participant_details_ft);
+					holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
+					holder.participantNameFTUnsaved = (TextView) v.findViewById(R.id.participant_name_ft_unsaved);
+					holder.image = (ImageView) v.findViewById(R.id.avatar);
+					holder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					if (holder.messageTextView == null)
+					{
+						holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
+					}
+					holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
+					holder.pokeCustom = (ImageView) v.findViewById(R.id.poke_receive_custom);
+					holder.messageContainer = v.findViewById(R.id.receive_message_container);
+					holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
+					holder.dayTextView = (TextView) v.findViewById(R.id.day);
+					holder.dayLeft = v.findViewById(R.id.day_left);
+					holder.dayRight = v.findViewById(R.id.day_right);
+					holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
+					holder.stickerPlaceholder = v.findViewById(R.id.sticker_placeholder);
+					holder.stickerLoader = (ProgressBar) v.findViewById(R.id.loading_progress);
+					holder.stickerParticipantDetails = (View) v.findViewById(R.id.participant_details);
+					holder.stickerParticipantName = (TextView) v.findViewById(R.id.participant_name);
+					holder.stickerParticipantNameUnsaved = (TextView) v.findViewById(R.id.participant_name_unsaved);
+					holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
+					holder.bubbleContainer = v.findViewById(R.id.bubble_container);
+					holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
+					holder.typing = (ImageView) v.findViewById(R.id.typing);
+					holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
+					holder.messageTime = (TextView) v.findViewById(R.id.message_time);
+					holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
+					holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
+					holder.container.setVisibility(View.GONE);
+					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					break;
+				case SMS_TOGGLE:
+					v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
+
+					holder.messageTextView = (TextView) v.findViewById(R.id.sms_toggle_subtext);
+					holder.smsToggle = (CheckBox) v.findViewById(R.id.checkbox);
+					holder.hikeSmsText = (TextView) v.findViewById(R.id.hike_text);
+					holder.regularSmsText = (TextView) v.findViewById(R.id.sms_text);
+				}
+				v.setTag(holder);
+			}
+			else
+			{
+				holder = (ViewHolder) v.getTag();
+			}
 		}
 
 		// int fieldCount = 1;
-		for (Field field : holder.getClass().getDeclaredFields())
+		if (holder != null)
 		{
-			View view = null;
-			field.setAccessible(true);
-			if (("this$0").equals(field.getName()))
+			for (Field field : holder.getClass().getDeclaredFields())
 			{
-				continue;
-			}
-			try
-			{
-				if (field.get(holder) != null)
+				View view = null;
+				field.setAccessible(true);
+				if (("this$0").equals(field.getName()))
 				{
-					if (field.get(holder) instanceof View)
-						view = (View) field.get(holder);
+					continue;
 				}
+				try
+				{
+					if (field.get(holder) != null)
+					{
+						if (field.get(holder) instanceof View)
+							view = (View) field.get(holder);
+					}
 
+				}
+				catch (IllegalArgumentException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				catch (IllegalAccessException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (view != null)
+				{
+					view.setVisibility(View.GONE);
+				}
+				// fieldCount++;
 			}
-			catch (IllegalArgumentException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch (IllegalAccessException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if (view != null)
-			{
-				view.setVisibility(View.GONE);
-			}
-			// fieldCount++;
+			if (holder.bubbleContainer != null)
+				holder.bubbleContainer.setVisibility(View.VISIBLE);
 		}
-		if (holder.bubbleContainer != null)
-			holder.bubbleContainer.setVisibility(View.VISIBLE);
 
 		// Applicable to all kinds of messages
 		if (convMessage.getTypingNotification() != null)
@@ -812,41 +845,130 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.smsToggle.setOnCheckedChangeListener(this);
 			return v;
 		}
-
-		if (showDayIndicator(position))
-		{
-			String dateFormatted = convMessage.getMessageDate(context);
-			holder.dayTextView.setText(dateFormatted.toUpperCase());
-
-			if (isDefaultTheme)
-			{
-				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
-				holder.dayLeft.setBackgroundColor(context.getResources().getColor(R.color.day_line));
-				holder.dayRight.setBackgroundColor(context.getResources().getColor(R.color.day_line));
-			}
-			else
-			{
-				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
-				holder.dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
-				holder.dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
-			}
-			holder.dayTextView.setVisibility(View.VISIBLE);
-			holder.dayLeft.setVisibility(View.VISIBLE);
-			holder.dayRight.setVisibility(View.VISIBLE);
-			holder.dayContainer.setVisibility(View.VISIBLE);
-		}
+		//
+		// if (showDayIndicator(position))
+		// {
+		// String dateFormatted = convMessage.getMessageDate(context);
+		// holder.dayTextView.setText(dateFormatted.toUpperCase());
+		//
+		// if (isDefaultTheme)
+		// {
+		// holder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+		// holder.dayLeft.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+		// holder.dayRight.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+		// }
+		// else
+		// {
+		// holder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
+		// holder.dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
+		// holder.dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
+		// }
+		// holder.dayTextView.setVisibility(View.VISIBLE);
+		// holder.dayLeft.setVisibility(View.VISIBLE);
+		// holder.dayRight.setVisibility(View.VISIBLE);
+		// holder.dayContainer.setVisibility(View.VISIBLE);
+		// }
 		boolean firstMessageFromParticipant = ifFirstMessageFromRecepient(convMessage, position);
 		MessageMetadata metadata = convMessage.getMetadata();
 
 		// //////////////////////////////////////////////////////////////////////////
 		// Categorical Applications
+		if (viewType == ViewType.STICKER_SENT)
+		{
+			stickerHolder.placeHolder.setBackgroundResource(0);
+			Sticker sticker = metadata.getSticker();
+			/*
+			 * If this is the default category, then the sticker are part of the app bundle itself
+			 */
+			if (sticker.getStickerIndex() != -1)
+			{
+				stickerHolder.image.setVisibility(View.VISIBLE);
+				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+				{
+					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+					int idx = sticker.getStickerIndex();
+					if (idx >= 0)
+						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
+				}
+				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+				{
+					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+					int idx = sticker.getStickerIndex();
+					if (idx >= 0)
+						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
+				}
+			}
+			else
+			{
+				String categoryId;
+				/*
+				 * If the category is an unknown one, we have the category id stored in the metadata.
+				 */
+				if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
+				{
+					categoryId = metadata.getUnknownStickerCategory();
+				}
+				else
+				{
+					categoryId = sticker.getCategory().categoryId.name();
+				}
+				String stickerId = sticker.getStickerId();
+
+				String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
+				File stickerImage = null;
+				if (categoryDirPath != null)
+				{
+					stickerImage = new File(categoryDirPath, stickerId);
+				}
+
+				String key = categoryId + stickerId;
+				boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
+
+				if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
+				{
+					Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
+					if (stickerDrawable != null)
+					{
+						stickerHolder.image.setVisibility(View.VISIBLE);
+						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+						stickerHolder.image.setImageDrawable(stickerDrawable);
+						// holder.stickerImage.setImageDrawable(IconCacheManager
+						// .getInstance().getSticker(context,
+						// stickerImage.getPath()));
+					}
+					else
+					{
+						stickerHolder.loader.setVisibility(View.VISIBLE);
+						stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+					}
+				}
+				else
+				{
+					stickerHolder.loader.setVisibility(View.VISIBLE);
+					stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+
+					/*
+					 * Download the sticker if not already downloading.
+					 */
+					if (!downloadingSticker)
+					{
+						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
+						StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
+						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
+					}
+				}
+			}
+			setTimeNStatus(position, stickerHolder.time, stickerHolder.status, true, stickerHolder.timeStatus);
+			setSelection(position, stickerHolder.selectedStateOverlay);
+		}
 		if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 		{
 			if (metadata != null && metadata.isPokeMessage())
 			{
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+						firstMessageFromParticipant);
 				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				if (holder.stickerParticipantNameUnsaved != null)
 				{
@@ -884,26 +1006,27 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setBackgroundResource(0);
 
 				Sticker sticker = metadata.getSticker();
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+						firstMessageFromParticipant);
+				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				if (holder.stickerParticipantNameUnsaved != null)
 				{
 					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				}
-//				if (!convMessage.isSent())
-//				{
-//					
-//					if (firstMessageFromParticipant)
-//					{
-//						holder.stickerParticipantName.setVisibility(View.VISIBLE);
-//						holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-//						holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-//					}
-//					else
-//					{
-//						holder.stickerParticipantName.setVisibility(View.GONE);
-//					}
-//				}
+				// if (!convMessage.isSent())
+				// {
+				//
+				// if (firstMessageFromParticipant)
+				// {
+				// holder.stickerParticipantName.setVisibility(View.VISIBLE);
+				// holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				// }
+				// else
+				// {
+				// holder.stickerParticipantName.setVisibility(View.GONE);
+				// }
+				// }
 
 				/*
 				 * If this is the default category, then the sticker are part of the app bundle itself
@@ -1130,8 +1253,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
-				//holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-				if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+				// holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
 					holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 				}
@@ -1143,8 +1266,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileSizeExt.setText("");
 				}
-				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-				if(!TextUtils.isEmpty(ext))
+				String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+				if (!TextUtils.isEmpty(ext))
 				{
 					holder.fileExtension.setText(ext);
 				}
@@ -1152,7 +1275,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileExtension.setText("?");
 				}
-				
+
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1163,13 +1286,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+						firstMessageFromParticipant);
 				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				if (holder.stickerParticipantNameUnsaved != null)
 				{
 					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				}
-				
+
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
 				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
 				circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
@@ -1215,7 +1339,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
-				if(thumbnail != null)
+				if (thumbnail != null)
 				{
 					if (showThumbnail)
 					{
@@ -1225,8 +1349,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						createMediaThumb(holder.fileThumb);
 					}
-	
-					if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+
+					if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 					{
 						holder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
 					}
@@ -1238,7 +1362,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileSize.setText("");
 					}
-					
+
 					holder.fileSize.setVisibility(View.VISIBLE);
 					holder.messageSize.setVisibility(View.VISIBLE);
 					holder.fileThumb.setVisibility(View.VISIBLE);
@@ -1249,7 +1373,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					createFileThumb(holder.fileThumb);
 					holder.fileName.setText(hikeFile.getFileName());
-					if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+					if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 					{
 						holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 					}
@@ -1261,8 +1385,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileSizeExt.setText("");
 					}
-					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-					if(!TextUtils.isEmpty(ext))
+					String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+					if (!TextUtils.isEmpty(ext))
 					{
 						holder.fileExtension.setText(ext);
 					}
@@ -1270,7 +1394,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileExtension.setText("?");
 					}
-					
+
 					holder.fileThumb.setVisibility(View.VISIBLE);
 					holder.fileName.setVisibility(View.VISIBLE);
 					holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1300,31 +1424,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
-				if(thumbnail != null || hikeFileType == HikeFileType.LOCATION)
+				if (thumbnail != null || hikeFileType == HikeFileType.LOCATION)
 				{
-				
-				if (showThumbnail)
-				{
-					holder.fileThumb.setBackgroundDrawable(thumbnail);
+
+					if (showThumbnail)
+					{
+						holder.fileThumb.setBackgroundDrawable(thumbnail);
+						holder.fileThumb.setVisibility(View.VISIBLE);
+					}
+					else if (hikeFileType == HikeFileType.IMAGE)
+					{
+						createMediaThumb(holder.fileThumb);
+					}
+					else
+					{
+						createMediaThumb(holder.fileThumb);
+						holder.fileThumb.setImageResource(R.drawable.ic_default_location);
+						holder.fileThumb.setScaleType(ScaleType.CENTER);
+					}
 					holder.fileThumb.setVisibility(View.VISIBLE);
-				}
-				else if (hikeFileType == HikeFileType.IMAGE)
-				{
-					createMediaThumb(holder.fileThumb);
-				}
-				else
-				{
-					createMediaThumb(holder.fileThumb);
-					holder.fileThumb.setImageResource(R.drawable.ic_default_location);
-					holder.fileThumb.setScaleType(ScaleType.CENTER);
-				}
-				holder.fileThumb.setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					createFileThumb(holder.fileThumb);
 					holder.fileName.setText(hikeFile.getFileName());
-					if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+					if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 					{
 						holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 					}
@@ -1336,8 +1460,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileSizeExt.setText("");
 					}
-					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-					if(!TextUtils.isEmpty(ext))
+					String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+					if (!TextUtils.isEmpty(ext))
 					{
 						holder.fileExtension.setText(ext);
 					}
@@ -1345,7 +1469,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileExtension.setText("?");
 					}
-					
+
 					holder.fileThumb.setVisibility(View.VISIBLE);
 					holder.fileName.setVisibility(View.VISIBLE);
 					holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1357,7 +1481,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
-				if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
 					holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 				}
@@ -1369,8 +1493,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileSizeExt.setText("");
 				}
-				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-				if(!TextUtils.isEmpty(ext))
+				String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+				if (!TextUtils.isEmpty(ext))
 				{
 					holder.fileExtension.setText(ext);
 				}
@@ -1378,7 +1502,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileExtension.setText("?");
 				}
-				
+
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1397,8 +1521,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
 			}
 			else if ((!showThumbnail)
-					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO
-					|| hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
+					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER
+							|| hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
 			{
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
@@ -1518,14 +1642,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.messageContainer.setOnClickListener(this);
 			holder.messageContainer.setOnLongClickListener(this);
 
-			if(holder.circularProgressBgExt != null)
+			if (holder.circularProgressBgExt != null)
 			{
 				holder.circularProgressBgExt.setTag(convMessage);
 				holder.circularProgressBgExt.setOnClickListener(this);
 				holder.circularProgressBgExt.setOnLongClickListener(this);
 			}
-			
-			if(holder.recPlaceholder != null)
+
+			if (holder.recPlaceholder != null)
 			{
 				holder.recPlaceholder.setTag(convMessage);
 				holder.recPlaceholder.setOnClickListener(this);
@@ -1591,13 +1715,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
 			if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
 			{
-				if((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				if ((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					
+
 				}
 				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
 				{
-					
+
 				}
 				else
 				{
@@ -1712,12 +1836,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftActionExt.setScaleType(ScaleType.CENTER);
 			}
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up Overlay Contents
-			
+
 			if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
 			{
-				if(hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				if (hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					
+
 				}
 				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
 				{
@@ -1725,10 +1849,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					
+
 				}
 			}
-			//else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+			// else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
 			else
 			{
 				if (convMessage.isSent()) // File is being sent
@@ -1798,15 +1922,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				// if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				// {
-				if(hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+				if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
-					if(thumbnail != null)
+					if (thumbnail != null)
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+								holder.sending);
 					}
 					else
 					{
@@ -1849,9 +1974,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
-					if(thumbnail != null)
+					if (thumbnail != null)
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+								holder.sending);
 					}
 					else
 					{
@@ -2263,55 +2389,92 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return v;
 		}
 
-		if (convMessage.isSent() && holder.messageContainer != null)
+		if (holder != null)
 		{
-			/* label outgoing hike conversations in green */
-			if (chatTheme == ChatTheme.DEFAULT)
+			if (convMessage.isSent() && holder.messageContainer != null)
 			{
-				holder.messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				/* label outgoing hike conversations in green */
+				if (chatTheme == ChatTheme.DEFAULT)
+				{
+					holder.messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				}
+				else
+				{
+					holder.messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+				}
 			}
-			else
+			if (holder.selectedStateOverlay != null)
 			{
-				holder.messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+				if (isActionModeOn)
+				{
+					/*
+					 * This is an transparent overlay over all the message which will listen click events while action mode is on.
+					 */
+					holder.selectedStateOverlay.setVisibility(View.VISIBLE);
+					holder.selectedStateOverlay.setOnClickListener(selectedStateOverlayClickListener);
+					holder.selectedStateOverlay.setOnLongClickListener(this);
+
+					if (isSelected(position))
+					{
+						/*
+						 * If a message has been selected then background of selected state overlay will change to selected state color. otherwise this overlay will be transparent
+						 */
+						holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(chatTheme.multiSelectBubbleColor()));
+					}
+					else
+					{
+						holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+					}
+				}
+				else
+				{
+					holder.selectedStateOverlay.setVisibility(View.GONE);
+				}
 			}
 		}
+		return v;
+	}
+
+	private void setSelection(int position, View overlay)
+	{
 		if (isActionModeOn)
 		{
 			/*
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
 			 */
-			holder.selectedStateOverlay.setVisibility(View.VISIBLE);
-			holder.selectedStateOverlay.setOnClickListener(selectedStateOverlayClickListener);
-			holder.selectedStateOverlay.setOnLongClickListener(this);
+			overlay.setVisibility(View.VISIBLE);
+			overlay.setOnClickListener(selectedStateOverlayClickListener);
+			overlay.setOnLongClickListener(this);
 
 			if (isSelected(position))
 			{
 				/*
 				 * If a message has been selected then background of selected state overlay will change to selected state color. otherwise this overlay will be transparent
 				 */
-				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(chatTheme.multiSelectBubbleColor()));
+				overlay.setBackgroundColor(context.getResources().getColor(chatTheme.multiSelectBubbleColor()));
+				Logger.d("sticker", "colored");
 			}
 			else
 			{
-				holder.selectedStateOverlay.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+				overlay.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+				Logger.d("sticker", "transparent");
 			}
 		}
 		else
 		{
-			holder.selectedStateOverlay.setVisibility(View.GONE);
+			overlay.setVisibility(View.GONE);
 		}
-		return v;
 	}
 
 	private void showSdrTip(View sdrFtueTip)
 	{
 		sdrFtueTip.setVisibility(View.VISIBLE);
-		if(!sdrTipFadeInShown)
+		if (!sdrTipFadeInShown)
 		{
-			Animation anim =  AnimationUtils.loadAnimation(context, R.anim.fade_in_animation);
+			Animation anim = AnimationUtils.loadAnimation(context, R.anim.fade_in_animation);
 			anim.setDuration(1000);
 			sdrFtueTip.startAnimation(anim);
-			sdrTipFadeInShown= true;
+			sdrTipFadeInShown = true;
 		}
 	}
 
@@ -2475,13 +2638,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
 		fileThumb.setImageResource(0);
 	}
-	
+
 	private void createMediaThumb(ImageView fileThumb)
 	{
 		// TODO Auto-generated method stub
 		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
-		//int pixels = (int) (250 * Utils.densityMultiplier);
+		// int pixels = (int) (250 * Utils.densityMultiplier);
 		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
@@ -2801,6 +2964,72 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
+	private void setTimeNStatus(int position, TextView time, ImageView status, boolean ext, View timeStatus)
+	{
+		ConvMessage message = getItem(position);
+		time.setText(message.getTimestampFormatted(false, context));
+		time.setVisibility(View.VISIBLE);
+		if (message.isSent())
+		{
+			if (message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
+			{
+				if (ext)
+				{
+					status.setImageResource(R.drawable.ic_clock_white);
+				}
+				else
+				{
+					status.setImageResource(R.drawable.ic_clock);
+				}
+			}
+			else if (ext)
+			{
+				switch (message.getState())
+				{
+				case SENT_UNCONFIRMED:
+					status.setImageResource(R.drawable.ic_clock_white);
+					break;
+				case SENT_CONFIRMED:
+					status.setImageResource(R.drawable.ic_tick_white);
+					break;
+				case SENT_DELIVERED:
+					status.setImageResource(R.drawable.ic_double_tick_white);
+					break;
+				case SENT_DELIVERED_READ:
+					status.setImageResource(R.drawable.ic_double_tick_r_white);
+					break;
+				default:
+					break;
+				}
+			}
+			else
+			{
+				switch (message.getState())
+				{
+				case SENT_UNCONFIRMED:
+					status.setImageResource(R.drawable.ic_clock);
+					break;
+				case SENT_CONFIRMED:
+					status.setImageResource(R.drawable.ic_tick);
+					break;
+				case SENT_DELIVERED:
+					status.setImageResource(R.drawable.ic_double_tick);
+					break;
+				case SENT_DELIVERED_READ:
+					status.setImageResource(R.drawable.ic_double_tick_r);
+					break;
+				default:
+					break;
+				}
+			}
+			status.setScaleType(ScaleType.CENTER);
+			status.setVisibility(View.VISIBLE);
+		}
+
+		if (timeStatus != null)
+			timeStatus.setVisibility(View.VISIBLE);
+	}
+
 	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)
 	{
 		ConvMessage message = getItem(position);
@@ -2809,9 +3038,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		time.setVisibility(View.VISIBLE);
 		if (message.isSent())
 		{
-			if(message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
+			if (message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
 			{
-				if(ext)
+				if (ext)
 				{
 					status.setImageResource(R.drawable.ic_clock_white);
 				}
