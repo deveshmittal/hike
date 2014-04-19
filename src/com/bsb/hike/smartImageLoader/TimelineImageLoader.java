@@ -106,7 +106,7 @@ public class TimelineImageLoader extends ImageWorker
 		{
 			try
 			{
-				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
+				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight);
 				// Logger.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
 			}
 			catch (Exception e1)
