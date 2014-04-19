@@ -445,7 +445,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private void releaseWakeLock()
 	{
-		if (wakelock.isHeld())
+		if (wakelock != null && wakelock.isHeld())
 		{
 			wakelock.release();
 			Logger.d(TAG, "Wakelock Released");
