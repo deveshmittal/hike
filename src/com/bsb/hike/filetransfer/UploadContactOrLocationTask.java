@@ -33,6 +33,8 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.CustomByteArrayEntity;
 import com.bsb.hike.models.ConvMessage;
@@ -291,8 +293,8 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel, HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Logger.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 
-		Bitmap thumbnail = BitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
-		String thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
+		Bitmap thumbnail = HikeBitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
+		String thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 
 		JSONObject metadata = getFileTransferMetadataForLocation(latitude, longitude, zoomLevel, address, thumbnailString);
 

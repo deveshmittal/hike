@@ -80,7 +80,7 @@ public class TagEditText extends EditText
 	 * 
 	 * @param text
 	 */
-	public void appendTag(String text, String uniqueness, Object data)
+	private void appendTag(String text, String uniqueness, Object data)
 	{
 
 		String customuniqueness = generateUniqueness(uniqueness);

@@ -68,6 +68,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
@@ -1753,9 +1754,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			Toast.makeText(getApplicationContext(), R.string.image_failed, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		Bitmap tempBitmap = Utils.scaleDownImage(mActivityState.destFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
+		Bitmap tempBitmap = HikeBitmapFactory.scaleDownImage(mActivityState.destFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
 
-		mActivityState.profileBitmap = Utils.getCircularBitmap(tempBitmap);
+		mActivityState.profileBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
 		mIconView.setBackgroundResource(R.color.transparent);
 		profilePicCamIcon.setImageResource(R.drawable.ic_signup_editphoto);

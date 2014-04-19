@@ -19,6 +19,8 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -153,10 +155,10 @@ public class DownloadStickerTask extends StickerTaskBase
 					File f = new File(largeStickerDir, stickerId);
 					Utils.saveBase64StringToFile(f, stickerData);
 
-					Bitmap thumbnail = Utils.scaleDownImage(f.getPath(), -1, false);
+					Bitmap thumbnail = HikeBitmapFactory.scaleDownImage(f.getPath(), -1, false);
 
 					File smallImage = new File(smallStickerDir, stickerId);
-					Utils.saveBitmapToFile(smallImage, thumbnail);
+					BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
 				}
 				catch (FileNotFoundException e)
 				{

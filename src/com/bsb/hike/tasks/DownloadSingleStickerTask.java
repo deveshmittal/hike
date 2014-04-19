@@ -19,6 +19,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -110,10 +112,10 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 			boolean isDisabled = data.optBoolean(HikeConstants.DISABLED_ST);
 			if (!isDisabled)
 			{
-				Bitmap thumbnail = Utils.scaleDownImage(largeStickerPath, -1, false);
+				Bitmap thumbnail = HikeBitmapFactory.scaleDownImage(largeStickerPath, -1, false);
 
 				File smallImage = new File(smallStickerPath);
-				Utils.saveBitmapToFile(smallImage, thumbnail);
+				BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
 			}
 		}
 		catch (JSONException e)

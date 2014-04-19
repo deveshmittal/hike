@@ -22,7 +22,7 @@ public class SpanUtil
 		return getImageSpan(context, view);
 	}
 
-	public static ImageSpan getImageSpan(Context context, View view)
+	private static ImageSpan getImageSpan(Context context, View view)
 	{
 		// create bitmap drawable for imagespan
 		BitmapDrawable bmpDrawable = new BitmapDrawable(context.getResources(), getBitMapFromTV(view));
@@ -30,7 +30,7 @@ public class SpanUtil
 		return new ImageSpan(bmpDrawable);
 	}
 
-	public static Bitmap getBitMapFromTV(View textView)
+	private static Bitmap getBitMapFromTV(View textView)
 	{
 		// capture bitmapt of genreated textview
 		int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);

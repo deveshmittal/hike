@@ -26,6 +26,8 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
@@ -104,7 +106,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		}
 		else
 		{
-			groupImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(groupId, true));
+			groupImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupId, true));
 		}
 	}
 
@@ -299,15 +301,15 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 				return;
 			}
 
-			Bitmap tempBitmap = Utils.scaleDownImage(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
+			Bitmap tempBitmap = HikeBitmapFactory.scaleDownImage(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
 
-			groupBitmap = Utils.getCircularBitmap(tempBitmap);
-			groupImage.setImageBitmap(Utils.getCircularBitmap(tempBitmap));
+			groupBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
+			groupImage.setImageBitmap(HikeBitmapFactory.getCircularBitmap(tempBitmap));
 
 			/*
 			 * Saving the icon in the DB.
 			 */
-			byte[] bytes = Utils.bitmapToBytes(tempBitmap, CompressFormat.JPEG, 100);
+			byte[] bytes = BitmapUtils.bitmapToBytes(tempBitmap, CompressFormat.JPEG, 100);
 			HikeUserDatabase.getInstance().setIcon(groupId, bytes, false);
 
 			break;
