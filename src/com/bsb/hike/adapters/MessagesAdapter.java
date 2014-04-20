@@ -104,10 +104,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT, STICKER_SENT
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
 	};
 
-	private class StickerViewHolder
+	private class DetailHolder
+	{
+
+		ImageView status;
+
+		TextView time;
+
+		View timeStatus;
+		
+		View senderDetails;
+
+		TextView senderName;
+
+		TextView senderNameUnsaved;
+		
+		ImageView avatarImage;
+		
+		ViewGroup avatarContainer;
+	}
+	
+	private class StickerViewHolder extends DetailHolder
 	{
 		View placeHolder;
 
@@ -115,14 +135,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		ImageView image;
 
-		ImageView status;
-
-		TextView time;
-
-		View timeStatus;
-
 		View selectedStateOverlay;
-	}
+	}	
 
 	private class ViewHolder
 	{
@@ -441,10 +455,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.isStickerMessage() && convMessage.isSent())
+		MessageMetadata metadata = convMessage.getMetadata();
+		if (convMessage.isStickerMessage())
 		{
-			type = ViewType.STICKER_SENT;
+			if (convMessage.isSent())
+			{
+				type = ViewType.STICKER_SENT;
+			}
+			else
+			{
+				type = ViewType.STICKER_RECEIVE;
+			}
 		}
+//		else if (metadata != null && metadata.isPokeMessage())
+//		{
+//			if (convMessage.isSent())
+//			{
+//				type = ViewType.NUDGE_SENT;
+//			}
+//			else
+//			{
+//				type = ViewType.NUDGE_RECEIVE;
+//			}
+//		}
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -527,6 +560,40 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerHolder = (StickerViewHolder) v.getTag();
 			}
 		}
+		else if (viewType == ViewType.STICKER_RECEIVE)
+		{
+			if (v == null)
+			{
+				stickerHolder = new StickerViewHolder();
+				v = inflater.inflate(R.layout.message_receive_sticker, parent, false);
+
+				stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
+				stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
+				stickerHolder.image = (ImageView) v.findViewById(R.id.image);
+				stickerHolder.time = (TextView) v.findViewById(R.id.time);
+				stickerHolder.status = (ImageView) v.findViewById(R.id.status);
+				stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+				stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+				stickerHolder.senderDetails = v.findViewById(R.id.sender_details);
+				stickerHolder.senderName = (TextView) v.findViewById(R.id.sender_name);
+				stickerHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
+				stickerHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
+				stickerHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+				v.setTag(stickerHolder);
+			}
+			else
+			{
+				stickerHolder = (StickerViewHolder) v.getTag();
+			}
+		}
+//		else if (viewType == ViewType.NUDGE_SENT)
+//		{
+//			
+//		}
+//		else if (viewType == ViewType.NUDGE_RECEIVE)
+//		{
+//			
+//		}
 		else
 		{
 			if (v == null)
@@ -873,10 +940,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		// //////////////////////////////////////////////////////////////////////////
 		// Categorical Applications
-		if (viewType == ViewType.STICKER_SENT)
+
+		if (viewType == ViewType.STICKER_SENT || viewType == ViewType.STICKER_RECEIVE)
 		{
 			stickerHolder.placeHolder.setBackgroundResource(0);
 			Sticker sticker = metadata.getSticker();
+			setSenderDetails(convMessage, position, stickerHolder, true);
 			/*
 			 * If this is the default category, then the sticker are part of the app bundle itself
 			 */
@@ -958,10 +1027,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 			}
-			setTimeNStatus(position, stickerHolder.time, stickerHolder.status, true, stickerHolder.timeStatus);
+			setTimeNStatus(position, stickerHolder, true);
 			setSelection(position, stickerHolder.selectedStateOverlay);
 		}
-		if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
+		else if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 		{
 			if (metadata != null && metadata.isPokeMessage())
 			{
@@ -2520,6 +2589,34 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 
+	private void setSenderDetails(ConvMessage convMessage, int position, DetailHolder detailHolder, boolean ext)
+	{
+		boolean firstMessageFromParticipant = ifFirstMessageFromRecepient(convMessage, position);
+		if (firstMessageFromParticipant)
+		{
+			setGroupParticipantName(convMessage, detailHolder.senderDetails, detailHolder.senderName, detailHolder.senderNameUnsaved, firstMessageFromParticipant);
+			if (ext)
+			{
+				if (detailHolder.senderName != null)
+				{
+					detailHolder.senderName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
+				if (detailHolder.senderNameUnsaved != null)
+				{
+					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+				}
+			}
+			detailHolder.avatarImage.setVisibility(View.VISIBLE);
+			setAvatar(convMessage.getGroupParticipantMsisdn(), detailHolder.avatarImage);
+			detailHolder.avatarContainer.setVisibility(View.VISIBLE);
+		}
+		else if (detailHolder.avatarContainer != null)
+		{
+			detailHolder.senderDetails.setVisibility(View.GONE);
+			detailHolder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+		}
+	}
+
 	private void setGroupParticipantName(ConvMessage convMessage, View participantDetails, TextView participantName, TextView participantNameUnsaved,
 			boolean firstMessageFromParticipant)
 	{
@@ -2608,19 +2705,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean ifFirstMessageFromRecepient(ConvMessage convMessage, int position)
 	{
 		boolean ret = false;
-		if (isGroupChat && !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn()))
+		if (!convMessage.isSent())
 		{
-			if (position != 0)
+			if (isGroupChat && !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn()))
 			{
-				ConvMessage previous = getItem(position - 1);
-				if (previous.getParticipantInfoState() != ParticipantInfoState.NO_INFO || !convMessage.getGroupParticipantMsisdn().equals(previous.getGroupParticipantMsisdn()))
+				if (position != 0)
+				{
+					ConvMessage previous = getItem(position - 1);
+					if (previous.getParticipantInfoState() != ParticipantInfoState.NO_INFO || !convMessage.getGroupParticipantMsisdn().equals(previous.getGroupParticipantMsisdn()))
+					{
+						ret = true;
+					}
+				}
+				else
 				{
 					ret = true;
 				}
-			}
-			else
-			{
-				ret = true;
 			}
 		}
 		return ret;
@@ -2964,9 +3064,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void setTimeNStatus(int position, TextView time, ImageView status, boolean ext, View timeStatus)
+	private void setTimeNStatus(int position, DetailHolder detailHolder, boolean ext)
 	{
 		ConvMessage message = getItem(position);
+		TextView time = detailHolder.time;
+		ImageView status = detailHolder.status;
+		View timeStatus = detailHolder.timeStatus;
 		time.setText(message.getTimestampFormatted(false, context));
 		time.setVisibility(View.VISIBLE);
 		if (message.isSent())
