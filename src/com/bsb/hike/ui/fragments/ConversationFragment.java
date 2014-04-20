@@ -309,11 +309,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			case ConversationTip.GROUP_CHAT_TIP:
 				((HomeActivity) getActivity()).showOverFlowMenu();
 				removeGroupChatTip(conv);
-				return;
-
+				break;
+			case ConversationTip.STEALTH_FTUE_TIP:
+				break;
 			default:
 				break;
 			}
+			return;
 		}
 
 		Intent intent = Utils.createIntentForConversation(getSherlockActivity(), conv);
@@ -450,6 +452,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (mAdapter != null)
 		{
 			mAdapter.clear();
+		}
+		
+		/*
+		 * Add item for stealth ftue conv tap tip.
+		 * Add it to first non hike_bot conversation.
+		 */
+		if (!conversations.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_STEALTH_FTUE_CONV_TIP, false))
+		{
+			int stealthTipLocation=0;
+			for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
+			{
+				stealthTipLocation++;
+				Object object = iter.next();
+				Conversation conv = (Conversation) object;
+				if (conv instanceof ConversationTip)
+				{
+					continue;
+				}
+				
+				if (!HikeMessengerApp.hikeBotNamesMap.containsKey(conv.getMsisdn()))
+				{
+					conversations.add(stealthTipLocation, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
+					break;
+				}
+			}
 		}
 
 		mAdapter = new ConversationsAdapter(getActivity(), R.layout.conversation_item, conversations);

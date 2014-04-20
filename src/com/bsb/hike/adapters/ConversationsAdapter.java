@@ -44,7 +44,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	private enum ViewType
 	{
-		CONVERSATION, GROUP_CHAT_TIP
+		CONVERSATION, GROUP_CHAT_TIP, STEALTH_FTUE_TIP_VIEW
 	}
 
 	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
@@ -72,7 +72,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 			case ConversationTip.GROUP_CHAT_TIP:
 				return ViewType.GROUP_CHAT_TIP.ordinal();
-
+			case ConversationTip.STEALTH_FTUE_TIP:
+				return ViewType.STEALTH_FTUE_TIP_VIEW.ordinal();
 			default:
 				break;
 			}
@@ -92,13 +93,19 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		View v = convertView;
 		if (v == null)
 		{
-			if (viewType == ViewType.GROUP_CHAT_TIP)
+			switch (viewType)
 			{
-				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
-			}
-			else
-			{
+			case CONVERSATION:
 				v = inflater.inflate(mResourceId, parent, false);
+				break;
+			case GROUP_CHAT_TIP:
+				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
+				break;
+			case STEALTH_FTUE_TIP_VIEW:
+				v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
+				break;
+			default:
+				break;
 			}
 		}
 
@@ -126,6 +133,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				}
 			});
 
+			return v;
+		}
+		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
+		{
 			return v;
 		}
 

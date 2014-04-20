@@ -1465,4 +1465,5 @@
 	    ]]>
     </string>
     <string name="stealth_double_tap_tip">Whoosh! It\'s hidden. Now double tap to access Stealth Mode.</string>
+    <string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark it as \'Stealth\'</string>
 </resources>

@@ -277,4 +277,5 @@
     <color name="group_chat_tip_bg_pressed">#e5e5e5</color>
     <color name="file_transfer_pop_up_button">#ebebeb</color>
     <color name="dark_brown_divider_color">#120e0e</color>
+    <color name="stealth_ftue_tip_bg">#535e6d</color>
 </resources>

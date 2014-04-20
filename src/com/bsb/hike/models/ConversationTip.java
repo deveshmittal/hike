@@ -4,6 +4,8 @@ public class ConversationTip extends Conversation
 {
 	public static final int GROUP_CHAT_TIP = 1;
 	
+	public static final int STEALTH_FTUE_TIP = 2;
+
 	private int tipType;
 	public ConversationTip(int tipType)
 	{
@@ -24,5 +26,10 @@ public class ConversationTip extends Conversation
 	public boolean isGroupChatTip()
 	{
 		return tipType == GROUP_CHAT_TIP;
+	}
+	
+	public boolean isStealthFtueTip()
+	{
+		return tipType == STEALTH_FTUE_TIP;
 	}
 }
