@@ -19,36 +19,64 @@
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_sender_details" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/placeholder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_below="@id/sender_details"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@id/avatar_container"
-        android:gravity="center"
-        android:orientation="vertical" >
+        android:background="@drawable/bg_ft_progress"
+        android:gravity="center" >
 
         <ProgressBar
-            android:id="@+id/loading_progress"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:indeterminateDrawable="@drawable/loading"
+            android:id="@+id/initializing"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:layout_centerInParent="true"
+            android:indeterminateDrawable="@drawable/circular_double_spinner_dark"
             android:visibility="gone" />
 
+        <com.bsb.hike.view.HoloCircularProgress
+            xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
+            android:id="@+id/play_progress"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:visibility="gone"
+            app:marker_visible="false"
+            app:progress="0.00"
+            app:progress_background_color="#00000000"
+            app:progress_color="@color/rec_progress"
+            app:stroke_width="2dp"
+            app:thumb_visible="false" />
+
         <ImageView
-            android:id="@+id/image"
+            android:id="@+id/action"
+            android:layout_width="16dp"
+            android:layout_height="20dp"
+            android:layout_centerInParent="true" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/sticker_1_hi"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="10sp"
             android:visibility="gone" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <include
         android:id="@+id/time_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/placeholder"
+        android:layout_marginTop="8dp"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_time_status_ext" />

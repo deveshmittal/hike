@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
 	};
 
 	private class DetailViewHolder
@@ -141,6 +141,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private class NudgeViewHolder extends DetailViewHolder
 	{
 		ImageView nudge;
+	}
+
+	private class WalkieTalkieViewHolder extends DetailViewHolder
+	{
+		View placeHolder;
+
+		ProgressBar initialization;
+
+		HoloCircularProgress progress;
+
+		ImageView action;
+
+		TextView duration;
 	}
 
 	private class ViewHolder
@@ -483,6 +496,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				type = ViewType.NUDGE_RECEIVE;
 			}
 		}
+		else if (convMessage.isFileTransferMessage())
+		{
+			final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			HikeFileType hikeFileType = hikeFile.getHikeFileType();
+			if (hikeFileType == HikeFileType.AUDIO_RECORDING)
+			{
+				if (convMessage.isSent())
+				{
+					type = ViewType.WALKIE_TALKIE_SENT;
+				}
+				else
+				{
+					type = ViewType.WALKIE_TALKIE_RECEIVE;
+				}
+			}
+			else
+				type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND : ViewType.FILE_TRANSFER_RECEIVE;
+		}
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -498,10 +529,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID)
 		{
 			type = ViewType.LAST_READ;
-		}
-		else if (convMessage.isFileTransferMessage())
-		{
-			type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND : ViewType.FILE_TRANSFER_RECEIVE;
 		}
 		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
@@ -554,6 +581,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 		}
 		else if (viewType == ViewType.NUDGE_RECEIVE)
+		{
+		}
+		else if (viewType == ViewType.WALKIE_TALKIE_SENT)
+		{
+		}
+		else if (viewType == ViewType.WALKIE_TALKIE_RECEIVE)
 		{
 		}
 		else
@@ -1104,6 +1137,153 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			setTimeNStatus(position, nudgeHolder, true);
 			setSelection(position, nudgeHolder.selectedStateOverlay);
+		}
+		else if (viewType == ViewType.WALKIE_TALKIE_SENT || viewType == ViewType.WALKIE_TALKIE_RECEIVE)
+		{
+			WalkieTalkieViewHolder wtHolder = null;
+			if (viewType == ViewType.WALKIE_TALKIE_SENT)
+			{
+				if (v == null)
+				{
+					wtHolder = new WalkieTalkieViewHolder();
+					v = inflater.inflate(R.layout.message_sent_walkie_talkie, parent, false);
+					wtHolder.placeHolder = v.findViewById(R.id.placeholder);
+					wtHolder.initialization = (ProgressBar) v.findViewById(R.id.initializing);
+					wtHolder.progress = (HoloCircularProgress) v.findViewById(R.id.play_progress);
+					wtHolder.action = (ImageView) v.findViewById(R.id.action);
+					wtHolder.duration = (TextView) v.findViewById(R.id.duration);
+					wtHolder.time = (TextView) v.findViewById(R.id.time);
+					wtHolder.status = (ImageView) v.findViewById(R.id.status);
+					wtHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					wtHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					v.setTag(wtHolder);
+				}
+				else
+				{
+					wtHolder = (WalkieTalkieViewHolder) v.getTag();
+				}
+			}
+			else if (viewType == ViewType.WALKIE_TALKIE_RECEIVE)
+			{
+				if (v == null)
+				{
+					wtHolder = new WalkieTalkieViewHolder();
+					v = inflater.inflate(R.layout.message_receive_walkie_talkie, parent, false);
+
+					wtHolder.placeHolder = v.findViewById(R.id.placeholder);
+					wtHolder.initialization = (ProgressBar) v.findViewById(R.id.initializing);
+					wtHolder.progress = (HoloCircularProgress) v.findViewById(R.id.play_progress);
+					wtHolder.action = (ImageView) v.findViewById(R.id.action);
+					wtHolder.duration = (TextView) v.findViewById(R.id.duration);
+					wtHolder.time = (TextView) v.findViewById(R.id.time);
+					wtHolder.status = (ImageView) v.findViewById(R.id.status);
+					wtHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					wtHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					wtHolder.senderDetails = v.findViewById(R.id.sender_details);
+					wtHolder.senderName = (TextView) v.findViewById(R.id.sender_name);
+					wtHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
+					wtHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
+					wtHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					v.setTag(wtHolder);
+				}
+				else
+				{
+					wtHolder = (WalkieTalkieViewHolder) v.getTag();
+				}
+			}
+			FileSavedState fss = null;
+			final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			HikeFileType hikeFileType = hikeFile.getHikeFileType();
+			File file = hikeFile.getFile();
+			if (convMessage.isSent())
+			{
+				fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
+			}
+			else
+			{
+				fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+			}
+
+			setSenderDetails(convMessage, position, wtHolder, true);
+
+			ShapeDrawable circle = new ShapeDrawable(new OvalShape());
+			circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
+			circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
+			if (convMessage.isSent())
+			{
+				/* label outgoing hike conversations in green */
+				if (chatTheme == ChatTheme.DEFAULT)
+				{
+					circle.getPaint().setColor(context.getResources().getColor(!convMessage.isSMS() ? R.color.bubble_blue : R.color.bubble_green));
+				}
+				else
+				{
+					circle.getPaint().setColor(context.getResources().getColor(chatTheme.bubbleColor()));
+				}
+
+			}
+			else
+			{
+				circle.getPaint().setColor(context.getResources().getColor(R.color.bubble_white));
+			}
+			wtHolder.placeHolder.setBackgroundDrawable(circle);
+
+			if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+			{
+				wtHolder.action.setBackgroundResource(0);
+				wtHolder.action.setImageResource(0);
+				wtHolder.action.setScaleType(ScaleType.CENTER_INSIDE);
+				if (hikeFile.getFileKey().equals(voiceMessagePlayer.getFileKey()))
+				{
+					if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING)
+					{
+						wtHolder.action.setImageResource(R.drawable.ic_pause_rec);
+					}
+					else
+					{
+						wtHolder.action.setImageResource(R.drawable.ic_mic);
+					}
+					wtHolder.duration.setTag(hikeFile.getFileKey());
+					voiceMessagePlayer.setDurationTxt(wtHolder.duration, wtHolder.progress);
+					wtHolder.duration.setVisibility(View.VISIBLE);
+					wtHolder.progress.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					wtHolder.action.setImageResource(R.drawable.ic_mic);
+					Utils.setupFormattedTime(wtHolder.duration, hikeFile.getRecordingDuration());
+					wtHolder.duration.setVisibility(View.VISIBLE);
+					wtHolder.progress.setVisibility(View.INVISIBLE);
+				}
+			}
+			else
+			{
+				wtHolder.duration.setVisibility(View.GONE);
+				wtHolder.action.setImageResource(R.drawable.ic_mic);
+			}
+
+			switch (fss.getFTState())
+			{
+			case INITIALIZED:
+			case PAUSING:
+			case IN_PROGRESS:
+				wtHolder.initialization.setVisibility(View.VISIBLE);
+				break;
+			case COMPLETED:
+			case NOT_STARTED:
+			case CANCELLED:
+			case PAUSED:
+			case ERROR:
+			default:
+				wtHolder.initialization.setVisibility(View.GONE);
+			}
+
+			setTimeNStatus(position, wtHolder, true);
+			setSelection(position, wtHolder.selectedStateOverlay);
+			
+			wtHolder.placeHolder.setTag(convMessage);
+			wtHolder.placeHolder.setOnClickListener(this);
+			wtHolder.placeHolder.setOnLongClickListener(this);
 		}
 		else if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 		{
@@ -2724,6 +2904,72 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
+	// pvivate void setProgressView()
+	// {
+	//
+	// if (convMessage.isSent()) // File is being sent
+	// {
+	// Logger.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
+	// switch (fss.getFTState())
+	// {
+	// case COMPLETED:
+	// break;
+	// case NOT_STARTED:
+	// case CANCELLED:
+	// break;
+	// case INITIALIZED:
+	// showTransferInitialization(holder, hikeFile, thumbnail);
+	// // setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
+	// // holder.fileType.setVisibility(View.VISIBLE);
+	// break;
+	// case ERROR:
+	// // Logger.d(getClass().getSimpleName(), "error display");
+	// // holder.image.setVisibility(View.VISIBLE);
+	// // holder.image.setImageResource(getDownloadFailedResIcon());
+	// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+	// break;
+	// case PAUSING:
+	// showTransferInitialization(holder, hikeFile, thumbnail);
+	// break;
+	// case PAUSED:
+	// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+	// break;
+	// case IN_PROGRESS:
+	// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+	// break;
+	// default:
+	// }
+	// }
+	// else
+	// // File is being received
+	// {
+	// Logger.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
+	// switch (fss.getFTState())
+	// {
+	// case INITIALIZED:
+	// showTransferInitialization(holder, hikeFile, thumbnail);
+	// break;
+	// case PAUSING:
+	// showTransferInitialization(holder, hikeFile, thumbnail);
+	// break;
+	// case PAUSED:
+	// case ERROR:
+	// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+	// break;
+	// case IN_PROGRESS:
+	// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+	// break;
+	// case NOT_STARTED:
+	// case CANCELLED:
+	// case COMPLETED:
+	// default:
+	// break;
+	//
+	// }
+	// }
+	//
+	// }
+
 	private void showTransferInitialization(ViewHolder holder, HikeFile hikeFile, Drawable thumbnail)
 	{
 		if (((hikeFile.getHikeFileType() == HikeFileType.IMAGE) || (hikeFile.getHikeFileType() == HikeFileType.VIDEO)) && thumbnail != null)
@@ -3547,10 +3793,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			String fileKey = hikeFile.getFileKey();
 
-			ImageView recAction = (ImageView) parent.findViewById(R.id.rec_action);
+			ImageView recAction = (ImageView) parent.findViewById(R.id.action);
 			// TextView durationTxt = (TextView) parent.findViewById(convMessage.isSent() ? R.id.message_send : R.id.message_receive_ft);
-			TextView durationTxt = (TextView) parent.findViewById(R.id.rec_duration);
-			View durationProgress = (View) parent.findViewById(R.id.rec_circular_progress);
+			TextView durationTxt = (TextView) parent.findViewById(R.id.duration);
+			View durationProgress = (View) parent.findViewById(R.id.play_progress);
 			durationTxt.setVisibility(View.VISIBLE);
 			durationProgress.setVisibility(View.VISIBLE);
 
