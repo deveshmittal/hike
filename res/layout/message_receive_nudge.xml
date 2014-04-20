@@ -19,37 +19,23 @@
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_sender_details" />
 
-    <LinearLayout
-        android:id="@+id/placeholder"
+    <ImageView
+        android:id="@+id/nudge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/sender_details"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@id/avatar_container"
         android:gravity="center_vertical|left"
-        android:orientation="vertical" >
-
-        <ProgressBar
-            android:id="@+id/loading_progress"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:indeterminateDrawable="@drawable/loading"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/sticker_1_hi"
-            android:visibility="gone" />
-    </LinearLayout>
+        android:src="@drawable/ic_nudge_hike_receive" />
 
     <include
         android:id="@+id/time_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/placeholder"
+        android:layout_below="@id/nudge"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_time_status_ext" />
 

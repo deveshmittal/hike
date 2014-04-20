@@ -107,7 +107,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
 	};
 
-	private class DetailHolder
+	private class DetailViewHolder
 	{
 
 		ImageView status;
@@ -115,28 +115,33 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView time;
 
 		View timeStatus;
-		
+
 		View senderDetails;
 
 		TextView senderName;
 
 		TextView senderNameUnsaved;
-		
+
 		ImageView avatarImage;
-		
+
 		ViewGroup avatarContainer;
+
+		View selectedStateOverlay;
 	}
-	
-	private class StickerViewHolder extends DetailHolder
+
+	private class StickerViewHolder extends DetailViewHolder
 	{
 		View placeHolder;
 
 		ProgressBar loader;
 
 		ImageView image;
+	}
 
-		View selectedStateOverlay;
-	}	
+	private class NudgeViewHolder extends DetailViewHolder
+	{
+		ImageView nudge;
+	}
 
 	private class ViewHolder
 	{
@@ -467,17 +472,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				type = ViewType.STICKER_RECEIVE;
 			}
 		}
-//		else if (metadata != null && metadata.isPokeMessage())
-//		{
-//			if (convMessage.isSent())
-//			{
-//				type = ViewType.NUDGE_SENT;
-//			}
-//			else
-//			{
-//				type = ViewType.NUDGE_RECEIVE;
-//			}
-//		}
+		else if (metadata != null && metadata.isPokeMessage())
+		{
+			if (convMessage.isSent())
+			{
+				type = ViewType.NUDGE_SENT;
+			}
+			else
+			{
+				type = ViewType.NUDGE_RECEIVE;
+			}
+		}
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -538,62 +543,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		final ConvMessage convMessage = getItem(position);
 
 		ViewHolder holder = null;
-		StickerViewHolder stickerHolder = null;
 		View v = convertView;
 		if (viewType == ViewType.STICKER_SENT)
 		{
-			if (v == null)
-			{
-				stickerHolder = new StickerViewHolder();
-				v = inflater.inflate(R.layout.message_sent_sticker, parent, false);
-				stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
-				stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
-				stickerHolder.image = (ImageView) v.findViewById(R.id.image);
-				stickerHolder.time = (TextView) v.findViewById(R.id.time);
-				stickerHolder.status = (ImageView) v.findViewById(R.id.status);
-				stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
-				stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				v.setTag(stickerHolder);
-			}
-			else
-			{
-				stickerHolder = (StickerViewHolder) v.getTag();
-			}
 		}
 		else if (viewType == ViewType.STICKER_RECEIVE)
 		{
-			if (v == null)
-			{
-				stickerHolder = new StickerViewHolder();
-				v = inflater.inflate(R.layout.message_receive_sticker, parent, false);
-
-				stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
-				stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
-				stickerHolder.image = (ImageView) v.findViewById(R.id.image);
-				stickerHolder.time = (TextView) v.findViewById(R.id.time);
-				stickerHolder.status = (ImageView) v.findViewById(R.id.status);
-				stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
-				stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
-				stickerHolder.senderDetails = v.findViewById(R.id.sender_details);
-				stickerHolder.senderName = (TextView) v.findViewById(R.id.sender_name);
-				stickerHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
-				stickerHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
-				stickerHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
-				v.setTag(stickerHolder);
-			}
-			else
-			{
-				stickerHolder = (StickerViewHolder) v.getTag();
-			}
 		}
-//		else if (viewType == ViewType.NUDGE_SENT)
-//		{
-//			
-//		}
-//		else if (viewType == ViewType.NUDGE_RECEIVE)
-//		{
-//			
-//		}
+		else if (viewType == ViewType.NUDGE_SENT)
+		{
+		}
+		else if (viewType == ViewType.NUDGE_RECEIVE)
+		{
+		}
 		else
 		{
 			if (v == null)
@@ -943,6 +905,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (viewType == ViewType.STICKER_SENT || viewType == ViewType.STICKER_RECEIVE)
 		{
+
+			StickerViewHolder stickerHolder = null;
+			if (viewType == ViewType.STICKER_SENT)
+			{
+				if (v == null)
+				{
+					stickerHolder = new StickerViewHolder();
+					v = inflater.inflate(R.layout.message_sent_sticker, parent, false);
+					stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
+					stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
+					stickerHolder.image = (ImageView) v.findViewById(R.id.image);
+					stickerHolder.time = (TextView) v.findViewById(R.id.time);
+					stickerHolder.status = (ImageView) v.findViewById(R.id.status);
+					stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					v.setTag(stickerHolder);
+				}
+				else
+				{
+					stickerHolder = (StickerViewHolder) v.getTag();
+				}
+			}
+			else if (viewType == ViewType.STICKER_RECEIVE)
+			{
+				if (v == null)
+				{
+					stickerHolder = new StickerViewHolder();
+					v = inflater.inflate(R.layout.message_receive_sticker, parent, false);
+
+					stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
+					stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
+					stickerHolder.image = (ImageView) v.findViewById(R.id.image);
+					stickerHolder.time = (TextView) v.findViewById(R.id.time);
+					stickerHolder.status = (ImageView) v.findViewById(R.id.status);
+					stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					stickerHolder.senderDetails = v.findViewById(R.id.sender_details);
+					stickerHolder.senderName = (TextView) v.findViewById(R.id.sender_name);
+					stickerHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
+					stickerHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
+					stickerHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					v.setTag(stickerHolder);
+				}
+				else
+				{
+					stickerHolder = (StickerViewHolder) v.getTag();
+				}
+			}
 			stickerHolder.placeHolder.setBackgroundResource(0);
 			Sticker sticker = metadata.getSticker();
 			setSenderDetails(convMessage, position, stickerHolder, true);
@@ -1029,6 +1039,71 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			setTimeNStatus(position, stickerHolder, true);
 			setSelection(position, stickerHolder.selectedStateOverlay);
+		}
+		else if (viewType == ViewType.NUDGE_SENT || viewType == ViewType.NUDGE_RECEIVE)
+		{
+			NudgeViewHolder nudgeHolder = null;
+			if (viewType == ViewType.NUDGE_SENT)
+			{
+				if (v == null)
+				{
+					nudgeHolder = new NudgeViewHolder();
+					v = inflater.inflate(R.layout.message_sent_nudge, parent, false);
+					nudgeHolder.nudge = (ImageView) v.findViewById(R.id.nudge);
+					nudgeHolder.time = (TextView) v.findViewById(R.id.time);
+					nudgeHolder.status = (ImageView) v.findViewById(R.id.status);
+					nudgeHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					nudgeHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					v.setTag(nudgeHolder);
+				}
+				else
+				{
+					nudgeHolder = (NudgeViewHolder) v.getTag();
+				}
+			}
+			else if (viewType == ViewType.NUDGE_RECEIVE)
+			{
+				if (v == null)
+				{
+					nudgeHolder = new NudgeViewHolder();
+					v = inflater.inflate(R.layout.message_receive_nudge, parent, false);
+
+					nudgeHolder.nudge = (ImageView) v.findViewById(R.id.nudge);
+					nudgeHolder.time = (TextView) v.findViewById(R.id.time);
+					nudgeHolder.status = (ImageView) v.findViewById(R.id.status);
+					nudgeHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					nudgeHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					nudgeHolder.senderDetails = v.findViewById(R.id.sender_details);
+					nudgeHolder.senderName = (TextView) v.findViewById(R.id.sender_name);
+					nudgeHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
+					nudgeHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
+					nudgeHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					v.setTag(nudgeHolder);
+				}
+				else
+				{
+					nudgeHolder = (NudgeViewHolder) v.getTag();
+				}
+			}
+			setSenderDetails(convMessage, position, nudgeHolder, true);
+			if (!chatTheme.isAnimated())
+			{
+				nudgeHolder.nudge.setVisibility(View.VISIBLE);
+				setNudgeImageResource(chatTheme, nudgeHolder.nudge, convMessage.isSent());
+			}
+			else
+			{
+				nudgeHolder.nudge.setVisibility(View.VISIBLE);
+
+				setNudgeImageResource(chatTheme, nudgeHolder.nudge, convMessage.isSent());
+				if (metadata.getNudgeAnimationType() != NudgeAnimationType.NONE)
+				{
+					metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
+					nudgeHolder.nudge.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
+				}
+			}
+			setTimeNStatus(position, nudgeHolder, true);
+			setSelection(position, nudgeHolder.selectedStateOverlay);
 		}
 		else if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 		{
@@ -2589,7 +2664,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 
-	private void setSenderDetails(ConvMessage convMessage, int position, DetailHolder detailHolder, boolean ext)
+	private void setSenderDetails(ConvMessage convMessage, int position, DetailViewHolder detailHolder, boolean ext)
 	{
 		boolean firstMessageFromParticipant = ifFirstMessageFromRecepient(convMessage, position);
 		if (firstMessageFromParticipant)
@@ -3064,7 +3139,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void setTimeNStatus(int position, DetailHolder detailHolder, boolean ext)
+	private void setTimeNStatus(int position, DetailViewHolder detailHolder, boolean ext)
 	{
 		ConvMessage message = getItem(position);
 		TextView time = detailHolder.time;
