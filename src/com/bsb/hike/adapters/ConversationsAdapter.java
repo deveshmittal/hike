@@ -137,6 +137,17 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		}
 		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
 		{
+			View close = v.findViewById(R.id.close);
+			final int pos = position;
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, pos);
+				}
+			});
 			return v;
 		}
 
