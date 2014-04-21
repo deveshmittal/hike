@@ -755,7 +755,7 @@ public class HikeConstants
 
 	public static final String MICROMAX = "MICROMAX";
 
-	public static final int MAX_READ_BY_NAMES = 3;
+	public static final int MAX_READ_BY_NAMES = 4;
 
 	public static final int LDPI_ID = 4;
 

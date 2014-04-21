@@ -2893,6 +2893,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				lastIndex = 0;
 			}
+			else if (lastIndex == 1)
+			{
+				/*
+				 * We increment the last index if its one since we can
+				 * accommodate another name in this case. 
+				 */
+				lastIndex ++;
+				moreNamesThanMaxCount = true;
+			}
 			else if (lastIndex > 0)
 			{
 				moreNamesThanMaxCount = true;
