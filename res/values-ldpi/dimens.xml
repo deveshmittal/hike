@@ -9,4 +9,19 @@
     <dimen name="hike_logo_margin">50dp</dimen>
     <dimen name="version_item_marginTop">40dp</dimen>
     <dimen name="icon_picture_size">65dp</dimen>
+    <dimen name="signup_header_height">64dp</dimen>
+    <dimen name="signup_gender_padding_top">37dp</dimen>
+    <dimen name="signup_profile_pic_dimen">66dp</dimen>
+    <dimen name="signup_profile_pic_icon_dimen">20dp</dimen>
+    <dimen name="addfriend_popup_content_height">128dp</dimen>
+	<dimen name="addfriend_popup_content_margin_top">16dp</dimen>
+	<dimen name="addfriend_popup_content_margin_bottom">16dp</dimen>
+	<dimen name="addfriend_popup_title_padding_right">8dp</dimen>
+	<dimen name="addfriend_popup_title_margin_bottom">4dp</dimen>
+	<dimen name="addfriend_popup_btn_margin_bottom">8dp</dimen>
+    <dimen name="gallery_cover_item_size">140dp</dimen>
+    <dimen name="timeine_big_picture_size">380dp</dimen>
+    <dimen name="tutorial_fragment_header_padding_left">7dp</dimen>
+	<dimen name="tutorial_fragment_title_padding_Right">7dp</dimen>
+    
 </resources>

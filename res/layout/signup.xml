@@ -2,65 +2,22 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/signup_bg" >
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:src="@drawable/welcome_bckg" />
-    
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="11dp"
-        android:layout_marginTop="10dp"
-        android:text="Phone"
-        android:textColor="@color/signup_white"
-        android:textSize="20dp"
-        android:textStyle="bold" />
-
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/btn_continue"
-        style="@style/SignupButton.Text.Bold.Button"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="7dp"
-        android:background="@drawable/bg_blue_signup_btn_selector"
-        android:maxWidth="100dp"
-        android:minWidth="66dp"
-        android:onClick="onClick"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:singleLine="true"
-        android:text="@string/next_signup"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-    
-    <View
-        android:id="@+id/header_dropshadow"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_below="@id/header"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:background="#a4006ab4" />
+    android:background="@color/white" >
 
     <com.bsb.hike.view.MyViewFlipper
         android:id="@+id/signup_viewflipper"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/header_dropshadow" >
+        android:layout_height="match_parent">
 
         <include layout="@layout/number_signup_item" />
 
         <include layout="@layout/pin_signup_item" />
 
         <include layout="@layout/name_signup_item" />
+        
+        <include layout="@layout/gender_signup_item" />
+        
+        <include layout="@layout/scanning_contacts_item" />
     </com.bsb.hike.view.MyViewFlipper>
 
 </RelativeLayout>

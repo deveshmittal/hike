@@ -3,11 +3,12 @@ package com.bsb.hike.ui.fragments;
 import java.io.File;
 
 import android.app.ProgressDialog;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,9 +22,13 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.ProfileImageLoader;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class ImageViewerFragment extends SherlockFragment implements LoaderCallbacks<Boolean>, OnClickListener
@@ -34,6 +39,8 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	private ProgressDialog mDialog;
 
 	private String mappedId;
+
+	private String key;
 
 	private boolean isStatusImage;
 
@@ -47,12 +54,15 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 	private IconLoader iconLoader;
 
+	private int imageSize;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 		iconLoader = new IconLoader(getActivity(), 180);
+		imageSize = this.getActivity().getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
 	}
 
 	@Override
@@ -71,6 +81,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		super.onActivityCreated(savedInstanceState);
 
 		mappedId = getArguments().getString(HikeConstants.Extras.MAPPED_ID);
+
 		isStatusImage = getArguments().getBoolean(HikeConstants.Extras.IS_STATUS_IMAGE);
 
 		url = getArguments().getString(HikeConstants.Extras.URL);
@@ -78,35 +89,79 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 
 		hasCustomImage = true;
+		key = mappedId;
 		if (!isStatusImage)
 		{
-			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(mappedId);
+			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			if (idx > 0)
+				key = key.substring(0, idx);
+			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(key);
 		}
 
-		fileName = hasCustomImage ? Utils.getProfileImageFileName(mappedId) : Utils.getDefaultAvatarServerName(mappedId);
-
-		File file = new File(basePath, fileName);
-
-		boolean downloadImage = true;
-		if (file.exists())
+		if (hasCustomImage)
 		{
-			Drawable drawable = BitmapDrawable.createFromPath(basePath + "/" + fileName);
-			if (drawable != null)
+			fileName = Utils.getProfileImageFileName(key);
+
+			File file = new File(basePath, fileName);
+
+			boolean downloadImage = false;
+			if (file.exists())
 			{
-				downloadImage = false;
+				BitmapDrawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
+				if (drawable == null)
+				{
+					Bitmap b = ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize);
+					if (b != null)
+					{
+						drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
+						Logger.e(getClass().getSimpleName(), "Decode from file is returning null bitmap.");
+						if (drawable != null)
+						{
+							HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+						}
+					}
+					else
+					{
+						Utils.removeLargerProfileImageForMsisdn(key);
+						drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
+						downloadImage = true;
+					}
+				}
+
 				imageView.setImageDrawable(drawable);
 			}
+			else
+			{
+				File f = new File(basePath, Utils.getTempProfileImageFileName(key));
+				if (f.exists())
+				{
+					BitmapDrawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
+					imageView.setImageDrawable(drawable);
+				}
+				else
+				{
+					downloadImage = true;
+				}
+			}
+
+			if (downloadImage)
+			{
+				BitmapDrawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
+				imageView.setImageDrawable(drawable);
+
+				// imageView.setImageDrawable(IconCacheManager.getInstance()
+				// .getIconForMSISDN(mappedId));
+
+				getLoaderManager().initLoader(0, null, this);
+
+				mDialog = ProgressDialog.show(getActivity(), null, getResources().getString(R.string.downloading_image));
+				mDialog.setCancelable(true);
+			}
 		}
-		if (downloadImage)
+		else
 		{
-			iconLoader.loadImage(mappedId, imageView);
-			// imageView.setImageDrawable(IconCacheManager.getInstance()
-			// .getIconForMSISDN(mappedId));
-
-			getLoaderManager().initLoader(0, null, this);
-
-			mDialog = ProgressDialog.show(getActivity(), null, getResources().getString(R.string.downloading_image));
-			mDialog.setCancelable(true);
+			imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(key, false));
+			imageView.setImageResource(Utils.isGroupConversation(mappedId) ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
 		}
 
 	}
@@ -127,7 +182,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 	@Override
 	public Loader<Boolean> onCreateLoader(int id, Bundle arguments)
 	{
-		return new ProfileImageLoader(getActivity(), mappedId, fileName, hasCustomImage, isStatusImage, url);
+		return new ProfileImageLoader(getActivity(), key, fileName, hasCustomImage, isStatusImage, url);
 	}
 
 	@Override
@@ -142,15 +197,22 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 		File file = new File(basePath, fileName);
 
+		BitmapDrawable drawable = null;
 		if (file.exists())
 		{
-			imageView.setImageDrawable(BitmapDrawable.createFromPath(basePath + "/" + fileName));
+			drawable = Utils.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
+					ImageWorker.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize));
+			imageView.setImageDrawable(drawable);
 		}
 
+		Log.d(getClass().getSimpleName(), "Putting in cache mappedId : " + mappedId);
 		/*
-		 * Removing the smaller icon in cache.
+		 * Putting downloaded image bitmap in cache.
 		 */
-		HikeMessengerApp.getLruCache().remove(mappedId);
+		if (drawable != null)
+		{
+			HikeMessengerApp.getLruCache().putInCache(mappedId, drawable);
+		}
 
 		if (isStatusImage)
 		{

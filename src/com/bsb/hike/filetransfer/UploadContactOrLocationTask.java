@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
@@ -39,6 +38,7 @@ import com.bsb.hike.http.CustomByteArrayEntity;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.ProgressListener;
 import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
@@ -149,6 +149,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
+				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -156,10 +157,11 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 			hikeFile.setFileKey(fileKey);
+			hikeFile.setFileSize(fileSize);
 			hikeFile.setFileTypeString(uploadingContact ? HikeConstants.CONTACT_CONTENT_TYPE : HikeConstants.LOCATION_CONTENT_TYPE);
 
 			filesArray.put(hikeFile.serialize());
-			Log.d(getClass().getSimpleName(), "JSON FINAL: " + hikeFile.serialize());
+			Logger.d(getClass().getSimpleName(), "JSON FINAL: " + hikeFile.serialize());
 			metadata.put(HikeConstants.FILES, filesArray);
 
 			((ConvMessage) userContext).setMetadata(metadata);
@@ -175,7 +177,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception", e);
+			Logger.e(getClass().getSimpleName(), "Exception", e);
 			return FTResult.UPLOAD_FAILED;
 		}
 		return FTResult.SUCCESS;
@@ -193,7 +195,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		AccountUtils.addToken(httpPut);
 		httpPut.addHeader("Connection", "Keep-Alive");
 		httpPut.addHeader("Content-Name", fileName);
-		Log.d("Upload", "Content type: " + fileType);
+		Logger.d("Upload", "Content type: " + fileType);
 		httpPut.addHeader("Content-Type", TextUtils.isEmpty(fileType) ? "" : fileType);
 		httpPut.addHeader("X-Thumbnail-Required", "0");
 		final AbstractHttpEntity entity;
@@ -223,7 +225,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private JSONObject getFileTransferMetadataForLocation(double latitude, double longitude, int zoomLevel, String address, String thumbnailString) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null).serialize());
+		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null, true).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 
@@ -267,7 +269,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception", e);
+			Logger.e(getClass().getSimpleName(), "Exception", e);
 			return;
 		}
 	}
@@ -287,7 +289,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private void fetchThumbnailAndUpdateConvMessage(double latitude, double longitude, int zoomLevel, String address, ConvMessage convMessage) throws Exception
 	{
 		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel, HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
-		Log.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
+		Logger.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 
 		Bitmap thumbnail = BitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
 		String thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
@@ -304,7 +306,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	protected void postExecute(FTResult result)
 	{
 		fileTaskMap.remove(((ConvMessage) userContext).getMsgID());
-		Log.d(getClass().getSimpleName(), "error display: removing" + ((ConvMessage) userContext).getMsgID());
+		Logger.d(getClass().getSimpleName(), "error display: removing" + ((ConvMessage) userContext).getMsgID());
 		if (userContext != null)
 		{
 			// HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);

@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.db.HikeUserDatabase;
@@ -33,7 +32,7 @@ public class ContactUtils
 
 		if (!Utils.isUserOnline(ctx))
 		{
-			Log.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
+			Logger.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			return;
 		}
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
@@ -85,7 +84,7 @@ public class ContactUtils
 		/* return early if things are in sync */
 		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty()))
 		{
-			Log.d("ContactUtils", "DB in sync");
+			Logger.d("ContactUtils", "DB in sync");
 			return;
 		}
 
@@ -96,7 +95,7 @@ public class ContactUtils
 			{
 				ids_json.put(string);
 			}
-			Log.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
+			Logger.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
 			/* Delete ids from hike user DB */
@@ -114,7 +113,7 @@ public class ContactUtils
 		}
 		catch (Exception e)
 		{
-			Log.e("ContactUtils", "error updating addressbook", e);
+			Logger.e("ContactUtils", "error updating addressbook", e);
 		}
 	}
 
@@ -204,7 +203,7 @@ public class ContactUtils
 
 			int idFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts._ID);
 			int nameFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-			Log.d("ContactUtils", "Starting to scan address book");
+			Logger.d("ContactUtils", "Starting to scan address book");
 			while (contacts.moveToNext())
 			{
 				String id = contacts.getString(idFieldColumnIndex);
@@ -302,13 +301,13 @@ public class ContactUtils
 				}
 				catch (Exception e)
 				{
-					Log.w("ContactUtils", "Expection while adding sim contacts", e);
+					Logger.w("ContactUtils", "Expection while adding sim contacts", e);
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			Log.w("ContactUtils", "Expection while querying for sim contacts", e);
+			Logger.w("ContactUtils", "Expection while querying for sim contacts", e);
 		}
 		finally
 		{

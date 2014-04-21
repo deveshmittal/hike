@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import android.util.Log;
+import com.bsb.hike.utils.Logger;
 
 public class HikePubSub implements Runnable
 {
@@ -235,8 +235,6 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_SMS_SYNC_DIALOG = "showSMSSyncDialog";
 
-	public static final String SHOWN_UNDELIVERED_MESSAGE = "shownUndeliveredMessage";
-
 	public static final String STICKER_DOWNLOADED = "stickerDownloaded";
 
 	public static final String STICKER_CATEGORY_DOWNLOADED = "stickerCategoryDownloaded";
@@ -294,6 +292,20 @@ public class HikePubSub implements Runnable
 	public static final String SHOW_FREE_INVITE_SMS = "showFreeInviteSMS";
 
 	public static final String CHAT_BACKGROUND_CHANGED = "chatBackgroundChanged";
+
+	public static final String CLEAR_CONVERSATION = "clearConversation";
+	
+	public static final String UPDATE_NETWORK_STATE = "updateNetworkState";
+
+	public static final String MULTI_FILE_TASK_FINISHED = "multiFileTaskFinished";
+
+	public static final String CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE = "conversationClearedByDeletingLastMessage";
+
+	public static final String CONTACT_SYNCED = "contactSynced";
+
+	public static final String MQTT_CONNECTED = "mqttConnected";
+
+	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
 
 	private final Thread mThread;
 
@@ -371,7 +383,7 @@ public class HikePubSub implements Runnable
 			}
 			catch (InterruptedException e)
 			{
-				Log.e("PubSub", "exception while running", e);
+				Logger.e("PubSub", "exception while running", e);
 				continue;
 			}
 			if (op == DONE_OPERATION)

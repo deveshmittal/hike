@@ -16,13 +16,13 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.View;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -66,7 +66,7 @@ public class MessageMetadata
 
 	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
 
-	public MessageMetadata(JSONObject metadata) throws JSONException
+	public MessageMetadata(JSONObject metadata, boolean isSent) throws JSONException
 	{
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER : ParticipantInfoState
 				.fromJSON(metadata);
@@ -109,11 +109,11 @@ public class MessageMetadata
 		}
 		this.newUser = metadata.optString(HikeConstants.NEW_USER).equals("true");
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
-		this.hikeFileList = getHikeFileListFromJSONArray(metadata.optJSONArray(HikeConstants.FILES));
+		this.hikeFileList = getHikeFileListFromJSONArray(metadata.optJSONArray(HikeConstants.FILES), isSent);
 		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(metadata.optString(HikeConstants.CONTENT_TYPE)))
 		{
 			this.hikeFileList = new ArrayList<HikeFile>();
-			this.hikeFileList.add(new HikeFile(metadata));
+			this.hikeFileList.add(new HikeFile(metadata, isSent));
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
 		this.json = metadata;
@@ -127,8 +127,7 @@ public class MessageMetadata
 			else
 			// this is the case when you receive a sticker from another user
 			{
-				String val = metadata.optString(StickerManager.CATEGORY_ID);
-				StickerCategory cat = StickerManager.getInstance().getCategoryForName(val);
+				String cat = metadata.optString(StickerManager.CATEGORY_ID);
 				this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
 			}
 		}
@@ -144,7 +143,7 @@ public class MessageMetadata
 		return json.optString(StickerManager.CATEGORY_ID);
 	}
 
-	private List<HikeFile> getHikeFileListFromJSONArray(JSONArray fileList)
+	private List<HikeFile> getHikeFileListFromJSONArray(JSONArray fileList, boolean isSent)
 	{
 		if (fileList == null)
 		{
@@ -153,7 +152,7 @@ public class MessageMetadata
 		List<HikeFile> hikeFileList = new ArrayList<HikeFile>();
 		for (int i = 0; i < fileList.length(); i++)
 		{
-			hikeFileList.add(new HikeFile(fileList.optJSONObject(i)));
+			hikeFileList.add(new HikeFile(fileList.optJSONObject(i), isSent));
 		}
 		return hikeFileList;
 	}
@@ -272,7 +271,7 @@ public class MessageMetadata
 			}
 			catch (JSONException e)
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 		}
 		else

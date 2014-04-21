@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.utils.Utils;
 
 public class IconLoader extends ImageWorker
 {
@@ -80,13 +79,8 @@ public class IconLoader extends ImageWorker
 			id = id.substring(0, idx);
 			rounded = true;
 		}
-		Bitmap bm = decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
-		if (bm == null)
-		{
-			return decodeSampledBitmapFromResource(mResources, Utils.getId(id, rounded), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
-		}
-		else
-			return bm;
+		Bitmap bm = decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight);
+		return bm;
 	}
 
 	@Override

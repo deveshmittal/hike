@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,10 +18,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +45,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class HikeListActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
@@ -69,15 +70,19 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private Map<String, Boolean> toggleBlockMap;
 
-	private ViewGroup doneContainer;
+	private View doneBtn;
 
-	private TextView doneText;
+	private ImageView arrow;
 
-	private Button doneBtn;
+	private TextView postText;
 
 	private TextView title;
 
 	private ImageView backIcon;
+	
+	List<Pair<AtomicBoolean, ContactInfo>> firstSectionList;
+	
+	private boolean calledFromFTUE = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -93,6 +98,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			type = Type.INVITE;
 		}
+		
+		if (getIntent().getBooleanExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, false))
+		{
+			calledFromFTUE = true;
+		}
 
 		selectedContacts = new HashSet<String>();
 
@@ -102,6 +112,8 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
+
+		findViewById(android.R.id.empty).setVisibility(View.GONE);
 
 		switch (type)
 		{
@@ -119,8 +131,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		if (type != Type.BLOCK)
 		{
-			selectedContacts.clear();
-			doneContainer.setVisibility(View.GONE);
+			postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 		}
 		backIcon.setImageResource(R.drawable.ic_back);
 		setLabel();
@@ -138,37 +149,36 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+
+		doneBtn.setVisibility(View.VISIBLE);
+		
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
+
 		if (type != Type.BLOCK)
 		{
-			doneContainer = (ViewGroup) actionBarView.findViewById(R.id.done_container);
-
-			int padding = (int) (7 * Utils.densityMultiplier);
-			doneContainer.setPadding(padding, 0, padding, 0);
-
-			doneText = (TextView) actionBarView.findViewById(R.id.done_text);
-			doneText.setTextSize(14);
-			doneText.setTypeface(doneText.getTypeface(), Typeface.BOLD);
-
-			View tickView = actionBarView.findViewById(R.id.ic_tick);
-			tickView.setVisibility(View.GONE);
-
-			doneContainer.setOnClickListener(new OnClickListener()
+			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
 				public void onClick(View v)
 				{
-					showNativeSMSPopup();
+					if(calledFromFTUE)
+					{
+						showInviteConfirmationPopup();
+					}
+					else
+					{
+						showNativeSMSPopup();
+					}
 				}
 			});
 		}
 		else
 		{
-			doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
-			doneBtn.setVisibility(View.VISIBLE);
-			doneBtn.setText(R.string.save);
-			doneBtn.setEnabled(false);
-
+			postText.setText(R.string.save);
 			doneBtn.setOnClickListener(new OnClickListener()
 			{
 
@@ -197,20 +207,40 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 					{
 						intent = new Intent(HikeListActivity.this, TellAFriend.class);
 					}
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
 				}
 				else
 				{
-					intent = new Intent(HikeListActivity.this, SettingsActivity.class);
+					onBackPressed();
 				}
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-
 			}
 		});
 
 		actionBar.setCustomView(actionBarView);
 
 		init();
+	}
+	
+	private void showInviteConfirmationPopup()
+	{
+		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
+		confirmDialog.setHeader(R.string.invite_friends);
+		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg, selectedContacts.size()));
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				confirmDialog.dismiss();
+				showNativeSMSPopup();
+			}
+		};
+
+		confirmDialog.setOkButton(R.string.invite_1, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.cancel);
+		confirmDialog.show();
 	}
 
 	private void setLabel()
@@ -316,25 +346,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
 			ViewGroup selectAllContainer = (ViewGroup) findViewById(R.id.select_all_container);
-
+			
+			firstSectionList = new ArrayList<Pair<AtomicBoolean,ContactInfo>>();
+			
 			switch (type)
 			{
 			case BLOCK:
-				/*
-				 * This would be true when we have pre checked items.
-				 */
-				for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList)
-				{
-					boolean checked = contactItem.first.get();
-					if (checked)
-					{
-						selectedContacts.add(contactItem.second.getMsisdn());
-					}
-					else
-					{
-						break;
-					}
-				}
+				getBlockedContactsList(contactList, firstSectionList); 
 				selectAllContainer.setVisibility(View.GONE);
 				break;
 			case INVITE:
@@ -366,34 +384,48 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						selectAllCB.setChecked(!selectAllCB.isChecked());
 					}
 				});
+				
+				getRecommendedInvitesList(contactList, firstSectionList);
 				break;
 			}
 
-			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, contactList, type == Type.BLOCK);
+			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean,ContactInfo>>>();
+			contactList.removeAll(firstSectionList);
+			if(!firstSectionList.isEmpty())
+			{
+				completeSectionsData.put(0,firstSectionList);
+			}
+			completeSectionsData.put(completeSectionsData.size(),contactList);
+			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, completeSectionsData, type == Type.BLOCK);
 			input.addTextChangedListener(adapter);
 
 			listView.setAdapter(adapter);
+			listView.setEmptyView(findViewById(android.R.id.empty));
+			setupActionBarElements();
 		}
 	}
 
 	public void selectAllToggled(boolean isChecked)
 	{
-		List<Pair<AtomicBoolean, ContactInfo>> contactList = adapter.getCompleteList();
+		HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> contactListMap = adapter.getCompleteList();
 
-		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
+		for(Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : contactListMap.entrySet())
 		{
-			pair.first.set(isChecked);
-			String msisdn = pair.second.getMsisdn();
-			if (isChecked)
+			for (Pair<AtomicBoolean, ContactInfo> pair : entry.getValue())
 			{
-				selectedContacts.add(msisdn);
-			}
-			else
-			{
-				selectedContacts.remove(msisdn);
+				pair.first.set(isChecked);
+				String msisdn = pair.second.getMsisdn();
+				if (isChecked)
+				{
+					selectedContacts.add(msisdn);
+				}
+				else
+				{
+					selectedContacts.remove(msisdn);
+				}
 			}
 		}
-		adapter.selectAllToggled();
+		adapter.notifyDataSetChanged();
 		setupActionBarElements();
 	}
 
@@ -452,7 +484,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				while (iterator.hasNext())
 				{
 					String msisdn = iterator.next();
-					Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+					Logger.d(getClass().getSimpleName(), "Inviting " + msisdn);
 					Utils.sendInvite(msisdn, this, false, true);
 
 					inviteArray.put(msisdn);
@@ -460,6 +492,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				data.put(HikeConstants.MESSAGE_ID, time);
 				data.put(HikeConstants.LIST, inviteArray);
 
+				if(calledFromFTUE)
+				{
+					JSONObject ftueData = new JSONObject();
+					ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
+					data.put(HikeConstants.METADATA, ftueData);
+				}
+				
 				mqttPacket.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
@@ -495,12 +534,58 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		if (!selectedContacts.isEmpty())
 		{
-			doneContainer.setVisibility(View.VISIBLE);
-			doneText.setText(getString(R.string.send_invite, selectedContacts.size()));
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
+			if(type != Type.BLOCK)
+			{
+				postText.setText(getString(R.string.send_invite, selectedContacts.size()));
+			}
 		}
 		else
 		{
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 			init();
+		}
+	}
+	
+	private void getBlockedContactsList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
+	{
+		/*
+		 * This would be true when we have pre checked items.
+		 */
+		for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList)
+		{
+			boolean checked = contactItem.first.get();
+			if (checked)
+			{
+				firstSectionList.add(contactItem);
+				selectedContacts.add(contactItem.second.getMsisdn());
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	private void getRecommendedInvitesList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
+	{
+		int limit = 6;
+		List<ContactInfo> recommendedContactList = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(20);
+		if (recommendedContactList.size() >= limit)
+		{
+			recommendedContactList = recommendedContactList.subList(0, limit);
+		}
+		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
+		{
+			ContactInfo contactInfo = pair.second;
+			if(recommendedContactList.contains(contactInfo)){
+				if(calledFromFTUE)
+				{
+					pair.first.set(true);
+					selectedContacts.add(contactInfo.getMsisdn());
+				}
+				firstSectionList.add(pair);
+			}
 		}
 	}
 
@@ -531,7 +616,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 			else
 			{
-				doneBtn.setEnabled(true);
+				Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
 				boolean blocked = pair.first.get();
 				toggleBlockMap.put(msisdn, blocked);
 			}
@@ -550,7 +635,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			{
 				msisdn = Utils.normalizeNumber(msisdn,
 						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE));
-				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+				Logger.d(getClass().getSimpleName(), "Inviting " + msisdn);
 				Utils.sendInvite(msisdn, this);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT).show();
 			}

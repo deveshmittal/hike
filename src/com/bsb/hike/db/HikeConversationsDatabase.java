@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +26,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -48,6 +46,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
@@ -262,10 +261,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						}
 						catch (JSONException e)
 						{
-							Log.e(getClass().getSimpleName(), "Invalid values");
+							Logger.e(getClass().getSimpleName(), "Invalid values");
 						}
 					}
-					Log.d(getClass().getSimpleName(), "DB data: " + data.toString());
+					Logger.d(getClass().getSimpleName(), "DB data: " + data.toString());
 					Utils.makeNewFileWithExistingData(data);
 
 					String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
@@ -602,7 +601,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (JSONException e)
 				{
-					Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+					Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 
 			}
@@ -721,7 +720,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid json");
+			Logger.w(getClass().getSimpleName(), "Invalid json");
 			return null;
 		}
 	}
@@ -744,7 +743,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), "Invalid json");
+			Logger.w(getClass().getSimpleName(), "Invalid json");
 		}
 	}
 
@@ -988,7 +987,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				return conv;
 			}
 			/* TODO does this happen? If so, what should we do? */
-			Log.wtf("Conversationadding", "Couldn't add conversation --- race condition?");
+			Logger.wtf("Conversationadding", "Couldn't add conversation --- race condition?");
 			return null;
 		}
 		finally
@@ -1038,7 +1037,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (JSONException e)
 				{
-					Log.w(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+					Logger.w(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
 				message.setReadByArray(c.getString(readByColumn));
 				elements.add(elements.size(), message);
@@ -1064,16 +1063,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE }, DBConstants.MSISDN + "=?",
-					new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT },
+					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
-				Log.d(getClass().getSimpleName(), "Could not find db entry");
+				Logger.d(getClass().getSimpleName(), "Could not find db entry");
 				return null;
 			}
 
 			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
 			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
+			int unreadCount = c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
 
 			if (Utils.isGroupConversation(msisdn))
 			{
@@ -1099,8 +1099,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			}
 
-			List<ConvMessage> messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			List<ConvMessage> messages;
+			if (limit != -1 && unreadCount > limit)
+			{
+				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+			}
+			else
+			{
+				messages = getConversationThread(msisdn, convid, limit, conv, -1);
+			}
 			conv.setMessages(messages);
+			conv.setUnreadCount(unreadCount);
 
 			return conv;
 		}
@@ -1131,7 +1140,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
-				Log.d(getClass().getSimpleName(), "Could not find db entry");
+				Logger.d(getClass().getSimpleName(), "Could not find db entry");
 				return null;
 			}
 
@@ -1177,7 +1186,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			catch (JSONException e)
 			{
-				Log.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+				Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 			}
 			conv.addMessage(message);
 
@@ -1251,7 +1260,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 				 */
-				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata))
+				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata) || Utils.isGroupConversation(msisdn))
 				{
 					ConvMessage message = new ConvMessage(messageString, msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 							c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));
@@ -1261,7 +1270,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					catch (JSONException e)
 					{
-						Log.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+						Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 					}
 					message.setConversation(conv);
 
@@ -1343,7 +1352,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 		conversations.addAll(conversationMap.values());
-		Log.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
+		Logger.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
@@ -1376,7 +1385,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (JSONException e)
 				{
-					Log.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
 				return message;
 			}
@@ -1449,7 +1458,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					new String[] { msisdn }, null, null, null);
 			if (!groupCursor.moveToFirst())
 			{
-				Log.w(getClass().getSimpleName(), "Could not find db entry: " + msisdn);
+				Logger.w(getClass().getSimpleName(), "Could not find db entry: " + msisdn);
 				return null;
 			}
 
@@ -1515,7 +1524,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			values.put(DBConstants.UNREAD_COUNT, 0);
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MESSAGE_ID + " in " + sb.toString(), null);
 
-			Log.d("HIKE CONVERSATION DB ", "Rows Updated : " + rowsAffected);
+			Logger.d("HIKE CONVERSATION DB ", "Rows Updated : " + rowsAffected);
 			return ids;
 		}
 		finally
@@ -1537,6 +1546,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			deleteMessageFromConversation(convMessage.getMsisdn(), convMessage.getConversation().getConvId());
 		}
+	}
+
+	public void clearConversation(long convId)
+	{
+		Long[] args = new Long[] { convId };
+		/*
+		 * Clearing the messages table.
+		 */
+		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.CONV_ID + "= ?", args);
+
+		/*
+		 * Next we have to clear the conversation table.
+		 */
+		clearLastConversationMessage(convId);
+	}
+
+	private void clearLastConversationMessage(long convId)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.MESSAGE, "");
+		contentValues.put(DBConstants.MESSAGE_METADATA, "");
+		contentValues.put(DBConstants.GROUP_PARTICIPANT, "");
+		contentValues.put(DBConstants.IS_STATUS_MSG, false);
+		contentValues.put(DBConstants.MESSAGE_ID, 0);
+		contentValues.put(DBConstants.MAPPED_MSG_ID, 0);
+		contentValues.put(DBConstants.UNREAD_COUNT, 0);
+		contentValues.put(DBConstants.MSG_STATUS, State.RECEIVED_READ.ordinal());
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { Long.toString(convId) });
 	}
 
 	private void deleteMessageFromConversation(String msisdn, long convId)
@@ -1570,18 +1608,30 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (JSONException e)
 				{
-					Log.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
 				ContentValues contentValues = getContentValueForConversationMessage(message);
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 			}
 			else
 			{
-				/*
-				 * This conversation is empty.
-				 */
-				mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
-				conversationEmpty = true;
+				if (Utils.isGroupConversation(msisdn))
+				{
+					/*
+					 * If we have removed the last message of a group, we should do the same operations we do when clearing a conversation.
+					 */
+					clearLastConversationMessage(convId);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, msisdn);
+					return;
+				}
+				else
+				{
+					/*
+					 * This conversation is empty.
+					 */
+					mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+					conversationEmpty = true;
+				}
 			}
 			ConvMessage newLastMessage = conversationEmpty ? null : getLastMessageForConversation(msisdn);
 
@@ -2062,12 +2112,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * 
 	 * @return
 	 */
-	public List<Pair<AtomicBoolean, ContactInfo>> getGroupNameAndParticipantsAsContacts(Context context)
+	public List<ContactInfo> getGroupNameAndParticipantsAsContacts(Context context)
 	{
 		Cursor groupCursor = null;
 		try
 		{
-			List<Pair<AtomicBoolean, ContactInfo>> groups = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+			List<ContactInfo> groups = new ArrayList<ContactInfo>();
 			groupCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME }, DBConstants.GROUP_ALIVE + "=1", null, null, null,
 					null);
 			int groupNameIdx = groupCursor.getColumnIndex(DBConstants.GROUP_NAME);
@@ -2086,7 +2136,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
 
 				ContactInfo group = new ContactInfo(groupId, numberMembers, groupName, groupId, true);
-				groups.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(), group));
+				groups.add(group);
 			}
 
 			return groups;
@@ -2112,7 +2162,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			insertStatement.bindLong(2, lastUsed);
 
 			long id = insertStatement.executeInsert();
-			Log.d(getClass().getSimpleName(), "iNserted row: " + id);
+			Logger.d(getClass().getSimpleName(), "iNserted row: " + id);
 		}
 		finally
 		{
@@ -2354,7 +2404,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String metadataString = c1.getString(c1.getColumnIndex(DBConstants.MESSAGE_METADATA));
 				try
 				{
-					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadataString));
+					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadataString), false);
 
 					if (statusId.equals(messageMetadata.getStatusMessage().getMappedId()))
 					{
@@ -2364,7 +2414,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (JSONException e)
 				{
-					Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+					Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
 		}
@@ -2392,7 +2442,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	private void denormaliseConversations(SQLiteDatabase mDb)
 	{
-		Log.d(getClass().getSimpleName(), "Denormalisingggg");
+		Logger.d(getClass().getSimpleName(), "Denormalisingggg");
 		String query = "SELECT " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE + ", " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + ", "
 				+ DBConstants.MESSAGES_TABLE + "." + DBConstants.TIMESTAMP + ", " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE_ID + ", " + DBConstants.MESSAGES_TABLE
 				+ "." + DBConstants.MAPPED_MSG_ID + ", " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE_METADATA + ", " + DBConstants.MESSAGES_TABLE + "."
@@ -2436,12 +2486,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.GROUP_PARTICIPANT, groupParticipant);
 				try
 				{
-					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadata));
+					MessageMetadata messageMetadata = new MessageMetadata(new JSONObject(metadata), false);
 					contentValues.put(DBConstants.IS_STATUS_MSG, messageMetadata.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE);
 				}
 				catch (JSONException e)
 				{
-					Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+					Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=" + convid, null);
@@ -2705,7 +2755,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					JSONObject fileJson = fileJsonArray.getJSONObject(0);
 
-					HikeFile hikeFile = new HikeFile(fileJson);
+					HikeFile hikeFile = new HikeFile(fileJson, false);
 
 					if (hikeFile.getThumbnail() == null)
 					{
@@ -2726,7 +2776,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (JSONException e)
 				{
-					Log.w(getClass().getSimpleName(), "Invalid JSON");
+					Logger.w(getClass().getSimpleName(), "Invalid JSON");
 				}
 			}
 
@@ -2974,5 +3024,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 		}
+	}
+
+	public void changeGroupOwner(String groupId, String msisdn)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.GROUP_OWNER, msisdn);
+
+		mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
 	}
 }

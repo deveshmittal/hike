@@ -2,8 +2,9 @@ package com.bsb.hike.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ListView;
+
+import com.bsb.hike.utils.Logger;
 
 /*
  * Added to add a workaround for this bug:
@@ -36,7 +37,7 @@ public class ConversationListView extends ListView
 		}
 		catch (IllegalStateException e)
 		{
-			Log.w(getClass().getSimpleName(), "Conversation footer exception");
+			Logger.w(getClass().getSimpleName(), "Conversation footer exception");
 		}
 	}
 }

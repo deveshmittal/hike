@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +39,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -92,6 +92,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		this.userMsisdn = userMsisdn;
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
 		this.iconImageLoader = new IconLoader(context, mIconImageSize);
+		this.iconImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.protipIndex = -1;
 	}
@@ -257,8 +258,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			}
 			else
 			{
-				iconImageLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.avatar, true);
-				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
+				setAvatar(statusMessage.getMsisdn(), viewHolder.avatar);
 			}
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 
@@ -336,7 +336,10 @@ public class CentralTimelineAdapter extends BaseAdapter
 				viewHolder.noBtn.setVisibility(View.GONE);
 				viewHolder.extraInfo.setVisibility(View.GONE);
 
-				viewHolder.mainInfo.setText(context.getString(R.string.friend_request_accepted_name, Utils.getFirstName(statusMessage.getNotNullName())));
+				boolean friendRequestAccepted = statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED;
+
+				viewHolder.mainInfo.setText(context.getString(friendRequestAccepted ? R.string.accepted_your_favorite_request_details
+						: R.string.you_accepted_favorite_request_details, Utils.getFirstName(statusMessage.getNotNullName())));
 				break;
 			case PROTIP:
 				Protip protip = statusMessage.getProtip();
@@ -402,7 +405,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case PROFILE_PIC_CHANGE:
-			iconImageLoader.loadImage(statusMessage.getMsisdn(), true, viewHolder.avatar, true);
+			setAvatar(statusMessage.getMsisdn(), viewHolder.avatar);
 			viewHolder.name.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me" : statusMessage.getNotNullName());
 			viewHolder.mainInfo.setText(R.string.status_profile_pic_notification);
 
@@ -423,8 +426,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 			break;
 
 		case FTUE_ITEM:
-			viewHolder.name.setText(R.string.friends_ftue_item_label);
-			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_friends);
+			viewHolder.name.setText(R.string.favorites_ftue_item_label);
+			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_favorites);
 
 			viewHolder.contactsContainer.removeAllViews();
 
@@ -445,7 +448,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView addBtn = (TextView) parentView.findViewById(R.id.invite_btn);
 
-				iconImageLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
+				setAvatar(contactInfo.getMsisdn(), avatar);
+
 				name.setText(contactInfo.getName());
 
 				addBtn.setTag(contactInfo);
@@ -478,6 +482,11 @@ public class CentralTimelineAdapter extends BaseAdapter
 		}
 
 		return convertView;
+	}
+
+	private void setAvatar(String msisdn, ImageView avatar)
+	{
+		iconImageLoader.loadImage(msisdn, true, avatar, true);
 	}
 
 	private void addMoods(ViewGroup container, int[] moods)
@@ -573,7 +582,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				}
 				catch (ActivityNotFoundException e)
 				{
-					Log.e(CentralTimelineAdapter.class.getSimpleName(), "Unable to open market");
+					Logger.e(CentralTimelineAdapter.class.getSimpleName(), "Unable to open market");
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.GAMING_PROTIP_DOWNLOADED, protip);
 			}
@@ -648,24 +657,9 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
-			FavoriteType favoriteType;
-			if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-			{
-				favoriteType = FavoriteType.FRIEND;
-			}
-			else
-			{
-				favoriteType = FavoriteType.REQUEST_SENT;
-				Toast.makeText(context, R.string.friend_request_sent, Toast.LENGTH_SHORT).show();
-			}
+			Utils.addFavorite(context, contactInfo, true);
 
-			/*
-			 * Cloning the object since we don't want to send the ftue reference.
-			 */
 			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
-
-			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(contactInfo2, favoriteType);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK, contactInfo2.getMsisdn());
 

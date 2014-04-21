@@ -8,4 +8,9 @@
     <dimen name="top_btn_padding">3dp</dimen>
     <dimen name="tutorial_button_margin">25dp</dimen>
     <dimen name="version_item_marginTop">120dp</dimen>
+    <dimen name="signup_header_height">127dp</dimen>
+    <dimen name="signup_gender_padding_top">74dp</dimen>
+    <dimen name="signup_profile_pic_dimen">96dp</dimen>
+    <dimen name="signup_profile_pic_icon_dimen">32dp</dimen>
+    <dimen name="addfriend_popup_title_padding_right">24dp</dimen>
 </resources>

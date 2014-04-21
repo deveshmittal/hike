@@ -24,18 +24,18 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> implements ActivityCallableTask
@@ -56,7 +56,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					String pin = Utils.getSMSPinCode(body);
 					if (pin != null)
 					{
-						SignupTask.this.addUserInput(pin);
+						if(getDisplayChild() != SignupActivity.PIN){
+							SignupTask.this.addUserInput(pin);
+						} else{
+							SignupTask.this.autoFillPin(pin);
+						}
 						this.abortBroadcast();
 						break;
 					}
@@ -69,10 +73,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	{
 		public void onProgressUpdate(StateValue value);
 	}
+	
+	public int getDisplayChild(){
+		return ((SignupActivity) context).getDisplayItem();
+	}
+
+	public void autoFillPin(String pin)
+	{
+		((SignupActivity) context).autoFillPin(pin);
+	}
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED
 	};
 
 	public class StateValue
@@ -110,7 +123,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private Birthday birthdate;
 
-	private boolean isFemale = false;
+	private Boolean isFemale;
+
+	private String userName;
 
 	private static final String INDIA_ISO = "IN";
 
@@ -127,6 +142,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	{
 		this.onSignupTaskProgressUpdate = (OnSignupTaskProgressUpdate) activity;
 		this.context = activity;
+		SignupTask.isAlreadyFetchingNumber = false; 
 	}
 
 	public static SignupTask getSignupTask(Activity activity)
@@ -153,8 +169,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public void addProfilePicPath(String path, Bitmap profilePic)
 	{
-		profilePicRequest = new HikeHttpRequest("/account/avatar", RequestType.PROFILE_PIC, null);
-		profilePicRequest.setFilePath(path);
+		if(path != null)
+		{
+			Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, path);
+			editor.commit();
+		}
 		this.profilePicSmall = profilePic;
 	}
 
@@ -163,7 +183,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.birthdate = birthdate;
 	}
 
-	public void addGender(boolean isFemale)
+	public void addUserName(String name)
+	{
+		this.userName = name;
+	}
+
+	
+	public void addGender(Boolean isFemale)
 	{
 		this.isFemale = isFemale;
 	}
@@ -171,7 +197,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
-		Log.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
+		Logger.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
 		isPinError = false;
 		isRunning = true;
 		SharedPreferences settings = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -183,7 +209,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (isCancelled())
 		{
 			/* just gtfo */
-			Log.d("SignupTask", "Task was cancelled");
+			Logger.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
 
@@ -228,14 +254,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				catch (InterruptedException e)
 				{
-					Log.d("SignupTask", "Interrupted exception while waiting for msisdn", e);
+					Logger.d("SignupTask", "Interrupted exception while waiting for msisdn", e);
 					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
 
 				String number = this.data;
 				this.data = null;
-				Log.d("SignupTask", "NUMBER RECEIVED: " + number);
+				Logger.d("SignupTask", "NUMBER RECEIVED: " + number);
 
 				if (canPullInSms)
 				{
@@ -253,7 +279,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 				if (TextUtils.isEmpty(unauthedMSISDN))
 				{
-					Log.d("SignupTask", "Unable to send PIN to user");
+					Logger.d("SignupTask", "Unable to send PIN to user");
 					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
@@ -265,13 +291,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				editor.putString(HikeMessengerApp.MSISDN_ENTERED, unauthedMSISDN);
 				editor.commit();
 
-				/*
-				 * If the device is a kit kat device, we won't be able to pull in SMS so no point waiting for 1 minute. If the device can't pull in SMS no point waiting for the
-				 * PIN.
-				 */
-				if (!Utils.hasKitKat() && canPullInSms)
+				if (canPullInSms)
 				{
-
 					publishProgress(new StateValue(State.PULLING_PIN, null));
 
 					synchronized (this)
@@ -283,27 +304,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						}
 						catch (InterruptedException e)
 						{
-							Log.e("SignupTask", "Task was interrupted", e);
+							Logger.e("SignupTask", "Task was interrupted", e);
 						}
 					}
 
-					this.context.getApplicationContext().unregisterReceiver(receiver);
-					receiver = null;
 				}
-				else
-				{
-					synchronized (this)
-					{
-						try
-						{
-							this.wait(HikeConstants.NON_SIM_WAIT_TIME);
-						}
-						catch (InterruptedException e)
-						{
-							Log.e("SignupTask", "Task was interrupted", e);
-						}
-					}
-				}
+				
 				accountInfo = null;
 				do
 				{
@@ -322,14 +328,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 							}
 							catch (InterruptedException e)
 							{
-								Log.e("SignupTask", "Task was interrupted while taking the pin", e);
+								Logger.e("SignupTask", "Task was interrupted while taking the pin", e);
 							}
 						}
 					}
 					if (isCancelled())
 					{
 						/* just gtfo */
-						Log.d("SignupTask", "Task was cancelled");
+						Logger.d("SignupTask", "Task was cancelled");
 						return Boolean.FALSE;
 					}
 					String pin = this.data;
@@ -361,9 +367,29 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				while (this.data == null);
+				
+				if(canPullInSms && receiver != null)
+				{
+					this.context.getApplicationContext().unregisterReceiver(receiver);
+					receiver = null;
+				}
+				
+				publishProgress(new StateValue(State.PIN_VERIFIED, null));
+				synchronized (this)
+				{
+					try
+					{
+						this.wait();
+					}
+					catch (InterruptedException e)
+					{
+						Logger.e("SignupTask", "Task was interrupted while taking the pin", e);
+					}
+				}
+				
 			}
 
-			Log.d("SignupTask", "saving MSISDN/Token");
+			Logger.d("SignupTask", "saving MSISDN/Token");
 			msisdn = accountInfo.msisdn;
 			/* save the new msisdn */
 			Utils.savedAccountCredentials(accountInfo, settings.edit());
@@ -377,16 +403,26 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.data = null;
 		// We're doing this to prevent the WelcomeScreen from being shown the
 		// next time we start the app.
-		Editor ed = signupTask.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		ed.putBoolean(HikeMessengerApp.ACCEPT_TERMS, true);
-		ed.commit();
-
 		if (isCancelled())
 		{
 			/* just gtfo */
-			Log.d("SignupTask", "Task was cancelled");
+			Logger.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
+
+		Editor ed = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		ed.putBoolean(HikeMessengerApp.ACCEPT_TERMS, true);
+		ed.commit();
+		
+		if(userName != null)
+		{
+			publishProgress(new StateValue(State.GENDER, ""));
+			if(isFemale != null)
+			{
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			}
+		}
+
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
@@ -421,14 +457,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					publishProgress(new StateValue(State.ERROR, HikeConstants.ADDRESS_BOOK_ERROR));
 					return Boolean.FALSE;
 				}
-				Log.d("SignupTask", "about to insert addressbook");
+				Logger.d("SignupTask", "about to insert addressbook");
 				db = HikeUserDatabase.getInstance();
 				db.setAddressBookAndBlockList(addressbook, blockList);
 
 			}
 			catch (Exception e)
 			{
-				Log.e("SignupTask", "Unable to post address book", e);
+				Logger.e("SignupTask", "Unable to post address book", e);
 				publishProgress(new StateValue(State.ERROR, HikeConstants.ADDRESS_BOOK_ERROR));
 				return Boolean.FALSE;
 			}
@@ -450,7 +486,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (isCancelled())
 		{
 			/* just gtfo */
-			Log.d("SignupTask", "Task was cancelled");
+			Logger.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
 
@@ -458,7 +494,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		{
 			try
 			{
-				if (this.data == null)
+				if (userName == null)
 				{
 					/*
 					 * publishing this will cause the the Activity to ask the user for a name and signal us
@@ -469,30 +505,47 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						this.wait();
 					}
 				}
-				name = this.data;
-				AccountUtils.setProfile(name, birthdate, isFemale);
+				
+				if (isFemale == null)
+				{
+					/*
+					 * publishing this will cause the the Activity to ask the user for a name and signal us
+					 */
+					publishProgress(new StateValue(State.GENDER, ""));
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+				
+				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
+				{
+					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+				}
+				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
+				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 			}
 			catch (InterruptedException e)
 			{
-				Log.e("SignupTask", "Interrupted exception while waiting for name", e);
+				Logger.e("SignupTask", "Interrupted exception while waiting for name", e);
 				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
 			}
 			catch (NetworkErrorException e)
 			{
-				Log.e("SignupTask", "Unable to set name", e);
+				Logger.e("SignupTask", "Unable to set name", e);
 				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
 			}
 			catch (IllegalStateException e)
 			{
-				Log.e(getClass().getSimpleName(), "Null Token", e);
+				Logger.e(getClass().getSimpleName(), "Null Token", e);
 				return Boolean.FALSE;
 			}
 
 			this.data = null;
 			Editor editor = settings.edit();
-			editor.putString(HikeMessengerApp.NAME_SETTING, name);
+			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
 			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
 			if (birthdate != null)
 			{
@@ -509,62 +562,24 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 
 		/* set the name */
-		publishProgress(new StateValue(State.NAME, name));
+		publishProgress(new StateValue(State.NAME, userName));
 
-		if (this.profilePicRequest != null)
+		if (profilePicSmall != null)
 		{
-			try
-			{
-				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.performRequest(profilePicRequest, true);
-
 				byte[] bytes = Utils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
 				HikeUserDatabase db = HikeUserDatabase.getInstance();
 				db.setIcon(msisdn, bytes, false);
-
-				Utils.renameTempProfileImage(msisdn);
-
-			}
-			catch (NetworkErrorException e)
-			{
-				Log.e("SignupTask", "Unable to set profile pic", e);
-				Utils.removeTempProfileImage(msisdn);
-				publishProgress(new StateValue(State.ERROR, null));
-				return Boolean.FALSE;
-			}
-			catch (IllegalStateException e)
-			{
-				Log.e("SignupTask", "Null token", e);
-				Utils.removeTempProfileImage(msisdn);
-				publishProgress(new StateValue(State.ERROR, null));
-				return Boolean.FALSE;
-			}
 		}
-
+		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-		Log.d("SignupTask", "Publishing Token_Created");
+		Logger.d("SignupTask", "Publishing Token_Created");
 
 		/* tell the service to start listening for new messages */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
-		deletePreviouslySavedProfileImages();
 		return Boolean.TRUE;
-	}
-
-	private void deletePreviouslySavedProfileImages()
-	{
-		String dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-		File dir = new File(dirPath);
-		if (!dir.exists())
-		{
-			return;
-		}
-		for (File file : dir.listFiles())
-		{
-			file.delete();
-		}
 	}
 
 	@Override
@@ -575,7 +590,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			signupTask.isRunning = false;
 		}
 		signupTask = null;
-		Log.d("SignupTask", "onCancelled called");
+		Logger.d("SignupTask", "onCancelled called");
 		unregisterReceiver();
 	}
 
@@ -613,12 +628,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public void cancelTask()
 	{
 		this.cancel(true);
-		if (signupTask != null)
-		{
-			signupTask.isRunning = false;
-		}
-		signupTask = null;
-		Log.d("SignupTask", "cancelling it manually");
+		Logger.d("SignupTask", "cancelling it manually");
 		unregisterReceiver();
 	}
 
@@ -635,7 +645,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			}
 			catch (IllegalArgumentException e)
 			{
-				Log.d("SignupTask", "IllegalArgumentException while unregistering receiver", e);
+				Logger.d("SignupTask", "IllegalArgumentException while unregistering receiver", e);
 			}
 			receiver = null;
 		}
@@ -651,6 +661,25 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
+	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	{
+		getSignupTask(activity);
+		if (!signupTask.isRunning())
+		{
+			signupTask.addGender(isFemale);
+			signupTask.addUserName(userName);
+			signupTask.addBirthdate(birthday);
+			signupTask.addProfilePicPath(null, profilePicSmall);
+			/*
+			 * if we are on signupActivity we should not anymore try to
+			 * auto auth
+			 */
+			SignupTask.isAlreadyFetchingNumber = true;
+			Utils.executeSignupTask(signupTask);
+		}
+		return signupTask;
+	}
+
 	public static SignupTask restartTask(Activity activity)
 	{
 		if (signupTask != null && signupTask.isRunning())
@@ -658,6 +687,16 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			signupTask.cancelTask();
 		}
 		startTask(activity);
+		return signupTask;
+	}
+	
+	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	{
+		if (signupTask != null && signupTask.isRunning())
+		{
+			signupTask.cancelTask();
+		}
+		startTask(activity, userName, isFemale, birthday, profilePicSmall);
 		return signupTask;
 	}
 }
