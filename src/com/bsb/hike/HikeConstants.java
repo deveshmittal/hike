@@ -792,8 +792,6 @@ public class HikeConstants
 	
 	public static final int JOINED_HIKE_STATUS_ID = -1;
 	
-	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
-
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
@@ -804,6 +802,10 @@ public class HikeConstants
 	
 	public static final int MAX_FAST_SCROLL_VISIBLE_POSITION = 6;
 	
+	public static final class ResultCodes
+	{
+		public static final int SELECT_COUNTRY = 4001;
+	}
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

@@ -792,7 +792,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 
 		Intent intent = new Intent(this, CountrySelectActivity.class);
-	    this.startActivityForResult(intent, HikeConstants.SELECT_COUNTRY_REQUEST_CODE);
+	    this.startActivityForResult(intent, HikeConstants.ResultCodes.SELECT_COUNTRY);
 	}
 
 	private void prepareLayoutForGettingPin(long timeLeft)
@@ -1733,7 +1733,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
 			setProfileImage();
 			break;
-		case HikeConstants.SELECT_COUNTRY_REQUEST_CODE:	
+		case HikeConstants.ResultCodes.SELECT_COUNTRY:	
 			if (resultCode == RESULT_OK) {
 				String countryName = data.getStringExtra(HikeConstants.Extras.SELECTED_COUNTRY);
 				selectCountry(countryName);
