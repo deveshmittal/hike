@@ -201,7 +201,13 @@
         <activity android:name=".ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>
-
+        
+        <activity
+    		android:name="com.haibison.android.lockpattern.LockPatternActivity"
+    		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
+    		android:screenOrientation="user"
+    		android:theme="@style/Theme.CustomDialog" />
+        
         <receiver android:name=".service.BootService" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
