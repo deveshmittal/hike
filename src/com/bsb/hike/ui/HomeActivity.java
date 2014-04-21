@@ -75,6 +75,7 @@ import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -1747,5 +1748,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		return fetchContactsTask;
 	}
 
-
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 }

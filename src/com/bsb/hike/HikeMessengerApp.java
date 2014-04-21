@@ -331,6 +331,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_STEALTH_FTUE_CONV_TIP = "shownSteathFtueConvTip";
 
+	public static final String STEALTH_ENCRYPTED_PATTERN = "stealthEncryptedPattern";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

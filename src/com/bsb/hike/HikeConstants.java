@@ -805,6 +805,10 @@ public class HikeConstants
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
+		
+		public static final int CREATE_LOCK_PATTERN = 4002;
+
+		public static final int CONFIRM_LOCK_PATTERN = 4003;
 	}
 	public static final class Extras
 	{
