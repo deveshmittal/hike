@@ -35,6 +35,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
@@ -170,9 +171,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
 		app.connectToService();
 
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setIcon(R.drawable.hike_logo_top_bar);
+		setupActionBar();
 
 		// Checking whether the state of the avatar and conv DB Upgrade settings
 		// is 1
@@ -214,6 +213,26 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				Utils.executeAsyncTask(fetchContactsTask);
 			}
 		}
+	}
+
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.home_action_bar, null);
+
+		View logo = actionBarView.findViewById(R.id.hike_logo);
+		logo.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState)
