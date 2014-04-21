@@ -121,4 +121,5 @@
 	<dimen name="gallery_selection_padding">20dp</dimen>
 	<dimen name="tutorial_fragment_header_padding_left">20dp</dimen>
 	<dimen name="tutorial_fragment_title_padding_Right">22dp</dimen>
+	<dimen name="app_logo_margin_right">12.3dp</dimen>
 </resources>
