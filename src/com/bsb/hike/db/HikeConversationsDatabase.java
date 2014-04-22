@@ -3044,4 +3044,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
 	}
+
+	public void toggleStealth(String msisdn, boolean isStealth)
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.IS_STEALTH, isStealth ? 1 : 0);
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
+	}
 }
