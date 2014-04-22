@@ -1094,23 +1094,8 @@ public class LockPatternView extends View {
         final Path currentPath = mCurrentPath;
         currentPath.rewind();
 
-        /*
-         * draw the circles
-         */
         final int paddingTop = mPaddingTop;
         final int paddingLeft = mPaddingLeft;
-
-        for (int i = 0; i < MATRIX_WIDTH; i++) {
-            float topY = paddingTop + i * squareHeight;
-            /*
-             * float centerY = mPaddingTop + i * mSquareHeight + (mSquareHeight
-             * / 2);
-             */
-            for (int j = 0; j < MATRIX_WIDTH; j++) {
-                float leftX = paddingLeft + j * squareWidth;
-                drawCircle(canvas, (int) leftX, (int) topY, drawLookup[i][j]);
-            }
-        }
 
         /*
          * TODO: the path should be created and cached every time we hit-detect
@@ -1180,6 +1165,21 @@ public class LockPatternView extends View {
                 currentPath.lineTo(mInProgressX, mInProgressY);
             }
             canvas.drawPath(currentPath, mPathPaint);
+        }
+        /*
+         * draw the circles
+         * We should draw circles above the path line
+         */
+        for (int i = 0; i < MATRIX_WIDTH; i++) {
+            float topY = paddingTop + i * squareHeight;
+            /*
+             * float centerY = mPaddingTop + i * mSquareHeight + (mSquareHeight
+             * / 2);
+             */
+            for (int j = 0; j < MATRIX_WIDTH; j++) {
+                float leftX = paddingLeft + j * squareWidth;
+                drawCircle(canvas, (int) leftX, (int) topY, drawLookup[i][j]);
+            }
         }
 
         /*
