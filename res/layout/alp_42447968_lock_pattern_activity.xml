@@ -26,8 +26,8 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="14sp"
-        android:textIsSelectable="true" />
+        android:textIsSelectable="true"
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -37,50 +37,61 @@
 
         <com.haibison.android.lockpattern.widget.LockPatternView
             android:id="@+id/alp_42447968_view_lock_pattern"
-            android:layout_centerInParent="true"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
     </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/alp_42447968_viewgroup_footer"
-        style="?attr/alp_42447968_button_bar_style"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
         android:visibility="gone" >
 
         <!-- A separator view -->
-
+        
         <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/alp_42447968_separator_size" />
-
+             android:layout_width="match_parent"
+             android:layout_height="1dp"
+             android:background="@color/stealth_ftue_popup_divider" />
+        
         <LinearLayout
             style="?attr/alp_42447968_button_bar_style"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="47dp"
             android:orientation="horizontal" >
 
-            <Button
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/alp_42447968_button_cancel"
-                style="?attr/alp_42447968_button_bar_button_style"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+	    		android:background="@drawable/popup_button_bg_selector"
+	    		android:textSize="16sp"
+	    		android:textColor="@drawable/popup_button_text_color_selector"
+	    		android:gravity="center"
                 android:layout_weight="1"
-                android:text="@android:string/cancel"
+                android:text="@string/cancel"
                 android:visibility="gone" />
 
-            <Button
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/stealth_ftue_popup_divider" />
+            
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/alp_42447968_button_confirm"
-                style="?attr/alp_42447968_button_bar_button_style"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+	    		android:background="@drawable/popup_button_bg_selector"
+	    		android:textSize="16sp"
+	    		android:textColor="@drawable/popup_button_text_color_selector"
+	    		android:gravity="center"
                 android:layout_weight="1"
                 android:enabled="false"
-                android:text="@string/alp_42447968_cmd_continue" />
+                android:text="@string/continue_txt" />
         </LinearLayout>
     </LinearLayout>
-
+  
 </RelativeLayout>
