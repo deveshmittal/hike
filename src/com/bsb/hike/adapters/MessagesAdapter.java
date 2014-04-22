@@ -688,6 +688,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (convMessage.isFileTransferMessage())
 		{
 		}
+		else if (viewType == ViewType.PARTICIPANT_INFO)
+		{
+		}
 		else
 		{
 			if (v == null)
@@ -716,19 +719,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.dayTextView = (TextView) v.findViewById(R.id.status_info);
 					holder.container = (ViewGroup) v.findViewById(R.id.content_container);
 					holder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
-					break;
-				case PARTICIPANT_INFO:
-					v = inflater.inflate(R.layout.message_item_receive, null);
-
-					holder.image = (ImageView) v.findViewById(R.id.avatar);
-					holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
-					holder.dayTextView = (TextView) v.findViewById(R.id.day);
-					holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
-					holder.dayLeft = v.findViewById(R.id.day_left);
-					holder.dayRight = v.findViewById(R.id.day_right);
-
-					holder.image.setVisibility(View.GONE);
-					v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
 					break;
 
 				case FILE_TRANSFER_SEND:
@@ -3089,9 +3079,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		else if (viewType == ViewType.PARTICIPANT_INFO)
 		{
-			holder.container.setVisibility(View.VISIBLE);
+			ViewGroup container = null;
+			if (v == null)
+			{
+				v = inflater.inflate(R.layout.participant_info_receive, null);
+				container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
+				
+				v.setTag(container);
+			}
+			else
+			{
+				container = (ViewGroup) v.getTag();
+			}
+			
+			container.setVisibility(View.VISIBLE);
 			ParticipantInfoState infoState = convMessage.getParticipantInfoState();
-			((ViewGroup) holder.container).removeAllViews();
+			((ViewGroup) container).removeAllViews();
 			int positiveMargin = (int) (8 * Utils.densityMultiplier);
 			int left = 0;
 			int top = 0;
@@ -3116,7 +3119,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), isDefaultTheme ? R.drawable.ic_joined_chat
 						: R.drawable.ic_joined_chat_custom);
-				((ViewGroup) holder.container).addView(participantInfo);
+				((ViewGroup) container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT || infoState == ParticipantInfoState.GROUP_END)
 			{
@@ -3139,7 +3142,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						lp.setMargins(left, top, right, bottom);
 						mainMessage.setLayoutParams(lp);
 
-						((ViewGroup) holder.container).addView(mainMessage);
+						((ViewGroup) container).addView(mainMessage);
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
@@ -3154,7 +3157,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				lp.setMargins(left, top, right, 0);
 				participantInfo.setLayoutParams(lp);
-				((ViewGroup) holder.container).addView(participantInfo);
+				((ViewGroup) container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.USER_JOIN || infoState == ParticipantInfoState.USER_OPT_IN)
 			{
@@ -3205,10 +3208,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				lp.setMargins(left, top, right, creditsMessageView != null ? bottom : 0);
 				mainMessage.setLayoutParams(lp);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 				if (creditsMessageView != null)
 				{
-					((ViewGroup) holder.container).addView(creditsMessageView);
+					((ViewGroup) container).addView(creditsMessageView);
 				}
 			}
 			else if ((infoState == ParticipantInfoState.CHANGED_GROUP_NAME) || (infoState == ParticipantInfoState.CHANGED_GROUP_IMAGE))
@@ -3232,7 +3235,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, participantName), icRes);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
 			{
@@ -3243,7 +3246,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), isDefaultTheme ? R.drawable.ic_no_int_sms
 						: R.drawable.ic_no_int_sms_custom);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.INTRO_MESSAGE)
 			{
@@ -3272,7 +3275,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), icRes);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.DND_USER)
 			{
@@ -3326,7 +3329,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					lp.setMargins(left, top, right, 0);
 					dndMessage.setLayoutParams(lp);
 
-					((ViewGroup) holder.container).addView(dndMessage);
+					((ViewGroup) container).addView(dndMessage);
 				}
 			}
 			else if (infoState == ParticipantInfoState.CHAT_BACKGROUND)
@@ -3351,7 +3354,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			return v;
 		}
