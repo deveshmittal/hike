@@ -1457,4 +1457,8 @@
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
+    <string name="mark_stealth">Mark as Stealth</string>
+    <string name="unmark_stealth">Unmark as Stealth</string>
+    <string name="chat_marked_stealth">Chat marked as stealth</string>
+    <string name="chat_unmarked_stealth">Chat unmarked as stealth</string>
 </resources>

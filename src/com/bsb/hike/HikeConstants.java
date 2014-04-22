@@ -803,7 +803,13 @@ public class HikeConstants
 	public static final String FTUE = "ftue";
 	
 	public static final int MAX_FAST_SCROLL_VISIBLE_POSITION = 6;
-	
+
+	public static final int STEALTH_OFF = 0;
+
+	public static final int STEALTH_ON_FAKE = 1;
+
+	public static final int STEALTH_ON = 2;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

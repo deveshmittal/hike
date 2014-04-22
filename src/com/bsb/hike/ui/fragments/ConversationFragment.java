@@ -35,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
@@ -58,6 +59,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -336,6 +338,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return false;
 		}
 
+		final int stealthType = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+
+		if(stealthType == HikeConstants.STEALTH_ON || stealthType == HikeConstants.STEALTH_ON_FAKE)
+		{
+			optionsList.add(getString(conv.isStealth() ? R.string.unmark_stealth : R.string.mark_stealth));
+		}
+
 		optionsList.add(getString(R.string.shortcut));
 		optionsList.add(getString(R.string.email_conversation));
 		if (conv instanceof GroupConversation)
@@ -387,7 +396,25 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 					DeleteAllConversations();
 				}
+				else if (getString(R.string.mark_stealth).equals(option) || getString(R.string.unmark_stealth).equals(option))
+				{
+					boolean newStealthValue = !conv.isStealth();
+					Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
 
+					if(stealthType == HikeConstants.STEALTH_ON_FAKE)
+					{
+						/*
+						 * We don't need to do anything here if the device is on fake stealth mode.
+						 */
+						return;
+					}
+
+					conv.setIsStealth(newStealthValue);
+
+					HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), newStealthValue);
+
+					mAdapter.notifyDataSetChanged();
+				}
 			}
 		});
 
