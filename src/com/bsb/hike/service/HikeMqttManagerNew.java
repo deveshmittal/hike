@@ -647,10 +647,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		try
 		{
 			forceDisconnect = true;
-			IMqttToken t = mqtt.disconnect(quiesceTime);
-			// blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout
-			t.waitForCompletion(500);
-			t.setActionCallback(new IMqttActionListener()
+			IMqttToken t = mqtt.disconnect(quiesceTime,new IMqttActionListener()
 			{
 				@Override
 				public void onSuccess(IMqttToken arg0)
@@ -661,11 +658,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				@Override
 				public void onFailure(IMqttToken arg0, Throwable arg1)
 				{
+					Logger.e(TAG, "Explicit Disconnection failed",arg1);
 					// dont care about failure and move on as you have to connect anyways
 					handleDisconnect(reconnect);
 				}
 			});
-			handleDisconnect(true);
+			// blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout
+			t.waitForCompletion(2 * quiesceTime);
 		}
 		catch (MqttException e)
 		{
@@ -1055,12 +1054,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		try
 		{
+			short retryAttempts = 0;
 			Logger.w(TAG, "Destroying mqtt connection.");
 			context.unregisterReceiver(this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
 			disconnectOnMqttThread(false);
+			// here we are blocking service main thread for 1 second or less so that disconnection takes place cleanly
+			while(mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 100)
+			{
+				Thread.sleep(10);
+				retryAttempts++;
+			}
 			if (mMqttHandlerLooper != null)
-				mMqttHandlerLooper.quit();
+				mMqttHandlerLooper.quitSafely();
 			mqttMessageManager.close();
 			Logger.w(TAG, "Mqtt connection destroyed.");
 		}
