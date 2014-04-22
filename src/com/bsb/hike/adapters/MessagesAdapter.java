@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT, TYPING_NOTIFICATION
 	};
 
 	private class DetailViewHolder
@@ -207,6 +207,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ViewGroup container;
 		
 		TextView messageInfo;
+		
+	}
+	private class TypingViewHolder
+	{
+		ImageView typing;
+		
+		ViewGroup typingAvatarContainer;
 		
 	}
 
@@ -632,7 +639,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (convMessage.getTypingNotification() != null)
 		{
-			type = ViewType.RECEIVE;
+			type = ViewType.TYPING_NOTIFICATION;
 		}
 		else if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID)
 		{
@@ -708,6 +715,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 		}
 		else if (viewType == ViewType.STATUS_MESSAGE)
+		{
+		}
+		else if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
 		}
 		else
@@ -863,8 +873,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
 					holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 					holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
-					holder.typing = (ImageView) v.findViewById(R.id.typing);
-					holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
 					holder.messageTime = (TextView) v.findViewById(R.id.message_time);
 					holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
 					holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
@@ -928,29 +936,45 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 		// Applicable to all kinds of messages
-		if (convMessage.getTypingNotification() != null)
+		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
-			holder.typing.setVisibility(View.VISIBLE);
+			
+			TypingViewHolder typingHolder = null;
+			if (v == null)
+			{
+				typingHolder = new TypingViewHolder();
+					v = inflater.inflate(R.layout.typing_notification_receive, parent, false);
+					typingHolder.typing = (ImageView) v.findViewById(R.id.typing);
+					typingHolder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
+					v.setTag(typingHolder);
+				}
+				else
+				{
+					typingHolder = (TypingViewHolder) v.getTag();
+				}
+			
+			
+			typingHolder.typing.setVisibility(View.VISIBLE);
 
-			AnimationDrawable ad = (AnimationDrawable) holder.typing.getDrawable();
-			ad.setCallback(holder.typing);
+			AnimationDrawable ad = (AnimationDrawable) typingHolder.typing.getDrawable();
+			ad.setCallback(typingHolder.typing);
 			ad.setVisible(true, true);
 			ad.start();
 
 			if (isGroupChat)
 			{
-				holder.typingAvatarContainer.setVisibility(View.VISIBLE);
+				typingHolder.typingAvatarContainer.setVisibility(View.VISIBLE);
 
 				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) convMessage.getTypingNotification();
 				List<String> participantList = groupTypingNotification.getGroupParticipantList();
 
-				holder.typingAvatarContainer.removeAllViews();
+				typingHolder.typingAvatarContainer.removeAllViews();
 
 				for (int i = participantList.size() - 1; i >= 0; i--)
 				{
 					String msisdn = participantList.get(i);
 
-					View avatarContainer = inflater.inflate(R.layout.small_avatar_container, holder.typingAvatarContainer, false);
+					View avatarContainer = inflater.inflate(R.layout.small_avatar_container, typingHolder.typingAvatarContainer, false);
 					ImageView imageView = (ImageView) avatarContainer.findViewById(R.id.avatar);
 					/*
 					 * Catching OOB here since the participant list can be altered by another thread. In that case an OOB will be thrown here. The only impact that will have is
@@ -960,7 +984,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						setAvatar(msisdn, imageView);
 
-						holder.typingAvatarContainer.addView(avatarContainer);
+						typingHolder.typingAvatarContainer.addView(avatarContainer);
 					}
 					catch (IndexOutOfBoundsException e)
 					{
