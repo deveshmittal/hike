@@ -1088,7 +1088,7 @@ public class LockPatternView extends View {
         final float squareWidth = mSquareWidth;
         final float squareHeight = mSquareHeight;
 
-        float radius = (squareWidth * mDiameterFactor * 0.5f);
+        float radius = (squareWidth * mDiameterFactor * 0.2f);
         mPathPaint.setStrokeWidth(radius);
 
         final Path currentPath = mCurrentPath;
