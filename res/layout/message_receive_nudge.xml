@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical|left"
+    android:minHeight="30dp"
+    android:paddingBottom="2dp" >
+
+    <include
+        android:id="@+id/avatar_container"
+        layout="@layout/message_sender_avatar" />
+
+    <include
+        android:id="@+id/sender_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/avatar_container"
+        layout="@layout/message_sender_details" />
+
+    <ImageView
+        android:id="@+id/nudge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sender_details"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/avatar_container"
+        android:gravity="center_vertical|left"
+        android:src="@drawable/ic_nudge_hike_receive" />
+
+    <include
+        android:id="@+id/time_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nudge"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_toRightOf="@id/avatar_container"
+        layout="@layout/message_time_status_ext" />
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/time_status"
+        android:layout_alignParentTop="true"
+        layout="@layout/message_overlay" />
+
+</RelativeLayout>

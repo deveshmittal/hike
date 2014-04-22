@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical"
+    android:minHeight="30dp"
+    android:paddingBottom="2dp" >
+
+    <ImageView
+        android:id="@+id/nudge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
+        android:gravity="center_vertical|right"
+        android:src="@drawable/ic_nudge_hike_sent" />
+
+    <include
+        android:id="@+id/time_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/nudge"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        layout="@layout/message_time_status_ext" />
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/time_status"
+        android:layout_alignTop="@id/nudge"
+        android:layout_alignWithParentIfMissing="true"
+        layout="@layout/message_overlay" />
+
+</RelativeLayout>
