@@ -33,11 +33,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.haibison.android.lockpattern.BuildConfig;
 import com.haibison.android.lockpattern.R;
 import com.haibison.android.lockpattern.util.UI;
 
@@ -430,9 +432,17 @@ public class LockPatternView extends View {
                 mBitmapCircleDefault, mBitmapCircleGreen, mBitmapCircleRed };
 
         for (Bitmap bitmap : bitmaps) {
+        	if (BuildConfig.DEBUG)
+        	{
+        		Log.i("com.haibson", "bimap size "+bitmap.getWidth() + " h = "+bitmap.getHeight());
+        	}
             mBitmapWidth = Math.max(mBitmapWidth, bitmap.getWidth());
             mBitmapHeight = Math.max(mBitmapHeight, bitmap.getHeight());
         }
+        if (BuildConfig.DEBUG)
+    	{
+    		Log.i("com.haibson", "final bimap size "+mBitmapWidth+ " h = "+mBitmapHeight);
+    	}
     }// LockPatternView()
 
     private Bitmap getBitmapFor(int resId) {
@@ -1263,14 +1273,14 @@ public class LockPatternView extends View {
              * the pattern is wrong
              */
             outerCircle = mBitmapCircleRed;
-            innerCircle = mBitmapBtnDefault;
+            innerCircle = mBitmapBtnTouched;
         } else if (mPatternDisplayMode == DisplayMode.Correct
                 || mPatternDisplayMode == DisplayMode.Animate) {
             /*
              * the pattern is correct
              */
             outerCircle = mBitmapCircleGreen;
-            innerCircle = mBitmapBtnDefault;
+            innerCircle = mBitmapBtnTouched;
         } else {
             throw new IllegalStateException("unknown display mode "
                     + mPatternDisplayMode);
