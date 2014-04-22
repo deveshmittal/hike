@@ -190,6 +190,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private View emptyView;
 
+	private List<Conversation> stealthConversations;
+
+	private List<Conversation> conversations;
+
 	private enum hikeBotConvStat
 	{
 		NOTVIEWED, VIEWED, DELETED
@@ -426,8 +430,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private void fetchConversations()
 	{
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-		List<Conversation> conversations = new ArrayList<Conversation>();
+		conversations = new ArrayList<Conversation>();
 		List<Conversation> conversationList = db.getConversations();
+
+		stealthConversations = new ArrayList<Conversation>();
+
+		for (Conversation conversation : conversationList)
+		{
+			if (conversation.isStealth())
+			{
+				stealthConversations.add(conversation);
+			}
+		}
 
 		/*
 		 * Add item for group chat tip.
@@ -442,27 +456,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
 		mConversationsAdded = new HashSet<String>();
 
-		/*
-		 * Use an iterator so we can remove conversations w/ no messages from our list
-		 */
-		for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
-		{
-			Object object = iter.next();
-			if (object == null)
-			{
-				continue;
-			}
-			Conversation conv = (Conversation) object;
-			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
-			{
-				iter.remove();
-			}
-			else
-			{
-				mConversationsAdded.add(conv.getMsisdn());
-			}
-		}
+		setupConversationLists();
 
 		if (mAdapter != null)
 		{
@@ -481,6 +475,43 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		getListView().setOnItemLongClickListener(this);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+	}
+
+	private void setupConversationLists()
+	{
+		int stealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+	
+		/*
+		 * Use an iterator so we can remove conversations w/ no messages from our list
+		 */
+		for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
+		{
+			Object object = iter.next();
+			if (object == null)
+			{
+				continue;
+			}
+			Conversation conv = (Conversation) object;
+			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+			if (conv.isStealth())
+			{
+				stealthConversations.add(conv);
+				HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
+			}
+
+			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
+			{
+				iter.remove();
+			}
+			else if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
+			{
+				iter.remove();
+			}
+			else
+			{
+				mConversationsAdded.add(conv.getMsisdn());
+			}
+		}
 	}
 
 	private void leaveGroup(Conversation conv)
