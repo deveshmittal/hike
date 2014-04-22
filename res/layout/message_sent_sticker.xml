@@ -20,7 +20,6 @@
             android:id="@+id/loading_progress"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:layout_marginLeft="7dp"
             android:indeterminateDrawable="@drawable/loading"
             android:visibility="gone" />
 
