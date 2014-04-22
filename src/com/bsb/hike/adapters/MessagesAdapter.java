@@ -193,6 +193,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private class FileViewHolder extends FTViewHolder
 	{
 	}
+	
+	private class StatusViewHolder
+	{
+		ImageView image;
+
+		ImageView avatarFrame;
+
+		TextView messageTextView;
+
+		TextView dayTextView;
+		
+		ViewGroup container;
+		
+		TextView messageInfo;
+		
+	}
 
 	private class ViewHolder
 	{
@@ -691,6 +707,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (viewType == ViewType.PARTICIPANT_INFO)
 		{
 		}
+		else if (viewType == ViewType.STATUS_MESSAGE)
+		{
+		}
 		else
 		{
 			if (v == null)
@@ -709,16 +728,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.dayLeft = v.findViewById(R.id.day_left);
 					holder.dayRight = v.findViewById(R.id.day_right);
 					v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
-					break;
-				case STATUS_MESSAGE:
-					v = inflater.inflate(R.layout.in_thread_status_update, null);
-
-					holder.image = (ImageView) v.findViewById(R.id.avatar);
-					holder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
-					holder.messageTextView = (TextView) v.findViewById(R.id.status_text);
-					holder.dayTextView = (TextView) v.findViewById(R.id.status_info);
-					holder.container = (ViewGroup) v.findViewById(R.id.content_container);
-					holder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
 					break;
 
 				case FILE_TRANSFER_SEND:
@@ -2982,66 +2991,85 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		// } // End of File Transfer Message
 		else if (viewType == ViewType.STATUS_MESSAGE)
 		{
-			holder.image.setVisibility(View.VISIBLE);
-			holder.avatarFrame.setVisibility(View.VISIBLE);
-			holder.messageTextView.setVisibility(View.VISIBLE);
-			holder.dayTextView.setVisibility(View.VISIBLE);
-			holder.container.setVisibility(View.VISIBLE);
-			holder.messageInfo.setVisibility(View.VISIBLE);
-
-			if (isDefaultTheme)
+			StatusViewHolder statusHolder = null;
+			if (v == null)
 			{
-				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
-				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
-				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+				statusHolder = new StatusViewHolder();
+				v = inflater.inflate(R.layout.in_thread_status_update, null);
+				statusHolder.image = (ImageView) v.findViewById(R.id.avatar);
+				statusHolder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
+				statusHolder.messageTextView = (TextView) v.findViewById(R.id.status_text);
+				statusHolder.dayTextView = (TextView) v.findViewById(R.id.status_info);
+				statusHolder.container = (ViewGroup) v.findViewById(R.id.content_container);
+				statusHolder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
+				
+				v.setTag(statusHolder);
 			}
 			else
 			{
-				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
-				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
-				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
+				statusHolder = (StatusViewHolder) v.getTag();
 			}
-			holder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
+			
+			statusHolder.image.setVisibility(View.VISIBLE);
+			statusHolder.avatarFrame.setVisibility(View.VISIBLE);
+			statusHolder.messageTextView.setVisibility(View.VISIBLE);
+			statusHolder.dayTextView.setVisibility(View.VISIBLE);
+			statusHolder.container.setVisibility(View.VISIBLE);
+			statusHolder.messageInfo.setVisibility(View.VISIBLE);
+
+			if (isDefaultTheme)
+			{
+				statusHolder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+				statusHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
+				statusHolder.messageTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+			}
+			else
+			{
+				statusHolder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
+				statusHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
+				statusHolder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
+			}
+			statusHolder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
 
 			StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
 
-			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
+			statusHolder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
+			statusHolder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
 			{
 				SmileyParser smileyParser = SmileyParser.getInstance();
-				holder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
-				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+				statusHolder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+				Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
 
 			}
 			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 			{
-				holder.messageTextView.setText(R.string.changed_profile);
+				statusHolder.messageTextView.setText(R.string.changed_profile);
 			}
 
 			if (statusMessage.hasMood())
 			{
-				holder.image.setBackgroundDrawable(null);
-				holder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
-				holder.avatarFrame.setVisibility(View.GONE);
+				statusHolder.image.setBackgroundDrawable(null);
+				statusHolder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
+				statusHolder.avatarFrame.setVisibility(View.GONE);
 			}
 			else
 			{
-				setAvatar(conversation.getMsisdn(), holder.image);
-				holder.avatarFrame.setVisibility(View.VISIBLE);
+				setAvatar(conversation.getMsisdn(), statusHolder.image);
+				statusHolder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 
-			holder.container.setTag(convMessage);
+			statusHolder.container.setTag(convMessage);
 			if (!isActionModeOn)
 			{
-				holder.container.setEnabled(true);
-				holder.container.setOnClickListener(this);
+				statusHolder.container.setEnabled(true);
+				statusHolder.container.setOnClickListener(this);
 			}
 			else
 			{
-				holder.container.setEnabled(false);
+				statusHolder.container.setEnabled(false);
 			}
 
 			boolean showTip = false;
