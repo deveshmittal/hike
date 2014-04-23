@@ -1456,7 +1456,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		else if (HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP.equals(type))
 		{

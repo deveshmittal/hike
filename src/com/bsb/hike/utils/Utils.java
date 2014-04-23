@@ -2475,13 +2475,19 @@ public class Utils
 		return !TextUtils.isEmpty(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.NAME_SETTING, null));
 	}
 
-	public static void sendAppState(Context context)
+	public static void appStateChanged(Context context)
 	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
 		}
 
+		sendAppState();
+
+	}
+
+	private static void sendAppState()
+	{
 		JSONObject object = new JSONObject();
 
 		try

@@ -20,7 +20,7 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was opened");
 			HikeMessengerApp.currentState = CurrentState.OPENED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		super.onCreate(savedInstanceState);
 	}
@@ -39,7 +39,7 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was resumed");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		super.onStart();
 	}
@@ -68,7 +68,7 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		super.onStop();
 	}
@@ -96,7 +96,7 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 	}
 }
