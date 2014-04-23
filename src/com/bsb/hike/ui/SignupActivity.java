@@ -418,7 +418,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				/*
 				 * Update the urls to use ssl or not.
 				 */
-				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCHED_DATA_CONNECTION, null);
+				Utils.setupUri(this.getApplicationContext());
 
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);
