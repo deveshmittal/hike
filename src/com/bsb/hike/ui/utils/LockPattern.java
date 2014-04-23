@@ -12,6 +12,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.haibison.android.lockpattern.LockPatternActivity;
 import com.haibison.android.lockpattern.util.Settings;
@@ -41,27 +42,20 @@ public class LockPattern
 			break;// _ReqCreateLockPattern
 
 		case HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN:
-			String msg = "";
 
 			switch (resultCode)
 			{
 			case Activity.RESULT_OK:
-				msg = "Ok ok";
+				Toast.makeText(activity, R.string.stealth_mode_on, Toast.LENGTH_SHORT).show();
+				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
 				break;
 			case Activity.RESULT_CANCELED:
-				msg = "canceled";
 				break;
 			case LockPatternActivity.RESULT_FAILED:
-				msg = "failed";
 				break;
 			default:
 				return;
 			}
-
-			Toast toast = Toast.makeText(activity, msg, Toast.LENGTH_SHORT);
-			toast.setDuration(Toast.LENGTH_LONG);
-			toast.setGravity(Gravity.CENTER, 0, 0);
-			toast.show();
 
 			break;
 		}

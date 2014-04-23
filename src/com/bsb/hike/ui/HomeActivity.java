@@ -256,6 +256,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
 						tipTypeShowing = null;
 					}
+					final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+					if(stealthType == HikeConstants.STEALTH_OFF)
+					{
+						LockPattern.confirmPattern(HomeActivity.this);
+					}
+					else 
+					{
+						Toast.makeText(HomeActivity.this, R.string.normal_mode_on, Toast.LENGTH_SHORT).show();
+						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+					}
 				}
 			}
 		});
