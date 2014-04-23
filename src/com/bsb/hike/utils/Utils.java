@@ -1235,7 +1235,7 @@ public class Utils
 
 		return thumbnail;
 	}
-	
+
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
 	{
 		Bitmap thumbnail = null;
@@ -1257,11 +1257,11 @@ public class Utils
 
 		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
 		options.inJustDecodeBounds = false;
-		if(applyBitmapConfig)
+		if (applyBitmapConfig)
 		{
 			options.inPreferredConfig = Config.RGB_565;
 		}
-		
+
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
@@ -1276,7 +1276,7 @@ public class Utils
 		}
 
 		return thumbnail;
-}
+	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
