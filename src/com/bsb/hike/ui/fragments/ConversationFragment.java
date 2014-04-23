@@ -177,7 +177,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP,
-			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP };
+			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP };
 
 	private ConversationsAdapter mAdapter;
 
@@ -363,6 +363,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				Conversation convTip = mAdapter.getItem(i);
 				if(convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
 				{
+					HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
 					removeStealthConvTip(convTip);
 					break;
 				}
@@ -446,6 +447,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), newStealthValue);
 
 					mAdapter.notifyDataSetChanged();
+					
+					if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+					{
+						HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, null);
+					}
 				}
 			}
 		});
@@ -1069,10 +1076,45 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					removeStealthConvTip(conversation);
 				}
 			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP.equals(type))
+		{
+			if (getActivity() == null)
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					 showStealthConvTip();
+				}
+			});
 
 		}
 	}
 
+	/*
+	 * Add item for stealth ftue conv tap tip.
+	 */
+	protected void showStealthConvTip()
+	{
+		if (!conversations.isEmpty())
+		{
+			Conversation conv = conversations.get(0);
+			if(!(conv != null && conv instanceof ConversationTip &&  ((ConversationTip)conv).isStealthFtueTip()))
+			{
+				conversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+		else
+		{
+			Toast.makeText(getActivity(), R.string.stealth_zero_chat_tip, Toast.LENGTH_SHORT).show();
+		}
+	}
 	protected void removeStealthConvTip(Conversation conversation)
 	{
 		mAdapter.remove(conversation);

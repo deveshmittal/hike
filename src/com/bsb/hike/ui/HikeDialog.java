@@ -8,6 +8,7 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.R.id;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -137,6 +138,7 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
 				dialog.dismiss();
 			}
 		});
