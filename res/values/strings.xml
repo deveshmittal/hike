@@ -1489,4 +1489,8 @@
         <item quantity="other">Connect at least %1$d dots.\nTry again…</item>
     </plurals>
     
+    <string name="mark_stealth">Mark as Stealth</string>
+    <string name="unmark_stealth">Unmark as Stealth</string>
+    <string name="chat_marked_stealth">Chat marked as stealth</string>
+    <string name="chat_unmarked_stealth">Chat unmarked as stealth</string>
 </resources>

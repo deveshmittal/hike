@@ -6,7 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -333,6 +335,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String STEALTH_ENCRYPTED_PATTERN = "stealthEncryptedPattern";
 
+	public static final String STEALTH_MODE = "stealthMode";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -344,6 +348,8 @@ public class HikeMessengerApp extends Application implements Listener
 	private static Messenger mMessenger;
 
 	private static Map<String, TypingNotification> typingNotificationMap;
+
+	private static Set<String> stealthMsisdn;
 
 	private Messenger mService;
 
@@ -645,6 +651,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
+		stealthMsisdn = new HashSet<String>();
+
 		initialiseListeners();
 
 		mMessenger = new Messenger(new IncomingHandler());
@@ -794,6 +802,16 @@ public class HikeMessengerApp extends Application implements Listener
 	public static Map<String, TypingNotification> getTypingNotificationSet()
 	{
 		return typingNotificationMap;
+	}
+
+	public static void addStealthMsisdn(String msisdn)
+	{
+		stealthMsisdn.add(msisdn);
+	}
+
+	public static boolean isStealthMsisdn(String msisdn)
+	{
+		return stealthMsisdn.contains(msisdn);
 	}
 
 	public void initialiseListeners()
