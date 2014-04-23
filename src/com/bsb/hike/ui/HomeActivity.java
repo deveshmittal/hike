@@ -331,16 +331,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	}
 	private void showStealthDoubleTapTip()
 	{
-		ViewStub stealthTipViewStub = (ViewStub) findViewById(R.id.stealth_double_tap_tip_viewstub);
-		stealthTipViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
-		{
-			@Override
-			public void onInflate(ViewStub stub, View inflated)
-			{
-				HikeTip.showTip(HomeActivity.this, TipType.STEALTH_FTUE_TIP_2, inflated);
-			}
-		});
-		stealthTipViewStub.inflate();
+		HikeTip.showTip(HomeActivity.this, TipType.STEALTH_FTUE_TIP_2, findViewById(R.id.stealth_double_tap_tip));
     }
 
 	@Override

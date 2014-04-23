@@ -34,6 +34,7 @@ public class LockPattern
 			{
 				String encryptedPattern = String.valueOf(data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN));
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, encryptedPattern);
+				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, true);
 			}
 			break;// _ReqCreateLockPattern
 
