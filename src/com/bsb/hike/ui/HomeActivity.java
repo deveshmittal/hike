@@ -152,12 +152,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private int friendsListCount = -1;
 
 	private int recommendedCount = -1;
-
+	
+	private HikeTip.TipType tipTypeShowing;
+	
 	private FetchContactsTask fetchContactsTask;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
-			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED, HikePubSub.MQTT_CONNECTED };
+			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED, HikePubSub.MQTT_CONNECTED,
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -232,6 +235,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
+				if(!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+				{
+					if(tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
+					{
+						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+						tipTypeShowing = null;
+						LockPattern.createNewPattern(HomeActivity.this);
+					}
+					else
+					{
+						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+						HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
+					}
+				}
+				else
+				{
+					if(tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
+					{
+						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+						tipTypeShowing = null;
+					}
+				}
 			}
 		});
 
@@ -329,9 +354,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
 	}
-	private void showStealthDoubleTapTip()
+
+	private void showStealthFtueTip(final boolean isSetPasswordTip)
 	{
-		HikeTip.showTip(HomeActivity.this, TipType.STEALTH_FTUE_TIP_2, findViewById(R.id.stealth_double_tap_tip));
+		tipTypeShowing = isSetPasswordTip?TipType.STEALTH_FTUE_TIP_2:TipType.STEALTH_FTUE_ENTER_PASS_TIP;
+		HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
     }
 
 	@Override
@@ -1419,6 +1446,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			 * Send a fg/bg packet on reconnecting.
 			 */
 			Utils.sendAppState(this);
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					showStealthFtueTip(true);
+				}
+			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					showStealthFtueTip(false);
+				}
+			});
 		}
 	}
 

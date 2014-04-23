@@ -1493,4 +1493,6 @@
     <string name="unmark_stealth">Unmark as Stealth</string>
     <string name="chat_marked_stealth">Chat marked as stealth</string>
     <string name="chat_unmarked_stealth">Chat unmarked as stealth</string>
+    <string name="stealth_enter_pass_tip">Tap here to access your hidden chats!</string>
+    <string name="stealth_zero_chat_tip">placeholder no chats</string>
 </resources>

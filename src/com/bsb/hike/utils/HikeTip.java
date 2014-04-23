@@ -15,7 +15,7 @@ public class HikeTip
 {
 	public static enum TipType
 	{
-		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE, STEALTH_FTUE_TIP_2
+		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE, STEALTH_FTUE_TIP_2, STEALTH_FTUE_ENTER_PASS_TIP
 	}
 
 	public static void showTip(final Activity activity, final TipType tipType, final View parentView)
@@ -54,9 +54,14 @@ public class HikeTip
 			tipText.setText(R.string.chat_bg_ftue_tip);
 			break;
 		case STEALTH_FTUE_TIP_2:
-			parentView.setBackgroundResource(R.drawable.bg_stealth_tip);
+			container.setBackgroundResource(R.drawable.bg_stealth_tip);
 			closeTip.setVisibility(View.GONE);
 			tipText.setText(R.string.stealth_double_tap_tip);
+			break;
+		case STEALTH_FTUE_ENTER_PASS_TIP:
+			container.setBackgroundResource(R.drawable.bg_stealth_tip);
+			closeTip.setVisibility(View.GONE);
+			tipText.setText(R.string.stealth_enter_pass_tip);	
 			break;
 		}
 		if (closeTip != null)
