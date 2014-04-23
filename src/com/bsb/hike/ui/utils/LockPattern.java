@@ -78,7 +78,6 @@ public class LockPattern
 	{
 		Intent i = new Intent(LockPatternActivity.ACTION_CREATE_PATTERN, null, activity, LockPatternActivity.class);
 		i.putExtra(LockPatternActivity.EXTRA_THEME, getThemeForLockPatternActivity());
-		i.putExtra(Settings.Security.METADATA_ENCRYPTER_CLASS, LPEncrypter.class);
 		i.putExtra(Settings.Security.METADATA_AUTO_SAVE_PATTERN, true);
 		i.putExtra(Settings.Display.METADATA_MIN_WIRED_DOTS, mBarMinWiredDots);
 		activity.startActivityForResult(i, HikeConstants.ResultCodes.CREATE_LOCK_PATTERN);
@@ -90,30 +89,9 @@ public class LockPattern
 		String encryptedPattern = HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, "");
 		i.putExtra(LockPatternActivity.EXTRA_PATTERN, encryptedPattern.toCharArray());
 		i.putExtra(LockPatternActivity.EXTRA_THEME, getThemeForLockPatternActivity());
-		i.putExtra(Settings.Security.METADATA_ENCRYPTER_CLASS, LPEncrypter.class);
 		i.putExtra(Settings.Security.METADATA_AUTO_SAVE_PATTERN, true);
 		i.putExtra(Settings.Display.METADATA_MIN_WIRED_DOTS, mBarMaxTries);
 		activity.startActivityForResult(i, HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN);
 	}// onClick()
-
-	public class LPEncrypter implements com.haibison.android.lockpattern.util.IEncrypter
-	{
-
-		@Override
-		public char[] encrypt(Context context, List<Cell> pattern)
-		{
-			// CRC32 c = new CRC32();
-			// c.update(s.getBytes());
-			// pattern.get(0).
-			// return String.format("%08x", c.getValue());
-			return LockPatternUtils.patternToString(pattern).toCharArray();
-		}
-
-		@Override
-		public List<Cell> decrypt(Context context, char[] encryptedPattern)
-		{
-			return LockPatternUtils.stringToPattern(String.valueOf(encryptedPattern));
-		}
-	}
 
 }
