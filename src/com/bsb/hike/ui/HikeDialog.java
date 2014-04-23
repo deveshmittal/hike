@@ -8,6 +8,7 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.R.id;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -17,6 +18,8 @@ public class HikeDialog
 	public static final int FILE_TRANSFER_DIALOG = 1;
 
 	public static final int FAVORITE_ADDED_DIALOG = 2;
+	
+	public static final int STEALTH_FTUE_DIALOG = 3;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -32,6 +35,8 @@ public class HikeDialog
 			return showFileTransferPOPUp(context);
 		case FAVORITE_ADDED_DIALOG:
 			return showAddedAsFavoriteDialog(context, listener, data);
+		case STEALTH_FTUE_DIALOG:
+			return showStealthFtuePopUp(context);
 		}
 
 		return null;
@@ -114,6 +119,30 @@ public class HikeDialog
 		};
 		no.setOnClickListener(clickListener);
 		yes.setOnClickListener(clickListener);
+		dialog.show();
+		return dialog;
+	}
+	
+	private static Dialog showStealthFtuePopUp(final Context context)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.stealth_ftue_popup);
+		dialog.setCancelable(true);
+
+		View okBtn = dialog.findViewById(R.id.awesomeButton);
+		TextView description = (TextView) dialog.findViewById(R.id.stealth_setup_description);
+		description.setText(Html.fromHtml(context.getString(R.string.stealth_setup_later)));
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+				dialog.dismiss();
+			}
+		});
+
 		dialog.show();
 		return dialog;
 	}

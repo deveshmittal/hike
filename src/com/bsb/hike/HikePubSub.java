@@ -307,6 +307,14 @@ public class HikePubSub implements Runnable
 
 	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
 
+	public static final String DISMISS_STEALTH_FTUE_CONV_TIP = "dismissStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_CONV_TIP = "showStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_SET_PASS_TIP = "showStealthFtueSetPassTip";
+
+	public static final String SHOW_STEALTH_FTUE_ENTER_PASS_TIP = "showStealthFtueEnterPassTip";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

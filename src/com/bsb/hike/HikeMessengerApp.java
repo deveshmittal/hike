@@ -331,7 +331,11 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_ADD_FAVORITE_TIP = "shownAddFavoriteTip";
 
+	public static final String STEALTH_ENCRYPTED_PATTERN = "stealthEncryptedPattern";
+
 	public static final String STEALTH_MODE = "stealthMode";
+
+	public static final String STEALTH_MODE_SETUP_DONE = "steatlhModeSetupDone";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

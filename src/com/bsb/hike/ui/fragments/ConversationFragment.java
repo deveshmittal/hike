@@ -49,6 +49,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -88,9 +89,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			for (Conversation conv : convs)
 			{
 				/*
-				 * Added to check for the null conversation item we add for the group chat tip.
+				 * Added to check for the Conversation tip item we add for the group chat tip and other.
 				 */
-				if (conv == null)
+				if (conv instanceof ConversationTip)
 				{
 					continue;
 				}
@@ -117,9 +118,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			for (Conversation conversation : deleted)
 			{
 				/*
-				 * Added to check for the null conversation item we add for the group chat tip.
+				 * Added to check for the Conversation tip item we add for the group chat tip and other.
 				 */
-				if (conversation == null)
+				if (conversation instanceof ConversationTip)
 				{
 					continue;
 				}
@@ -175,7 +176,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP,
+			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP };
 
 	private ConversationsAdapter mAdapter;
 
@@ -304,12 +306,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		Conversation conv = (Conversation) mAdapter.getItem(position);
 
 		/*
-		 * The item will be null only for group chat tip.
+		 * The item will be instance ConversationTip only for tips we show on ConversationFragment.
 		 */
-		if (conv == null)
+		if (conv instanceof ConversationTip)
 		{
-			((HomeActivity) getActivity()).showOverFlowMenu();
-			removeGroupChatTip(conv);
+			switch (((ConversationTip)conv).getTipType())
+			{
+			case ConversationTip.GROUP_CHAT_TIP:
+				((HomeActivity) getActivity()).showOverFlowMenu();
+				removeGroupChatTip(conv);
+				break;
+			case ConversationTip.STEALTH_FTUE_TIP:
+				break;
+			default:
+				break;
+			}
 			return;
 		}
 
@@ -336,10 +347,29 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		final Conversation conv = (Conversation) mAdapter.getItem(position);
-		if (conv == null)
+		
+		if (conv instanceof ConversationTip)
 		{
 			return false;
 		}
+		
+		/*
+		 * If stealth ftue conv tap tip is visible than remove it
+		 */
+		if(!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+		{
+			for (int i=0; i<mAdapter.getCount(); i++)
+			{
+				Conversation convTip = mAdapter.getItem(i);
+				if(convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
+				{
+					HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
+					removeStealthConvTip(convTip);
+					break;
+				}
+			}
+		}
+		
 
 		final int stealthType = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
@@ -417,6 +447,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), newStealthValue);
 
 					mAdapter.notifyDataSetChanged();
+					
+					if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+					{
+						HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, null);
+					}
 				}
 			}
 		});
@@ -447,7 +483,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 */
 		if (!conversationList.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
 		{
-			conversations.add(null);
+			conversations.add(new ConversationTip(ConversationTip.GROUP_CHAT_TIP));
 		}
 
 		conversations.addAll(conversationList);
@@ -486,11 +522,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
 		{
 			Object object = iter.next();
-			if (object == null)
+			Conversation conv = (Conversation) object;
+			if (conv instanceof ConversationTip)
 			{
 				continue;
 			}
-			Conversation conv = (Conversation) object;
+			
 			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
 			if (conv.isStealth())
 			{
@@ -511,6 +548,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mConversationsAdded.add(conv.getMsisdn());
 			}
 		}
+
 	}
 
 	private void leaveGroup(Conversation conv)
@@ -992,7 +1030,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 			final Conversation conversation = mAdapter.getItem(0);
-			if (conversation != null)
+			if (!(conversation instanceof ConversationTip && ((ConversationTip)conversation).isGroupChatTip()))
 			{
 				return;
 			}
@@ -1012,6 +1050,76 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			});
 
 		}
+		else if (HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP.equals(type))
+		{
+			if (mAdapter == null || mAdapter.isEmpty())
+			{
+				return;
+			}
+			int position = (Integer) object;
+			final Conversation conversation = mAdapter.getItem(position);
+			if (!(conversation instanceof ConversationTip && ((ConversationTip)conversation).isStealthFtueTip()))
+			{
+				return;
+			}
+
+			if (getActivity() == null)
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeStealthConvTip(conversation);
+				}
+			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP.equals(type))
+		{
+			if (getActivity() == null)
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					 showStealthConvTip();
+				}
+			});
+
+		}
+	}
+
+	/*
+	 * Add item for stealth ftue conv tap tip.
+	 */
+	protected void showStealthConvTip()
+	{
+		if (!conversations.isEmpty())
+		{
+			Conversation conv = conversations.get(0);
+			if(!(conv != null && conv instanceof ConversationTip &&  ((ConversationTip)conv).isStealthFtueTip()))
+			{
+				conversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+		else
+		{
+			Toast.makeText(getActivity(), R.string.stealth_zero_chat_tip, Toast.LENGTH_SHORT).show();
+		}
+	}
+	protected void removeStealthConvTip(Conversation conversation)
+	{
+		mAdapter.remove(conversation);
+		ConversationFragment.this.run();
+
 	}
 
 	private void removeGroupChatTip(Conversation conversation)

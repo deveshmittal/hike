@@ -25,6 +25,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
@@ -43,7 +44,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	private enum ViewType
 	{
-		CONVERSATION, GROUP_CHAT_TIP
+		CONVERSATION, GROUP_CHAT_TIP, STEALTH_FTUE_TIP_VIEW
 	}
 
 	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
@@ -65,9 +66,17 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	public int getItemViewType(int position)
 	{
 		Conversation conversation = getItem(position);
-		if (conversation == null)
+		if (conversation instanceof ConversationTip)
 		{
-			return ViewType.GROUP_CHAT_TIP.ordinal();
+			switch (((ConversationTip)conversation).getTipType())
+			{
+			case ConversationTip.GROUP_CHAT_TIP:
+				return ViewType.GROUP_CHAT_TIP.ordinal();
+			case ConversationTip.STEALTH_FTUE_TIP:
+				return ViewType.STEALTH_FTUE_TIP_VIEW.ordinal();
+			default:
+				break;
+			}
 		}
 		return ViewType.CONVERSATION.ordinal();
 	}
@@ -84,13 +93,19 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		View v = convertView;
 		if (v == null)
 		{
-			if (viewType == ViewType.GROUP_CHAT_TIP)
+			switch (viewType)
 			{
-				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
-			}
-			else
-			{
+			case CONVERSATION:
 				v = inflater.inflate(mResourceId, parent, false);
+				break;
+			case GROUP_CHAT_TIP:
+				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
+				break;
+			case STEALTH_FTUE_TIP_VIEW:
+				v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
+				break;
+			default:
+				break;
 			}
 		}
 
@@ -118,6 +133,21 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				}
 			});
 
+			return v;
+		}
+		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
+		{
+			View close = v.findViewById(R.id.close);
+			final int pos = position;
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, pos);
+				}
+			});
 			return v;
 		}
 

@@ -792,8 +792,6 @@ public class HikeConstants
 	
 	public static final int JOINED_HIKE_STATUS_ID = -1;
 	
-	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
-
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
@@ -809,6 +807,15 @@ public class HikeConstants
 	public static final int STEALTH_ON_FAKE = 1;
 
 	public static final int STEALTH_ON = 2;
+	
+	public static final class ResultCodes
+	{
+		public static final int SELECT_COUNTRY = 4001;
+		
+		public static final int CREATE_LOCK_PATTERN = 4002;
+
+		public static final int CONFIRM_LOCK_PATTERN = 4003;
+	}
 
 	public static final class Extras
 	{
@@ -1444,11 +1451,6 @@ public class HikeConstants
 	public static enum SMSSyncState
 	{
 		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
-	}
-
-	public static enum TipType
-	{
-		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
 	}
 
 	public static enum EmoticonType
