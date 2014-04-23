@@ -29,7 +29,7 @@ public class HikeDialog
 		switch (whichDialog)
 		{
 		case FILE_TRANSFER_DIALOG:
-			return showFileTransferPOPUp(context);
+			return showFileTransferPOPUp(context, listener);
 		case FAVORITE_ADDED_DIALOG:
 			return showAddedAsFavoriteDialog(context, listener, data);
 		}
@@ -38,7 +38,7 @@ public class HikeDialog
 
 	}
 
-	private static Dialog showFileTransferPOPUp(final Context context)
+	private static Dialog showFileTransferPOPUp(Context context, final HikeDialogListener listener)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.file_transfer_tutorial_pop_up);
@@ -51,8 +51,14 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
-				dialog.dismiss();
+				if (listener != null)
+				{
+					listener.neutralClicked(dialog);
+				}
+				else
+				{
+					dialog.dismiss();
+				}
 			}
 		});
 
