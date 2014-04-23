@@ -35,6 +35,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -55,7 +56,7 @@ import com.bsb.hike.utils.Utils;
  * interval of time. All pings are handled by mqtt paho internally. As soon as you get connected simply reschdule next conn check. In case of no netowrk and SERVER unavailable , we
  * should try and connect on exponential basis.
  * */
-public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.Listener
+public class HikeMqttManagerNew extends BroadcastReceiver
 {
 	// this variable when true, does not allow mqtt operation such as publish or connect
 	// this will become true when you force close or force disconnect mqtt (ex : ssl toggle)
@@ -94,7 +95,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	private IMqttActionListener listernerConnect;
 
 	private MqttMessagesManager mqttMessageManager;
-	
+
 	private IsMqttConnectedCheckRunnable isConnRunnable;
 
 	private ConnectionCheckRunnable connChkRunnable;
@@ -162,14 +163,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		@Override
 		public void run()
 		{
-			if(!isConnected())
+			if (!isConnected())
 			{
 				HikeMessengerApp.networkError = true;
 				HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
 			}
 		}
 	}
-	
+
 	// this is used to check and connect mqtt and will be run on MQTT thread
 	private class ConnectionCheckRunnable implements Runnable
 	{
@@ -312,8 +313,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		filter.addAction(MQTT_CONNECTION_CHECK_ACTION);
+		filter.addAction(HikePubSub.SSL_PREFERENCE_CHANGED);
 		context.registerReceiver(this, filter);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
+		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 15 * 1000); // this is just for testing
 	}
 
@@ -365,7 +367,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	public void finish()
 	{
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
+		context.unregisterReceiver(this);
 		this.mqttMessageManager.close();
 	}
 
@@ -522,13 +524,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			Logger.e(TAG, "Exception in MQTT connect handler: " + e.getMessage());
 		}
 	}
-	
+
 	private void scheduleNetworkErrorTimer()
 	{
-		if(HikeMessengerApp.networkError == true)
+		if (HikeMessengerApp.networkError == true)
 			return;
-		
-		if(isAirplaneModeOn(context))
+
+		if (isAirplaneModeOn(context))
 		{
 			HikeMessengerApp.networkError = true;
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
@@ -536,11 +538,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		}
 		mqttThreadHandler.postDelayed(isConnRunnable, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
 	}
-	
+
 	private void cancelNetworkErrorTimer()
 	{
 		mqttThreadHandler.removeCallbacks(isConnRunnable);
-		if(HikeMessengerApp.networkError == false)
+		if (HikeMessengerApp.networkError == false)
 			return;
 		HikeMessengerApp.networkError = false;
 		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
@@ -550,7 +552,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	{
 		return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
 	}
-	
+
 	// this should and will run only on MQTT thread so no need to synchronize it explicitly
 	private void connect()
 	{
@@ -566,6 +568,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			if (forceDisconnect)
 				return;
 
+			boolean shouldSSL = Utils.switchSSLOn(context);
 			if (op == null)
 			{
 				op = new MqttConnectOptions();
@@ -574,12 +577,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 				op.setCleanSession(false);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
-				if (Utils.switchSSLOn(context))
+				if (shouldSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
 			if (mqtt == null)
 			{
-				String protocol = Utils.switchSSLOn(context) ? "ssl://" : "tcp://";
+				String protocol = shouldSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
 				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
@@ -595,7 +598,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			if (isNetworkAvailable())
 			{
 				acquireWakeLock(connectionTimeoutSec);
-				mqtt.connect(op,null,getConnectListener());
+				mqtt.connect(op, null, getConnectListener());
 			}
 			else
 			{
@@ -647,18 +650,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		try
 		{
 			forceDisconnect = true;
-			IMqttToken t = mqtt.disconnect(quiesceTime,new IMqttActionListener()
+			IMqttToken t = mqtt.disconnect(quiesceTime, null, new IMqttActionListener()
 			{
 				@Override
 				public void onSuccess(IMqttToken arg0)
 				{
+					Logger.d(TAG, "Explicit Disconnection success");
 					handleDisconnect(reconnect);
 				}
 
 				@Override
 				public void onFailure(IMqttToken arg0, Throwable arg1)
 				{
-					Logger.e(TAG, "Explicit Disconnection failed",arg1);
+					Logger.e(TAG, "Explicit Disconnection failed", arg1);
 					// dont care about failure and move on as you have to connect anyways
 					handleDisconnect(reconnect);
 				}
@@ -1057,10 +1061,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			short retryAttempts = 0;
 			Logger.w(TAG, "Destroying mqtt connection.");
 			context.unregisterReceiver(this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
 			disconnectOnMqttThread(false);
 			// here we are blocking service main thread for 1 second or less so that disconnection takes place cleanly
-			while(mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 100)
+			while (mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 100)
 			{
 				Thread.sleep(10);
 				retryAttempts++;
@@ -1090,29 +1093,43 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 			boolean isNetwork = isNetworkAvailable();
 			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
+			{
 				connectOnMqttThread();
+				Utils.setupUri(context); //TODO : this hsould be moved out from here to some other place
+			}
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
 			Logger.d(TAG, "Connection check happened from GCM");
 			connectOnMqttThread();
 		}
-	}
-
-	// this will be called on for pubsub events
-	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type))
+		else if (intent.getAction().equals(HikePubSub.SSL_PREFERENCE_CHANGED))
 		{
 			/*
-			 * ssl settings toggled so disconenct and reconnect mqtt
+			 * ssl settings toggled so disconnect and reconnect mqtt
 			 */
-			boolean switchSslOn = object != null ? (Boolean) object : Utils.switchSSLOn(context);
-			setBrokerHostPort(switchSslOn);
-			disconnectOnMqttThread(true);
+			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+			setBrokerHostPort(shouldConnectUsingSSL);
+			boolean isSSLConnected = isConnectionOnSSL();
+			
+			// reconnect using SSL as currently not connected using SSL
+			if(shouldConnectUsingSSL && !isSSLConnected)
+				disconnectOnMqttThread(true);
+			// reconnect using nonSSL but currently connected using SSL
+			else if(!shouldConnectUsingSSL && isSSLConnected)
+				disconnectOnMqttThread(true);
 		}
+	}
 
+	private boolean isConnectionOnSSL()
+	{
+		if(mqtt != null)
+		{
+			String uri = mqtt.getServerURI();
+			if(uri != null && uri.startsWith("ssl"))
+				return true;
+		}
+		return false;
 	}
 
 	// This class is just for testing .....
