@@ -4,8 +4,7 @@
     android:layout_width="@dimen/chatthread_avatar"
     android:layout_height="@dimen/chatthread_avatar"
     android:layout_alignParentTop="true"
-    android:layout_marginLeft="8dp"
-    android:visibility="gone" >
+    android:layout_marginLeft="8dp" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/avatar"

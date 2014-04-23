@@ -9,8 +9,6 @@
 
     <include
         android:id="@+id/avatar_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         layout="@layout/message_sender_avatar" />
 
     <RelativeLayout
