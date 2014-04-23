@@ -2484,6 +2484,10 @@ public class Utils
 
 		sendAppState();
 
+		if(HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+		{
+			resetStealthMode(context);
+		}
 	}
 
 	private static void sendAppState()
@@ -2513,7 +2517,11 @@ public class Utils
 		{
 			Logger.w("AppState", "Invalid json", e);
 		}
+	}
 
+	private static void resetStealthMode(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)
