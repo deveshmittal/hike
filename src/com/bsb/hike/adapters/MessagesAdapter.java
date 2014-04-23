@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, TYPING, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
 	};
 
 	private class DetailViewHolder
@@ -192,6 +192,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private class FileViewHolder extends FTViewHolder
 	{
+	}
+	
+	private class TextViewHolder extends DetailViewHolder
+	{
+		TextView text;
 	}
 
 	private class ViewHolder
@@ -616,7 +621,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (convMessage.getTypingNotification() != null)
 		{
-			type = ViewType.RECEIVE;
+			type = ViewType.TYPING;
 		}
 		else if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID)
 		{
@@ -686,6 +691,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 		}
 		else if (convMessage.isFileTransferMessage())
+		{
+		}
+		else if(viewType == ViewType.SEND_HIKE)
+		{
+		}
+		else if(viewType == ViewType.SEND_SMS)
+		{
+		}
+		else if(viewType == ViewType.RECEIVE)
 		{
 		}
 		else
@@ -834,6 +848,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
 					holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
+				case TYPING:
 				case RECEIVE:
 					if (v == null)
 					{
@@ -1833,7 +1848,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 				setSenderDetails(convMessage, position, fileHolder, false);
-				createFileThumb(holder.fileThumb);
+				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileThumb.setImageResource(R.drawable.ic_default_contact);
 				fileHolder.fileName.setText(hikeFile.getDisplayName());
 				List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
@@ -2003,236 +2018,298 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (viewType == ViewType.RECEIVE || viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 		{
-			if (metadata != null && metadata.isPokeMessage())
+			
+			TextViewHolder textHolder = null;
+			if (viewType == ViewType.SEND_HIKE || viewType == ViewType.SEND_SMS)
 			{
-				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
-				holder.stickerPlaceholder.setBackgroundResource(0);
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
-						firstMessageFromParticipant);
-				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-				if (holder.stickerParticipantNameUnsaved != null)
+				if (v == null)
 				{
-					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-				}
-				// if (isDefaultTheme)
-				// {
-				// holder.poke.setVisibility(View.VISIBLE);
-				// holder.messageContainer.setVisibility(View.VISIBLE);
-				// setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
-				// }
-				// else
-				if (!chatTheme.isAnimated())
-				{
-					holder.pokeCustom.setVisibility(View.VISIBLE);
-					holder.messageContainer.setVisibility(View.GONE);
-					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+					textHolder = new TextViewHolder();
+					v = inflater.inflate(R.layout.message_sent_text, parent, false);
+					textHolder.text = (TextView) v.findViewById(R.id.text);
+					textHolder.time = (TextView) v.findViewById(R.id.time);
+					textHolder.status = (ImageView) v.findViewById(R.id.status);
+					textHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					textHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					textHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+					v.setTag(textHolder);
 				}
 				else
 				{
-					holder.pokeCustom.setVisibility(View.VISIBLE);
-					holder.messageContainer.setVisibility(View.GONE);
-
-					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
-					if (metadata.getNudgeAnimationType() != NudgeAnimationType.NONE)
-					{
-						metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
-						holder.pokeCustom.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
-					}
+					textHolder = (TextViewHolder) v.getTag();
 				}
 			}
-			else if (convMessage.isStickerMessage())
+			else if (viewType == ViewType.RECEIVE)
 			{
-				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
-				holder.stickerPlaceholder.setBackgroundResource(0);
-
-				Sticker sticker = metadata.getSticker();
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
-						firstMessageFromParticipant);
-				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-				if (holder.stickerParticipantNameUnsaved != null)
+				if (v == null)
 				{
-					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-				}
-				// if (!convMessage.isSent())
-				// {
-				//
-				// if (firstMessageFromParticipant)
-				// {
-				// holder.stickerParticipantName.setVisibility(View.VISIBLE);
-				// holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-				// }
-				// else
-				// {
-				// holder.stickerParticipantName.setVisibility(View.GONE);
-				// }
-				// }
+					textHolder = new TextViewHolder();
+					v = inflater.inflate(R.layout.message_receive_text, parent, false);
 
-				/*
-				 * If this is the default category, then the sticker are part of the app bundle itself
-				 */
-				if (sticker.getStickerIndex() != -1)
-				{
-					holder.stickerImage.setVisibility(View.VISIBLE);
-					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
-					{
-						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-						int idx = sticker.getStickerIndex();
-						if (idx >= 0)
-							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
-					}
-					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-					{
-						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-						int idx = sticker.getStickerIndex();
-						if (idx >= 0)
-							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
-					}
+					textHolder.text = (TextView) v.findViewById(R.id.text);
+					textHolder.time = (TextView) v.findViewById(R.id.time);
+					textHolder.status = (ImageView) v.findViewById(R.id.status);
+					textHolder.timeStatus = (View) v.findViewById(R.id.time_status);
+					textHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					textHolder.senderDetails = v.findViewById(R.id.sender_details);
+					textHolder.senderName = (TextView) v.findViewById(R.id.sender_name);
+					textHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
+					textHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
+					textHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					textHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+					v.setTag(textHolder);
 				}
 				else
 				{
-					String categoryId;
-					/*
-					 * If the category is an unknown one, we have the category id stored in the metadata.
-					 */
-					if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-					{
-						categoryId = metadata.getUnknownStickerCategory();
-					}
-					else
-					{
-						categoryId = sticker.getCategory().categoryId.name();
-					}
-					String stickerId = sticker.getStickerId();
-
-					String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
-					File stickerImage = null;
-					if (categoryDirPath != null)
-					{
-						stickerImage = new File(categoryDirPath, stickerId);
-					}
-
-					String key = categoryId + stickerId;
-					boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
-
-					if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
-					{
-						Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
-						if (stickerDrawable != null)
-						{
-							holder.stickerImage.setVisibility(View.VISIBLE);
-							// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-							holder.stickerImage.setImageDrawable(stickerDrawable);
-							// holder.stickerImage.setImageDrawable(IconCacheManager
-							// .getInstance().getSticker(context,
-							// stickerImage.getPath()));
-						}
-						else
-						{
-							holder.stickerLoader.setVisibility(View.VISIBLE);
-							holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
-						}
-					}
-					else
-					{
-						holder.stickerLoader.setVisibility(View.VISIBLE);
-						holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
-
-						/*
-						 * Download the sticker if not already downloading.
-						 */
-						if (!downloadingSticker)
-						{
-							DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
-							StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
-							Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
-						}
-					}
+					textHolder = (TextViewHolder) v.getTag();
 				}
 			}
-			else
-			{
-				holder.messageTextView.setVisibility(View.VISIBLE);
-				holder.messageContainer.setVisibility(View.VISIBLE);
-
-				CharSequence markedUp = convMessage.getMessage();
-				// Fix for bug where if a participant leaves the group chat, the
-				// participant's name is never shown
-				setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
-
-				SmileyParser smileyParser = SmileyParser.getInstance();
-				markedUp = smileyParser.addSmileySpans(markedUp, false);
-				holder.messageTextView.setText(markedUp);
-				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
-				Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
-			}
-
-			if (!convMessage.isSent())
-			{
-				if (firstMessageFromParticipant)
-				{
-					holder.image.setVisibility(View.VISIBLE);
-					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
-					holder.avatarContainer.setVisibility(View.VISIBLE);
-				}
-				else
-				{
-					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
-				}
-			}
-
-			if (convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
-			{
-				setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
-			}
-			else
-			{
-				setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-
-				boolean showTip = false;
-
-				if (viewType == ViewType.SEND_HIKE)
-				{
-					if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
-					{
-						if (msgIdForSdrTip == -1)
-						{
-							showTip = true;
-						}
-						else if (convMessage.getMsgID() == msgIdForSdrTip)
-						{
-							showTip = true;
-						}
-					}
-
-					if (showTip)
-					{
-						msgIdForSdrTip = convMessage.getMsgID();
-						showSdrTip(holder.sdrFtueTip);
-					}
-					else
-					{
-						holder.sdrFtueTip.setVisibility(View.GONE);
-					}
-				}
-			}
-
-			// if(isDefaultTheme)
-			// {
-			// if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
-			// {
-			// setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
-			// }
-			// else
-			// {
-			// setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
-			// }
-			// }
-			// else
-			// {
-			// setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
-			// }
+			setSenderDetails(convMessage, position, textHolder, false);
+			
+			CharSequence markedUp = convMessage.getMessage();
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			markedUp = smileyParser.addSmileySpans(markedUp, false);
+			textHolder.text.setText(markedUp);
+			Linkify.addLinks(textHolder.text, Linkify.ALL);
+			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
+			
+			setTimeNStatus(position, textHolder, false);
+			setSelection(position, textHolder.selectedStateOverlay);
+			textHolder.messageContainer.setTag(convMessage);
+			textHolder.messageContainer.setOnClickListener(this);
+			textHolder.messageContainer.setOnLongClickListener(this);
 		}
+//		{
+//			if (metadata != null && metadata.isPokeMessage())
+//			{
+//				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+//				holder.stickerPlaceholder.setBackgroundResource(0);
+//				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+//						firstMessageFromParticipant);
+//				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+//				if (holder.stickerParticipantNameUnsaved != null)
+//				{
+//					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+//				}
+//				// if (isDefaultTheme)
+//				// {
+//				// holder.poke.setVisibility(View.VISIBLE);
+//				// holder.messageContainer.setVisibility(View.VISIBLE);
+//				// setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
+//				// }
+//				// else
+//				if (!chatTheme.isAnimated())
+//				{
+//					holder.pokeCustom.setVisibility(View.VISIBLE);
+//					holder.messageContainer.setVisibility(View.GONE);
+//					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+//				}
+//				else
+//				{
+//					holder.pokeCustom.setVisibility(View.VISIBLE);
+//					holder.messageContainer.setVisibility(View.GONE);
+//
+//					setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+//					if (metadata.getNudgeAnimationType() != NudgeAnimationType.NONE)
+//					{
+//						metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
+//						holder.pokeCustom.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
+//					}
+//				}
+//			}
+//			else if (convMessage.isStickerMessage())
+//			{
+//				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+//				holder.stickerPlaceholder.setBackgroundResource(0);
+//
+//				Sticker sticker = metadata.getSticker();
+//				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+//						firstMessageFromParticipant);
+//				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+//				if (holder.stickerParticipantNameUnsaved != null)
+//				{
+//					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+//				}
+//				// if (!convMessage.isSent())
+//				// {
+//				//
+//				// if (firstMessageFromParticipant)
+//				// {
+//				// holder.stickerParticipantName.setVisibility(View.VISIBLE);
+//				// holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+//				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+//				// }
+//				// else
+//				// {
+//				// holder.stickerParticipantName.setVisibility(View.GONE);
+//				// }
+//				// }
+//
+//				/*
+//				 * If this is the default category, then the sticker are part of the app bundle itself
+//				 */
+//				if (sticker.getStickerIndex() != -1)
+//				{
+//					holder.stickerImage.setVisibility(View.VISIBLE);
+//					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+//					{
+//						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+//						int idx = sticker.getStickerIndex();
+//						if (idx >= 0)
+//							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
+//					}
+//					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+//					{
+//						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+//						int idx = sticker.getStickerIndex();
+//						if (idx >= 0)
+//							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
+//					}
+//				}
+//				else
+//				{
+//					String categoryId;
+//					/*
+//					 * If the category is an unknown one, we have the category id stored in the metadata.
+//					 */
+//					if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
+//					{
+//						categoryId = metadata.getUnknownStickerCategory();
+//					}
+//					else
+//					{
+//						categoryId = sticker.getCategory().categoryId.name();
+//					}
+//					String stickerId = sticker.getStickerId();
+//
+//					String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
+//					File stickerImage = null;
+//					if (categoryDirPath != null)
+//					{
+//						stickerImage = new File(categoryDirPath, stickerId);
+//					}
+//
+//					String key = categoryId + stickerId;
+//					boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
+//
+//					if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
+//					{
+//						Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
+//						if (stickerDrawable != null)
+//						{
+//							holder.stickerImage.setVisibility(View.VISIBLE);
+//							// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+//							holder.stickerImage.setImageDrawable(stickerDrawable);
+//							// holder.stickerImage.setImageDrawable(IconCacheManager
+//							// .getInstance().getSticker(context,
+//							// stickerImage.getPath()));
+//						}
+//						else
+//						{
+//							holder.stickerLoader.setVisibility(View.VISIBLE);
+//							holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+//						}
+//					}
+//					else
+//					{
+//						holder.stickerLoader.setVisibility(View.VISIBLE);
+//						holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+//
+//						/*
+//						 * Download the sticker if not already downloading.
+//						 */
+//						if (!downloadingSticker)
+//						{
+//							DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
+//							StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
+//							Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
+//						}
+//					}
+//				}
+//			}
+//			else
+//			{
+//				holder.messageTextView.setVisibility(View.VISIBLE);
+//				holder.messageContainer.setVisibility(View.VISIBLE);
+//
+//				CharSequence markedUp = convMessage.getMessage();
+//				// Fix for bug where if a participant leaves the group chat, the
+//				// participant's name is never shown
+//				setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+//
+//				SmileyParser smileyParser = SmileyParser.getInstance();
+//				markedUp = smileyParser.addSmileySpans(markedUp, false);
+//				holder.messageTextView.setText(markedUp);
+//				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+//				Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
+//			}
+//
+//			if (!convMessage.isSent())
+//			{
+//				if (firstMessageFromParticipant)
+//				{
+//					holder.image.setVisibility(View.VISIBLE);
+//					setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
+//					holder.avatarContainer.setVisibility(View.VISIBLE);
+//				}
+//				else
+//				{
+//					holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+//				}
+//			}
+//
+//			if (convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
+//			{
+//				setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+//			}
+//			else
+//			{
+//				setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+//
+//				boolean showTip = false;
+//
+//				if (viewType == ViewType.SEND_HIKE)
+//				{
+//					if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
+//					{
+//						if (msgIdForSdrTip == -1)
+//						{
+//							showTip = true;
+//						}
+//						else if (convMessage.getMsgID() == msgIdForSdrTip)
+//						{
+//							showTip = true;
+//						}
+//					}
+//
+//					if (showTip)
+//					{
+//						msgIdForSdrTip = convMessage.getMsgID();
+//						showSdrTip(holder.sdrFtueTip);
+//					}
+//					else
+//					{
+//						holder.sdrFtueTip.setVisibility(View.GONE);
+//					}
+//				}
+//			}
+//
+//			// if(isDefaultTheme)
+//			// {
+//			// if(convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
+//			// {
+//			// setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, false, holder.extMessageTimeStatus, holder.messageInfo);
+//			// }
+//			// else
+//			// {
+//			// setNewSDR(position, holder.messageTime, holder.messageStatus, true, null, holder.messageInfo);
+//			// }
+//			// }
+//			// else
+//			// {
+//			// setSDRAndTimestamp(position, holder.messageInfo, holder.sending, holder.bubbleContainer);
+//			// }
+//		}
 		// else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
 		// {
 		// FileSavedState fss = null;

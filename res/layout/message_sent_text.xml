@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical|right"
+    android:minHeight="30dp"
+    android:paddingBottom="2dp" >
+
+    <RelativeLayout
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="18dp"
+        android:background="@drawable/ic_bubble_green_selector"
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomSendMessageTextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:maxWidth="265dp"
+            android:text="This is the message"
+            android:textColor="@color/chat_color"
+            android:textSize="16sp" />
+
+        <include
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignRight="@id/text"
+            android:layout_marginBottom="3dp"
+            layout="@layout/message_time_status" />
+    </RelativeLayout>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_alignParentTop="true"
+        layout="@layout/message_overlay" />
+
+</RelativeLayout>

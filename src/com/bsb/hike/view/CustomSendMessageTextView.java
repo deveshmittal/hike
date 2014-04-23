@@ -16,7 +16,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 	
 	private static final int widthTime24Hour = 59;
 	
-	private static final int widthMargin = 5;
+	private static final int widthMargin = 2;
 	
 	private static final int heightTime = 14;
 
@@ -92,7 +92,8 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = viewHeight;
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
-				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
+				linesMaxWidth = Math.max(linesMaxWidth, (int) (((widthAddition + 0) * Utils.densityMultiplier) + lastLineWidth));
+				//super.onMeasure(MeasureSpec.makeMeasureSpec(linesMaxWidth, MeasureSpec.EXACTLY), heightMeasureSpec);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 			else

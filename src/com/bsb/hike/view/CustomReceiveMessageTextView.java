@@ -16,7 +16,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 	
 	private static final int widthTime24Hour = 38;
 	
-	private static final int widthMargin = 5;
+	private static final int widthMargin = 2;
 	
 	private static final int heightTime = 14;
 
