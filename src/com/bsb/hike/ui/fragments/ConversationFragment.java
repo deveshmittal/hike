@@ -356,7 +356,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		/*
 		 * If stealth ftue conv tap tip is visible than remove it
 		 */
-		if(!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_STEALTH_FTUE_CONV_TIP, false))
+		if(!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
 			for (int i=0; i<mAdapter.getCount(); i++)
 			{
@@ -542,48 +542,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 		}
 
-		if (mAdapter != null)
-		{
-			mAdapter.clear();
-		}
-		
-		/*
-		 * Add item for stealth ftue conv tap tip.
-		 * Add it to first non hike_bot conversation.
-		 */
-		if (!conversations.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_STEALTH_FTUE_CONV_TIP, false))
-		{
-			int stealthTipLocation=0;
-			for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
-			{
-				stealthTipLocation++;
-				Object object = iter.next();
-				Conversation conv = (Conversation) object;
-				if (conv instanceof ConversationTip)
-				{
-					continue;
-				}
-				
-				if (!HikeMessengerApp.hikeBotNamesMap.containsKey(conv.getMsisdn()))
-				{
-					conversations.add(stealthTipLocation, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
-					break;
-				}
-			}
-		}
-
-		mAdapter = new ConversationsAdapter(getActivity(), R.layout.conversation_item, conversations);
-
-		/*
-		 * because notifyOnChange gets re-enabled whenever we call notifyDataSetChanged it's simpler to assume it's set to false and always notifyOnChange by hand
-		 */
-		mAdapter.setNotifyOnChange(false);
-
-		setListAdapter(mAdapter);
-
-		getListView().setOnItemLongClickListener(this);
-
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	private void leaveGroup(Conversation conv)
@@ -1120,9 +1078,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.remove(conversation);
 		ConversationFragment.this.run();
 
-		Editor editor = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_STEALTH_FTUE_CONV_TIP, true);
-		editor.commit();
 	}
 
 	private void removeGroupChatTip(Conversation conversation)
