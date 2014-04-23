@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="@drawable/stealth_ftue_conv_tip_selector"
+    android:background="#ef554e"
     android:gravity="center"
     android:orientation="vertical" >
 
@@ -15,7 +15,7 @@
         android:layout_alignTop="@+id/tip"
         android:background="@drawable/bg_overflow_menu_selector"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_stealth_tip_dismiss" />
+        android:src="@drawable/ic_stealth_tip_cross" />
 
     <View
         android:id="@+id/divider"
@@ -24,7 +24,7 @@
         android:layout_alignBottom="@+id/tip"
         android:layout_alignTop="@+id/tip"
         android:layout_toLeftOf="@id/close"
-        android:background="#636d7a" />
+        android:background="#f2706a" />
 
     <ImageView
         android:id="@+id/pointer"
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_stealth_tip_pointer" />
+        android:src="@drawable/ic_stealth_intro_2" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/tip"
