@@ -641,6 +641,7 @@ public class LockPatternActivity extends Activity {
                 if (result)
                     finishWithResultOk(null);
                 else {
+                    finishWithNegativeResult(RESULT_CANCELED);    
                     mRetryCount++;
                     mIntentResult.putExtra(EXTRA_RETRY_COUNT, mRetryCount);
 
