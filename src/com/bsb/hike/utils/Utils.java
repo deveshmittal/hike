@@ -1236,7 +1236,7 @@ public class Utils
 
 		return thumbnail;
 	}
-	
+
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
 	{
 		Bitmap thumbnail = null;
@@ -1258,11 +1258,11 @@ public class Utils
 
 		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
 		options.inJustDecodeBounds = false;
-		if(applyBitmapConfig)
+		if (applyBitmapConfig)
 		{
 			options.inPreferredConfig = Config.RGB_565;
 		}
-		
+
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
@@ -1277,7 +1277,7 @@ public class Utils
 		}
 
 		return thumbnail;
-}
+	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
@@ -3867,5 +3867,13 @@ public class Utils
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+	}
+
+	public static void addToContacts(Activity context, String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		context.startActivity(i);
 	}
 }
