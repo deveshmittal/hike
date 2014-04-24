@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, TYPING, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT, TYPING_NOTIFICATION
 	};
 
 	private class DetailViewHolder
@@ -193,10 +193,33 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private class FileViewHolder extends FTViewHolder
 	{
 	}
-	
+
 	private class TextViewHolder extends DetailViewHolder
 	{
 		TextView text;
+	}
+
+	private class StatusViewHolder
+	{
+		ImageView image;
+
+		ImageView avatarFrame;
+
+		TextView messageTextView;
+
+		TextView dayTextView;
+
+		ViewGroup container;
+
+		TextView messageInfo;
+
+	}
+
+	private class TypingViewHolder
+	{
+		ImageView typing;
+
+		ViewGroup typingAvatarContainer;
 	}
 
 	private class ViewHolder
@@ -621,7 +644,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (convMessage.getTypingNotification() != null)
 		{
-			type = ViewType.TYPING;
+			type = ViewType.TYPING_NOTIFICATION;
 		}
 		else if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID)
 		{
@@ -702,6 +725,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if(viewType == ViewType.RECEIVE)
 		{
 		}
+		else if (viewType == ViewType.PARTICIPANT_INFO)
+		{
+		}
+		else if (viewType == ViewType.STATUS_MESSAGE)
+		{
+		}
+		else if (viewType == ViewType.TYPING_NOTIFICATION)
+		{
+		}
 		else
 		{
 			if (v == null)
@@ -719,29 +751,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
 					holder.dayLeft = v.findViewById(R.id.day_left);
 					holder.dayRight = v.findViewById(R.id.day_right);
-					v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
-					break;
-				case STATUS_MESSAGE:
-					v = inflater.inflate(R.layout.in_thread_status_update, null);
-
-					holder.image = (ImageView) v.findViewById(R.id.avatar);
-					holder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
-					holder.messageTextView = (TextView) v.findViewById(R.id.status_text);
-					holder.dayTextView = (TextView) v.findViewById(R.id.status_info);
-					holder.container = (ViewGroup) v.findViewById(R.id.content_container);
-					holder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
-					break;
-				case PARTICIPANT_INFO:
-					v = inflater.inflate(R.layout.message_item_receive, null);
-
-					holder.image = (ImageView) v.findViewById(R.id.avatar);
-					holder.dayContainer = (LinearLayout) v.findViewById(R.id.day_container);
-					holder.dayTextView = (TextView) v.findViewById(R.id.day);
-					holder.container = (ViewGroup) v.findViewById(R.id.participant_info_container);
-					holder.dayLeft = v.findViewById(R.id.day_left);
-					holder.dayRight = v.findViewById(R.id.day_right);
-
-					holder.image.setVisibility(View.GONE);
 					v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
 					break;
 
@@ -848,7 +857,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					holder.filmstripLeft = (ImageView) v.findViewById(R.id.filmstrip_left);
 					holder.filmstripRight = (ImageView) v.findViewById(R.id.filmstrip_right);
-				case TYPING:
 				case RECEIVE:
 					if (v == null)
 					{
@@ -879,8 +887,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.stickerImage = (ImageView) v.findViewById(R.id.sticker_image);
 					holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 					holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
-					holder.typing = (ImageView) v.findViewById(R.id.typing);
-					holder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
 					holder.messageTime = (TextView) v.findViewById(R.id.message_time);
 					holder.extMessageTime = (TextView) v.findViewById(R.id.message_time_ext);
 					holder.intMessageTime = (TextView) v.findViewById(R.id.message_time_int);
@@ -944,29 +950,45 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 		// Applicable to all kinds of messages
-		if (convMessage.getTypingNotification() != null)
+		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
-			holder.typing.setVisibility(View.VISIBLE);
+			
+			TypingViewHolder typingHolder = null;
+			if (v == null)
+			{
+				typingHolder = new TypingViewHolder();
+					v = inflater.inflate(R.layout.typing_notification_receive, parent, false);
+					typingHolder.typing = (ImageView) v.findViewById(R.id.typing);
+					typingHolder.typingAvatarContainer = (ViewGroup) v.findViewById(R.id.typing_avatar_container);
+					v.setTag(typingHolder);
+				}
+				else
+				{
+					typingHolder = (TypingViewHolder) v.getTag();
+				}
+			
+			
+			typingHolder.typing.setVisibility(View.VISIBLE);
 
-			AnimationDrawable ad = (AnimationDrawable) holder.typing.getDrawable();
-			ad.setCallback(holder.typing);
+			AnimationDrawable ad = (AnimationDrawable) typingHolder.typing.getDrawable();
+			ad.setCallback(typingHolder.typing);
 			ad.setVisible(true, true);
 			ad.start();
 
 			if (isGroupChat)
 			{
-				holder.typingAvatarContainer.setVisibility(View.VISIBLE);
+				typingHolder.typingAvatarContainer.setVisibility(View.VISIBLE);
 
 				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) convMessage.getTypingNotification();
 				List<String> participantList = groupTypingNotification.getGroupParticipantList();
 
-				holder.typingAvatarContainer.removeAllViews();
+				typingHolder.typingAvatarContainer.removeAllViews();
 
 				for (int i = participantList.size() - 1; i >= 0; i--)
 				{
 					String msisdn = participantList.get(i);
 
-					View avatarContainer = inflater.inflate(R.layout.small_avatar_container, holder.typingAvatarContainer, false);
+					View avatarContainer = inflater.inflate(R.layout.small_avatar_container, typingHolder.typingAvatarContainer, false);
 					ImageView imageView = (ImageView) avatarContainer.findViewById(R.id.avatar);
 					/*
 					 * Catching OOB here since the participant list can be altered by another thread. In that case an OOB will be thrown here. The only impact that will have is
@@ -976,7 +998,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						setAvatar(msisdn, imageView);
 
-						holder.typingAvatarContainer.addView(avatarContainer);
+						typingHolder.typingAvatarContainer.addView(avatarContainer);
 					}
 					catch (IndexOutOfBoundsException e)
 					{
@@ -3069,66 +3091,85 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		// } // End of File Transfer Message
 		else if (viewType == ViewType.STATUS_MESSAGE)
 		{
-			holder.image.setVisibility(View.VISIBLE);
-			holder.avatarFrame.setVisibility(View.VISIBLE);
-			holder.messageTextView.setVisibility(View.VISIBLE);
-			holder.dayTextView.setVisibility(View.VISIBLE);
-			holder.container.setVisibility(View.VISIBLE);
-			holder.messageInfo.setVisibility(View.VISIBLE);
-
-			if (isDefaultTheme)
+			StatusViewHolder statusHolder = null;
+			if (v == null)
 			{
-				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
-				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
-				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+				statusHolder = new StatusViewHolder();
+				v = inflater.inflate(R.layout.in_thread_status_update, null);
+				statusHolder.image = (ImageView) v.findViewById(R.id.avatar);
+				statusHolder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
+				statusHolder.messageTextView = (TextView) v.findViewById(R.id.status_text);
+				statusHolder.dayTextView = (TextView) v.findViewById(R.id.status_info);
+				statusHolder.container = (ViewGroup) v.findViewById(R.id.content_container);
+				statusHolder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
+				
+				v.setTag(statusHolder);
 			}
 			else
 			{
-				holder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
-				holder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
-				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
+				statusHolder = (StatusViewHolder) v.getTag();
 			}
-			holder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
+			
+			statusHolder.image.setVisibility(View.VISIBLE);
+			statusHolder.avatarFrame.setVisibility(View.VISIBLE);
+			statusHolder.messageTextView.setVisibility(View.VISIBLE);
+			statusHolder.dayTextView.setVisibility(View.VISIBLE);
+			statusHolder.container.setVisibility(View.VISIBLE);
+			statusHolder.messageInfo.setVisibility(View.VISIBLE);
+
+			if (isDefaultTheme)
+			{
+				statusHolder.dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+				statusHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
+				statusHolder.messageTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+			}
+			else
+			{
+				statusHolder.dayTextView.setTextColor(context.getResources().getColor(R.color.white));
+				statusHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
+				statusHolder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
+			}
+			statusHolder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
 
 			StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
 
-			holder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
+			statusHolder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
 
-			holder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
+			statusHolder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
 
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
 			{
 				SmileyParser smileyParser = SmileyParser.getInstance();
-				holder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
-				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+				statusHolder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+				Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
 
 			}
 			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 			{
-				holder.messageTextView.setText(R.string.changed_profile);
+				statusHolder.messageTextView.setText(R.string.changed_profile);
 			}
 
 			if (statusMessage.hasMood())
 			{
-				holder.image.setBackgroundDrawable(null);
-				holder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
-				holder.avatarFrame.setVisibility(View.GONE);
+				statusHolder.image.setBackgroundDrawable(null);
+				statusHolder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
+				statusHolder.avatarFrame.setVisibility(View.GONE);
 			}
 			else
 			{
-				setAvatar(conversation.getMsisdn(), holder.image);
-				holder.avatarFrame.setVisibility(View.VISIBLE);
+				setAvatar(conversation.getMsisdn(), statusHolder.image);
+				statusHolder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 
-			holder.container.setTag(convMessage);
+			statusHolder.container.setTag(convMessage);
 			if (!isActionModeOn)
 			{
-				holder.container.setEnabled(true);
-				holder.container.setOnClickListener(this);
+				statusHolder.container.setEnabled(true);
+				statusHolder.container.setOnClickListener(this);
 			}
 			else
 			{
-				holder.container.setEnabled(false);
+				statusHolder.container.setEnabled(false);
 			}
 
 			boolean showTip = false;
@@ -3166,9 +3207,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		else if (viewType == ViewType.PARTICIPANT_INFO)
 		{
-			holder.container.setVisibility(View.VISIBLE);
+			ViewGroup container = null;
+			if (v == null)
+			{
+				v = inflater.inflate(R.layout.participant_info_receive, null);
+				container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
+				
+				v.setTag(container);
+			}
+			else
+			{
+				container = (ViewGroup) v.getTag();
+			}
+			
+			container.setVisibility(View.VISIBLE);
 			ParticipantInfoState infoState = convMessage.getParticipantInfoState();
-			((ViewGroup) holder.container).removeAllViews();
+			((ViewGroup) container).removeAllViews();
 			int positiveMargin = (int) (8 * Utils.densityMultiplier);
 			int left = 0;
 			int top = 0;
@@ -3193,7 +3247,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), isDefaultTheme ? R.drawable.ic_joined_chat
 						: R.drawable.ic_joined_chat_custom);
-				((ViewGroup) holder.container).addView(participantInfo);
+				((ViewGroup) container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT || infoState == ParticipantInfoState.GROUP_END)
 			{
@@ -3216,7 +3270,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						lp.setMargins(left, top, right, bottom);
 						mainMessage.setLayoutParams(lp);
 
-						((ViewGroup) holder.container).addView(mainMessage);
+						((ViewGroup) container).addView(mainMessage);
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
@@ -3231,7 +3285,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				lp.setMargins(left, top, right, 0);
 				participantInfo.setLayoutParams(lp);
-				((ViewGroup) holder.container).addView(participantInfo);
+				((ViewGroup) container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.USER_JOIN || infoState == ParticipantInfoState.USER_OPT_IN)
 			{
@@ -3282,10 +3336,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				lp.setMargins(left, top, right, creditsMessageView != null ? bottom : 0);
 				mainMessage.setLayoutParams(lp);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 				if (creditsMessageView != null)
 				{
-					((ViewGroup) holder.container).addView(creditsMessageView);
+					((ViewGroup) container).addView(creditsMessageView);
 				}
 			}
 			else if ((infoState == ParticipantInfoState.CHANGED_GROUP_NAME) || (infoState == ParticipantInfoState.CHANGED_GROUP_IMAGE))
@@ -3309,7 +3363,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, participantName), icRes);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
 			{
@@ -3320,7 +3374,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), isDefaultTheme ? R.drawable.ic_no_int_sms
 						: R.drawable.ic_no_int_sms_custom);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.INTRO_MESSAGE)
 			{
@@ -3349,7 +3403,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), icRes);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.DND_USER)
 			{
@@ -3403,7 +3457,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					lp.setMargins(left, top, right, 0);
 					dndMessage.setLayoutParams(lp);
 
-					((ViewGroup) holder.container).addView(dndMessage);
+					((ViewGroup) container).addView(dndMessage);
 				}
 			}
 			else if (infoState == ParticipantInfoState.CHAT_BACKGROUND)
@@ -3428,7 +3482,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
-				((ViewGroup) holder.container).addView(mainMessage);
+				((ViewGroup) container).addView(mainMessage);
 			}
 			return v;
 		}
