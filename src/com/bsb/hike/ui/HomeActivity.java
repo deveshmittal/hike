@@ -373,8 +373,24 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void showStealthFtueTip(final boolean isSetPasswordTip)
 	{
-		tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
-		HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
+		ViewStub stealthTipViewStub = (ViewStub) findViewById(R.id.stealth_double_tap_tip_viewstub);
+		if(stealthTipViewStub != null)
+		{
+			stealthTipViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
+			{
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					showStealthFtueTip(isSetPasswordTip);
+				}
+			});
+			stealthTipViewStub.inflate();
+		}
+		else
+		{
+			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
+			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
+		}
 	}
 
 	@Override
