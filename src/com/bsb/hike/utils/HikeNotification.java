@@ -47,6 +47,8 @@ public class HikeNotification
 
 	public static final int APP_UPDATE_AVAILABLE_ID = -126;
 
+	public static final int STEALTH_NOTIFICATION_ID = -127;
+
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
 	private static final String SEPERATOR = " ";
@@ -247,6 +249,29 @@ public class HikeNotification
 			// regular message
 			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null);
 		}
+	}
+
+	public void notifyStealthMessage()
+	{
+		final int notificationId = STEALTH_NOTIFICATION_ID;
+
+		String message = context.getString(R.string.stealth_notification_message);
+		String key = "hike";
+
+		String text = message;
+
+		// we've got to invoke the timeline here
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(key, message, text, avatarDrawable, smallIconId, false);
+
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(notificationId, mBuilder.getNotification());
 	}
 
 	public void notifyFavorite(final ContactInfo contactInfo)
