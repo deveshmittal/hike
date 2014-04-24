@@ -1569,15 +1569,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			return;
 		}
 		Utils.logEvent(this, HikeConstants.LogEvent.MENU_ADD_TO_CONTACTS);
-		addToContacts(mLocalMSISDN);
-	}
-
-	private void addToContacts(String msisdn)
-	{
-		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
-		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-		i.putExtra(Insert.PHONE, msisdn);
-		startActivity(i);
+		Utils.addToContacts(this, mLocalMSISDN);
 	}
 
 	public void onInviteToHikeClicked(View v)
@@ -1955,7 +1947,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					}
 					else if (getString(R.string.add_to_contacts).equals(option))
 					{
-						addToContacts(contactInfo.getMsisdn());
+						Utils.addToContacts(ProfileActivity.this, contactInfo.getMsisdn());
 					}
 					else if (getString(R.string.remove_from_group).equals(option))
 					{
