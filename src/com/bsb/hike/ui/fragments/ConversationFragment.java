@@ -297,6 +297,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		if(!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+		{
+			/*
+			 * if ftue setup is not done and we are showing stealth ftue tip we should unset this preference
+			 */
+			if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+			{
+				HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
+			}
+		}
 		super.onDestroy();
 	}
 
@@ -1150,6 +1160,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
 				mAdapter.notifyDataSetChanged();
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
 			}
 		}
 		else
@@ -1160,6 +1171,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	protected void removeStealthConvTip(Conversation conversation)
 	{
+		HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
 		mAdapter.remove(conversation);
 		ConversationFragment.this.run();
 	}

@@ -235,6 +235,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
+				if(HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+				{
+					Toast.makeText(HomeActivity.this, R.string.stealth_ftue_conv_tip_showing, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 				{
 					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
