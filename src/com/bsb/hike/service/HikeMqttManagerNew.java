@@ -569,7 +569,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				return;
 
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
-			
+
 			if (op == null)
 			{
 				op = new MqttConnectOptions();
@@ -581,7 +581,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
-			
+
 			if (mqtt == null)
 			{
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
@@ -599,6 +599,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (isNetworkAvailable())
 			{
 				acquireWakeLock(connectionTimeoutSec);
+				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
 			}
 			else
@@ -650,28 +651,31 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	{
 		try
 		{
-			forceDisconnect = true;
-			IMqttToken t = mqtt.disconnect(quiesceTime, null, new IMqttActionListener()
+			if (mqtt != null)
 			{
-				@Override
-				public void onSuccess(IMqttToken arg0)
+				forceDisconnect = true;
+				IMqttToken t = mqtt.disconnect(quiesceTime, null, new IMqttActionListener()
 				{
-					Logger.d(TAG, "Explicit Disconnection success");
-					handleDisconnect(reconnect);
-				}
+					@Override
+					public void onSuccess(IMqttToken arg0)
+					{
+						Logger.d(TAG, "Explicit Disconnection success");
+						handleDisconnect(reconnect);
+					}
 
-				@Override
-				public void onFailure(IMqttToken arg0, Throwable arg1)
-				{
-					Logger.e(TAG, "Explicit Disconnection failed", arg1);
-					// dont care about failure and move on as you have to connect anyways
-					handleDisconnect(reconnect);
-				}
-			});
-			/* blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout
-			 * This will wait for max 5 secs
-			 */
-			t.waitForCompletion(10 * quiesceTime);
+					@Override
+					public void onFailure(IMqttToken arg0, Throwable arg1)
+					{
+						Logger.e(TAG, "Explicit Disconnection failed", arg1);
+						// dont care about failure and move on as you have to connect anyways
+						handleDisconnect(reconnect);
+					}
+				});
+				/*
+				 * blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout This will wait for max 5 secs
+				 */
+				t.waitForCompletion(10 * quiesceTime);
+			}
 		}
 		catch (MqttException e)
 		{
@@ -1065,14 +1069,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Logger.w(TAG, "Destroying mqtt connection.");
 			context.unregisterReceiver(this);
 			disconnectOnMqttThread(false);
-			// here we are blocking service main thread for 1 second or less so that disconnection takes place cleanly
-			while (mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 100)
+			// here we are blocking service main thread for 5 second or less so that disconnection takes place cleanly
+			while (mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 500)
 			{
 				Thread.sleep(10);
 				retryAttempts++;
 			}
 			if (mMqttHandlerLooper != null)
-				mMqttHandlerLooper.quitSafely();
+			{
+				if (Utils.hasKitKat())
+					mMqttHandlerLooper.quitSafely();
+				else
+					mMqttHandlerLooper.quit();
+			}
 			mqttMessageManager.close();
 			Logger.w(TAG, "Mqtt connection destroyed.");
 		}
@@ -1097,8 +1106,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
 			{
-				connectOnMqttThread();
-				Utils.setupUri(context); //TODO : this hsould be moved out from here to some other place
+				boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+				setBrokerHostPort(shouldConnectUsingSSL);
+				boolean isSSLConnected = isSSLAlreadyOn();
+				// reconnect using SSL as currently not connected using SSL
+				if (shouldConnectUsingSSL && !isSSLConnected)
+					disconnectOnMqttThread(true);
+				// reconnect using nonSSL but currently connected using SSL
+				else if (!shouldConnectUsingSSL && isSSLConnected)
+					disconnectOnMqttThread(true);
+				else
+					connectOnMqttThread();
+				Utils.setupUri(context); // TODO : this hsould be moved out from here to some other place
 			}
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
@@ -1114,22 +1133,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
 			setBrokerHostPort(shouldConnectUsingSSL);
 			boolean isSSLConnected = isSSLAlreadyOn();
-			
+			Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
 			// reconnect using SSL as currently not connected using SSL
-			if(shouldConnectUsingSSL && !isSSLConnected)
+			if (shouldConnectUsingSSL && !isSSLConnected)
 				disconnectOnMqttThread(true);
 			// reconnect using nonSSL but currently connected using SSL
-			else if(!shouldConnectUsingSSL && isSSLConnected)
+			else if (!shouldConnectUsingSSL && isSSLConnected)
 				disconnectOnMqttThread(true);
 		}
 	}
 
 	private boolean isSSLAlreadyOn()
 	{
-		if(mqtt != null)
+		if (mqtt != null)
 		{
 			String uri = mqtt.getServerURI();
-			if(uri != null && uri.startsWith("ssl"))
+			if (uri != null && uri.startsWith("ssl"))
 				return true;
 		}
 		return false;
