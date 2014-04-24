@@ -40,7 +40,7 @@
     <string name="terms_privacy">Terms and Privacy</string>
     <string name="invite_now">Invite now</string>
     <string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
-    <string name="shortcut">Add Shortcut</string>
+    <string name="shortcut">Add conversation shortcut</string>
     <string name="earn_200_sms">Invite friends, earn more free SMS.</string>
     <string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. For %1$s to receive hike messages, %1$s needs to opt-in to hike by giving a missed call to %2$s.\n\nYou\'ll get an extra 10 free SMS\' per month if %1$s opts-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
     <string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
@@ -579,7 +579,7 @@
     <string name="exporting_conversations_prefix">Exporting conversations...</string>
     <string name="attached_is_the_conversation_backup_string">Attached is the conversation backup..</string>
     <string name="new_chat">New Chat</string>
-    <string name="new_update">New Update</string>
+    <string name="new_update">Status Update</string>
     <string name="invite_via_facebook">Invite Via Facebook</string>
     <string name="feedback">Feedback</string>
     <string name="sending_feedback">Sending Feedback</string>
@@ -1457,4 +1457,5 @@
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
+    <string name="edit">Edit</string>
 </resources>
