@@ -1497,4 +1497,5 @@
     <string name="stealth_zero_chat_tip">placeholder no chats</string>
     <string name="stealth_mode_on">Placeholder Stealth mode entered</string>
     <string name="normal_mode_on">Placeholder Switched to normal mode entered</string>
+    <string name="stealth_notification_message">You have a new notification</string>
 </resources>

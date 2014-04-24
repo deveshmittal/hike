@@ -1235,7 +1235,7 @@ public class Utils
 
 		return thumbnail;
 	}
-	
+
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
 	{
 		Bitmap thumbnail = null;
@@ -1257,11 +1257,11 @@ public class Utils
 
 		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
 		options.inJustDecodeBounds = false;
-		if(applyBitmapConfig)
+		if (applyBitmapConfig)
 		{
 			options.inPreferredConfig = Config.RGB_565;
 		}
-		
+
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
@@ -1276,7 +1276,7 @@ public class Utils
 		}
 
 		return thumbnail;
-}
+	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
@@ -2475,13 +2475,23 @@ public class Utils
 		return !TextUtils.isEmpty(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.NAME_SETTING, null));
 	}
 
-	public static void sendAppState(Context context)
+	public static void appStateChanged(Context context)
 	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
 		}
 
+		sendAppState();
+
+		if(HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+		{
+			resetStealthMode(context);
+		}
+	}
+
+	private static void sendAppState()
+	{
 		JSONObject object = new JSONObject();
 
 		try
@@ -2507,7 +2517,11 @@ public class Utils
 		{
 			Logger.w("AppState", "Invalid json", e);
 		}
+	}
 
+	private static void resetStealthMode(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)

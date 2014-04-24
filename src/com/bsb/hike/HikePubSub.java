@@ -315,6 +315,8 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_STEALTH_FTUE_ENTER_PASS_TIP = "showStealthFtueEnterPassTip";
 
+	public static final String STEALTH_MODE_TOGGLED = "stealthModeToggled";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
