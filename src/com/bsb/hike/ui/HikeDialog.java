@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.R.id;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 
 public class HikeDialog
@@ -18,7 +17,7 @@ public class HikeDialog
 	public static final int FILE_TRANSFER_DIALOG = 1;
 
 	public static final int FAVORITE_ADDED_DIALOG = 2;
-	
+
 	public static final int STEALTH_FTUE_DIALOG = 3;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
@@ -122,7 +121,7 @@ public class HikeDialog
 		dialog.show();
 		return dialog;
 	}
-	
+
 	private static Dialog showStealthFtuePopUp(final Context context)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);

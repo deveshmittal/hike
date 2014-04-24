@@ -68,7 +68,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		Conversation conversation = getItem(position);
 		if (conversation instanceof ConversationTip)
 		{
-			switch (((ConversationTip)conversation).getTipType())
+			switch (((ConversationTip) conversation).getTipType())
 			{
 			case ConversationTip.GROUP_CHAT_TIP:
 				return ViewType.GROUP_CHAT_TIP.ordinal();
