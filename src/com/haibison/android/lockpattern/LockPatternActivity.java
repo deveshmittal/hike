@@ -347,7 +347,7 @@ public class LockPatternActivity extends Activity {
              * Use this hook instead of onBackPressed(), because onBackPressed()
              * is not available in API 4.
              */
-            finishWithNegativeResult(RESULT_CANCELED);
+            finishWithNegativeResult(RESULT_FAILED);
             return true;
         }
 
