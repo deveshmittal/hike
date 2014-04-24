@@ -192,6 +192,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
 					unreadIndicator.setVisibility(View.VISIBLE);
 
+					unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
+
 					if (conversation.getUnreadCount() == 0)
 					{
 						unreadIndicator.setText("");
