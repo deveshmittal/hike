@@ -568,7 +568,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (forceDisconnect)
 				return;
 
-			boolean shouldSSL = Utils.switchSSLOn(context);
+			boolean connectUsingSSL = Utils.switchSSLOn(context);
+			
 			if (op == null)
 			{
 				op = new MqttConnectOptions();
@@ -577,19 +578,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op.setCleanSession(false);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
-				if (shouldSSL)
+				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
+			
 			if (mqtt == null)
 			{
-				String protocol = shouldSSL ? "ssl://" : "tcp://";
+				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
 				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
-
 			if (isConnected())
 				return;
 
@@ -667,8 +668,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					handleDisconnect(reconnect);
 				}
 			});
-			// blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout
-			t.waitForCompletion(2 * quiesceTime);
+			/* blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout
+			 * This will wait for max 5 secs
+			 */
+			t.waitForCompletion(10 * quiesceTime);
 		}
 		catch (MqttException e)
 		{
@@ -698,7 +701,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		op = null;
 		mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 		if (reconnect)
-			connectOnMqttThread(20); // try reconnection after 20 ms
+			connectOnMqttThread(10); // try reconnection after 10 ms
 		else
 		{
 			try
@@ -1110,7 +1113,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 */
 			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
 			setBrokerHostPort(shouldConnectUsingSSL);
-			boolean isSSLConnected = isConnectionOnSSL();
+			boolean isSSLConnected = isSSLAlreadyOn();
 			
 			// reconnect using SSL as currently not connected using SSL
 			if(shouldConnectUsingSSL && !isSSLConnected)
@@ -1121,7 +1124,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	private boolean isConnectionOnSSL()
+	private boolean isSSLAlreadyOn()
 	{
 		if(mqtt != null)
 		{
