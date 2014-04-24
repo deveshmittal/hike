@@ -1072,8 +1072,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT },
-					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT,
+					DBConstants.IS_STEALTH }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
 				Logger.d(getClass().getSimpleName(), "Could not find db entry");
@@ -1083,6 +1083,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
 			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
 			int unreadCount = c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
+			boolean isStealth = c.getInt(c.getColumnIndex(DBConstants.IS_STEALTH)) != 0;
 
 			if (Utils.isGroupConversation(msisdn))
 			{
@@ -1104,7 +1105,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					name = contactInfo.getName();
 					onhike |= contactInfo.isOnhike();
 				}
-				conv = new Conversation(msisdn, convid, name, onhike);
+				conv = new Conversation(msisdn, convid, name, onhike, isStealth);
 
 			}
 
