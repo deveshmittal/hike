@@ -194,6 +194,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private List<Conversation> stealthConversations;
 
 	private List<Conversation> displayedConversations;
+	
+	private boolean showingStealthFtueConvTip = false;
 
 	private enum hikeBotConvStat
 	{
@@ -316,10 +318,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		// TODO Auto-generated method stub
 		super.onStop();
-		Conversation convTip = displayedConversations.get(0);
-		if (convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
+		if (showingStealthFtueConvTip)
 		{
 			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			Conversation convTip = displayedConversations.get(0);
 			removeStealthConvTip(convTip);
 		}
 
@@ -1198,6 +1200,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
 			mAdapter.notifyDataSetChanged();
 			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
+			showingStealthFtueConvTip = true;
 		}
 		else
 		{
@@ -1208,6 +1211,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	protected void removeStealthConvTip(Conversation conversation)
 	{
 		HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
+		showingStealthFtueConvTip = false;
 		mAdapter.remove(conversation);
 		ConversationFragment.this.run();
 	}
