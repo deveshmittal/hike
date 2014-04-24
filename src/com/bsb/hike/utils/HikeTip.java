@@ -54,12 +54,12 @@ public class HikeTip
 			tipText.setText(R.string.chat_bg_ftue_tip);
 			break;
 		case STEALTH_FTUE_TIP_2:
-			container.setBackgroundResource(R.drawable.bg_stealth_tip);
+			parentView.setBackgroundResource(R.drawable.bg_stealth_tip);
 			closeTip.setVisibility(View.GONE);
 			tipText.setText(R.string.stealth_double_tap_tip);
 			break;
 		case STEALTH_FTUE_ENTER_PASS_TIP:
-			container.setBackgroundResource(R.drawable.bg_stealth_tip);
+			parentView.setBackgroundResource(R.drawable.bg_stealth_tip);
 			closeTip.setVisibility(View.GONE);
 			tipText.setText(R.string.stealth_enter_pass_tip);	
 			break;

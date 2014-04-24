@@ -58,14 +58,11 @@
          android:layout_width="match_parent"
          android:layout_height="match_parent" />
     
-    <LinearLayout
-         android:id="@+id/stealth_double_tap_tip"
+    <ViewStub android:id="@+id/stealth_double_tap_tip_viewstub"
+         android:inflatedId="@+id/stealth_double_tap_tip"
          android:layout_marginLeft="5dp"
-         android:layout_width="204dp"
+         android:layout="@layout/tool_tip"
+         android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:orientation="horizontal"
-         android:visibility="gone" >
-
-         <include layout="@layout/tool_tip" />
-    </LinearLayout>
+         android:layout_marginRight="40dp" />
 </FrameLayout>

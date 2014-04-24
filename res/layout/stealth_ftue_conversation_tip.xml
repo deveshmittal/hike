@@ -9,12 +9,10 @@
     <ImageView
         android:id="@+id/close"
         android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/tip"
+        android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/tip"
-        android:background="@drawable/bg_overflow_menu_selector"
-        android:scaleType="centerInside"
+        android:background="@drawable/popup_button_bg_selector"
+	    android:scaleType="centerInside"
         android:src="@drawable/ic_stealth_tip_cross" />
 
     <View
