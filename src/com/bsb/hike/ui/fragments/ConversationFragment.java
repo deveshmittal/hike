@@ -297,6 +297,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		
+		if(!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+		{
+			// if stealth setup is not done and user has marked some chats as stealth unmark all of them
+			for (Conversation conv : stealthConversations)
+			{
+				conv.setIsStealth(false);
+				HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), false);
+			}
+		}
+		
 		super.onDestroy();
 	}
 
