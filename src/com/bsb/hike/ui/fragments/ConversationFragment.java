@@ -1167,15 +1167,37 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	 */
 	protected void showStealthConvTip()
 	{
+		Conversation conv = null;
+		/*
+		 * if group chat tip is showing we should remove this first and than 
+		 * add stealth ftue conversation tip
+		 */
 		if (!displayedConversations.isEmpty())
 		{
-			Conversation conv = displayedConversations.get(0);
-			if (!(conv != null && conv instanceof ConversationTip && ((ConversationTip) conv).isStealthFtueTip()))
+			conv = displayedConversations.get(0);
+			if(conv instanceof ConversationTip && ((ConversationTip) conv).isGroupChatTip())
 			{
-				displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
-				mAdapter.notifyDataSetChanged();
-				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
+				if(displayedConversations.size()>1)
+				{
+					mAdapter.remove(conv);
+					ConversationFragment.this.run();
+				}
+				else
+				{
+					conv = null;
+				}
 			}
+		}
+		/*
+		 * if conv not null this implies,
+		 * We certainly have some conversations on the screen other than 
+		 * group chat tip
+		 */
+		if(conv != null )
+		{	
+			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
+			mAdapter.notifyDataSetChanged();
+			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
 		}
 		else
 		{
