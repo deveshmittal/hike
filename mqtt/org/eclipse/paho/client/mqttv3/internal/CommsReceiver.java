@@ -17,11 +17,16 @@ package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttInputStream;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 import com.bsb.hike.utils.Logger;
@@ -38,15 +43,20 @@ public class CommsReceiver implements Runnable {
 	private CommsTokenStore tokenStore = null;
 	private Thread recThread = null;
 	private volatile boolean receiving;
+	private Socket socket = null;
+	private Map<Long, Long> messageMap;
 	
 	private final static String className = CommsReceiver.class.getName();
 	private final String TAG = "CommsReciever";
 	
-	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
+
+	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in, Socket socket, Map<Long, Long> messageMap) {
+		this.socket = socket;
 		this.in = new MqttInputStream(in);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
+		this.messageMap = messageMap;
 	}
 	
 	/**
@@ -103,6 +113,22 @@ public class CommsReceiver implements Runnable {
 				receiving = true;
 				MqttWireMessage message = in.readMqttWireMessage();
 				receiving = false;
+				if(message instanceof MqttPublish){
+					Logger.d(TAG, "socket read completed for message : " + ((MqttPublish) message).getMessage().toString());
+					int length = ((MqttPublish) message).getHeaderLength() + ((MqttPublish) message).getPayloadLength();
+					Logger.d(TAG, "bytes read on socket : " + length);
+				}else if(message instanceof MqttAck){
+					Logger.d(TAG, "socket read completed for ack : " + ((MqttAck) message).toString());
+					long key = ((MqttAck) message).getMessageId();
+					if(messageMap.containsKey(key)){
+						long time = System.currentTimeMillis() - ((long)messageMap.get(key));
+						messageMap.remove(key);
+						Logger.d("total time", "total time taken for message id: " + key + " is : " + time);
+					}
+				} else {
+					Logger.d(TAG, "socket read completed");
+				}
+				logSocketProperties();
 				
 				if (message instanceof MqttAck) {
 					token = tokenStore.getToken(message);
@@ -162,5 +188,35 @@ public class CommsReceiver implements Runnable {
 	 */
 	public boolean isReceiving() {
 		return receiving;
+	}
+	
+	private void logSocketProperties(){
+		try
+		{
+			if(socket.getChannel() != null){
+				Logger.d(TAG, "is socket channel blocking : " + socket.getChannel().isBlocking());
+				Logger.d(TAG, "is socket channel connected : " + socket.getChannel().isConnected());
+				Logger.d(TAG, "is socket channel connection pending : " + socket.getChannel().isConnectionPending());
+				Logger.d(TAG, "is socket channel open : " + socket.getChannel().isOpen());
+				Logger.d(TAG, "is socket channel connected : " + socket.getChannel().isRegistered());
+				Logger.d(TAG, "socket channel validOps: " + socket.getChannel().validOps());
+			}
+			Logger.d(TAG, "is socket keep alive on: " + socket.getKeepAlive());
+			Logger.d(TAG, "is socket tcp no delay on: " + socket.getTcpNoDelay());
+			Logger.d(TAG, "is socket OOBline enabled : " + socket.getOOBInline());
+			Logger.d(TAG, "is socket bound : " + socket.isBound());
+			Logger.d(TAG, "is socket closed : " + socket.isClosed());
+			Logger.d(TAG, "is socket connected : " + socket.isConnected());
+			Logger.d(TAG, "is socket input shutdown : " + socket.isInputShutdown());
+			Logger.d(TAG, "is socket output shutdown : " + socket.isOutputShutdown());
+			Logger.d(TAG, "socket receive buffer size : " + socket.getReceiveBufferSize());
+			Logger.d(TAG, "socket send buffer size : " + socket.getSendBufferSize());
+			Logger.d(TAG, "socket linger timeout : " + socket.getSoLinger());
+			Logger.d(TAG, "socket timeout : " + socket.getSoTimeout());
+			Logger.d(TAG, "socket traffic class : " + socket.getTrafficClass());
+		}
+		catch (Exception ex){
+			Logger.d(TAG, "exception during taking logs");
+		}
 	}
 }
