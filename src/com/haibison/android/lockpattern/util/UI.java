@@ -48,23 +48,23 @@ public class UI {
         /**
          * Small.
          */
-        SMALL(.6f, .6f, .77f, .77f),
+        SMALL(.6f, .66f, .64f, .77f),
         /**
          * Normal.
          */
-        NORMAL(.6f, .6f, .77f, .77f),
+        NORMAL(.6f, .66f, .64f, .77f),
         /**
          * Large.
          */
-        LARGE(.6f, .6f, .77f, .77f),
+        LARGE(.6f, .66f, .64f, .77f),
         /**
          * X-Large.
          */
-        XLARGE(.6f, .6f, .77f, .77f),
+        XLARGE(.6f, .66f, .64f, .77f),
         /**
          * Undefined.
          */
-        UNDEFINED(.6f, .6f, .77f, .77f);
+        UNDEFINED(.6f, .66f, .64f, .77f);
 
         /**
          * The desired fixed width for a dialog along the minor axis (the screen

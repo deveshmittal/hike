@@ -17,69 +17,70 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
-
-    <TextView
-        android:id="@+id/alp_42447968_textview_info"
-        android:layout_width="wrap_content"
-        android:layout_height="70dp"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="14sp"
-        android:textIsSelectable="true" />
+    android:layout_height="wrap_content"
+    android:paddingLeft="19dp" >
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:id="@+id/alp_42447968_view_lock_pattern_view_group"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/alp_42447968_viewgroup_footer"
-        android:layout_below="@id/alp_42447968_textview_info" >
+        android:layout_alignParentRight="true" >
 
         <com.haibison.android.lockpattern.widget.LockPatternView
             android:id="@+id/alp_42447968_view_lock_pattern"
-            android:layout_centerInParent="true"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/alp_42447968_textview_info"
+        android:layout_width="144dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textIsSelectable="true"
+        android:textSize="14sp" />
 
     <LinearLayout
         android:id="@+id/alp_42447968_viewgroup_footer"
-        style="?attr/alp_42447968_button_bar_style"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="144dp"
+        android:layout_height="111dp"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
         android:visibility="gone" >
 
         <!-- A separator view -->
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/alp_42447968_separator_size" />
-
         <LinearLayout
             style="?attr/alp_42447968_button_bar_style"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:layout_height="96dp"
+            android:orientation="vertical" >
 
-            <Button
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/alp_42447968_button_cancel"
-                style="?attr/alp_42447968_button_bar_button_style"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@android:string/cancel"
+                android:background="@drawable/popup_button_bg_selector"
+                android:gravity="center"
+                android:text="@string/cancel"
+                android:textColor="@drawable/popup_button_text_color_selector"
+                android:textSize="16sp"
                 android:visibility="gone" />
 
-            <Button
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/alp_42447968_button_confirm"
-                style="?attr/alp_42447968_button_bar_button_style"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@drawable/popup_button_bg_selector"
                 android:enabled="false"
-                android:text="@string/alp_42447968_cmd_continue" />
+                android:gravity="center"
+                android:text="@string/continue_txt"
+                android:textColor="@drawable/popup_button_text_color_selector"
+                android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
 
