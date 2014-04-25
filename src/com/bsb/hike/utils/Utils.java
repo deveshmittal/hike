@@ -485,8 +485,6 @@ public class Utils
 		return path.toString();
 	}
 
-	
-
 	public static void savedAccountCredentials(AccountInfo accountInfo, SharedPreferences.Editor editor)
 	{
 		AccountUtils.setToken(accountInfo.token);
@@ -1077,7 +1075,6 @@ public class Utils
 		}
 	}
 
-	
 	public static String getRealPathFromUri(Uri contentUri, Activity activity)
 	{
 		String[] proj = { MediaStore.Images.Media.DATA };
@@ -1146,7 +1143,7 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
@@ -1707,7 +1704,7 @@ public class Utils
 		Bitmap thumbnailBmp = HikeBitmapFactory.stringToBitmap(thumbnailString);
 		if (!BitmapUtils.isThumbnailSquare(thumbnailBmp))
 		{
-			Bitmap squareThumbnail = HikeBitmapFactory.makeSquareThumbnail(thumbnailBmp, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+			Bitmap squareThumbnail = HikeBitmapFactory.makeSquareThumbnail(thumbnailBmp);
 			thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(squareThumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 			squareThumbnail.recycle();
 			squareThumbnail = null;
@@ -3029,8 +3026,6 @@ public class Utils
 			Logger.w("LE", "Invalid json");
 		}
 	}
-
-	
 
 	public static void resetUpdateParams(SharedPreferences prefs)
 	{
