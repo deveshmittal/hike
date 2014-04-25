@@ -938,7 +938,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if (mActivityState.destFilePath != null)
 		{
 			/* the server only needs a smaller version */
-			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownImage(mActivityState.destFilePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
+			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(mActivityState.destFilePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
+					HikeConstants.PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565);
 
 			if (smallerBitmap == null)
 			{

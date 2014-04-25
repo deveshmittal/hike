@@ -301,7 +301,8 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 				return;
 			}
 
-			Bitmap tempBitmap = HikeBitmapFactory.scaleDownImage(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
+			Bitmap tempBitmap = HikeBitmapFactory.scaleDownBitmap(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS,
+					Bitmap.Config.RGB_565);
 
 			groupBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 			groupImage.setImageBitmap(HikeBitmapFactory.getCircularBitmap(tempBitmap));
