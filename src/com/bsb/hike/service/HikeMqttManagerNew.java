@@ -674,7 +674,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				/*
 				 * blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout This will wait for max 5 secs
 				 */
-				t.waitForCompletion(10 * quiesceTime);
+				t.waitForCompletion(2 * quiesceTime);
 			}
 		}
 		catch (MqttException e)
@@ -1068,9 +1068,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			short retryAttempts = 0;
 			Logger.w(TAG, "Destroying mqtt connection.");
 			context.unregisterReceiver(this);
+			LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
 			disconnectOnMqttThread(false);
-			// here we are blocking service main thread for 5 second or less so that disconnection takes place cleanly
-			while (mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 500)
+			// here we are blocking service main thread for 1 second or less so that disconnection takes place cleanly
+			while (mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED || mqttConnStatus != MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON && retryAttempts <= 100)
 			{
 				Thread.sleep(10);
 				retryAttempts++;
@@ -1117,7 +1118,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					disconnectOnMqttThread(true);
 				else
 					connectOnMqttThread();
-				Utils.setupUri(context); // TODO : this hsould be moved out from here to some other place
+				Utils.setupUri(context); // TODO : this should be moved out from here to some other place
 			}
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
