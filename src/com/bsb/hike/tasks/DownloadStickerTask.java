@@ -48,7 +48,7 @@ public class DownloadStickerTask extends StickerTaskBase
 	private DownloadType downloadType;
 
 	private StickerPageAdapter stickerPageAdapter;
-	
+
 	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
 
 	public DownloadStickerTask(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st)
@@ -193,11 +193,10 @@ public class DownloadStickerTask extends StickerTaskBase
 		File f = new File(largeStickerDir, stickerId);
 		Utils.saveBase64StringToFile(f, stickerData);
 
-		Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE);
-		Bitmap thumbnail = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, SIZE_IMAGE, SIZE_IMAGE);
+		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE);
 
 		File smallImage = new File(smallStickerDir, stickerId);
-		BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
+		BitmapUtils.saveBitmapToFile(smallImage, small);
 	}
 
 	@Override
