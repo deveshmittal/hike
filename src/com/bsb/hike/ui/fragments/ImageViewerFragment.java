@@ -203,7 +203,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		if (file.exists())
 		{
 			drawable = HikeBitmapFactory.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
-					HikeBitmapFactory.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize));
+					HikeBitmapFactory.scaleDownBitmap(basePath + "/" + fileName, imageSize, imageSize, Bitmap.Config.RGB_565));
 			imageView.setImageDrawable(drawable);
 		}
 

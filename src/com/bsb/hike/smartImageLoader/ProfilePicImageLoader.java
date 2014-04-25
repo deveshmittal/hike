@@ -82,7 +82,7 @@ public class ProfilePicImageLoader extends ImageWorker
 		{
 			try
 			{
-				bitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight);
+				bitmap = HikeBitmapFactory.scaleDownBitmap(orgFile.getPath(), mImageWidth, mImageHeight, Bitmap.Config.RGB_565);
 				// Logger.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
 			}
 			catch (Exception e1)
