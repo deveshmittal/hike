@@ -2488,6 +2488,10 @@ public class Utils
 		{
 			resetStealthMode(context);
 		}
+		else
+		{
+			clearStealthResetTimer(context);
+		}
 	}
 
 	private static void sendAppState()
@@ -2521,7 +2525,12 @@ public class Utils
 
 	private static void resetStealthMode(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+		StealthResetTimer.getInstance(context).resetStealth();
+	}
+
+	private static void clearStealthResetTimer(Context context)
+	{
+		StealthResetTimer.getInstance(context).clearScheduledTimer();
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)

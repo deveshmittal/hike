@@ -68,7 +68,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		Conversation conversation = getItem(position);
 		if (conversation instanceof ConversationTip)
 		{
-			switch (((ConversationTip)conversation).getTipType())
+			switch (((ConversationTip) conversation).getTipType())
 			{
 			case ConversationTip.GROUP_CHAT_TIP:
 				return ViewType.GROUP_CHAT_TIP.ordinal();
@@ -191,6 +191,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				{
 					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
 					unreadIndicator.setVisibility(View.VISIBLE);
+
+					unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
 
 					if (conversation.getUnreadCount() == 0)
 					{

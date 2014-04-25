@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONException;
 
@@ -191,7 +192,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private View emptyView;
 
-	private List<Conversation> stealthConversations;
+	private Set<Conversation> stealthConversations;
 
 	private List<Conversation> displayedConversations;
 	
@@ -466,7 +467,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						 */
 						return;
 					}
-					stealthConversations.add(conv);
+					if(getString(R.string.mark_stealth).equals(option))
+					{
+						stealthConversations.add(conv);
+					}
+					else
+					{
+						stealthConversations.remove(conv);
+					}
 
 					conv.setIsStealth(newStealthValue);
 
@@ -495,7 +503,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		displayedConversations = new ArrayList<Conversation>();
 		List<Conversation> conversationList = db.getConversations();
 
-		stealthConversations = new ArrayList<Conversation>();
+		stealthConversations = new HashSet<Conversation>();
 
 		/*
 		 * Add item for group chat tip.
