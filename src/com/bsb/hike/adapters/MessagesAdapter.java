@@ -734,6 +734,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
 		}
+		else if (viewType == ViewType.UNREAD_COUNT)
+		{
+		}
 		else
 		{
 			if (v == null)
@@ -2049,7 +2052,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = new TextViewHolder();
 					long time = System.currentTimeMillis();
 					v = inflater.inflate(R.layout.message_sent_text, parent, false);
-					Logger.d("MSG_GET_VIEW",""+(System.currentTimeMillis() - time) );
+					Logger.d("MSG_GET_VIEW", "" + (System.currentTimeMillis() - time));
 					textHolder.text = (TextView) v.findViewById(R.id.text);
 					// textHolder.text = (TextView) v.findViewById(R.id.chat_message_text);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
@@ -2071,7 +2074,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = new TextViewHolder();
 					long time = System.currentTimeMillis();
 					v = inflater.inflate(R.layout.message_receive_text, parent, false);
-					Logger.d("MSG_GET_VIEW",""+(System.currentTimeMillis() - time) );
+					Logger.d("MSG_GET_VIEW", "" + (System.currentTimeMillis() - time));
 
 					textHolder.text = (TextView) v.findViewById(R.id.text);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
@@ -3493,7 +3496,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (viewType == ViewType.UNREAD_COUNT)
 		{
-			holder.container.setVisibility(View.VISIBLE);
+			ViewGroup container = null;
+			if (v == null)
+			{
+				v = inflater.inflate(R.layout.participant_info_receive, null);
+				container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
+
+				v.setTag(container);
+			}
+			else
+			{
+				container = (ViewGroup) v.getTag();
+			}
+
 			int layoutRes = chatTheme.systemMessageLayoutId();
 			TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
 			if (convMessage.getUnreadCount() == 1)
@@ -3504,8 +3519,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				participantInfo.setText(context.getResources().getString(R.string.num_unread_messages, convMessage.getUnreadCount()));
 			}
-			((ViewGroup) holder.container).removeAllViews();
-			((ViewGroup) holder.container).addView(participantInfo);
+			container.removeAllViews();
+			container.addView(participantInfo);
 			return v;
 		}
 
