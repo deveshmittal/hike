@@ -55,6 +55,7 @@ import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -562,6 +563,11 @@ public class HikeMessengerApp extends Application implements Listener
 			mEditor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 0);
 			mEditor.commit();
 		}
+
+		/*
+		 * Resetting the stealth mode when the app starts. 
+		 */
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
