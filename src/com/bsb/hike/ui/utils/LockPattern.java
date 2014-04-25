@@ -39,6 +39,10 @@ public class LockPattern
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, true);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, null);
 			}
+			else
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_FTUE_STEALTH_CONV, null);
+			}
 			break;// _ReqCreateLockPattern
 
 		case HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN:

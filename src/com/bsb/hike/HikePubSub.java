@@ -317,6 +317,8 @@ public class HikePubSub implements Runnable
 
 	public static final String STEALTH_MODE_TOGGLED = "stealthModeToggled";
 
+	public static final String CLEAR_FTUE_STEALTH_CONV = "clearFtueStealthConv";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
