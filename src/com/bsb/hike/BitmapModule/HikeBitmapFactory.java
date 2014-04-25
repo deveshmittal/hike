@@ -113,7 +113,7 @@ public class HikeBitmapFactory
 		}
 		if (makeSquareThumbnail)
 		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
+			return makeSquareThumbnail(thumbnail);
 		}
 
 		return thumbnail;
@@ -155,21 +155,22 @@ public class HikeBitmapFactory
 		}
 		if (makeSquareThumbnail)
 		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
+			return makeSquareThumbnail(thumbnail);
 		}
 
 		return thumbnail;
 	}
 
-	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
+	public static Bitmap makeSquareThumbnail(Bitmap thumbnail)
 	{
-		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
+		int dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
 
 		int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail.getWidth() - dimensionLimit) / 2) : 0;
 		int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail.getHeight() - dimensionLimit) / 2) : 0;
 
 		Logger.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
-		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
+		Logger.d("Utils", "dimensionLimit : " + dimensionLimit);
+		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, startX + dimensionLimit, startY + dimensionLimit);
 
 		if (squareThumbnail != thumbnail)
 		{
@@ -294,11 +295,20 @@ public class HikeBitmapFactory
 	 */
 	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight)
 	{
+		return decodeSampledBitmapFromResource(res, resId, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
+	}
+
+	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight, Bitmap.Config con)
+	{
 
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeResource(res, resId, options);
+
+		options.inPreferredConfig = con;
+		if (con == Bitmap.Config.RGB_565)
+			options.inDither = true;
 
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -342,10 +352,19 @@ public class HikeBitmapFactory
 	 */
 	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight)
 	{
+		return decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
+	}
+
+	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight, Bitmap.Config con)
+	{
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(filename, options);
+
+		options.inPreferredConfig = con;
+		if (con == Bitmap.Config.RGB_565)
+			options.inDither = true;
 
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -387,7 +406,12 @@ public class HikeBitmapFactory
 	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
 	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
 	 */
-	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight)
+	public static Bitmap decodeSampledBitmapFromByteArray(String msisdn, boolean rounded, int reqWidth, int reqHeight)
+	{
+		return decodeSampledBitmapFromByteArray(msisdn, rounded, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
+	}
+
+	public static Bitmap decodeSampledBitmapFromByteArray(String msisdn, boolean rounded, int reqWidth, int reqHeight, Bitmap.Config con)
 	{
 		byte[] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
 		if (icondata == null)
@@ -397,6 +421,10 @@ public class HikeBitmapFactory
 		options.inJustDecodeBounds = true;
 
 		BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+
+		options.inPreferredConfig = con;
+		if (con == Bitmap.Config.RGB_565)
+			options.inDither = true;
 
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -476,6 +504,7 @@ public class HikeBitmapFactory
 			{
 				inSampleSize *= 2;
 			}
+			
 		}
 		return inSampleSize;
 	}
@@ -535,15 +564,29 @@ public class HikeBitmapFactory
 		return BitmapFactory.decodeByteArray(data, offset, length);
 	}
 
-	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int reqWidth, int reqHeight)
+	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight)
 	{
-		if (reqWidth <= unscaledBitmap.getWidth() && reqHeight <= unscaledBitmap.getHeight())
+		return scaleDownBitmap(filename, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
+	}
+
+	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, Bitmap.Config config)
+	{
+		Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, config);
+
+		Bitmap small = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config);
+
+		return small;
+	}
+
+	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int reqWidth, int reqHeight, Bitmap.Config config)
+	{
+		if (reqWidth < unscaledBitmap.getWidth() && reqHeight < unscaledBitmap.getHeight())
 		{
 			Rect srcRect = new Rect(0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
 
 			Rect reqRect = calculateReqRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), reqWidth, reqHeight);
 
-			Bitmap scaledBitmap = Bitmap.createBitmap(reqRect.width(), reqRect.height(), Config.ARGB_8888);
+			Bitmap scaledBitmap = Bitmap.createBitmap(reqRect.width(), reqRect.height(), config);
 
 			Canvas canvas = new Canvas(scaledBitmap);
 			canvas.drawBitmap(unscaledBitmap, srcRect, reqRect, new Paint(Paint.FILTER_BITMAP_FLAG));
