@@ -17,6 +17,7 @@
 package com.haibison.android.lockpattern.util;
 
 import com.bsb.hike.BuildConfig;
+import com.bsb.hike.utils.Utils;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -48,15 +49,15 @@ public class UI {
         /**
          * Small.
          */
-        SMALL(.6f, .66f, .64f, .77f),
+        SMALL(.8f, .66f, .9f, .77f),
         /**
          * Normal.
          */
-        NORMAL(.6f, .66f, .64f, .77f),
+        NORMAL(.73f, .66f, .8f, .77f),
         /**
          * Large.
          */
-        LARGE(.6f, .66f, .64f, .77f),
+        LARGE(.66f, .66f, .7f, .77f),
         /**
          * X-Large.
          */
@@ -120,7 +121,19 @@ public class UI {
             case Configuration.SCREENLAYOUT_SIZE_SMALL:
                 return SMALL;
             case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-                return NORMAL;
+            	if(Utils.densityMultiplier >= 2)
+            	{
+                    return XLARGE;
+            	}
+            	else if(Utils.densityMultiplier >= 1.5)
+            	{
+                    return LARGE;
+            	}
+            	else if(Utils.densityMultiplier >= 1)
+            	{
+            		return NORMAL;
+            	}
+
             case Configuration.SCREENLAYOUT_SIZE_LARGE:
                 return LARGE;
             case Configuration.SCREENLAYOUT_SIZE_XLARGE:
