@@ -35,8 +35,8 @@
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/file_thumb"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:layout_gravity="center" />
 
             <RelativeLayout
