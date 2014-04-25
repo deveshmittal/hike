@@ -22,7 +22,7 @@
     <TextView
         android:id="@+id/alp_42447968_textview_info"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
+        android:layout_height="@dimen/alp_textview_info_height"
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
