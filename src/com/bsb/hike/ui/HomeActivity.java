@@ -1388,7 +1388,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.sendAppState(this);
+			Utils.sendAppState(this.getApplicationContext());
 		}
 	}
 

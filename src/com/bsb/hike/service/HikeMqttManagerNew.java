@@ -94,6 +94,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	private IMqttActionListener listernerConnect;
 
 	private MqttMessagesManager mqttMessageManager;
+	
+	private IsMqttConnectedCheckRunnable isConnRunnable;
 
 	private ConnectionCheckRunnable connChkRunnable;
 
@@ -132,8 +134,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE; // this is the time for which conn will remain open w/o messages
 
 	private static short connectionTimeoutSec = 60;
-	
-	private Timer myTimer;
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -157,6 +157,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		ACCEPTED, UNACCEPTABLE_PROTOCOL_VERSION, IDENTIFIER_REJECTED, SERVER_UNAVAILABLE, BAD_USERNAME_OR_PASSWORD, NOT_AUTHORIZED, UNKNOWN
 	}
 
+	private class IsMqttConnectedCheckRunnable implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			if(!isConnected())
+			{
+				HikeMessengerApp.networkError = true;
+				HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
+			}
+		}
+	}
+	
 	// this is used to check and connect mqtt and will be run on MQTT thread
 	private class ConnectionCheckRunnable implements Runnable
 	{
@@ -279,6 +292,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
 		setBrokerHostPort(Utils.switchSSLOn(context));
+		isConnRunnable = new IsMqttConnectedCheckRunnable();
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
 	}
@@ -445,7 +459,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 
 	private void releaseWakeLock()
 	{
-		if (wakelock.isHeld())
+		if (wakelock != null && wakelock.isHeld())
 		{
 			wakelock.release();
 			Logger.d(TAG, "Wakelock Released");
@@ -517,47 +531,21 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements HikePubSub.
 		if(isAirplaneModeOn(context))
 		{
 			HikeMessengerApp.networkError = true;
-			updateNetworkState();
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
 			return;
 		}
-		if(myTimer != null)
-			return;
-		
-		myTimer = new Timer();
-		myTimer.schedule( new TimerTask()
-		{
-			
-			@Override
-			public void run()
-			{
-				if(!isConnected())
-				{
-					HikeMessengerApp.networkError = true;
-					updateNetworkState();
-				}
-			}
-		}, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
+		mqttThreadHandler.postDelayed(isConnRunnable, HikeConstants.NETWORK_ERROR_POP_UP_TIME);
 	}
 	
 	private void cancelNetworkErrorTimer()
 	{
-		if(myTimer != null)
-		{
-			myTimer.cancel();
-			myTimer.purge();
-			myTimer = null;
-		}
+		mqttThreadHandler.removeCallbacks(isConnRunnable);
 		if(HikeMessengerApp.networkError == false)
 			return;
 		HikeMessengerApp.networkError = false;
-		updateNetworkState();
-	}
-
-	private void updateNetworkState()
-	{
 		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_NETWORK_STATE, null);
 	}
-	
+
 	private static boolean isAirplaneModeOn(Context context)
 	{
 		return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
