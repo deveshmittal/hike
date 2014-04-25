@@ -4,11 +4,12 @@ import android.content.Context;
 import android.text.Layout;
 import android.util.AttributeSet;
 
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class CustomReceiveMessageTextView extends CustomFontTextView
 {
-	private String TAG = "CustomSendMessageTextView";
+	private String TAG = "CustomReceiveMessageTextView";
 	
 	private static final int maxWidth = 265;
 	
@@ -44,7 +45,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			int linesMaxWidth = 0;
 			int lines = 0;
 			
-			//super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 			Layout layout = getLayout();
 			lines = layout.getLineCount();
 			float lastLine = layout.getLineWidth(lines - 1);
@@ -83,7 +84,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			{
 				widthAddition = widthTime12Hour;
 			}
-			
+
 			if((int) (((widthAddition + widthMargin) * Utils.densityMultiplier) + lastLineWidth) < (int)(maxWidth * Utils.densityMultiplier))
 			//if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
 			{
@@ -107,6 +108,7 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 		}
 		catch (Exception e)
 		{
+			Logger.d(TAG,"exception: " + e.getStackTrace());
 			try
 			{
 				super.onMeasure(widthMeasureSpec, heightMeasureSpec);

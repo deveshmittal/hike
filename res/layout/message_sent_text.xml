@@ -13,10 +13,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="8dp"
-        android:paddingLeft="12dp"
-        android:paddingRight="18dp"
         android:background="@drawable/ic_bubble_green_selector"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="18dp" >
 
         <com.bsb.hike.view.CustomSendMessageTextView
             android:id="@+id/text"
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:gravity="left"
             android:maxWidth="265dp"
-            android:text="This is the message"
+            android:text="This is the message(sent)"
             android:textColor="@color/chat_color"
             android:textSize="16sp" />
 
