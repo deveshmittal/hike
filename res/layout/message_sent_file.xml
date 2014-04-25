@@ -20,6 +20,7 @@
             android:id="@+id/placeholder"
             android:layout_width="@dimen/file_message_item_size"
             android:layout_height="@dimen/file_message_item_size"
+            android:layout_marginLeft="2dp"
             android:background="@drawable/bg_file_thumb" >
 
             <com.bsb.hike.ui.utils.RecyclingImageView
@@ -40,7 +41,8 @@
                 android:text=".pdf"
                 android:textColor="@color/white"
                 android:textSize="15sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <LinearLayout
