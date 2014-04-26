@@ -25,6 +25,8 @@
         android:layout_height="@dimen/alp_textview_info_height"
         android:layout_centerHorizontal="true"
         android:gravity="center"
+        android:drawableLeft="@drawable/ic_stealth_passcode"
+        android:drawablePadding="9dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textIsSelectable="true"
         android:textSize="14sp" />
