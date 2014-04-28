@@ -177,7 +177,7 @@ public class HikePubSub implements Runnable
 
 	public static final String REFRESH_RECENTS = "refreshRecents";
 
-	public static final String SWITCHED_DATA_CONNECTION = "switchedDataConnection";
+	public static final String SSL_PREFERENCE_CHANGED = "sslPrefChanged";
 
 	public static final String GROUP_REVIVED = "groupRevived";
 

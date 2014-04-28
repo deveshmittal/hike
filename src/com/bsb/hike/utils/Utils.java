@@ -1488,6 +1488,13 @@ public class Utils
 		return b;
 	}
 
+	public static void setupUri(Context ctx)
+	{
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
+		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
+	}
+	
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
@@ -2063,6 +2070,11 @@ public class Utils
 		return uri;
 	}
 
+	/**
+	 * This will return true when SSL toggle is on and connection type is WIFI
+	 * @param context
+	 * @return
+	 */
 	public static boolean switchSSLOn(Context context)
 	{
 		/*
@@ -2284,6 +2296,16 @@ public class Utils
 		}
 		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+	}
+
+	public static void showSoftKeyboard(Context context, View v)
+	{
+		if (v == null)
+		{
+			return;
+		}
+		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(v, InputMethodManager.RESULT_UNCHANGED_SHOWN);
 	}
 
 	public static void sendLocaleToServer(Context context)

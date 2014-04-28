@@ -1515,7 +1515,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 				}
 			});
-
 		}
 	}
 

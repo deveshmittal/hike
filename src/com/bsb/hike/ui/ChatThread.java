@@ -85,6 +85,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -93,6 +94,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
@@ -121,11 +124,13 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -197,13 +202,16 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import com.google.android.gms.internal.at;
 
 @SuppressLint("NewApi")
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener, BackKeyListener
 {
 
 	private enum DialogShowing
@@ -236,7 +244,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private View mBottomView;
 
-	private EditText mComposeView;
+	private CustomFontEditText mComposeView;
 
 	private ListView mConversationsView;
 
@@ -310,10 +318,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
-			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
-			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
-			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
+			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
+			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
+			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
 
 	private EmoticonType emoticonType;
 
@@ -377,11 +385,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View unreadMessageIndicator;
 
 	private int unreadMessageCount = 0;
-	
+
 	private View bottomFastScrollIndicator;
-	
+
 	private View upFastScrollIndicator;
-	
+
 	int currentFirstVisibleItem = Integer.MAX_VALUE;
 
 	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
@@ -444,7 +452,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		if(prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
+		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
 			Editor editor = prefs.edit();
 			editor.putBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, true);
@@ -524,7 +532,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
-
+		findViewById(R.id.chatThreadParentLayout).getViewTreeObserver().addOnGlobalLayoutListener(getGlobalLayoutListener());
 		// we are getting the intent which has started our activity here.
 		// we fetch the boolean extra to check if the keyboard has to be
 		// expanded.
@@ -547,7 +555,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		backgroundImage = (ImageView) findViewById(R.id.background);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
-		mComposeView = (EditText) findViewById(R.id.msg_compose);
+		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
+		mComposeView.setBackKeyListener(this);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
@@ -561,7 +570,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				hideUnreadCountIndicator();
 			}
 		});
-		
+
 		bottomFastScrollIndicator = findViewById(R.id.scroll_bottom_indicator);
 		bottomFastScrollIndicator.setOnClickListener(new OnClickListener()
 		{
@@ -572,10 +581,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				hideFastScrollIndicator();
 			}
 		});
-		
+
 		upFastScrollIndicator = findViewById(R.id.scroll_top_indicator);
-		((ImageView)upFastScrollIndicator.findViewById(R.id.indicator_img)).setVisibility(View.GONE);
-		((ImageView)upFastScrollIndicator.findViewById(R.id.up_indicator_img)).setVisibility(View.VISIBLE);
+		((ImageView) upFastScrollIndicator.findViewById(R.id.indicator_img)).setVisibility(View.GONE);
+		((ImageView) upFastScrollIndicator.findViewById(R.id.up_indicator_img)).setVisibility(View.VISIBLE);
 		upFastScrollIndicator.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -585,7 +594,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				hideUpFastScrollIndicator();
 			}
 		});
-		
+
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different than the sen button we have), we send the message.
 		 */
@@ -766,8 +775,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			onEmoticonBtnClicked(null, 0, true);
+			// onEmoticonBtnClicked(null, 0, true);
 		}
+		super.onBackPressed();
 	}
 
 	private void saveDraft()
@@ -1496,7 +1506,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							sendSticker(sticker);
 							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
 							// add this sticker to recents if this sticker is not disabled
-							if(!isDis)
+							if (!isDis)
 								StickerManager.getInstance().addRecentSticker(sticker);
 							/*
 							 * Making sure the sticker is not forwarded again on orientation change
@@ -1507,7 +1517,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
 					}
-					if(isActionModeOn)
+					if (isActionModeOn)
 					{
 						destroyActionMode();
 					}
@@ -1751,7 +1761,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
-			if(message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
 			{
 				long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
 				long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
@@ -1805,7 +1815,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation.getUnreadCount() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
-			if(message.getTypingNotification() != null)
+			if (message.getTypingNotification() != null)
 			{
 				message = messages.get(messages.size() - 2);
 			}
@@ -2136,7 +2146,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void setAvatar()
 	{
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
-		if(drawable != null)
+		if (drawable != null)
 		{
 			avatar.setScaleType(ScaleType.FIT_CENTER);
 			avatar.setImageDrawable(drawable);
@@ -3305,7 +3315,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
 			{
-				if (convMessage.getTypingNotification() == null && (convMessage.getParticipantInfoState()== ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState()== ParticipantInfoState.STATUS_MESSAGE) )
+				if (convMessage.getTypingNotification() == null
+						&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
 				{
 					showUnreadCountIndicator();
 				}
@@ -3356,22 +3367,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showFastScrollIndicator()
 	{
-		if(unreadMessageIndicator.getVisibility() == View.GONE){
+		if (unreadMessageIndicator.getVisibility() == View.GONE)
+		{
 			bottomFastScrollIndicator.setVisibility(View.VISIBLE);
 		}
 	}
 
 	private void hideFastScrollIndicator()
 	{
-		if(bottomFastScrollIndicator != null)
+		if (bottomFastScrollIndicator != null)
 		{
 			bottomFastScrollIndicator.setVisibility(View.GONE);
 		}
 	}
-	
+
 	private void hideUpFastScrollIndicator()
 	{
-		if(upFastScrollIndicator != null)
+		if (upFastScrollIndicator != null)
 		{
 			upFastScrollIndicator.setVisibility(View.GONE);
 		}
@@ -3388,6 +3400,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onShown()
 	{
+
 		if (messages != null)
 		{
 			mHandler.post(new Runnable()
@@ -3400,10 +3413,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 		}
 		Logger.d(getClass().getSimpleName(), "Keyboard shown");
-		if (emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
-		{
-			onEmoticonBtnClicked(null);
-		}
+		// if (emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
+		// {
+		// onEmoticonBtnClicked(null);
+		// }
 	}
 
 	@Override
@@ -3680,10 +3693,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
 			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
-			if(chatTheme == ChatTheme.DEFAULT){
+			if (chatTheme == ChatTheme.DEFAULT)
+			{
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
-			}else{
-			tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_nudge, 0, 0, 0);
+			}
+			else
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_nudge, 0, 0, 0);
 			}
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -4954,23 +4970,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		onEmoticonBtnClicked(v, 0, false);
 	}
 
-	public void onEmoticonBtnClicked(View v, int whichSubcategory, boolean backPressed)
+	public void onEmoticonBtnClicked(final View v, int whichSubcategory, boolean backPressed)
 	{
-		dismissPopupWindow();
+		// boolean controls whether we switch from sticker to emo or vice versa
+		emoticonLayout = emoticonLayout == null ? (ViewGroup) LayoutInflater.from(getApplicationContext()).inflate(R.layout.emoticon_layout_containor, null) : emoticonLayout;
 
-		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
-		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+		emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
-		View eraseKey = findViewById(R.id.erase_key);
+		View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
 
-		boolean sameType = true;
 		if (v != null)
 		{
-
 			int[] tabDrawables = null;
 
 			if (v.getId() == R.id.sticker_btn)
 			{
+				if (emoticonType == EmoticonType.STICKERS)
+				{
+					// view not changed , exit with dismiss dialog
+					dismissPopupWindow();
+					return;
+				}
 				if (tipView != null)
 				{
 					TipType viewTipType = (TipType) tipView.getTag();
@@ -4983,13 +5003,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				if (emoticonType != EmoticonType.STICKERS)
 				{
-					sameType = false;
 					emoticonType = EmoticonType.STICKERS;
 				}
 				eraseKey.setVisibility(View.GONE);
 			}
 			else
 			{
+				if (emoticonType == EmoticonType.EMOTICON)
+				{
+					dismissPopupWindow();
+					return;
+				}
 				int offset = 0;
 				int emoticonsListSize = 0;
 				tabDrawables = new int[] { R.drawable.ic_recents_emo, R.drawable.emo_1_tab, R.drawable.emo_2_tab, R.drawable.emo_3_tab, R.drawable.emo_4_tab,
@@ -4997,7 +5021,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						EmoticonConstants.EMOJI_RES_IDS[392] };
 				if (emoticonType != EmoticonType.EMOTICON)
 				{
-					sameType = false;
 					emoticonType = EmoticonType.EMOTICON;
 				}
 				emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
@@ -5029,57 +5052,69 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				});
 			}
 			setupEmoticonLayout(emoticonType, whichSubcategory, tabDrawables);
-		}
-
-		if (emoticonLayout.getVisibility() == View.VISIBLE)
-		{
-			if (!sameType && v != null)
+			if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
 			{
 				return;
 			}
-			mHandler.postDelayed(new Runnable()
-			{
 
-				@Override
-				public void run()
-				{
-					emoticonLayout.setVisibility(View.GONE);
-				}
-			}, 65);
-			if (!backPressed)
+			// emotype is same , so same view clicked
+
+			int selection = mConversationsView.getLastVisiblePosition();
+			attachmentWindow = new PopupWindow(ChatThread.this);
+			ViewGroup.LayoutParams lp = emoticonLayout.findViewById(R.id.emoticonLayout).getLayoutParams();
+			if (lp == null)
 			{
-				InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-				imm.showSoftInput(mComposeView, InputMethodManager.SHOW_IMPLICIT);
+				lp = new RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 0);
 			}
-		}
-		else
-		{
-			Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
-			slideUp.setDuration(400);
-			emoticonLayout.setAnimation(slideUp);
-			mHandler.postDelayed(new Runnable()
+			if (possibleKeyboardHeight != 0)
+			{
+				lp.height = possibleKeyboardHeight;
+			}
+			else
+			{
+				lp.height = (int) (getResources().getDimension(R.dimen.emoticon_pallete));
+
+				// lp.height = (int) (Utils.densityMultiplier * getResources().getDimension(R.dimen.emoticon_pallete));
+			}
+			View anchor = findViewById(R.id.chatThreadParentLayout);
+
+			anchor.setVisibility(View.VISIBLE);
+			Log.i("keyboard", "height " + lp.height);
+			emoticonLayout.setLayoutParams(lp);
+			attachmentWindow.setContentView(emoticonLayout);
+			Log.i("keyboard", "showing at emoticon anchor");
+			attachmentWindow.setWidth(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+			int bottomPanelHeight = findViewById(R.id.bottom_panel).getHeight();
+			View mock = emoticonLayout.findViewById(R.id.mockemoticonPallateIconLL);
+			android.view.ViewGroup.LayoutParams mlp = mock.getLayoutParams();
+			mlp.height = bottomPanelHeight;
+			mock.findViewById(R.id.mock_sticker_btn_emo_pal).setOnClickListener(mockEmoTransparentClickListener);
+			mock.findViewById(R.id.mockTransparentEmoPalEmoIcon).setOnClickListener(mockEmoTransparentClickListener);
+			mock.findViewById(R.id.mockTransparentEmoPalET).setOnTouchListener(mockEmoTransparentTouchListener);
+			mock.findViewById(R.id.mockTransparentEmoPalSend).setOnTouchListener(mockEmoTransparentTouchListener);
+			attachmentWindow.setHeight(lp.height + bottomPanelHeight);
+			resizeMainheight(lp.height);
+			attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+			attachmentWindow.setOutsideTouchable(true);
+			attachmentWindow.setFocusable(false);
+			attachmentWindow.setOnDismissListener(new OnDismissListener()
 			{
 
 				@Override
-				public void run()
+				public void onDismiss()
 				{
-					final int selection = mConversationsView.getLastVisiblePosition();
-
-					emoticonLayout.setVisibility(View.VISIBLE);
-					/*
-					 * Making sure we keep the same selection as we did before showing the sticker/emoticon layout.
-					 */
-					mHandler.post(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							mConversationsView.setSelection(selection);
-						}
-					});
+					Log.i("keyboard", "on dismiss listener");
+					resizeMainheight(0);
+					emoticonType = null;
+					attachmentWindow = null;
 				}
-			}, 45);
-			Utils.hideSoftKeyboard(this, mComposeView);
+			});
+			// attachmentWindow.showAsDropDown(anchor, 0, 0);
+			attachmentWindow.showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
+			/*
+			 * Making sure we keep the same selection as we did before showing the sticker/emoticon layout.
+			 */
+			mConversationsView.setSelection(selection);
 		}
 
 	}
@@ -5442,7 +5477,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		emoticonViewPager.setCurrentItem(actualPageNum, false);
 		emoticonViewPager.invalidate();
 
-		iconPageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
+		iconPageIndicator = (StickerEmoticonIconPageIndicator) emoticonLayout.findViewById(R.id.icon_indicator);
 		iconPageIndicator.setViewPager(emoticonViewPager);
 		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
 		iconPageIndicator.notifyDataSetChanged();
@@ -5649,10 +5684,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				hideFastScrollIndicator();
 				/*
-				 * if user is viewing message less than certain position in chatthread
-				 * we should not show topfast scroll.
+				 * if user is viewing message less than certain position in chatthread we should not show topfast scroll.
 				 */
-				if(firstVisibleItem > HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
+				if (firstVisibleItem > HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 				{
 					upFastScrollIndicator.setVisibility(View.VISIBLE);
 				}
@@ -5674,7 +5708,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 		Logger.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
-		if(bottomFastScrollIndicator.getVisibility() ==View.VISIBLE)
+		if (bottomFastScrollIndicator.getVisibility() == View.VISIBLE)
 		{
 			if (view.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
@@ -5693,13 +5727,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}, 2000);
 			}
 		}
-		if(upFastScrollIndicator.getVisibility() ==View.VISIBLE)
+		if (upFastScrollIndicator.getVisibility() == View.VISIBLE)
 		{
-			if(view.getFirstVisiblePosition() <= HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
+			if (view.getFirstVisiblePosition() <= HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)
 			{
 				hideUpFastScrollIndicator();
 			}
-			else if( scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+			else if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 			{
 				mHandler.postDelayed(new Runnable()
 				{
@@ -6410,12 +6444,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}, 2000);
 	}
-	
+
 	public Drawable getChatTheme(ChatTheme chatTheme)
 	{
 		/*
-		 * for xhdpi and above we should not scale down the chat theme nodpi asset
-		 * for hdpi and below to save memory we should scale it down
+		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
 		BitmapDrawable bd = Utils.getBitmapDrawable(getResources(), ImageWorker.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize));
@@ -6428,6 +6461,110 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		return bd;
+	}
+
+	private static int possibleKeyboardHeight;
+
+	private ViewTreeObserver.OnGlobalLayoutListener getGlobalLayoutListener()
+	{
+		return new ViewTreeObserver.OnGlobalLayoutListener()
+		{
+
+			@Override
+			public void onGlobalLayout()
+			{
+				Log.i("keybpard", "global layout listener");
+				View root = findViewById(R.id.chatThreadParentLayout);
+				Log.i("keybpard", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
+				int temp = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight();
+				if (temp > 0)
+				{
+					possibleKeyboardHeight = temp;
+				}
+			}
+		};
+	}
+
+	private boolean resizeMainheight(int emoticonPalHeight)
+	{
+		View root = findViewById(R.id.chatThreadParentLayout);
+
+		int statusBarHeight = getStatusBarHeight();
+		int maxHeight = root.getRootView().getHeight();
+		int requiredHeight = maxHeight - statusBarHeight - emoticonPalHeight;
+		// keyboard open
+		if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
+		{
+			return false;
+		}
+		if (root.getPaddingBottom() != emoticonPalHeight)
+		{
+			root.setPadding(0, 0, 0, emoticonPalHeight);
+			return true;
+		}
+		return false;
+	}
+
+	public int getStatusBarHeight()
+	{
+		int result = 0;
+		int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0)
+		{
+			result = getResources().getDimensionPixelSize(resourceId);
+		}
+		return result;
+	}
+
+	private OnTouchListener mockEmoTransparentTouchListener = new OnTouchListener()
+	{
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event)
+		{
+			int id = v.getId();
+			if (id == R.id.mockTransparentEmoPalSend)
+			{
+				onSendClick(null);
+			}
+
+			else if (id == R.id.mockTransparentEmoPalET)
+			{
+				dismissPopupWindow();
+				mComposeView.requestFocus();
+				Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
+			}
+			return false;
+		}
+	};
+
+	private OnClickListener mockEmoTransparentClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			int id = v.getId();
+			if (id == R.id.mock_sticker_btn_emo_pal)
+			{
+				onEmoticonBtnClicked(findViewById(R.id.sticker_btn));
+			}
+			else if (id == R.id.mockTransparentEmoPalEmoIcon)
+			{
+				onEmoticonBtnClicked(findViewById(R.id.emo_btn));
+			}
+		}
+	};
+
+	@Override
+	public void onBackKeyPressedET(CustomFontEditText editText)
+	{
+		// on back press - keyboard gone , try to hide emoticons
+		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+		{
+			dismissPopupWindow();
+		}
+
 	}
 
 }
