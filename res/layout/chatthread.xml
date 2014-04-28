@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chatThreadParentLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
@@ -264,7 +265,6 @@
                             android:paddingTop="11dp"
                             android:src="@drawable/smiley_selector" />
                     </LinearLayout>
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -313,16 +313,6 @@
                     android:layout_marginTop="3dp"
                     android:gravity="center_horizontal"
                     android:visibility="invisible" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/emoticon_layout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/emoticon_pallete"
-                android:layout_below="@id/compose_container"
-                android:visibility="gone" >
-
-                <include layout="@layout/emoticon_layout" />
             </RelativeLayout>
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
