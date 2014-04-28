@@ -319,6 +319,10 @@ public class HikePubSub implements Runnable
 
 	public static final String CLEAR_FTUE_STEALTH_CONV = "clearFtueStealthConv";
 
+	public static final String STEALTH_CONVERSATION_MARKED = "stealthConverstaionMarked";
+
+	public static final String STEALTH_CONVERSATION_UNMARKED = "stealthConversationUnmarked";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

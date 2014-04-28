@@ -552,6 +552,69 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		makeCompleteList(false);
 	}
 
+	public void stealthContactAdded(String msisdn)
+	{
+		boolean contactAdded = addSingleStealthContactToStealthList(friendsList, friendsStealthList, msisdn);
+		/*
+		 * We only need to add the contact once. So if it was found removed in the first list, we don't need to check for it in the next list.
+		 */
+		if (contactAdded)
+		{
+			return;
+		}
+		contactAdded = addSingleStealthContactToStealthList(hikeContactsList, hikeStealthContactsList, msisdn);
+		if (contactAdded)
+		{
+			return;
+		}
+		addSingleStealthContactToStealthList(smsContactsList, smsStealthContactsList, msisdn);
+	}
+
+	private boolean addSingleStealthContactToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList, String msisdn)
+	{
+		for (ContactInfo contactInfo : contactList)
+		{
+			if (msisdn.equals(contactInfo.getMsisdn()))
+			{
+				stealthList.add(contactInfo);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void stealthContactRemoved(String msisdn)
+	{
+		boolean contactRemoved = removeSingleStealthContactFromStealthList(friendsStealthList, msisdn);
+		/*
+		 * We only need to remove the contact once. So if it was already removed in the first list, we don't need to check for it in the next list.
+		 */
+		if (contactRemoved)
+		{
+			return;
+		}
+		contactRemoved = removeSingleStealthContactFromStealthList(hikeStealthContactsList, msisdn);
+		if (contactRemoved)
+		{
+			return;
+		}
+		removeSingleStealthContactFromStealthList(smsStealthContactsList, msisdn);
+	}
+
+	private boolean removeSingleStealthContactFromStealthList(List<ContactInfo> contactList, String msisdn)
+	{
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
+		{
+			ContactInfo contactInfo = iter.next();
+			if (msisdn.equals(contactInfo.getMsisdn()))
+			{
+				iter.remove();
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void addToGroup(ContactInfo contactInfo, int groupIndex)
 	{
 		removeContact(contactInfo, false);
