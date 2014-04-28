@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical|left"
+    android:minHeight="30dp"
+    android:paddingBottom="2dp" >
+
+    <include
+        android:id="@+id/avatar_container"
+        layout="@layout/message_sender_avatar" />
+
+    <RelativeLayout
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/avatar_container"
+        android:background="@drawable/ic_bubble_white_selector"
+        android:paddingLeft="18dp"
+        android:paddingRight="12dp" >
+
+        <include
+            android:id="@+id/sender_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/message_sender_details" />
+
+        <com.bsb.hike.view.CustomReceiveMessageTextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/sender_details"
+            android:gravity="left"
+            android:maxWidth="265dp"
+            android:text="Thanks lksad jfljasldkf alsdf lkasfdalsk"
+            android:textColor="@color/chat_color"
+            android:textSize="16sp" />
+
+        <include
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignRight="@id/text"
+            android:layout_marginBottom="3dp"
+            layout="@layout/message_time_status" />
+    </RelativeLayout>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_alignParentTop="true"
+        layout="@layout/message_overlay" />
+
+</RelativeLayout>

@@ -40,10 +40,15 @@
             android:layout_marginTop="@dimen/st__action_bar_default_height"
             android:layout_weight="30" >
 
+            <include
+                android:id="@+id/sms_toggle_button"
+                layout="@layout/sms_toggle_item" />
+
             <ListView
                 android:id="@+id/conversations_list"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:layout_below="@id/sms_toggle_button"
                 android:cacheColorHint="#00000000"
                 android:divider="@null"
                 android:fadingEdge="none"
