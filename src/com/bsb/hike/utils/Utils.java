@@ -2881,7 +2881,7 @@ public class Utils
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
-		Bitmap scaled = Bitmap.createScaledBitmap(bitmap, dimension, dimension, false);
+		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.ARGB_8888, false);
 		bitmap = null;
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
