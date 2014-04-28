@@ -45,7 +45,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 	private String[] pubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.CONTACT_ADDED,
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT, HikePubSub.STEALTH_MODE_TOGGLED };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.STEALTH_CONVERSATION_MARKED,
+			HikePubSub.STEALTH_CONVERSATION_UNMARKED };
 
 	private SharedPreferences preferences;
 
@@ -464,6 +465,18 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 					}
 				}
 			});
+		}
+		else if (HikePubSub.STEALTH_CONVERSATION_MARKED.equals(type) || HikePubSub.STEALTH_CONVERSATION_UNMARKED.equals(type))
+		{
+			String msisdn = (String) object;
+			if (HikePubSub.STEALTH_CONVERSATION_UNMARKED.equals(type))
+			{
+				friendsAdapter.stealthContactRemoved(msisdn);
+			}
+			else
+			{
+				friendsAdapter.stealthContactAdded(msisdn);
+			}
 		}
 	}
 

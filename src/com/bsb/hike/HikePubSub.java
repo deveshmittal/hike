@@ -317,6 +317,10 @@ public class HikePubSub implements Runnable
 
 	public static final String STEALTH_MODE_TOGGLED = "stealthModeToggled";
 
+	public static final String STEALTH_CONVERSATION_MARKED = "stealthConverstaionMarked";
+
+	public static final String STEALTH_CONVERSATION_UNMARKED = "stealthConversationUnmarked";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
