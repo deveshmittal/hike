@@ -17,6 +17,7 @@
 package com.haibison.android.lockpattern.util;
 
 import com.bsb.hike.BuildConfig;
+import com.bsb.hike.utils.Utils;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -48,23 +49,23 @@ public class UI {
         /**
          * Small.
          */
-        SMALL(.6f, .6f, .77f, .77f),
+        SMALL(.8f, .66f, .9f, .77f),
         /**
          * Normal.
          */
-        NORMAL(.6f, .6f, .77f, .77f),
+        NORMAL(.73f, .66f, .8f, .77f),
         /**
          * Large.
          */
-        LARGE(.6f, .6f, .77f, .77f),
+        LARGE(.66f, .66f, .7f, .77f),
         /**
          * X-Large.
          */
-        XLARGE(.6f, .6f, .77f, .77f),
+        XLARGE(.6f, .66f, .64f, .77f),
         /**
          * Undefined.
          */
-        UNDEFINED(.6f, .6f, .77f, .77f);
+        UNDEFINED(.6f, .66f, .64f, .77f);
 
         /**
          * The desired fixed width for a dialog along the minor axis (the screen
@@ -120,7 +121,19 @@ public class UI {
             case Configuration.SCREENLAYOUT_SIZE_SMALL:
                 return SMALL;
             case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-                return NORMAL;
+            	if(Utils.densityMultiplier >= 2)
+            	{
+                    return XLARGE;
+            	}
+            	else if(Utils.densityMultiplier >= 1.5)
+            	{
+                    return LARGE;
+            	}
+            	else if(Utils.densityMultiplier >= 1)
+            	{
+            		return NORMAL;
+            	}
+
             case Configuration.SCREENLAYOUT_SIZE_LARGE:
                 return LARGE;
             case Configuration.SCREENLAYOUT_SIZE_XLARGE:
@@ -144,8 +157,8 @@ public class UI {
      * @param dialog
      *            the dialog.
      */
-    public static void adjustDialogSizeForLargeScreens(Dialog dialog) {
-        adjustDialogSizeForLargeScreens(dialog.getWindow());
+    public static void adjustDialogSizeForLargeScreens(Dialog dialog, boolean isActionCreatePattern) {
+        adjustDialogSizeForLargeScreens(dialog.getWindow(), isActionCreatePattern);
     }// adjustDialogSizeForLargeScreens()
 
     /**
@@ -154,7 +167,7 @@ public class UI {
      * @param dialogWindow
      *            the window <i>of the dialog</i>.
      */
-    public static void adjustDialogSizeForLargeScreens(Window dialogWindow) {
+    public static void adjustDialogSizeForLargeScreens(Window dialogWindow, boolean isActionCreatePattern) {
         if (BuildConfig.DEBUG)
             Log.d(CLASSNAME, "adjustDialogSizeForLargeScreens()");
 
@@ -184,7 +197,18 @@ public class UI {
         width = (int) (width * (isPortrait ? screenSize.fixedWidthMinor
                 : screenSize.fixedWidthMajor));
         height = (int) (height * (isPortrait ? screenSize.fixedHeightMajor
-                : screenSize.fixedHeightMinor));
+    			: screenSize.fixedHeightMinor));
+        if(!isActionCreatePattern)
+        {
+        	if(isPortrait)
+        	{
+        		height = LayoutParams.WRAP_CONTENT;
+        	}
+        	else
+        	{
+        		width = height;
+        	}
+        }
 
         if (BuildConfig.DEBUG)
             Log.d(CLASSNAME, String.format(

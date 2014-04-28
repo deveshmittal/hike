@@ -39,6 +39,10 @@ public class LockPattern
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, true);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, null);
 			}
+			else
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_FTUE_STEALTH_CONV, null);
+			}
 			break;// _ReqCreateLockPattern
 
 		case HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN:
@@ -51,7 +55,7 @@ public class LockPattern
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 				break;
 			case Activity.RESULT_CANCELED:
-				Toast.makeText(activity, R.string.stealth_mode_on, Toast.LENGTH_SHORT).show();
+				Toast.makeText(activity, activity.getString(R.string.stealth_mode_on)+".", Toast.LENGTH_SHORT).show();
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON_FAKE);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
 				break;

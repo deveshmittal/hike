@@ -178,7 +178,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP,
-			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED };
+			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1171,6 +1171,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					changeConversationsVisibility();
+				}
+			});
+		}
+		else if (HikePubSub.CLEAR_FTUE_STEALTH_CONV.equals(type))
+		{
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					// if stealth setup is not done and user has marked some chats as stealth unmark all of them
+					for (Conversation conv : stealthConversations)
+					{
+						conv.setIsStealth(false);
+						HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), false);
+					}
+					displayedConversations.addAll(stealthConversations);
+					stealthConversations.clear();
+					mAdapter.sort(mConversationsComparator);
+					mAdapter.notifyDataSetChanged();
+					mAdapter.setNotifyOnChange(false);
 				}
 			});
 		}
