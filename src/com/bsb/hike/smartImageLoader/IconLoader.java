@@ -80,7 +80,7 @@ public class IconLoader extends ImageWorker
 			id = id.substring(0, idx);
 			rounded = true;
 		}
-		Bitmap bm = HikeBitmapFactory.decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight);
+		Bitmap bm = HikeBitmapFactory.decodeSampledBitmapFromByteArray(id, rounded, mImageWidth, mImageHeight);
 		return bm;
 	}
 
