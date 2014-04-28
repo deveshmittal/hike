@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
@@ -514,6 +515,41 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			makeCompleteList(false);
 		}
+	}
+
+	public void removeStealthContacts()
+	{
+		removeStealthContactFromList(friendsList);
+		removeStealthContactFromList(hikeContactsList);
+		removeStealthContactFromList(smsContactsList);
+
+		makeCompleteList(false);
+	}
+
+	private void removeStealthContactFromList(List<ContactInfo> contactList)
+	{
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
+		{
+			ContactInfo contactInfo = iter.next();
+			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			{
+				iter.remove();
+			}
+		}
+	}
+
+	public void addStealthContacts()
+	{
+		friendsList.addAll(friendsStealthList);
+		Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+
+		hikeContactsList.addAll(hikeStealthContactsList);
+		Collections.sort(hikeContactsList);
+
+		smsContactsList.addAll(smsStealthContactsList);
+		Collections.sort(smsContactsList);
+
+		makeCompleteList(false);
 	}
 
 	public void addToGroup(ContactInfo contactInfo, int groupIndex)
