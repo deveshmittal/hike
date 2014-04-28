@@ -16,9 +16,8 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="19dp" >
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
 
     <RelativeLayout
         android:id="@+id/alp_42447968_view_lock_pattern_view_group"
@@ -38,6 +37,7 @@
         android:layout_width="144dp"
         android:layout_height="wrap_content"
         android:paddingTop="15dp"
+        android:paddingLeft="19dp"
         android:drawableLeft="@drawable/ic_stealth_passcode"
         android:drawablePadding="9dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -48,6 +48,7 @@
         android:id="@+id/alp_42447968_viewgroup_footer"
         android:layout_width="144dp"
         android:layout_height="111dp"
+        android:paddingLeft="19dp"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
         android:visibility="gone" >
