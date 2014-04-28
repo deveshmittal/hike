@@ -309,6 +309,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				conv.setIsStealth(false);
 				HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), false);
 			}
+
+			HikeMessengerApp.clearStealthMsisdn();
 		}
 		
 		super.onDestroy();
@@ -470,10 +472,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					if(getString(R.string.mark_stealth).equals(option))
 					{
 						stealthConversations.add(conv);
+						HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
 					}
 					else
 					{
 						stealthConversations.remove(conv);
+						HikeMessengerApp.removeStealthMsisdn(conv.getMsisdn());
 					}
 
 					conv.setIsStealth(newStealthValue);

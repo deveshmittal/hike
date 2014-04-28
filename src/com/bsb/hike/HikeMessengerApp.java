@@ -817,6 +817,16 @@ public class HikeMessengerApp extends Application implements Listener
 		stealthMsisdn.add(msisdn);
 	}
 
+	public static void removeStealthMsisdn(String msisdn)
+	{
+		stealthMsisdn.remove(msisdn);
+	}
+
+	public static void clearStealthMsisdn()
+	{
+		stealthMsisdn.clear();
+	}
+
 	public static boolean isStealthMsisdn(String msisdn)
 	{
 		return stealthMsisdn.contains(msisdn);
