@@ -158,26 +158,6 @@ public class StickerManager
 				return "humanoidDownloadShown";
 			}
 		},
-		doggy
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.doggy;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_doggy;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "doggyDownloadShown";
-			}
-		},
 		expressions
 		{
 			@Override
@@ -196,6 +176,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "expDownloadShown";
+			}
+		},
+		doggy
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.doggy;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_doggy;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "doggyDownloadShown";
 			}
 		},
 		love
