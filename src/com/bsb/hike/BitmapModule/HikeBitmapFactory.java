@@ -504,7 +504,7 @@ public class HikeBitmapFactory
 			{
 				inSampleSize *= 2;
 			}
-			
+
 		}
 		return inSampleSize;
 	}
@@ -572,6 +572,11 @@ public class HikeBitmapFactory
 	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, Bitmap.Config config)
 	{
 		Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, config);
+
+		if (unscaledBitmap == null)
+		{
+			return null;
+		}
 
 		Bitmap small = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config);
 
