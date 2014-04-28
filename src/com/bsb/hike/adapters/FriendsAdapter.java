@@ -81,6 +81,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	protected List<ContactInfo> smsContactsList;
 
+	protected List<ContactInfo> friendsStealthList;
+
+	protected List<ContactInfo> hikeStealthContactsList;
+
+	protected List<ContactInfo> smsStealthContactsList;
+
 	protected List<ContactInfo> filteredFriendsList;
 
 	protected List<ContactInfo> filteredHikeContactsList;
@@ -88,6 +94,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> filteredSmsContactsList;
 
 	protected List<ContactInfo> groupsList;
+
+	protected List<ContactInfo> groupsStealthList;
 
 	protected List<ContactInfo> filteredGroupsList;
 
@@ -141,6 +149,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
 
+		friendsStealthList = new ArrayList<ContactInfo>(0);
+		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
+		smsStealthContactsList = new ArrayList<ContactInfo>(0);
+
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
@@ -151,8 +163,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
-				filteredSmsContactsList);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 

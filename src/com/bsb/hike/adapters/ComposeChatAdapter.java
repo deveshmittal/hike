@@ -46,6 +46,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private List<ContactInfo> newContactsList;
 
+	private boolean isCreatingOrEditingGroup;
+
 	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId)
 	{
 		super(context, listView);
@@ -58,15 +60,22 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		this.existingGroupId = existingGroupId;
 		this.fetchGroups = fetchGroups;
 		groupsList = new ArrayList<ContactInfo>(0);
+		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+	}
+
+	public void setIsCreatingOrEditingGroup(boolean b)
+	{
+		isCreatingOrEditingGroup = b;
 	}
 
 	@Override
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
-				filteredSmsContactsList, groupsList, filteredGroupsList, existingParticipants, fetchGroups, existingGroupId);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList,
+				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
