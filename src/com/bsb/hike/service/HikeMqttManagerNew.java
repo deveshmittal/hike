@@ -578,6 +578,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op.setCleanSession(false);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
+				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
@@ -629,6 +630,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			scheduleNextConnectionCheck();
 			releaseWakeLock();
 		}
+	}
+	
+	private void setServerUris(MqttConnectOptions op)
+	{
+		String protocol = Utils.switchSSLOn(context) ? "ssl://" : "tcp://";
+		String serverURIs[] = 
+			{ 
+				protocol + "54.251.180.0" + ":" + brokerPortNumber, 
+				protocol + "54.251.180.1" + ":" + brokerPortNumber, 
+				protocol + "54.251.180.2" + ":" + brokerPortNumber,
+				protocol + "54.251.180.3" + ":" + brokerPortNumber, 
+				protocol + "54.251.180.4" + ":" + brokerPortNumber, 
+				protocol + "54.251.180.5" + ":" + brokerPortNumber,
+				protocol + "54.251.180.6" + ":" + brokerPortNumber
+			}; 
+		op.setServerURIs(serverURIs);
 	}
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
