@@ -5224,7 +5224,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
 			stickerBtnBg = R.drawable.doggy_btn;
-			stickerBtnText = android.R.string.ok;
+			stickerBtnText = R.string.download;
 			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
 
@@ -5252,7 +5252,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.exp_bg);
 
 			stickerBtnBg = R.drawable.exp_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = android.R.string.ok;
 			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.exp_btn_text_shadow);
 
