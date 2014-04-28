@@ -129,8 +129,6 @@ public class HikeDialog
 		dialog.setCancelable(true);
 
 		View okBtn = dialog.findViewById(R.id.awesomeButton);
-		TextView description = (TextView) dialog.findViewById(R.id.stealth_setup_description);
-		description.setText(Html.fromHtml(context.getString(R.string.stealth_setup_later)));
 		okBtn.setOnClickListener(new OnClickListener()
 		{
 
