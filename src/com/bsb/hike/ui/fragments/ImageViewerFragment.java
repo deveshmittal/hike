@@ -112,7 +112,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				BitmapDrawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
 				if (drawable == null)
 				{
-					Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromFile(basePath + "/" + fileName, imageSize, imageSize);
+					Bitmap b = HikeBitmapFactory.scaleDownBitmap(basePath + "/" + fileName, imageSize, imageSize, Bitmap.Config.RGB_565);
 					if (b != null)
 					{
 						drawable = HikeBitmapFactory.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
