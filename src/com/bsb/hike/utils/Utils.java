@@ -2525,12 +2525,12 @@ public class Utils
 
 	private static void resetStealthMode(Context context)
 	{
-		StealthResetTimer.getInstance(context).resetStealth();
+		StealthResetTimer.getInstance(context).resetStealthToggle();
 	}
 
 	private static void clearStealthResetTimer(Context context)
 	{
-		StealthResetTimer.getInstance(context).clearScheduledTimer();
+		StealthResetTimer.getInstance(context).clearScheduledStealthToggleTimer();
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)

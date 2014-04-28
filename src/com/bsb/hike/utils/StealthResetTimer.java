@@ -7,9 +7,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 
-public class StealthResetTimer implements Runnable
+public class StealthResetTimer
 {
-	private static final int RESET_TIME_MS = 10 * 1000;
+	private static final int RESET_TOGGLE_TIME_MS = 10 * 1000;
 
 	private static StealthResetTimer stealthResetTimer;
 
@@ -32,21 +32,25 @@ public class StealthResetTimer implements Runnable
 		return stealthResetTimer;
 	}
 
-	public void resetStealth()
+	public void resetStealthToggle()
 	{
-		clearScheduledTimer();
-		handler.postDelayed(this, RESET_TIME_MS);
+		clearScheduledStealthToggleTimer();
+		handler.postDelayed(toggleReset, RESET_TOGGLE_TIME_MS);
 	}
 
-	public void clearScheduledTimer()
+	public void clearScheduledStealthToggleTimer()
 	{
-		handler.removeCallbacks(this);
+		handler.removeCallbacks(toggleReset);
 	}
 
-	@Override
-	public void run()
+	private Runnable toggleReset = new Runnable()
 	{
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
-	}
+
+		@Override
+		public void run()
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+		}
+	};
 }
