@@ -279,6 +279,17 @@ public class HikeBitmapFactory
 	}
 
 	/**
+	 * Returns aspect ratio of bitmap (Width to Height ratio)
+	 */
+	public static float getAspectRatioFromFile(String filename)
+	{
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(filename, options);
+		return (float) (options.outWidth) / options.outHeight;
+	}
+
+	/**
 	 * Decode and sample down a bitmap from resources to the requested width and height.
 	 * 
 	 * @param res
