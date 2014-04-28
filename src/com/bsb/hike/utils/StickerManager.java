@@ -39,7 +39,7 @@ public class StickerManager
 
 	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
 
-	public static final String EXPRESSIONS_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
+	public static final String EXPRESSIONS_CATEGORY_INSERT_TO_DB = "defaultExpressionsCategoryInsertedToDB";
 
 	public static final String HUMANOID_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
 
