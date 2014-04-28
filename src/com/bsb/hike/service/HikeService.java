@@ -332,8 +332,15 @@ public class HikeService extends Service
 			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true);
 			settings.edit().commit();
 			
-			HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
-			StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
+			if(sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
+			{
+				HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
+				StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
+			}
+			else
+			{
+				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
+			}
 		}
 	}
 

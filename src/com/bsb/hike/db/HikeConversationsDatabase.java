@@ -2539,6 +2539,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public void removeStickerCategory(String categoryId)
+	{
+		mDb.delete(DBConstants.STICKERS_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+	}
 
 	public void stickerUpdateAvailable(String categoryId)
 	{
