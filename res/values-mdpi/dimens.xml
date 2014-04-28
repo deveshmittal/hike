@@ -15,5 +15,4 @@
 	<dimen name="stealth_ftue_pu_img_margin_top">18dp</dimen>
 	<dimen name="stealth_setup_des_margin_bottom">10dp</dimen>
 	<dimen name="stealth_ftue_pu_msg_margin_bottom">10dp</dimen>
-	<dimen name="alp_textview_info_height">50dp</dimen>
 </resources>
