@@ -86,6 +86,8 @@ public class StickerManager
 	public static final String ADD_NO_MEDIA_FILE_FOR_STICKERS = "addNoMediaFileForStickers";
 
 	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
+	
+	public static final String DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER = "delDefaultDownloadedExpressionsStickers";
 
 	public static int RECENT_STICKERS_COUNT = 30;
 
@@ -983,6 +985,27 @@ public class StickerManager
 			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
 			for(String stId : LOCAL_STICKER_IDS_HUMANOID)
+			{
+				File st = new File(largeStickerDir,stId);
+				Utils.deleteFile(st);
+				st = new File(smallStickerDir,stId);
+				Utils.deleteFile(st);
+			}
+		}
+		catch (Exception e)
+		{
+
+		}
+	}
+	
+	public void deleteDefaultDownloadedExpressionsStickers()
+	{
+		try
+		{
+			String dirPath  = getStickerDirectoryForCategoryId(context, StickerCategoryId.expressions.name());
+			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+			for(String stId : LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				File st = new File(largeStickerDir,stId);
 				Utils.deleteFile(st);
