@@ -303,8 +303,6 @@ public class HikePubSub implements Runnable
 
 	public static final String CONTACT_SYNCED = "contactSynced";
 
-	public static final String MQTT_CONNECTED = "mqttConnected";
-
 	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
 
 	public static final String DISMISS_STEALTH_FTUE_CONV_TIP = "dismissStealthFtueConvTip";

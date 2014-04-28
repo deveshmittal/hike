@@ -752,7 +752,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Logger.d(TAG, "Client Connected ....");
 					cancelNetworkErrorTimer();
 
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
+					/*
+					 * Send a fg/bg packet on reconnecting.
+					 */
+					Utils.appStateChanged(context);
 
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
