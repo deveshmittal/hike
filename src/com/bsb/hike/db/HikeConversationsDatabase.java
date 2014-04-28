@@ -2625,9 +2625,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void insertDoggyStickerCategory()
+	public void insertExpressionsStickerCategory()
 	{
-		addOrUpdateStickerCategory(StickerCategoryId.doggy.name(), StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length, false);
+		addOrUpdateStickerCategory(StickerCategoryId.expressions.name(), StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS.length, false);
 	}
 
 	public void insertHumanoidStickerCategory()

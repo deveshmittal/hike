@@ -897,12 +897,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (sticker.getStickerIndex() != -1)
 				{
 					holder.stickerImage.setVisibility(View.VISIBLE);
-					if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+					if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
 					{
 						// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 						int idx = sticker.getStickerIndex();
 						if (idx >= 0)
-							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
+							holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
 					}
 					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 					{

@@ -89,9 +89,9 @@ public class DownloadStickerTask extends StickerTaskBase
 				existingStickerIds.put(stickerId);
 			}
 		}
-		else if (category.categoryId.equals(StickerCategoryId.doggy))
+		else if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
-			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY)
+			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				existingStickerIds.put(stickerId);
 			}

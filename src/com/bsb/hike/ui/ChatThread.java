@@ -5096,7 +5096,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				StickerCategoryId categoryId = category.categoryId;
 				if (StickerCategoryId.recent.equals(categoryId))
 					return;
-				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.doggy))
+				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.expressions))
 				{
 					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
 							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
@@ -5145,7 +5145,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					editor.putBoolean(category.categoryId.downloadPref(), true);
 					if (category.categoryId.equals(StickerCategoryId.recent) || category.categoryId.equals(StickerCategoryId.humanoid)
-							|| category.categoryId.equals(StickerCategoryId.doggy))
+							|| category.categoryId.equals(StickerCategoryId.expressions))
 					{
 						return;
 					}
@@ -5173,7 +5173,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onCancel(DialogInterface dialog)
 			{
 				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid)
-						&& !category.categoryId.equals(StickerCategoryId.doggy) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
+						&& !category.categoryId.equals(StickerCategoryId.expressions) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
 				{
 					int idx = 0;
 					if (StickerManager.getInstance().getRecentStickerList().size() == 0)

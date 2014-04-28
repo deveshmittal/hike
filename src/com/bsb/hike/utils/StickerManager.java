@@ -39,7 +39,7 @@ public class StickerManager
 
 	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
 
-	public static final String DOGGY_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
+	public static final String EXPRESSIONS_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
 
 	public static final String HUMANOID_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
 
@@ -100,14 +100,14 @@ public class StickerManager
 	public final String[] LOCAL_STICKER_IDS_HUMANOID = { "001_love1.png", "002_love2.png", "003_teasing.png", "004_rofl.png", "005_bored.png", "006_angry.png", "007_strangle.png",
 			"008_shocked.png", "009_hurray.png", "010_yawning.png" };
 
-	public final int[] LOCAL_STICKER_RES_IDS_DOGGY = { R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup, R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
+	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup, R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
 			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh, R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
 
-	public final int[] LOCAL_STICKER_SMALL_RES_IDS_DOGGY = { R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup, R.drawable.sticker_small_3_drooling,
+	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup, R.drawable.sticker_small_3_drooling,
 			R.drawable.sticker_small_4_devilsmile, R.drawable.sticker_small_5_sorry, R.drawable.sticker_small_6_urgh, R.drawable.sticker_small_7_confused,
 			R.drawable.sticker_small_8_dreaming };
 
-	public final String[] LOCAL_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
+	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
 			"007_confused.png", "008_dreaming.png", };
 
 	public enum StickerCategoryId
@@ -539,11 +539,11 @@ public class StickerManager
 
 	private void removeCategoryFromRecents(StickerCategory category)
 	{
-		if (category.categoryId.equals(StickerCategoryId.doggy))
+		if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
-			for (int i = 0; i < LOCAL_STICKER_IDS_DOGGY.length; i++)
+			for (int i = 0; i < LOCAL_STICKER_IDS_EXPRESSIONS.length; i++)
 			{
-				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_DOGGY[i], i));
+				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_EXPRESSIONS[i], i));
 			}
 		}
 		else if (category.categoryId.equals(StickerCategoryId.humanoid))
@@ -570,11 +570,11 @@ public class StickerManager
 		}
 	}
 
-	public void insertDoggyCategory()
+	public void insertExpressionsCategory()
 	{
-		HikeConversationsDatabase.getInstance().insertDoggyStickerCategory();
+		HikeConversationsDatabase.getInstance().insertExpressionsStickerCategory();
 		Editor editor = preferenceManager.edit();
-		editor.putBoolean(DOGGY_CATEGORY_INSERT_TO_DB, true);
+		editor.putBoolean(EXPRESSIONS_CATEGORY_INSERT_TO_DB, true);
 		editor.commit();
 	}
 
@@ -588,7 +588,7 @@ public class StickerManager
 
 	public void resetReachedEndForDefaultStickers()
 	{
-		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.doggy.name(), false);
+		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.expressions.name(), false);
 		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.humanoid.name(), false);
 		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
@@ -979,20 +979,9 @@ public class StickerManager
 	{
 		try
 		{
-			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.doggy.name());
+			String dirPath  = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
 			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-				for(String stId : LOCAL_STICKER_IDS_DOGGY)
-				{
-					File st = new File(largeStickerDir,stId);
-					Utils.deleteFile(st);
-					st = new File(smallStickerDir,stId);
-					Utils.deleteFile(st);
-				}
-			
-			dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
-			largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
-			smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
 			for(String stId : LOCAL_STICKER_IDS_HUMANOID)
 			{
 				File st = new File(largeStickerDir,stId);

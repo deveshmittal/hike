@@ -288,9 +288,9 @@ public class HikeService extends Service
 			sm.removeHumanoidSticker();
 		}
 
-		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false))
+		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
 		{
-			sm.insertDoggyCategory();
+			sm.insertExpressionsCategory();
 		}
 
 		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false))
