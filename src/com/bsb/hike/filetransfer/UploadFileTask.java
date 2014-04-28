@@ -89,6 +89,10 @@ public class UploadFileTask extends FileTransferBase
 
 	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
 
+	private int height;
+
+	private int width;
+
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
 			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
@@ -156,6 +160,27 @@ public class UploadFileTask extends FileTransferBase
 		fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
 	}
 
+	private void calculateReqHeightAndWidth(String fileName)
+	{
+		float aspectRatio = HikeBitmapFactory.getAspectRatioFromFile(fileName);
+		height = (int) (150 * Utils.densityMultiplier);
+		width = (int) (aspectRatio * height);
+
+		int maxWidth = (int) (250 * Utils.densityMultiplier);
+		int minWidth = (int) (119 * Utils.densityMultiplier);
+
+		if (width < minWidth)
+		{
+			width = minWidth;
+			height = (int) (aspectRatio * width);
+		}
+		else if (width > maxWidth)
+		{
+			width = maxWidth;
+			height = (int) (aspectRatio * width);
+		}
+	}
+
 	// private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long
 	// recordingDuration) throws FileTransferCancelledException, Exception
 	private void createConvMessage()
@@ -175,7 +200,12 @@ public class UploadFileTask extends FileTransferBase
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
-					thumbnail = HikeBitmapFactory.scaleDownImage(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
+					calculateReqHeightAndWidth(destinationFile.getPath());
+
+					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), width, height, Bitmap.Config.RGB_565);
+
+					// Logger.d("UploadFileTask",
+					// "thumbnail size : " + BitmapUtils.getBitmapSize(thumbnail) + "  height : " + thumbnail.getHeight() + "   width : " + thumbnail.getWidth());
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
@@ -185,7 +215,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 				}
-				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(),(int) mFile.length());
+				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length());
 			}
 			else
 			// this is the case for picasa picture
@@ -273,8 +303,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
 				// do not copy the file if it is video or audio
-				if(hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING
-						|| hikeFileType == HikeFileType.OTHER)
+				if (hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
 				{
 					selectedFile = mFile;
 					hikeFile.setFile(selectedFile);
@@ -325,7 +354,8 @@ public class UploadFileTask extends FileTransferBase
 				hikeFile.removeSourceFile();
 			}
 		}
-		else // picasa case
+		else
+		// picasa case
 		{
 			try
 			{
@@ -340,7 +370,9 @@ public class UploadFileTask extends FileTransferBase
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
-				thumbnail = HikeBitmapFactory.scaleDownImage(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false, true);
+				calculateReqHeightAndWidth(selectedFile.getPath());
+				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
+						Bitmap.Config.RGB_565);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
 			{
@@ -371,7 +403,8 @@ public class UploadFileTask extends FileTransferBase
 	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, true).serialize());
+		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, true)
+				.serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
@@ -380,7 +413,7 @@ public class UploadFileTask extends FileTransferBase
 	@Override
 	public FTResult call()
 	{
-		mThread  = Thread.currentThread();
+		mThread = Thread.currentThread();
 		try
 		{
 			initFileUpload();
@@ -439,18 +472,18 @@ public class UploadFileTask extends FileTransferBase
 				{
 					String file_md5Hash = Utils.fileToMD5(selectedFile.getPath());
 					Logger.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
-//					if (!md5Hash.equals(file_md5Hash))
-//					{
-//						Logger.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-//						deleteStateFile();
-//						return FTResult.FAILED_UNRECOVERABLE;
-//					}
+					// if (!md5Hash.equals(file_md5Hash))
+					// {
+					// Logger.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
+					// deleteStateFile();
+					// return FTResult.FAILED_UNRECOVERABLE;
+					// }
 				}
-//				else
-//				{
-//					deleteStateFile();
-//					return FTResult.FAILED_UNRECOVERABLE;
-//				}
+				// else
+				// {
+				// deleteStateFile();
+				// return FTResult.FAILED_UNRECOVERABLE;
+				// }
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -469,7 +502,7 @@ public class UploadFileTask extends FileTransferBase
 			// The file was just uploaded to the servers, we want to publish
 			// this event
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
-			
+
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
 
@@ -555,7 +588,7 @@ public class UploadFileTask extends FileTransferBase
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
 		}
 		long length = sourceFile.length();
-		if(mStart >= length)
+		if (mStart >= length)
 		{
 			mStart = 0;
 			X_SESSION_ID = UUID.randomUUID().toString();
@@ -565,11 +598,11 @@ public class UploadFileTask extends FileTransferBase
 		mUrl = new URL(AccountUtils.fileTransferUploadBase + "/user/pft/");
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
-		
+
 		setChunkSize();
-		if(chunkSize > length)
+		if (chunkSize > length)
 			chunkSize = (int) length;
-		
+
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
 
@@ -587,7 +620,7 @@ public class UploadFileTask extends FileTransferBase
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 
-			Logger.d(getClass().getSimpleName(),"bytes " + start + "-" + end + "/" + length + "/" + chunkSize);
+			Logger.d(getClass().getSimpleName(), "bytes " + start + "-" + end + "/" + length + "/" + chunkSize);
 			boolean resetAndUpdate = false;
 			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
 			if (bytesRead == -1)
@@ -602,7 +635,7 @@ public class UploadFileTask extends FileTransferBase
 
 			if (end == (length - 1) && responseString != null)
 			{
-				Logger.d(getClass().getSimpleName(),"response: " + responseString);
+				Logger.d(getClass().getSimpleName(), "response: " + responseString);
 				responseJson = new JSONObject(responseString);
 				incrementBytesTransferred(chunkSize);
 				resetAndUpdate = true; // To update UI
@@ -617,9 +650,9 @@ public class UploadFileTask extends FileTransferBase
 					{
 						raf.seek(start);
 						setChunkSize();
-						if(chunkSize > length)
+						if (chunkSize > length)
 							chunkSize = (int) length;
-						
+
 					}
 					else
 					{
@@ -879,7 +912,8 @@ public class UploadFileTask extends FileTransferBase
 	String getBoundaryMessage()
 	{
 		String sendingFileType = "";
-		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType) || HikeConstants.VOICE_MESSAGE_CONTENT_TYPE.equals(fileType))
+		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType) || HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType)
+				|| HikeConstants.VOICE_MESSAGE_CONTENT_TYPE.equals(fileType))
 		{
 			sendingFileType = fileType;
 		}
@@ -903,7 +937,7 @@ public class UploadFileTask extends FileTransferBase
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Logger.d(getClass().getSimpleName(),"encode file name: " + name);
+		Logger.d(getClass().getSimpleName(), "encode file name: " + name);
 		res.append("Content-Disposition: form-data; name=\"").append("file").append("\"; filename=\"").append(name).append("\"\r\n").append("Content-Type: ")
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
@@ -1060,14 +1094,15 @@ public class UploadFileTask extends FileTransferBase
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
-//		if (result == FTResult.SUCCESS)
-//		{
-//			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
-//		}
+		// if (result == FTResult.SUCCESS)
+		// {
+		// ((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
+		// }
 		else if (result != FTResult.PAUSED)
 		{
-			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled : result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed
-					: result == FTResult.CARD_UNMOUNT ? R.string.card_unmount : result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
+			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled
+					: result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed : result == FTResult.CARD_UNMOUNT ? R.string.card_unmount
+							: result == FTResult.DOWNLOAD_FAILED ? R.string.download_failed : R.string.upload_failed;
 
 			handler.post(new Runnable()
 			{
