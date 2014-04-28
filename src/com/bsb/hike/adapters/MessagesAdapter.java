@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE, UNREAD_COUNT, TYPING_NOTIFICATION
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION
 	};
 
 	private class DetailViewHolder
@@ -646,10 +646,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.TYPING_NOTIFICATION;
 		}
-		else if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID)
-		{
-			type = ViewType.SMS_TOGGLE;
-		}
 		else if (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID)
 		{
 			type = ViewType.LAST_READ;
@@ -896,13 +892,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					holder.container.setVisibility(View.GONE);
 					holder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					break;
-				case SMS_TOGGLE:
-					v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
-
-					holder.messageTextView = (TextView) v.findViewById(R.id.sms_toggle_subtext);
-					holder.smsToggle = (CheckBox) v.findViewById(R.id.checkbox);
-					holder.hikeSmsText = (TextView) v.findViewById(R.id.hike_text);
-					holder.regularSmsText = (TextView) v.findViewById(R.id.sms_text);
 				}
 				v.setTag(holder);
 			}
@@ -1008,41 +997,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 			}
-			return v;
-		}
-		if (viewType == ViewType.SMS_TOGGLE)
-		{
-			smsToggleSubtext = holder.messageTextView;
-			hikeSmsText = holder.hikeSmsText;
-			regularSmsText = holder.regularSmsText;
-
-			if (isDefaultTheme)
-			{
-				holder.hikeSmsText.setTextColor(context.getResources().getColor(R.color.sms_choice_unselected));
-				holder.regularSmsText.setTextColor(context.getResources().getColor(R.color.sms_choice_unselected));
-				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.sms_choice_unselected));
-				holder.smsToggle.setButtonDrawable(R.drawable.sms_checkbox);
-				v.setBackgroundResource(R.drawable.bg_sms_toggle);
-			}
-			else
-			{
-				holder.hikeSmsText.setTextColor(context.getResources().getColor(R.color.white));
-				holder.regularSmsText.setTextColor(context.getResources().getColor(R.color.white));
-				holder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
-				holder.smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
-				v.setBackgroundResource(chatTheme.smsToggleBgRes());
-			}
-
-			boolean smsToggleOn = Utils.getSendSmsPref(context);
-			holder.smsToggle.setChecked(smsToggleOn);
-			setSmsToggleSubtext(smsToggleOn);
-
-			holder.messageTextView.setVisibility(View.VISIBLE);
-			holder.smsToggle.setVisibility(View.VISIBLE);
-			holder.hikeSmsText.setVisibility(View.VISIBLE);
-			holder.regularSmsText.setVisibility(View.VISIBLE);
-
-			holder.smsToggle.setOnCheckedChangeListener(this);
 			return v;
 		}
 		//
@@ -4676,7 +4630,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void setSmsToggleSubtext(boolean isChecked)
+	public void initializeSmsToggleTexts(TextView hikeSMSText, TextView regularSMSText, TextView SMSToggleSubtext)
+	{
+		hikeSmsText = hikeSMSText;
+		regularSmsText = regularSMSText;
+		smsToggleSubtext = SMSToggleSubtext;
+	}
+	public void setSmsToggleSubtext(boolean isChecked)
 	{
 		String msisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
