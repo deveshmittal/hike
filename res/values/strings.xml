@@ -1460,11 +1460,7 @@
     <string name="introducing_stealth_mode">Introducing Stealth Mode!</string>
     <string name="stealth_mode_popup_msg">Worry about personal chats? You can now mark them as Stealth and access them all in Stealth Mode (password protected).</string>
     <string name="quick_setup">Quick setup</string>
-    <string name="stealth_setup_later">
-<![CDATA[ You can setup later under <font color="#fdf0e1">Settings > Privacy</font> 
-	    ]]>
-    </string>
-	<string name="stealth_double_tap_tip">Your chat has been hidden and we’ve switched to Normal mode. Set up a password to access your hidden chats in Stealth mode.</string><string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark it as \'Stealth\'</string>
+    <string name="stealth_double_tap_tip">Your chat has been hidden and we’ve switched to Normal mode. Set up a password to access your hidden chats in Stealth mode.</string><string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark it as \'Stealth\'</string>
     <string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark it as \'Stealth\'</string>
     <string name="alp_42447968_cmd_confirm">Confirm</string>
     <string name="alp_42447968_cmd_continue">Continue</string>
