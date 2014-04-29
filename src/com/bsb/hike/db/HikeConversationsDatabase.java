@@ -1088,6 +1088,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (Utils.isGroupConversation(msisdn))
 			{
 				conv = getGroupConversation(msisdn, convid);
+				conv.setIsStealth(isStealth);
 			}
 			else
 			{
@@ -1340,6 +1341,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				groupConversation.setGroupParticipantList(groupParticipants);
 				groupConversation.setMessages(conversation.getMessages());
 				groupConversation.setUnreadCount(conversation.getUnreadCount());
+				groupConversation.setIsStealth(conversation.isStealth());
 
 				/*
 				 * Setting the conversation for the message.
