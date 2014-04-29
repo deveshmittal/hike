@@ -253,7 +253,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					else
 					{
 						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-						HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
 					}
 				}
 				else
@@ -1896,7 +1896,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			break;
 		case FILE_TRANSFER_POP_Up:
 			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getFileTransferDialogListener());
-
+			break;
+		case STEALTH_FTUE_POPUP:
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG);
 			break;
 		}
 	}
