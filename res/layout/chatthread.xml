@@ -199,10 +199,10 @@
                 <ImageButton
                     android:id="@+id/send_message"
                     android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_height="match_parent"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="@drawable/compose_view_btn_selector"
+                    android:background="?actionBarItemBackground"
                     android:onClick="onSendClick"
                     android:src="@drawable/ic_walkie_talkie"
                     android:state_enabled="false" />
@@ -210,10 +210,10 @@
                 <ImageButton
                     android:id="@+id/sticker_btn"
                     android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_height="match_parent"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/compose_view_btn_selector"
+                    android:background="?actionBarItemBackground"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker" />
