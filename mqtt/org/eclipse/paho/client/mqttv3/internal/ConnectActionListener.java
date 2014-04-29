@@ -17,6 +17,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 
+import com.bsb.hike.utils.Logger;
+
 /**
  * <p>This class handles the connection of the AsyncClient to one of the available URLs.</p>  
  * <p>The URLs are supplied as either the singleton when the client is created, or as a list in the connect options.</p> 
@@ -93,6 +95,7 @@ public class ConnectActionListener implements IMqttActionListener {
     if (index < numberOfURIs) {
       comms.setNetworkModuleIndex(index);
       try {
+    	Logger.d("ips loop", "trying the url with index : " + index);
         connect();
       }
       catch (MqttPersistenceException e) {
