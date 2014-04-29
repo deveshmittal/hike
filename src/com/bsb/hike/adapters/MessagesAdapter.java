@@ -107,7 +107,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION
 	};
 
-	private class DetailViewHolder
+	private static class DetailViewHolder
 	{
 
 		ImageView status;
@@ -131,7 +131,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ViewGroup messageContainer;
 	}
 
-	private class FTViewHolder extends DetailViewHolder
+	private static class FTViewHolder extends DetailViewHolder
 	{
 		ImageView fileThumb;
 
@@ -152,7 +152,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView fileExtension;
 	}
 
-	private class StickerViewHolder extends DetailViewHolder
+	private static class StickerViewHolder extends DetailViewHolder
 	{
 		View placeHolder;
 
@@ -161,12 +161,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ImageView image;
 	}
 
-	private class NudgeViewHolder extends DetailViewHolder
+	private static class NudgeViewHolder extends DetailViewHolder
 	{
 		ImageView nudge;
 	}
 
-	private class WalkieTalkieViewHolder extends DetailViewHolder
+	private static class WalkieTalkieViewHolder extends DetailViewHolder
 	{
 		View placeHolder;
 
@@ -179,27 +179,27 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView duration;
 	}
 
-	private class VideoViewHolder extends FTViewHolder
+	private static class VideoViewHolder extends FTViewHolder
 	{
 		ImageView filmstripLeft;
 
 		ImageView filmstripRight;
 	}
 
-	private class ImageViewHolder extends FTViewHolder
+	private static class ImageViewHolder extends FTViewHolder
 	{
 	}
 
-	private class FileViewHolder extends FTViewHolder
+	private static class FileViewHolder extends FTViewHolder
 	{
 	}
 
-	private class TextViewHolder extends DetailViewHolder
+	private static class TextViewHolder extends DetailViewHolder
 	{
 		TextView text;
 	}
 
-	private class StatusViewHolder
+	private static class StatusViewHolder
 	{
 		ImageView image;
 
@@ -215,7 +215,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	}
 
-	private class TypingViewHolder
+	private static class TypingViewHolder
 	{
 		ImageView typing;
 
