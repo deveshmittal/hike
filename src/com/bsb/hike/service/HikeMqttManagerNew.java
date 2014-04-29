@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -635,17 +636,39 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private void setServerUris(MqttConnectOptions op)
 	{
 		String protocol = Utils.switchSSLOn(context) ? "ssl://" : "tcp://";
-		String serverURIs[] = 
-			{ 
-				protocol + "54.251.180.0" + ":" + brokerPortNumber, 
-				protocol + "54.251.180.1" + ":" + brokerPortNumber, 
-				protocol + "54.251.180.2" + ":" + brokerPortNumber,
-				protocol + "54.251.180.3" + ":" + brokerPortNumber, 
-				protocol + "54.251.180.4" + ":" + brokerPortNumber, 
-				protocol + "54.251.180.5" + ":" + brokerPortNumber,
-				protocol + "54.251.180.6" + ":" + brokerPortNumber
-			}; 
-		op.setServerURIs(serverURIs);
+
+		SharedPreferences pref = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String ipString = pref.getString(HikeMessengerApp.MQTT_IPS, "");
+		JSONArray ipArray = null;
+		try
+		{
+			ipArray = new JSONArray(ipString);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		
+		if(null != ipArray && ipArray.length() > 0){
+			String serverURIs[] = new String[ipArray.length()];
+			for(int  i = 0 ; i < ipArray.length() ; i ++){
+				serverURIs[i] = protocol + ipArray.optString(i) + ":" + brokerPortNumber;
+			}
+			op.setServerURIs(serverURIs);
+		} else{
+			String serverURIs[] = 
+				{ 
+					protocol + "54.251.180.0" + ":" + brokerPortNumber, 
+					protocol + "54.251.180.1" + ":" + brokerPortNumber, 
+					protocol + "54.251.180.2" + ":" + brokerPortNumber,
+					protocol + "54.251.180.3" + ":" + brokerPortNumber, 
+					protocol + "54.251.180.4" + ":" + brokerPortNumber, 
+					protocol + "54.251.180.5" + ":" + brokerPortNumber,
+					protocol + "54.251.180.6" + ":" + brokerPortNumber
+				}; 
+			op.setServerURIs(serverURIs);
+		}
+		
 	}
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
