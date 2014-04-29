@@ -49,6 +49,7 @@
         android:background="?actionBarItemBackground"
         android:clickable="true"
         android:orientation="vertical"
+        android:gravity="center_vertical"
         android:paddingLeft="4dp" >
 
         <com.bsb.hike.view.CustomFontTextView
