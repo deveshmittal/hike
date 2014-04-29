@@ -3628,7 +3628,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		attachmentsGridView.requestFocus();
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setOutsideTouchable(false);
 		attachmentWindow.setFocusable(true);
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
@@ -4999,6 +4999,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void onEmoticonBtnClicked(final View v, int whichSubcategory, boolean backPressed)
 	{
+		if (showingChatThemePicker)
+		{
+			return;
+		}
 		// boolean controls whether we switch from sticker to emo or vice versa
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) LayoutInflater.from(getApplicationContext()).inflate(R.layout.emoticon_layout, null) : emoticonLayout;
 
