@@ -20,6 +20,8 @@ public class HikeDialog
 
 	public static final int STEALTH_FTUE_DIALOG = 3;
 
+	public static final int RESET_STEALTH_DIALOG = 4;
+
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
 		return showDialog(context, whichDialog, null, data);
@@ -36,6 +38,8 @@ public class HikeDialog
 			return showAddedAsFavoriteDialog(context, listener, data);
 		case STEALTH_FTUE_DIALOG:
 			return showStealthFtuePopUp(context);
+		case RESET_STEALTH_DIALOG:
+			return showStealthResetDialog(context, listener, data);
 		}
 
 		return null;
@@ -137,6 +141,53 @@ public class HikeDialog
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
 				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+		return dialog;
+	}
+
+	private static Dialog showStealthResetDialog(Context context, final HikeDialogListener listener, Object... data)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.stealth_ftue_popup);
+		dialog.setCancelable(true);
+
+		String header = (String) data[0];
+		String body = (String) data[1];
+		String okBtnString = (String) data[2];
+		String cancelBtnString = (String) data[3];
+
+		TextView headerText = (TextView) dialog.findViewById(R.id.header);
+		TextView bodyText = (TextView) dialog.findViewById(R.id.body);
+		TextView cancelBtn = (TextView) dialog.findViewById(R.id.noButton);
+		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
+
+		cancelBtn.setVisibility(View.VISIBLE);
+
+		headerText.setText(header);
+		bodyText.setText(body);
+		cancelBtn.setText(cancelBtnString);
+		okBtn.setText(okBtnString);
+
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(dialog);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(dialog);
 			}
 		});
 
