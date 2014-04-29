@@ -383,6 +383,8 @@ public class HikeConstants
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
+	public static final String RESET_STEALTH_PREF = "resetStealthPref";
+
 	public static final String REQUEST_DP = "rdp";
 
 	public static final String C_TIME_STAMP = "cts";

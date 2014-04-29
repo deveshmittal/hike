@@ -3809,4 +3809,9 @@ public class Utils
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
+
+	public static final void cancelScheduledStealthReset(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+	}
 }

@@ -1495,4 +1495,11 @@
     <string name="normal_mode_on">Normal mode entered</string>
     <string name="stealth_notification_message">You have a new notification</string>
     <string name="stealth_ftue_conv_tip_showing">please tap and hold some conversation</string>
+
+	<string name="reset_complete_stealth_header">Reset Stealth Mode</string>
+	<string name="reset_complete_stealth_info">Forgot your password? Reset Stealth Mode. You’ll lose all hidden chats.</string>
+	<string name="initiate_reset_stealth_header">Reset Stealth Mode</string>
+	<string name="initiate_reset_stealth_body">Stealth Mode will be reset in 30 minutes. Continue?</string>
+	<string name="resetting_complete_stealth_header">Resetting Stealth Mode</string>
+	<string name="resetting_complete_stealth_info">Tap to cancel.</string>
 </resources>

@@ -340,6 +340,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWING_STEALTH_FTUE_CONV_TIP = "showingStealthFtueConvTip";
 
+	public static final String RESET_COMPLETE_STEALTH_START_TIME = "resetCompleteStealthStartTime";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

@@ -323,6 +323,10 @@ public class HikePubSub implements Runnable
 
 	public static final String STEALTH_CONVERSATION_UNMARKED = "stealthConversationUnmarked";
 
+	public static final String RESET_STEALTH_INITIATED = "resetStealthInitiated";
+
+	public static final String RESET_STEALTH_CANCELLED = "resetStealthCancelled";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

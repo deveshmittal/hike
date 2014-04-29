@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
@@ -197,6 +199,18 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (muteChatBgPreference != null)
 		{
 			muteChatBgPreference.setOnPreferenceClickListener(this);
+		}
+
+		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
+		if (resetStealthPreference != null)
+		{
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			{
+				resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
+				resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
+			}
+
+			resetStealthPreference.setOnPreferenceClickListener(this);
 		}
 
 		setupActionBar(titleRes);
@@ -539,6 +553,55 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			catch (JSONException e)
 			{
 				Logger.w(getClass().getSimpleName(), e);
+			}
+		}
+		else if (HikeConstants.RESET_STEALTH_PREF.equals(preference.getKey()))
+		{
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			{
+				Utils.cancelScheduledStealthReset(this);
+
+				preference.setTitle(R.string.reset_complete_stealth_header);
+				preference.setSummary(R.string.reset_complete_stealth_info);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
+			}
+			else
+			{
+				Object[] dialogStrings = new Object[4];
+				dialogStrings[0] = getString(R.string.initiate_reset_stealth_header);
+				dialogStrings[1] = getString(R.string.initiate_reset_stealth_body);
+				dialogStrings[2] = getString(R.string.confirm);
+				dialogStrings[3] = getString(R.string.cancel);
+
+				HikeDialog.showDialog(this, HikeDialog.RESET_STEALTH_DIALOG, new HikeDialog.HikeDialogListener()
+				{
+
+					@Override
+					public void positiveClicked(Dialog dialog)
+					{
+						HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, System.currentTimeMillis());
+
+						HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_INITIATED, null);
+
+						preference.setTitle(R.string.resetting_complete_stealth_header);
+						preference.setSummary(R.string.resetting_complete_stealth_info);
+
+						dialog.dismiss();
+					}
+
+					@Override
+					public void neutralClicked(Dialog dialog)
+					{
+
+					}
+
+					@Override
+					public void negativeClicked(Dialog dialog)
+					{
+						dialog.dismiss();
+					}
+				}, dialogStrings);
 			}
 		}
 
