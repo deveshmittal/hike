@@ -2,6 +2,7 @@ package com.bsb.hike.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -925,6 +926,13 @@ public class MqttMessagesManager
 					this.pubSub.publish(HikePubSub.SHOW_FREE_INVITE_SMS, bundle);
 				}
 			}
+			if(data.has(HikeConstants.MQTT_IP_ADDRESSES)){
+				JSONArray ipArray = data.getJSONArray(HikeConstants.MQTT_IP_ADDRESSES);
+				if (null != ipArray && ipArray.length() > 0)
+				{
+					editor.putString(HikeMessengerApp.MQTT_IPS, ipArray.toString());
+				}
+			}
 
 			editor.commit();
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -1704,4 +1712,5 @@ public class MqttMessagesManager
 
 		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
 	}
+	
 }
