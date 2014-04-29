@@ -35,7 +35,7 @@ public class HikeDialog
 		case FAVORITE_ADDED_DIALOG:
 			return showAddedAsFavoriteDialog(context, listener, data);
 		case STEALTH_FTUE_DIALOG:
-			return showStealthFtuePopUp(context);
+			return showStealthFtuePopUp(context, listener);
 		}
 
 		return null;
@@ -128,7 +128,7 @@ public class HikeDialog
 		return dialog;
 	}
 
-	private static Dialog showStealthFtuePopUp(final Context context)
+	private static Dialog showStealthFtuePopUp(final Context context, final HikeDialogListener listener)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.stealth_ftue_popup);
@@ -141,7 +141,15 @@ public class HikeDialog
 			@Override
 			public void onClick(View v)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+				if (listener != null)
+				{
+					listener.neutralClicked(dialog);
+				}
+				else
+				{
+					dialog.dismiss();
+				}
+				
 				dialog.dismiss();
 			}
 		});
