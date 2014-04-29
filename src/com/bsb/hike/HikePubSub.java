@@ -303,9 +303,23 @@ public class HikePubSub implements Runnable
 
 	public static final String CONTACT_SYNCED = "contactSynced";
 
-	public static final String MQTT_CONNECTED = "mqttConnected";
-
 	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
+
+	public static final String DISMISS_STEALTH_FTUE_CONV_TIP = "dismissStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_CONV_TIP = "showStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_SET_PASS_TIP = "showStealthFtueSetPassTip";
+
+	public static final String SHOW_STEALTH_FTUE_ENTER_PASS_TIP = "showStealthFtueEnterPassTip";
+
+	public static final String STEALTH_MODE_TOGGLED = "stealthModeToggled";
+
+	public static final String STEALTH_CONVERSATION_MARKED = "stealthConverstaionMarked";
+
+	public static final String STEALTH_CONVERSATION_UNMARKED = "stealthConversationUnmarked";
+
+	public static final String CLEAR_FTUE_STEALTH_CONV = "clearFtueStealthConv";
 
 	private final Thread mThread;
 

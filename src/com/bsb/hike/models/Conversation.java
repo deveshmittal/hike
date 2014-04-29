@@ -62,6 +62,8 @@ public class Conversation implements Comparable<Conversation>
 
 	private int unreadCount;
 
+	private boolean isStealth;
+
 	public void setOnhike(boolean onhike)
 	{
 		this.onhike = onhike;
@@ -87,10 +89,16 @@ public class Conversation implements Comparable<Conversation>
 
 	public Conversation(String msisdn, long convId, String contactName, boolean onhike)
 	{
+		this(msisdn, convId, contactName, onhike, false);
+	}
+
+	public Conversation(String msisdn, long convId, String contactName, boolean onhike, boolean isStealth)
+	{
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactName = contactName;
 		this.onhike = onhike;
+		this.isStealth = isStealth;
 		this.messages = new ArrayList<ConvMessage>();
 	}
 
@@ -158,6 +166,16 @@ public class Conversation implements Comparable<Conversation>
 	public List<ConvMessage> getMessages()
 	{
 		return messages;
+	}
+
+	public void setIsStealth(boolean isStealth)
+	{
+		this.isStealth = isStealth;
+	}
+
+	public boolean isStealth()
+	{
+		return isStealth;
 	}
 
 	@Override

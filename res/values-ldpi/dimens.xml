@@ -23,5 +23,9 @@
     <dimen name="timeine_big_picture_size">380dp</dimen>
     <dimen name="tutorial_fragment_header_padding_left">7dp</dimen>
 	<dimen name="tutorial_fragment_title_padding_Right">7dp</dimen>
+	<dimen name="stealth_ftue_pu_img_margin_bottom">8dp</dimen>
+	<dimen name="stealth_ftue_pu_img_margin_top">14dp</dimen>
+	<dimen name="stealth_setup_des_margin_bottom">8dp</dimen>
+	<dimen name="stealth_ftue_pu_msg_margin_bottom">10dp</dimen>
     
 </resources>
