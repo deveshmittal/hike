@@ -1265,23 +1265,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	private byte[] getRoundedBitmapBytes(byte[] data)
-	{
-
-		Bitmap tempBitmap = HikeBitmapFactory.decodeByteArray(data, 0, data.length);
-		Bitmap roundedBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
-
-		try
-		{
-			return BitmapUtils.bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
-		}
-		finally
-		{
-			tempBitmap.recycle();
-			roundedBitmap.recycle();
-		}
-	}
-
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
 		if (!isProfileImage)
@@ -1291,7 +1274,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			 */
 			Utils.removeLargerProfileImageForMsisdn(msisdn);
 
-			byte[] roundedData = getRoundedBitmapBytes(data);
+			byte[] roundedData = BitmapUtils.getRoundedBitmapBytes(data);
 
 			insertRoundedThumbnailData(mDb, msisdn, roundedData);
 		}
@@ -1322,7 +1305,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				return null;
 			}
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
-			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
+			
+			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
 		}
 		finally
 		{
@@ -1937,7 +1921,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					continue;
 				}
 
-				byte[] roundedData = getRoundedBitmapBytes(data);
+				byte[] roundedData = BitmapUtils.getRoundedBitmapBytes(data);
 
 				insertRoundedThumbnailData(db, msisdn, roundedData);
 			}

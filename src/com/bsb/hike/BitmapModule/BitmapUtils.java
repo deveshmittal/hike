@@ -17,7 +17,7 @@ public class BitmapUtils
 	{
 		return (thumbnail.getWidth() == thumbnail.getHeight());
 	}
-	
+
 	public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format)
 	{
 		return bitmapToBytes(bitmap, format, 50);
@@ -29,7 +29,7 @@ public class BitmapUtils
 		bitmap.compress(format, quality, bao);
 		return bao.toByteArray();
 	}
-	
+
 	private static int iconHash(String s)
 	{
 		/*
@@ -92,7 +92,7 @@ public class BitmapUtils
 		fos.flush();
 		fos.close();
 	}
-	
+
 	public static int getBitmapSize(Bitmap bitmap)
 	{
 		if (bitmap == null)
@@ -112,5 +112,22 @@ public class BitmapUtils
 		// Pre HC-MR1
 		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
-	
+
+	public static byte[] getRoundedBitmapBytes(byte[] data)
+	{
+
+		Bitmap tempBitmap = HikeBitmapFactory.decodeByteArray(data, 0, data.length);
+		Bitmap roundedBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
+
+		try
+		{
+			return bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
+		}
+		finally
+		{
+			tempBitmap.recycle();
+			roundedBitmap.recycle();
+		}
+	}
+
 }
