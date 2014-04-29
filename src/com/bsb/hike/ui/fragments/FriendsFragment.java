@@ -34,6 +34,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 
 public class FriendsFragment extends SherlockListFragment implements Listener, OnItemLongClickListener
@@ -44,7 +45,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 	private String[] pubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.CONTACT_ADDED,
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT };
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.STEALTH_CONVERSATION_MARKED,
+			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE };
 
 	private SharedPreferences preferences;
 
@@ -429,6 +431,67 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				public void run()
 				{
 					friendsAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+		else if (HikePubSub.STEALTH_MODE_TOGGLED.equals(type))
+		{
+			boolean shouldChangeItemVisibility = (Boolean) object;
+
+			if (!shouldChangeItemVisibility)
+			{
+				return;
+			}
+
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					int stealthMode = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+
+					if (stealthMode == HikeConstants.STEALTH_ON)
+					{
+						friendsAdapter.addStealthContacts();
+					}
+					else
+					{
+						friendsAdapter.removeStealthContacts();
+					}
+				}
+			});
+		}
+		else if (HikePubSub.STEALTH_CONVERSATION_MARKED.equals(type) || HikePubSub.STEALTH_CONVERSATION_UNMARKED.equals(type))
+		{
+			String msisdn = (String) object;
+			if (HikePubSub.STEALTH_CONVERSATION_UNMARKED.equals(type))
+			{
+				friendsAdapter.stealthContactRemoved(msisdn);
+			}
+			else
+			{
+				friendsAdapter.stealthContactAdded(msisdn);
+			}
+		}
+		else if (HikePubSub.STEALTH_MODE_RESET_COMPLETE.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					friendsAdapter.addStealthContacts();
+					friendsAdapter.clearStealthLists();
 				}
 			});
 		}

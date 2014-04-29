@@ -2525,12 +2525,12 @@ public class Utils
 
 	private static void resetStealthMode(Context context)
 	{
-		StealthResetTimer.getInstance(context).resetStealth();
+		StealthResetTimer.getInstance(context).resetStealthToggle();
 	}
 
 	private static void clearStealthResetTimer(Context context)
 	{
-		StealthResetTimer.getInstance(context).clearScheduledTimer();
+		StealthResetTimer.getInstance(context).clearScheduledStealthToggleTimer();
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)
@@ -3808,5 +3808,10 @@ public class Utils
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+	}
+
+	public static final void cancelScheduledStealthReset(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
 }
