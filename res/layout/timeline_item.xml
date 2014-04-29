@@ -18,13 +18,11 @@
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
-                style="@style/AvatarStyle.Padding"
-                android:src="@drawable/ic_avatar1" />
+                style="@style/AvatarStyle.Padding" />
 
             <ImageView
                 android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle"
-                android:src="@drawable/frame_avatar_medium_selector" />
+                style="@style/AvatarStyle" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -41,10 +39,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_alignBottom="@+id/name"
+                android:paddingBottom="2dp"
                 android:text="2 mins ago"
                 android:textColor="@color/conversation_timestamp"
-                android:textSize="12sp"
-                android:textStyle="bold|italic" />
+                android:textSize="12sp" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/name"
@@ -57,7 +56,7 @@
                 android:singleLine="true"
                 android:text="Rishabh Sharma"
                 android:textColor="@color/updates_text"
-                android:textSize="14sp"
+                android:textSize="17sp"
                 android:textStyle="bold|italic" />
         </RelativeLayout>
 
@@ -74,7 +73,6 @@
                 android:id="@+id/main_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
                 android:textColor="@color/updates_text"
                 android:textSize="16sp"

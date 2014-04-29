@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
@@ -22,6 +21,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
@@ -81,14 +81,14 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 				}
 			}
 
-			Log.d(getClass().getSimpleName(), "Downloading sticker: " + urlString);
+			Logger.d(getClass().getSimpleName(), "Downloading sticker: " + urlString);
 			URL url = new URL(urlString);
 
 			URLConnection connection = url.openConnection();
 			AccountUtils.addUserAgent(connection);
 			connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
-			Log.d(getClass().getSimpleName(), "File size: " + connection.getContentLength());
+			Logger.d(getClass().getSimpleName(), "File size: " + connection.getContentLength());
 			if (AccountUtils.ssl)
 			{
 				((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
@@ -118,17 +118,17 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 		}
 		catch (JSONException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		catch (MalformedURLException e)
 		{
-			Log.e(getClass().getSimpleName(), "Invalid URL", e);
+			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		catch (IOException e)
 		{
-			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
+			Logger.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		finally
@@ -142,7 +142,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 			}
 			catch (IOException e)
 			{
-				Log.e(getClass().getSimpleName(), "Error while closing file", e);
+				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
 				return FTResult.DOWNLOAD_FAILED;
 			}
 		}

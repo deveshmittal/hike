@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeConstants;
@@ -28,7 +27,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was opened");
+			Logger.d(TAG + getClass().getSimpleName(), "App was opened");
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.sendAppState(this);
 		}
@@ -48,7 +47,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was resumed");
+			Logger.d(TAG + getClass().getSimpleName(), "App was resumed");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.sendAppState(this);
 		}
@@ -84,17 +83,17 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	protected void onStop()
 	{
-		Log.d(TAG + getClass().getSimpleName(), "OnStop");
+		Logger.d(TAG + getClass().getSimpleName(), "OnStop");
 		if (HikeMessengerApp.currentState == CurrentState.NEW_ACTIVITY)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was going to another activity");
+			Logger.d(TAG + getClass().getSimpleName(), "App was going to another activity");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 		}
 		else if (HikeMessengerApp.currentState == CurrentState.BACK_PRESSED)
 		{
 			if (this instanceof HomeActivity)
 			{
-				Log.d(TAG + getClass().getSimpleName(), "App was closed");
+				Logger.d(TAG + getClass().getSimpleName(), "App was closed");
 				HikeMessengerApp.currentState = CurrentState.CLOSED;
 				Utils.sendAppState(this);
 			}
@@ -105,7 +104,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		}
 		else
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App was backgrounded");
+			Logger.d(TAG + getClass().getSimpleName(), "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
 			Utils.sendAppState(this);
 		}
@@ -142,7 +141,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		super.onActivityResult(requestCode, resultCode, data);
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED)
 		{
-			Log.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
+			Logger.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.sendAppState(this);
 		}

@@ -1,7 +1,5 @@
 package com.bsb.hike.utils;
 
-import android.util.Log;
-
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -25,12 +23,12 @@ public class ActivityTimeLogger implements Listener
 		{
 			activityName = object.getClass().getSimpleName();
 			onTime = System.currentTimeMillis();
-			Log.d("ActivityTimeLogger", "CURRENTLY IN: " + activityName);
+			Logger.d("ActivityTimeLogger", "CURRENTLY IN: " + activityName);
 		}
 		else
 		{
 			onTime = System.currentTimeMillis() - onTime;
-			Log.d("ActivityTimeLogger", "Stayed in " + activityName + " for " + onTime);
+			Logger.d("ActivityTimeLogger", "Stayed in " + activityName + " for " + onTime);
 		}
 	}
 

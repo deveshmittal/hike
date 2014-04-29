@@ -16,11 +16,8 @@
 	<dimen name="chat_theme_popup_view_width">370dp</dimen>
 	<dimen name="chat_theme_popup_view_height">262dp</dimen>
 	
-	<dimen name="chat_themes_text_padding_top">150dp</dimen>
-	<dimen name="chat_themes_msg_text_padding_left">10dp</dimen>
 	<dimen name="chat_themes_msg_text_padding_right">10dp</dimen>
 	<dimen name="chat_themes_msg_text_padding_top">0dp</dimen>
-	<dimen name="chat_themes_msg_text_height">40dp</dimen>
 	
 	<dimen name="chat_theme_intro_img_height">135dp</dimen>
 	<dimen name="chat_theme_popup_brush_padding_top">24dp</dimen>
@@ -37,4 +34,10 @@
 	<dimen name="fs_moving_ribbon1_height">246dp</dimen>
 	<dimen name="gift_card_width">208dp</dimen>
 	<dimen name="gift_card_height">216dp</dimen>
+	<dimen name="signup_gender_padding_top">7dp</dimen>
+	<dimen name="signup_gender_drawable_padding">7dp</dimen>
+	<dimen name="signup_header_height">70dp</dimen>
+	<dimen name="addfriend_popup_content_height">128dp</dimen>
+	
+	
 </resources>

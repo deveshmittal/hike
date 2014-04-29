@@ -21,10 +21,10 @@ import java.io.File;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -98,7 +98,7 @@ public class TimelineImageLoader extends ImageWorker
 		if (!orgFile.exists())
 		{
 			BitmapDrawable b = this.getLruCache().getIconFromCache(id);
-			Log.d(TAG, "Bitmap from icondb");
+			Logger.d(TAG, "Bitmap from icondb");
 			if (b != null)
 				return b.getBitmap();
 		}
@@ -107,7 +107,7 @@ public class TimelineImageLoader extends ImageWorker
 			try
 			{
 				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight, HikeMessengerApp.getLruCache());
-				// Log.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
+				// Logger.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
 			}
 			catch (Exception e1)
 			{

@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -263,9 +264,9 @@ public class HikeNotification
 
 		final String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 
-		final String message = context.getString(R.string.add_as_friend_notification_line);
+		final String message = context.getString(R.string.add_as_favorite_notification_line);
 
-		final String text = context.getString(R.string.add_as_friend_notification, key);
+		final String text = context.getString(R.string.add_as_favorite_notification, key);
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, msisdn, null);
 		addNotificationId(notificationId);
@@ -308,7 +309,7 @@ public class HikeNotification
 		}
 		else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED)
 		{
-			message = context.getString(R.string.confirmed_friend_2, key);
+			message = context.getString(R.string.favorite_confirmed_notification, key);
 			text = message;
 		}
 		else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
@@ -410,7 +411,8 @@ public class HikeNotification
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		final Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn);
+
 		final int smallIconId = returnSmallIcon();
 
 		NotificationCompat.Builder mBuilder;
@@ -478,7 +480,7 @@ public class HikeNotification
 		final Bitmap avatarBitmap = Utils.returnScaledBitmap((Utils.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
-				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setDefaults(vibrate).setPriority(Notification.PRIORITY_HIGH);
+				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setDefaults(vibrate).setPriority(Notification.PRIORITY_DEFAULT);
 
 		if (!forceNotPlaySound)
 		{

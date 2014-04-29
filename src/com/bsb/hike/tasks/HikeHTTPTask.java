@@ -2,11 +2,11 @@ package com.bsb.hike.tasks;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
 
 public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> implements ActivityCallableTask
 {
@@ -72,14 +72,14 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 		{
 			for (HikeHttpRequest hikeHttpRequest : requests)
 			{
-				Log.d("HikeHTTPTask", "About to perform request:" + hikeHttpRequest.getPath());
+				Logger.d("HikeHTTPTask", "About to perform request:" + hikeHttpRequest.getPath());
 				AccountUtils.performRequest(hikeHttpRequest, addToken);
-				Log.d("HikeHTTPTask", "Finished performing request:" + hikeHttpRequest.getPath());
+				Logger.d("HikeHTTPTask", "Finished performing request:" + hikeHttpRequest.getPath());
 			}
 		}
 		catch (Exception e)
 		{
-			Log.e("HikeHTTPTask", "Exception performing http task", e);
+			Logger.e("HikeHTTPTask", "Exception performing http task", e);
 			return Boolean.FALSE;
 		}
 

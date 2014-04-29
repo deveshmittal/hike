@@ -3,6 +3,6 @@
     android:id="@android:id/checkbox"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:button="@drawable/compose_checkbox"
+    android:button="@drawable/hike_list_item_checkbox"
     android:clickable="false"
     android:focusable="false" />

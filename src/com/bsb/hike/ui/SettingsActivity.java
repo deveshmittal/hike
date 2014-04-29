@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,10 +16,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
@@ -39,8 +43,17 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.notifications));
 		items.add(getString(R.string.auto_download_media));
-		items.add(getString(R.string.sms));
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.FREE_SMS_PREF, true))
+		{
+			int credits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
+			items.add(getString(R.string.sms_with_credits, credits));
+		}
+		else
+		{
+			items.add(getString(R.string.sms));
+		}
 		items.add(getString(R.string.privacy));
+		items.add(getString(R.string.sync_contacts));
 		items.add(getString(R.string.help));
 		items.add(null);
 
@@ -50,6 +63,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemsSummary.add(getString(R.string.auto_download_media_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
+		itemsSummary.add(getString(R.string.sync_contacts_hinttext));
 		itemsSummary.add(getString(R.string.help_hinttext));
 
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
@@ -58,6 +72,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
+		itemIcons.add(R.drawable.ic_sync_contacts);
 		itemIcons.add(R.drawable.ic_help_settings);
 
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this, R.layout.setting_item, R.id.item, items)
@@ -185,9 +200,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
 			break;
 		case 3:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.sms_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.sms);
+			intent = new Intent(this, CreditsActivity.class);
 			break;
 		case 4:
 			intent = new Intent(this, HikePreferences.class);
@@ -195,6 +208,12 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
 			break;
 		case 5:
+			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
+			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
+			sendBroadcast(contactSyncIntent);
+			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
+			break;
+		case 6:
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF, R.xml.help_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
