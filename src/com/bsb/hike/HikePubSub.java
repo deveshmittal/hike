@@ -327,6 +327,8 @@ public class HikePubSub implements Runnable
 
 	public static final String RESET_STEALTH_CANCELLED = "resetStealthCancelled";
 
+	public static final String STEALTH_MODE_RESET_COMPLETE = "stealthModeResetComplete";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

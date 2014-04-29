@@ -11,6 +11,7 @@ import java.util.Set;
 import org.json.JSONException;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,6 +58,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -348,7 +350,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				break;
 			case ConversationTip.STEALTH_FTUE_TIP:
 				break;
-			default:
+			case ConversationTip.RESET_STEALTH_TIP:
+				resetStealthTipClicked();
 				break;
 			}
 			return;
@@ -365,6 +368,76 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			editor.commit();
 		}
 
+	}
+
+	private void resetStealthTipClicked()
+	{
+		long remainingTime = System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l);
+
+		if (remainingTime > HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS)
+		{
+			Object[] dialogStrings = new Object[4];
+			dialogStrings[0] = getString(R.string.reset_complete_stealth_header);
+			dialogStrings[1] = getString(R.string.reset_stealth_confirmation);
+			dialogStrings[2] = getString(R.string.confirm);
+			dialogStrings[3] = getString(R.string.cancel);
+
+			HikeDialog.showDialog(getActivity(), HikeDialog.RESET_STEALTH_DIALOG, new HikeDialog.HikeDialogListener()
+			{
+
+				@Override
+				public void positiveClicked(Dialog dialog)
+				{
+					resetStealthMode();
+					dialog.dismiss();
+				}
+
+				@Override
+				public void neutralClicked(Dialog dialog)
+				{
+
+				}
+
+				@Override
+				public void negativeClicked(Dialog dialog)
+				{
+					dialog.dismiss();
+				}
+			}, dialogStrings);
+		}
+	}
+
+	private void resetStealthMode()
+	{
+		removeResetStealthTipIfExists();
+
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+		task.execute(stealthConversations.toArray(new Conversation[0]));
+
+		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+
+		resetStealthPreferences();
+		HikeMessengerApp.clearStealthMsisdn();
+		stealthConversations.clear();
+
+		/*
+		 * If previously the stealth mode was off, we should publish an event telling the friends fragment to refresh its list.
+		 */
+		if (prevStealthValue == HikeConstants.STEALTH_OFF)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_RESET_COMPLETE, null);
+		}
+	}
+
+	private void resetStealthPreferences()
+	{
+		HikeSharedPreferenceUtil prefUtil = HikeSharedPreferenceUtil.getInstance(getActivity());
+
+		prefUtil.removeData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN);
+		prefUtil.removeData(HikeMessengerApp.STEALTH_MODE);
+		prefUtil.removeData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE);
+		prefUtil.removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
+		prefUtil.removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
 
 	@Override

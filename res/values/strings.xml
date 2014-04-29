@@ -1504,4 +1504,5 @@
 	<string name="resetting_complete_stealth_info">Tap to cancel.</string>
 	<string name="reset_stealth_tip">Stealth Mode will be reset in %1$s</string>
 	<string name="tap_to_reset_stealth_tip">Tap here to reset Stealth Mode</string>
+	<string name="reset_stealth_confirmation">Are you sure you want to reset Stealth Mode? All hidden chats will be deleted?</string>	
 </resources>
