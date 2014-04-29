@@ -136,6 +136,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE; // this is the time for which conn will remain open w/o messages
 
 	private static short connectionTimeoutSec = 60;
+	
+	private static volatile AtomicBoolean ipsChanged = new AtomicBoolean(false);
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -570,8 +572,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				return;
 
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
-
-			if (op == null)
+			
+			if (op == null || ipsChanged.get())
 			{
 				op = new MqttConnectOptions();
 				op.setUserName(uid);
@@ -582,6 +584,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+				
+				if(ipsChanged.get())
+				{
+					ipsChanged.set(false);
+				}
 			}
 
 			if (mqtt == null)
@@ -640,6 +647,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		SharedPreferences pref = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String ipString = pref.getString(HikeMessengerApp.MQTT_IPS, "");
 		JSONArray ipArray = null;
+		
 		try
 		{
 			ipArray = new JSONArray(ipString);
@@ -648,16 +656,26 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			e.printStackTrace();
 		}
-		
-		if(null != ipArray && ipArray.length() > 0){
-			String serverURIs[] = new String[ipArray.length()];
-			for(int  i = 0 ; i < ipArray.length() ; i ++){
-				serverURIs[i] = protocol + ipArray.optString(i) + ":" + brokerPortNumber;
+
+		if (null != ipArray && ipArray.length() > 0)
+		{
+			String serverURIs[] = new String[ipArray.length() + 1];
+			int len  = ipArray.length();
+			
+			serverURIs[0] = protocol + brokerHostName + ":" + brokerPortNumber;
+			for (int i = 0; i < len; i++)
+			{
+				serverURIs[i + 1] = protocol + ipArray.optString(i) + ":" + brokerPortNumber;
 			}
+			
 			op.setServerURIs(serverURIs);
-		} else{
+		} 
+		else
+		{
+			
 			String serverURIs[] = 
 				{ 
+					protocol + brokerHostName + ":" + brokerPortNumber,
 					protocol + "54.251.180.0" + ":" + brokerPortNumber, 
 					protocol + "54.251.180.1" + ":" + brokerPortNumber, 
 					protocol + "54.251.180.2" + ":" + brokerPortNumber,
@@ -665,11 +683,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					protocol + "54.251.180.4" + ":" + brokerPortNumber, 
 					protocol + "54.251.180.5" + ":" + brokerPortNumber,
 					protocol + "54.251.180.6" + ":" + brokerPortNumber
-				}; 
+				};
+			
 			op.setServerURIs(serverURIs);
 		}
-		
+
 	}
+	
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
 	public void disconnectOnMqttThread(final boolean reconnect)
@@ -1193,6 +1213,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				return true;
 		}
 		return false;
+	}
+	
+	public static void setIpsChanged(boolean isIpsChnaged){
+		ipsChanged.set(isIpsChnaged);
 	}
 
 	// This class is just for testing .....

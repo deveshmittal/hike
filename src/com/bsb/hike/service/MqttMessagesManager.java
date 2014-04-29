@@ -2,7 +2,6 @@ package com.bsb.hike.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -931,6 +930,7 @@ public class MqttMessagesManager
 				if (null != ipArray && ipArray.length() > 0)
 				{
 					editor.putString(HikeMessengerApp.MQTT_IPS, ipArray.toString());
+					HikeMqttManagerNew.setIpsChanged(true);
 				}
 			}
 
@@ -1712,5 +1712,5 @@ public class MqttMessagesManager
 
 		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
 	}
-	
+		
 }
