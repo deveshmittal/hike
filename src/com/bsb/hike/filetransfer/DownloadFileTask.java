@@ -140,7 +140,7 @@ public class DownloadFileTask extends FileTransferBase
 		URLConnection conn = null;
 		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
 		chunkSize = networkType.getMinChunkSize();
-		while (shouldRetry())
+		while (shouldRetry() && _state == FTState.IN_PROGRESS)
 		{
 			try
 			{
