@@ -178,7 +178,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP,
-			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV };
+			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
+			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED };
 
 	private ConversationsAdapter mAdapter;
 
@@ -509,11 +510,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		stealthConversations = new HashSet<Conversation>();
 
-		/*
-		 * Add item for group chat tip.
-		 */
-		if (!conversationList.isEmpty() && !getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
+		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		if (prefs.getLong(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
+			displayedConversations.add(new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
+		}
+		else if (!conversationList.isEmpty() && !prefs.getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
+		{
+			/*
+			 * Add item for group chat tip.
+			 */
 			displayedConversations.add(new ConversationTip(ConversationTip.GROUP_CHAT_TIP));
 		}
 
@@ -1195,18 +1202,65 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
+		else if (HikePubSub.RESET_STEALTH_INITIATED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeGroupChatTipIfExists();
+
+					displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
+
+					ConversationFragment.this.run();
+				}
+			});
+		}
+		else if (HikePubSub.RESET_STEALTH_CANCELLED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeResetStealthTipIfExists();
+				}
+			});
+		}
 	}
 
-	/*
-	 * Add item for stealth ftue conv tap tip.
-	 */
-	protected void showStealthConvTip()
+	private void removeResetStealthTipIfExists()
+	{
+		if (mAdapter.isEmpty())
+		{
+			return;
+		}
+
+		Conversation conversation = mAdapter.getItem(0);
+
+		if (conversation instanceof ConversationTip && ((ConversationTip) conversation).isResetStealthTip())
+		{
+			mAdapter.remove(conversation);
+			mAdapter.resetCountDownSetter();
+
+			ConversationFragment.this.run();
+		}
+	}
+
+	private Conversation removeGroupChatTipIfExists()
 	{
 		Conversation conv = null;
-		/*
-		 * if group chat tip is showing we should remove this first and than 
-		 * add stealth ftue conversation tip
-		 */
 		if (!displayedConversations.isEmpty())
 		{
 			conv = displayedConversations.get(0);
@@ -1223,13 +1277,24 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			}
 		}
+		return conv;
+	}
+
+	/*
+	 * Add item for stealth ftue conv tap tip.
+	 */
+	protected void showStealthConvTip()
+	{
 		/*
-		 * if conv not null this implies,
-		 * We certainly have some conversations on the screen other than 
-		 * group chat tip
+		 * if group chat tip is showing we should remove this first and than add stealth ftue conversation tip
 		 */
-		if(conv != null )
-		{	
+		Conversation conv = removeGroupChatTipIfExists();
+
+		/*
+		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
+		 */
+		if (conv != null)
+		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
 			mAdapter.notifyDataSetChanged();
 			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);

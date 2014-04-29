@@ -809,7 +809,9 @@ public class HikeConstants
 	public static final int STEALTH_ON_FAKE = 1;
 
 	public static final int STEALTH_ON = 2;
-	
+
+	public static final long RESET_COMPLETE_STEALTH_TIME_MS = 20 * 1000;
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
