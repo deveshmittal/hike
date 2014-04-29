@@ -1,5 +1,7 @@
 package com.bsb.hike.ui.utils;
 
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,15 +26,15 @@ public class SpanUtil
 
 	private static ImageSpan getImageSpan(Context context, View view)
 	{
-		// create bitmap drawable for imagespan
-		BitmapDrawable bmpDrawable = new BitmapDrawable(context.getResources(), getBitMapFromTV(view));
+		// create bitmap drawable for imagespan 
+		BitmapDrawable bmpDrawable = HikeBitmapFactory.getBitmapDrawable(context.getResources(), getBitMapFromTV(view));
 		bmpDrawable.setBounds(0, 0, bmpDrawable.getIntrinsicWidth(), bmpDrawable.getIntrinsicHeight());
 		return new ImageSpan(bmpDrawable);
 	}
 
 	private static Bitmap getBitMapFromTV(View textView)
 	{
-		// capture bitmapt of genreated textview
+		// capture bitmapt of genreated textviewl
 		int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 		textView.measure(spec, spec);
 		textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
