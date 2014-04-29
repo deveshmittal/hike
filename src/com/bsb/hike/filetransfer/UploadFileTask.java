@@ -954,18 +954,26 @@ public class UploadFileTask extends FileTransferBase
 		}
 		catch (Exception e)
 		{
-			Logger.d(getClass().getSimpleName(), "Caught Exception: " + e.getMessage());
-			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2) || e.getMessage().contains(NETWORK_ERROR_3)))
-			{
-				Logger.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
-				// we should retry if failed due to network
-			}
-			else
+			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
+			if (retryAttempts >= MAX_RETRY_ATTEMPTS)
 			{
 				error();
 				res = null;
 				retry = false;
 			}
+			
+//			Logger.d(getClass().getSimpleName(), "Caught Exception: " + e.getMessage());
+//			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2) || e.getMessage().contains(NETWORK_ERROR_3)))
+//			{
+//				Logger.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
+//				// we should retry if failed due to network
+//			}
+//			else
+//			{
+//				error();
+//				res = null;
+//				retry = false;
+//			}
 		}
 
 		return res;
