@@ -181,15 +181,20 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 	{
 		if (fragment != null)
 		{
-			if (fragment.isAdded())
+			if (fragment.isAdded() && isDialogShowing())
 				dialog.dismiss();
 		}
 		else
 		{
-			if (!activity.isFinishing())
+			if (!activity.isFinishing() && isDialogShowing())
 				dialog.dismiss();
 		}
 		super.onPostExecute(result);
+	}
+
+	private boolean isDialogShowing()
+	{
+		return dialog != null && dialog.isShowing();
 	}
 
 	public File createChatTextFile(String text, String fileName)

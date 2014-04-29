@@ -25,6 +25,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.bsb.hike.utils.Logger;
+
 /**
  * This class provides several utilities to cancel bitmap decoding.
  * 
@@ -223,7 +225,7 @@ public class BitmapManager
 		Thread thread = Thread.currentThread();
 		if (!canThreadDecoding(thread))
 		{
-			Log.d(TAG, "Thread " + thread + " is not allowed to decode.");
+			Logger.d(TAG, "Thread " + thread + " is not allowed to decode.");
 			return null;
 		}
 

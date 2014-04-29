@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class UpdatesFragment extends SherlockListFragment implements OnScrollListener, Listener
@@ -54,9 +54,15 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private boolean loadingMoreMessages;
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.PROTIP_ADDED };
+			HikePubSub.PROTIP_ADDED, HikePubSub.ICON_CHANGED };
 
 	private String[] friendMsisdns;
+
+	private int previousFirstVisibleItem;
+
+	private long previousEventTime;
+
+	private int velocity;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -153,11 +159,21 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
+		if (previousFirstVisibleItem != firstVisibleItem)
+		{
+			long currTime = System.currentTimeMillis();
+			long timeToScrollOneElement = currTime - previousEventTime;
+			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+			previousFirstVisibleItem = firstVisibleItem;
+			previousEventTime = currTime;
+		}
+
 		if (!reachedEnd && !loadingMoreMessages && !statusMessages.isEmpty()
 				&& (firstVisibleItem + visibleItemCount) >= (statusMessages.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
 
-			Log.d(getClass().getSimpleName(), "Loading more items");
+			Logger.d(getClass().getSimpleName(), "Loading more items");
 			loadingMoreMessages = true;
 
 			AsyncTask<Void, Void, List<StatusMessage>> asyncTask = new AsyncTask<Void, Void, List<StatusMessage>>()
@@ -211,8 +227,8 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		Log.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
-		centralTimelineAdapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+		Logger.d(getClass().getSimpleName(), "CentralTimeline Adapter Scrolled State: " + scrollState);
+		centralTimelineAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		/*
 		 * // Pause fetcher to ensure smoother scrolling when flinging if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) { // Before Honeycomb pause image loading
 		 * on scroll to help with performance if (!Utils.hasHoneycomb()) { if(centralTimelineAdapter != null) { centralTimelineAdapter.getTimelineImageLoader().setPauseWork(true);
@@ -313,6 +329,21 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				}
 			});
 		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
+		}
 	}
 
 	private int getStartIndex()
@@ -397,7 +428,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		{
 			if (!isAdded())
 			{
-				Log.d(getClass().getSimpleName(), "Not added");
+				Logger.d(getClass().getSimpleName(), "Not added");
 				return;
 			}
 
@@ -441,7 +472,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			}
 
 			statusMessages.addAll(result);
-			Log.d(getClass().getSimpleName(), "Updating...");
+			Logger.d(getClass().getSimpleName(), "Updating...");
 			/*
 			 * added this to delay updating the adapter while the viewpager is swiping since it break that animation.
 			 */

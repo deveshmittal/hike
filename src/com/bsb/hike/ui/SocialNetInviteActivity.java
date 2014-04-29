@@ -23,12 +23,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -54,6 +52,7 @@ import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
@@ -94,9 +93,11 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 	private int MAX_INVITE_LIMIT = 10;
 
-	private ViewGroup doneContainer;
+	private View doneBtn;
 
-	private TextView doneText;
+	private ImageView arrow;
+
+	private TextView postText;
 
 	private TextView title;
 
@@ -122,12 +123,13 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
+		findViewById(android.R.id.empty).setVisibility(View.GONE);
 
 		list = new ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>();
 
 		input = (EditText) findViewById(R.id.input_number);
 
-		findViewById(R.id.input_number_container).setVisibility(View.GONE);
+		findViewById(R.id.input_number).setVisibility(View.GONE);
 		findViewById(R.id.contact_list).setVisibility(View.GONE);
 		findViewById(R.id.progress_container).setVisibility(View.VISIBLE);
 		if (isFacebook)
@@ -149,7 +151,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	private void init()
 	{
 		selectedFriends.clear();
-		doneContainer.setVisibility(View.GONE);
+		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
+
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		setLabel();
@@ -166,8 +169,11 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		backIcon = (ImageView) actionBarView.findViewById(R.id.abs__up);
 
-		doneContainer = (ViewGroup) actionBarView.findViewById(R.id.done_container);
-		doneText = (TextView) actionBarView.findViewById(R.id.done_text);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
+		doneBtn.setVisibility(View.VISIBLE);
+
+		postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
 
@@ -184,7 +190,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 		});
 
-		doneContainer.setOnClickListener(new OnClickListener()
+		doneBtn.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -223,17 +229,17 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
 	{
-		Log.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
+		Logger.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
 		return mTwitterInviteTask;
 	}
 
 	private void getFriends()
 	{
 		Session activeSession = Session.getActiveSession();
-		Log.d("INFO", activeSession.getPermissions().toString());
+		Logger.d("INFO", activeSession.getPermissions().toString());
 		if (activeSession != null && activeSession.getState().isOpened())
 		{
-			Log.d("SocialNetInviteActivity", "active session is opened quering for friends");
+			Logger.d("SocialNetInviteActivity", "active session is opened quering for friends");
 			Request friendRequest = Request.newMyFriendsRequest(activeSession, new GraphUserListCallback()
 			{
 				@Override
@@ -244,20 +250,20 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 						FacebookRequestError error = response.getError();
 						if (error != null)
 						{
-							Log.i("friend Request Response", "session is invalid");
-							Log.i("friend Request Response", "Do not have permissions");
+							Logger.i("friend Request Response", "session is invalid");
+							Logger.i("friend Request Response", "Do not have permissions");
 						}
 						else
 						{
-							Log.d("SocialNetInviteActivity", "got the friends object from facebook calling getFriends");
-							Log.d("SocialNetInviteActivity", response.toString());
+							Logger.d("SocialNetInviteActivity", "got the friends object from facebook calling getFriends");
+							Logger.d("SocialNetInviteActivity", response.toString());
 							friends = users;
 							Utils.executeStringResultTask(new GetFriends());
 						}
 					}
 					catch (NullPointerException e)
 					{
-						Log.e(this.getClass().getName(), "Unable to Connect to Internet", e);
+						Logger.e(this.getClass().getName(), "Unable to Connect to Internet", e);
 						Toast toast = Toast.makeText(SocialNetInviteActivity.this, getString(R.string.social_invite_network_error), Toast.LENGTH_LONG);
 						toast.show();
 						finish();
@@ -307,7 +313,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			catch (TwitterException e)
 			{
-				Log.w(getClass().getSimpleName(), e);
+				Logger.w(getClass().getSimpleName(), e);
 			}
 			return str;
 
@@ -320,7 +326,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			input.addTextChangedListener(adapter);
 			listView.setAdapter(adapter);
 			listView.setOnScrollListener(scrollListener);
-			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
+			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
@@ -356,7 +362,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			catch (JSONException e)
 			{
-				Log.w(getClass().getSimpleName(), "Invalid JSON");
+				Logger.w(getClass().getSimpleName(), "Invalid JSON");
 			}
 			return str;
 		}
@@ -370,9 +376,10 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 			listView.setAdapter(adapter);
 			listView.setOnScrollListener(scrollListener);
+			listView.setEmptyView(findViewById(android.R.id.empty));
 
 			adapter.notifyDataSetChanged();
-			findViewById(R.id.input_number_container).setVisibility(View.VISIBLE);
+			findViewById(R.id.input_number).setVisibility(View.VISIBLE);
 			findViewById(R.id.contact_list).setVisibility(View.VISIBLE);
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
@@ -381,15 +388,28 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 	OnScrollListener scrollListener = new OnScrollListener()
 	{
+		private int previousFirstVisibleItem;
+		private int velocity;
+		private long previousEventTime;
+
 		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState)
 		{
-			adapter.setIsListFlinging(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING);
+			adapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
 		}
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 		{
+			if (previousFirstVisibleItem != firstVisibleItem)
+			{
+				long currTime = System.currentTimeMillis();
+				long timeToScrollOneElement = currTime - previousEventTime;
+				velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+				previousFirstVisibleItem = firstVisibleItem;
+				previousEventTime = currTime;
+			}
 		}
 	};
 
@@ -397,7 +417,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	{
 		String selectedFriendsIds = "";
 		selectedFriendsIds = TextUtils.join(",", selectedFriends);
-		Log.d("selectedFriendsIds", selectedFriendsIds);
+		Logger.d("selectedFriendsIds", selectedFriendsIds);
 
 		if (isFacebook && !selectedFriendsIds.equals(""))
 			sendRequestDialog(selectedFriendsIds);
@@ -415,7 +435,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			catch (JSONException e)
 			{
-				Log.e("SocialNetInviteActivity", "Creating a JSONObject payload for http Twitter Invite request", e);
+				Logger.e("SocialNetInviteActivity", "Creating a JSONObject payload for http Twitter Invite request", e);
 			}
 		}
 	}
@@ -497,14 +517,14 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										data.put(HikeConstants.DATA, d);
 										data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000);
 										HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, data);
-										Log.d("SocialNetInviteActivity", "fb packet" + data.toString());
+										Logger.d("SocialNetInviteActivity", "fb packet" + data.toString());
 
 										// sendFacebookInviteIds(data);
 									}
 									catch (JSONException e)
 									{
 										// TODO Auto-generated catch block
-										Log.e("SocialNetInviteActivity", "while preparing JSON For Fb", e);
+										Logger.e("SocialNetInviteActivity", "while preparing JSON For Fb", e);
 									}
 
 									String alreadyInvited = settings.getString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, "");
@@ -513,7 +533,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										selectedFriends.add(alreadyInvitedArray[i]);
 									settings.edit().putString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, TextUtils.join(",", selectedFriends)).commit();
 
-									Log.d("invited ids", settings.getString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, ""));
+									Logger.d("invited ids", settings.getString(HikeMessengerApp.INVITED_FACEBOOK_FRIENDS_IDS, ""));
 
 									selectedFriends.clear();
 									finish();
@@ -556,8 +576,8 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 
 		if (!selectedFriends.isEmpty())
 		{
-			doneContainer.setVisibility(View.VISIBLE);
-			doneText.setText(Integer.toString(selectedFriends.size()));
+			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
+			postText.setText(Integer.toString(selectedFriends.size()));
 			getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header_compose));
 
 			// title.setText(R.string.invite);

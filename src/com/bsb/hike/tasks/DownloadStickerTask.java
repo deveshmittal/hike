@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
@@ -26,6 +25,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.StickerTaskBase;
@@ -64,7 +64,7 @@ public class DownloadStickerTask extends StickerTaskBase
 	@Override
 	protected FTResult doInBackground(Void... params)
 	{
-		Log.d(getClass().getSimpleName(), "CategoryId: " + category.categoryId.name());
+		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.categoryId.name());
 
 		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.categoryId.name());
 		if (directoryPath == null)
@@ -97,21 +97,25 @@ public class DownloadStickerTask extends StickerTaskBase
 			}
 		}
 
-		if (largeStickerDir.exists())
+		if (smallStickerDir.exists())
 		{
-			String[] stickerIds = largeStickerDir.list();
+			String[] stickerIds = smallStickerDir.list();
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
-				Log.d(getClass().getSimpleName(), "Exising id: " + stickerId);
+				Logger.d(getClass().getSimpleName(), "Exising id: " + stickerId);
 			}
 		}
 		else
 		{
-			largeStickerDir.mkdirs();
-			Log.d(getClass().getSimpleName(), "No existing sticker");
+			smallStickerDir.mkdirs();
+			Logger.d(getClass().getSimpleName(), "No existing sticker");
 		}
-		smallStickerDir.mkdirs();
+		if(!largeStickerDir.exists())
+			largeStickerDir.mkdirs();
+
+		Utils.makeNoMediaFile(largeStickerDir);
+		Utils.makeNoMediaFile(smallStickerDir);
 
 		try
 		{
@@ -132,8 +136,8 @@ public class DownloadStickerTask extends StickerTaskBase
 
 			totalNumber = response.optInt(HikeConstants.NUMBER_OF_STICKERS, -1);
 			reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
-			Log.d(getClass().getSimpleName(), "Reached end? " + reachedEnd);
-			Log.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
+			Logger.d(getClass().getSimpleName(), "Reached end? " + reachedEnd);
+			Logger.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 			for (Iterator<String> keys = data.keys(); keys.hasNext();)
 			{
@@ -156,28 +160,28 @@ public class DownloadStickerTask extends StickerTaskBase
 				}
 				catch (FileNotFoundException e)
 				{
-					Log.w(getClass().getSimpleName(), e);
+					Logger.w(getClass().getSimpleName(), e);
 				}
 				catch (IOException e)
 				{
-					Log.w(getClass().getSimpleName(), e);
+					Logger.w(getClass().getSimpleName(), e);
 				}
 			}
 
 		}
 		catch (NetworkErrorException e)
 		{
-			Log.w(getClass().getSimpleName(), e);
+			Logger.w(getClass().getSimpleName(), e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		catch (IllegalStateException e)
 		{
-			Log.w(getClass().getSimpleName(), e);
+			Logger.w(getClass().getSimpleName(), e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		catch (JSONException e)
 		{
-			Log.w(getClass().getSimpleName(), e);
+			Logger.w(getClass().getSimpleName(), e);
 			return FTResult.DOWNLOAD_FAILED;
 		}
 

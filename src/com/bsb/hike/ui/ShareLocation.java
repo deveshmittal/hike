@@ -43,6 +43,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
@@ -124,7 +125,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 			// 16ms = 60fps
 			.setSmallestDisplacement(4).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-	private Button doneBtn;
+	private View doneBtn;
 
 	private TextView title;
 
@@ -251,7 +252,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 				}
 				catch (UnsupportedEncodingException e)
 				{
-					Log.w(getClass().getSimpleName(), "in nearby search url encoding", e);
+					Logger.w(getClass().getSimpleName(), "in nearby search url encoding", e);
 				}
 			}
 		});
@@ -278,9 +279,11 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		title = (TextView) actionBarView.findViewById(R.id.title);
 		title.setText(R.string.share_location);
 
-		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+		doneBtn = actionBarView.findViewById(R.id.done_container);
 		doneBtn.setVisibility(View.VISIBLE);
-		doneBtn.setText(R.string.send);
+
+		TextView postText = (TextView) actionBarView.findViewById(R.id.post_btn);
+		postText.setText(R.string.send);
 
 		backContainer.setOnClickListener(new OnClickListener()
 		{
@@ -333,7 +336,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		{
 			userMarker.setPosition(new LatLng(newLocation.getLatitude(), newLocation.getLongitude()));
 			map.animateCamera(CameraUpdateFactory.newLatLng(userMarker.getPosition()));
-			Log.d("ShareLocation", "is Location changed = " + Double.valueOf(myLocation.distanceTo(newLocation)).toString());
+			Logger.d("ShareLocation", "is Location changed = " + Double.valueOf(myLocation.distanceTo(newLocation)).toString());
 			if ((currentLocationDevice == GPS_ENABLED && myLocation.distanceTo(newLocation) > 100)
 					|| (currentLocationDevice == GPS_DISABLED && myLocation.distanceTo(newLocation) > 800))
 			{
@@ -342,8 +345,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 				userMarker.setPosition(new LatLng(newLocation.getLatitude(), newLocation.getLongitude()));
 				updateLocationAddress(myLocation.getLatitude(), myLocation.getLongitude(), userMarker);
 				// do something on location change
-				Log.d("ShareLocation", "my longi in loc listener = " + Double.valueOf(newLocation.getLongitude()).toString());
-				Log.d("ShareLocation", "my lati in loc listener = " + Double.valueOf(newLocation.getLatitude()).toString());
+				Logger.d("ShareLocation", "my longi in loc listener = " + Double.valueOf(newLocation.getLongitude()).toString());
+				Logger.d("ShareLocation", "my lati in loc listener = " + Double.valueOf(newLocation.getLatitude()).toString());
 				if (!isTextSearch)
 				{
 					lastMarker = userMarker;
@@ -372,10 +375,10 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	@Override
 	public void onConnected(Bundle arg0)
 	{
-		Log.d("ShareLocation", "LocationClient Connected");
+		Logger.d("ShareLocation", "LocationClient Connected");
 		if (myLocation == null)
 		{
-			Log.d("ShareLocation", "LocationClient Connected inside if");
+			Logger.d("ShareLocation", "LocationClient Connected inside if");
 			updateMyLocation();
 		}
 		mLocationClient.requestLocationUpdates(REQUEST, this); // LocationListener
@@ -400,10 +403,10 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	public void onPause()
 	{
 		super.onPause();
-		Log.d("ShareLocation", "onPause");
+		Logger.d("ShareLocation", "onPause");
 		if (mLocationClient != null)
 		{
-			Log.d("ShareLocation", "Disconnecting LocationClient");
+			Logger.d("ShareLocation", "Disconnecting LocationClient");
 			mLocationClient.disconnect();
 		}
 	}
@@ -412,7 +415,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	{
 		if (lastMarker == null)
 		{
-			Log.d("ShareLocation", "sendSelectedLocation");
+			Logger.d("ShareLocation", "sendSelectedLocation");
 			Toast.makeText(getApplicationContext(), R.string.select_location, Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -443,7 +446,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		if (myLocation == null)
 			myLocation = locManager.getLastKnownLocation(currentLocationDevice == GPS_ENABLED ? LocationManager.GPS_PROVIDER : LocationManager.NETWORK_PROVIDER);
 		// myLocation = map.getMyLocation();
-		Log.d(getClass().getSimpleName(), "inside updateMyLocation");
+		Logger.d(getClass().getSimpleName(), "inside updateMyLocation");
 
 		if (myLocation != null)
 		{
@@ -472,7 +475,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		CameraPosition cameraPosition = new CameraPosition.Builder().target(myLatLng) // Sets the center of the map to Mountain View
 				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
 				.build(); // Creates a CameraPosition from the builder
-		Log.d(getClass().getSimpleName(), "stting up camera in set my location");
+		Logger.d(getClass().getSimpleName(), "stting up camera in set my location");
 		map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 	}
@@ -509,7 +512,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		protected Integer doInBackground(String... placesURL)
 		{
 			// fetch places
-			Log.d(getClass().getSimpleName(), "GetPlaces Async Task do in background");
+			Logger.d(getClass().getSimpleName(), "GetPlaces Async Task do in background");
 			JSONObject resultObject = null;
 			for (String placeSearchURL : placesURL)
 			{
@@ -540,7 +543,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 						// read lat lng
 						placeLL = new LatLng(Double.valueOf(loc.getString("lat")), Double.valueOf(loc.getString("lng")));
 
-						Log.d(getClass().getSimpleName(), Integer.valueOf(p).toString() + " = " + (String) placeObject.get("name"));
+						Logger.d(getClass().getSimpleName(), Integer.valueOf(p).toString() + " = " + (String) placeObject.get("name"));
 
 						// vicinity
 						if (!isTextSearch)
@@ -587,17 +590,17 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 					placeMarkers[pm].remove();
 				}
 			}
-			Log.d(getClass().getSimpleName(), "list length before = " + Integer.valueOf(list.size()).toString());
+			Logger.d(getClass().getSimpleName(), "list length before = " + Integer.valueOf(list.size()).toString());
 			int listSize = list.size();
 			for (int i = listSize - 1; i > 0; i--)
 			{
-				Log.d(getClass().getSimpleName(), Integer.valueOf(i).toString() + " = " + list.get(i).getName());
+				Logger.d(getClass().getSimpleName(), Integer.valueOf(i).toString() + " = " + list.get(i).getName());
 				list.remove(i);
 			}
 			adapter.notifyDataSetChanged();
-			Log.d(getClass().getSimpleName(), "list length after = " + Integer.valueOf(list.size()).toString());
+			Logger.d(getClass().getSimpleName(), "list length after = " + Integer.valueOf(list.size()).toString());
 
-			Log.d(getClass().getSimpleName(), "GetPlaces Async Task do in background");
+			Logger.d(getClass().getSimpleName(), "GetPlaces Async Task do in background");
 			findViewById(R.id.progress_dialog).setVisibility(View.VISIBLE);
 		}
 
@@ -877,13 +880,13 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		{
 			JSONObject resultObj = Utils.getJSONfromURL("http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=true");
 			String Status = resultObj.getString("status");
-			Log.d("ShareLocation", "url = " + "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=true");
+			Logger.d("ShareLocation", "url = " + "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=true");
 			if (Status.equalsIgnoreCase("OK"))
 			{
 				JSONArray Results = resultObj.getJSONArray("results");
 				JSONObject zero = Results.getJSONObject(0);
 				address = zero.getString("formatted_address");
-				Log.d("ShareLocation", "my address = " + address);
+				Logger.d("ShareLocation", "my address = " + address);
 			}
 		}
 		catch (Exception e)

@@ -6,7 +6,8 @@
 
     <ListView
         android:id="@id/android:list"
-        style="@style/HomeList" />
+        style="@style/HomeList"
+        android:divider="@null" />
 
     <ScrollView
         android:id="@android:id/empty"

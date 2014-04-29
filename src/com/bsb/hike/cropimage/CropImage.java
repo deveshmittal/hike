@@ -47,7 +47,6 @@ import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -56,6 +55,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -127,23 +127,23 @@ public class CropImage extends MonitoredActivity
 		}
 		catch (IllegalArgumentException e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+			Logger.e(getClass().getSimpleName(), "Exception during reflection", e);
 		}
 		catch (IllegalAccessException e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+			Logger.e(getClass().getSimpleName(), "Exception during reflection", e);
 		}
 		catch (InvocationTargetException e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+			Logger.e(getClass().getSimpleName(), "Exception during reflection", e);
 		}
 		catch (SecurityException e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+			Logger.e(getClass().getSimpleName(), "Exception during reflection", e);
 		}
 		catch (NoSuchMethodException e)
 		{
-			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+			Logger.e(getClass().getSimpleName(), "Exception during reflection", e);
 		}
 
 		showStorageToast(this);
@@ -177,7 +177,7 @@ public class CropImage extends MonitoredActivity
 		{
 			Toast toast = Toast.makeText(this, getResources().getString(R.string.image_failed), Toast.LENGTH_LONG);
 			toast.show();
-			Log.d(TAG, "Unable to open bitmap");
+			Logger.d(TAG, "Unable to open bitmap");
 			finish();
 			return;
 		}
@@ -421,7 +421,7 @@ public class CropImage extends MonitoredActivity
 				catch (IOException ex)
 				{
 					// TODO: report error to caller
-					Log.e(TAG, "Cannot open file: " + mSaveUri, ex);
+					Logger.e(TAG, "Cannot open file: " + mSaveUri, ex);
 				}
 				finally
 				{

@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.net.MailTo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +20,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 
 public class WebViewActivity extends HikeAppStateBaseFragmentActivity
 {
@@ -83,7 +83,7 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity
 					}
 					catch (ActivityNotFoundException e)
 					{
-						Log.w(getClass().getSimpleName(), e);
+						Logger.w(getClass().getSimpleName(), e);
 						view.loadUrl(url);
 					}
 				}

@@ -10,12 +10,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class SMSBroadcastReceiver extends BroadcastReceiver
@@ -39,13 +39,13 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 			mDb = HikeUserDatabase.getInstance();
 		}
 
-		Log.d(getClass().getSimpleName(), "Received SMS message");
+		Logger.d(getClass().getSimpleName(), "Received SMS message");
 		Bundle extras = intent.getExtras();
 		if (extras != null)
 		{
-			Log.d(getClass().getSimpleName(), "Received SMS message with extras " + extras.keySet());
+			Logger.d(getClass().getSimpleName(), "Received SMS message with extras " + extras.keySet());
 			Object[] extra = (Object[]) extras.get("pdus");
-			Log.d(getClass().getSimpleName(), "Extras length is " + extra.length);
+			Logger.d(getClass().getSimpleName(), "Extras length is " + extra.length);
 			for (int i = 0; i < extra.length; ++i)
 			{
 				SmsMessage sms = SmsMessage.createFromPdu((byte[]) extra[i]);
@@ -56,7 +56,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 				ContactInfo contactInfo = mDb.getContactInfoFromMSISDN(from, true);
 				if (contactInfo == null)
 				{
-					Log.d(getClass().getSimpleName(), "Ignoring SMS message because contact not in addressbook phone_no=" + from);
+					Logger.d(getClass().getSimpleName(), "Ignoring SMS message because contact not in addressbook phone_no=" + from);
 					return;
 				}
 				try
@@ -75,7 +75,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 
 					writeToNativeSMSDb(context, msg);
 
-					Log.d(getClass().getSimpleName(), "Received SMS " + msg.toString());
+					Logger.d(getClass().getSimpleName(), "Received SMS " + msg.toString());
 					Intent smsReceivedIntent = new Intent(context, HikeService.class);
 					smsReceivedIntent.putExtra(HikeConstants.Extras.SMS_MESSAGE, msg.toString());
 					context.startService(smsReceivedIntent);
@@ -84,7 +84,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 				}
 				catch (JSONException e)
 				{
-					Log.e(getClass().getSimpleName(), "Invalid data for SMS message", e);
+					Logger.e(getClass().getSimpleName(), "Invalid data for SMS message", e);
 					return;
 				}
 
