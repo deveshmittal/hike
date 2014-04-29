@@ -253,7 +253,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					else
 					{
 						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-						HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
 					}
 				}
 				else
@@ -1874,13 +1874,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			showFreeInviteDialog();
 			break;
 		case FILE_TRANSFER_POP_Up:
-			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getFileTransferDialogListener());
-
+			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
+			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
 			break;
 		}
 	}
 
-	private HikeDialogListener getFileTransferDialogListener()
+	private HikeDialogListener getHomeActivityDialogListener()
 	{
 		return new HikeDialog.HikeDialogListener()
 		{
@@ -1894,7 +1898,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void neutralClicked(Dialog dialog)
 			{
-				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+				switch (dialogShowing)
+				{
+				case FILE_TRANSFER_POP_Up:
+					HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+					break;
+				case STEALTH_FTUE_POPUP:
+					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+					break;
+
+				default:
+					break;
+				}
+				
 				dialogShowing = null;
 				dialog.dismiss();
 				HomeActivity.this.dialog = null;
