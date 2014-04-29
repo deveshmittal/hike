@@ -198,7 +198,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private Set<Conversation> stealthConversations;
 
 	private List<Conversation> displayedConversations;
-	
+
 	private boolean showingStealthFtueConvTip = false;
 
 	private enum hikeBotConvStat
@@ -303,8 +303,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	public void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-		
-		if(!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+
+		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
 			// if stealth setup is not done and user has marked some chats as stealth unmark all of them
 			for (Conversation conv : stealthConversations)
@@ -315,7 +315,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			HikeMessengerApp.clearStealthMsisdn();
 		}
-		
+
 		super.onDestroy();
 	}
 
@@ -332,6 +332,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 	}
+
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
@@ -543,7 +544,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						 */
 						return;
 					}
-					if(getString(R.string.mark_stealth).equals(option))
+					if (getString(R.string.mark_stealth).equals(option))
 					{
 						stealthConversations.add(conv);
 						HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
@@ -1337,9 +1338,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!displayedConversations.isEmpty())
 		{
 			conv = displayedConversations.get(0);
-			if(conv instanceof ConversationTip && ((ConversationTip) conv).isGroupChatTip())
+			if (conv instanceof ConversationTip && ((ConversationTip) conv).isGroupChatTip())
 			{
-				if(displayedConversations.size()>1)
+				if (displayedConversations.size() > 1)
 				{
 					mAdapter.remove(conv);
 					ConversationFragment.this.run();
