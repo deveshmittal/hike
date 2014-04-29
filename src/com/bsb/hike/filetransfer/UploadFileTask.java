@@ -162,7 +162,7 @@ public class UploadFileTask extends FileTransferBase
 
 	private void calculateReqHeightAndWidth(String fileName)
 	{
-		float aspectRatio = HikeBitmapFactory.getAspectRatioFromFile(fileName);
+		float aspectRatio = BitmapUtils.getAspectRatioFromFile(fileName);
 		height = (int) (150 * Utils.densityMultiplier);
 		width = (int) (aspectRatio * height);
 

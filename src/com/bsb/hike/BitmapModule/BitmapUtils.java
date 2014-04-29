@@ -9,10 +9,22 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.Utils;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 
 public class BitmapUtils
 {
+	/**
+	 * Returns aspect ratio of bitmap (Width to Height ratio)
+	 */
+	public static float getAspectRatioFromFile(String filename)
+	{
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(filename, options);
+		return (float) (options.outWidth) / options.outHeight;
+	}
+	
 	public static boolean isThumbnailSquare(Bitmap thumbnail)
 	{
 		return (thumbnail.getWidth() == thumbnail.getHeight());

@@ -279,17 +279,6 @@ public class HikeBitmapFactory
 	}
 
 	/**
-	 * Returns aspect ratio of bitmap (Width to Height ratio)
-	 */
-	public static float getAspectRatioFromFile(String filename)
-	{
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(filename, options);
-		return (float) (options.outWidth) / options.outHeight;
-	}
-
-	/**
 	 * Decode and sample down a bitmap from resources to the requested width and height.
 	 * 
 	 * @param res
@@ -465,7 +454,7 @@ public class HikeBitmapFactory
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	protected static void addInBitmapOptions(BitmapFactory.Options options)
+	private static void addInBitmapOptions(BitmapFactory.Options options)
 	{
 		// inBitmap only works with mutable bitmaps so force the decoder to
 		// return mutable bitmaps.
@@ -497,7 +486,7 @@ public class HikeBitmapFactory
 	 *            The requested height of the resulting bitmap
 	 * @return The value to be used for inSampleSize
 	 */
-	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight)
+	private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight)
 	{
 		final int height = options.outHeight;
 		final int width = options.outWidth;
@@ -617,7 +606,7 @@ public class HikeBitmapFactory
 		}
 	}
 
-	protected static Rect calculateReqRect(int srcWidth, int srcHeight, int reqWidth, int reqHeight)
+	private static Rect calculateReqRect(int srcWidth, int srcHeight, int reqWidth, int reqHeight)
 	{
 		final float srcAspect = (float) srcWidth / (float) srcHeight;
 		final float dstAspect = (float) reqWidth / (float) reqHeight;
