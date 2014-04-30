@@ -343,8 +343,6 @@ public class HikeBitmapFactory
 		decodeResource(res, resId, options);
 
 		options.inPreferredConfig = con;
-		if (con == Bitmap.Config.RGB_565)
-			options.inDither = true;
 
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -400,9 +398,7 @@ public class HikeBitmapFactory
 		decodeFile(filename, options);
 
 		options.inPreferredConfig = con;
-		if (con == Bitmap.Config.RGB_565)
-			options.inDither = true;
-
+		
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
@@ -460,8 +456,6 @@ public class HikeBitmapFactory
 		decodeByteArray(icondata, 0, icondata.length, options);
 
 		options.inPreferredConfig = con;
-		if (con == Bitmap.Config.RGB_565)
-			options.inDither = true;
 
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
