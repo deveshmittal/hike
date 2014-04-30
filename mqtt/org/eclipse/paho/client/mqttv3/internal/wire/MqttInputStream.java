@@ -18,8 +18,8 @@ import java.io.InputStream;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
+import com.bsb.hike.utils.Logger;
 
 
 /**
@@ -29,7 +29,6 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class MqttInputStream extends InputStream {
 	private static final String className = MqttInputStream.class.getName();
 	private DataInputStream in;
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
 
 	public MqttInputStream(InputStream in) {
 		this.in = new DataInputStream(in);
@@ -69,8 +68,8 @@ public class MqttInputStream extends InputStream {
 		byte[] header = bais.toByteArray();
 		System.arraycopy(header,0,packet,0, header.length);
 		MqttWireMessage message = MqttWireMessage.createWireMessage(packet);
-		// @TRACE 501= received {0} 
-		log.fine(className, methodName, "501",new Object[] {message});
+		// @TRACE 501= received {0}
+		Logger.d("MqttInputStream", "recieved message : " + message.toString());
 		return message;
 	}
 }

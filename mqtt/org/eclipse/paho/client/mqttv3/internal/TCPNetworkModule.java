@@ -22,8 +22,8 @@ import java.net.SocketAddress;
 import javax.net.SocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
+import com.bsb.hike.utils.Logger;
 
 /**
  * A network module for connecting over TCP. 
@@ -36,7 +36,7 @@ public class TCPNetworkModule implements NetworkModule {
 	private int conTimeout;
 	
 	final static String className = TCPNetworkModule.class.getName();
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
+	private final String TAG = "TCPNetworkModule";
 	
 	/**
 	 * Constructs a new TCPNetworkModule using the specified host and
@@ -44,7 +44,6 @@ public class TCPNetworkModule implements NetworkModule {
 	 * socket.
 	 */
 	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext) {
-		log.setResourceName(resourceContext);
 		this.factory = factory;
 		this.host = host;
 		this.port = port;
@@ -60,7 +59,6 @@ public class TCPNetworkModule implements NetworkModule {
 //			InetAddress localAddr = InetAddress.getLocalHost();
 //			socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
-			log.fine(className,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			socket = factory.createSocket();
 			socket.connect(sockaddr, conTimeout*1000);
@@ -71,7 +69,7 @@ public class TCPNetworkModule implements NetworkModule {
 		}
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket
-			log.fine(className,methodName,"250",null,ex);
+			Logger.d(TAG, "failed to create tcp socket");
 			throw new MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR, ex);
 		}
 	}
@@ -89,7 +87,9 @@ public class TCPNetworkModule implements NetworkModule {
 	 */
 	public void stop() throws IOException {
 		if (socket != null) {
+			Logger.d(TAG, "socket close started");
 			socket.close();
+			Logger.d(TAG, "socket close completed");
 		}
 	}
 	

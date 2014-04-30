@@ -19,8 +19,8 @@ import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttInputStream;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
+import com.bsb.hike.utils.Logger;
 
 /**
  * Receives MQTT packets from the server.
@@ -35,14 +35,13 @@ public class CommsReceiver implements Runnable {
 	private Thread recThread = null;
 	
 	private final static String className = CommsReceiver.class.getName();
-	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
+	private final String TAG = "CommsReciever";
 	
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(in);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
-		log.setResourceName(clientComms.getClient().getClientId());
 	}
 	
 	/**
@@ -51,7 +50,7 @@ public class CommsReceiver implements Runnable {
 	public void start(String threadName) {
 		final String methodName = "start";
 		//@TRACE 855=starting
-		log.fine(className,methodName, "855");
+		Logger.d(TAG, "started the thread");
 		synchronized (lifecycle) {
 			if (running == false) {
 				running = true;
@@ -68,7 +67,7 @@ public class CommsReceiver implements Runnable {
 		final String methodName = "stop";
 		synchronized (lifecycle) {
 			//@TRACE 850=stopping
-			log.fine(className,methodName, "850");
+			Logger.d(TAG, "stopping thread started");
 			if (running) {
 				running = false;
 				if (!Thread.currentThread().equals(recThread)) {
@@ -83,7 +82,7 @@ public class CommsReceiver implements Runnable {
 		}
 		recThread = null;
 		//@TRACE 851=stopped
-		log.fine(className,methodName,"851");
+		Logger.d(TAG, "stopping thread completed");
 	}
 	
 	/**
@@ -96,7 +95,6 @@ public class CommsReceiver implements Runnable {
 		while (running && (in != null)) {
 			try {
 				//@TRACE 852=network read message
-				log.fine(className,methodName,"852");
 				MqttWireMessage message = in.readMqttWireMessage();
 				
 				if (message instanceof MqttAck) {
@@ -121,14 +119,14 @@ public class CommsReceiver implements Runnable {
 			}
 			catch (MqttException ex) {
 				//@TRACE 856=Stopping, MQttException
-				log.fine(className,methodName,"856",null,ex);
+				Logger.d(TAG, "mqtt exception in run , cause : " + ex.getCause());
 				running = false;
 				// Token maybe null but that is handled in shutdown
 				clientComms.shutdownConnection(token, ex);
 			} 
 			catch (IOException ioe) {
 				//@TRACE 853=Stopping due to IOException
-				log.fine(className,methodName,"853");
+				Logger.d(TAG, "IO exception in run , cause : " + ioe.getCause());
 
 				running = false;
 				// An EOFException could be raised if the broker processes the 
@@ -141,7 +139,6 @@ public class CommsReceiver implements Runnable {
 		}
 		
 		//@TRACE 854=<
-		log.fine(className,methodName,"854");
 	}
 	
 	public boolean isRunning() {
