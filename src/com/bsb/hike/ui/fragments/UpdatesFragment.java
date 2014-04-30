@@ -33,6 +33,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -150,6 +151,14 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			return;
 		}
 
+		if (HikeMessengerApp.isStealthMsisdn(statusMessage.getMsisdn()))
+		{
+			int stealthMode = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			if (stealthMode != HikeConstants.STEALTH_ON)
+			{
+				return;
+			}
+		}
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		intent.setClass(getActivity(), ChatThread.class);
