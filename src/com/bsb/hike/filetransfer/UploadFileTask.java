@@ -934,6 +934,7 @@ public class UploadFileTask extends FileTransferBase
 			post.addHeader("X-SESSION-ID", X_SESSION_ID);
 			post.addHeader("X-CONTENT-RANGE", contentRange);
 			post.addHeader("Cookie", "user=" + token + ";uid=" + uId);
+			Logger.d(getClass().getSimpleName(),"user=" + token + ";uid=" + uId);
 			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
 			// byte[] postBytes = getPostBytes(fileBytes);
