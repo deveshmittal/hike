@@ -97,8 +97,7 @@ public class HikeBitmapFactory
 			return null;
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
-		// TODO
-		return new BitmapDrawable(decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+		return getBitmapDrawable(decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
@@ -298,6 +297,23 @@ public class HikeBitmapFactory
 		}
 	}
 
+	public static BitmapDrawable getBitmapDrawable(final Bitmap bitmap)
+	{
+		if (bitmap == null)
+			return null;
+
+		if (Utils.isHoneycombOrHigher())
+		{
+			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+			return new BitmapDrawable(bitmap);
+		}
+		else
+		{
+			// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+			// which will recycle automagically
+			return new RecyclingBitmapDrawable(bitmap);
+		}
+	}
 	/**
 	 * Decode and sample down a bitmap from resources to the requested width and height.
 	 * 

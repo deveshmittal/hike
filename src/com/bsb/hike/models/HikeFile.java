@@ -193,7 +193,7 @@ public class HikeFile
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.isSent = isSent;
 	}
@@ -204,7 +204,7 @@ public class HikeFile
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
@@ -221,7 +221,7 @@ public class HikeFile
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.address = address;
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.isSent = isSent;
 	}
 
