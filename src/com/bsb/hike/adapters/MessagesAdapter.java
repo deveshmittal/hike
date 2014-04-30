@@ -1270,6 +1270,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				videoHolder.filmstripLeft.setVisibility(View.VISIBLE);
 				videoHolder.filmstripRight.setVisibility(View.VISIBLE);
 
+				setBubbleColor(convMessage, videoHolder.messageContainer);
 				setupFileState(videoHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, videoHolder, true);
 				setSelection(position, videoHolder.selectedStateOverlay);
@@ -1395,6 +1396,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				imageHolder.fileThumb.setVisibility(View.VISIBLE);
 
+				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true);
 				setSelection(position, imageHolder.selectedStateOverlay);
@@ -1506,6 +1508,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					imageHolder.circularProgressBg.setVisibility(View.VISIBLE);
 				}
 
+				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true);
 				setSelection(position, imageHolder.selectedStateOverlay);
@@ -1624,6 +1627,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					fileHolder.circularProgressBg.setVisibility(View.VISIBLE);
 				}
 
+				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setTimeNStatus(position, fileHolder, false);
 				setSelection(position, fileHolder.selectedStateOverlay);
 
@@ -1731,6 +1735,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileHolder.fileExtension.setVisibility(View.VISIBLE);
 				fileHolder.fileDetails.setVisibility(View.VISIBLE);
 
+				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setupFileState(fileHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), true);
 				setTimeNStatus(position, fileHolder, false);
 				setSelection(position, fileHolder.selectedStateOverlay);
@@ -1807,9 +1812,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
+			setBubbleColor(convMessage, textHolder.messageContainer);
 			setTimeNStatus(position, textHolder, false);
 			setSelection(position, textHolder.selectedStateOverlay);
-			
+
 //			 boolean showTip = false;
 //				
 //			 if (viewType == ViewType.SEND_HIKE)
@@ -2939,10 +2945,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				v.findViewById(R.id.status_tip).setVisibility(View.GONE);
 			}
-
-			return v;
 		}
-
 		else if (viewType == ViewType.PARTICIPANT_INFO)
 		{
 			ViewGroup container = null;
@@ -3222,7 +3225,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				((ViewGroup) container).addView(mainMessage);
 			}
-			return v;
 		}
 		else if (viewType == ViewType.UNREAD_COUNT)
 		{
@@ -3251,9 +3253,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			container.removeAllViews();
 			container.addView(participantInfo);
-			return v;
 		}
 		return v;
+	}
+	
+	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
+	{
+		if (convMessage.isSent() && messageContainer != null)
+		{
+			int leftPad = messageContainer.getPaddingLeft();
+			int topPad = messageContainer.getPaddingTop();
+			int rightPad = messageContainer.getPaddingRight();
+			int bottomPad = messageContainer.getPaddingBottom();
+			/* label outgoing hike conversations in green */
+			if (chatTheme == ChatTheme.DEFAULT)
+			{
+				messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+			}
+			else
+			{
+				messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+			}
+			messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
+		}
 	}
 
 	private View inflateView(int resource, ViewGroup root)
