@@ -27,26 +27,9 @@ public class SpanUtil
 	private static ImageSpan getImageSpan(Context context, View view)
 	{
 		// create bitmap drawable for imagespan 
-		BitmapDrawable bmpDrawable = HikeBitmapFactory.getBitmapDrawable(context.getResources(), getBitMapFromTV(view));
+		BitmapDrawable bmpDrawable = HikeBitmapFactory.getBitmapDrawable(context.getResources(), HikeBitmapFactory.getBitMapFromTV(view));
 		bmpDrawable.setBounds(0, 0, bmpDrawable.getIntrinsicWidth(), bmpDrawable.getIntrinsicHeight());
 		return new ImageSpan(bmpDrawable);
-	}
-
-	private static Bitmap getBitMapFromTV(View textView)
-	{
-		// capture bitmapt of genreated textviewl
-		int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-		textView.measure(spec, spec);
-		textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-		Bitmap b = Bitmap.createBitmap(textView.getWidth(), textView.getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas canvas = new Canvas(b);
-		canvas.translate(-textView.getScrollX(), -textView.getScrollY());
-		textView.draw(canvas);
-		textView.setDrawingCacheEnabled(true);
-		Bitmap cacheBmp = textView.getDrawingCache();
-		Bitmap viewBmp = cacheBmp.copy(Bitmap.Config.ARGB_8888, true);
-		textView.destroyDrawingCache(); // destory drawable
-		return viewBmp;
 	}
 
 }

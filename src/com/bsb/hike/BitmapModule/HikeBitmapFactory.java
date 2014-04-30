@@ -20,6 +20,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.view.View;
+import android.view.View.MeasureSpec;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -69,6 +71,23 @@ public class HikeBitmapFactory
 		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
 		canvas.drawBitmap(bitmap, rect, rect, paint);
 		return output;
+	}
+
+	public static Bitmap getBitMapFromTV(View textView)
+	{
+		// capture bitmapt of genreated textviewl
+		int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+		textView.measure(spec, spec);
+		textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
+		Bitmap b = Bitmap.createBitmap(textView.getWidth(), textView.getHeight(), Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(b);
+		canvas.translate(-textView.getScrollX(), -textView.getScrollY());
+		textView.draw(canvas);
+		textView.setDrawingCacheEnabled(true);
+		Bitmap cacheBmp = textView.getDrawingCache();
+		Bitmap viewBmp = cacheBmp.copy(Bitmap.Config.ARGB_8888, true);
+		textView.destroyDrawingCache(); // destory drawable
+		return viewBmp;
 	}
 
 	public static BitmapDrawable stringToDrawable(String encodedString)
@@ -438,7 +457,7 @@ public class HikeBitmapFactory
 		// }
 
 		// Decode bitmap with inSampleSize set
-		options.inJustDecodeBounds = false;	
+		options.inJustDecodeBounds = false;
 		Bitmap result = null;
 		try
 		{
@@ -605,7 +624,7 @@ public class HikeBitmapFactory
 			Logger.wtf(TAG, "Out of Memory");
 
 			System.gc();
-			
+
 			try
 			{
 				return Bitmap.createBitmap(b, i, j, width, height, m, c);
@@ -629,7 +648,7 @@ public class HikeBitmapFactory
 			Logger.wtf(TAG, "Out of Memory");
 
 			System.gc();
-			
+
 			try
 			{
 				return BitmapFactory.decodeFile(path);
@@ -653,7 +672,7 @@ public class HikeBitmapFactory
 			Logger.wtf(TAG, "Out of Memory");
 
 			System.gc();
-			
+
 			try
 			{
 				return BitmapFactory.decodeFile(path, opt);
@@ -675,7 +694,7 @@ public class HikeBitmapFactory
 		catch (OutOfMemoryError e)
 		{
 			Logger.wtf(TAG, "Out of Memory");
-			
+
 			System.gc();
 
 			try
