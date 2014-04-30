@@ -378,8 +378,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private int selectedCancelableMsgs = 0;
 
-	private boolean onTouchActionDownCalled = false;
-
 	private boolean isActionModeOn = false;
 
 	private TextView mActionModeTitle;
@@ -5617,29 +5615,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
-		switch (event.getAction())
-		{
-		/*
-		 * This is to handle the case. when user long taps on a clickable item in chatthread. and even if longclick event is consumed. ACTION_UP event is triggered which eventually
-		 * triggers onitemclick for the view which is not desired.
-		 */
-		case MotionEvent.ACTION_DOWN:
-		{
-			onTouchActionDownCalled = true;
-			break;
-		}
-		case MotionEvent.ACTION_UP:
-		{
-			if (isActionModeOn && !onTouchActionDownCalled)
-			{
-				/*
-				 * This is the case when ACTION_UP is called without calling ACTION_DOWN first. in this case we should not consider ACTION_UP as click event and just let it pass.
-				 */
-				return true;
-			}
-			onTouchActionDownCalled = false;
-		}
-		}
 		return gestureDetector.onTouchEvent(event);
 	}
 
