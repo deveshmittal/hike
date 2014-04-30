@@ -131,6 +131,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
+
+				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn());;
+				stealthConversations.remove(conversation);
 			}
 
 			mAdapter.notifyDataSetChanged();
