@@ -33,7 +33,7 @@ public class HikeBitmapFactory
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
 	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
 		Canvas canvas = new Canvas(output);
 
 		final int color = 0xff424242;
@@ -55,7 +55,7 @@ public class HikeBitmapFactory
 
 	public static Bitmap getCircularBitmap(Bitmap bitmap)
 	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
 		Canvas canvas = new Canvas(output);
 
 		final int color = 0xff424242;
@@ -78,7 +78,8 @@ public class HikeBitmapFactory
 			return null;
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
-		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+		// TODO
+		return new BitmapDrawable(decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
@@ -91,7 +92,7 @@ public class HikeBitmapFactory
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 
-		BitmapFactory.decodeFile(filePath, options);
+		decodeFile(filePath, options);
 		currentHeight = options.outHeight;
 		currentWidth = options.outWidth;
 
@@ -103,7 +104,7 @@ public class HikeBitmapFactory
 		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
 		options.inJustDecodeBounds = false;
 
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		thumbnail = decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
 		 */
@@ -129,7 +130,7 @@ public class HikeBitmapFactory
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 
-		BitmapFactory.decodeFile(filePath, options);
+		decodeFile(filePath, options);
 		currentHeight = options.outHeight;
 		currentWidth = options.outWidth;
 
@@ -145,7 +146,7 @@ public class HikeBitmapFactory
 			options.inPreferredConfig = Config.RGB_565;
 		}
 
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		thumbnail = decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
 		 */
@@ -170,7 +171,8 @@ public class HikeBitmapFactory
 
 		Logger.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
 		Logger.d("Utils", "dimensionLimit : " + dimensionLimit);
-		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, startX + dimensionLimit, startY + dimensionLimit);
+
+		Bitmap squareThumbnail = createBitmap(thumbnail, startX, startY, startX + dimensionLimit, startY + dimensionLimit);
 
 		if (squareThumbnail != thumbnail)
 		{
@@ -183,7 +185,7 @@ public class HikeBitmapFactory
 	public static Bitmap stringToBitmap(String thumbnailString)
 	{
 		byte[] encodeByte = Base64.decode(thumbnailString, Base64.DEFAULT);
-		return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+		return decodeByteArray(encodeByte, 0, encodeByte.length);
 	}
 
 	public static Bitmap drawableToBitmap(Drawable drawable)
@@ -195,7 +197,7 @@ public class HikeBitmapFactory
 		/*
 		 * http://developer.android.com/reference/android/graphics/Bitmap.Config. html
 		 */
-		Bitmap bitmap = Bitmap.createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), Config.ARGB_8888);
+		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), Config.ARGB_8888);
 
 		Canvas canvas = new Canvas(bitmap);
 		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -211,7 +213,7 @@ public class HikeBitmapFactory
 			m.setRotate(degrees, (float) b.getWidth() / 2, (float) b.getHeight() / 2);
 			try
 			{
-				Bitmap b2 = Bitmap.createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
+				Bitmap b2 = createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
 				if (b != b2)
 				{
 					b.recycle();
@@ -233,11 +235,10 @@ public class HikeBitmapFactory
 		{
 			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
 			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			return src = Bitmap.createScaledBitmap(src, width, height, false);
+			return src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false);
 		}
 		else
 			return src;
-
 	}
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn)
@@ -257,7 +258,7 @@ public class HikeBitmapFactory
 
 	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn, boolean rounded)
 	{
-		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), BitmapUtils.getDefaultAvatarResourceId(msisdn, rounded)));
+		return getBitmapDrawable(context.getResources(), decodeResource(context.getResources(), BitmapUtils.getDefaultAvatarResourceId(msisdn, rounded)));
 	}
 
 	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
@@ -300,11 +301,11 @@ public class HikeBitmapFactory
 
 	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight, Bitmap.Config con)
 	{
-
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeResource(res, resId, options);
+
+		decodeResource(res, resId, options);
 
 		options.inPreferredConfig = con;
 		if (con == Bitmap.Config.RGB_565)
@@ -324,11 +325,11 @@ public class HikeBitmapFactory
 		Bitmap result = null;
 		try
 		{
-			result = BitmapFactory.decodeResource(res, resId, options);
+			result = decodeResource(res, resId, options);
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = BitmapFactory.decodeResource(res, resId);
+			result = decodeResource(res, resId);
 		}
 		catch (Exception e)
 		{
@@ -360,7 +361,8 @@ public class HikeBitmapFactory
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(filename, options);
+
+		decodeFile(filename, options);
 
 		options.inPreferredConfig = con;
 		if (con == Bitmap.Config.RGB_565)
@@ -380,11 +382,11 @@ public class HikeBitmapFactory
 		Bitmap result = null;
 		try
 		{
-			result = BitmapFactory.decodeFile(filename, options);
+			result = decodeFile(filename, options);
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = BitmapFactory.decodeFile(filename, options);
+			result = decodeFile(filename, options);
 		}
 		catch (Exception e)
 		{
@@ -420,7 +422,7 @@ public class HikeBitmapFactory
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 
-		BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+		decodeByteArray(icondata, 0, icondata.length, options);
 
 		options.inPreferredConfig = con;
 		if (con == Bitmap.Config.RGB_565)
@@ -436,15 +438,15 @@ public class HikeBitmapFactory
 		// }
 
 		// Decode bitmap with inSampleSize set
-		options.inJustDecodeBounds = false;
+		options.inJustDecodeBounds = false;	
 		Bitmap result = null;
 		try
 		{
-			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
+			result = decodeByteArray(icondata, 0, icondata.length, options);
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length);
+			result = decodeByteArray(icondata, 0, icondata.length);
 		}
 		catch (Exception e)
 		{
@@ -531,11 +533,11 @@ public class HikeBitmapFactory
 		Bitmap result = null;
 		try
 		{
-			result = BitmapFactory.decodeResource(res, resId, options);
+			result = decodeResource(res, resId, options);
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = BitmapFactory.decodeResource(res, resId);
+			result = decodeResource(res, resId);
 		}
 		catch (Exception e)
 		{
@@ -544,24 +546,245 @@ public class HikeBitmapFactory
 		return result;
 	}
 
+	public static Bitmap createBitmap(int width, int height, Config con)
+	{
+		try
+		{
+			return Bitmap.createBitmap(width, height, con);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+
+			try
+			{
+				return Bitmap.createBitmap(width, height, con);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
+	}
+
+	private static Bitmap createBitmap(Bitmap thumbnail, int startX, int startY, int i, int j)
+	{
+		try
+		{
+			return Bitmap.createBitmap(thumbnail, startX, startY, i, j);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+
+			try
+			{
+				return Bitmap.createBitmap(thumbnail, startX, startY, i, j);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
+	}
+
+	private static Bitmap createBitmap(Bitmap b, int i, int j, int width, int height, Matrix m, boolean c)
+	{
+		try
+		{
+			return Bitmap.createBitmap(b, i, j, width, height, m, c);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+			
+			try
+			{
+				return Bitmap.createBitmap(b, i, j, width, height, m, c);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
+	}
+
 	public static Bitmap decodeFile(String path)
 	{
-		return BitmapFactory.decodeFile(path);
+		try
+		{
+			return BitmapFactory.decodeFile(path);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+			
+			try
+			{
+				return BitmapFactory.decodeFile(path);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
+	}
+
+	public static Bitmap decodeFile(String path, BitmapFactory.Options opt)
+	{
+		try
+		{
+			return BitmapFactory.decodeFile(path, opt);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+			
+			try
+			{
+				return BitmapFactory.decodeFile(path, opt);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
 	}
 
 	public static Bitmap decodeStream(InputStream is)
 	{
-		return BitmapFactory.decodeStream(is);
+		try
+		{
+			return BitmapFactory.decodeStream(is);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+			
+			System.gc();
+
+			try
+			{
+				return BitmapFactory.decodeStream(is);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
 	}
 
 	public static Bitmap decodeResource(Resources res, int id)
 	{
-		return BitmapFactory.decodeResource(res, id);
+		try
+		{
+			return BitmapFactory.decodeResource(res, id);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+
+			try
+			{
+				return BitmapFactory.decodeResource(res, id);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
+	}
+
+	public static Bitmap decodeResource(Resources res, int id, BitmapFactory.Options opt)
+	{
+		try
+		{
+			return BitmapFactory.decodeResource(res, id, opt);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+
+			try
+			{
+				return BitmapFactory.decodeResource(res, id, opt);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
 	}
 
 	public static Bitmap decodeByteArray(byte[] data, int offset, int length)
 	{
-		return BitmapFactory.decodeByteArray(data, offset, length);
+		try
+		{
+			return BitmapFactory.decodeByteArray(data, offset, length);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+
+			try
+			{
+				return BitmapFactory.decodeByteArray(data, offset, length);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc");
+				return null;
+			}
+		}
+	}
+
+	public static Bitmap decodeByteArray(byte[] data, int offset, int length, BitmapFactory.Options opt)
+	{
+		try
+		{
+			return BitmapFactory.decodeByteArray(data, offset, length, opt);
+		}
+		catch (OutOfMemoryError e)
+		{
+			Logger.wtf(TAG, "Out of Memory");
+
+			System.gc();
+
+			try
+			{
+				return BitmapFactory.decodeByteArray(data, offset, length, opt);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				Logger.wtf(TAG, "Out of Memory even after System.gc called");
+
+				return null;
+			}
+		}
 	}
 
 	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight)
@@ -571,14 +794,14 @@ public class HikeBitmapFactory
 
 	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, Bitmap.Config config)
 	{
-		Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, config);
+		Bitmap unscaledBitmap = decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, config);
 
 		if (unscaledBitmap == null)
 		{
 			return null;
 		}
 
-		Bitmap small = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config, true);
+		Bitmap small = createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config, true);
 
 		return small;
 	}
@@ -591,7 +814,7 @@ public class HikeBitmapFactory
 
 			Rect reqRect = calculateReqRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), reqWidth, reqHeight);
 
-			Bitmap scaledBitmap = Bitmap.createBitmap(reqRect.width(), reqRect.height(), config);
+			Bitmap scaledBitmap = createBitmap(reqRect.width(), reqRect.height(), config);
 
 			Canvas canvas = new Canvas(scaledBitmap);
 			Paint p = new Paint();
