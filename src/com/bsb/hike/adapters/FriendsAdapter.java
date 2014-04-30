@@ -552,6 +552,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		makeCompleteList(false);
 	}
 
+	public void clearStealthLists()
+	{
+		friendsStealthList.clear();
+		hikeStealthContactsList.clear();
+		smsStealthContactsList.clear();
+	}
+
 	public void stealthContactAdded(String msisdn)
 	{
 		boolean contactAdded = addSingleStealthContactToStealthList(friendsList, friendsStealthList, msisdn);
