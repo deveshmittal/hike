@@ -36,6 +36,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
@@ -77,9 +78,12 @@ import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -102,7 +106,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -151,11 +155,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private int recommendedCount = -1;
 
+	private HikeTip.TipType tipTypeShowing;
+
 	private FetchContactsTask fetchContactsTask;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
-			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED, HikePubSub.MQTT_CONNECTED };
+			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -172,9 +179,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
 		app.connectToService();
 
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setIcon(R.drawable.hike_logo_top_bar);
+		setupActionBar();
 
 		// Checking whether the state of the avatar and conv DB Upgrade settings
 		// is 1
@@ -216,6 +221,64 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				Utils.executeAsyncTask(fetchContactsTask);
 			}
 		}
+	}
+
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.home_action_bar, null);
+
+		View logo = actionBarView.findViewById(R.id.hike_logo);
+		logo.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+				{
+					Toast.makeText(HomeActivity.this, R.string.stealth_ftue_conv_tip_showing, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+				{
+					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
+					{
+						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+						tipTypeShowing = null;
+						LockPattern.createNewPattern(HomeActivity.this);
+					}
+					else
+					{
+						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
+					}
+				}
+				else
+				{
+					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
+					{
+						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+						tipTypeShowing = null;
+					}
+					final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+					if (stealthType == HikeConstants.STEALTH_OFF)
+					{
+						LockPattern.confirmPattern(HomeActivity.this);
+					}
+					else
+					{
+						Toast.makeText(HomeActivity.this, R.string.normal_mode_on, Toast.LENGTH_SHORT).show();
+						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+					}
+				}
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState)
@@ -286,6 +349,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
+	}
+
+	private void showStealthFtueTip(final boolean isSetPasswordTip)
+	{
+		ViewStub stealthTipViewStub = (ViewStub) findViewById(R.id.stealth_double_tap_tip_viewstub);
+		if (stealthTipViewStub != null)
+		{
+			stealthTipViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
+			{
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					showStealthFtueTip(isSetPasswordTip);
+				}
+			});
+			stealthTipViewStub.inflate();
+		}
+		else
+		{
+			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
+			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
+		}
 	}
 
 	@Override
@@ -1377,12 +1462,42 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if (HikePubSub.MQTT_CONNECTED.equals(type))
+		else if (HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP.equals(type))
 		{
-			/*
-			 * Send a fg/bg packet on reconnecting.
-			 */
-			Utils.sendAppState(this.getApplicationContext());
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					showStealthFtueTip(true);
+				}
+			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					showStealthFtueTip(false);
+				}
+			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (viewPager.getCurrentItem() != 1)
+					{
+						viewPager.setCurrentItem(1);
+					}
+				}
+			});
 		}
 	}
 
@@ -1759,13 +1874,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			showFreeInviteDialog();
 			break;
 		case FILE_TRANSFER_POP_Up:
-			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getFileTransferDialogListener());
-
+			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
+			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
 			break;
 		}
 	}
 
-	private HikeDialogListener getFileTransferDialogListener()
+	private HikeDialogListener getHomeActivityDialogListener()
 	{
 		return new HikeDialog.HikeDialogListener()
 		{
@@ -1779,7 +1898,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void neutralClicked(Dialog dialog)
 			{
-				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+				switch (dialogShowing)
+				{
+				case FILE_TRANSFER_POP_Up:
+					HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+					break;
+				case STEALTH_FTUE_POPUP:
+					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+					break;
+
+				default:
+					break;
+				}
+				
 				dialogShowing = null;
 				dialog.dismiss();
 				HomeActivity.this.dialog = null;
@@ -1790,5 +1921,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 			}
 		};
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 }

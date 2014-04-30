@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="370"
-    android:versionName="2.9.0" >
+    android:versionCode="392"
+    android:versionName="2.9.5.2" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -202,7 +202,13 @@
         <activity android:name=".ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>
-
+        
+        <activity
+    		android:name="com.haibison.android.lockpattern.LockPatternActivity"
+    		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
+    		android:screenOrientation="user"
+    		android:theme="@style/Theme.CustomDialog" />
+        
         <receiver android:name=".service.BootService" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

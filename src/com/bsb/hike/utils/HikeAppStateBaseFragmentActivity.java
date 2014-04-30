@@ -29,7 +29,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was opened");
 			HikeMessengerApp.currentState = CurrentState.OPENED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		super.onCreate(savedInstanceState);
 
@@ -49,7 +49,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was resumed");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
@@ -95,7 +95,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 			{
 				Logger.d(TAG + getClass().getSimpleName(), "App was closed");
 				HikeMessengerApp.currentState = CurrentState.CLOSED;
-				Utils.sendAppState(this);
+				Utils.appStateChanged(this);
 			}
 			else
 			{
@@ -106,7 +106,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 		super.onStop();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SHOW_IMAGE, this);
@@ -143,7 +143,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.sendAppState(this);
+			Utils.appStateChanged(this);
 		}
 	}
 

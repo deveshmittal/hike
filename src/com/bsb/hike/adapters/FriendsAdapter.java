@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
@@ -24,7 +25,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -82,6 +82,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	protected List<ContactInfo> smsContactsList;
 
+	protected List<ContactInfo> friendsStealthList;
+
+	protected List<ContactInfo> hikeStealthContactsList;
+
+	protected List<ContactInfo> smsStealthContactsList;
+
 	protected List<ContactInfo> filteredFriendsList;
 
 	protected List<ContactInfo> filteredHikeContactsList;
@@ -89,6 +95,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> filteredSmsContactsList;
 
 	protected List<ContactInfo> groupsList;
+
+	protected List<ContactInfo> groupsStealthList;
 
 	protected List<ContactInfo> filteredGroupsList;
 
@@ -142,6 +150,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
 
+		friendsStealthList = new ArrayList<ContactInfo>(0);
+		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
+		smsStealthContactsList = new ArrayList<ContactInfo>(0);
+
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
@@ -152,8 +164,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
-				filteredSmsContactsList);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -503,6 +515,104 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			makeCompleteList(false);
 		}
+	}
+
+	public void removeStealthContacts()
+	{
+		removeStealthContactFromList(friendsList);
+		removeStealthContactFromList(hikeContactsList);
+		removeStealthContactFromList(smsContactsList);
+
+		makeCompleteList(false);
+	}
+
+	private void removeStealthContactFromList(List<ContactInfo> contactList)
+	{
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
+		{
+			ContactInfo contactInfo = iter.next();
+			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			{
+				iter.remove();
+			}
+		}
+	}
+
+	public void addStealthContacts()
+	{
+		friendsList.addAll(friendsStealthList);
+		Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+
+		hikeContactsList.addAll(hikeStealthContactsList);
+		Collections.sort(hikeContactsList);
+
+		smsContactsList.addAll(smsStealthContactsList);
+		Collections.sort(smsContactsList);
+
+		makeCompleteList(false);
+	}
+
+	public void stealthContactAdded(String msisdn)
+	{
+		boolean contactAdded = addSingleStealthContactToStealthList(friendsList, friendsStealthList, msisdn);
+		/*
+		 * We only need to add the contact once. So if it was found removed in the first list, we don't need to check for it in the next list.
+		 */
+		if (contactAdded)
+		{
+			return;
+		}
+		contactAdded = addSingleStealthContactToStealthList(hikeContactsList, hikeStealthContactsList, msisdn);
+		if (contactAdded)
+		{
+			return;
+		}
+		addSingleStealthContactToStealthList(smsContactsList, smsStealthContactsList, msisdn);
+	}
+
+	private boolean addSingleStealthContactToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList, String msisdn)
+	{
+		for (ContactInfo contactInfo : contactList)
+		{
+			if (msisdn.equals(contactInfo.getMsisdn()))
+			{
+				stealthList.add(contactInfo);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void stealthContactRemoved(String msisdn)
+	{
+		boolean contactRemoved = removeSingleStealthContactFromStealthList(friendsStealthList, msisdn);
+		/*
+		 * We only need to remove the contact once. So if it was already removed in the first list, we don't need to check for it in the next list.
+		 */
+		if (contactRemoved)
+		{
+			return;
+		}
+		contactRemoved = removeSingleStealthContactFromStealthList(hikeStealthContactsList, msisdn);
+		if (contactRemoved)
+		{
+			return;
+		}
+		removeSingleStealthContactFromStealthList(smsStealthContactsList, msisdn);
+	}
+
+	private boolean removeSingleStealthContactFromStealthList(List<ContactInfo> contactList, String msisdn)
+	{
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
+		{
+			ContactInfo contactInfo = iter.next();
+			if (msisdn.equals(contactInfo.getMsisdn()))
+			{
+				iter.remove();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void addToGroup(ContactInfo contactInfo, int groupIndex)

@@ -124,11 +124,19 @@ public class ToastListener implements Listener
 					{
 						contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
 					}
-					/*
-					 * Check if this is a big picture message, else toast a normal push message
-					 */
-					Bitmap bigPicture = Utils.returnBigPicture(message, context);
-					this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+
+					if(message.getConversation().isStealth())
+					{
+						this.toaster.notifyStealthMessage();
+					}
+					else
+					{
+						/*
+						 * Check if this is a big picture message, else toast a normal push message
+						 */
+						Bitmap bigPicture = Utils.returnBigPicture(message, context);
+						this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+					}
 				}
 
 			}
