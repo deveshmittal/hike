@@ -164,6 +164,8 @@ public class HikeDialog
 		TextView cancelBtn = (TextView) dialog.findViewById(R.id.noButton);
 		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
 
+		dialog.findViewById(R.id.btn_separator).setVisibility(View.VISIBLE);
+
 		cancelBtn.setVisibility(View.VISIBLE);
 
 		headerText.setText(header);

@@ -81,6 +81,7 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -2126,8 +2127,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else
 		{
-
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
+
+			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			{
+				int stealthMode = HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				if (stealthMode != HikeConstants.STEALTH_ON)
+				{
+					return;
+				}
+			}
 
 			String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
