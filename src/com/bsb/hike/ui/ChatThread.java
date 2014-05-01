@@ -282,7 +282,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean animatedOnce = false;
 
-	private boolean isOverlayShowing = false;
+	private boolean isOverlayShowing = false, isKeyboardOpen;
 
 	private ViewPager emoticonViewPager;
 
@@ -5106,7 +5106,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onDismiss()
 				{
-					resizeMainheight(0);
+					resizeMainheight(0, false);
 					emoticonType = null;
 					attachmentWindow = null;
 				}
@@ -5267,6 +5267,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 
 		dialog.show();
+		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+		{
+			resizeMainheight(attachmentWindow.getHeight(), false);
+		}
 	}
 
 	private void setupStickerPreviewDialog(View parent, StickerCategoryId categoryId)
@@ -6523,26 +6527,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Log.i("keybpard", "global layout listener");
 				View root = findViewById(R.id.chatThreadParentLayout);
 				Log.i("keybpard", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
-				int temp = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight();
-				if (temp > 0)
+				int rootHeight = root.getHeight();
+				int temp = root.getRootView().getHeight() - rootHeight - getStatusBarHeight();
+				if (temp > rootHeight / 3)
 				{
 					possibleKeyboardHeight = temp;
+					isKeyboardOpen = true;
+				}
+				else
+				{
+					isKeyboardOpen = false;
 				}
 			}
 		};
 	}
 
-	private boolean resizeMainheight(int emoticonPalHeight)
+	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
 		View root = findViewById(R.id.chatThreadParentLayout);
-
-		int statusBarHeight = getStatusBarHeight();
-		int maxHeight = root.getRootView().getHeight();
-		int requiredHeight = maxHeight - statusBarHeight - emoticonPalHeight;
-		// keyboard open
-		if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
+		if (respectKeyboardVisiblity)
 		{
-			return false;
+			int statusBarHeight = getStatusBarHeight();
+			int maxHeight = root.getRootView().getHeight();
+			int requiredHeight = maxHeight - statusBarHeight - emoticonPalHeight;
+			// keyboard open
+			if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
+			{
+				return false;
+			}
 		}
 		if (root.getPaddingBottom() != emoticonPalHeight)
 		{
@@ -6566,8 +6578,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackKeyPressedET(CustomFontEditText editText)
 	{
-		// on back press - keyboard gone , try to hide emoticons
-		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+		// on back press - if keyboard was open , now keyboard gone , try to hide emoticons
+		// if keyboard ws not open , onbackpress of activity will get call back, dismiss popup there
+		// if we dismiss here in second case as well, then onbackpress of acitivty will be called and it will finish activity
+		if (isKeyboardOpen && attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
 		{
 			dismissPopupWindow();
 		}
@@ -6605,6 +6619,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Log.i("keyboard", "height " + lp.height);
 		emoticonLayout.setLayoutParams(lp);
 		attachmentWindow.setHeight(lp.height);
-		resizeMainheight(lp.height);
+		resizeMainheight(lp.height, true);
 	}
 }
