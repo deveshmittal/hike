@@ -327,6 +327,8 @@ public class HikePubSub implements Runnable
 
 	public static final String STEALTH_MODE_RESET_COMPLETE = "stealthModeResetComplete";
 
+	public static final String CONNECTED_TO_MQTT = "connectedToMqtt";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

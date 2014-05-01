@@ -2499,6 +2499,11 @@ public class Utils
 
 	public static void appStateChanged(Context context)
 	{
+		appStateChanged(context, true);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth)
+	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
@@ -2506,13 +2511,16 @@ public class Utils
 
 		sendAppState();
 
-		if(HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+		if(resetStealth)
 		{
-			resetStealthMode(context);
-		}
-		else
-		{
-			clearStealthResetTimer(context);
+			if(HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+			{
+				resetStealthMode(context);
+			}
+			else
+			{
+				clearStealthResetTimer(context);
+			}
 		}
 	}
 
