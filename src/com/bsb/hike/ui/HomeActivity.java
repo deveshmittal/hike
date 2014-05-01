@@ -1853,9 +1853,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void showAppropriateDialog()
 	{
-		if (dialog != null && dialog.isShowing())
+		if (dialog != null)
 		{
-			dialog.dismiss();
+			if(dialog.isShowing())
+			{
+				dialog.dismiss();
+			}
+			else
+			{
+				return;
+			}
 		}
 		switch (dialogShowing)
 		{
