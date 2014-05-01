@@ -100,6 +100,7 @@ public class CommsCallback implements Runnable
 		final String methodName = "stop";
 		synchronized (lifecycle)
 		{
+			Logger.d(TAG, Thread.currentThread().getName() + " acquired lock : lifecycle");
 			if (running)
 			{
 				// @TRACE 700=stopping
@@ -111,11 +112,13 @@ public class CommsCallback implements Runnable
 					{
 						synchronized (workAvailable)
 						{
-							// @TRACE 701=notify workAvailable and wait for run
+							Logger.d(TAG, Thread.currentThread().getName() + " acquired lock : workAvailable");
+							// notify workAvailable and wait for run
 							// to finish
 							Logger.d(TAG, "notify workAvailable and wait for run to finish");
 							workAvailable.notifyAll();
 						}
+						Logger.d(TAG, Thread.currentThread().getName() + " released lock : workAvailable");
 						// Wait for the thread to finish.
 						callbackThread.join();
 					}
@@ -126,8 +129,9 @@ public class CommsCallback implements Runnable
 			}
 			callbackThread = null;
 			// @TRACE 703=stopped
-			Logger.d(TAG, "stopping completed");
+			Logger.d(TAG, "Callback Thread stopped");
 		}
+		Logger.d(TAG, Thread.currentThread().getName() + " released lock : lifecycle");
 	}
 
 	public void setCallback(MqttCallback mqttCallback)

@@ -290,6 +290,7 @@ public class ClientComms
 	public void shutdownConnection(MqttToken token, MqttException reason)
 	{
 		final String methodName = "shutdownConnection";
+		Logger.d(TAG, methodName + " is called from thread : " + Thread.currentThread().getName());
 		boolean wasConnected;
 		MqttToken endToken = null; // Token to notify after disconnect completes
 
@@ -297,10 +298,13 @@ public class ClientComms
 		// to run once.
 		synchronized (conLock)
 		{
+			Logger.d(TAG, Thread.currentThread().getName() + " acquired conLock");
 			if (stoppingComms || closePending)
 			{
+				Logger.d(TAG, Thread.currentThread().getName() + " released conLock");
 				return;
 			}
+			Logger.d(TAG, Thread.currentThread().getName() + " released conLock");
 			stoppingComms = true;
 
 			// @TRACE 216=state=DISCONNECTING
@@ -309,7 +313,6 @@ public class ClientComms
 			wasConnected = (isConnected() || isDisconnecting());
 			conState = DISCONNECTING;
 		}
-
 		// Update the token with the reason for shutdown if it
 		// is not already complete.
 		if (token != null && !token.isComplete())
@@ -319,12 +322,13 @@ public class ClientComms
 
 		// Stop the thread that is used to call the user back
 		// when actions complete
-		Logger.d(TAG, "shutdown callback stop started");
 		if (callback != null)
 		{
+			Logger.d(TAG, "Stopping callback thread");
 			callback.stop();
+			Logger.d(TAG, "Callback thread stopped");
 		}
-		Logger.d(TAG, "shutdown callback stop completed");
+
 		// Stop the network module, send and receive now not possible
 		try
 		{
@@ -333,7 +337,9 @@ public class ClientComms
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				if (networkModule != null)
 				{
+					Logger.d(TAG, "Stopping Network Module");
 					networkModule.stop();
+					Logger.d(TAG, "Network Module Stopped");
 				}
 			}
 		}
@@ -343,12 +349,12 @@ public class ClientComms
 		}
 
 		// Stop the thread that handles inbound work from the network
-		Logger.d(TAG, "shutdown reciever stop started");
 		if (receiver != null)
 		{
+			Logger.d(TAG, "Stopping receiver thread");
 			receiver.stop();
+			Logger.d(TAG, "Receiver thread stopped");
 		}
-		Logger.d(TAG, "shutdown reciever stop completed");
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
 		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
