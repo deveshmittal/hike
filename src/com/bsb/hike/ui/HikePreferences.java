@@ -588,6 +588,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 						preference.setTitle(R.string.resetting_complete_stealth_header);
 						preference.setSummary(R.string.resetting_complete_stealth_info);
 
+						Intent intent = new Intent(HikePreferences.this, HomeActivity.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+
 						dialog.dismiss();
 					}
 
