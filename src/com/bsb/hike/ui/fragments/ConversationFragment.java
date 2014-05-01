@@ -405,6 +405,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void negativeClicked(Dialog dialog)
 				{
+					removeResetStealthTipIfExists();
+
+					Utils.cancelScheduledStealthReset(getActivity());
+
 					dialog.dismiss();
 				}
 			}, dialogStrings);
