@@ -283,7 +283,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean animatedOnce = false;
 
-	private boolean isOverlayShowing = false;
+	private boolean isOverlayShowing = false, isKeyboardOpen;
 
 	private ViewPager emoticonViewPager;
 
@@ -3629,7 +3629,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		attachmentsGridView.requestFocus();
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setOutsideTouchable(false);
 		attachmentWindow.setFocusable(true);
 		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
@@ -5000,6 +5000,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void onEmoticonBtnClicked(final View v, int whichSubcategory, boolean backPressed)
 	{
+		if (showingChatThemePicker)
+		{
+			return;
+		}
 		// boolean controls whether we switch from sticker to emo or vice versa
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) LayoutInflater.from(getApplicationContext()).inflate(R.layout.emoticon_layout, null) : emoticonLayout;
 
@@ -5103,7 +5107,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onDismiss()
 				{
-					resizeMainheight(0);
+					resizeMainheight(0, false);
 					emoticonType = null;
 					attachmentWindow = null;
 				}
@@ -5128,22 +5132,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
 						{
 							int eventX = (int) event.getX();
-							View st = findViewById(R.id.sticker_btn);
-							int[] xy = new int[2];
-							st.getLocationInWindow(xy);
-							// touch over sticker
-							if ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())))
-							{
+							boolean stickerTouch = eatOuterTouchEmoticonPallete(eventX, R.id.sticker_btn);
+							if (stickerTouch)
 								return true;
-							}
-							View emo = findViewById(R.id.emo_btn);
-							int[] xye = new int[2];
-							emo.getLocationInWindow(xye);
-							// touch over emoticon
-							if ((eventX >= xye[0] && eventX <= (xye[0] + emo.getWidth())))
-							{
+							boolean emoTouch = eatOuterTouchEmoticonPallete(eventX, R.id.emo_btn);
+							if (emoTouch)
 								return true;
-							}
+							boolean recordingTouch = eatOuterTouchEmoticonPallete(eventX, R.id.send_message);
+							if (recordingTouch)
+								return true;
+
 							return false;
 						}
 
@@ -5161,6 +5159,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mConversationsView.setSelection(selection);
 		}
 
+	}
+
+	private boolean eatOuterTouchEmoticonPallete(int eventX, int viewId)
+	{
+		View st = findViewById(viewId);
+		int[] xy = new int[2];
+		st.getLocationInWindow(xy);
+		// touch over sticker
+		if ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
@@ -5264,6 +5275,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 
 		dialog.show();
+		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+		{
+			resizeMainheight(attachmentWindow.getHeight(), false);
+		}
 	}
 
 	private void setupStickerPreviewDialog(View parent, StickerCategoryId categoryId)
@@ -6520,26 +6535,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Log.i("keybpard", "global layout listener");
 				View root = findViewById(R.id.chatThreadParentLayout);
 				Log.i("keybpard", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
-				int temp = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight();
-				if (temp > 0)
+				int rootHeight = root.getHeight();
+				int temp = root.getRootView().getHeight() - rootHeight - getStatusBarHeight();
+				if (temp > rootHeight / 3)
 				{
 					possibleKeyboardHeight = temp;
+					isKeyboardOpen = true;
+				}
+				else
+				{
+					isKeyboardOpen = false;
 				}
 			}
 		};
 	}
 
-	private boolean resizeMainheight(int emoticonPalHeight)
+	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
 		View root = findViewById(R.id.chatThreadParentLayout);
-
-		int statusBarHeight = getStatusBarHeight();
-		int maxHeight = root.getRootView().getHeight();
-		int requiredHeight = maxHeight - statusBarHeight - emoticonPalHeight;
-		// keyboard open
-		if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
+		if (respectKeyboardVisiblity)
 		{
-			return false;
+			int statusBarHeight = getStatusBarHeight();
+			int maxHeight = root.getRootView().getHeight();
+			int requiredHeight = maxHeight - statusBarHeight - emoticonPalHeight;
+			// keyboard open
+			if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
+			{
+				return false;
+			}
 		}
 		if (root.getPaddingBottom() != emoticonPalHeight)
 		{
@@ -6563,8 +6586,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackKeyPressedET(CustomFontEditText editText)
 	{
-		// on back press - keyboard gone , try to hide emoticons
-		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+		// on back press - if keyboard was open , now keyboard gone , try to hide emoticons
+		// if keyboard ws not open , onbackpress of activity will get call back, dismiss popup there
+		// if we dismiss here in second case as well, then onbackpress of acitivty will be called and it will finish activity
+		if (isKeyboardOpen && attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
 		{
 			dismissPopupWindow();
 		}
@@ -6602,6 +6627,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Log.i("keyboard", "height " + lp.height);
 		emoticonLayout.setLayoutParams(lp);
 		attachmentWindow.setHeight(lp.height);
-		resizeMainheight(lp.height);
+		resizeMainheight(lp.height, true);
 	}
 }
