@@ -1130,6 +1130,14 @@ public class Utils
 		context.startActivity(s);
 	}
 
+	public static void startShareImageIntent(Context context, String imagePath)
+	{
+		Intent s = new Intent(android.content.Intent.ACTION_SEND);
+		s.setType("image/*");
+		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
+		context.startActivity(s);
+	}
+
 	public static void bytesToFile(byte[] bytes, File dst)
 	{
 		OutputStream out = null;

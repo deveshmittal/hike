@@ -214,6 +214,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private HikeConversationsDatabase mConversationDb;
 
+	private String currentFileSelectionPath;
+
 	private String mContactName;
 
 	private String mContactNumber;
@@ -363,7 +365,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private int selectedNonTextMsgs = 0;
 
-	private int selectedNonForwadableMsgs = 0;
+	private int selectedNonForwadableMsgs = 0, shareableMessagesCount;
 
 	private int selectedCancelableMsgs = 0;
 
@@ -1252,6 +1254,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					 * File Transfer is in progress. this can be canceled.
 					 */
 					selectedCancelableMsg(isMsgSelected);
+				}
+			}
+			else
+			{
+				if (isMsgSelected)
+				{
+					shareableMessagesCount++;
+					currentFileSelectionPath = hikeFile.getFilePath();
+				}
+				else
+				{
+					shareableMessagesCount--;
+					currentFileSelectionPath = null;
 				}
 			}
 		}
@@ -6096,6 +6111,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			mOptionsList.put(R.id.copy_msgs, false);
 		}
+		mOptionsList.put(R.id.share_msgs, shareableMessagesCount == 1 && mAdapter.getSelectedCount() == 1);
 		if (selectedNonForwadableMsgs > 0)
 		{
 			mOptionsList.put(R.id.forward_msgs, false);
@@ -6295,6 +6311,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.action_mode_overflow_menu:
 			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
 			showActionModeOverflow(message);
+			return true;
+		case R.id.share_msgs:
+			if (currentFileSelectionPath != null)
+			{
+				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionPath);
+				currentFileSelectionPath = null;
+				shareableMessagesCount--;
+				invalidateOptionsMenu();
+			}
+			else
+			{
+				Toast.makeText(ChatThread.this, "Some error occured!", Toast.LENGTH_SHORT).show();
+			}
 			return true;
 		default:
 			destroyActionMode();
