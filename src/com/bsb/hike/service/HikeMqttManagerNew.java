@@ -793,6 +793,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 					Logger.d(TAG, "Client Connected ....");
+					if(true)
+					throw new RuntimeException("Bakwaas");
 					cancelNetworkErrorTimer();
 
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
