@@ -6,6 +6,8 @@ public class ConversationTip extends Conversation
 	
 	public static final int STEALTH_FTUE_TIP = 2;
 
+	public static final int RESET_STEALTH_TIP = 3;
+
 	private int tipType;
 	public ConversationTip(int tipType)
 	{
@@ -31,5 +33,10 @@ public class ConversationTip extends Conversation
 	public boolean isStealthFtueTip()
 	{
 		return tipType == STEALTH_FTUE_TIP;
+	}
+
+	public boolean isResetStealthTip()
+	{
+		return tipType == RESET_STEALTH_TIP;
 	}
 }

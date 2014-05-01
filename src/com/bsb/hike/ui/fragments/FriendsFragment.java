@@ -46,7 +46,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.STEALTH_CONVERSATION_MARKED,
-			HikePubSub.STEALTH_CONVERSATION_UNMARKED };
+			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE };
 
 	private SharedPreferences preferences;
 
@@ -477,6 +477,23 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			{
 				friendsAdapter.stealthContactAdded(msisdn);
 			}
+		}
+		else if (HikePubSub.STEALTH_MODE_RESET_COMPLETE.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					friendsAdapter.addStealthContacts();
+					friendsAdapter.clearStealthLists();
+				}
+			});
 		}
 	}
 
