@@ -393,6 +393,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void positiveClicked(Dialog dialog)
 				{
+					HikeAnalyticsEvent.sendStealthReset();
 					resetStealthMode();
 					dialog.dismiss();
 				}

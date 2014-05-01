@@ -816,6 +816,8 @@ public class HikeConstants
 
 	public static final String DISABLED_STEALTH = "di";
 	
+	public static final String RESET = "reset";
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;

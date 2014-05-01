@@ -34,4 +34,25 @@ public class HikeAnalyticsEvent
 
 	}
 
+	/*
+	 * We send this event every time when user resets stealth mode
+	 */
+	public static void sendStealthReset()
+	{
+		JSONObject object = new JSONObject();
+		try
+		{
+			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.STEALTH);
+
+			JSONObject dataJson = new JSONObject();
+			dataJson.put(HikeConstants.RESET, true);
+			object.put(HikeConstants.DATA, dataJson);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("HikeAnalyticsEvent", "Exception in sending analytics event", e);
+		}
+	}
+
 }
