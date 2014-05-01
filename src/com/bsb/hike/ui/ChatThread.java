@@ -5131,22 +5131,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
 						{
 							int eventX = (int) event.getX();
-							View st = findViewById(R.id.sticker_btn);
-							int[] xy = new int[2];
-							st.getLocationInWindow(xy);
-							// touch over sticker
-							if ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())))
-							{
+							boolean stickerTouch = eatOuterTouchEmoticonPallete(eventX, R.id.sticker_btn);
+							if (stickerTouch)
 								return true;
-							}
-							View emo = findViewById(R.id.emo_btn);
-							int[] xye = new int[2];
-							emo.getLocationInWindow(xye);
-							// touch over emoticon
-							if ((eventX >= xye[0] && eventX <= (xye[0] + emo.getWidth())))
-							{
+							boolean emoTouch = eatOuterTouchEmoticonPallete(eventX, R.id.emo_btn);
+							if (emoTouch)
 								return true;
-							}
+							boolean recordingTouch = eatOuterTouchEmoticonPallete(eventX, R.id.send_message);
+							if (recordingTouch)
+								return true;
+
 							return false;
 						}
 
@@ -5164,6 +5158,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mConversationsView.setSelection(selection);
 		}
 
+	}
+
+	private boolean eatOuterTouchEmoticonPallete(int eventX, int viewId)
+	{
+		View st = findViewById(viewId);
+		int[] xy = new int[2];
+		st.getLocationInWindow(xy);
+		// touch over sticker
+		if ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
