@@ -892,6 +892,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					anim.setDuration(600);
 					popup.setAnimation(anim);
 				}
+				
+				/*
+				 * if overflow popup is showing we should dismiss it
+				 */
+				if(overFlowWindow != null && overFlowWindow.isShowing())
+				{
+					overFlowWindow.dismiss();
+				}
 
 			}
 		});
