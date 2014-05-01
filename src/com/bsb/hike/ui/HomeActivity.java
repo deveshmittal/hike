@@ -270,7 +270,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						Toast.makeText(HomeActivity.this, R.string.normal_mode_on, Toast.LENGTH_SHORT).show();
 						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 					}
@@ -1861,9 +1860,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void showAppropriateDialog()
 	{
-		if (dialog != null && dialog.isShowing())
+		if (dialog != null)
 		{
-			dialog.dismiss();
+			if(dialog.isShowing())
+			{
+				dialog.dismiss();
+			}
+			else
+			{
+				return;
+			}
 		}
 		switch (dialogShowing)
 		{
