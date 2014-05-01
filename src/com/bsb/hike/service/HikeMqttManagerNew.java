@@ -581,7 +581,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op.setCleanSession(false);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
-				setServerUris(op);
+//				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 				
