@@ -812,6 +812,8 @@ public class HikeConstants
 
 	public static final long RESET_COMPLETE_STEALTH_TIME_MS = 30 * 1000;
 	
+	public static final String ENABLED = "enabled";
+	
 	public static final String ENABLED_STEALTH = "en";
 
 	public static final String DISABLED_STEALTH = "di";
@@ -1421,6 +1423,9 @@ public class HikeConstants
 		public static final String REQUEST_DP = "rdp";
 		
 		public static final String STEALTH = "stlth";
+
+		public static final String TOGGLE_STEALTH = "ts";
+
 	}
 
 	public static final class SMSNative

@@ -55,4 +55,24 @@ public class HikeAnalyticsEvent
 		}
 	}
 
+	/*
+	 * We send this event every time when user enter stealth mode
+	 */
+	public static void sendStealthEnabled(boolean enabled)
+	{
+		JSONObject object = new JSONObject();
+		try
+		{
+			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.TOGGLE_STEALTH);
+
+			JSONObject dataJson = new JSONObject();
+			dataJson.put(HikeConstants.ENABLED, enabled);
+			object.put(HikeConstants.DATA, dataJson);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("HikeAnalyticsEvent", "Exception in sending analytics event", e);
+		}
+	}
 }
