@@ -15,6 +15,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -73,6 +74,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -313,10 +315,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
-
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
-		initialiseViewPager();
+		initialiseViewPager(savedInstanceState);
 		initialiseTabs();
 
 		if (savedInstanceState == null && dialogShowing == null)
@@ -328,28 +329,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (dialogShowing != null)
 		{
-			switch (dialogShowing)
-			{
-			case SMS_CLIENT:
-				showSMSClientDialog();
-				break;
-
-			case SMS_SYNC_CONFIRMATION:
-			case SMS_SYNCING:
-				showSMSSyncDialog();
-				break;
-			case UPGRADE_POPUP:
-				showUpdatePopup(updateType);
-				break;
-			case FREE_INVITE_POPUP:
-				showFreeInviteDialog();
-				break;
-			case FILE_TRANSFER_POP_Up:
-				HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG);
-			case STEALTH_FTUE_POPUP:
-				HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG);
-				break;
-			}
+			showAppropriateDialog();
 		}
 
 		if (!AppRater.showingDialog() && dialogShowing == null)
@@ -946,7 +926,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		outState.putInt(HikeConstants.Extras.FRIENDS_LIST_COUNT, friendsListCount);
 		outState.putInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT, hikeContactsCount);
 		outState.putInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT, recommendedCount);
-
 		super.onSaveInstanceState(outState);
 	}
 
@@ -1113,28 +1092,31 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean showUpdateIcon;
 
-	private void initialiseViewPager()
+	private void initialiseViewPager(Bundle outBundle)
 	{
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
 
 		List<Fragment> fragmentList = new ArrayList<Fragment>(headers.length);
-		fragmentList.add(getFragmentForIndex(0));
-		fragmentList.add(getFragmentForIndex(1));
-		fragmentList.add(getFragmentForIndex(2));
-
+		fragmentList.add(getFragmentForIndex(outBundle, 0));
+		fragmentList.add(getFragmentForIndex(outBundle, 1));
+		fragmentList.add(getFragmentForIndex(outBundle, 2));
+		viewPager.setOffscreenPageLimit(2);
 		viewPager.setAdapter(new HomeAdapter(getSupportFragmentManager(), fragmentList));
 		viewPager.setCurrentItem(1);
 	}
 
-	private Fragment getFragmentForIndex(int index)
+	private Fragment getFragmentForIndex(Bundle oBundle, int index)
 	{
+
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + index);
 		if (fragment == null)
 		{
 			switch (index)
 			{
 			case 0:
+
 				fragment = new UpdatesFragment();
+
 				break;
 
 			case 1:
@@ -1156,6 +1138,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		public HomeAdapter(FragmentManager fm, List<Fragment> fragments)
 		{
+
 			super(fm);
 			this.fragments = fragments;
 		}
@@ -1191,6 +1174,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object)
+		{
+			// TODO Auto-generated method stub
+			super.destroyItem(container, position, object);
+			viewPager.removeView(((Fragment) object).getView());
+		}
 	}
 
 	private void showUpdatePopup(final int updateType)
@@ -1862,5 +1852,72 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		// TODO Auto-generated method stub
+		super.onConfigurationChanged(newConfig);
+		// handle dialogs here
+		if (dialogShowing != null)
+		{
+			showAppropriateDialog();
+		}
+	}
+
+	private void showAppropriateDialog()
+	{
+		if (dialog != null && dialog.isShowing())
+		{
+			dialog.dismiss();
+		}
+		switch (dialogShowing)
+		{
+		case SMS_CLIENT:
+			showSMSClientDialog();
+			break;
+
+		case SMS_SYNC_CONFIRMATION:
+		case SMS_SYNCING:
+			showSMSSyncDialog();
+			break;
+		case UPGRADE_POPUP:
+			showUpdatePopup(updateType);
+			break;
+		case FREE_INVITE_POPUP:
+			showFreeInviteDialog();
+			break;
+		case FILE_TRANSFER_POP_Up:
+			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getFileTransferDialogListener());
+
+			break;
+		}
+	}
+
+	private HikeDialogListener getFileTransferDialogListener()
+	{
+		return new HikeDialog.HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+				dialogShowing = null;
+				dialog.dismiss();
+				HomeActivity.this.dialog = null;
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+			}
+		};
 	}
 }
