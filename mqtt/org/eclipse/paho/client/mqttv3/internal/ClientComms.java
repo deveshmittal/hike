@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,8 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -51,6 +53,7 @@ public class ClientComms {
 	private MqttClientPersistence persistence;
 	CommsTokenStore 			tokenStore;
 	boolean 					stoppingComms = false;
+	Map<Long, Long> messageMap = new HashMap<Long, Long>();
 
 	final static byte CONNECTED	= 0;
 	final static byte CONNECTING	= 1;
@@ -540,9 +543,9 @@ public class ClientComms {
 				// packet.
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
-				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream());
+				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream(), networkModule.getSocket(), messageMap);
 				receiver.start("MQTT Rec: "+getClient().getClientId());
-				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream());
+				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream(), networkModule.getSocket(), messageMap);
 				sender.start("MQTT Snd: "+getClient().getClientId());
 				callback.start("MQTT Call: "+getClient().getClientId());
 
