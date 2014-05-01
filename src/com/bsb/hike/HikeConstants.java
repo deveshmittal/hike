@@ -385,6 +385,8 @@ public class HikeConstants
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
+	public static final String RESET_STEALTH_PREF = "resetStealthPref";
+
 	public static final String REQUEST_DP = "rdp";
 
 	public static final String C_TIME_STAMP = "cts";
@@ -809,7 +811,9 @@ public class HikeConstants
 	public static final int STEALTH_ON_FAKE = 1;
 
 	public static final int STEALTH_ON = 2;
-	
+
+	public static final long RESET_COMPLETE_STEALTH_TIME_MS = 30 * 1000;
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;

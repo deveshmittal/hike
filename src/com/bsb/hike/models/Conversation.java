@@ -30,6 +30,15 @@ public class Conversation implements Comparable<Conversation>
 				return 1;
 			}
 
+			if (lhs instanceof ConversationTip)
+			{
+				return -1;
+			}
+			else if (rhs instanceof ConversationTip)
+			{
+				return 1;
+			}
+
 			return rhs.compareTo(lhs);
 		}
 	}

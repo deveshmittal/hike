@@ -1496,4 +1496,14 @@
     <string name="stealth_notification_message">You have a new notification</string>
     <string name="stealth_ftue_conv_tip_showing">please tap and hold some conversation</string>
     <string name="retry">Retry</string>
+
+	<string name="reset_complete_stealth_header">Reset Stealth Mode</string>
+	<string name="reset_complete_stealth_info">Forgot your password? Reset Stealth Mode. You’ll lose all hidden chats.</string>
+	<string name="initiate_reset_stealth_header">Reset Stealth Mode</string>
+	<string name="initiate_reset_stealth_body">Stealth Mode will be reset in 30 minutes. Continue?</string>
+	<string name="resetting_complete_stealth_header">Resetting Stealth Mode</string>
+	<string name="resetting_complete_stealth_info">Tap to cancel.</string>
+	<string name="reset_stealth_tip">Stealth Mode will be reset in %1$s</string>
+	<string name="tap_to_reset_stealth_tip">Tap here to reset Stealth Mode</string>
+	<string name="reset_stealth_confirmation">Are you sure you want to reset Stealth Mode? All hidden chats will be deleted?</string>	
 </resources>
