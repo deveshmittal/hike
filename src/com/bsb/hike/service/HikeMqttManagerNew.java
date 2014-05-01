@@ -720,7 +720,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	/* Listeners for conection */
+	/* Listeners for connection */
 	private IMqttActionListener getConnectListener()
 	{
 		if (listernerConnect == null)
@@ -730,24 +730,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void onSuccess(IMqttToken arg0)
 				{
-					reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
-					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
-					Logger.d(TAG, "Client Connected ....");
-					cancelNetworkErrorTimer();
-
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
-
-					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
-						/*
-						 * String[] topics = new String[3]; topics[0] = uid + "/s"; topics[1] = uid + "/a"; topics[2] = uid + "/u"; int[] qos = new int[] { 1, 1, 1 };
-						 * mqtt.subscribe(topics, qos).setActionCallback(new IMqttActionListener() {
-						 * 
-						 * @Override public void onSuccess(IMqttToken arg0) { Logger.d(TAG, "Successfully subscribed to topics."); }
-						 * 
-						 * @Override public void onFailure(IMqttToken arg0, Throwable arg1) { Logger.e(TAG, "Error subscribing to topics : " + arg1.getMessage()); } });
-						 */
+						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
+						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
+						Logger.d(TAG, "Client Connected ....");
+						cancelNetworkErrorTimer();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
+						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
 
@@ -759,51 +749,64 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						e.printStackTrace();
 						scheduleNextConnectionCheck();
 					}
-					releaseWakeLock();
+					finally
+					{
+						releaseWakeLock();
+					}
 				}
 
 				@Override
 				public void onFailure(IMqttToken arg0, Throwable value)
 				{
-					MqttException ex = arg0.getException();
-					if (ex != null)
-						Logger.e(TAG, "Exception : " + ex.getReasonCode());
-					ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
-					scheduleNetworkErrorTimer();
-					if (value != null)
+					try
 					{
-						Logger.e(TAG, "Connection failed : " + value.getMessage());
-						String msg = value.getMessage();
-						Logger.e("(TAG", "Hike Unable to connect", value);
-						connectionStatus = getServerStatusCode(msg);
-
-						if (connectionStatus == ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD || connectionStatus == ServerConnectionStatus.IDENTIFIER_REJECTED
-								|| connectionStatus == ServerConnectionStatus.NOT_AUTHORIZED)
+						MqttException ex = arg0.getException();
+						if (ex != null)
+							Logger.e(TAG, "Exception : " + ex.getReasonCode());
+						ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
+						scheduleNetworkErrorTimer();
+						if (value != null)
 						{
-							clearSettings();
+							Logger.e(TAG, "Connection failed : " + value.getMessage());
+							String msg = value.getMessage();
+							Logger.e("(TAG", "Hike Unable to connect", value);
+							connectionStatus = getServerStatusCode(msg);
+
+							if (connectionStatus == ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD || connectionStatus == ServerConnectionStatus.IDENTIFIER_REJECTED
+									|| connectionStatus == ServerConnectionStatus.NOT_AUTHORIZED)
+							{
+								clearSettings();
+							}
+
 						}
+						mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON;
 
+						/*
+						 * if something has failed, we wait for one keep-alive period before trying again in a real implementation, you would probably want to keep count of how
+						 * many times you attempt this, and stop trying after a certain number, or length of time - rather than keep trying forever. a failure is often an
+						 * intermittent network issue, however, so some limited retry is a good idea
+						 */
+						if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
+						{
+							int reConnTime = getConnRetryTime();
+							Logger.d(TAG, "Reconnect time (sec): " + reConnTime);
+							scheduleNextConnectionCheck(reConnTime);
+						}
+						else
+						{
+							Random random = new Random();
+							int reconnectIn = random.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
+							scheduleNextConnectionCheck(reconnectIn * 60); // Converting minutes to seconds
+						}
 					}
-					mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON;
-
-					/*
-					 * if something has failed, we wait for one keep-alive period before trying again in a real implementation, you would probably want to keep count of how many
-					 * times you attempt this, and stop trying after a certain number, or length of time - rather than keep trying forever. a failure is often an intermittent
-					 * network issue, however, so some limited retry is a good idea
-					 */
-					if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
+					catch (Exception e)
 					{
-						int reConnTime = getConnRetryTime();
-						Logger.d(TAG, "Reconnect time (sec): " + reConnTime);
-						scheduleNextConnectionCheck(reConnTime);
+						Logger.e(TAG, "Exception in connect failure callback",e);
 					}
-					else
+					finally
 					{
-						Random random = new Random();
-						int reconnectIn = random.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
-						scheduleNextConnectionCheck(reconnectIn * 60); // Converting minutes to seconds
+						releaseWakeLock();
 					}
-					releaseWakeLock();
 				}
 			};
 		}
@@ -1118,8 +1121,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					disconnectOnMqttThread(true);
 				else
 					connectOnMqttThread();
-				Utils.setupUri(context); // TODO : this should be moved out from here to some other place
 			}
+			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
