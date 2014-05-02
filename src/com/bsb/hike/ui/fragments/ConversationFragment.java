@@ -467,7 +467,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		/*
-		 * If stealth ftue conv tap tip is visible than remove it
+		 * Switch to stealth mode if we are in ftue.
 		 */
 		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
@@ -477,7 +477,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if (convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
 				{
 					HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
-					removeStealthConvTip(convTip);
 					break;
 				}
 			}
@@ -545,6 +544,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					boolean newStealthValue = !conv.isStealth();
 					Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
+					
+					/*
+					 * If stealth ftue conv tap tip is visible than remove it
+					 */
+					if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+					{
+						for (int i = 0; i < mAdapter.getCount(); i++)
+						{
+							Conversation convTip = mAdapter.getItem(i);
+							if (convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
+							{
+								removeStealthConvTip(convTip);
+								break;
+							}
+						}
+					}
 
 					if (stealthType == HikeConstants.STEALTH_ON_FAKE)
 					{
