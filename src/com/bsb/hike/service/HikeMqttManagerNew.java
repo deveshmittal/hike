@@ -581,7 +581,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op.setCleanSession(false);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
-				setServerUris(op);
+//				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 				
@@ -795,10 +795,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Logger.d(TAG, "Client Connected ....");
 					cancelNetworkErrorTimer();
 
-					/*
-					 * Send a fg/bg packet on reconnecting.
-					 */
-					Utils.appStateChanged(context);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONNECTED_TO_MQTT, null);
 
 					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try

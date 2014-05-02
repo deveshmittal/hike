@@ -62,6 +62,7 @@ import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -392,6 +393,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void positiveClicked(Dialog dialog)
 				{
+					HikeAnalyticsEvent.sendStealthReset();
 					resetStealthMode();
 					dialog.dismiss();
 				}
@@ -405,6 +407,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void negativeClicked(Dialog dialog)
 				{
+					removeResetStealthTipIfExists();
+
+					Utils.cancelScheduledStealthReset(getActivity());
+
 					dialog.dismiss();
 				}
 			}, dialogStrings);
@@ -549,11 +555,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					if (getString(R.string.mark_stealth).equals(option))
 					{
+						Set<String> enabledConvs = new HashSet<String>();
+						enabledConvs.add(conv.getMsisdn());
+						HikeAnalyticsEvent.sendStealthMsisdns(enabledConvs, new HashSet<String>());
+						
 						stealthConversations.add(conv);
 						HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
 					}
 					else
 					{
+						Set<String> disabledConvs = new HashSet<String>();
+						disabledConvs.add(conv.getMsisdn());
+						HikeAnalyticsEvent.sendStealthMsisdns(new HashSet<String>(), disabledConvs);
+						
 						stealthConversations.remove(conv);
 						HikeMessengerApp.removeStealthMsisdn(conv.getMsisdn());
 					}

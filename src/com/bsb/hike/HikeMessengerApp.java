@@ -63,7 +63,7 @@ import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application
+public class HikeMessengerApp extends Application implements HikePubSub.Listener
 {
 
 	public static enum CurrentState
@@ -715,6 +715,8 @@ public class HikeMessengerApp extends Application
 		 * Setting the last seen preference for the friends comparator.
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 	}
 
 	private static HikeLruCache cache;
@@ -848,6 +850,18 @@ public class HikeMessengerApp extends Application
 		if (activityTimeLogger == null)
 		{
 			activityTimeLogger = new ActivityTimeLogger();
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if(HikePubSub.CONNECTED_TO_MQTT.equals(type))
+		{
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			Utils.appStateChanged(this, false);
 		}
 	}
 }

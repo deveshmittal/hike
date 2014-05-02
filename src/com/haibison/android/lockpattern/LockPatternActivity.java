@@ -304,7 +304,7 @@ public class LockPatternActivity extends Activity {
     private View mFooter;
     private Button mBtnCancel;
     private Button mBtnConfirm;
-
+    private Boolean mIsRetryBtnVisible;
     /**
      * Called when the activity is first created.
      */
@@ -552,6 +552,11 @@ public class LockPatternActivity extends Activity {
             }
             if (btnOkEnabled != null)
                 mBtnConfirm.setEnabled(btnOkEnabled);
+            
+            if(mIsRetryBtnVisible != null && mIsRetryBtnVisible)
+            {
+            	changeCancelToRetry();
+            }
         }// ACTION_CREATE_PATTERN
         else if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction())) {
             if (TextUtils.isEmpty(infoText))
@@ -848,6 +853,8 @@ public class LockPatternActivity extends Activity {
         public void onPatternStart() {
             mLockPatternView.removeCallbacks(mLockPatternViewReloader);
             mLockPatternView.setDisplayMode(DisplayMode.Correct);
+            changeCancelToRetry();
+            mBtnCancel.setEnabled(false);
 
             if (ACTION_CREATE_PATTERN.equals(getIntent().getAction())) {
                 mTextInfo
@@ -870,6 +877,7 @@ public class LockPatternActivity extends Activity {
         public void onPatternDetected(List<Cell> pattern) {
             if (ACTION_CREATE_PATTERN.equals(getIntent().getAction())) {
                 doCheckAndCreatePattern(pattern);
+                mBtnCancel.setEnabled(true);
             }// ACTION_CREATE_PATTERN
             else if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction())) {
                 doComparePattern(pattern);
@@ -884,6 +892,8 @@ public class LockPatternActivity extends Activity {
         @Override
         public void onPatternCleared() {
             mLockPatternView.removeCallbacks(mLockPatternViewReloader);
+            changeRetryToCancel();
+            mBtnCancel.setEnabled(true);
 
             if (ACTION_CREATE_PATTERN.equals(getIntent().getAction())) {
                 mLockPatternView.setDisplayMode(DisplayMode.Correct);
@@ -923,19 +933,49 @@ public class LockPatternActivity extends Activity {
             finishWithNegativeResult(RESULT_CANCELED);
         }// onClick()
     };// mBtnCancelOnClickListener
+    
+    private final View.OnClickListener mBtnRetryOnClickListener = new View.OnClickListener() {
 
+        @Override
+        public void onClick(View v) {
+        	mLockPatternViewReloader.run();
+        }// onClick()
+    };
+
+    private final void changeCancelToRetry()
+    {
+    	if (mBtnOkCmd == ButtonOkCommand.CONTINUE) 
+    	{
+    		mIsRetryBtnVisible = true;
+    		mBtnCancel.setText(R.string.retry);
+    		mBtnCancel.setOnClickListener(mBtnRetryOnClickListener);
+    	}
+    }
+    
+    private final void changeRetryToCancel()
+    {
+    	if (mBtnOkCmd == ButtonOkCommand.CONTINUE) 
+    	{
+    		mIsRetryBtnVisible = false;
+    		mBtnCancel.setText(android.R.string.cancel);
+    		mBtnCancel.setOnClickListener(mBtnCancelOnClickListener);
+    	}
+    }
+    
     private final View.OnClickListener mBtnConfirmOnClickListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
             if (ACTION_CREATE_PATTERN.equals(getIntent().getAction())) {
                 if (mBtnOkCmd == ButtonOkCommand.CONTINUE) {
+                	changeRetryToCancel();
                     mBtnOkCmd = ButtonOkCommand.DONE;
                     mLockPatternView.clearPattern();
                     mTextInfo
                             .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
                     mBtnConfirm.setText(R.string.alp_42447968_cmd_confirm);
                     mBtnConfirm.setEnabled(false);
+                    mIsRetryBtnVisible = null;
                 } else {
                     final char[] pattern = getIntent().getCharArrayExtra(
                             EXTRA_PATTERN);
