@@ -58,7 +58,7 @@ public class LockPattern
 				break;
 			case Activity.RESULT_CANCELED:
 				Toast.makeText(activity, activity.getString(R.string.stealth_mode_on)+".", Toast.LENGTH_SHORT).show();
-				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON_FAKE);
+				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
 				break;
 			case LockPatternActivity.RESULT_FAILED:
