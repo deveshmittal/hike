@@ -6,6 +6,7 @@ import org.json.JSONArray;
 
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -165,7 +166,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 			if (remainingTime <= 0)
 			{
-				tipText.setText(R.string.tap_to_reset_stealth_tip);
+				tipText.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
 			}
 			else
 			{
@@ -448,7 +449,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 				return;
 			}
-			textView.setText(R.string.tap_to_reset_stealth_tip);
+			textView.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
 		}
 
 		@Override
@@ -474,7 +475,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		int minutes = (int) (secondsUntilFinished / 60);
 		int seconds = (int) (secondsUntilFinished % 60);
 		String text = String.format("%1$02d:%2$02d", minutes, seconds);
-		textView.setText(getContext().getResources().getString(R.string.reset_stealth_tip, text));
+		textView.setText(Html.fromHtml(getContext().getString(R.string.reset_stealth_tip, text)));
+
 	}
 
 	public void resetCountDownSetter()
