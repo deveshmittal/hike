@@ -198,16 +198,9 @@ public class UI {
                 : screenSize.fixedWidthMajor));
         height = (int) (height * (isPortrait ? screenSize.fixedHeightMajor
     			: screenSize.fixedHeightMinor));
-        if(!isActionCreatePattern)
+        if(!isActionCreatePattern && isPortrait)
         {
-        	if(isPortrait)
-        	{
-        		height = LayoutParams.WRAP_CONTENT;
-        	}
-        	else
-        	{
-        		width = height;
-        	}
+        	height = LayoutParams.WRAP_CONTENT;
         }
 
         if (BuildConfig.DEBUG)
