@@ -1,6 +1,7 @@
 package com.bsb.hike.adapters;
 
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 
@@ -11,10 +12,13 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,6 +50,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	private int mIconImageSize;
 
 	private CountDownSetter countDownSetter;
+	
+	private SparseBooleanArray itemsToAnimat;
 
 	private enum ViewType
 	{
@@ -59,6 +65,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
+		itemsToAnimat = new SparseBooleanArray();
 	}
 
 	@Override
@@ -201,6 +208,13 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		}
 
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
+		if(itemToBeAnimated(conversation))
+		{
+			final Animation animation = AnimationUtils.loadAnimation(context,
+		            R.anim.slide_in_right_noalpha);
+			v.startAnimation(animation);
+			setItemAnimated(conversation);
+		}
 		String name = conversation.getLabel();
 
 		contactView.setText(name);
@@ -488,5 +502,23 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 		this.countDownSetter.cancel();
 		this.countDownSetter = null;
+	}
+
+	public void addItemsToAnimat(Set<Conversation> stealthConversations)
+	{
+		for (Conversation conversation : stealthConversations)
+		{
+			itemsToAnimat.put(conversation.hashCode(), true);
+		}
+	}
+	
+	public void setItemAnimated(Conversation conv)
+	{
+		itemsToAnimat.delete(conv.hashCode());
+	}
+	
+	public boolean itemToBeAnimated(Conversation conv)
+	{
+		return itemsToAnimat.get(conv.hashCode()) && conv.isStealth();
 	}
 }

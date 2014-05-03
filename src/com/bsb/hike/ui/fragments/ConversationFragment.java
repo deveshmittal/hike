@@ -720,6 +720,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
+			mAdapter.addItemsToAnimat(stealthConversations);
 			displayedConversations.addAll(stealthConversations);
 		}
 
