@@ -118,6 +118,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -1220,7 +1221,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		dismissPopupWindow();
 		ConvMessage message = mAdapter.getItem(position);
-		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isSmsToggle())
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
 			return false;
 		}
@@ -1771,14 +1772,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		/*
-		 * Add another item which translates to the SMS toggle option.
-		 */
-		if (!mConversation.isOnhike() && !Utils.isContactInternational(mContactNumber))
-		{
-			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
-		}
-
 		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
@@ -1935,6 +1928,43 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+	}
+
+	private void setupSMSToggleButton()
+	{
+		TextView smsToggleSubtext = (TextView) findViewById(R.id.sms_toggle_subtext);
+		CheckBox smsToggle = (CheckBox) findViewById(R.id.checkbox);
+		TextView hikeSmsText = (TextView) findViewById(R.id.hike_text);
+		TextView regularSmsText = (TextView) findViewById(R.id.sms_text);
+
+		if (selectedTheme == ChatTheme.DEFAULT)
+		{
+			hikeSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			regularSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			smsToggle.setButtonDrawable(R.drawable.sms_checkbox);
+			findViewById(R.id.sms_toggle_button).setBackgroundResource(R.drawable.bg_sms_toggle);
+		}
+		else
+		{
+			hikeSmsText.setTextColor(this.getResources().getColor(R.color.white));
+			regularSmsText.setTextColor(this.getResources().getColor(R.color.white));
+			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.white));
+			smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
+			findViewById(R.id.sms_toggle_button).setBackgroundResource(selectedTheme.smsToggleBgRes());
+		}
+
+		boolean smsToggleOn = Utils.getSendSmsPref(this);
+		smsToggle.setChecked(smsToggleOn);
+		mAdapter.initializeSmsToggleTexts(hikeSmsText, regularSmsText, smsToggleSubtext);
+		mAdapter.setSmsToggleSubtext(smsToggleOn);
+
+		smsToggleSubtext.setVisibility(View.VISIBLE);
+		smsToggle.setVisibility(View.VISIBLE);
+		hikeSmsText.setVisibility(View.VISIBLE);
+		regularSmsText.setVisibility(View.VISIBLE);
+
+		smsToggle.setOnCheckedChangeListener(mAdapter);
 	}
 
 	private void setupChatThemeFTUE()
@@ -2250,7 +2280,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (mConversation.isOnhike() || (mConversation instanceof GroupConversation))
 		{
-
 			removeSMSToggle();
 
 			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
@@ -2279,27 +2308,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void removeSMSToggle()
 	{
-		if (!messages.isEmpty() && hasSMSToggle())
-		{
-			mAdapter.removeMessage(0);
-		}
-	}
-
-	private boolean hasSMSToggle()
-	{
-		ConvMessage convMessage = messages.get(0);
-		/*
-		 * Typing notification
-		 */
-		if (convMessage == null)
-		{
-			return false;
-		}
-		if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID)
-		{
-			return true;
-		}
-		return false;
+		findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
 	}
 
 	/* returns TRUE iff the last message was received and unread */
@@ -3692,14 +3701,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mAdapter.setChatTheme(chatTheme);
-		View nudgeTutorial = getNudgeTutorialView(chatTheme);
-		if (nudgeTutorial != null)
+
+		if (!mConversation.isOnhike() && !Utils.isContactInternational(mContactNumber))
 		{
-			ViewGroup empty = (ViewGroup) findViewById(android.R.id.empty);
-			empty.removeAllViews();
-			empty.addView(nudgeTutorial);
-			empty.setOnTouchListener(this);
-			mConversationsView.setEmptyView(empty);
+			/*
+			 * Add another item which translates to the SMS toggle option.
+			 */
+			setupSMSToggleButton();
+			findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
+			View nudgeTutorial = getNudgeTutorialView(chatTheme);
+			if (nudgeTutorial != null)
+			{
+				ViewGroup empty = (ViewGroup) findViewById(android.R.id.empty);
+				empty.removeAllViews();
+				empty.addView(nudgeTutorial);
+				empty.setOnTouchListener(this);
+				mConversationsView.setEmptyView(empty);
+			}
 		}
 		setMuteViewBackground();
 
@@ -5671,7 +5693,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
 
-			int startIndex = hasSMSToggle() ? 1 : 0;
+			int startIndex = 0;
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
