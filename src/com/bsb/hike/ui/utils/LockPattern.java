@@ -60,6 +60,7 @@ public class LockPattern
 			case Activity.RESULT_CANCELED:
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.ENTER_WRONG_STEALTH_MODE);
 				break;
 			case LockPatternActivity.RESULT_FAILED:
 				break;

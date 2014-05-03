@@ -284,6 +284,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+						Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
 					}
 				}
 			}

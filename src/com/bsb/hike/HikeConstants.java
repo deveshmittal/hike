@@ -1327,6 +1327,10 @@ public class HikeConstants
 		
 		public static final String RESET_STEALTH_CANCEL = "resetStlthCancel";
 		
+		public static final String ENTER_WRONG_STEALTH_MODE = "entWrongStlth";
+		
+		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
+		
 	}
 
 	public static final class MqttMessageTypes
