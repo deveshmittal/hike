@@ -46,7 +46,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -94,12 +93,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStub;
-import android.view.ViewTreeObserver;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -109,7 +107,6 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -118,13 +115,11 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -143,7 +138,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -178,9 +172,7 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.ImageWorker;
-import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -195,8 +187,8 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.RoundedRepeatingDrawable;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -207,7 +199,6 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
-import com.google.android.gms.internal.at;
 
 @SuppressLint("NewApi")
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
@@ -1801,7 +1792,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
+
+		/*
+		 * Added a hacky fix to ensure that we don't load more messages the first
+		 * time onScroll is called.
+		 */
+		loadingMoreMessages = true;
 		mConversationsView.setOnScrollListener(this);
+		loadingMoreMessages = false;
 
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, false))
 		{
@@ -5685,12 +5683,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	};
 
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-
-			int startIndex = hasSMSToggle() ? 1 : 0;
+			final int startIndex = hasSMSToggle() ? 1 : 0;
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
@@ -5701,24 +5698,51 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			loadingMoreMessages = true;
 
-			List<ConvMessage> olderMessages = mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
-					mConversation, messages.get(startIndex).getMsgID());
-
-			if (!olderMessages.isEmpty())
+			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
 			{
-				mAdapter.addMessages(olderMessages, startIndex);
-				mAdapter.notifyDataSetChanged();
-				mConversationsView.setSelection(firstVisibleItem + olderMessages.size());
+
+				@Override
+				protected List<ConvMessage> doInBackground(Void... params)
+				{
+					return mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
+							mConversation, messages.get(startIndex).getMsgID());
+				}
+
+				@Override
+				protected void onPostExecute(List<ConvMessage> result)
+				{
+					if (!result.isEmpty())
+					{
+						int scrollOffset = 0;
+
+						if (mConversationsView.getChildAt(0) != null)
+						{
+							scrollOffset = mConversationsView.getChildAt(0).getTop();
+						}
+
+						mAdapter.addMessages(result, startIndex);
+						mAdapter.notifyDataSetChanged();
+						mConversationsView.setSelectionFromTop(firstVisibleItem + result.size(), scrollOffset);
+					}
+					else
+					{
+						/*
+						 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
+						 */
+						reachedEnd = true;
+					}
+					loadingMoreMessages = false;
+				}
+			};
+
+			if (Utils.isHoneycombOrHigher())
+			{
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 			else
 			{
-				/*
-				 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
-				 */
-				reachedEnd = true;
+				asyncTask.execute();
 			}
-
-			loadingMoreMessages = false;
 		}
 
 		if (unreadMessageIndicator.getVisibility() == View.VISIBLE && mConversationsView.getLastVisiblePosition() > messages.size() - unreadMessageCount - 2)

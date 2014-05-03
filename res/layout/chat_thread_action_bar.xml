@@ -73,7 +73,7 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="1"
             android:textStyle="normal"
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:visibility="gone" />
     </LinearLayout>
 
