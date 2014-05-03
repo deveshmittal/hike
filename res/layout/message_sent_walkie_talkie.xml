@@ -20,6 +20,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@id/day_container"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="2.5dp"
         android:background="@drawable/bg_ft_progress"
         android:gravity="center" >
 
@@ -82,7 +83,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@id/day_container"
         layout="@layout/message_overlay" />
-    
+
     <ViewStub
         android:id="@+id/message_info_stub"
         android:layout_width="wrap_content"

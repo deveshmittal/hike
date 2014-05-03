@@ -18,6 +18,7 @@
         android:layout_width="@dimen/chatthread_avatar"
         android:layout_height="@dimen/chatthread_avatar"
         android:layout_below="@id/day_container"
+        android:layout_marginTop="2.5dp"
         layout="@layout/message_sender_avatar" />
 
     <include
@@ -26,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/day_container"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="2.5dp"
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_sender_details" />
 

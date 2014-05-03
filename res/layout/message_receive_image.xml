@@ -18,6 +18,7 @@
         android:layout_width="@dimen/chatthread_avatar"
         android:layout_height="@dimen/chatthread_avatar"
         android:layout_below="@id/day_container"
+        android:layout_marginTop="2.5dp"
         layout="@layout/message_sender_avatar" />
 
     <LinearLayout
@@ -25,7 +26,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/day_container"
+        android:layout_marginBottom="2.5dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="2.5dp"
         android:layout_toRightOf="@id/avatar_container"
         android:background="@drawable/ic_bubble_white_selector"
         android:orientation="vertical" >
@@ -100,7 +103,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignBottom="@id/message_container"
-        android:layout_alignTop="@id/message_container"
+        android:layout_below="@id/day_container"
         layout="@layout/message_overlay" />
 
 </RelativeLayout>
