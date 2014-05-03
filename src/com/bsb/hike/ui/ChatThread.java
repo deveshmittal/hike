@@ -5673,12 +5673,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	};
 
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-
-			int startIndex = hasSMSToggle() ? 1 : 0;
+			final int startIndex = hasSMSToggle() ? 1 : 0;
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
@@ -5689,24 +5688,51 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			loadingMoreMessages = true;
 
-			List<ConvMessage> olderMessages = mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
-					mConversation, messages.get(startIndex).getMsgID());
-
-			if (!olderMessages.isEmpty())
+			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
 			{
-				mAdapter.addMessages(olderMessages, startIndex);
-				mAdapter.notifyDataSetChanged();
-				mConversationsView.setSelection(firstVisibleItem + olderMessages.size());
+
+				@Override
+				protected List<ConvMessage> doInBackground(Void... params)
+				{
+					return mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
+							mConversation, messages.get(startIndex).getMsgID());
+				}
+
+				@Override
+				protected void onPostExecute(List<ConvMessage> result)
+				{
+					if (!result.isEmpty())
+					{
+						int scrollOffset = 0;
+
+						if (mConversationsView.getChildAt(0) != null)
+						{
+							scrollOffset = mConversationsView.getChildAt(0).getTop();
+						}
+
+						mAdapter.addMessages(result, startIndex);
+						mAdapter.notifyDataSetChanged();
+						mConversationsView.setSelectionFromTop(firstVisibleItem + result.size(), scrollOffset);
+					}
+					else
+					{
+						/*
+						 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
+						 */
+						reachedEnd = true;
+					}
+					loadingMoreMessages = false;
+				}
+			};
+
+			if (Utils.isHoneycombOrHigher())
+			{
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 			else
 			{
-				/*
-				 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
-				 */
-				reachedEnd = true;
+				asyncTask.execute();
 			}
-
-			loadingMoreMessages = false;
 		}
 
 		if (unreadMessageIndicator.getVisibility() == View.VISIBLE && mConversationsView.getLastVisiblePosition() > messages.size() - unreadMessageCount - 2)
