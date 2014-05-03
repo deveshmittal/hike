@@ -1941,6 +1941,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case STEALTH_FTUE_POPUP:
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.QUICK_SETUP_CLICK);
 					break;
 
 				default:
