@@ -501,7 +501,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.delete));
 		}
-		optionsList.add(getString(R.string.deleteconversations));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
