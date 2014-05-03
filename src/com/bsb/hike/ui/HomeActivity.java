@@ -252,16 +252,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						if(!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+						if(!(dialog != null && dialog.isShowing()))
 						{
-							
-								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
-						}
-						else
-						{
-							dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
-							dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+							if(!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+							{
+								
+									dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+									dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+							}
+							else
+							{
+								dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+							}
 						}
 					}
 				}
