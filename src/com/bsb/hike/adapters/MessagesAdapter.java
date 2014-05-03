@@ -202,6 +202,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private static class TextViewHolder extends DetailViewHolder
 	{
 		TextView text;
+		
+		ViewStub sdrTipStub;
 	}
 
 	private static class StatusViewHolder extends DayHolder
@@ -1793,9 +1795,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = new TextViewHolder();
 					long time = System.currentTimeMillis();
 					v = inflateView(R.layout.message_sent_text, parent, false);
-					Logger.d("MSG_GET_VIEW", "" + (System.currentTimeMillis() - time));
 					textHolder.text = (TextView) v.findViewById(R.id.text);
-					// textHolder.text = (TextView) v.findViewById(R.id.chat_message_text);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
 					textHolder.status = (ImageView) v.findViewById(R.id.status);
 					textHolder.timeStatus = (View) v.findViewById(R.id.time_status);
@@ -1803,6 +1803,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 					textHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					textHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
+					textHolder.sdrTipStub = (ViewStub) v.findViewById(R.id.sdr_ftue_tip);
 					v.setTag(textHolder);
 				}
 				else
@@ -1852,32 +1853,32 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
 			setSelection(position, textHolder.selectedStateOverlay);
 
-			// boolean showTip = false;
-			//
-			// if (viewType == ViewType.SEND_HIKE)
-			// {
-			// if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
-			// {
-			// if (msgIdForSdrTip == -1)
-			// {
-			// showTip = true;
-			// }
-			// else if (convMessage.getMsgID() == msgIdForSdrTip)
-			// {
-			// showTip = true;
-			// }
-			// }
-			//
-			// if (showTip)
-			// {
-			// msgIdForSdrTip = convMessage.getMsgID();
-			// showSdrTip(holder.sdrFtueTip);
-			// }
-			// else
-			// {
-			// holder.sdrFtueTip.setVisibility(View.GONE);
-			// }
-			// }
+			boolean showTip = false;
+
+			if (viewType == ViewType.SEND_HIKE)
+			{
+				if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
+				{
+					if (msgIdForSdrTip == -1)
+					{
+						showTip = true;
+					}
+					else if (convMessage.getMsgID() == msgIdForSdrTip)
+					{
+						showTip = true;
+					}
+				}
+
+				if (showTip)
+				{
+					msgIdForSdrTip = convMessage.getMsgID();
+					inflateSdrTip(textHolder.sdrTipStub);
+				}
+				else
+				{
+					textHolder.sdrTipStub.setVisibility(View.GONE);
+				}
+			}
 			textHolder.messageContainer.setTag(convMessage);
 			textHolder.messageContainer.setOnClickListener(this);
 			textHolder.messageContainer.setOnLongClickListener(this);
@@ -3360,6 +3361,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
+	private void inflateSdrTip(ViewStub sdrStub)
+	{
+		sdrStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		{
+			@Override
+			public void onInflate(ViewStub stub, View inflated)
+			{
+				View tipContainer = inflated.findViewById(R.id.tip_container);
+				showSdrTip(tipContainer);
+			}
+		});
+		try
+		{
+			sdrStub.inflate();
+		}
+		catch (Exception e)
+		{
+
+		}
+	}
 	private void showSdrTip(View sdrFtueTip)
 	{
 		sdrFtueTip.setVisibility(View.VISIBLE);

@@ -59,4 +59,13 @@
         android:layout_below="@id/message_container"
         android:layout="@layout/message_sent_info" />
 
+    <ViewStub
+        android:id="@+id/sdr_ftue_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/message_container"
+        android:layout_marginRight="6dp"
+        android:layout="@layout/sdr_tool_tip" />
+
 </RelativeLayout>
