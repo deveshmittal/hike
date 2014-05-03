@@ -3284,8 +3284,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.addView(participantInfo);
 			dayHolder = participantInfoHolder;
 		}
-		if(dayHolder.dayStub == null)
-			Logger.d("gaurav","stub == null for "+ viewType);
 		if (showDayIndicator(position))
 		{
 			setDay(convMessage, dayHolder);
