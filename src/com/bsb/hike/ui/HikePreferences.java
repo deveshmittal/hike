@@ -593,6 +593,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 						startActivity(intent);
 
 						dialog.dismiss();
+						Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_INIT);
 					}
 
 					@Override

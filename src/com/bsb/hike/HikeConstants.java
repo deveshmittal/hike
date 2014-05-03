@@ -1323,6 +1323,10 @@ public class HikeConstants
 		
 		public static final String STEALTH_FTUE_DONE = "stlthFtueDone";
 		
+		public static final String RESET_STEALTH_INIT = "resetStlthInit";
+		
+		public static final String RESET_STEALTH_CANCEL = "resetStlthCancel";
+		
 	}
 
 	public static final class MqttMessageTypes
