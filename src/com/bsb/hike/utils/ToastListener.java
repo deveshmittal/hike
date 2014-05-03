@@ -225,6 +225,11 @@ public class ToastListener implements Listener
 				Logger.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
+			if(message.getConversation().isStealth())
+			{
+				Logger.d(getClass().getSimpleName(), "this conversation is stealth");
+				return;
+			}
 			final Bitmap bigPicture = Utils.returnBigPicture(message, context);
 			if (bigPicture != null)
 			{

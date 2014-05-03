@@ -318,6 +318,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 
 			HikeMessengerApp.clearStealthMsisdn();
+			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
 		}
 
 		super.onDestroy();
@@ -396,6 +397,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					HikeAnalyticsEvent.sendStealthReset();
 					resetStealthMode();
 					dialog.dismiss();
+					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 				}
 
 				@Override
@@ -467,7 +469,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		/*
-		 * If stealth ftue conv tap tip is visible than remove it
+		 * Switch to stealth mode if we are in ftue.
 		 */
 		if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 		{
@@ -477,7 +479,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if (convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
 				{
 					HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
-					removeStealthConvTip(convTip);
 					break;
 				}
 			}
@@ -500,7 +501,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.delete));
 		}
-		optionsList.add(getString(R.string.deleteconversations));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -545,6 +545,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					boolean newStealthValue = !conv.isStealth();
 					Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
+					
+					/*
+					 * If stealth ftue conv tap tip is visible than remove it
+					 */
+					if (!getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+					{
+						for (int i = 0; i < mAdapter.getCount(); i++)
+						{
+							Conversation convTip = mAdapter.getItem(i);
+							if (convTip instanceof ConversationTip && ((ConversationTip) convTip).isStealthFtueTip())
+							{
+								removeStealthConvTip(convTip);
+								break;
+							}
+						}
+					}
 
 					if (stealthType == HikeConstants.STEALTH_ON_FAKE)
 					{
@@ -703,6 +719,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
+			mAdapter.addItemsToAnimat(stealthConversations);
 			displayedConversations.addAll(stealthConversations);
 		}
 
@@ -1376,25 +1393,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	 */
 	protected void showStealthConvTip()
 	{
-		/*
-		 * if group chat tip is showing we should remove this first and than add stealth ftue conversation tip
-		 */
-		Conversation conv = removeGroupChatTipIfExists();
-
-		/*
-		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
-		 */
-		if (conv != null)
-		{
-			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
-			mAdapter.notifyDataSetChanged();
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
-			showingStealthFtueConvTip = true;
-		}
-		else
-		{
-			Toast.makeText(getActivity(), R.string.stealth_zero_chat_tip, Toast.LENGTH_SHORT).show();
-		}
+		displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_FTUE_TIP));
+		mAdapter.notifyDataSetChanged();
+		HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, true);
+		showingStealthFtueConvTip = true;
 	}
 
 	protected void removeStealthConvTip(Conversation conversation)
@@ -1561,5 +1563,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 		}
 		super.onResume();
+	}
+	
+	public boolean hasNoConversation()
+	{
+		/*
+		 * if group chat tip is showing we should remove this first and than add stealth ftue conversation tip
+		 */
+		Conversation conv = removeGroupChatTipIfExists();
+
+		/*
+		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
+		 */
+		return conv==null;
 	}
 }

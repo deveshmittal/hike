@@ -46,7 +46,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -94,12 +93,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStub;
-import android.view.ViewTreeObserver;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -109,7 +107,6 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -118,13 +115,13 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -143,7 +140,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -178,9 +174,7 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.ImageWorker;
-import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -195,8 +189,8 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.RoundedRepeatingDrawable;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -207,7 +201,6 @@ import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
-import com.google.android.gms.internal.at;
 
 @SuppressLint("NewApi")
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
@@ -320,10 +313,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
-			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
-			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
-			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
-			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE };
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED,
+			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP,
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT };
 
 	private EmoticonType emoticonType;
 
@@ -1220,7 +1213,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		dismissPopupWindow();
 		ConvMessage message = mAdapter.getItem(position);
-		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isSmsToggle())
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
 			return false;
 		}
@@ -1771,14 +1764,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		/*
-		 * Add another item which translates to the SMS toggle option.
-		 */
-		if (!mConversation.isOnhike() && !Utils.isContactInternational(mContactNumber))
-		{
-			messages.add(0, new ConvMessage(null, null, -1, State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
-		}
-
 		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
@@ -1801,7 +1786,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
+
+		/*
+		 * Added a hacky fix to ensure that we don't load more messages the first
+		 * time onScroll is called.
+		 */
+		loadingMoreMessages = true;
 		mConversationsView.setOnScrollListener(this);
+		loadingMoreMessages = false;
 
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, false))
 		{
@@ -1935,6 +1927,43 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+	}
+
+	private void setupSMSToggleButton()
+	{
+		TextView smsToggleSubtext = (TextView) findViewById(R.id.sms_toggle_subtext);
+		CheckBox smsToggle = (CheckBox) findViewById(R.id.checkbox);
+		TextView hikeSmsText = (TextView) findViewById(R.id.hike_text);
+		TextView regularSmsText = (TextView) findViewById(R.id.sms_text);
+
+		if (selectedTheme == ChatTheme.DEFAULT)
+		{
+			hikeSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			regularSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			smsToggle.setButtonDrawable(R.drawable.sms_checkbox);
+			findViewById(R.id.sms_toggle_button).setBackgroundResource(R.drawable.bg_sms_toggle);
+		}
+		else
+		{
+			hikeSmsText.setTextColor(this.getResources().getColor(R.color.white));
+			regularSmsText.setTextColor(this.getResources().getColor(R.color.white));
+			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.white));
+			smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
+			findViewById(R.id.sms_toggle_button).setBackgroundResource(selectedTheme.smsToggleBgRes());
+		}
+
+		boolean smsToggleOn = Utils.getSendSmsPref(this);
+		smsToggle.setChecked(smsToggleOn);
+		mAdapter.initializeSmsToggleTexts(hikeSmsText, regularSmsText, smsToggleSubtext);
+		mAdapter.setSmsToggleSubtext(smsToggleOn);
+
+		smsToggleSubtext.setVisibility(View.VISIBLE);
+		smsToggle.setVisibility(View.VISIBLE);
+		hikeSmsText.setVisibility(View.VISIBLE);
+		regularSmsText.setVisibility(View.VISIBLE);
+
+		smsToggle.setOnCheckedChangeListener(mAdapter);
 	}
 
 	private void setupChatThemeFTUE()
@@ -2250,7 +2279,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (mConversation.isOnhike() || (mConversation instanceof GroupConversation))
 		{
-
 			removeSMSToggle();
 
 			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
@@ -2279,27 +2307,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void removeSMSToggle()
 	{
-		if (!messages.isEmpty() && hasSMSToggle())
-		{
-			mAdapter.removeMessage(0);
-		}
-	}
-
-	private boolean hasSMSToggle()
-	{
-		ConvMessage convMessage = messages.get(0);
-		/*
-		 * Typing notification
-		 */
-		if (convMessage == null)
-		{
-			return false;
-		}
-		if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID)
-		{
-			return true;
-		}
-		return false;
+		findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
 	}
 
 	/* returns TRUE iff the last message was received and unread */
@@ -3049,6 +3057,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		else if (HikePubSub.CLOSE_CURRENT_STEALTH_CHAT.equals(type))
+		{
+			if (mConversation == null || !mConversation.isStealth())
+			{
+				return;
+			}
+			
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
+				}
+			});
+		}
 	}
 
 	public boolean isContactOnline()
@@ -3692,14 +3719,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mAdapter.setChatTheme(chatTheme);
-		View nudgeTutorial = getNudgeTutorialView(chatTheme);
-		if (nudgeTutorial != null)
+
+		if (!mConversation.isOnhike() && !Utils.isContactInternational(mContactNumber))
 		{
-			ViewGroup empty = (ViewGroup) findViewById(android.R.id.empty);
-			empty.removeAllViews();
-			empty.addView(nudgeTutorial);
-			empty.setOnTouchListener(this);
-			mConversationsView.setEmptyView(empty);
+			/*
+			 * Add another item which translates to the SMS toggle option.
+			 */
+			setupSMSToggleButton();
+			findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
+			View nudgeTutorial = getNudgeTutorialView(chatTheme);
+			if (nudgeTutorial != null)
+			{
+				ViewGroup empty = (ViewGroup) findViewById(android.R.id.empty);
+				empty.removeAllViews();
+				empty.addView(nudgeTutorial);
+				empty.setOnTouchListener(this);
+				mConversationsView.setEmptyView(empty);
+			}
 		}
 		setMuteViewBackground();
 
@@ -5666,12 +5706,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	};
 
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-
-			int startIndex = hasSMSToggle() ? 1 : 0;
+			final int startIndex = 0;
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
@@ -5682,24 +5721,51 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			loadingMoreMessages = true;
 
-			List<ConvMessage> olderMessages = mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
-					mConversation, messages.get(startIndex).getMsgID());
-
-			if (!olderMessages.isEmpty())
+			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
 			{
-				mAdapter.addMessages(olderMessages, startIndex);
-				mAdapter.notifyDataSetChanged();
-				mConversationsView.setSelection(firstVisibleItem + olderMessages.size());
+
+				@Override
+				protected List<ConvMessage> doInBackground(Void... params)
+				{
+					return mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
+							mConversation, messages.get(startIndex).getMsgID());
+				}
+
+				@Override
+				protected void onPostExecute(List<ConvMessage> result)
+				{
+					if (!result.isEmpty())
+					{
+						int scrollOffset = 0;
+
+						if (mConversationsView.getChildAt(0) != null)
+						{
+							scrollOffset = mConversationsView.getChildAt(0).getTop();
+						}
+
+						mAdapter.addMessages(result, startIndex);
+						mAdapter.notifyDataSetChanged();
+						mConversationsView.setSelectionFromTop(firstVisibleItem + result.size(), scrollOffset);
+					}
+					else
+					{
+						/*
+						 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
+						 */
+						reachedEnd = true;
+					}
+					loadingMoreMessages = false;
+				}
+			};
+
+			if (Utils.isHoneycombOrHigher())
+			{
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 			else
 			{
-				/*
-				 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
-				 */
-				reachedEnd = true;
+				asyncTask.execute();
 			}
-
-			loadingMoreMessages = false;
 		}
 
 		if (unreadMessageIndicator.getVisibility() == View.VISIBLE && mConversationsView.getLastVisiblePosition() > messages.size() - unreadMessageCount - 2)
