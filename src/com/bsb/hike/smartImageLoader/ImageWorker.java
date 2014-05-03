@@ -123,7 +123,6 @@ public abstract class ImageWorker
 
 		imageView.setImageDrawable(null);
 		imageView.setBackgroundDrawable(null);
-
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
@@ -134,7 +133,6 @@ public abstract class ImageWorker
 				value = null;
 			}
 		}
-
 		if (value != null)
 		{
 			Logger.d(TAG, data + " Bitmap found in cache and is not recycled.");
@@ -515,7 +513,7 @@ public abstract class ImageWorker
 				if (!dontSetBackground)
 				{
 					// Set background to loading bitmap
-					imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+					imageView.setBackgroundDrawable(HikeBitmapFactory.getBitmapDrawable(mResources, mLoadingBitmap));
 				}
 
 				imageView.setImageDrawable(td);

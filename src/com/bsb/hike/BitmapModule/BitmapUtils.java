@@ -11,6 +11,7 @@ import com.bsb.hike.utils.Utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.drawable.BitmapDrawable;
 
 public class BitmapUtils
 {
@@ -24,7 +25,7 @@ public class BitmapUtils
 		BitmapFactory.decodeFile(filename, options);
 		return (float) (options.outWidth) / options.outHeight;
 	}
-	
+
 	public static boolean isThumbnailSquare(Bitmap thumbnail)
 	{
 		return (thumbnail.getWidth() == thumbnail.getHeight());
@@ -103,6 +104,18 @@ public class BitmapUtils
 		fos.write(b);
 		fos.flush();
 		fos.close();
+	}
+	
+	/**
+	 * Get the size in bytes of a bitmap in a BitmapDrawable. Note that from Android 4.4 (KitKat) onward this returns the allocated memory size of the bitmap which can be larger
+	 * than the actual bitmap data byte count (in the case it was re-used).
+	 * 
+	 * @param value
+	 * @return size in bytes
+	 */
+	public static int getBitmapSize(BitmapDrawable bd)
+	{
+		return getBitmapSize(bd.getBitmap());
 	}
 
 	public static int getBitmapSize(Bitmap bitmap)

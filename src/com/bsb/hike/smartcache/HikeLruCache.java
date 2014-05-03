@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.adapters.ProfileAdapter;
@@ -39,7 +40,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	// Constants to easily toggle various caches
 	private static final boolean DEFAULT_MEM_CACHE_ENABLED = true;
-	
+
 	private final static int MAX_CACHE_SIZE = 1024 * 15;
 
 	private static HikeLruCache instance;
@@ -92,7 +93,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 				throw new IllegalArgumentException("setMemCacheSizePercent - percent must be " + "between 0.01 and 0.8 (inclusive)");
 			}
 			memCacheSize = Math.round(percent * Runtime.getRuntime().maxMemory() / 1024);
-			if(memCacheSize > MAX_CACHE_SIZE)
+			if (memCacheSize > MAX_CACHE_SIZE)
 				memCacheSize = MAX_CACHE_SIZE;
 		}
 	}
@@ -121,43 +122,11 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	}
 
 	/**
-	 * Get the size in bytes of a bitmap in a BitmapDrawable. Note that from Android 4.4 (KitKat) onward this returns the allocated memory size of the bitmap which can be larger
-	 * than the actual bitmap data byte count (in the case it was re-used).
-	 * 
-	 * @param value
-	 * @return size in bytes
-	 */
-	@TargetApi(VERSION_CODES.KITKAT)
-	public static int getBitmapSize(BitmapDrawable value)
-	{
-		Bitmap bitmap = value.getBitmap();
-		if (bitmap == null)
-		{
-			return 0;
-		}
-
-		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
-		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
-		{
-			return bitmap.getAllocationByteCount();
-		}
-
-		if (Utils.hasHoneycombMR1())
-		{
-			return bitmap.getByteCount();
-		}
-
-		// Pre HC-MR1
-		return bitmap.getRowBytes() * bitmap.getHeight();
-	}
-
-	/**
 	 * Measure item size in kilobytes rather than units which is more practical for a bitmap cache
 	 */
 	protected int sizeOf(String key, BitmapDrawable value)
 	{
-		final int bitmapSize = getBitmapSize(value) / 1024;
+		final int bitmapSize = BitmapUtils.getBitmapSize(value) / 1024;
 		return bitmapSize == 0 ? 1 : bitmapSize;
 	}
 
@@ -380,10 +349,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			return null;
 		}
 
-		if (Utils.isHoneycombOrHigher())
-			bd = new BitmapDrawable(mResources, stickerBitmap);
-		else
-			bd = new RecyclingBitmapDrawable(mResources, stickerBitmap);
+		bd = HikeBitmapFactory.getBitmapDrawable(mResources, stickerBitmap);
+
 		putInCache(path, bd);
 		return bd;
 	}
