@@ -197,9 +197,11 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 					if (!olderMessages.isEmpty())
 					{
+						int scrollOffset = getListView().getChildAt(0).getTop();
+
 						statusMessages.addAll(statusMessages.size(), olderMessages);
 						centralTimelineAdapter.notifyDataSetChanged();
-						getListView().setSelection(firstVisibleItem);
+						getListView().setSelectionFromTop(firstVisibleItem, scrollOffset);
 					}
 					else
 					{

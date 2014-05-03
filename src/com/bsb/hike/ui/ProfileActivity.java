@@ -801,13 +801,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if (!olderMessages.isEmpty())
 					{
+						int scrollOffset = profileContent.getChildAt(0).getTop();
+
 						if (isLastMessageJoinedHike)
 						{
 							profileItems.remove(profileItems.size() - 1);
 						}
 						addStatusMessageAsProfileItems(olderMessages);
 						profileAdapter.notifyDataSetChanged();
-						profileContent.setSelection(firstVisibleItem);
+						profileContent.setSelectionFromTop(firstVisibleItem, scrollOffset);
 					}
 					else
 					{
