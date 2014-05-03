@@ -1490,7 +1490,6 @@
     <string name="chat_marked_stealth">Chat Hidden</string>
     <string name="chat_unmarked_stealth">Chat Unhidden</string>
     <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
-    <string name="stealth_zero_chat_tip">placeholder no chats</string>
     <string name="stealth_notification_message">You have a new notification</string>
     <string name="stealth_ftue_conv_tip_showing">please tap and hold some conversation</string>
     <string name="retry">Retry</string>
@@ -1506,5 +1505,6 @@
 	<string name="tap_to_reset_stealth_tip"><![CDATA[ <b> Tap here to reset Hidden Mode now! </b> 
 	    ]]></string>
 	<string name="reset_stealth_confirmation">Resetting Hidden Mode will delete all your hidden Chats.\nAre you sure?</string>
+	<string name="stealth_mode_empty_conv_popup_msg">You can now hide your private chats from the world and read them only with a password. Start a new chat and try it out by tapping on \'hi\'!</string>
 	
 </resources>

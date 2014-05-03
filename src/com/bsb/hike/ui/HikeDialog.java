@@ -22,6 +22,8 @@ public class HikeDialog
 
 	public static final int RESET_STEALTH_DIALOG = 4;
 
+	public static final int STEALTH_FTUE_EMPTY_STATE_DIALOG = 5;
+
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
 		return showDialog(context, whichDialog, null, data);
@@ -37,9 +39,11 @@ public class HikeDialog
 		case FAVORITE_ADDED_DIALOG:
 			return showAddedAsFavoriteDialog(context, listener, data);
 		case STEALTH_FTUE_DIALOG:
-			return showStealthFtuePopUp(context, listener);
+			return showStealthFtuePopUp(context, listener, true);
 		case RESET_STEALTH_DIALOG:
 			return showStealthResetDialog(context, listener, data);
+		case STEALTH_FTUE_EMPTY_STATE_DIALOG:
+			return showStealthFtuePopUp(context, listener, false);
 		}
 
 		return null;
@@ -132,13 +136,25 @@ public class HikeDialog
 		return dialog;
 	}
 
-	private static Dialog showStealthFtuePopUp(final Context context, final HikeDialogListener listener)
+	private static Dialog showStealthFtuePopUp(final Context context, final HikeDialogListener listener, boolean isStealthFtueDialog)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.stealth_ftue_popup);
 		dialog.setCancelable(true);
-
-		View okBtn = dialog.findViewById(R.id.awesomeButton);
+		TextView okBtn = (TextView) dialog.findViewById(R.id.awesomeButton);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		
+		if(isStealthFtueDialog)
+		{
+			body.setText(R.string.stealth_mode_popup_msg);
+			okBtn.setText(R.string.quick_setup);
+		}
+		else
+		{
+			body.setText(R.string.stealth_mode_empty_conv_popup_msg);
+			okBtn.setText(android.R.string.ok);
+		}
+		
 		okBtn.setOnClickListener(new OnClickListener()
 		{
 

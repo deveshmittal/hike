@@ -106,7 +106,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -252,8 +252,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+						if(!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+						{
+							
+								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+						}
+						else
+						{
+							dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+							dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+						}
 					}
 				}
 				else
@@ -1900,6 +1909,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		case STEALTH_FTUE_POPUP:
 			dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
 			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_EMPTY_STATE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
 			break;
 		}
 	}
