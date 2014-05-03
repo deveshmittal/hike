@@ -132,6 +132,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View selectedStateOverlay;
 
 		ViewGroup messageContainer;
+
+		ViewStub messageInfoStub;
 	}
 
 	private static class FTViewHolder extends DetailViewHolder
@@ -799,6 +801,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 					stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					stickerHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+					stickerHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 					v.setTag(stickerHolder);
 				}
 				else
@@ -918,7 +921,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 				}
 			}
-			setTimeNStatus(position, stickerHolder, true);
+			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
 			setSelection(position, stickerHolder.selectedStateOverlay);
 		}
 		else if (viewType == ViewType.NUDGE_SENT || viewType == ViewType.NUDGE_RECEIVE)
@@ -936,6 +939,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					nudgeHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 					nudgeHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					nudgeHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+					nudgeHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 					v.setTag(nudgeHolder);
 				}
 				else
@@ -986,7 +990,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					nudgeHolder.nudge.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
 				}
 			}
-			setTimeNStatus(position, nudgeHolder, true);
+			setTimeNStatus(position, nudgeHolder, true, nudgeHolder.nudge);
 			setSelection(position, nudgeHolder.selectedStateOverlay);
 		}
 		else if (convMessage.isFileTransferMessage())
@@ -1025,6 +1029,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						wtHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						wtHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						wtHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+						wtHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(wtHolder);
 					}
 					else
@@ -1136,7 +1141,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					wtHolder.initialization.setVisibility(View.GONE);
 				}
 
-				setTimeNStatus(position, wtHolder, true);
+				setTimeNStatus(position, wtHolder, true, wtHolder.placeHolder);
 				setSelection(position, wtHolder.selectedStateOverlay);
 
 				wtHolder.placeHolder.setTag(convMessage);
@@ -1168,6 +1173,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						videoHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						videoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+						videoHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(videoHolder);
 					}
 					else
@@ -1285,7 +1291,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				setBubbleColor(convMessage, videoHolder.messageContainer);
 				setupFileState(videoHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
-				setTimeNStatus(position, videoHolder, true);
+				setTimeNStatus(position, videoHolder, true, videoHolder.fileThumb);
 				setSelection(position, videoHolder.selectedStateOverlay);
 
 				videoHolder.fileThumb.setTag(convMessage);
@@ -1315,6 +1321,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+						imageHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(imageHolder);
 					}
 					else
@@ -1413,7 +1420,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
-				setTimeNStatus(position, imageHolder, true);
+				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
 				setSelection(position, imageHolder.selectedStateOverlay);
 
 				imageHolder.fileThumb.setTag(convMessage);
@@ -1443,6 +1450,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+						imageHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(imageHolder);
 					}
 					else
@@ -1527,7 +1535,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
-				setTimeNStatus(position, imageHolder, true);
+				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
 				setSelection(position, imageHolder.selectedStateOverlay);
 
 				imageHolder.fileThumb.setTag(convMessage);
@@ -1557,6 +1565,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+						fileHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(fileHolder);
 					}
 					else
@@ -1647,7 +1656,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				setBubbleColor(convMessage, fileHolder.messageContainer);
-				setTimeNStatus(position, fileHolder, false);
+				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
 				setSelection(position, fileHolder.selectedStateOverlay);
 
 				fileHolder.fileThumb.setTag(convMessage);
@@ -1684,6 +1693,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+						fileHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(fileHolder);
 					}
 					else
@@ -1759,7 +1769,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setupFileState(fileHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), true);
-				setTimeNStatus(position, fileHolder, false);
+				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
 				setSelection(position, fileHolder.selectedStateOverlay);
 
 				fileHolder.fileThumb.setTag(convMessage);
@@ -1792,6 +1802,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					textHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 					textHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+					textHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 					v.setTag(textHolder);
 				}
 				else
@@ -1838,7 +1849,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
 			setBubbleColor(convMessage, textHolder.messageContainer);
-			setTimeNStatus(position, textHolder, false);
+			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
 			setSelection(position, textHolder.selectedStateOverlay);
 
 			// boolean showTip = false;
@@ -2867,7 +2878,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				statusHolder = (StatusViewHolder) v.getTag();
 			}
 			dayHolder = statusHolder;
-			
+
 			statusHolder.image.setVisibility(View.VISIBLE);
 			statusHolder.avatarFrame.setVisibility(View.VISIBLE);
 			statusHolder.messageTextView.setVisibility(View.VISIBLE);
@@ -3272,11 +3283,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.addView(participantInfo);
 			dayHolder = participantInfoHolder;
 		}
+		if(dayHolder.dayStub == null)
+			Logger.d("gaurav","stub == null for "+ viewType);
 		if (showDayIndicator(position))
 		{
 			setDay(convMessage, dayHolder);
 		}
-		else if(dayHolder.dayStub != null)
+		else if (dayHolder.dayStub != null)
 		{
 			dayHolder.dayStub.setVisibility(View.GONE);
 		}
@@ -3379,7 +3392,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private String dataDisplay(int bytes)
 	{
 		Logger.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
-		if (bytes < 0)
+		if (bytes <= 0)
 			return ("");
 		if (bytes >= (1000 * 1024))
 		{
@@ -3868,7 +3881,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void setTimeNStatus(int position, DetailViewHolder detailHolder, boolean ext)
+	private void setTimeNStatus(int position, DetailViewHolder detailHolder, boolean ext, View clickableItem)
 	{
 		ConvMessage message = getItem(position);
 		TextView time = detailHolder.time;
@@ -3935,6 +3948,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (timeStatus != null)
 			timeStatus.setVisibility(View.VISIBLE);
+
+		if ((message.getState() != null) && (position == lastSentMessagePosition)
+				&& ((message.getState() == State.SENT_DELIVERED_READ && isGroupChat) || message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED))
+		{
+			setMessageInfo(getItem(position), detailHolder, clickableItem);
+		}
+		else if (detailHolder.messageInfoStub != null)
+		{
+			detailHolder.messageInfoStub.setVisibility(View.GONE);
+		}
+	}
+
+	private void setMessageInfo(final ConvMessage message, DetailViewHolder detailHolder, final View clickableItem)
+	{
+		detailHolder.messageInfoStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		{
+			@Override
+			public void onInflate(ViewStub stub, View inflated)
+			{
+				TextView messageInfo = (TextView) inflated.findViewById(R.id.message_info);
+				ImageView sending = (ImageView) inflated.findViewById(R.id.sending_anim);
+
+				messageInfo.setVisibility(View.GONE);
+				sending.setVisibility(View.GONE);
+				if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
+				{
+					messageInfo.setVisibility(View.VISIBLE);
+					messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
+					setReadByForGroup(message, messageInfo);
+				}
+				else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
+				{
+					if (!message.isSMS())
+					{
+						scheduleUndeliveredText(messageInfo, clickableItem, sending, message.getTimestamp());
+					}
+				}
+			}
+		});
+		try
+		{
+			detailHolder.messageInfoStub.inflate();
+		}
+		catch (Exception e)
+		{
+
+		}
+
 	}
 
 	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)

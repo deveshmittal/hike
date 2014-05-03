@@ -125,8 +125,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignBottom="@id/message_container"
-        android:layout_alignTop="@id/message_container"
         android:layout_below="@id/day_container"
         layout="@layout/message_overlay" />
+
+    <ViewStub
+        android:id="@+id/message_info_stub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/message_container"
+        android:layout="@layout/message_sent_info" />
 
 </RelativeLayout>

@@ -37,8 +37,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignBottom="@id/time_status"
-        android:layout_alignTop="@id/nudge"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/day_container"
         layout="@layout/message_overlay" />
+
+    <ViewStub
+        android:id="@+id/message_info_stub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/time_status"
+        android:layout="@layout/message_sent_info" />
 
 </RelativeLayout>
