@@ -7,11 +7,18 @@
     android:minHeight="30dp"
     android:paddingBottom="2dp" >
 
+    <ViewStub
+        android:id="@+id/day_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/message_day_container" />
+
     <RelativeLayout
         android:id="@+id/placeholder"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/day_container"
         android:layout_marginRight="8dp"
         android:background="@drawable/bg_ft_progress"
         android:gravity="center" >
@@ -64,16 +71,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/placeholder"
-        android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
         layout="@layout/message_time_status_ext" />
 
     <include
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignBottom="@id/time_status"
-        android:layout_alignTop="@id/placeholder"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/day_container"
         layout="@layout/message_overlay" />
 
 </RelativeLayout>

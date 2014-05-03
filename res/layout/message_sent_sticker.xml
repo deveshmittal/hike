@@ -7,11 +7,18 @@
     android:minHeight="30dp"
     android:paddingBottom="2dp" >
 
+    <ViewStub
+        android:id="@+id/day_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/message_day_container" />
+
     <LinearLayout
         android:id="@+id/placeholder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/day_container"
         android:layout_marginRight="8dp"
         android:gravity="center"
         android:orientation="vertical" >

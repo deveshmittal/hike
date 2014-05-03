@@ -42,6 +42,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
@@ -99,15 +100,17 @@ import com.bsb.hike.view.HoloCircularProgress;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
-
-	public static final int LAST_READ_CONV_MESSAGE_ID = -911;
-
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION
 	};
 
-	private static class DetailViewHolder
+	private static class DayHolder
+	{
+		ViewStub dayStub;
+	}
+
+	private static class DetailViewHolder extends DayHolder
 	{
 
 		ImageView status;
@@ -199,7 +202,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		TextView text;
 	}
 
-	private static class StatusViewHolder
+	private static class StatusViewHolder extends DayHolder
 	{
 		ImageView image;
 
@@ -213,6 +216,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		TextView messageInfo;
 
+	}
+
+	private static class ParticipantInfoHolder extends DayHolder
+	{
+		ViewGroup container;
 	}
 
 	private static class TypingViewHolder
@@ -434,7 +442,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void addMessage(ConvMessage convMessage)
 	{
-		Logger.d(getClass().getSimpleName(), "received convMsg" + convMessage.getMsgID());
 		convMessages.add(convMessage);
 		if (convMessage != null && convMessage.isSent())
 		{
@@ -646,10 +653,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.TYPING_NOTIFICATION;
 		}
-		else if (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID)
-		{
-			type = ViewType.LAST_READ;
-		}
 		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
 			type = ViewType.STATUS_MESSAGE;
@@ -689,8 +692,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		final ConvMessage convMessage = getItem(position);
 
-		//ViewHolder holder = null;
-		View v = convertView;		
+		DayHolder dayHolder = null;
+		View v = convertView;
 		// Applicable to all kinds of messages
 		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
@@ -780,7 +783,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (viewType == ViewType.STICKER_SENT || viewType == ViewType.STICKER_RECEIVE)
 		{
-
 			StickerViewHolder stickerHolder = null;
 			if (viewType == ViewType.STICKER_SENT)
 			{
@@ -788,7 +790,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					stickerHolder = new StickerViewHolder();
 					v = inflateView(R.layout.message_sent_sticker, parent, false);
-					
+
 					stickerHolder.placeHolder = v.findViewById(R.id.placeholder);
 					stickerHolder.loader = (ProgressBar) v.findViewById(R.id.loading_progress);
 					stickerHolder.image = (ImageView) v.findViewById(R.id.image);
@@ -796,6 +798,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.status = (ImageView) v.findViewById(R.id.status);
 					stickerHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 					stickerHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					stickerHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					v.setTag(stickerHolder);
 				}
 				else
@@ -822,6 +825,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
 					stickerHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 					stickerHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					stickerHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					v.setTag(stickerHolder);
 				}
 				else
@@ -829,6 +833,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder = (StickerViewHolder) v.getTag();
 				}
 			}
+			dayHolder = stickerHolder;
 			stickerHolder.placeHolder.setBackgroundResource(0);
 			Sticker sticker = metadata.getSticker();
 			setSenderDetails(convMessage, position, stickerHolder, true);
@@ -930,6 +935,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					nudgeHolder.status = (ImageView) v.findViewById(R.id.status);
 					nudgeHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 					nudgeHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+					nudgeHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					v.setTag(nudgeHolder);
 				}
 				else
@@ -954,6 +960,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					nudgeHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
 					nudgeHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 					nudgeHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+					nudgeHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					v.setTag(nudgeHolder);
 				}
 				else
@@ -961,6 +968,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					nudgeHolder = (NudgeViewHolder) v.getTag();
 				}
 			}
+			dayHolder = nudgeHolder;
 			setSenderDetails(convMessage, position, nudgeHolder, true);
 			if (!chatTheme.isAnimated())
 			{
@@ -1016,6 +1024,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						wtHolder.status = (ImageView) v.findViewById(R.id.status);
 						wtHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						wtHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
+						wtHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(wtHolder);
 					}
 					else
@@ -1044,6 +1053,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						wtHolder.senderNameUnsaved = (TextView) v.findViewById(R.id.sender_unsaved_name);
 						wtHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 						wtHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
+						wtHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(wtHolder);
 					}
 					else
@@ -1051,7 +1061,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						wtHolder = (WalkieTalkieViewHolder) v.getTag();
 					}
 				}
-
+				dayHolder = wtHolder;
 				setSenderDetails(convMessage, position, wtHolder, true);
 
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
@@ -1157,6 +1167,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						videoHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						videoHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						videoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(videoHolder);
 					}
 					else
@@ -1191,6 +1202,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 						videoHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 						videoHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						videoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(videoHolder);
 					}
 					else
@@ -1198,6 +1210,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder = (VideoViewHolder) v.getTag();
 					}
 				}
+				dayHolder = videoHolder;
 				setSenderDetails(convMessage, position, videoHolder, false);
 
 				videoHolder.fileThumb.setBackgroundResource(0);
@@ -1301,6 +1314,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						imageHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(imageHolder);
 					}
 					else
@@ -1333,6 +1347,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 						imageHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(imageHolder);
 					}
 					else
@@ -1340,7 +1355,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder = (ImageViewHolder) v.getTag();
 					}
 				}
-
+				dayHolder = imageHolder;
 				setSenderDetails(convMessage, position, imageHolder, false);
 
 				imageHolder.fileThumb.setBackgroundResource(0);
@@ -1427,6 +1442,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						imageHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(imageHolder);
 					}
 					else
@@ -1459,6 +1475,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 						imageHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(imageHolder);
 					}
 					else
@@ -1466,7 +1483,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder = (ImageViewHolder) v.getTag();
 					}
 				}
-
+				dayHolder = imageHolder;
 				setSenderDetails(convMessage, position, imageHolder, false);
 				imageHolder.fileThumb.setBackgroundResource(0);
 				imageHolder.fileThumb.setImageResource(0);
@@ -1519,7 +1536,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (viewType == ViewType.CONTACT_SENT || viewType == ViewType.CONTACT_RECEIVE)
 			{
-
 				FileViewHolder fileHolder = null;
 				if (viewType == ViewType.CONTACT_SENT)
 				{
@@ -1540,6 +1556,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						fileHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(fileHolder);
 					}
 					else
@@ -1572,6 +1589,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 						fileHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(fileHolder);
 					}
 					else
@@ -1579,6 +1597,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder = (FileViewHolder) v.getTag();
 					}
 				}
+				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
 				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileThumb.setImageResource(R.drawable.ic_default_contact);
@@ -1664,6 +1683,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 						fileHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(fileHolder);
 					}
 					else
@@ -1697,6 +1717,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 						fileHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(fileHolder);
 					}
 					else
@@ -1704,6 +1725,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder = (FileViewHolder) v.getTag();
 					}
 				}
+				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
 				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileName.setText(hikeFile.getFileName());
@@ -1769,6 +1791,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder.timeStatus = (View) v.findViewById(R.id.time_status);
 					textHolder.selectedStateOverlay = v.findViewById(R.id.selected_state_overlay);
 					textHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+					textHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					v.setTag(textHolder);
 				}
 				else
@@ -1796,6 +1819,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder.avatarImage = (ImageView) v.findViewById(R.id.avatar);
 					textHolder.avatarContainer = (ViewGroup) v.findViewById(R.id.avatar_container);
 					textHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
+					textHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 					v.setTag(textHolder);
 				}
 				else
@@ -1803,6 +1827,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = (TextViewHolder) v.getTag();
 				}
 			}
+			dayHolder = textHolder;
 			setSenderDetails(convMessage, position, textHolder, false);
 
 			CharSequence markedUp = convMessage.getMessage();
@@ -1816,1023 +1841,1011 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			setTimeNStatus(position, textHolder, false);
 			setSelection(position, textHolder.selectedStateOverlay);
 
-//			 boolean showTip = false;
-//				
-//			 if (viewType == ViewType.SEND_HIKE)
-//			 {
-//			 if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
-//			 {
-//			 if (msgIdForSdrTip == -1)
-//			 {
-//			 showTip = true;
-//			 }
-//			 else if (convMessage.getMsgID() == msgIdForSdrTip)
-//			 {
-//			 showTip = true;
-//			 }
-//			 }
-//			
-//			 if (showTip)
-//			 {
-//			 msgIdForSdrTip = convMessage.getMsgID();
-//			 showSdrTip(holder.sdrFtueTip);
-//			 }
-//			 else
-//			 {
-//			 holder.sdrFtueTip.setVisibility(View.GONE);
-//			 }
-//			 }
+			// boolean showTip = false;
+			//
+			// if (viewType == ViewType.SEND_HIKE)
+			// {
+			// if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
+			// {
+			// if (msgIdForSdrTip == -1)
+			// {
+			// showTip = true;
+			// }
+			// else if (convMessage.getMsgID() == msgIdForSdrTip)
+			// {
+			// showTip = true;
+			// }
+			// }
+			//
+			// if (showTip)
+			// {
+			// msgIdForSdrTip = convMessage.getMsgID();
+			// showSdrTip(holder.sdrFtueTip);
+			// }
+			// else
+			// {
+			// holder.sdrFtueTip.setVisibility(View.GONE);
+			// }
+			// }
 			textHolder.messageContainer.setTag(convMessage);
 			textHolder.messageContainer.setOnClickListener(this);
 			textHolder.messageContainer.setOnLongClickListener(this);
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-//		 {
-//		 if (metadata != null && metadata.isPokeMessage())
-//		 {
-//		 holder.stickerPlaceholder.setVisibility(View.VISIBLE);
-//		 holder.stickerPlaceholder.setBackgroundResource(0);
-//		 setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
-//		 firstMessageFromParticipant);
-//		 holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-//		 if (holder.stickerParticipantNameUnsaved != null)
-//		 {
-//		 holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-//		 }
-//		 // if (isDefaultTheme)
-//		 // {
-//		 // holder.poke.setVisibility(View.VISIBLE);
-//		 // holder.messageContainer.setVisibility(View.VISIBLE);
-//		 // setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
-//		 // }
-//		 // else
-//		 if (!chatTheme.isAnimated())
-//		 {
-//		 holder.pokeCustom.setVisibility(View.VISIBLE);
-//		 holder.messageContainer.setVisibility(View.GONE);
-//		 setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
-//		 }
-//		 else
-//		 {
-//		 holder.pokeCustom.setVisibility(View.VISIBLE);
-//		 holder.messageContainer.setVisibility(View.GONE);
-//		
-//		 setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
-//		 if (metadata.getNudgeAnimationType() != NudgeAnimationType.NONE)
-//		 {
-//		 metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
-//		 holder.pokeCustom.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
-//		 }
-//		 }
-//		 }
-//		 else if (convMessage.isStickerMessage())
-//		 {
-//		 holder.stickerPlaceholder.setVisibility(View.VISIBLE);
-//		 holder.stickerPlaceholder.setBackgroundResource(0);
-//		
-//		 Sticker sticker = metadata.getSticker();
-//		 setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
-//		 firstMessageFromParticipant);
-//		 // holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-//		 if (holder.stickerParticipantNameUnsaved != null)
-//		 {
-//		 holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-//		 }
-//		 // if (!convMessage.isSent())
-//		 // {
-//		 //
-//		 // if (firstMessageFromParticipant)
-//		 // {
-//		 // holder.stickerParticipantName.setVisibility(View.VISIBLE);
-//		 // holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-//		 // holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-//		 // }
-//		 // else
-//		 // {
-//		 // holder.stickerParticipantName.setVisibility(View.GONE);
-//		 // }
-//		 // }
-//		
-//		 /*
-//		 * If this is the default category, then the sticker are part of the app bundle itself
-//		 */
-//		 if (sticker.getStickerIndex() != -1)
-//		 {
-//		 holder.stickerImage.setVisibility(View.VISIBLE);
-//		 if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
-//		 {
-//		 // TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-//		 int idx = sticker.getStickerIndex();
-//		 if (idx >= 0)
-//		 holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
-//		 }
-//		 else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-//		 {
-//		 // TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-//		 int idx = sticker.getStickerIndex();
-//		 if (idx >= 0)
-//		 holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
-//		 }
-//		 }
-//		 else
-//		 {
-//		 String categoryId;
-//		 /*
-//		 * If the category is an unknown one, we have the category id stored in the metadata.
-//		 */
-//		 if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-//		 {
-//		 categoryId = metadata.getUnknownStickerCategory();
-//		 }
-//		 else
-//		 {
-//		 categoryId = sticker.getCategory().categoryId.name();
-//		 }
-//		 String stickerId = sticker.getStickerId();
-//		
-//		 String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
-//		 File stickerImage = null;
-//		 if (categoryDirPath != null)
-//		 {
-//		 stickerImage = new File(categoryDirPath, stickerId);
-//		 }
-//		
-//		 String key = categoryId + stickerId;
-//		 boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
-//		
-//		 if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
-//		 {
-//		 Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
-//		 if (stickerDrawable != null)
-//		 {
-//		 holder.stickerImage.setVisibility(View.VISIBLE);
-//		 // largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-//		 holder.stickerImage.setImageDrawable(stickerDrawable);
-//		 // holder.stickerImage.setImageDrawable(IconCacheManager
-//		 // .getInstance().getSticker(context,
-//		 // stickerImage.getPath()));
-//		 }
-//		 else
-//		 {
-//		 holder.stickerLoader.setVisibility(View.VISIBLE);
-//		 holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
-//		 }
-//		 }
-//		 else
-//		 {
-//		 holder.stickerLoader.setVisibility(View.VISIBLE);
-//		 holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
-//		
-//		 /*
-//		 * Download the sticker if not already downloading.
-//		 */
-//		 if (!downloadingSticker)
-//		 {
-//		 DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
-//		 StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
-//		 Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
-//		 }
-//		 }
-//		 }
-//		 }
-//		 else
-//		 {
-//		 holder.messageTextView.setVisibility(View.VISIBLE);
-//		 holder.messageContainer.setVisibility(View.VISIBLE);
-//		
-//		 CharSequence markedUp = convMessage.getMessage();
-//		 // Fix for bug where if a participant leaves the group chat, the
-//		 // participant's name is never shown
-//		 setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
-//		
-//		 SmileyParser smileyParser = SmileyParser.getInstance();
-//		 markedUp = smileyParser.addSmileySpans(markedUp, false);
-//		 holder.messageTextView.setText(markedUp);
-//		 Linkify.addLinks(holder.messageTextView, Linkify.ALL);
-//		 Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
-//		 }
-//		
-//		 if (!convMessage.isSent())
-//		 {
-//		 if (firstMessageFromParticipant)
-//		 {
-//		 holder.image.setVisibility(View.VISIBLE);
-//		 setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
-//		 holder.avatarContainer.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
-//		 }
-//		 }
-//		
-//		 if (convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
-//		 {
-//		 setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 }
-//		 else
-//		 {
-//		 setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		
-//		 boolean showTip = false;
-//		
-//		 if (viewType == ViewType.SEND_HIKE)
-//		 {
-//		 if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
-//		 {
-//		 if (msgIdForSdrTip == -1)
-//		 {
-//		 showTip = true;
-//		 }
-//		 else if (convMessage.getMsgID() == msgIdForSdrTip)
-//		 {
-//		 showTip = true;
-//		 }
-//		 }
-//		
-//		 if (showTip)
-//		 {
-//		 msgIdForSdrTip = convMessage.getMsgID();
-//		 showSdrTip(holder.sdrFtueTip);
-//		 }
-//		 else
-//		 {
-//		 holder.sdrFtueTip.setVisibility(View.GONE);
-//		 }
-//		 }
-//		 }
-//		
-//		 }
-//		 else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
-//		 {
-//		 FileSavedState fss = null;
-//		 final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-//		 HikeFileType hikeFileType = hikeFile.getHikeFileType();
-//		 File file = hikeFile.getFile();
-//		 if (convMessage.isSent())
-//		 {
-//		 fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
-//		 }
-//		 else
-//		 {
-//		 fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
-//		 }
-//		 Logger.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
-//		 Logger.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
-//		
-//		 if (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING)
-//		 holder.messageContainer.setVisibility(View.VISIBLE);
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail
-//		 holder.fileThumb.setBackgroundResource(0);
-//		 holder.fileThumb.setImageResource(0);
-//		 boolean showThumbnail = false;
-//		 Drawable thumbnail = null;
-//		 if (hikeFileType == HikeFileType.CONTACT)
-//		 {
-//		 createFileThumb(holder.fileThumb);
-//		 holder.fileThumb.setImageResource(R.drawable.ic_default_contact);
-//		 holder.fileName.setText(hikeFile.getDisplayName());
-//		 List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
-//		 String phone = null, email = null;
-//		 for (ContactInfoData contactInfoData : items)
-//		 {
-//		 if (contactInfoData.getDataType() == DataType.PHONE_NUMBER)
-//		 phone = contactInfoData.getData();
-//		
-//		 else if (contactInfoData.getDataType() == DataType.EMAIL)
-//		 email = contactInfoData.getData();
-//		 }
-//		
-//		 if (!TextUtils.isEmpty(phone))
-//		 {
-//		 holder.fileSizeExt.setText(phone);
-//		 holder.fileSizeExt.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (!TextUtils.isEmpty(email))
-//		 {
-//		 holder.fileSizeExt.setText(email);
-//		 holder.fileSizeExt.setVisibility(View.VISIBLE);
-//		 }
-//		
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 holder.fileName.setVisibility(View.VISIBLE);
-//		 holder.fileDetails.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (hikeFileType == HikeFileType.AUDIO)
-//		 {
-//		 createFileThumb(holder.fileThumb);
-//		 holder.fileName.setText(hikeFile.getFileName());
-//		 // holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-//		 if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
-//		 }
-//		 else if (hikeFile.getFileSize() > 0)
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-//		 }
-//		 else
-//		 {
-//		 holder.fileSizeExt.setText("");
-//		 }
-//		 String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-//		 if (!TextUtils.isEmpty(ext))
-//		 {
-//		 holder.fileExtension.setText(ext);
-//		 }
-//		 else
-//		 {
-//		 holder.fileExtension.setText("?");
-//		 }
-//		
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 holder.fileName.setVisibility(View.VISIBLE);
-//		 holder.fileSizeExt.setVisibility(View.VISIBLE);
-//		 holder.fileExtension.setVisibility(View.VISIBLE);
-//		 holder.fileDetails.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
-//		 {
-//		 holder.stickerPlaceholder.setVisibility(View.VISIBLE);
-//		 holder.stickerPlaceholder.setBackgroundResource(0);
-//		 setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
-//		 firstMessageFromParticipant);
-//		 holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-//		 if (holder.stickerParticipantNameUnsaved != null)
-//		 {
-//		 holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-//		 }
-//		
-//		 ShapeDrawable circle = new ShapeDrawable(new OvalShape());
-//		 circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
-//		 circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
-//		 if (convMessage.isSent())
-//		 {
-//		 /* label outgoing hike conversations in green */
-//		 if (chatTheme == ChatTheme.DEFAULT)
-//		 {
-//		 circle.getPaint().setColor(context.getResources().getColor(!convMessage.isSMS() ? R.color.bubble_blue : R.color.bubble_green));
-//		 }
-//		 else
-//		 {
-//		 circle.getPaint().setColor(context.getResources().getColor(chatTheme.bubbleColor()));
-//		 }
-//		
-//		 }
-//		 else
-//		 {
-//		 circle.getPaint().setColor(context.getResources().getColor(R.color.bubble_white));
-//		 }
-//		
-//		 holder.recPlaceholder.setBackgroundDrawable(circle);
-//		 holder.recPlaceholder.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (hikeFileType == HikeFileType.VIDEO)
-//		 {
-//		 showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
-//		 .wasFileDownloaded())) && (hikeFile.getThumbnail() != null);
-//		 thumbnail = null;
-//		 if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
-//		 {
-//		 thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
-//		 if (thumbnail != null)
-//		 {
-//		 showThumbnail = true;
-//		 }
-//		 }
-//		 else
-//		 {
-//		 thumbnail = hikeFile.getThumbnail();
-//		 }
-//		 if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()) && !(conversation instanceof GroupConversation)
-//		 && (!convMessage.isSent()))
-//		 showThumbnail = false;
-//		
-//		 if (thumbnail != null)
-//		 {
-//		 if (showThumbnail)
-//		 {
-//		 holder.fileThumb.setBackgroundDrawable(thumbnail);
-//		 }
-//		 else
-//		 {
-//		 createMediaThumb(holder.fileThumb);
-//		 }
-//		
-//		 if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
-//		 {
-//		 holder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
-//		 }
-//		 else if (hikeFile.getFileSize() > 0)
-//		 {
-//		 holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
-//		 }
-//		 else
-//		 {
-//		 holder.fileSize.setText("");
-//		 }
-//		
-//		 holder.fileSize.setVisibility(View.VISIBLE);
-//		 holder.messageSize.setVisibility(View.VISIBLE);
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 holder.filmstripLeft.setVisibility(View.VISIBLE);
-//		 holder.filmstripRight.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 createFileThumb(holder.fileThumb);
-//		 holder.fileName.setText(hikeFile.getFileName());
-//		 if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
-//		 }
-//		 else if (hikeFile.getFileSize() > 0)
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-//		 }
-//		 else
-//		 {
-//		 holder.fileSizeExt.setText("");
-//		 }
-//		 String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-//		 if (!TextUtils.isEmpty(ext))
-//		 {
-//		 holder.fileExtension.setText(ext);
-//		 }
-//		 else
-//		 {
-//		 holder.fileExtension.setText("?");
-//		 }
-//		
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 holder.fileName.setVisibility(View.VISIBLE);
-//		 holder.fileSizeExt.setVisibility(View.VISIBLE);
-//		 holder.fileExtension.setVisibility(View.VISIBLE);
-//		 holder.fileDetails.setVisibility(View.VISIBLE);
-//		 }
-//		 }
-//		 else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
-//		 {
-//		
-//		 showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
-//		 .wasFileDownloaded())) && (hikeFile.getThumbnail() != null);
-//		 thumbnail = null;
-//		 if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
-//		 {
-//		 thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
-//		 if (thumbnail != null)
-//		 {
-//		 showThumbnail = true;
-//		 }
-//		 }
-//		 else
-//		 {
-//		 thumbnail = hikeFile.getThumbnail();
-//		 }
-//		 if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()) && !(conversation instanceof GroupConversation)
-//		 && (!convMessage.isSent()))
-//		 showThumbnail = false;
-//		
-//		 if (thumbnail != null || hikeFileType == HikeFileType.LOCATION)
-//		 {
-//		
-//		 if (showThumbnail)
-//		 {
-//		 holder.fileThumb.setBackgroundDrawable(thumbnail);
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (hikeFileType == HikeFileType.IMAGE)
-//		 {
-//		 createMediaThumb(holder.fileThumb);
-//		 }
-//		 else
-//		 {
-//		 createMediaThumb(holder.fileThumb);
-//		 holder.fileThumb.setImageResource(R.drawable.ic_default_location);
-//		 holder.fileThumb.setScaleType(ScaleType.CENTER);
-//		 }
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 createFileThumb(holder.fileThumb);
-//		 holder.fileName.setText(hikeFile.getFileName());
-//		 if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
-//		 }
-//		 else if (hikeFile.getFileSize() > 0)
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-//		 }
-//		 else
-//		 {
-//		 holder.fileSizeExt.setText("");
-//		 }
-//		 String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-//		 if (!TextUtils.isEmpty(ext))
-//		 {
-//		 holder.fileExtension.setText(ext);
-//		 }
-//		 else
-//		 {
-//		 holder.fileExtension.setText("?");
-//		 }
-//		
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 holder.fileName.setVisibility(View.VISIBLE);
-//		 holder.fileSizeExt.setVisibility(View.VISIBLE);
-//		 holder.fileExtension.setVisibility(View.VISIBLE);
-//		 holder.fileDetails.setVisibility(View.VISIBLE);
-//		 }
-//		 }
-//		 else if (hikeFileType == HikeFileType.OTHER)
-//		 {
-//		 createFileThumb(holder.fileThumb);
-//		 holder.fileName.setText(hikeFile.getFileName());
-//		 if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
-//		 }
-//		 else if (hikeFile.getFileSize() > 0)
-//		 {
-//		 holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-//		 }
-//		 else
-//		 {
-//		 holder.fileSizeExt.setText("");
-//		 }
-//		 String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-//		 if (!TextUtils.isEmpty(ext))
-//		 {
-//		 holder.fileExtension.setText(ext);
-//		 }
-//		 else
-//		 {
-//		 holder.fileExtension.setText("?");
-//		 }
-//		
-//		 holder.fileThumb.setVisibility(View.VISIBLE);
-//		 holder.fileName.setVisibility(View.VISIBLE);
-//		 holder.fileSizeExt.setVisibility(View.VISIBLE);
-//		 holder.fileExtension.setVisibility(View.VISIBLE);
-//		 holder.fileDetails.setVisibility(View.VISIBLE);
-//		 }
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail Dimensions
-//		 RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) holder.fileThumb.getLayoutParams();
-//		 if (hikeFileType == HikeFileType.AUDIO_RECORDING)
-//		 {
-//		
-//		 }
-//		 else if ((!showThumbnail) && (hikeFileType == HikeFileType.LOCATION))
-//		 {
-//		 holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
-//		 }
-//		 else if ((!showThumbnail)
-//		 && (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER
-//		 || hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
-//		 {
-//		 holder.fileThumb.setScaleType(ScaleType.CENTER);
-//		 }
-//		 else if (showThumbnail && thumbnail != null)
-//		 {
-//		 holder.fileThumb.setScaleType(ScaleType.CENTER);
-//		 fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
-//		 fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
-//		 /*
-//		 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
-//		 */
-//		 int maxWidth = (int) (250 * Utils.densityMultiplier);
-//		 fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
-//		 int minWidth = (int) (119 * Utils.densityMultiplier);
-//		 fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
-//		
-//		 if (fileThumbParams.width == minWidth)
-//		 {
-//		 fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
-//		 }
-//		 }
-//		 else
-//		 {
-//		 holder.fileThumb.setScaleType(ScaleType.CENTER);
-//		 fileThumbParams.height = LayoutParams.WRAP_CONTENT;
-//		 fileThumbParams.width = LayoutParams.WRAP_CONTENT;
-//		 }
-//		 holder.fileThumb.setScaleType(ScaleType.CENTER);
-//		 holder.fileThumb.setLayoutParams(fileThumbParams);
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting and Showing MessageTextView
-//		 if (hikeFileType == HikeFileType.AUDIO_RECORDING)
-//		 {
-//		 // Utils.setupFormattedTime(holder.recDuration, hikeFile.getRecordingDuration());
-//		 // holder.recDuration.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (hikeFileType == HikeFileType.CONTACT)
-//		 {
-//		 // holder.messageTextView.setText(hikeFile.getFileName());
-//		 // holder.messageTextView.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 holder.messageTextView.setText(hikeFile.getFileName());
-//		 }
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up the FileButton
-//		 if (hikeFileType == HikeFileType.AUDIO_RECORDING)
-//		 {
-//		 if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
-//		 {
-//		 // holder.mediaAction.setBackgroundResource(0);
-//		 // holder.mediaAction.setImageResource(0);
-//		 // holder.mediaAction.setScaleType(ScaleType.CENTER_INSIDE);
-//		 holder.recAction.setBackgroundResource(0);
-//		 holder.recAction.setImageResource(0);
-//		 holder.recAction.setScaleType(ScaleType.CENTER_INSIDE);
-//		 if (hikeFile.getFileKey().equals(voiceMessagePlayer.getFileKey()))
-//		 {
-//		 holder.recAction.setVisibility(View.VISIBLE);
-//		 if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING)
-//		 {
-//		 holder.recAction.setImageResource(R.drawable.ic_pause_rec);
-//		 }
-//		 else
-//		 {
-//		 holder.recAction.setImageResource(R.drawable.ic_mic);
-//		 }
-//		 // holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
-//		 holder.recDuration.setTag(hikeFile.getFileKey());
-//		 voiceMessagePlayer.setDurationTxt(holder.recDuration, holder.recProgress);
-//		 holder.recDuration.setVisibility(View.VISIBLE);
-//		 holder.recProgress.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 if ((!convMessage.isSent()) || (!TextUtils.isEmpty(hikeFile.getFileKey())))
-//		 {
-//		 // setFileButtonResource(holder.mediaAction, convMessage, hikeFile);
-//		 // holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
-//		 // holder.recAction.setImageResource(R.drawable.ic_open_received_file);
-//		 holder.recAction.setImageResource(R.drawable.ic_mic);
-//		 holder.recAction.setVisibility(View.VISIBLE);
-//		 }
-//		 Utils.setupFormattedTime(holder.recDuration, hikeFile.getRecordingDuration());
-//		 holder.recDuration.setVisibility(View.VISIBLE);
-//		 holder.recProgress.setVisibility(View.INVISIBLE);
-//		 }
-//		 }
-//		 else
-//		 {
-//		 holder.recAction.setImageResource(R.drawable.ic_mic);
-//		 holder.recAction.setVisibility(View.VISIBLE);
-//		 }
-//		 }
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Margin View
-//		 // if (holder.marginView != null)
-//		 // {
-//		 // holder.marginView.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE : View.GONE);
-//		 // }
-//		 setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
-//		
-//		 // if (!convMessage.isSent())
-//		 // {
-//		 // if (firstMessageFromParticipant)
-//		 // {
-//		 // holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-//		 // holder.participantNameFT.setVisibility(View.VISIBLE);
-//		 // }
-//		 // else
-//		 // {
-//		 // holder.participantNameFT.setVisibility(View.GONE);
-//		 // }
-//		 // }
-//		 holder.messageContainer.setTag(convMessage);
-//		 holder.messageContainer.setOnClickListener(this);
-//		 holder.messageContainer.setOnLongClickListener(this);
-//		
-//		 if (holder.circularProgressBgExt != null)
-//		 {
-//		 holder.circularProgressBgExt.setTag(convMessage);
-//		 holder.circularProgressBgExt.setOnClickListener(this);
-//		 holder.circularProgressBgExt.setOnLongClickListener(this);
-//		 }
-//		
-//		 if (holder.recPlaceholder != null)
-//		 {
-//		 holder.recPlaceholder.setTag(convMessage);
-//		 holder.recPlaceholder.setOnClickListener(this);
-//		 holder.recPlaceholder.setOnLongClickListener(this);
-//		 }
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
-//		 if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
-//		 {
-//		 if ((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
-//		 {
-//		
-//		 }
-//		 else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
-//		 {
-//		
-//		 }
-//		 else
-//		 {
-//		 if (hikeFileType == HikeFileType.LOCATION)
-//		 {
-//		 holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
-//		 holder.ftAction.setVisibility(View.VISIBLE);
-//		 holder.ftAction.setScaleType(ScaleType.CENTER);
-//		 holder.circularProgressBg.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.ftActionExt.setScaleType(ScaleType.CENTER);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 }
-//		 }
-//		 }
-//		 else if (((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO)) && (thumbnail != null))
-//		 {
-//		 ImageView ftAction;
-//		 View circularProgressBg;
-//		 ftAction = holder.ftAction;
-//		 circularProgressBg = holder.circularProgressBg;
-//		 switch (fss.getFTState())
-//		 {
-//		 case NOT_STARTED:
-//		 if (!convMessage.isSent())
-//		 {
-//		 ftAction.setImageResource(R.drawable.ic_download_image_video);
-//		 ftAction.setVisibility(View.VISIBLE);
-//		 circularProgressBg.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (TextUtils.isEmpty(hikeFile.getFileKey()))
-//		 {
-//		 ftAction.setImageResource(R.drawable.ic_retry_image_video);
-//		 ftAction.setVisibility(View.VISIBLE);
-//		 circularProgressBg.setVisibility(View.VISIBLE);
-//		 }
-//		 break;
-//		 case INITIALIZED:
-//		 break;
-//		 case IN_PROGRESS:
-//		 ftAction.setImageResource(R.drawable.ic_pause_image_video);
-//		 ftAction.setVisibility(View.VISIBLE);
-//		 circularProgressBg.setVisibility(View.VISIBLE);
-//		 break;
-//		 case PAUSING:
-//		 ftAction.setImageResource(0);
-//		 ftAction.setVisibility(View.VISIBLE);
-//		 circularProgressBg.setVisibility(View.VISIBLE);
-//		 break;
-//		 case PAUSED:
-//		 ftAction.setImageResource(R.drawable.ic_retry_image_video);
-//		 ftAction.setVisibility(View.VISIBLE);
-//		 circularProgressBg.setVisibility(View.VISIBLE);
-//		 break;
-//		 case ERROR:
-//		 ftAction.setImageResource(R.drawable.ic_retry_image_video);
-//		 ftAction.setVisibility(View.VISIBLE);
-//		 circularProgressBg.setVisibility(View.VISIBLE);
-//		 break;
-//		 default:
-//		 break;
-//		 }
-//		 ftAction.setScaleType(ScaleType.CENTER);
-//		 }
-//		 else if (hikeFileType != HikeFileType.AUDIO_RECORDING)
-//		 {
-//		 switch (fss.getFTState())
-//		 {
-//		 case NOT_STARTED:
-//		 if (!convMessage.isSent())
-//		 {
-//		 holder.ftActionExt.setImageResource(R.drawable.ic_download_other);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 }
-//		 else if (TextUtils.isEmpty(hikeFile.getFileKey()))
-//		 {
-//		 holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 }
-//		 break;
-//		 case INITIALIZED:
-//		 break;
-//		 case IN_PROGRESS:
-//		 holder.ftActionExt.setImageResource(R.drawable.ic_pause_other);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 break;
-//		 case PAUSING:
-//		 holder.ftActionExt.setImageResource(0);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 break;
-//		 case PAUSED:
-//		 holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 break;
-//		 case ERROR:
-//		 holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
-//		 holder.ftActionExt.setVisibility(View.VISIBLE);
-//		 holder.circularProgressBgExt.setVisibility(View.VISIBLE);
-//		 break;
-//		 default:
-//		 break;
-//		 }
-//		 holder.ftActionExt.setScaleType(ScaleType.CENTER);
-//		 }
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up Overlay Contents
-//		
-//		 if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
-//		 {
-//		 if (hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
-//		 {
-//		
-//		 }
-//		 else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
-//		 {
-//		 showTransferInitialization(holder, hikeFile, thumbnail);
-//		 }
-//		 else
-//		 {
-//		
-//		 }
-//		 }
-//		 // else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
-//		 else
-//		 {
-//		 if (convMessage.isSent()) // File is being sent
-//		 {
-//		 Logger.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
-//		 switch (fss.getFTState())
-//		 {
-//		 case COMPLETED:
-//		 break;
-//		 case NOT_STARTED:
-//		 case CANCELLED:
-//		 break;
-//		 case INITIALIZED:
-//		 showTransferInitialization(holder, hikeFile, thumbnail);
-//		 // setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
-//		 // holder.fileType.setVisibility(View.VISIBLE);
-//		 break;
-//		 case ERROR:
-//		 // Logger.d(getClass().getSimpleName(), "error display");
-//		 // holder.image.setVisibility(View.VISIBLE);
-//		 // holder.image.setImageResource(getDownloadFailedResIcon());
-//		 showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
-//		 break;
-//		 case PAUSING:
-//		 showTransferInitialization(holder, hikeFile, thumbnail);
-//		 break;
-//		 case PAUSED:
-//		 showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
-//		 break;
-//		 case IN_PROGRESS:
-//		 showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
-//		 break;
-//		 default:
-//		 }
-//		 }
-//		 else
-//		 // File is being received
-//		 {
-//		 Logger.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
-//		 switch (fss.getFTState())
-//		 {
-//		 case INITIALIZED:
-//		 showTransferInitialization(holder, hikeFile, thumbnail);
-//		 break;
-//		 case PAUSING:
-//		 showTransferInitialization(holder, hikeFile, thumbnail);
-//		 break;
-//		 case PAUSED:
-//		 case ERROR:
-//		 showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
-//		 break;
-//		 case IN_PROGRESS:
-//		 showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
-//		 break;
-//		 case NOT_STARTED:
-//		 case CANCELLED:
-//		 case COMPLETED:
-//		 default:
-//		 break;
-//		
-//		 }
-//		 }
-//		 }
-//		
-//		 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Message status and time stamp
-//		 if (convMessage.isSent())
-//		 {
-//		 // if (!TextUtils.isEmpty(hikeFile.getFileKey()))
-//		 // {
-//		 if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
-//		 {
-//		 setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 }
-//		 else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
-//		 {
-//		 if (thumbnail != null)
-//		 {
-//		 setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
-//		 holder.sending);
-//		 }
-//		 else
-//		 {
-//		 setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 }
-//		 }
-//		 else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-//		 || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
-//		 {
-//		 // setFileTypeText(holder.fileType, hikeFile);
-//		 // holder.fileType.setVisibility(View.VISIBLE);
-//		 setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 }
-//		 else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-//		 {
-//		 setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
-//		 holder.sending);
-//		 }
-//		 else
-//		 {
-//		 setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, false, holder.intMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
-//		 holder.sending);
-//		 }
-//		 }
-//		 else
-//		 {
-//		 if (firstMessageFromParticipant)
-//		 {
-//		 holder.image.setVisibility(View.VISIBLE);
-//		 setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
-//		 holder.avatarContainer.setVisibility(View.VISIBLE);
-//		 }
-//		 else
-//		 {
-//		 holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
-//		 }
-//		 if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
-//		 {
-//		 setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 }
-//		 else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
-//		 {
-//		 if (thumbnail != null)
-//		 {
-//		 setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
-//		 holder.sending);
-//		 }
-//		 else
-//		 {
-//		 setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 }
-//		 }
-//		 else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-//		 || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
-//		 {
-//		 // if(fss.getFTState() == FTState.COMPLETED)
-//		 // {
-//		 setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
-//		 // setFileTypeText(holder.fileType, hikeFile);
-//		 // holder.fileType.setVisibility(View.VISIBLE);
-//		 // }
-//		 }
-//		 else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-//		 {
-//		 setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
-//		 holder.sending);
-//		 }
-//		 else
-//		 {
-//		 setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, false, holder.intMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
-//		 holder.sending);
-//		 }
-//		 }
-//		 } // End of File Transfer Message
-		
-		
-		
-		
-		
-		
+
+		// {
+		// if (metadata != null && metadata.isPokeMessage())
+		// {
+		// holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+		// holder.stickerPlaceholder.setBackgroundResource(0);
+		// setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+		// firstMessageFromParticipant);
+		// holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+		// if (holder.stickerParticipantNameUnsaved != null)
+		// {
+		// holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+		// }
+		// // if (isDefaultTheme)
+		// // {
+		// // holder.poke.setVisibility(View.VISIBLE);
+		// // holder.messageContainer.setVisibility(View.VISIBLE);
+		// // setNudgeImageResource(chatTheme, holder.poke, convMessage.isSent());
+		// // }
+		// // else
+		// if (!chatTheme.isAnimated())
+		// {
+		// holder.pokeCustom.setVisibility(View.VISIBLE);
+		// holder.messageContainer.setVisibility(View.GONE);
+		// setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+		// }
+		// else
+		// {
+		// holder.pokeCustom.setVisibility(View.VISIBLE);
+		// holder.messageContainer.setVisibility(View.GONE);
+		//
+		// setNudgeImageResource(chatTheme, holder.pokeCustom, convMessage.isSent());
+		// if (metadata.getNudgeAnimationType() != NudgeAnimationType.NONE)
+		// {
+		// metadata.setNudgeAnimationType(NudgeAnimationType.NONE);
+		// holder.pokeCustom.startAnimation(AnimationUtils.loadAnimation(context, R.anim.valetines_nudge_anim));
+		// }
+		// }
+		// }
+		// else if (convMessage.isStickerMessage())
+		// {
+		// holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+		// holder.stickerPlaceholder.setBackgroundResource(0);
+		//
+		// Sticker sticker = metadata.getSticker();
+		// setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+		// firstMessageFromParticipant);
+		// // holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+		// if (holder.stickerParticipantNameUnsaved != null)
+		// {
+		// holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+		// }
+		// // if (!convMessage.isSent())
+		// // {
+		// //
+		// // if (firstMessageFromParticipant)
+		// // {
+		// // holder.stickerParticipantName.setVisibility(View.VISIBLE);
+		// // holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+		// // holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+		// // }
+		// // else
+		// // {
+		// // holder.stickerParticipantName.setVisibility(View.GONE);
+		// // }
+		// // }
+		//
+		// /*
+		// * If this is the default category, then the sticker are part of the app bundle itself
+		// */
+		// if (sticker.getStickerIndex() != -1)
+		// {
+		// holder.stickerImage.setVisibility(View.VISIBLE);
+		// if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+		// {
+		// // TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+		// int idx = sticker.getStickerIndex();
+		// if (idx >= 0)
+		// holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
+		// }
+		// else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+		// {
+		// // TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
+		// int idx = sticker.getStickerIndex();
+		// if (idx >= 0)
+		// holder.stickerImage.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
+		// }
+		// }
+		// else
+		// {
+		// String categoryId;
+		// /*
+		// * If the category is an unknown one, we have the category id stored in the metadata.
+		// */
+		// if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
+		// {
+		// categoryId = metadata.getUnknownStickerCategory();
+		// }
+		// else
+		// {
+		// categoryId = sticker.getCategory().categoryId.name();
+		// }
+		// String stickerId = sticker.getStickerId();
+		//
+		// String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
+		// File stickerImage = null;
+		// if (categoryDirPath != null)
+		// {
+		// stickerImage = new File(categoryDirPath, stickerId);
+		// }
+		//
+		// String key = categoryId + stickerId;
+		// boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
+		//
+		// if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
+		// {
+		// Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
+		// if (stickerDrawable != null)
+		// {
+		// holder.stickerImage.setVisibility(View.VISIBLE);
+		// // largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+		// holder.stickerImage.setImageDrawable(stickerDrawable);
+		// // holder.stickerImage.setImageDrawable(IconCacheManager
+		// // .getInstance().getSticker(context,
+		// // stickerImage.getPath()));
+		// }
+		// else
+		// {
+		// holder.stickerLoader.setVisibility(View.VISIBLE);
+		// holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+		// }
+		// }
+		// else
+		// {
+		// holder.stickerLoader.setVisibility(View.VISIBLE);
+		// holder.stickerPlaceholder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+		//
+		// /*
+		// * Download the sticker if not already downloading.
+		// */
+		// if (!downloadingSticker)
+		// {
+		// DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
+		// StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
+		// Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
+		// }
+		// }
+		// }
+		// }
+		// else
+		// {
+		// holder.messageTextView.setVisibility(View.VISIBLE);
+		// holder.messageContainer.setVisibility(View.VISIBLE);
+		//
+		// CharSequence markedUp = convMessage.getMessage();
+		// // Fix for bug where if a participant leaves the group chat, the
+		// // participant's name is never shown
+		// setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+		//
+		// SmileyParser smileyParser = SmileyParser.getInstance();
+		// markedUp = smileyParser.addSmileySpans(markedUp, false);
+		// holder.messageTextView.setText(markedUp);
+		// Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+		// Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
+		// }
+		//
+		// if (!convMessage.isSent())
+		// {
+		// if (firstMessageFromParticipant)
+		// {
+		// holder.image.setVisibility(View.VISIBLE);
+		// setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
+		// holder.avatarContainer.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+		// }
+		// }
+		//
+		// if (convMessage.isStickerMessage() || (metadata != null && metadata.isPokeMessage()))
+		// {
+		// setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// }
+		// else
+		// {
+		// setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		//
+		// boolean showTip = false;
+		//
+		// if (viewType == ViewType.SEND_HIKE)
+		// {
+		// if (!shownSdrIntroTip && !isGroupChat && convMessage.getState() == State.SENT_DELIVERED_READ)
+		// {
+		// if (msgIdForSdrTip == -1)
+		// {
+		// showTip = true;
+		// }
+		// else if (convMessage.getMsgID() == msgIdForSdrTip)
+		// {
+		// showTip = true;
+		// }
+		// }
+		//
+		// if (showTip)
+		// {
+		// msgIdForSdrTip = convMessage.getMsgID();
+		// showSdrTip(holder.sdrFtueTip);
+		// }
+		// else
+		// {
+		// holder.sdrFtueTip.setVisibility(View.GONE);
+		// }
+		// }
+		// }
+		//
+		// }
+		// else if (viewType == ViewType.FILE_TRANSFER_SEND || viewType == ViewType.FILE_TRANSFER_RECEIVE)
+		// {
+		// FileSavedState fss = null;
+		// final HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+		// HikeFileType hikeFileType = hikeFile.getHikeFileType();
+		// File file = hikeFile.getFile();
+		// if (convMessage.isSent())
+		// {
+		// fss = FileTransferManager.getInstance(context).getUploadFileState(convMessage.getMsgID(), file);
+		// }
+		// else
+		// {
+		// fss = FileTransferManager.getInstance(context).getDownloadFileState(convMessage.getMsgID(), file);
+		// }
+		// Logger.d(getClass().getSimpleName(), "FT msdId: " + convMessage.getMsgID());
+		// Logger.d(getClass().getSimpleName(), "FT state: " + fss.getFTState().toString());
+		//
+		// if (hikeFile.getHikeFileType() != HikeFileType.AUDIO_RECORDING)
+		// holder.messageContainer.setVisibility(View.VISIBLE);
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail
+		// holder.fileThumb.setBackgroundResource(0);
+		// holder.fileThumb.setImageResource(0);
+		// boolean showThumbnail = false;
+		// Drawable thumbnail = null;
+		// if (hikeFileType == HikeFileType.CONTACT)
+		// {
+		// createFileThumb(holder.fileThumb);
+		// holder.fileThumb.setImageResource(R.drawable.ic_default_contact);
+		// holder.fileName.setText(hikeFile.getDisplayName());
+		// List<ContactInfoData> items = Utils.getContactDataFromHikeFile(hikeFile);
+		// String phone = null, email = null;
+		// for (ContactInfoData contactInfoData : items)
+		// {
+		// if (contactInfoData.getDataType() == DataType.PHONE_NUMBER)
+		// phone = contactInfoData.getData();
+		//
+		// else if (contactInfoData.getDataType() == DataType.EMAIL)
+		// email = contactInfoData.getData();
+		// }
+		//
+		// if (!TextUtils.isEmpty(phone))
+		// {
+		// holder.fileSizeExt.setText(phone);
+		// holder.fileSizeExt.setVisibility(View.VISIBLE);
+		// }
+		// else if (!TextUtils.isEmpty(email))
+		// {
+		// holder.fileSizeExt.setText(email);
+		// holder.fileSizeExt.setVisibility(View.VISIBLE);
+		// }
+		//
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// holder.fileName.setVisibility(View.VISIBLE);
+		// holder.fileDetails.setVisibility(View.VISIBLE);
+		// }
+		// else if (hikeFileType == HikeFileType.AUDIO)
+		// {
+		// createFileThumb(holder.fileThumb);
+		// holder.fileName.setText(hikeFile.getFileName());
+		// // holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+		// if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+		// {
+		// holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+		// }
+		// else if (hikeFile.getFileSize() > 0)
+		// {
+		// holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+		// }
+		// else
+		// {
+		// holder.fileSizeExt.setText("");
+		// }
+		// String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+		// if (!TextUtils.isEmpty(ext))
+		// {
+		// holder.fileExtension.setText(ext);
+		// }
+		// else
+		// {
+		// holder.fileExtension.setText("?");
+		// }
+		//
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// holder.fileName.setVisibility(View.VISIBLE);
+		// holder.fileSizeExt.setVisibility(View.VISIBLE);
+		// holder.fileExtension.setVisibility(View.VISIBLE);
+		// holder.fileDetails.setVisibility(View.VISIBLE);
+		// }
+		// else if (hikeFileType == HikeFileType.AUDIO_RECORDING)
+		// {
+		// holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+		// holder.stickerPlaceholder.setBackgroundResource(0);
+		// setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+		// firstMessageFromParticipant);
+		// holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+		// if (holder.stickerParticipantNameUnsaved != null)
+		// {
+		// holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
+		// }
+		//
+		// ShapeDrawable circle = new ShapeDrawable(new OvalShape());
+		// circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
+		// circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
+		// if (convMessage.isSent())
+		// {
+		// /* label outgoing hike conversations in green */
+		// if (chatTheme == ChatTheme.DEFAULT)
+		// {
+		// circle.getPaint().setColor(context.getResources().getColor(!convMessage.isSMS() ? R.color.bubble_blue : R.color.bubble_green));
+		// }
+		// else
+		// {
+		// circle.getPaint().setColor(context.getResources().getColor(chatTheme.bubbleColor()));
+		// }
+		//
+		// }
+		// else
+		// {
+		// circle.getPaint().setColor(context.getResources().getColor(R.color.bubble_white));
+		// }
+		//
+		// holder.recPlaceholder.setBackgroundDrawable(circle);
+		// holder.recPlaceholder.setVisibility(View.VISIBLE);
+		// }
+		// else if (hikeFileType == HikeFileType.VIDEO)
+		// {
+		// showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
+		// .wasFileDownloaded())) && (hikeFile.getThumbnail() != null);
+		// thumbnail = null;
+		// if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
+		// {
+		// thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
+		// if (thumbnail != null)
+		// {
+		// showThumbnail = true;
+		// }
+		// }
+		// else
+		// {
+		// thumbnail = hikeFile.getThumbnail();
+		// }
+		// if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()) && !(conversation instanceof GroupConversation)
+		// && (!convMessage.isSent()))
+		// showThumbnail = false;
+		//
+		// if (thumbnail != null)
+		// {
+		// if (showThumbnail)
+		// {
+		// holder.fileThumb.setBackgroundDrawable(thumbnail);
+		// }
+		// else
+		// {
+		// createMediaThumb(holder.fileThumb);
+		// }
+		//
+		// if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+		// {
+		// holder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+		// }
+		// else if (hikeFile.getFileSize() > 0)
+		// {
+		// holder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+		// }
+		// else
+		// {
+		// holder.fileSize.setText("");
+		// }
+		//
+		// holder.fileSize.setVisibility(View.VISIBLE);
+		// holder.messageSize.setVisibility(View.VISIBLE);
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// holder.filmstripLeft.setVisibility(View.VISIBLE);
+		// holder.filmstripRight.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// createFileThumb(holder.fileThumb);
+		// holder.fileName.setText(hikeFile.getFileName());
+		// if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+		// {
+		// holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+		// }
+		// else if (hikeFile.getFileSize() > 0)
+		// {
+		// holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+		// }
+		// else
+		// {
+		// holder.fileSizeExt.setText("");
+		// }
+		// String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+		// if (!TextUtils.isEmpty(ext))
+		// {
+		// holder.fileExtension.setText(ext);
+		// }
+		// else
+		// {
+		// holder.fileExtension.setText("?");
+		// }
+		//
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// holder.fileName.setVisibility(View.VISIBLE);
+		// holder.fileSizeExt.setVisibility(View.VISIBLE);
+		// holder.fileExtension.setVisibility(View.VISIBLE);
+		// holder.fileDetails.setVisibility(View.VISIBLE);
+		// }
+		// }
+		// else if (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
+		// {
+		//
+		// showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
+		// .wasFileDownloaded())) && (hikeFile.getThumbnail() != null);
+		// thumbnail = null;
+		// if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
+		// {
+		// thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
+		// if (thumbnail != null)
+		// {
+		// showThumbnail = true;
+		// }
+		// }
+		// else
+		// {
+		// thumbnail = hikeFile.getThumbnail();
+		// }
+		// if ((TextUtils.isEmpty(conversation.getContactName())) && (!hikeFile.wasFileDownloaded()) && !(conversation instanceof GroupConversation)
+		// && (!convMessage.isSent()))
+		// showThumbnail = false;
+		//
+		// if (thumbnail != null || hikeFileType == HikeFileType.LOCATION)
+		// {
+		//
+		// if (showThumbnail)
+		// {
+		// holder.fileThumb.setBackgroundDrawable(thumbnail);
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// }
+		// else if (hikeFileType == HikeFileType.IMAGE)
+		// {
+		// createMediaThumb(holder.fileThumb);
+		// }
+		// else
+		// {
+		// createMediaThumb(holder.fileThumb);
+		// holder.fileThumb.setImageResource(R.drawable.ic_default_location);
+		// holder.fileThumb.setScaleType(ScaleType.CENTER);
+		// }
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// createFileThumb(holder.fileThumb);
+		// holder.fileName.setText(hikeFile.getFileName());
+		// if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+		// {
+		// holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+		// }
+		// else if (hikeFile.getFileSize() > 0)
+		// {
+		// holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+		// }
+		// else
+		// {
+		// holder.fileSizeExt.setText("");
+		// }
+		// String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+		// if (!TextUtils.isEmpty(ext))
+		// {
+		// holder.fileExtension.setText(ext);
+		// }
+		// else
+		// {
+		// holder.fileExtension.setText("?");
+		// }
+		//
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// holder.fileName.setVisibility(View.VISIBLE);
+		// holder.fileSizeExt.setVisibility(View.VISIBLE);
+		// holder.fileExtension.setVisibility(View.VISIBLE);
+		// holder.fileDetails.setVisibility(View.VISIBLE);
+		// }
+		// }
+		// else if (hikeFileType == HikeFileType.OTHER)
+		// {
+		// createFileThumb(holder.fileThumb);
+		// holder.fileName.setText(hikeFile.getFileName());
+		// if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+		// {
+		// holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
+		// }
+		// else if (hikeFile.getFileSize() > 0)
+		// {
+		// holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+		// }
+		// else
+		// {
+		// holder.fileSizeExt.setText("");
+		// }
+		// String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+		// if (!TextUtils.isEmpty(ext))
+		// {
+		// holder.fileExtension.setText(ext);
+		// }
+		// else
+		// {
+		// holder.fileExtension.setText("?");
+		// }
+		//
+		// holder.fileThumb.setVisibility(View.VISIBLE);
+		// holder.fileName.setVisibility(View.VISIBLE);
+		// holder.fileSizeExt.setVisibility(View.VISIBLE);
+		// holder.fileExtension.setVisibility(View.VISIBLE);
+		// holder.fileDetails.setVisibility(View.VISIBLE);
+		// }
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Thumbnail Dimensions
+		// RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) holder.fileThumb.getLayoutParams();
+		// if (hikeFileType == HikeFileType.AUDIO_RECORDING)
+		// {
+		//
+		// }
+		// else if ((!showThumbnail) && (hikeFileType == HikeFileType.LOCATION))
+		// {
+		// holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
+		// }
+		// else if ((!showThumbnail)
+		// && (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER
+		// || hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
+		// {
+		// holder.fileThumb.setScaleType(ScaleType.CENTER);
+		// }
+		// else if (showThumbnail && thumbnail != null)
+		// {
+		// holder.fileThumb.setScaleType(ScaleType.CENTER);
+		// fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
+		// fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
+		// /*
+		// * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
+		// */
+		// int maxWidth = (int) (250 * Utils.densityMultiplier);
+		// fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
+		// int minWidth = (int) (119 * Utils.densityMultiplier);
+		// fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
+		//
+		// if (fileThumbParams.width == minWidth)
+		// {
+		// fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
+		// }
+		// }
+		// else
+		// {
+		// holder.fileThumb.setScaleType(ScaleType.CENTER);
+		// fileThumbParams.height = LayoutParams.WRAP_CONTENT;
+		// fileThumbParams.width = LayoutParams.WRAP_CONTENT;
+		// }
+		// holder.fileThumb.setScaleType(ScaleType.CENTER);
+		// holder.fileThumb.setLayoutParams(fileThumbParams);
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting and Showing MessageTextView
+		// if (hikeFileType == HikeFileType.AUDIO_RECORDING)
+		// {
+		// // Utils.setupFormattedTime(holder.recDuration, hikeFile.getRecordingDuration());
+		// // holder.recDuration.setVisibility(View.VISIBLE);
+		// }
+		// else if (hikeFileType == HikeFileType.CONTACT)
+		// {
+		// // holder.messageTextView.setText(hikeFile.getFileName());
+		// // holder.messageTextView.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// holder.messageTextView.setText(hikeFile.getFileName());
+		// }
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up the FileButton
+		// if (hikeFileType == HikeFileType.AUDIO_RECORDING)
+		// {
+		// if (fss.getFTState() == FTState.COMPLETED || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+		// {
+		// // holder.mediaAction.setBackgroundResource(0);
+		// // holder.mediaAction.setImageResource(0);
+		// // holder.mediaAction.setScaleType(ScaleType.CENTER_INSIDE);
+		// holder.recAction.setBackgroundResource(0);
+		// holder.recAction.setImageResource(0);
+		// holder.recAction.setScaleType(ScaleType.CENTER_INSIDE);
+		// if (hikeFile.getFileKey().equals(voiceMessagePlayer.getFileKey()))
+		// {
+		// holder.recAction.setVisibility(View.VISIBLE);
+		// if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING)
+		// {
+		// holder.recAction.setImageResource(R.drawable.ic_pause_rec);
+		// }
+		// else
+		// {
+		// holder.recAction.setImageResource(R.drawable.ic_mic);
+		// }
+		// // holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
+		// holder.recDuration.setTag(hikeFile.getFileKey());
+		// voiceMessagePlayer.setDurationTxt(holder.recDuration, holder.recProgress);
+		// holder.recDuration.setVisibility(View.VISIBLE);
+		// holder.recProgress.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// if ((!convMessage.isSent()) || (!TextUtils.isEmpty(hikeFile.getFileKey())))
+		// {
+		// // setFileButtonResource(holder.mediaAction, convMessage, hikeFile);
+		// // holder.mediaAction.setBackgroundResource(R.drawable.bg_red_btn_selector);
+		// // holder.recAction.setImageResource(R.drawable.ic_open_received_file);
+		// holder.recAction.setImageResource(R.drawable.ic_mic);
+		// holder.recAction.setVisibility(View.VISIBLE);
+		// }
+		// Utils.setupFormattedTime(holder.recDuration, hikeFile.getRecordingDuration());
+		// holder.recDuration.setVisibility(View.VISIBLE);
+		// holder.recProgress.setVisibility(View.INVISIBLE);
+		// }
+		// }
+		// else
+		// {
+		// holder.recAction.setImageResource(R.drawable.ic_mic);
+		// holder.recAction.setVisibility(View.VISIBLE);
+		// }
+		// }
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting Margin View
+		// // if (holder.marginView != null)
+		// // {
+		// // holder.marginView.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE : View.GONE);
+		// // }
+		// setGroupParticipantName(convMessage, holder.participantDetailsFT, holder.participantNameFT, holder.participantNameFTUnsaved, firstMessageFromParticipant);
+		//
+		// // if (!convMessage.isSent())
+		// // {
+		// // if (firstMessageFromParticipant)
+		// // {
+		// // holder.participantNameFT.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+		// // holder.participantNameFT.setVisibility(View.VISIBLE);
+		// // }
+		// // else
+		// // {
+		// // holder.participantNameFT.setVisibility(View.GONE);
+		// // }
+		// // }
+		// holder.messageContainer.setTag(convMessage);
+		// holder.messageContainer.setOnClickListener(this);
+		// holder.messageContainer.setOnLongClickListener(this);
+		//
+		// if (holder.circularProgressBgExt != null)
+		// {
+		// holder.circularProgressBgExt.setTag(convMessage);
+		// holder.circularProgressBgExt.setOnClickListener(this);
+		// holder.circularProgressBgExt.setOnLongClickListener(this);
+		// }
+		//
+		// if (holder.recPlaceholder != null)
+		// {
+		// holder.recPlaceholder.setTag(convMessage);
+		// holder.recPlaceholder.setOnClickListener(this);
+		// holder.recPlaceholder.setOnLongClickListener(this);
+		// }
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
+		// if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
+		// {
+		// if ((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+		// {
+		//
+		// }
+		// else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
+		// {
+		//
+		// }
+		// else
+		// {
+		// if (hikeFileType == HikeFileType.LOCATION)
+		// {
+		// holder.ftAction.setImageResource(R.drawable.ic_retry_image_video);
+		// holder.ftAction.setVisibility(View.VISIBLE);
+		// holder.ftAction.setScaleType(ScaleType.CENTER);
+		// holder.circularProgressBg.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.ftActionExt.setScaleType(ScaleType.CENTER);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// }
+		// }
+		// }
+		// else if (((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO)) && (thumbnail != null))
+		// {
+		// ImageView ftAction;
+		// View circularProgressBg;
+		// ftAction = holder.ftAction;
+		// circularProgressBg = holder.circularProgressBg;
+		// switch (fss.getFTState())
+		// {
+		// case NOT_STARTED:
+		// if (!convMessage.isSent())
+		// {
+		// ftAction.setImageResource(R.drawable.ic_download_image_video);
+		// ftAction.setVisibility(View.VISIBLE);
+		// circularProgressBg.setVisibility(View.VISIBLE);
+		// }
+		// else if (TextUtils.isEmpty(hikeFile.getFileKey()))
+		// {
+		// ftAction.setImageResource(R.drawable.ic_retry_image_video);
+		// ftAction.setVisibility(View.VISIBLE);
+		// circularProgressBg.setVisibility(View.VISIBLE);
+		// }
+		// break;
+		// case INITIALIZED:
+		// break;
+		// case IN_PROGRESS:
+		// ftAction.setImageResource(R.drawable.ic_pause_image_video);
+		// ftAction.setVisibility(View.VISIBLE);
+		// circularProgressBg.setVisibility(View.VISIBLE);
+		// break;
+		// case PAUSING:
+		// ftAction.setImageResource(0);
+		// ftAction.setVisibility(View.VISIBLE);
+		// circularProgressBg.setVisibility(View.VISIBLE);
+		// break;
+		// case PAUSED:
+		// ftAction.setImageResource(R.drawable.ic_retry_image_video);
+		// ftAction.setVisibility(View.VISIBLE);
+		// circularProgressBg.setVisibility(View.VISIBLE);
+		// break;
+		// case ERROR:
+		// ftAction.setImageResource(R.drawable.ic_retry_image_video);
+		// ftAction.setVisibility(View.VISIBLE);
+		// circularProgressBg.setVisibility(View.VISIBLE);
+		// break;
+		// default:
+		// break;
+		// }
+		// ftAction.setScaleType(ScaleType.CENTER);
+		// }
+		// else if (hikeFileType != HikeFileType.AUDIO_RECORDING)
+		// {
+		// switch (fss.getFTState())
+		// {
+		// case NOT_STARTED:
+		// if (!convMessage.isSent())
+		// {
+		// holder.ftActionExt.setImageResource(R.drawable.ic_download_other);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// }
+		// else if (TextUtils.isEmpty(hikeFile.getFileKey()))
+		// {
+		// holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// }
+		// break;
+		// case INITIALIZED:
+		// break;
+		// case IN_PROGRESS:
+		// holder.ftActionExt.setImageResource(R.drawable.ic_pause_other);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// break;
+		// case PAUSING:
+		// holder.ftActionExt.setImageResource(0);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// break;
+		// case PAUSED:
+		// holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// break;
+		// case ERROR:
+		// holder.ftActionExt.setImageResource(R.drawable.ic_retry_other);
+		// holder.ftActionExt.setVisibility(View.VISIBLE);
+		// holder.circularProgressBgExt.setVisibility(View.VISIBLE);
+		// break;
+		// default:
+		// break;
+		// }
+		// holder.ftActionExt.setScaleType(ScaleType.CENTER);
+		// }
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up Overlay Contents
+		//
+		// if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
+		// {
+		// if (hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+		// {
+		//
+		// }
+		// else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
+		// {
+		// showTransferInitialization(holder, hikeFile, thumbnail);
+		// }
+		// else
+		// {
+		//
+		// }
+		// }
+		// // else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+		// else
+		// {
+		// if (convMessage.isSent()) // File is being sent
+		// {
+		// Logger.d(getClass().getSimpleName(), "updating upload progress : " + fss.getFTState().toString() + "fileKey: " + hikeFile.getFileKey().toString());
+		// switch (fss.getFTState())
+		// {
+		// case COMPLETED:
+		// break;
+		// case NOT_STARTED:
+		// case CANCELLED:
+		// break;
+		// case INITIALIZED:
+		// showTransferInitialization(holder, hikeFile, thumbnail);
+		// // setFileTypeText(holder.fileType, hikeFile.getHikeFileType());
+		// // holder.fileType.setVisibility(View.VISIBLE);
+		// break;
+		// case ERROR:
+		// // Logger.d(getClass().getSimpleName(), "error display");
+		// // holder.image.setVisibility(View.VISIBLE);
+		// // holder.image.setImageResource(getDownloadFailedResIcon());
+		// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+		// break;
+		// case PAUSING:
+		// showTransferInitialization(holder, hikeFile, thumbnail);
+		// break;
+		// case PAUSED:
+		// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+		// break;
+		// case IN_PROGRESS:
+		// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+		// break;
+		// default:
+		// }
+		// }
+		// else
+		// // File is being received
+		// {
+		// Logger.d(getClass().getSimpleName(), "setting progress visibility : " + fss.getFTState().toString());
+		// switch (fss.getFTState())
+		// {
+		// case INITIALIZED:
+		// showTransferInitialization(holder, hikeFile, thumbnail);
+		// break;
+		// case PAUSING:
+		// showTransferInitialization(holder, hikeFile, thumbnail);
+		// break;
+		// case PAUSED:
+		// case ERROR:
+		// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+		// break;
+		// case IN_PROGRESS:
+		// showTransferProgress(holder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), thumbnail);
+		// break;
+		// case NOT_STARTED:
+		// case CANCELLED:
+		// case COMPLETED:
+		// default:
+		// break;
+		//
+		// }
+		// }
+		// }
+		//
+		// // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Message status and time stamp
+		// if (convMessage.isSent())
+		// {
+		// // if (!TextUtils.isEmpty(hikeFile.getFileKey()))
+		// // {
+		// if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		// {
+		// setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// }
+		// else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+		// {
+		// if (thumbnail != null)
+		// {
+		// setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+		// holder.sending);
+		// }
+		// else
+		// {
+		// setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// }
+		// }
+		// else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+		// || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+		// {
+		// // setFileTypeText(holder.fileType, hikeFile);
+		// // holder.fileType.setVisibility(View.VISIBLE);
+		// setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// }
+		// else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+		// {
+		// setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+		// holder.sending);
+		// }
+		// else
+		// {
+		// setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, false, holder.intMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+		// holder.sending);
+		// }
+		// }
+		// else
+		// {
+		// if (firstMessageFromParticipant)
+		// {
+		// holder.image.setVisibility(View.VISIBLE);
+		// setAvatar(convMessage.getGroupParticipantMsisdn(), holder.image);
+		// holder.avatarContainer.setVisibility(View.VISIBLE);
+		// }
+		// else
+		// {
+		// holder.avatarContainer.setVisibility(isGroupChat ? View.INVISIBLE : View.GONE);
+		// }
+		// if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		// {
+		// setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// }
+		// else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
+		// {
+		// if (thumbnail != null)
+		// {
+		// setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+		// holder.sending);
+		// }
+		// else
+		// {
+		// setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// }
+		// }
+		// else if ((hikeFile.getHikeFileType() == HikeFileType.AUDIO) || (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+		// || (hikeFile.getHikeFileType() == HikeFileType.OTHER))
+		// {
+		// // if(fss.getFTState() == FTState.COMPLETED)
+		// // {
+		// setNewSDR(position, holder.messageTime, holder.messageStatus, false, null, holder.messageInfo, holder.bubbleContainer, holder.sending);
+		// // setFileTypeText(holder.fileType, hikeFile);
+		// // holder.fileType.setVisibility(View.VISIBLE);
+		// // }
+		// }
+		// else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+		// {
+		// setNewSDR(position, holder.extMessageTime, holder.extMessageStatus, true, holder.extMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+		// holder.sending);
+		// }
+		// else
+		// {
+		// setNewSDR(position, holder.intMessageTime, holder.intMessageStatus, false, holder.intMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+		// holder.sending);
+		// }
+		// }
+		// } // End of File Transfer Message
+
 		else if (viewType == ViewType.STATUS_MESSAGE)
 		{
 			StatusViewHolder statusHolder = null;
@@ -2846,14 +2859,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				statusHolder.dayTextView = (TextView) v.findViewById(R.id.status_info);
 				statusHolder.container = (ViewGroup) v.findViewById(R.id.content_container);
 				statusHolder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
-
+				statusHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 				v.setTag(statusHolder);
 			}
 			else
 			{
 				statusHolder = (StatusViewHolder) v.getTag();
 			}
-
+			dayHolder = statusHolder;
+			
 			statusHolder.image.setVisibility(View.VISIBLE);
 			statusHolder.avatarFrame.setVisibility(View.VISIBLE);
 			statusHolder.messageTextView.setVisibility(View.VISIBLE);
@@ -2948,22 +2962,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (viewType == ViewType.PARTICIPANT_INFO)
 		{
-			ViewGroup container = null;
+			ParticipantInfoHolder participantInfoHolder = null;
 			if (v == null)
 			{
+				participantInfoHolder = new ParticipantInfoHolder();
 				v = inflateView(R.layout.participant_info_receive, null);
-				container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
-
-				v.setTag(container);
+				participantInfoHolder.container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
+				participantInfoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+				v.setTag(participantInfoHolder);
 			}
 			else
 			{
-				container = (ViewGroup) v.getTag();
+				participantInfoHolder = (ParticipantInfoHolder) v.getTag();
 			}
-
-			container.setVisibility(View.VISIBLE);
+			dayHolder = participantInfoHolder;
+			participantInfoHolder.container.setVisibility(View.VISIBLE);
 			ParticipantInfoState infoState = convMessage.getParticipantInfoState();
-			((ViewGroup) container).removeAllViews();
+			((ViewGroup) participantInfoHolder.container).removeAllViews();
 			int positiveMargin = (int) (8 * Utils.densityMultiplier);
 			int left = 0;
 			int top = 0;
@@ -2988,7 +3003,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), isDefaultTheme ? R.drawable.ic_joined_chat
 						: R.drawable.ic_joined_chat_custom);
-				((ViewGroup) container).addView(participantInfo);
+				((ViewGroup) participantInfoHolder.container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT || infoState == ParticipantInfoState.GROUP_END)
 			{
@@ -3011,7 +3026,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						lp.setMargins(left, top, right, bottom);
 						mainMessage.setLayoutParams(lp);
 
-						((ViewGroup) container).addView(mainMessage);
+						((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation).getGroupParticipantFirstName(participantMsisdn);
@@ -3026,7 +3041,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				lp.setMargins(left, top, right, 0);
 				participantInfo.setLayoutParams(lp);
-				((ViewGroup) container).addView(participantInfo);
+				((ViewGroup) participantInfoHolder.container).addView(participantInfo);
 			}
 			else if (infoState == ParticipantInfoState.USER_JOIN || infoState == ParticipantInfoState.USER_OPT_IN)
 			{
@@ -3077,10 +3092,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				lp.setMargins(left, top, right, creditsMessageView != null ? bottom : 0);
 				mainMessage.setLayoutParams(lp);
 
-				((ViewGroup) container).addView(mainMessage);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 				if (creditsMessageView != null)
 				{
-					((ViewGroup) container).addView(creditsMessageView);
+					((ViewGroup) participantInfoHolder.container).addView(creditsMessageView);
 				}
 			}
 			else if ((infoState == ParticipantInfoState.CHANGED_GROUP_NAME) || (infoState == ParticipantInfoState.CHANGED_GROUP_IMAGE))
@@ -3104,7 +3119,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, participantName), icRes);
 
-				((ViewGroup) container).addView(mainMessage);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
 			{
@@ -3115,7 +3130,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), isDefaultTheme ? R.drawable.ic_no_int_sms
 						: R.drawable.ic_no_int_sms_custom);
 
-				((ViewGroup) container).addView(mainMessage);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.INTRO_MESSAGE)
 			{
@@ -3144,7 +3159,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), icRes);
 
-				((ViewGroup) container).addView(mainMessage);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
 			else if (infoState == ParticipantInfoState.DND_USER)
 			{
@@ -3198,7 +3213,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					lp.setMargins(left, top, right, 0);
 					dndMessage.setLayoutParams(lp);
 
-					((ViewGroup) container).addView(dndMessage);
+					((ViewGroup) participantInfoHolder.container).addView(dndMessage);
 				}
 			}
 			else if (infoState == ParticipantInfoState.CHAT_BACKGROUND)
@@ -3223,24 +3238,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
-				((ViewGroup) container).addView(mainMessage);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
+			dayHolder = participantInfoHolder;
 		}
 		else if (viewType == ViewType.UNREAD_COUNT)
 		{
-			ViewGroup container = null;
+			ParticipantInfoHolder participantInfoHolder = null;
 			if (v == null)
 			{
+				participantInfoHolder = new ParticipantInfoHolder();
 				v = inflateView(R.layout.participant_info_receive, null);
-				container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
-
-				v.setTag(container);
+				participantInfoHolder.container = (ViewGroup) v.findViewById(R.id.participant_info_receive_container);
+				participantInfoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
+				v.setTag(participantInfoHolder);
 			}
 			else
 			{
-				container = (ViewGroup) v.getTag();
+				participantInfoHolder = (ParticipantInfoHolder) v.getTag();
 			}
-
+			dayHolder = participantInfoHolder;
 			int layoutRes = chatTheme.systemMessageLayoutId();
 			TextView participantInfo = (TextView) inflater.inflate(layoutRes, null);
 			if (convMessage.getUnreadCount() == 1)
@@ -3251,12 +3268,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				participantInfo.setText(context.getResources().getString(R.string.num_unread_messages, convMessage.getUnreadCount()));
 			}
-			container.removeAllViews();
-			container.addView(participantInfo);
+			participantInfoHolder.container.removeAllViews();
+			participantInfoHolder.container.addView(participantInfo);
+			dayHolder = participantInfoHolder;
+		}
+		if (showDayIndicator(position))
+		{
+			setDay(convMessage, dayHolder);
+		}
+		else if(dayHolder.dayStub != null)
+		{
+			dayHolder.dayStub.setVisibility(View.GONE);
 		}
 		return v;
 	}
-	
+
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
 	{
 		if (convMessage.isSent() && messageContainer != null)
@@ -3373,6 +3399,44 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 			return (Integer.toString(bytes) + " B");
+	}
+
+	private void setDay(ConvMessage convMessage, DayHolder dayHolder)
+	{
+		final String dateFormatted = convMessage.getMessageDate(context);
+		dayHolder.dayStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		{
+			@Override
+			public void onInflate(ViewStub stub, View inflated)
+			{
+				TextView dayTextView = (TextView) inflated.findViewById(R.id.day);
+				View dayLeft = inflated.findViewById(R.id.day_left);
+				View dayRight = inflated.findViewById(R.id.day_right);
+
+				dayTextView.setText(dateFormatted.toUpperCase());
+
+				if (isDefaultTheme)
+				{
+					dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+					dayLeft.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+					dayRight.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+				}
+				else
+				{
+					dayTextView.setTextColor(context.getResources().getColor(R.color.white));
+					dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
+					dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
+				}
+			}
+		});
+		try
+		{
+			dayHolder.dayStub.inflate();
+		}
+		catch (Exception e)
+		{
+
+		}
 	}
 
 	private void setSenderDetails(ConvMessage convMessage, int position, DetailViewHolder detailHolder, boolean ext)
@@ -3720,10 +3784,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (previous == null)
 		{
 			return true;
-		}
-		else if (previous.getMsgID() == LAST_READ_CONV_MESSAGE_ID)
-		{
-			return false;
 		}
 
 		Calendar currentMessageCalendar = Calendar.getInstance();

@@ -7,11 +7,18 @@
     android:minHeight="30dp"
     android:paddingBottom="2dp" >
 
+    <ViewStub
+        android:id="@+id/day_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/message_day_container" />
+
     <ImageView
         android:id="@+id/nudge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/day_container"
         android:layout_marginRight="8dp"
         android:gravity="center_vertical|right"
         android:src="@drawable/ic_nudge_hike_sent" />
@@ -22,8 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/nudge"
-        android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
         layout="@layout/message_time_status_ext" />
 
     <include
