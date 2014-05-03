@@ -710,7 +710,7 @@ public class LockPatternActivity extends Activity {
                         mBtnConfirm.setEnabled(true);
                     } else {
                         mTextInfo
-                                .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
+                                .setText(R.string.alp_42447968_msg_try_again);
                         mBtnConfirm.setEnabled(false);
                         mLockPatternView.setDisplayMode(DisplayMode.Wrong);
                         mLockPatternView.postDelayed(mLockPatternViewReloader,
