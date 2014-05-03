@@ -15,6 +15,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Utils;
 import com.haibison.android.lockpattern.LockPatternActivity;
 import com.haibison.android.lockpattern.util.Settings;
 import com.haibison.android.lockpattern.widget.LockPatternUtils;
@@ -39,6 +40,7 @@ public class LockPattern
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, encryptedPattern);
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, true);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, null);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.STEALTH_FTUE_DONE);
 			}
 			else
 			{
@@ -51,15 +53,14 @@ public class LockPattern
 			switch (resultCode)
 			{
 			case Activity.RESULT_OK:
-				Toast.makeText(activity, R.string.stealth_mode_on, Toast.LENGTH_SHORT).show();
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 				HikeAnalyticsEvent.sendStealthEnabled(true);
 				break;
 			case Activity.RESULT_CANCELED:
-				Toast.makeText(activity, activity.getString(R.string.stealth_mode_on)+".", Toast.LENGTH_SHORT).show();
-				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_ON_FAKE);
+				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.ENTER_WRONG_STEALTH_MODE);
 				break;
 			case LockPatternActivity.RESULT_FAILED:
 				break;

@@ -106,7 +106,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -252,8 +252,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-						HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG);
+						if(!(dialog != null && dialog.isShowing()))
+						{
+							if(!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+							{
+								
+									dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+									dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+							}
+							else
+							{
+								dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+							}
+						}
 					}
 				}
 				else
@@ -270,9 +282,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						Toast.makeText(HomeActivity.this, R.string.normal_mode_on, Toast.LENGTH_SHORT).show();
 						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+						Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
 					}
 				}
 			}
@@ -370,6 +382,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
 			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
+			Animation anim =  AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
+			anim.setDuration(1000);
+			findViewById(R.id.stealth_double_tap_tip).startAnimation(anim);
 		}
 	}
 
@@ -1895,13 +1910,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			showFreeInviteDialog();
 			break;
 		case FILE_TRANSFER_POP_Up:
-			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getFileTransferDialogListener());
-
+			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
+			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_EMPTY_STATE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
 			break;
 		}
 	}
 
-	private HikeDialogListener getFileTransferDialogListener()
+	private HikeDialogListener getHomeActivityDialogListener()
 	{
 		return new HikeDialog.HikeDialogListener()
 		{
@@ -1915,7 +1938,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void neutralClicked(Dialog dialog)
 			{
-				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+				switch (dialogShowing)
+				{
+				case FILE_TRANSFER_POP_Up:
+					HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+					break;
+				case STEALTH_FTUE_POPUP:
+					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+					break;
+
+				default:
+					break;
+				}
+				
 				dialogShowing = null;
 				dialog.dismiss();
 				HomeActivity.this.dialog = null;

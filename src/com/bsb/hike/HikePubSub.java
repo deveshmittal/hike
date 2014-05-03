@@ -329,6 +329,8 @@ public class HikePubSub implements Runnable
 
 	public static final String STEALTH_MODE_RESET_COMPLETE = "stealthModeResetComplete";
 
+	public static final String CLOSE_CURRENT_STEALTH_CHAT = "closeCurrentStealthChat";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

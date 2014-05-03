@@ -1318,6 +1318,19 @@ public class HikeConstants
 		public static final String FTUE_TUTORIAL_CBG_VIEWED = "ftueTutorialCbgViewed";
 
 		public static final String START_HIKING = "startHiking";
+		
+		public static final String QUICK_SETUP_CLICK = "quickSetupClick";
+		
+		public static final String STEALTH_FTUE_DONE = "stlthFtueDone";
+		
+		public static final String RESET_STEALTH_INIT = "resetStlthInit";
+		
+		public static final String RESET_STEALTH_CANCEL = "resetStlthCancel";
+		
+		public static final String ENTER_WRONG_STEALTH_MODE = "entWrongStlth";
+		
+		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
+		
 	}
 
 	public static final class MqttMessageTypes

@@ -564,7 +564,6 @@ public class LockPatternActivity extends Activity {
                         .setText(R.string.alp_42447968_msg_draw_pattern_to_unlock);
             else
                 mTextInfo.setText(infoText);
-            mTextInfo.setVisibility(View.GONE);
             if (getIntent().hasExtra(EXTRA_PENDING_INTENT_FORGOT_PATTERN)) {
                 mBtnConfirm.setOnClickListener(mBtnConfirmOnClickListener);
                 mBtnConfirm.setText(R.string.alp_42447968_cmd_forgot_pattern);
@@ -711,7 +710,7 @@ public class LockPatternActivity extends Activity {
                         mBtnConfirm.setEnabled(true);
                     } else {
                         mTextInfo
-                                .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
+                                .setText(R.string.alp_42447968_msg_try_again);
                         mBtnConfirm.setEnabled(false);
                         mLockPatternView.setDisplayMode(DisplayMode.Wrong);
                         mLockPatternView.postDelayed(mLockPatternViewReloader,
