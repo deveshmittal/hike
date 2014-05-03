@@ -1801,7 +1801,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
+
+		/*
+		 * Added a hacky fix to ensure that we don't load more messages the first
+		 * time onScroll is called.
+		 */
+		loadingMoreMessages = true;
 		mConversationsView.setOnScrollListener(this);
+		loadingMoreMessages = false;
 
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE, false))
 		{
