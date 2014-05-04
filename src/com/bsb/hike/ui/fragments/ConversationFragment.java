@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -133,7 +134,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
 
-				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn());;
+				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn());
+				;
 				stealthConversations.remove(conversation);
 			}
 
@@ -215,14 +217,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		View parent = inflater.inflate(R.layout.conversations, null);
 
-		ListView friendsList = (ListView) parent.findViewById(android.R.id.list);
-
-		emptyView = parent.findViewById(android.R.id.empty);
-		setupEmptyView();
-
-		friendsList.setEmptyView(emptyView);
-
 		return parent;
+	}
+
+	private void setEmptyState()
+	{
+		ViewStub emptyStub = (ViewStub) getView().findViewById(R.id.emptyViewStub);
+		emptyStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		{
+
+			@Override
+			public void onInflate(ViewStub stub, View inflated)
+			{
+				ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
+
+				emptyView = inflated;
+				setupEmptyView();
+
+				friendsList.setEmptyView(emptyView);
+
+			}
+		});
+
 	}
 
 	private void setupEmptyView()
@@ -545,7 +561,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					boolean newStealthValue = !conv.isStealth();
 					Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
-					
+
 					/*
 					 * If stealth ftue conv tap tip is visible than remove it
 					 */
@@ -574,7 +590,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						Set<String> enabledConvs = new HashSet<String>();
 						enabledConvs.add(conv.getMsisdn());
 						HikeAnalyticsEvent.sendStealthMsisdns(enabledConvs, new HashSet<String>());
-						
+
 						stealthConversations.add(conv);
 						HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
 					}
@@ -583,7 +599,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						Set<String> disabledConvs = new HashSet<String>();
 						disabledConvs.add(conv.getMsisdn());
 						HikeAnalyticsEvent.sendStealthMsisdns(new HashSet<String>(), disabledConvs);
-						
+
 						stealthConversations.remove(conv);
 						HikeMessengerApp.removeStealthMsisdn(conv.getMsisdn());
 					}
@@ -614,7 +630,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		displayedConversations = new ArrayList<Conversation>();
 		List<Conversation> conversationList = db.getConversations();
-
+		if (conversationList == null || conversationList.isEmpty())
+		{
+			setEmptyState();
+			return;
+		}
 		stealthConversations = new HashSet<Conversation>();
 
 		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -1564,7 +1584,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		super.onResume();
 	}
-	
+
 	public boolean hasNoConversation()
 	{
 		/*
@@ -1575,6 +1595,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		/*
 		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
 		 */
-		return conv==null;
+		return conv == null;
 	}
 }
