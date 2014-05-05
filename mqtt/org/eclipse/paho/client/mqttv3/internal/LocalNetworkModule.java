@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.net.Socket;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -84,12 +83,5 @@ public class LocalNetworkModule implements NetworkModule {
 			} catch(Exception e) {
 			}
 		}
-	}
-
-	@Override
-	public Socket getSocket()
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

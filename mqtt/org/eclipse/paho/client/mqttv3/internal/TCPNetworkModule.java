@@ -81,11 +81,6 @@ public class TCPNetworkModule implements NetworkModule {
 	public OutputStream getOutputStream() throws IOException {
 		return socket.getOutputStream();
 	}
-	
-	public Socket getSocket() {
-		return socket;
-	}
-
 
 	/**
 	 * Stops the module, by closing the TCP socket.
