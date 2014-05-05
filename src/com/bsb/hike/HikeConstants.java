@@ -144,6 +144,8 @@ public class HikeConstants
 	public static final String MSISDNS = "msisdns";
 
 	public static final String REWARDS_TOKEN = "reward_token";
+	
+	public static final String MQTT_IP_ADDRESSES = "ip";
 
 	public static final String SHOW_REWARDS = "show_rewards";
 

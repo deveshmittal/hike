@@ -22,82 +22,101 @@ import java.net.SocketAddress;
 import javax.net.SocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
+import com.bsb.hike.utils.Logger;
 
 /**
- * A network module for connecting over TCP. 
+ * A network module for connecting over TCP.
  */
-public class TCPNetworkModule implements NetworkModule {
+public class TCPNetworkModule implements NetworkModule
+{
 	protected Socket socket;
+
 	private SocketFactory factory;
+
 	private String host;
+
 	private int port;
+
 	private int conTimeout;
-	
+
 	final static String className = TCPNetworkModule.class.getName();
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
-	
+
+	private final String TAG = "TCPNetworkModule";
+
 	/**
-	 * Constructs a new TCPNetworkModule using the specified host and
-	 * port.  The supplied SocketFactory is used to supply the network
-	 * socket.
+	 * Constructs a new TCPNetworkModule using the specified host and port. The supplied SocketFactory is used to supply the network socket.
 	 */
-	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext) {
-		log.setResourceName(resourceContext);
+	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext)
+	{
 		this.factory = factory;
 		this.host = host;
 		this.port = port;
-		
+
 	}
 
 	/**
 	 * Starts the module, by creating a TCP socket to the server.
 	 */
-	public void start() throws IOException, MqttException {
+	public void start() throws IOException, MqttException
+	{
 		final String methodName = "start";
-		try {
-//			InetAddress localAddr = InetAddress.getLocalHost();
-//			socket = factory.createSocket(host, port, localAddr, 0);
+		try
+		{
+			// InetAddress localAddr = InetAddress.getLocalHost();
+			// socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
-			log.fine(className,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			socket = factory.createSocket();
-			socket.connect(sockaddr, conTimeout*1000);
-		
-			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm. 
+			socket.connect(sockaddr, conTimeout * 1000);
+			socket.setTcpNoDelay(true);
+			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
 			// This should not be required.
-//			socket.setTcpNoDelay(true);	// TCP_NODELAY on, which means we do not use Nagle's algorithm
+			// socket.setTcpNoDelay(true); // TCP_NODELAY on, which means we do not use Nagle's algorithm
 		}
-		catch (ConnectException ex) {
-			//@TRACE 250=Failed to create TCP socket
-			log.fine(className,methodName,"250",null,ex);
+		catch (ConnectException ex)
+		{
+			// @TRACE 250=Failed to create TCP socket
+			Logger.d(TAG, "failed to create tcp socket");
 			throw new MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR, ex);
 		}
 	}
 
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream() throws IOException
+	{
 		return socket.getInputStream();
 	}
-	
-	public OutputStream getOutputStream() throws IOException {
+
+	public OutputStream getOutputStream() throws IOException
+	{
 		return socket.getOutputStream();
+	}
+
+	public Socket getSocket()
+	{
+		return socket;
 	}
 
 	/**
 	 * Stops the module, by closing the TCP socket.
 	 */
-	public void stop() throws IOException {
-		if (socket != null) {
+	public void stop() throws IOException
+	{
+		if (socket != null)
+		{
+			Logger.d(TAG, "socket close started");
 			socket.close();
+			Logger.d(TAG, "socket close completed");
 		}
 	}
-	
+
 	/**
 	 * Set the maximum time to wait for a socket to be established
+	 * 
 	 * @param timeout
 	 */
-	public void setConnectTimeout(int timeout) {
+	public void setConnectTimeout(int timeout)
+	{
 		this.conTimeout = timeout;
 	}
 }

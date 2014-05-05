@@ -327,6 +327,8 @@ public class HikeMessengerApp extends Application
 	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
 	public static final String SHOWN_ADD_FAVORITE_TIP = "shownAddFavoriteTip";
+	
+	public static final String MQTT_IPS = "mqttIps";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

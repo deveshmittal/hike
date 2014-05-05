@@ -12,33 +12,38 @@
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
 /**
- * Represents a Multi-Byte Integer (MBI), as defined by the MQTT V3
- * specification.
+ * Represents a Multi-Byte Integer (MBI), as defined by the MQTT V3 specification.
  */
-public class MultiByteInteger {
+public class MultiByteInteger
+{
 	private long value;
+
 	private int length;
-	
-	public MultiByteInteger(long value) {
+
+	public MultiByteInteger(long value)
+	{
 		this(value, -1);
 	}
-	
-	public MultiByteInteger(long value, int length) {
+
+	public MultiByteInteger(long value, int length)
+	{
 		this.value = value;
 		this.length = length;
 	}
-	
+
 	/**
 	 * Returns the number of bytes read when decoding this MBI.
 	 */
-	public int getEncodedLength() {
+	public int getEncodedLength()
+	{
 		return length;
 	}
 
 	/**
 	 * Returns the value of this MBI.
 	 */
-	public long getValue() {
+	public long getValue()
+	{
 		return value;
 	}
 }

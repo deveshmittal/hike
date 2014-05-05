@@ -23,18 +23,25 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 /**
  * An on-the-wire representation of an MQTT CONNECT message.
  */
-public class MqttConnect extends MqttWireMessage {
+public class MqttConnect extends MqttWireMessage
+{
 
 	public static String KEY = "Con";
 
 	private String clientId;
+
 	private boolean cleanSession;
+
 	private MqttMessage willMessage;
+
 	private String userName;
+
 	private char[] password;
+
 	private int keepAliveInterval;
+
 	private String willDestination;
-	
+
 	/**
 	 * Constructor for an on the wire MQTT connect message
 	 * 
@@ -43,7 +50,8 @@ public class MqttConnect extends MqttWireMessage {
 	 * @throws IOException
 	 * @throws MqttException
 	 */
-	public MqttConnect(byte info, byte[] data) throws IOException, MqttException {
+	public MqttConnect(byte info, byte[] data) throws IOException, MqttException
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
@@ -56,7 +64,8 @@ public class MqttConnect extends MqttWireMessage {
 		dis.close();
 	}
 
-	public MqttConnect(String clientId, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
+	public MqttConnect(String clientId, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination)
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
@@ -67,43 +76,53 @@ public class MqttConnect extends MqttWireMessage {
 		this.willDestination = willDestination;
 	}
 
-	public String toString() {
+	public String toString()
+	{
 		String rc = super.toString();
 		rc += " clientId " + clientId + " keepAliveInterval " + keepAliveInterval;
 		return rc;
 	}
-	
-	protected byte getMessageInfo() {
+
+	protected byte getMessageInfo()
+	{
 		return (byte) 0;
 	}
 
-	public boolean isCleanSession() {
+	public boolean isCleanSession()
+	{
 		return cleanSession;
 	}
-	
-	protected byte[] getVariableHeader() throws MqttException {
-		try {
+
+	protected byte[] getVariableHeader() throws MqttException
+	{
+		try
+		{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			encodeUTF8(dos,"MQIsdp");			
+			encodeUTF8(dos, "MQIsdp");
 			dos.write(3);
 			byte connectFlags = 0;
-			
-			if (cleanSession) {
+
+			if (cleanSession)
+			{
 				connectFlags |= 0x02;
 			}
-			
-			if (willMessage != null ) {
+
+			if (willMessage != null)
+			{
 				connectFlags |= 0x04;
-				connectFlags |= (willMessage.getQos()<<3);
-				if (willMessage.isRetained()) {
+				connectFlags |= (willMessage.getQos() << 3);
+				if (willMessage.isRetained())
+				{
 					connectFlags |= 0x20;
 				}
 			}
-			
-			if (userName != null) {
+
+			if (userName != null)
+			{
 				connectFlags |= 0x80;
-				if (password != null) {
+				if (password != null)
+				{
 					connectFlags |= 0x40;
 				}
 			}
@@ -111,44 +130,55 @@ public class MqttConnect extends MqttWireMessage {
 			dos.writeShort(keepAliveInterval);
 			dos.flush();
 			return baos.toByteArray();
-		} catch(IOException ioe) {
+		}
+		catch (IOException ioe)
+		{
 			throw new MqttException(ioe);
 		}
 	}
-	
-	public byte[] getPayload() throws MqttException {
-		try {
+
+	public byte[] getPayload() throws MqttException
+	{
+		try
+		{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			encodeUTF8(dos,clientId);
-			
-			if (willMessage != null) {
-				encodeUTF8(dos,willDestination);
+			encodeUTF8(dos, clientId);
+
+			if (willMessage != null)
+			{
+				encodeUTF8(dos, willDestination);
 				dos.writeShort(willMessage.getPayload().length);
 				dos.write(willMessage.getPayload());
 			}
-			
-			if (userName != null) {
-				encodeUTF8(dos,userName);
-				if (password != null) {
-					encodeUTF8(dos,new String(password));
+
+			if (userName != null)
+			{
+				encodeUTF8(dos, userName);
+				if (password != null)
+				{
+					encodeUTF8(dos, new String(password));
 				}
 			}
 			dos.flush();
 			return baos.toByteArray();
-		} catch (IOException ex) {
+		}
+		catch (IOException ex)
+		{
 			throw new MqttException(ex);
 		}
 	}
-	
+
 	/**
 	 * Returns whether or not this message needs to include a message ID.
 	 */
-	public boolean isMessageIdRequired() {
+	public boolean isMessageIdRequired()
+	{
 		return false;
 	}
-	
-	public String getKey() {
+
+	public String getKey()
+	{
 		return new String(KEY);
 	}
 }

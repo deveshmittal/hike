@@ -17,22 +17,26 @@ import java.io.InputStream;
 /**
  * An input stream that counts the bytes read from it.
  */
-public class CountingInputStream extends InputStream {
+public class CountingInputStream extends InputStream
+{
 	private InputStream in;
+
 	private int counter;
 
 	/**
-	 * Constructs a new <code>CountingInputStream</code> wrapping the supplied
-	 * input stream.
+	 * Constructs a new <code>CountingInputStream</code> wrapping the supplied input stream.
 	 */
-	public CountingInputStream(InputStream in) {
+	public CountingInputStream(InputStream in)
+	{
 		this.in = in;
 		this.counter = 0;
 	}
-	
-	public int read() throws IOException {
+
+	public int read() throws IOException
+	{
 		int i = in.read();
-		if (i != -1) {
+		if (i != -1)
+		{
 			counter++;
 		}
 		return i;
@@ -41,14 +45,16 @@ public class CountingInputStream extends InputStream {
 	/**
 	 * Returns the number of bytes read since the last reset.
 	 */
-	public int getCounter() {
+	public int getCounter()
+	{
 		return counter;
 	}
-	
+
 	/**
 	 * Resets the counter to zero.
 	 */
-	public void resetCounter() {
+	public void resetCounter()
+	{
 		counter = 0;
 	}
 }
