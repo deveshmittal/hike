@@ -189,6 +189,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.RoundedRepeatingDrawable;
@@ -1620,6 +1621,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 */
 	private void createConversation()
 	{
+		/*
+		 * If we are in a stealth conversation when the stealth mode is off, we should exit the conversation.
+		 */
+		if (HikeMessengerApp.isStealthMsisdn(mContactNumber))
+		{
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
+			{
+				Intent intent = new Intent(this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		}
+
 		// This prevent the activity from simply finishing and opens up the last
 		// screen.
 		getIntent().removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
