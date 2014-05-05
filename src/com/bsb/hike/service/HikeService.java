@@ -120,9 +120,6 @@ public class HikeService extends Service
 	/* VARIABLES - other local variables */
 	/************************************************************************/
 
-	// receiver that notifies change in network type.
-	private NetworkTypeChangeIntentReceiver networkTypeChangeIntentReceiver;
-
 	// receiver that triggers a contact sync
 	private ManualContactSyncTrigger manualContactSyncTrigger;
 
@@ -182,8 +179,7 @@ public class HikeService extends Service
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
 		mMqttManager.init();
-		networkTypeChangeIntentReceiver = new NetworkTypeChangeIntentReceiver();
-		registerReceiver(networkTypeChangeIntentReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
 		 * what's going on
@@ -369,7 +365,6 @@ public class HikeService extends Service
 		mMqttManager.destroyMqtt();
 		this.mMqttManager = null;
 		// inform the app that the app has successfully disconnected
-		unregisterDataChangeReceivers();
 		if (contactsReceived != null)
 		{
 			getContentResolver().unregisterContentObserver(contactsReceived);
@@ -428,16 +423,6 @@ public class HikeService extends Service
 		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastThor);
 	}
 
-	public void unregisterDataChangeReceivers()
-	{
-
-		if (networkTypeChangeIntentReceiver != null)
-		{
-			unregisterReceiver(networkTypeChangeIntentReceiver);
-			networkTypeChangeIntentReceiver = null;
-		}
-	}
-
 	/************************************************************************/
 	/* METHODS - broadcasts and notifications */
 	/************************************************************************/
@@ -490,26 +475,6 @@ public class HikeService extends Service
 			scheduleNextManualContactSync();
 
 			manualSync = false;
-		}
-	}
-
-	private class NetworkTypeChangeIntentReceiver extends BroadcastReceiver
-	{
-
-		boolean wasWifiOnLastTime = false;
-
-		@Override
-		public void onReceive(Context context, Intent intent)
-		{
-			boolean isWifiOn = Utils.switchSSLOn(getApplicationContext());
-			if (wasWifiOnLastTime == isWifiOn)
-			{
-				Logger.d("SSL", "Same connection type as before. Wifi? " + isWifiOn);
-				return;
-			}
-			Logger.d("SSL", "Different connection type. Wifi? " + isWifiOn);
-			wasWifiOnLastTime = isWifiOn;
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCHED_DATA_CONNECTION, isWifiOn);
 		}
 	}
 

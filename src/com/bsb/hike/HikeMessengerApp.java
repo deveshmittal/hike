@@ -37,7 +37,6 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
@@ -61,7 +60,7 @@ import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application implements Listener
+public class HikeMessengerApp extends Application
 {
 
 	public static enum CurrentState
@@ -328,6 +327,8 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
 	public static final String SHOWN_ADD_FAVORITE_TIP = "shownAddFavoriteTip";
+	
+	public static final String MQTT_IPS = "mqttIps";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -682,8 +683,6 @@ public class HikeMessengerApp extends Application implements Listener
 
 		makeNoMediaFiles();
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
-
 		hikeBotNamesMap = new HashMap<String, String>();
 		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
@@ -805,18 +804,6 @@ public class HikeMessengerApp extends Application implements Listener
 		if (activityTimeLogger == null)
 		{
 			activityTimeLogger = new ActivityTimeLogger();
-		}
-	}
-
-	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type))
-		{
-			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			boolean isWifiConnection = object != null ? (Boolean) object : Utils.switchSSLOn(getApplicationContext());
-
-			Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), isWifiConnection);
 		}
 	}
 }

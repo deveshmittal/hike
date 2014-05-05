@@ -564,7 +564,7 @@ public abstract class ImageWorker
 	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
 	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
 	 */
-	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight, HikeLruCache cache)
+	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight)
 	{
 
 		// First decode with inJustDecodeBounds=true to check dimensions
@@ -612,7 +612,7 @@ public abstract class ImageWorker
 	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
 	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
 	 */
-	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight, HikeLruCache cache)
+	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight)
 	{
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -659,7 +659,7 @@ public abstract class ImageWorker
 	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
 	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
 	 */
-	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight, HikeLruCache cache)
+	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight)
 	{
 		byte[] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
 		if (icondata == null)
@@ -698,12 +698,12 @@ public abstract class ImageWorker
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	protected static void addInBitmapOptions(BitmapFactory.Options options, HikeLruCache cache)
+	protected static void addInBitmapOptions(BitmapFactory.Options options)
 	{
 		// inBitmap only works with mutable bitmaps so force the decoder to
 		// return mutable bitmaps.
 		options.inMutable = true;
-
+		HikeLruCache cache = HikeMessengerApp.getLruCache();
 		if (cache != null)
 		{
 			// Try and find a bitmap to use for inBitmap
