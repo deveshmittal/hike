@@ -955,7 +955,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
-		if (!mConversation.isOnhike() && mCredits <= 0)
+		if (!mConversation.isOnhike() && mCredits <= 0 && !isActionModeOn)
 		{
 			boolean nativeSmsPref = Utils.getSendSmsPref(this);
 			if (!nativeSmsPref)
