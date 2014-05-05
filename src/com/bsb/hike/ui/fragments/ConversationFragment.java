@@ -141,6 +141,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			mAdapter.notifyDataSetChanged();
 			mAdapter.setNotifyOnChange(false);
+			if (mAdapter.getCount() == 0)
+			{
+				setEmptyState();
+			}
 		}
 	}
 
@@ -222,23 +226,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setEmptyState()
 	{
-		ViewStub emptyStub = (ViewStub) getView().findViewById(R.id.emptyViewStub);
-		emptyStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		if (emptyView == null)
 		{
-
-			@Override
-			public void onInflate(ViewStub stub, View inflated)
-			{
-				ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
-
-				emptyView = inflated;
-				setupEmptyView();
-
-				friendsList.setEmptyView(emptyView);
-
-			}
-		});
-
+			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
+			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view, emptyHolder);
+			// emptyHolder.addView(emptyView);
+			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
+			setupEmptyView();
+			friendsList.setEmptyView(emptyView);
+		}
 	}
 
 	private void setupEmptyView()
@@ -294,6 +290,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 				{
+					
 					ContactInfo contactInfo = (ContactInfo) view.getTag();
 					Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 					intent.setClass(getActivity(), ChatThread.class);
@@ -630,11 +627,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		displayedConversations = new ArrayList<Conversation>();
 		List<Conversation> conversationList = db.getConversations();
-		if (conversationList == null || conversationList.isEmpty())
-		{
-			setEmptyState();
-			return;
-		}
+
 		stealthConversations = new HashSet<Conversation>();
 
 		SharedPreferences prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -675,6 +668,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		getListView().setOnItemLongClickListener(this);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		if (displayedConversations.isEmpty())
+		{
+			setEmptyState();
+		}
 	}
 
 	private void setupConversationLists()
