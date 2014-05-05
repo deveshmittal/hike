@@ -72,6 +72,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
+import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -1533,6 +1534,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 
+		addEmailLogItem(optionsList);
+
 		overFlowWindow = new PopupWindow(this);
 
 		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
@@ -1657,6 +1660,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
+				case 7:
+					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
+					Utils.executeAsyncTask(logsTask);
+					break;
 				}
 
 				if (intent != null)
@@ -1691,6 +1698,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				return onKeyUp(keyCode, event);
 			}
 		});
+	}
+
+	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
+	{
+		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 7));
 	}
 
 	@Override
