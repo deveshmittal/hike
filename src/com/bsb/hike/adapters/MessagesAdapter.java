@@ -3722,6 +3722,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						intent.putExtra(HikeConstants.Extras.MSISDN, message.getGroupParticipantMsisdn());
 						intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 						intent.setClass(context, ChatThread.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						context.startActivity(intent);
 					}
 				}

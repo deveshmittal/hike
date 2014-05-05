@@ -3153,6 +3153,7 @@ public class Utils
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
 
@@ -3435,6 +3436,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, HomeActivity.class);
 		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		return intent;
 	}
@@ -3730,6 +3732,7 @@ public class Utils
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		context.startActivity(intent);
 	}
 
