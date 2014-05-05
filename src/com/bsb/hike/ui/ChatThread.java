@@ -515,6 +515,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
 				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
 				setupActionModeActionBar();
+				invalidateOptionsMenu();
 			}
 		}
 	}
