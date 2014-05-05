@@ -83,15 +83,16 @@
                 android:textColor="@color/file_size"
                 android:textSize="12sp" />
         </LinearLayout>
-
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignRight="@id/file_details"
-            android:layout_marginBottom="3dp"
-            layout="@layout/message_time_status" />
     </RelativeLayout>
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_alignRight="@id/message_container"
+        android:layout_marginBottom="6dp"
+        android:layout_marginRight="14dp"
+        layout="@layout/message_time_status" />
 
     <RelativeLayout
         android:id="@+id/circular_bg"

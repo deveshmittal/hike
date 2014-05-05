@@ -26,9 +26,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/day_container"
-        android:layout_marginBottom="2.5dp"
+        android:layout_marginBottom="3dp"
         android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
-        android:layout_marginTop="2.5dp"
+        android:layout_marginTop="3dp"
         android:layout_toRightOf="@id/avatar_container"
         android:background="@drawable/ic_bubble_white_selector"
         android:paddingLeft="18dp"
@@ -50,15 +50,16 @@
             android:text="Thanks lksad jfljasldkf alsdf lkasfdalsk"
             android:textColor="@color/chat_color"
             android:textSize="16sp" />
-
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignRight="@id/text"
-            android:layout_marginBottom="3dp"
-            layout="@layout/message_time_status" />
     </RelativeLayout>
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_alignRight="@id/message_container"
+        android:layout_marginBottom="6dp"
+        android:layout_marginRight="8dp"
+        layout="@layout/message_time_status" />
 
     <include
         android:layout_width="match_parent"
