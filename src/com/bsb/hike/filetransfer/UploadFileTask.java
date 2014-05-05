@@ -214,6 +214,7 @@ public class UploadFileTask extends FileTransferBase
 				if (thumbnail != null)
 				{
 					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+				    thumbnail.recycle();
 				}
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length());
 			}
@@ -381,6 +382,7 @@ public class UploadFileTask extends FileTransferBase
 			if (thumbnail != null)
 			{
 				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+			    thumbnail.recycle();
 			}
 			else
 			{

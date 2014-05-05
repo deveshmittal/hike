@@ -86,6 +86,10 @@ public class HikeBitmapFactory
 		textView.setDrawingCacheEnabled(true);
 		Bitmap cacheBmp = textView.getDrawingCache();
 		Bitmap viewBmp = cacheBmp.copy(Bitmap.Config.ARGB_8888, true);
+		if (cacheBmp != null)
+		{
+			cacheBmp.recycle();
+		}
 		textView.destroyDrawingCache(); // destory drawable
 		return viewBmp;
 	}
@@ -314,6 +318,7 @@ public class HikeBitmapFactory
 			return new RecyclingBitmapDrawable(bitmap);
 		}
 	}
+
 	/**
 	 * Decode and sample down a bitmap from resources to the requested width and height.
 	 * 
@@ -398,7 +403,7 @@ public class HikeBitmapFactory
 		decodeFile(filename, options);
 
 		options.inPreferredConfig = con;
-		
+
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
@@ -831,6 +836,11 @@ public class HikeBitmapFactory
 		}
 
 		Bitmap small = createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config, true);
+		
+		if (unscaledBitmap != small)
+		{
+			unscaledBitmap.recycle();
+		}
 
 		return small;
 	}

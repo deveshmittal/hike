@@ -114,8 +114,12 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 			{
 				Bitmap thumbnail = HikeBitmapFactory.scaleDownBitmap(largeStickerPath, DownloadStickerTask.SIZE_IMAGE, DownloadStickerTask.SIZE_IMAGE);
 
-				File smallImage = new File(smallStickerPath);
-				BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
+				if (thumbnail != null)
+				{
+					File smallImage = new File(smallStickerPath);
+					BitmapUtils.saveBitmapToFile(smallImage, thumbnail);
+					thumbnail.recycle();
+				}
 			}
 		}
 		catch (JSONException e)

@@ -311,6 +311,9 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			 * Saving the icon in the DB.
 			 */
 			byte[] bytes = BitmapUtils.bitmapToBytes(tempBitmap, CompressFormat.JPEG, 100);
+			
+			tempBitmap.recycle();
+			
 			HikeUserDatabase.getInstance().setIcon(groupId, bytes, false);
 
 			break;

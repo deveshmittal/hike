@@ -126,11 +126,11 @@ public class UploadContactOrLocationTask extends FileTransferBase
 				latitude = hikeFile.getLatitude();
 				longitude = hikeFile.getLongitude();
 				address = hikeFile.getAddress();
-				
-				if(address == null)
+
+				if (address == null)
 					address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
 
-				if(TextUtils.isEmpty(hikeFile.getThumbnailString()))
+				if (TextUtils.isEmpty(hikeFile.getThumbnailString()))
 				{
 					fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
 				}
@@ -295,7 +295,10 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 		Bitmap thumbnail = HikeBitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
 		String thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
-
+		if (thumbnail != null)
+		{
+			thumbnail.recycle();
+		}
 		JSONObject metadata = getFileTransferMetadataForLocation(latitude, longitude, zoomLevel, address, thumbnailString);
 
 		convMessage.setMetadata(metadata);

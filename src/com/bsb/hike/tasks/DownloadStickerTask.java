@@ -195,8 +195,12 @@ public class DownloadStickerTask extends StickerTaskBase
 
 		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE);
 
-		File smallImage = new File(smallStickerDir, stickerId);
-		BitmapUtils.saveBitmapToFile(smallImage, small);
+		if (small != null)
+		{
+			File smallImage = new File(smallStickerDir, stickerId);
+			BitmapUtils.saveBitmapToFile(smallImage, small);
+			small.recycle();
+		}
 	}
 
 	@Override
