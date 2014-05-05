@@ -22,131 +22,158 @@ import android.nfc.Tag;
 import com.bsb.hike.utils.Logger;
 
 /**
- * <p>This class handles the connection of the AsyncClient to one of the available URLs.</p>  
- * <p>The URLs are supplied as either the singleton when the client is created, or as a list in the connect options.</p> 
- * <p>This class uses its own onSuccess and onFailure callbacks in preference to the user supplied callbacks.</p>
- * <p>An attempt is made to connect to each URL in the list until either a connection attempt succeeds or all the URLs have been tried</p> 
- * <p>If a connection succeeds then the users token is notified and the users onSuccess callback is called.</p>
- * <p>If a connection fails then another URL in the list is attempted, otherwise the users token is notified 
- * and the users onFailure callback is called</p>
+ * <p>
+ * This class handles the connection of the AsyncClient to one of the available URLs.
+ * </p>
+ * <p>
+ * The URLs are supplied as either the singleton when the client is created, or as a list in the connect options.
+ * </p>
+ * <p>
+ * This class uses its own onSuccess and onFailure callbacks in preference to the user supplied callbacks.
+ * </p>
+ * <p>
+ * An attempt is made to connect to each URL in the list until either a connection attempt succeeds or all the URLs have been tried
+ * </p>
+ * <p>
+ * If a connection succeeds then the users token is notified and the users onSuccess callback is called.
+ * </p>
+ * <p>
+ * If a connection fails then another URL in the list is attempted, otherwise the users token is notified and the users onFailure callback is called
+ * </p>
  */
-public class ConnectActionListener implements IMqttActionListener {
+public class ConnectActionListener implements IMqttActionListener
+{
 
-  private MqttClientPersistence persistence;
-  private MqttAsyncClient client;
-  private ClientComms comms;
-  private MqttConnectOptions options;
-  private MqttToken userToken;
-  private Object userContext;
-  private IMqttActionListener userCallback;
-  private final String TAG = "ConnectionActionListener";
+	private MqttClientPersistence persistence;
 
-  /**
-   * @param persistence
-   * @param client 
-   * @param comms
-   * @param options 
-   * @param userToken  
-   * @param userContext
-   * @param userCallback
-   */
-  public ConnectActionListener(
-      MqttAsyncClient client,
-      MqttClientPersistence persistence,
-      ClientComms comms,
-      MqttConnectOptions options,
-      MqttToken userToken,
-      Object userContext,
-      IMqttActionListener userCallback) {
-    this.persistence = persistence;
-    this.client = client;
-    this.comms = comms;
-    this.options = options;
-    this.userToken = userToken;
-    this.userContext = userContext;
-    this.userCallback = userCallback;
-  }
+	private MqttAsyncClient client;
 
-  /**
-   * If the connect succeeded then call the users onSuccess callback
-   * 
-   * @param token 
-   */
-  public void onSuccess(IMqttToken token) {
+	private ClientComms comms;
 
-    Logger.d(TAG, "connect successful ");
-	userToken.internalTok.markComplete(null, null);
-    userToken.internalTok.notifyComplete();
+	private MqttConnectOptions options;
 
-    if (userCallback != null) {
-      userToken.setUserContext(userContext);
-      userCallback.onSuccess(userToken);
-    }
-  }
+	private MqttToken userToken;
 
-  /**
-   * The connect failed, so try the next URI on the list.
-   * If there are no more URIs, then fail the overall connect. 
-   * 
-   * @param token 
-   * @param exception 
-   */
-  public void onFailure(IMqttToken token, Throwable exception) {
+	private Object userContext;
 
-    int numberOfURIs = comms.getNetworkModules().length;
-    int index = 1 + comms.getNetworkModuleIndex();
-    Logger.d(TAG, "connect failed due to " + exception.getCause() );
-    if (index < numberOfURIs) {
-      comms.setNetworkModuleIndex(index);
-      try {
-    	Logger.d(TAG, "trying the url with index : " + index);
-        connect();
-      }
-      catch (MqttPersistenceException e) {
-        onFailure(token, e); // try the next URI in the list
-      }
-    }
-    else {
-      MqttException ex;
-      if (exception instanceof MqttException) {
-        ex = (MqttException) exception;
-      }
-      else {
-        ex = new MqttException(exception);
-      }
-      Logger.d(TAG, "connect failed , reason" + ex.getCause());
-      userToken.internalTok.markComplete(null, ex);
-      userToken.internalTok.notifyComplete();
+	private IMqttActionListener userCallback;
 
-      if (userCallback != null) {
-        userToken.setUserContext(userContext);
-        userCallback.onFailure(userToken, exception);
-      }
-    }
-  }
+	private final String TAG = "ConnectionActionListener";
 
-  /**
-   * The connect failed, so try the next URI on the list.
-   * If there are no more URIs, then fail the overall connect. 
-   * @throws MqttPersistenceException 
-   */
-  public void connect() throws MqttPersistenceException {
-    MqttToken token = new MqttToken(client.getClientId());
-    token.setActionCallback(this);
-    token.setUserContext(this);
+	/**
+	 * @param persistence
+	 * @param client
+	 * @param comms
+	 * @param options
+	 * @param userToken
+	 * @param userContext
+	 * @param userCallback
+	 */
+	public ConnectActionListener(MqttAsyncClient client, MqttClientPersistence persistence, ClientComms comms, MqttConnectOptions options, MqttToken userToken, Object userContext,
+			IMqttActionListener userCallback)
+	{
+		this.persistence = persistence;
+		this.client = client;
+		this.comms = comms;
+		this.options = options;
+		this.userToken = userToken;
+		this.userContext = userContext;
+		this.userCallback = userCallback;
+	}
 
-    persistence.open(client.getClientId(), client.getServerURI());
+	/**
+	 * If the connect succeeded then call the users onSuccess callback
+	 * 
+	 * @param token
+	 */
+	public void onSuccess(IMqttToken token)
+	{
 
-    if (options.isCleanSession()) {
-      persistence.clear();
-    }
+		Logger.d(TAG, "connect successful ");
+		userToken.internalTok.markComplete(null, null);
+		userToken.internalTok.notifyComplete();
 
-    try {
-      comms.connect(options, token);
-    }
-    catch (MqttException e) {
-      onFailure(token, e);
-    }
-  }
+		if (userCallback != null)
+		{
+			userToken.setUserContext(userContext);
+			userCallback.onSuccess(userToken);
+		}
+	}
+
+	/**
+	 * The connect failed, so try the next URI on the list. If there are no more URIs, then fail the overall connect.
+	 * 
+	 * @param token
+	 * @param exception
+	 */
+	public void onFailure(IMqttToken token, Throwable exception)
+	{
+
+		int numberOfURIs = comms.getNetworkModules().length;
+		int index = 1 + comms.getNetworkModuleIndex();
+		Logger.d(TAG, "connect failed due to " + exception.getCause());
+		if (index < numberOfURIs)
+		{
+			comms.setNetworkModuleIndex(index);
+			try
+			{
+				Logger.d(TAG, "trying the url with index : " + index);
+				connect();
+			}
+			catch (MqttPersistenceException e)
+			{
+				onFailure(token, e); // try the next URI in the list
+			}
+		}
+		else
+		{
+			MqttException ex;
+			if (exception instanceof MqttException)
+			{
+				ex = (MqttException) exception;
+			}
+			else
+			{
+				ex = new MqttException(exception);
+			}
+			Logger.d(TAG, "connect failed , reason" + ex.getCause());
+			userToken.internalTok.markComplete(null, ex);
+			userToken.internalTok.notifyComplete();
+
+			if (userCallback != null)
+			{
+				userToken.setUserContext(userContext);
+				userCallback.onFailure(userToken, exception);
+			}
+		}
+	}
+
+	/**
+	 * The connect failed, so try the next URI on the list. If there are no more URIs, then fail the overall connect.
+	 * 
+	 * @throws MqttPersistenceException
+	 */
+	public void connect() throws MqttPersistenceException
+	{
+		MqttToken token = new MqttToken(client.getClientId());
+		token.setActionCallback(this);
+		token.setUserContext(this);
+
+		persistence.open(client.getClientId(), client.getServerURI());
+
+		if (options.isCleanSession())
+		{
+			persistence.clear();
+		}
+
+		try
+		{
+			comms.connect(options, token);
+		}
+		catch (MqttException e)
+		{
+			onFailure(token, e);
+		}
+	}
 
 }

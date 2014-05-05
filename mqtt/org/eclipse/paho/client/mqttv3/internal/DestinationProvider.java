@@ -14,14 +14,10 @@ package org.eclipse.paho.client.mqttv3.internal;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
 /**
- * This interface exists to act as a common type for
- * MqttClient and MqttMIDPClient so they can be passed to
- * ClientComms without either client class need to know
- * about the other.
- * Specifically, this allows the MIDP client to work
- * without the non-MIDP MqttClient/MqttConnectOptions
- * classes being present.
+ * This interface exists to act as a common type for MqttClient and MqttMIDPClient so they can be passed to ClientComms without either client class need to know about the other.
+ * Specifically, this allows the MIDP client to work without the non-MIDP MqttClient/MqttConnectOptions classes being present.
  */
-public interface DestinationProvider {
+public interface DestinationProvider
+{
 	public MqttTopic getTopic(String topic);
 }

@@ -26,39 +26,52 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 
 import com.bsb.hike.utils.Logger;
 
-
-public class CommsSender implements Runnable {
+public class CommsSender implements Runnable
+{
 	/**
 	 * Sends MQTT packets to the server on its own thread
 	 */
-	private boolean running 		= false;
-	private Object lifecycle 		= new Object();
+	private boolean running = false;
+
+	private Object lifecycle = new Object();
+
 	private ClientState clientState = null;
+
 	private MqttOutputStream out;
+
 	private ClientComms clientComms = null;
+
 	private CommsTokenStore tokenStore = null;
-	private Thread 	sendThread		= null;
+
+	private Thread sendThread = null;
+
 	private Socket socket = null;
-	private Map<Long , Long> messageMap = null;
-	
+
+	private Map<Long, Long> messageMap = null;
+
 	private final static String className = CommsSender.class.getName();
+
 	private final String TAG = "CommsSender";
-	
-	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out, Socket socket, Map<Long, Long> messageMap) {
-  		this.socket = socket;
+
+	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out, Socket socket, Map<Long, Long> messageMap)
+	{
+		this.socket = socket;
 		this.out = new MqttOutputStream(out);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.messageMap = messageMap;
 		this.tokenStore = tokenStore;
 	}
-	
+
 	/**
 	 * Starts up the Sender thread.
 	 */
-	public void start(String threadName) {
-		synchronized (lifecycle) {
-			if (running == false) {
+	public void start(String threadName)
+	{
+		synchronized (lifecycle)
+		{
+			if (running == false)
+			{
 				running = true;
 				sendThread = new Thread(this, threadName);
 				sendThread.start();
@@ -67,116 +80,148 @@ public class CommsSender implements Runnable {
 	}
 
 	/**
-	 * Stops the Sender's thread.  This call will block.
+	 * Stops the Sender's thread. This call will block.
 	 */
-	public void stop() {
+	public void stop()
+	{
 		final String methodName = "stop";
-		
-		synchronized (lifecycle) {
-			//@TRACE 800=stopping sender
+
+		synchronized (lifecycle)
+		{
+			// @TRACE 800=stopping sender
 			Logger.d(TAG, "stopping sender thread started");
-			if (running) {
+			if (running)
+			{
 				running = false;
-				if (!Thread.currentThread().equals(sendThread)) {
-					try {
+				if (!Thread.currentThread().equals(sendThread))
+				{
+					try
+					{
 						// first notify get routine to finish
 						clientState.notifyQueueLock();
 						// Wait for the thread to finish.
 						sendThread.join();
 					}
-					catch (InterruptedException ex) {
+					catch (InterruptedException ex)
+					{
 					}
 				}
 			}
-			sendThread=null;
-			//@TRACE 801=stopped
+			sendThread = null;
+			// @TRACE 801=stopped
 			Logger.d(TAG, "stopping sender completed");
 		}
 	}
-	
-	public void run() {
+
+	public void run()
+	{
 		final String methodName = "run";
 		MqttWireMessage message = null;
-		while (running && (out != null)) {
-			try {
+		while (running && (out != null))
+		{
+			try
+			{
 				message = clientState.get();
-				if (message != null) {
-					//@TRACE 802=network send key={0} msg={1}
-					if (message instanceof MqttAck) {
+				if (message != null)
+				{
+					// @TRACE 802=network send key={0} msg={1}
+					if (message instanceof MqttAck)
+					{
 						Logger.d(TAG, "socket write started for ack : " + ((MqttAck) message).toString());
 						logSocketProperties();
 						out.write(message);
 						out.flush();
 						Logger.d(TAG, "socket write completed for ack : " + ((MqttAck) message).toString());
 						logSocketProperties();
-					} else {
+					}
+					else
+					{
 						MqttToken token = tokenStore.getToken(message);
-						// While quiescing the tokenstore can be cleared so need 
+						// While quiescing the tokenstore can be cleared so need
 						// to check for null for the case where clear occurs
 						// while trying to send a message.
-						if (token != null) {
-							synchronized (token) {
-								if(message instanceof MqttPublish){
+						if (token != null)
+						{
+							synchronized (token)
+							{
+								if (message instanceof MqttPublish)
+								{
 									Logger.d(TAG, "socket write started for message : " + ((MqttPublish) message).getMessage().toString());
 									Logger.d(TAG, "socket write started for message id : " + ((MqttPublish) message).getMessageId());
 									messageMap.put((long) ((MqttPublish) message).getMessageId(), System.currentTimeMillis());
 									logSocketProperties();
 								}
 								out.write(message);
-								try {
+								try
+								{
 									out.flush();
-								} catch (IOException ex) {
+								}
+								catch (IOException ex)
+								{
 									// The flush has been seen to fail on disconnect of a SSL socket
 									// as disconnect is in progress this should not be treated as an error
 									if (!(message instanceof MqttDisconnect))
 										throw ex;
 								}
-								if(message instanceof MqttPublish){
+								if (message instanceof MqttPublish)
+								{
 									Logger.d(TAG, "socket write completed for message : " + ((MqttPublish) message).getMessage().toString());
 									Logger.d(TAG, "socket write completed for message : " + ((MqttPublish) message).getMessageId());
 									int length = ((MqttPublish) message).getHeaderLength() + ((MqttPublish) message).getPayloadLength();
 									Logger.d(TAG, "bytes written on socket : " + length);
-									logSocketProperties();	
+									logSocketProperties();
 								}
 								clientState.notifySent(message);
 							}
 						}
 					}
-				} else { // null message
-					//@TRACE 803=get message returned null, stopping}
+				}
+				else
+				{ // null message
+					// @TRACE 803=get message returned null, stopping}
 					Logger.d(TAG, "get message returned null, stopping");
 					running = false;
 				}
-			} catch (MqttException me) {
+			}
+			catch (MqttException me)
+			{
 				handleRunException(message, me);
-			} catch (Exception ex) {		
-				handleRunException(message, ex);	
+			}
+			catch (Exception ex)
+			{
+				handleRunException(message, ex);
 			}
 		} // end while
-		
-		//@TRACE 805=<
+
+		// @TRACE 805=<
 
 	}
 
-	private void handleRunException(MqttWireMessage message, Exception ex) {
+	private void handleRunException(MqttWireMessage message, Exception ex)
+	{
 		final String methodName = "handleRunException";
-		//@TRACE 804=exception
+		// @TRACE 804=exception
 		Logger.d(TAG, "exception in run , cause : " + ex.getCause());
 		MqttException mex;
-		if ( !(ex instanceof MqttException)) {
+		if (!(ex instanceof MqttException))
+		{
 			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
-		} else {
-			mex = (MqttException)ex;
+		}
+		else
+		{
+			mex = (MqttException) ex;
 		}
 
 		running = false;
 		clientComms.shutdownConnection(null, mex);
 	}
-	
-	private void logSocketProperties(){
+
+	private void logSocketProperties()
+	{
 		try
 		{
-			if(socket.getChannel() != null){
+			if (socket.getChannel() != null)
+			{
 				Logger.d(TAG, "is socket channel blocking : " + socket.getChannel().isBlocking());
 				Logger.d(TAG, "is socket channel connected : " + socket.getChannel().isConnected());
 				Logger.d(TAG, "is socket channel connection pending : " + socket.getChannel().isConnectionPending());
@@ -198,7 +243,8 @@ public class CommsSender implements Runnable {
 			Logger.d(TAG, "socket timeout : " + socket.getSoTimeout());
 			Logger.d(TAG, "socket traffic class : " + socket.getTrafficClass());
 		}
-		catch (Exception ex){
+		catch (Exception ex)
+		{
 			Logger.d(TAG, "exception during taking logs");
 		}
 	}

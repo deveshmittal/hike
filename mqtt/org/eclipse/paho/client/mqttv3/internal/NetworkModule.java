@@ -18,15 +18,15 @@ import java.net.Socket;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
-
-public interface NetworkModule {
+public interface NetworkModule
+{
 	public void start() throws IOException, MqttException;
-	
+
 	public InputStream getInputStream() throws IOException;
-	
+
 	public OutputStream getOutputStream() throws IOException;
-	
+
 	public void stop() throws IOException;
-	
+
 	public Socket getSocket();
 }

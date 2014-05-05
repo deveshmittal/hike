@@ -21,69 +21,92 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 /**
  * Persistence that uses memory
  * 
- * In cases where reliability is not required across client or device 
- * restarts memory this memory peristence can be used. In cases where
- * reliability is required like when clean session is set to false
- * then a non-volatile form of persistence should be used. 
+ * In cases where reliability is not required across client or device restarts memory this memory peristence can be used. In cases where reliability is required like when clean
+ * session is set to false then a non-volatile form of persistence should be used.
  * 
  */
-public class MemoryPersistence implements MqttClientPersistence {
+public class MemoryPersistence implements MqttClientPersistence
+{
 
 	private Hashtable data;
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#close()
 	 */
-	public void close() throws MqttPersistenceException {
+	public void close() throws MqttPersistenceException
+	{
 		data.clear();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#keys()
 	 */
-	public Enumeration keys() throws MqttPersistenceException {
+	public Enumeration keys() throws MqttPersistenceException
+	{
 		return data.keys();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#get(java.lang.String)
 	 */
-	public MqttPersistable get(String key) throws MqttPersistenceException {
-		return (MqttPersistable)data.get(key);
+	public MqttPersistable get(String key) throws MqttPersistenceException
+	{
+		return (MqttPersistable) data.get(key);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#open(java.lang.String, java.lang.String)
 	 */
-	public void open(String clientId, String serverURI) throws MqttPersistenceException {
+	public void open(String clientId, String serverURI) throws MqttPersistenceException
+	{
 		this.data = new Hashtable();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#put(java.lang.String, org.eclipse.paho.client.mqttv3.MqttPersistable)
 	 */
-	public void put(String key, MqttPersistable persistable) throws MqttPersistenceException {
+	public void put(String key, MqttPersistable persistable) throws MqttPersistenceException
+	{
 		data.put(key, persistable);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#remove(java.lang.String)
 	 */
-	public void remove(String key) throws MqttPersistenceException {
+	public void remove(String key) throws MqttPersistenceException
+	{
 		data.remove(key);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#clear()
 	 */
-	public void clear() throws MqttPersistenceException {
+	public void clear() throws MqttPersistenceException
+	{
 		data.clear();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#containsKey(java.lang.String)
 	 */
-	public boolean containsKey(String key) throws MqttPersistenceException {
+	public boolean containsKey(String key) throws MqttPersistenceException
+	{
 		return data.containsKey(key);
 	}
 }

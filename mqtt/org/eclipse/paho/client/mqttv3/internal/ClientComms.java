@@ -60,8 +60,11 @@ public class ClientComms
 	MqttConnectOptions conOptions;
 
 	private MqttClientPersistence persistence;
-	CommsTokenStore 			tokenStore;
-	boolean 					stoppingComms = false;
+
+	CommsTokenStore tokenStore;
+
+	boolean stoppingComms = false;
+
 	Map<Long, Long> messageMap = new HashMap<Long, Long>();
 
 	final static byte CONNECTED = 0;
@@ -674,10 +677,10 @@ public class ClientComms
 				networkModule.start();
 
 				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream(), networkModule.getSocket(), messageMap);
-				receiver.start("MQTT Rec: "+getClient().getClientId());
+				receiver.start("MQTT Rec: " + getClient().getClientId());
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream(), networkModule.getSocket(), messageMap);
-				sender.start("MQTT Snd: "+getClient().getClientId());
-				callback.start("MQTT Call: "+getClient().getClientId());
+				sender.start("MQTT Snd: " + getClient().getClientId());
+				callback.start("MQTT Call: " + getClient().getClientId());
 
 				internalSend(conPacket, conToken);
 			}

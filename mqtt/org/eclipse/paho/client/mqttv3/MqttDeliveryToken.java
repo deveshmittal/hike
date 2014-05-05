@@ -15,35 +15,40 @@ package org.eclipse.paho.client.mqttv3;
  * Provides a mechanism to track the delivery progress of a message.
  * 
  * <p>
- * Used to track the the delivery progress of a message when a publish is 
- * executed in a non-blocking manner (run in the background)</p>
- *  
+ * Used to track the the delivery progress of a message when a publish is executed in a non-blocking manner (run in the background)
+ * </p>
+ * 
  * @see MqttToken
  */
-public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken {
-		
-	
-	public MqttDeliveryToken() {
+public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken
+{
+
+	public MqttDeliveryToken()
+	{
 		super();
 	}
-	
-	public MqttDeliveryToken(String logContext) {
+
+	public MqttDeliveryToken(String logContext)
+	{
 		super(logContext);
 	}
 
 	/**
 	 * Returns the message associated with this token.
-	 * <p>Until the message has been delivered, the message being delivered will
-	 * be returned. Once the message has been delivered <code>null</code> will be 
-	 * returned.
+	 * <p>
+	 * Until the message has been delivered, the message being delivered will be returned. Once the message has been delivered <code>null</code> will be returned.
+	 * 
 	 * @return the message associated with this token or null if already delivered.
-	 * @throws MqttException if there was a problem completing retrieving the message
+	 * @throws MqttException
+	 *             if there was a problem completing retrieving the message
 	 */
-	public MqttMessage getMessage() throws MqttException {
+	public MqttMessage getMessage() throws MqttException
+	{
 		return internalTok.getMessage();
 	}
-	
-	protected void setMessage(MqttMessage msg) {
+
+	protected void setMessage(MqttMessage msg)
+	{
 		internalTok.setMessage(msg);
 	}
 }
