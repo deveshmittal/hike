@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-
-import com.bsb.hike.utils.Logger;
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 
 /**
@@ -27,6 +27,8 @@ import com.bsb.hike.utils.Logger;
 public class MqttOutputStream extends OutputStream {
 	private static final String className = MqttOutputStream.class.getName();
 	private BufferedOutputStream out;
+
+	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
 	
 	public MqttOutputStream(OutputStream out) {
 		this.out = new BufferedOutputStream(out);
@@ -64,7 +66,7 @@ public class MqttOutputStream extends OutputStream {
 		out.write(bytes,0,bytes.length);
 		out.write(pl,0,pl.length);
 		// @TRACE 500= sent {0}
-		Logger.d("MqttOutputStream", "writing message : " + message.toString());
+    	log.fine(className, methodName, "500", new Object[]{message});
 	}
 }
 

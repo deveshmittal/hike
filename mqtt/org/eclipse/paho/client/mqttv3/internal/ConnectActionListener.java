@@ -17,8 +17,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 
-import android.nfc.Tag;
-
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -39,7 +37,6 @@ public class ConnectActionListener implements IMqttActionListener {
   private MqttToken userToken;
   private Object userContext;
   private IMqttActionListener userCallback;
-  private final String TAG = "ConnectionActionListener";
 
   /**
    * @param persistence
@@ -74,8 +71,7 @@ public class ConnectActionListener implements IMqttActionListener {
    */
   public void onSuccess(IMqttToken token) {
 
-    Logger.d(TAG, "connect successful ");
-	userToken.internalTok.markComplete(null, null);
+    userToken.internalTok.markComplete(null, null);
     userToken.internalTok.notifyComplete();
 
     if (userCallback != null) {
@@ -95,11 +91,11 @@ public class ConnectActionListener implements IMqttActionListener {
 
     int numberOfURIs = comms.getNetworkModules().length;
     int index = 1 + comms.getNetworkModuleIndex();
-    Logger.d(TAG, "connect failed due to " + exception.getCause() );
+
     if (index < numberOfURIs) {
       comms.setNetworkModuleIndex(index);
       try {
-    	Logger.d(TAG, "trying the url with index : " + index);
+    	Logger.d("ips loop", "trying the url with index : " + index);
         connect();
       }
       catch (MqttPersistenceException e) {
@@ -114,7 +110,6 @@ public class ConnectActionListener implements IMqttActionListener {
       else {
         ex = new MqttException(exception);
       }
-      Logger.d(TAG, "connect failed , reason" + ex.getCause());
       userToken.internalTok.markComplete(null, ex);
       userToken.internalTok.notifyComplete();
 
