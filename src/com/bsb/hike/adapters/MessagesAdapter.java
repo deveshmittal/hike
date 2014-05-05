@@ -109,6 +109,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private static class DayHolder
 	{
 		ViewStub dayStub;
+
+		View dayStubInflated;
 	}
 
 	private static class DetailViewHolder extends DayHolder
@@ -135,6 +137,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ViewGroup messageContainer;
 
 		ViewStub messageInfoStub;
+
+		View messageInfoInflated;
 	}
 
 	private static class FTViewHolder extends DetailViewHolder
@@ -203,7 +207,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private static class TextViewHolder extends DetailViewHolder
 	{
 		TextView text;
-		
+
 		ViewStub sdrTipStub;
 	}
 
@@ -895,6 +899,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
 					if (stickerDrawable != null)
 					{
+						stickerHolder.loader.setVisibility(View.GONE);
+						stickerHolder.placeHolder.setBackgroundResource(0);
 						stickerHolder.image.setVisibility(View.VISIBLE);
 						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
 						stickerHolder.image.setImageDrawable(stickerDrawable);
@@ -3287,7 +3293,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		if (showDayIndicator(position))
 		{
-			setDay(convMessage, dayHolder);
+			inflateNSetDay(convMessage, dayHolder);
 		}
 		else if (dayHolder.dayStub != null)
 		{
@@ -3380,6 +3386,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		}
 	}
+
 	private void showSdrTip(View sdrFtueTip)
 	{
 		sdrFtueTip.setVisibility(View.VISIBLE);
@@ -3434,41 +3441,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return (Integer.toString(bytes) + " B");
 	}
 
-	private void setDay(ConvMessage convMessage, DayHolder dayHolder)
+	private void inflateNSetDay(ConvMessage convMessage, final DayHolder dayHolder)
 	{
 		final String dateFormatted = convMessage.getMessageDate(context);
-		dayHolder.dayStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		if (dayHolder.dayStubInflated == null)
 		{
-			@Override
-			public void onInflate(ViewStub stub, View inflated)
+			dayHolder.dayStub.setOnInflateListener(new ViewStub.OnInflateListener()
 			{
-				TextView dayTextView = (TextView) inflated.findViewById(R.id.day);
-				View dayLeft = inflated.findViewById(R.id.day_left);
-				View dayRight = inflated.findViewById(R.id.day_right);
-
-				dayTextView.setText(dateFormatted.toUpperCase());
-
-				if (isDefaultTheme)
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
 				{
-					dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
-					dayLeft.setBackgroundColor(context.getResources().getColor(R.color.day_line));
-					dayRight.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+					dayHolder.dayStubInflated = inflated;
+					setDay(dayHolder.dayStubInflated, dateFormatted);
 				}
-				else
-				{
-					dayTextView.setTextColor(context.getResources().getColor(R.color.white));
-					dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
-					dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
-				}
+			});
+			try
+			{
+				dayHolder.dayStub.inflate();
 			}
-		});
-		try
-		{
-			dayHolder.dayStub.inflate();
-		}
-		catch (Exception e)
-		{
+			catch (Exception e)
+			{
 
+			}
+		}
+		else
+		{
+			setDay(dayHolder.dayStubInflated, dateFormatted);
+		}
+	}
+
+	private void setDay(View inflated, String dateFormatted)
+	{
+		TextView dayTextView = (TextView) inflated.findViewById(R.id.day);
+		View dayLeft = inflated.findViewById(R.id.day_left);
+		View dayRight = inflated.findViewById(R.id.day_right);
+
+		dayTextView.setText(dateFormatted.toUpperCase());
+
+		if (isDefaultTheme)
+		{
+			dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+			dayLeft.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+			dayRight.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+		}
+		else
+		{
+			dayTextView.setTextColor(context.getResources().getColor(R.color.white));
+			dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
+			dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
 		}
 	}
 
@@ -3973,7 +3993,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if ((message.getState() != null) && (position == lastSentMessagePosition)
 				&& ((message.getState() == State.SENT_DELIVERED_READ && isGroupChat) || message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED))
 		{
-			setMessageInfo(getItem(position), detailHolder, clickableItem);
+			inflateNSetMessageInfo(getItem(position), detailHolder, clickableItem);
 		}
 		else if (detailHolder.messageInfoStub != null)
 		{
@@ -3981,42 +4001,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 	}
 
-	private void setMessageInfo(final ConvMessage message, DetailViewHolder detailHolder, final View clickableItem)
+	private void inflateNSetMessageInfo(final ConvMessage message, final DetailViewHolder detailHolder, final View clickableItem)
 	{
-		detailHolder.messageInfoStub.setOnInflateListener(new ViewStub.OnInflateListener()
+		if (detailHolder.messageInfoInflated == null)
 		{
-			@Override
-			public void onInflate(ViewStub stub, View inflated)
+			detailHolder.messageInfoStub.setOnInflateListener(new ViewStub.OnInflateListener()
 			{
-				TextView messageInfo = (TextView) inflated.findViewById(R.id.message_info);
-				ImageView sending = (ImageView) inflated.findViewById(R.id.sending_anim);
-
-				messageInfo.setVisibility(View.GONE);
-				sending.setVisibility(View.GONE);
-				if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
 				{
-					messageInfo.setVisibility(View.VISIBLE);
-					messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
-					setReadByForGroup(message, messageInfo);
+					detailHolder.messageInfoInflated = inflated;
+					setMessageInfo(message, detailHolder.messageInfoInflated, clickableItem);
 				}
-				else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
-				{
-					if (!message.isSMS())
-					{
-						scheduleUndeliveredText(messageInfo, clickableItem, sending, message.getTimestamp());
-					}
-				}
+			});
+			try
+			{
+				detailHolder.messageInfoStub.inflate();
 			}
-		});
-		try
-		{
-			detailHolder.messageInfoStub.inflate();
-		}
-		catch (Exception e)
-		{
+			catch (Exception e)
+			{
 
+			}
 		}
+		else
+		{
+			setMessageInfo(message, detailHolder.messageInfoInflated, clickableItem);
+		}
+	}
 
+	private void setMessageInfo(ConvMessage message, View inflated, View clickableItem)
+	{
+		TextView messageInfo = (TextView) inflated.findViewById(R.id.message_info);
+		ImageView sending = (ImageView) inflated.findViewById(R.id.sending_anim);
+
+		messageInfo.setVisibility(View.GONE);
+		sending.setVisibility(View.GONE);
+		if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
+		{
+			messageInfo.setVisibility(View.VISIBLE);
+			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
+			setReadByForGroup(message, messageInfo);
+		}
+		else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
+		{
+			if (!message.isSMS())
+			{
+				scheduleUndeliveredText(messageInfo, clickableItem, sending, message.getTimestamp());
+			}
+		}
 	}
 
 	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)

@@ -1884,6 +1884,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			showAppropriateDialog();
 		}
+		if(overFlowWindow!= null && overFlowWindow.isShowing())
+		{
+			overFlowWindow.dismiss();
+			showOverFlowMenu();
+		}
 	}
 
 	private void showAppropriateDialog()

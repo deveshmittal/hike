@@ -516,6 +516,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
 				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
 				setupActionModeActionBar();
+				invalidateOptionsMenu();
 			}
 		}
 	}
@@ -956,7 +957,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return false;
 		}
-		if (!mConversation.isOnhike() && mCredits <= 0)
+		if (!mConversation.isOnhike() && mCredits <= 0 && !isActionModeOn)
 		{
 			boolean nativeSmsPref = Utils.getSendSmsPref(this);
 			if (!nativeSmsPref)
