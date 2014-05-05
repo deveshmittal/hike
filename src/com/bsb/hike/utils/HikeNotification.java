@@ -176,6 +176,7 @@ public class HikeNotification
 			notificationIntent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
 		}
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		/*
 		 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to the

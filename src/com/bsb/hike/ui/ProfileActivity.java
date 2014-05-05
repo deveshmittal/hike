@@ -1429,11 +1429,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 		intent.setClass(this, ChatThread.class);
-		if (!getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false))
-		{
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		}
-		else
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false))
 		{
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		}
@@ -1447,6 +1444,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		Intent intent = new Intent(ProfileActivity.this, ChatThread.class);
 		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 
 	}

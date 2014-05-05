@@ -264,6 +264,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					ContactInfo contactInfo = (ContactInfo) view.getTag();
 					Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 					intent.setClass(getActivity(), ChatThread.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
 
 					Utils.sendUILogEvent(HikeConstants.LogEvent.GRID_6, contactInfo.getMsisdn());
