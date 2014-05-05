@@ -19,7 +19,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 	
 	private static final int widthMargin = 2;
 	
-	private static final int heightTime = 14;
+	private static final int heightTime = 16;
 
 	public CustomSendMessageTextView(Context context)
 	{
