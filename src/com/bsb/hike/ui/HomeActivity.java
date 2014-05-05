@@ -252,13 +252,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						if(!(dialog != null && dialog.isShowing()))
+						if (!(dialog != null && dialog.isShowing()))
 						{
-							if(!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+							if (!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
 							{
-								
-									dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-									dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+
+								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
 							}
 							else
 							{
@@ -382,7 +382,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
 			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
-			Animation anim =  AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
+			Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
 			anim.setDuration(1000);
 			findViewById(R.id.stealth_double_tap_tip).startAnimation(anim);
 		}
@@ -907,11 +907,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					anim.setDuration(600);
 					popup.setAnimation(anim);
 				}
-				
+
 				/*
 				 * if overflow popup is showing we should dismiss it
 				 */
-				if(overFlowWindow != null && overFlowWindow.isShowing())
+				if (overFlowWindow != null && overFlowWindow.isShowing())
 				{
 					overFlowWindow.dismiss();
 				}
@@ -1878,7 +1878,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		if (dialog != null)
 		{
-			if(dialog.isShowing())
+			if (dialog.isShowing())
 			{
 				dialog.dismiss();
 			}
@@ -1945,7 +1945,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				default:
 					break;
 				}
-				
+
 				dialogShowing = null;
 				dialog.dismiss();
 				HomeActivity.this.dialog = null;
