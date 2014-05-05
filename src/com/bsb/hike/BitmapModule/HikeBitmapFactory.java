@@ -36,40 +36,45 @@ public class HikeBitmapFactory
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
 	{
 		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(output);
+		if (output != null)
+		{
+			Canvas canvas = new Canvas(output);
 
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-		final RectF rectF = new RectF(rect);
-		final float roundPx = 4;
+			final int color = 0xff424242;
+			final Paint paint = new Paint();
+			final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+			final RectF rectF = new RectF(rect);
+			final float roundPx = 4;
 
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+			paint.setAntiAlias(true);
+			canvas.drawARGB(0, 0, 0, 0);
+			paint.setColor(color);
+			canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
 
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-
+			paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+			canvas.drawBitmap(bitmap, rect, rect, paint);
+		}
 		return output;
 	}
 
 	public static Bitmap getCircularBitmap(Bitmap bitmap)
 	{
 		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(output);
+		if (output != null)
+		{
+			Canvas canvas = new Canvas(output);
 
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+			final int color = 0xff424242;
+			final Paint paint = new Paint();
+			final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
+			paint.setAntiAlias(true);
+			canvas.drawARGB(0, 0, 0, 0);
+			paint.setColor(color);
+			canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
+			paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+			canvas.drawBitmap(bitmap, rect, rect, paint);
+		}
 		return output;
 	}
 
@@ -79,7 +84,11 @@ public class HikeBitmapFactory
 		int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 		textView.measure(spec, spec);
 		textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-		Bitmap b = Bitmap.createBitmap(textView.getWidth(), textView.getHeight(), Bitmap.Config.ARGB_8888);
+		Bitmap b = createBitmap(textView.getWidth(), textView.getHeight(), Bitmap.Config.ARGB_8888);
+		if (b == null)
+		{
+			return null;
+		}
 		Canvas canvas = new Canvas(b);
 		canvas.translate(-textView.getScrollX(), -textView.getScrollY());
 		textView.draw(canvas);
@@ -92,6 +101,7 @@ public class HikeBitmapFactory
 		}
 		textView.destroyDrawingCache(); // destory drawable
 		return viewBmp;
+
 	}
 
 	public static BitmapDrawable stringToDrawable(String encodedString)
@@ -221,9 +231,12 @@ public class HikeBitmapFactory
 		 */
 		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), Config.ARGB_8888);
 
-		Canvas canvas = new Canvas(bitmap);
-		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawable.draw(canvas);
+		if (bitmap != null)
+		{
+			Canvas canvas = new Canvas(bitmap);
+			drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+			drawable.draw(canvas);
+		}
 		return bitmap;
 	}
 
@@ -836,7 +849,7 @@ public class HikeBitmapFactory
 		}
 
 		Bitmap small = createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config, true);
-		
+
 		if (unscaledBitmap != small)
 		{
 			unscaledBitmap.recycle();

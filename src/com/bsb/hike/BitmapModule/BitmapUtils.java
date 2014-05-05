@@ -38,6 +38,10 @@ public class BitmapUtils
 
 	public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format, int quality)
 	{
+		if (bitmap == null)
+		{
+			return null;
+		}
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		bitmap.compress(format, quality, bao);
 		return bao.toByteArray();
@@ -105,7 +109,7 @@ public class BitmapUtils
 		fos.flush();
 		fos.close();
 	}
-	
+
 	/**
 	 * Get the size in bytes of a bitmap in a BitmapDrawable. Note that from Android 4.4 (KitKat) onward this returns the allocated memory size of the bitmap which can be larger
 	 * than the actual bitmap data byte count (in the case it was re-used).
