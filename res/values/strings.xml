@@ -1491,7 +1491,6 @@
     <string name="chat_unmarked_stealth">Chat Unhidden</string>
     <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
     <string name="stealth_notification_message">You have a new notification</string>
-    <string name="stealth_ftue_conv_tip_showing">please tap and hold some conversation</string>
     <string name="retry">Retry</string>
 
 	<string name="reset_complete_stealth_header">Reset Hidden Mode</string>
