@@ -52,6 +52,7 @@
     <dimen name="ic_twitter_priv_left_margin">12dp</dimen>
     <dimen name="ic_twitter_priv_right_margin">2dp</dimen>
     <dimen name="chat_bubble_edge_spacing">8dp</dimen>
+    <dimen name="chat_bubble_time_edge_spacing">14dp</dimen>
     <dimen name="avatar_typing_margin">2dp</dimen>
     <dimen name="sms_toggle_unchecked">12sp</dimen>
     <dimen name="sms_toggle_checked">14sp</dimen>
