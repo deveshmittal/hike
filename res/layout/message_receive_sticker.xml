@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/day_container"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_sender_details" />
 
@@ -35,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/sender_details"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
         android:layout_toRightOf="@id/avatar_container"
         android:gravity="center"
         android:orientation="vertical" >
@@ -60,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/placeholder"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
         android:layout_toRightOf="@id/avatar_container"
         layout="@layout/message_time_status_ext" />
 
