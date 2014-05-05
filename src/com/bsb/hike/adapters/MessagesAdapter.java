@@ -148,9 +148,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ProgressBar stickerLoader;
 
 		View stickerParticipantDetails;
-		
+
 		TextView stickerParticipantName;
-		
+
 		TextView stickerParticipantNameUnsaved;
 
 		ImageView stickerImage;
@@ -235,9 +235,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View selectedStateOverlay;
 
 		View sdrFtueTip;
-		
+
 		ImageView filmstripLeft;
-		
+
 		ImageView filmstripRight;
 	}
 
@@ -283,7 +283,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isActionModeOn = false;
 
 	private boolean shownSdrIntroTip = true;
-	
+
 	private boolean sdrTipFadeInShown = false;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
@@ -832,7 +832,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+						firstMessageFromParticipant);
 				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				if (holder.stickerParticipantNameUnsaved != null)
 				{
@@ -870,26 +871,27 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.stickerPlaceholder.setBackgroundResource(0);
 
 				Sticker sticker = metadata.getSticker();
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+						firstMessageFromParticipant);
 				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				if (holder.stickerParticipantNameUnsaved != null)
 				{
 					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				}
-//				if (!convMessage.isSent())
-//				{
-//					
-//					if (firstMessageFromParticipant)
-//					{
-//						holder.stickerParticipantName.setVisibility(View.VISIBLE);
-//						holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
-//						holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
-//					}
-//					else
-//					{
-//						holder.stickerParticipantName.setVisibility(View.GONE);
-//					}
-//				}
+				// if (!convMessage.isSent())
+				// {
+				//
+				// if (firstMessageFromParticipant)
+				// {
+				// holder.stickerParticipantName.setVisibility(View.VISIBLE);
+				// holder.stickerParticipantName.setText(((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()));
+				// holder.stickerParticipantName.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.chat_color : R.color.white));
+				// }
+				// else
+				// {
+				// holder.stickerParticipantName.setVisibility(View.GONE);
+				// }
+				// }
 
 				/*
 				 * If this is the default category, then the sticker are part of the app bundle itself
@@ -1116,8 +1118,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
-				//holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
-				if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+				// holder.fileSizeExt.setText(dataDisplay(hikeFile.getFileSize()));
+				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
 					holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 				}
@@ -1129,8 +1131,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileSizeExt.setText("");
 				}
-				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-				if(!TextUtils.isEmpty(ext))
+				String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+				if (!TextUtils.isEmpty(ext))
 				{
 					holder.fileExtension.setText(ext);
 				}
@@ -1138,7 +1140,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileExtension.setText("?");
 				}
-				
+
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1149,13 +1151,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				holder.stickerPlaceholder.setVisibility(View.VISIBLE);
 				holder.stickerPlaceholder.setBackgroundResource(0);
-				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved, firstMessageFromParticipant);
+				setGroupParticipantName(convMessage, holder.stickerParticipantDetails, holder.stickerParticipantName, holder.stickerParticipantNameUnsaved,
+						firstMessageFromParticipant);
 				holder.stickerParticipantName.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				if (holder.stickerParticipantNameUnsaved != null)
 				{
 					holder.stickerParticipantNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				}
-				
+
 				ShapeDrawable circle = new ShapeDrawable(new OvalShape());
 				circle.setIntrinsicHeight((int) (36 * Utils.densityMultiplier));
 				circle.setIntrinsicWidth((int) (36 * Utils.densityMultiplier));
@@ -1201,7 +1204,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
-				if(thumbnail != null)
+				if (thumbnail != null)
 				{
 					if (showThumbnail)
 					{
@@ -1211,8 +1214,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						createMediaThumb(holder.fileThumb);
 					}
-	
-					if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+
+					if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 					{
 						holder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
 					}
@@ -1224,7 +1227,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileSize.setText("");
 					}
-					
+
 					holder.fileSize.setVisibility(View.VISIBLE);
 					holder.messageSize.setVisibility(View.VISIBLE);
 					holder.fileThumb.setVisibility(View.VISIBLE);
@@ -1235,7 +1238,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					createFileThumb(holder.fileThumb);
 					holder.fileName.setText(hikeFile.getFileName());
-					if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+					if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 					{
 						holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 					}
@@ -1247,8 +1250,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileSizeExt.setText("");
 					}
-					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-					if(!TextUtils.isEmpty(ext))
+					String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+					if (!TextUtils.isEmpty(ext))
 					{
 						holder.fileExtension.setText(ext);
 					}
@@ -1256,7 +1259,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileExtension.setText("?");
 					}
-					
+
 					holder.fileThumb.setVisibility(View.VISIBLE);
 					holder.fileName.setVisibility(View.VISIBLE);
 					holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1286,31 +1289,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						&& (!convMessage.isSent()))
 					showThumbnail = false;
 
-				if(thumbnail != null || hikeFileType == HikeFileType.LOCATION)
+				if (thumbnail != null || hikeFileType == HikeFileType.LOCATION)
 				{
-				
-				if (showThumbnail)
-				{
-					holder.fileThumb.setBackgroundDrawable(thumbnail);
+
+					if (showThumbnail)
+					{
+						holder.fileThumb.setBackgroundDrawable(thumbnail);
+						holder.fileThumb.setVisibility(View.VISIBLE);
+					}
+					else if (hikeFileType == HikeFileType.IMAGE)
+					{
+						createMediaThumb(holder.fileThumb);
+					}
+					else
+					{
+						createMediaThumb(holder.fileThumb);
+						holder.fileThumb.setImageResource(R.drawable.ic_default_location);
+						holder.fileThumb.setScaleType(ScaleType.CENTER);
+					}
 					holder.fileThumb.setVisibility(View.VISIBLE);
-				}
-				else if (hikeFileType == HikeFileType.IMAGE)
-				{
-					createMediaThumb(holder.fileThumb);
-				}
-				else
-				{
-					createMediaThumb(holder.fileThumb);
-					holder.fileThumb.setImageResource(R.drawable.ic_default_location);
-					holder.fileThumb.setScaleType(ScaleType.CENTER);
-				}
-				holder.fileThumb.setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					createFileThumb(holder.fileThumb);
 					holder.fileName.setText(hikeFile.getFileName());
-					if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+					if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 					{
 						holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 					}
@@ -1322,8 +1325,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileSizeExt.setText("");
 					}
-					String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-					if(!TextUtils.isEmpty(ext))
+					String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+					if (!TextUtils.isEmpty(ext))
 					{
 						holder.fileExtension.setText(ext);
 					}
@@ -1331,7 +1334,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						holder.fileExtension.setText("?");
 					}
-					
+
 					holder.fileThumb.setVisibility(View.VISIBLE);
 					holder.fileName.setVisibility(View.VISIBLE);
 					holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1343,7 +1346,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				createFileThumb(holder.fileThumb);
 				holder.fileName.setText(hikeFile.getFileName());
-				if(convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
+				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
 					holder.fileSizeExt.setText(dataDisplay((int) hikeFile.getFile().length()));
 				}
@@ -1355,8 +1358,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileSizeExt.setText("");
 				}
-				String ext =  Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
-				if(!TextUtils.isEmpty(ext))
+				String ext = Utils.getFileExtension(hikeFile.getFileName()).toUpperCase();
+				if (!TextUtils.isEmpty(ext))
 				{
 					holder.fileExtension.setText(ext);
 				}
@@ -1364,7 +1367,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					holder.fileExtension.setText("?");
 				}
-				
+
 				holder.fileThumb.setVisibility(View.VISIBLE);
 				holder.fileName.setVisibility(View.VISIBLE);
 				holder.fileSizeExt.setVisibility(View.VISIBLE);
@@ -1383,8 +1386,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
 			}
 			else if ((!showThumbnail)
-					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO
-					|| hikeFileType == HikeFileType.OTHER || hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
+					&& (hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.OTHER
+							|| hikeFileType == HikeFileType.CONTACT || hikeFileType == HikeFileType.LOCATION))
 			{
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 			}
@@ -1404,6 +1407,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (fileThumbParams.width == minWidth)
 				{
 					fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
+				}
+				else if (fileThumbParams.width == maxWidth)
+				{
+					fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
 				}
 			}
 			else
@@ -1504,14 +1511,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.messageContainer.setOnClickListener(this);
 			holder.messageContainer.setOnLongClickListener(this);
 
-			if(holder.circularProgressBgExt != null)
+			if (holder.circularProgressBgExt != null)
 			{
 				holder.circularProgressBgExt.setTag(convMessage);
 				holder.circularProgressBgExt.setOnClickListener(this);
 				holder.circularProgressBgExt.setOnLongClickListener(this);
 			}
-			
-			if(holder.recPlaceholder != null)
+
+			if (holder.recPlaceholder != null)
 			{
 				holder.recPlaceholder.setTag(convMessage);
 				holder.recPlaceholder.setOnClickListener(this);
@@ -1577,13 +1584,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Overlay status
 			if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
 			{
-				if((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				if ((!convMessage.isSent()) || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					
+
 				}
 				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
 				{
-					
+
 				}
 				else
 				{
@@ -1698,12 +1705,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftActionExt.setScaleType(ScaleType.CENTER);
 			}
 			// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Setting up Overlay Contents
-			
+
 			if (hikeFileType == HikeFileType.LOCATION || hikeFileType == HikeFileType.CONTACT)
 			{
-				if(hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
+				if (hikeFile.wasFileDownloaded() || (convMessage.isSent() && !TextUtils.isEmpty(hikeFile.getFileKey())))
 				{
-					
+
 				}
 				else if (FileTransferManager.getInstance(context).isFileTaskExist(convMessage.getMsgID()))
 				{
@@ -1711,10 +1718,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else
 				{
-					
+
 				}
 			}
-			//else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
+			// else if ((hikeFileType == HikeFileType.IMAGE) || (hikeFileType == HikeFileType.VIDEO))
 			else
 			{
 				if (convMessage.isSent()) // File is being sent
@@ -1784,15 +1791,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				// if (!TextUtils.isEmpty(hikeFile.getFileKey()))
 				// {
-				if(hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+				if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 				{
 					setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
-					if(thumbnail != null)
+					if (thumbnail != null)
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+								holder.sending);
 					}
 					else
 					{
@@ -1835,9 +1843,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				else if ((hikeFile.getHikeFileType() == HikeFileType.VIDEO) || (hikeFile.getHikeFileType() == HikeFileType.IMAGE))
 				{
-					if(thumbnail != null)
+					if (thumbnail != null)
 					{
-						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer, holder.sending);
+						setNewSDR(position, holder.ftMessageTime, holder.ftMessageStatus, true, holder.ftMessageTimeStatus, holder.messageInfo, holder.bubbleContainer,
+								holder.sending);
 					}
 					else
 					{
@@ -2292,12 +2301,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void showSdrTip(View sdrFtueTip)
 	{
 		sdrFtueTip.setVisibility(View.VISIBLE);
-		if(!sdrTipFadeInShown)
+		if (!sdrTipFadeInShown)
 		{
-			Animation anim =  AnimationUtils.loadAnimation(context, R.anim.fade_in_animation);
+			Animation anim = AnimationUtils.loadAnimation(context, R.anim.fade_in_animation);
 			anim.setDuration(1000);
 			sdrFtueTip.startAnimation(anim);
-			sdrTipFadeInShown= true;
+			sdrTipFadeInShown = true;
 		}
 	}
 
@@ -2461,13 +2470,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
 		fileThumb.setImageResource(0);
 	}
-	
+
 	private void createMediaThumb(ImageView fileThumb)
 	{
 		// TODO Auto-generated method stub
 		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
 		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
-		//int pixels = (int) (250 * Utils.densityMultiplier);
+		// int pixels = (int) (250 * Utils.densityMultiplier);
 		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
@@ -2795,9 +2804,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		time.setVisibility(View.VISIBLE);
 		if (message.isSent())
 		{
-			if(message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
+			if (message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
 			{
-				if(ext)
+				if (ext)
 				{
 					status.setImageResource(R.drawable.ic_clock_white);
 				}
