@@ -26,6 +26,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -1430,21 +1431,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = new HashMap<String, Map<String, GroupParticipant>>();
 			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
+			Map<String, GroupParticipant> msisdnToGP = new HashMap<String, GroupParticipant>();
+			StringBuilder msisdnSB = new StringBuilder("(");
 
 			while (c.moveToNext())
 			{
 				String groupId = c.getString(groupIdIdx);
 				String msisdn = c.getString(msisdnIdx);
-
-				// TODO make this single query.
-				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn, false);
-				if (TextUtils.isEmpty(contactInfo.getName()))
-				{
-					contactInfo.setName(c.getString(nameIdx));
-				}
-				contactInfo.setOnhike(c.getInt(onHikeIdx) == 1 ? true : false);
-
-				GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(hasLeftIdx) != 0, c.getInt(onDndIdx) != 0);
+				msisdnSB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(nameIdx), msisdn), c.getInt(hasLeftIdx) != 0,
+						c.getInt(onDndIdx) != 0);
 
 				Map<String, GroupParticipant> participantList = groupIdParticipantsMap.get(groupId);
 				if (participantList == null)
@@ -1453,6 +1449,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					groupIdParticipantsMap.put(groupId, participantList);
 				}
 				participantList.put(msisdn, groupParticipant);
+				msisdnToGP.put(msisdn, groupParticipant);
+			}
+			// atleast one msisdn entered
+			if (!"(".equals(msisdnSB.toString()))
+			{
+				String msisdnMulti = msisdnSB.substring(0, msisdnSB.length() - 1) + ")";
+				List<ContactInfo> contactInfos = huDB.getContactNamesFromMsisdnList(msisdnMulti);
+				for (ContactInfo contactInfo : contactInfos)
+				{
+					msisdnToGP.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+				}
 			}
 			return groupIdParticipantsMap;
 		}
