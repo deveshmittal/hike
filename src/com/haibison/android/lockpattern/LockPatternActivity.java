@@ -570,6 +570,7 @@ public class LockPatternActivity extends Activity {
                 mBtnConfirm.setEnabled(true);
                 mFooter.setVisibility(View.VISIBLE);
             }
+            mFooter.setVisibility(View.GONE);
         }// ACTION_COMPARE_PATTERN
         else if (ACTION_VERIFY_CAPTCHA.equals(getIntent().getAction())) {
             mTextInfo

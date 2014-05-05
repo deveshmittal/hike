@@ -211,7 +211,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		if(itemToBeAnimated(conversation))
 		{
 			final Animation animation = AnimationUtils.loadAnimation(context,
-		            R.anim.slide_in_right_noalpha);
+		            R.anim.slide_in_from_left);
 			v.startAnimation(animation);
 			setItemAnimated(conversation);
 		}
