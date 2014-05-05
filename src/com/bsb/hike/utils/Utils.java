@@ -1278,6 +1278,48 @@ public class Utils
 		return thumbnail;
 	}
 
+	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
+	{
+		Bitmap rotatedBitmap = null;
+		Matrix m = new Matrix();
+		ExifInterface exif = null;
+		int orientation = 1;
+
+		try
+		{
+			if (path != null)
+			{
+				// Getting Exif information of the file
+				exif = new ExifInterface(path);
+			}
+			if (exif != null)
+			{
+				orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
+				switch (orientation)
+				{
+				case ExifInterface.ORIENTATION_ROTATE_270:
+					m.preRotate(270);
+					break;
+
+				case ExifInterface.ORIENTATION_ROTATE_90:
+					m.preRotate(90);
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_180:
+					m.preRotate(180);
+					break;
+				}
+				// Rotates the image according to the orientation
+				rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return rotatedBitmap;
+	}
+	
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
 		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
