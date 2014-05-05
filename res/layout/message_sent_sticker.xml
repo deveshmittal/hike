@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/day_container"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
         android:gravity="center"
         android:orientation="vertical" >
 
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/placeholder"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
         layout="@layout/message_time_status_ext" />
 
     <include
