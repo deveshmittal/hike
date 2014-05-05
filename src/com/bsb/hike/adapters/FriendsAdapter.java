@@ -35,6 +35,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -511,6 +512,16 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		removeContactByMatchingMsisdn(hikeContactsList, contactInfo);
 
 		removeContactByMatchingMsisdn(smsContactsList, contactInfo);
+
+		if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+		{
+			removeContactByMatchingMsisdn(friendsStealthList, contactInfo);
+
+			removeContactByMatchingMsisdn(hikeStealthContactsList, contactInfo);
+
+			removeContactByMatchingMsisdn(smsStealthContactsList, contactInfo);
+		}
+
 		if (remakeCompleteList)
 		{
 			makeCompleteList(false);
@@ -631,6 +642,19 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			return;
 		}
 
+		/*
+		 * We check if the contact to be added is a stealth contact. If it is, we check if the current stealth mode allows us to display stealth contacts. If not we skip the rest
+		 * of the process.
+		 */
+		if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+		{
+			boolean addToDisplayList = addToStealthList(contactInfo, groupIndex);
+			if (!addToDisplayList)
+			{
+				return;
+			}
+		}
+
 		switch (groupIndex)
 		{
 		case FRIEND_INDEX:
@@ -648,6 +672,24 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 
 		makeCompleteList(false);
+	}
+
+	private boolean addToStealthList(ContactInfo contactInfo, int groupIndex)
+	{
+		switch (groupIndex)
+		{
+		case FRIEND_INDEX:
+			friendsStealthList.add(contactInfo);
+			break;
+		case HIKE_INDEX:
+			hikeStealthContactsList.add(contactInfo);
+			break;
+		case SMS_INDEX:
+			smsStealthContactsList.add(contactInfo);
+			break;
+		}
+
+		return HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) == HikeConstants.STEALTH_ON;
 	}
 
 	public void refreshGroupList(List<ContactInfo> newGroupList, int groupIndex)
@@ -678,12 +720,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 		case FRIEND_INDEX:
 			removeContactByMatchingMsisdn(friendsList, contactInfo);
+			removeContactByMatchingMsisdn(friendsStealthList, contactInfo);
 			break;
 		case HIKE_INDEX:
 			removeContactByMatchingMsisdn(hikeContactsList, contactInfo);
+			removeContactByMatchingMsisdn(hikeStealthContactsList, contactInfo);
 			break;
 		case SMS_INDEX:
 			removeContactByMatchingMsisdn(smsContactsList, contactInfo);
+			removeContactByMatchingMsisdn(smsStealthContactsList, contactInfo);
 			break;
 		}
 		makeCompleteList(false);

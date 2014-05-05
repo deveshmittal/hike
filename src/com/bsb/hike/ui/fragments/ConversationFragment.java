@@ -279,6 +279,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 				{
 					ContactInfo contactInfo = (ContactInfo) view.getTag();
+
+					if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+					{
+						int stealthMode = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+						if (stealthMode != HikeConstants.STEALTH_ON)
+						{
+							return;
+						}
+					}
+
 					Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
 					intent.setClass(getActivity(), ChatThread.class);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
