@@ -69,6 +69,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -1703,7 +1704,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					else
 					{
 						itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
-						itemImageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+						itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
 						itemImageView.setImageResource(R.drawable.ic_default_avatar);
 					}
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);

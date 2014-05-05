@@ -33,6 +33,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -2864,7 +2865,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
-			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
+			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
 		}
 		finally
 		{
