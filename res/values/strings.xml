@@ -1460,7 +1460,7 @@
     <string name="introducing_stealth_mode">Introducing Hidden Mode!</string>
     <string name="stealth_mode_popup_msg">You can now hide your private chats from the world and read them only with a password.\nTry it now!</string>
     <string name="quick_setup">Quick setup</string>
-    <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Tap here on the \'hi\' to access them. <b>Set up a password to access Hidden Mode!<b> ]]></string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Set up a password to access Hidden Mode. <b> Tap here on \'hi\' to begin. ]]></string>
     <string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark it \'Hidden\'.</string>
     <string name="alp_42447968_cmd_confirm">Confirm</string>
     <string name="alp_42447968_cmd_continue">Continue</string>
