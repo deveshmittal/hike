@@ -795,7 +795,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						cancelNetworkErrorTimer();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
-						scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
+						//scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
 
 					/*
@@ -804,7 +804,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					catch (Exception e) // although this might not happen , but still catching it
 					{
 						e.printStackTrace();
-						scheduleNextConnectionCheck();
+						// if mqtt is not connected then only schedule connection check
+						if(!isConnected())
+							scheduleNextConnectionCheck();
 					}
 					finally
 					{
