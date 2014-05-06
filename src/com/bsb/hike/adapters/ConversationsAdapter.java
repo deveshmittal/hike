@@ -216,6 +216,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					notifyDataSetChanged();
 
 					Utils.cancelScheduledStealthReset(getContext());
+					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 				}
 			});
 			
