@@ -1,18 +1,24 @@
 package com.bsb.hike.adapters;
 
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 
 import android.content.Context;
+import android.os.CountDownTimer;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,10 +31,12 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConversationTip;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -41,9 +49,13 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	private int mIconImageSize;
 
+	private CountDownSetter countDownSetter;
+	
+	private SparseBooleanArray itemsToAnimat;
+
 	private enum ViewType
 	{
-		CONVERSATION, GROUP_CHAT_TIP
+		CONVERSATION, GROUP_CHAT_TIP, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP
 	}
 
 	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
@@ -53,6 +65,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
+		itemsToAnimat = new SparseBooleanArray();
 	}
 
 	@Override
@@ -65,9 +78,17 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	public int getItemViewType(int position)
 	{
 		Conversation conversation = getItem(position);
-		if (conversation == null)
+		if (conversation instanceof ConversationTip)
 		{
-			return ViewType.GROUP_CHAT_TIP.ordinal();
+			switch (((ConversationTip) conversation).getTipType())
+			{
+			case ConversationTip.GROUP_CHAT_TIP:
+				return ViewType.GROUP_CHAT_TIP.ordinal();
+			case ConversationTip.STEALTH_FTUE_TIP:
+				return ViewType.STEALTH_FTUE_TIP_VIEW.ordinal();
+			case ConversationTip.RESET_STEALTH_TIP:
+				return ViewType.RESET_STEALTH_TIP.ordinal();
+			}
 		}
 		return ViewType.CONVERSATION.ordinal();
 	}
@@ -84,13 +105,20 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		View v = convertView;
 		if (v == null)
 		{
-			if (viewType == ViewType.GROUP_CHAT_TIP)
+			switch (viewType)
 			{
-				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
-			}
-			else
-			{
+			case CONVERSATION:
 				v = inflater.inflate(mResourceId, parent, false);
+				break;
+			case GROUP_CHAT_TIP:
+				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
+				break;
+			case STEALTH_FTUE_TIP_VIEW:
+			case RESET_STEALTH_TIP:
+				v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
+				break;
+			default:
+				break;
 			}
 		}
 
@@ -120,8 +148,73 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 			return v;
 		}
+		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
+		{
+			View close = v.findViewById(R.id.close);
+			final int pos = position;
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, pos);
+				}
+			});
+			return v;
+		}
+		else if (viewType == ViewType.RESET_STEALTH_TIP)
+		{
+			View close = v.findViewById(R.id.close);
+			TextView tipText = (TextView) v.findViewById(R.id.tip);
+
+			long remainingTime = HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS
+					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance(getContext()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
+
+			if (remainingTime <= 0)
+			{
+				tipText.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
+			}
+			else
+			{
+				if (countDownSetter == null)
+				{
+					countDownSetter = new CountDownSetter(tipText, remainingTime, 1000);
+					countDownSetter.start();
+
+					setTimeRemainingText(tipText, remainingTime);
+				}
+				else
+				{
+					countDownSetter.setTextView(tipText);
+				}
+			}
+
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					resetCountDownSetter();
+
+					remove(conversation);
+					notifyDataSetChanged();
+
+					Utils.cancelScheduledStealthReset(getContext());
+				}
+			});
+			return v;
+		}
 
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
+		if(itemToBeAnimated(conversation))
+		{
+			final Animation animation = AnimationUtils.loadAnimation(context,
+		            R.anim.slide_in_right_noalpha);
+			v.startAnimation(animation);
+			setItemAnimated(conversation);
+		}
 		String name = conversation.getLabel();
 
 		contactView.setText(name);
@@ -161,6 +254,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				{
 					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
 					unreadIndicator.setVisibility(View.VISIBLE);
+
+					unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
 
 					if (conversation.getUnreadCount() == 0)
 					{
@@ -351,4 +446,79 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		return v;
 	}
 
+	private class CountDownSetter extends CountDownTimer
+	{
+		TextView textView;
+
+		public CountDownSetter(TextView textView, long millisInFuture, long countDownInterval)
+		{
+			super(millisInFuture, countDownInterval);
+			this.textView = textView;
+		}
+
+		@Override
+		public void onFinish()
+		{
+			if (textView == null)
+			{
+				return;
+			}
+			textView.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
+		}
+
+		@Override
+		public void onTick(long millisUntilFinished)
+		{
+			if (textView == null)
+			{
+				return;
+			}
+
+			setTimeRemainingText(textView, millisUntilFinished);
+		}
+
+		public void setTextView(TextView tv)
+		{
+			this.textView = tv;
+		}
+	}
+
+	private void setTimeRemainingText(TextView textView, long millisUntilFinished)
+	{
+		long secondsUntilFinished = millisUntilFinished / 1000;
+		int minutes = (int) (secondsUntilFinished / 60);
+		int seconds = (int) (secondsUntilFinished % 60);
+		String text = String.format("%1$02d:%2$02d", minutes, seconds);
+		textView.setText(Html.fromHtml(getContext().getString(R.string.reset_stealth_tip, text)));
+
+	}
+
+	public void resetCountDownSetter()
+	{
+		if(countDownSetter == null)
+		{
+			return;
+		}
+
+		this.countDownSetter.cancel();
+		this.countDownSetter = null;
+	}
+
+	public void addItemsToAnimat(Set<Conversation> stealthConversations)
+	{
+		for (Conversation conversation : stealthConversations)
+		{
+			itemsToAnimat.put(conversation.hashCode(), true);
+		}
+	}
+	
+	public void setItemAnimated(Conversation conv)
+	{
+		itemsToAnimat.delete(conv.hashCode());
+	}
+	
+	public boolean itemToBeAnimated(Conversation conv)
+	{
+		return itemsToAnimat.get(conv.hashCode()) && conv.isStealth();
+	}
 }

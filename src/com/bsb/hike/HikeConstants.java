@@ -144,6 +144,8 @@ public class HikeConstants
 	public static final String MSISDNS = "msisdns";
 
 	public static final String REWARDS_TOKEN = "reward_token";
+	
+	public static final String MQTT_IP_ADDRESSES = "ip";
 
 	public static final String SHOW_REWARDS = "show_rewards";
 
@@ -382,6 +384,8 @@ public class HikeConstants
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
+
+	public static final String RESET_STEALTH_PREF = "resetStealthPref";
 
 	public static final String REQUEST_DP = "rdp";
 
@@ -755,7 +759,7 @@ public class HikeConstants
 
 	public static final String MICROMAX = "MICROMAX";
 
-	public static final int MAX_READ_BY_NAMES = 3;
+	public static final int MAX_READ_BY_NAMES = 4;
 
 	public static final int LDPI_ID = 4;
 
@@ -792,8 +796,6 @@ public class HikeConstants
 	
 	public static final int JOINED_HIKE_STATUS_ID = -1;
 	
-	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
-
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
@@ -803,7 +805,32 @@ public class HikeConstants
 	public static final String FTUE = "ftue";
 	
 	public static final int MAX_FAST_SCROLL_VISIBLE_POSITION = 6;
+
+	public static final int STEALTH_OFF = 0;
+
+	public static final int STEALTH_ON_FAKE = 1;
+
+	public static final int STEALTH_ON = 2;
+
+	public static final long RESET_COMPLETE_STEALTH_TIME_MS = 30 * 1000;
 	
+	public static final String ENABLED = "enabled";
+	
+	public static final String ENABLED_STEALTH = "en";
+
+	public static final String DISABLED_STEALTH = "di";
+	
+	public static final String RESET = "reset";
+	
+	public static final class ResultCodes
+	{
+		public static final int SELECT_COUNTRY = 4001;
+		
+		public static final int CREATE_LOCK_PATTERN = 4002;
+
+		public static final int CONFIRM_LOCK_PATTERN = 4003;
+	}
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -1293,6 +1320,19 @@ public class HikeConstants
 		public static final String FTUE_TUTORIAL_CBG_VIEWED = "ftueTutorialCbgViewed";
 
 		public static final String START_HIKING = "startHiking";
+		
+		public static final String QUICK_SETUP_CLICK = "quickSetupClick";
+		
+		public static final String STEALTH_FTUE_DONE = "stlthFtueDone";
+		
+		public static final String RESET_STEALTH_INIT = "resetStlthInit";
+		
+		public static final String RESET_STEALTH_CANCEL = "resetStlthCancel";
+		
+		public static final String ENTER_WRONG_STEALTH_MODE = "entWrongStlth";
+		
+		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
+		
 	}
 
 	public static final class MqttMessageTypes
@@ -1396,6 +1436,11 @@ public class HikeConstants
 		public static final String GROUP_OWNER_CHANGE = "goc";
 
 		public static final String REQUEST_DP = "rdp";
+		
+		public static final String STEALTH = "stlth";
+
+		public static final String TOGGLE_STEALTH = "ts";
+
 	}
 
 	public static final class SMSNative
@@ -1438,11 +1483,6 @@ public class HikeConstants
 	public static enum SMSSyncState
 	{
 		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
-	}
-
-	public static enum TipType
-	{
-		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
 	}
 
 	public static enum EmoticonType

@@ -140,7 +140,7 @@ public class DownloadFileTask extends FileTransferBase
 		URLConnection conn = null;
 		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
 		chunkSize = networkType.getMinChunkSize();
-		while (shouldRetry())
+		while (shouldRetry() && _state == FTState.IN_PROGRESS)
 		{
 			try
 			{
@@ -313,32 +313,46 @@ public class DownloadFileTask extends FileTransferBase
 					}
 				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
-				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
-				if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)))
-				{
-					// here we should retry
-					mStart = _bytesTransferred;
-					// Is case id the task quits after making MAX attempts
-					// the file state is saved
-					if (retryAttempts >= MAX_RETRY_ATTEMPTS)
-					{
-						error();
-						res = FTResult.DOWNLOAD_FAILED;
-					}
-				}
-				else
+				Logger.e(getClass().getSimpleName(), "FT Download error : " + e.getMessage());
+				// here we should retry
+				mStart = _bytesTransferred;
+				// Is case id the task quits after making MAX attempts
+				// the file state is saved
+				if (retryAttempts >= MAX_RETRY_ATTEMPTS)
 				{
 					error();
 					res = FTResult.DOWNLOAD_FAILED;
 					retry = false;
 				}
 			}
-			catch (Exception e)
-			{
-				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
-			}
+//			catch (IOException e)
+//			{
+//				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
+//				if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)))
+//				{
+//					// here we should retry
+//					mStart = _bytesTransferred;
+//					// Is case id the task quits after making MAX attempts
+//					// the file state is saved
+//					if (retryAttempts >= MAX_RETRY_ATTEMPTS)
+//					{
+//						error();
+//						res = FTResult.DOWNLOAD_FAILED;
+//					}
+//				}
+//				else
+//				{
+//					error();
+//					res = FTResult.DOWNLOAD_FAILED;
+//					retry = false;
+//				}
+//			}
+//			catch (Exception e)
+//			{
+//				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
+//			}
 		}
 		if (res == FTResult.SUCCESS)
 			res = closeStreams(raf, in);

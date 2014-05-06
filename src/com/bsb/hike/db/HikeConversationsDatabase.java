@@ -26,12 +26,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -106,7 +108,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ " INTEGER, " + DBConstants.CONTACT_ID + " STRING, " + DBConstants.MSISDN + " UNIQUE, " + DBConstants.OVERLAY_DISMISSED + " INTEGER, " + DBConstants.MESSAGE
 				+ " STRING, " + DBConstants.MSG_STATUS + " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER, " + DBConstants.MAPPED_MSG_ID
 				+ " INTEGER, " + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, "
-				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0" + " )";
+				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0, " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0" + " )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + " STRING, " + DBConstants.MSISDN + " TEXT, " + DBConstants.NAME
 				+ " TEXT, " + DBConstants.ONHIKE + " INTEGER, " + DBConstants.HAS_LEFT + " INTEGER, " + DBConstants.ON_DND + " INTEGER, " + DBConstants.SHOWN_STATUS + " INTEGER "
@@ -387,6 +389,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		if (!chatBgTableAdded && oldVersion < 23)
 		{
 			String alter = "ALTER TABLE " + DBConstants.CHAT_BG_TABLE + " ADD COLUMN " + DBConstants.TIMESTAMP + " INTEGER";
+			db.execSQL(alter);
+		}
+
+		/*
+		 * Version 24 adds the stealth column to the converations table
+		 */
+		if (oldVersion < 24)
+		{
+			String alter = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
 	}
@@ -1063,8 +1074,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT },
-					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT,
+					DBConstants.IS_STEALTH }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
 				Logger.d(getClass().getSimpleName(), "Could not find db entry");
@@ -1074,10 +1085,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
 			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
 			int unreadCount = c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
+			boolean isStealth = c.getInt(c.getColumnIndex(DBConstants.IS_STEALTH)) != 0;
 
 			if (Utils.isGroupConversation(msisdn))
 			{
 				conv = getGroupConversation(msisdn, convid);
+				conv.setIsStealth(isStealth);
 			}
 			else
 			{
@@ -1095,7 +1108,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					name = contactInfo.getName();
 					onhike |= contactInfo.isOnhike();
 				}
-				conv = new Conversation(msisdn, convid, name, onhike);
+				conv = new Conversation(msisdn, convid, name, onhike, isStealth);
 
 			}
 
@@ -1207,8 +1220,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		Cursor groupInfoCursor = null;
 		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.CONV_ID, DBConstants.MESSAGE, DBConstants.MSG_STATUS,
-				DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT },
-				null, null, null, null, null);
+				DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
+				DBConstants.IS_STEALTH }, null, null, null, null, null);
 
 		Map<String, Conversation> conversationMap = new HashMap<String, Conversation>(c.getCount());
 
@@ -1225,6 +1238,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 		final int unreadCountColumn = c.getColumnIndex(DBConstants.UNREAD_COUNT);
+		final int isStealthColumn = c.getColumnIndex(DBConstants.IS_STEALTH);
 
 		HikeUserDatabase huDb = null;
 
@@ -1251,6 +1265,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				conv = new Conversation(msisdn, convid);
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
+				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
 
 				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
 				{
@@ -1328,6 +1343,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				groupConversation.setGroupParticipantList(groupParticipants);
 				groupConversation.setMessages(conversation.getMessages());
 				groupConversation.setUnreadCount(conversation.getUnreadCount());
+				groupConversation.setIsStealth(conversation.isStealth());
 
 				/*
 				 * Setting the conversation for the message.
@@ -1416,21 +1432,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = new HashMap<String, Map<String, GroupParticipant>>();
 			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
+			Map<String, GroupParticipant> msisdnToGP = new HashMap<String, GroupParticipant>();
+			StringBuilder msisdnSB = new StringBuilder("(");
 
 			while (c.moveToNext())
 			{
 				String groupId = c.getString(groupIdIdx);
 				String msisdn = c.getString(msisdnIdx);
-
-				// TODO make this single query.
-				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn, false);
-				if (TextUtils.isEmpty(contactInfo.getName()))
-				{
-					contactInfo.setName(c.getString(nameIdx));
-				}
-				contactInfo.setOnhike(c.getInt(onHikeIdx) == 1 ? true : false);
-
-				GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(hasLeftIdx) != 0, c.getInt(onDndIdx) != 0);
+				msisdnSB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(nameIdx), msisdn), c.getInt(hasLeftIdx) != 0,
+						c.getInt(onDndIdx) != 0);
 
 				Map<String, GroupParticipant> participantList = groupIdParticipantsMap.get(groupId);
 				if (participantList == null)
@@ -1439,6 +1450,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					groupIdParticipantsMap.put(groupId, participantList);
 				}
 				participantList.put(msisdn, groupParticipant);
+				msisdnToGP.put(msisdn, groupParticipant);
+			}
+			// atleast one msisdn entered
+			if (!"(".equals(msisdnSB.toString()))
+			{
+				String msisdnMulti = msisdnSB.substring(0, msisdnSB.length() - 1) + ")";
+				List<ContactInfo> contactInfos = huDB.getContactNamesFromMsisdnList(msisdnMulti);
+				for (ContactInfo contactInfo : contactInfos)
+				{
+					msisdnToGP.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+				}
 			}
 			return groupIdParticipantsMap;
 		}
@@ -2843,7 +2865,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
-			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
+			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
 		}
 		finally
 		{
@@ -3032,5 +3054,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.GROUP_OWNER, msisdn);
 
 		mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
+	}
+
+	public void toggleStealth(String msisdn, boolean isStealth)
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.IS_STEALTH, isStealth ? 1 : 0);
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 }

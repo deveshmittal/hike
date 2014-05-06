@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -22,6 +21,7 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -46,6 +46,8 @@ public class HikeNotification
 	public static final int FREE_SMS_POPUP_NOTIFICATION_ID = -125;
 
 	public static final int APP_UPDATE_AVAILABLE_ID = -126;
+
+	public static final int STEALTH_NOTIFICATION_ID = -127;
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -176,6 +178,7 @@ public class HikeNotification
 			notificationIntent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
 		}
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		/*
 		 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to the
@@ -247,6 +250,29 @@ public class HikeNotification
 			// regular message
 			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null);
 		}
+	}
+
+	public void notifyStealthMessage()
+	{
+		final int notificationId = STEALTH_NOTIFICATION_ID;
+
+		String message = context.getString(R.string.stealth_notification_message);
+		String key = "hike";
+
+		String text = message;
+
+		// we've got to invoke the timeline here
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(key, message, text, avatarDrawable, smallIconId, false);
+
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(notificationId, mBuilder.getNotification());
 	}
 
 	public void notifyFavorite(final ContactInfo contactInfo)
@@ -343,7 +369,7 @@ public class HikeNotification
 		final String text = key + " " + message;
 
 		final int icon = returnSmallIcon();
-		final Bitmap bigPictureImage = BitmapFactory.decodeFile(imagePath);
+		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
 		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
@@ -477,7 +503,7 @@ public class HikeNotification
 
 		final boolean playNativeJingle = preferenceManager.getBoolean(HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final Bitmap avatarBitmap = Utils.returnScaledBitmap((Utils.drawableToBitmap(avatarDrawable)), context);
+		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setDefaults(vibrate).setPriority(Notification.PRIORITY_DEFAULT);
