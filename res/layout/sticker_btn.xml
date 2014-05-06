@@ -6,11 +6,18 @@
 
     <ImageView
         android:id="@+id/category_btn"
+        style="?attr/vpiIconPageIndicatorStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerInside"
         android:src="@drawable/kitty"
-        style="?attr/vpiIconPageIndicatorStyle" />
+        android:background="@drawable/emoticon_tab_indicator" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/emoticon_tab_divider" />
 
     <ImageView
         android:id="@+id/update_available"
