@@ -35,6 +35,8 @@ import com.bsb.hike.ui.HomeActivity;
 
 public class HikeNotification
 {
+	public static final long[] NOTIFI_VIBRATE_TIME = new long[] { 0, 1000 }; // milis
+
 	public static final int HIKE_NOTIFICATION = 0;
 
 	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
@@ -496,7 +498,6 @@ public class HikeNotification
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-		final int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, false) ? Notification.DEFAULT_VIBRATE : 0;
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
 		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND : 0;
@@ -506,13 +507,16 @@ public class HikeNotification
 		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
-				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setDefaults(vibrate).setPriority(Notification.PRIORITY_DEFAULT);
-
+				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
+		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, false))
+		{
+			mBuilder.setVibrate(NOTIFI_VIBRATE_TIME);
+		}
 		if (!forceNotPlaySound)
 		{
 			if (playNativeJingle && playSound != 0)
 			{
-				mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.v1));
+				mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 			}
 			else if (playSound != 0)
 			{
