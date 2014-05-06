@@ -508,7 +508,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(getActivity(), R.layout.alert_item, R.id.item, options);
+		ListAdapter dialogAdapter = new MenuArrayAdapter(getActivity(), R.layout.alert_item, R.id.item, options);
 
 		builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener()
 		{
@@ -1577,5 +1577,37 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
 		 */
 		return conv==null;
+	}
+	
+	private class MenuArrayAdapter extends ArrayAdapter<CharSequence>
+	{
+		private boolean stealthFtueDone = true;
+		private int stealthType;
+		
+		public MenuArrayAdapter(Context context, int resource, int textViewResourceId, String[] options)
+		{
+			super(context, resource, textViewResourceId, options);
+			stealthFtueDone = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false);
+			stealthType = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			View v = super.getView(position, convertView, parent);
+			
+			if(!stealthFtueDone && stealthType == HikeConstants.STEALTH_ON && position == 0)
+			{
+				v.findViewById(R.id.intro_img).setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				v.findViewById(R.id.intro_img).setVisibility(View.GONE);
+			}
+			// TODO Auto-generated method stub
+			return v;
+		}
+		
 	}
 }
