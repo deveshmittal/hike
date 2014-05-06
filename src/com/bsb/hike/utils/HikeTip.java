@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -56,7 +57,7 @@ public class HikeTip
 		case STEALTH_FTUE_TIP_2:
 			parentView.setBackgroundResource(R.drawable.bg_stealth_tip);
 			closeTip.setVisibility(View.GONE);
-			tipText.setText(R.string.stealth_double_tap_tip);
+			tipText.setText(Html.fromHtml(activity.getResources().getString(R.string.stealth_double_tap_tip)));
 			break;
 		case STEALTH_FTUE_ENTER_PASS_TIP:
 			parentView.setBackgroundResource(R.drawable.bg_stealth_tip);

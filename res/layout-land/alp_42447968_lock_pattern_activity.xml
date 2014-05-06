@@ -32,17 +32,43 @@
             android:layout_centerInParent="true" />
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/alp_42447968_textview_info"
-        android:layout_width="144dp"
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
-        android:paddingLeft="19dp"
-        android:drawableLeft="@drawable/ic_stealth_passcode"
-        android:drawablePadding="9dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textIsSelectable="true"
-        android:textSize="14sp" />
+        android:layout_marginLeft="19dp"
+        android:layout_marginRight="4dp"
+        android:layout_toLeftOf="@id/alp_42447968_view_lock_pattern_view_group"
+        android:layout_above="@id/alp_42447968_viewgroup_footer"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:layout_alignParentLeft="true">
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            
+            <ImageView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_stealth_passcode_50"
+                android:layout_gravity="center"/>
+            
+			<TextView
+		        android:id="@+id/alp_42447968_textview_info"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:paddingTop="5dp"
+		        android:gravity="center"
+		        android:minLines="2"
+		        android:textAppearance="?android:attr/textAppearanceMedium"
+		        android:textIsSelectable="true"
+		        android:textSize="14sp" />
+        </LinearLayout>
+        
+    </RelativeLayout>
+    
 
     <LinearLayout
         android:id="@+id/alp_42447968_viewgroup_footer"
