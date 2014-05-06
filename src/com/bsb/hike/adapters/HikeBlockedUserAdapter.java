@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -77,7 +78,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		}
 		else
 		{
-			imageView.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context, contactInfo.getMsisdn(), true));
+			imageView.setImageDrawable(HikeBitmapFactory.getDefaultIconForUserFromDecodingRes(context, contactInfo.getMsisdn(), true));
 		}
 
 		ImageView blockImg = (ImageView) v.findViewById(R.id.contact_button);

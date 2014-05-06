@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -16,6 +18,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -23,12 +26,16 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
 {
@@ -134,7 +141,7 @@ public class ToastListener implements Listener
 						/*
 						 * Check if this is a big picture message, else toast a normal push message
 						 */
-						Bitmap bigPicture = Utils.returnBigPicture(message, context);
+						Bitmap bigPicture = returnBigPicture(message, context);
 						this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
 					}
 				}
@@ -230,7 +237,7 @@ public class ToastListener implements Listener
 				Logger.d(getClass().getSimpleName(), "this conversation is stealth");
 				return;
 			}
-			final Bitmap bigPicture = Utils.returnBigPicture(message, context);
+			final Bitmap bigPicture = returnBigPicture(message, context);
 			if (bigPicture != null)
 			{
 				ContactInfo contactInfo;
@@ -300,6 +307,67 @@ public class ToastListener implements Listener
 		}
 	}
 
+	private Bitmap returnBigPicture(ConvMessage convMessage, Context context)
+	{
+
+		HikeFile hikeFile = null;
+		Bitmap bigPictureImage = null;
+
+		// Check if this is a file transfer message of image type
+		// construct a bitmap only if the big picture condition matches
+		if (convMessage.isFileTransferMessage())
+		{
+			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			if (hikeFile != null)
+			{
+				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
+				{
+					final String filePath = hikeFile.getFilePath(); // check
+					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
+				}
+			}
+
+		}
+		// check if this is a sticker message and find if its non-downloaded or
+		// non present.
+		if (convMessage.isStickerMessage())
+		{
+			final Sticker sticker = convMessage.getMetadata().getSticker();
+			/*
+			 * If this is the first category, then the sticker are a part of the app bundle itself
+			 */
+			if (sticker.isDefaultSticker())
+			{
+				int resourceId = 0;
+
+				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
+				{
+					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()];
+				}
+				else if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+				{
+					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker.getStickerIndex()];
+				}
+
+				if (resourceId > 0)
+				{
+					final Drawable dr = context.getResources().getDrawable(resourceId);
+					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr);
+				}
+
+			}
+			else
+			{
+				final String filePath = sticker.getStickerPath(context);
+				if (!TextUtils.isEmpty(filePath))
+				{
+					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
+				}
+			}
+		}
+		return bigPictureImage;
+	}
+	
 	private void notifyConnStatus(MQTTConnectionStatus status)
 	{
 		/* only show the trying to connect message after we've connected once */

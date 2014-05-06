@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -177,6 +178,7 @@ public class HikeNotification
 			notificationIntent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
 		}
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		/*
 		 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to the
@@ -367,7 +369,7 @@ public class HikeNotification
 		final String text = key + " " + message;
 
 		final int icon = returnSmallIcon();
-		final Bitmap bigPictureImage = BitmapFactory.decodeFile(imagePath);
+		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
 		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
@@ -501,7 +503,7 @@ public class HikeNotification
 
 		final boolean playNativeJingle = preferenceManager.getBoolean(HikeConstants.NATIVE_JINGLE_PREF, true);
 
-		final Bitmap avatarBitmap = Utils.returnScaledBitmap((Utils.drawableToBitmap(avatarDrawable)), context);
+		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setDefaults(vibrate).setPriority(Notification.PRIORITY_DEFAULT);

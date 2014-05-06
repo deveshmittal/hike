@@ -69,12 +69,14 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
+import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -252,13 +254,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						if(!(dialog != null && dialog.isShowing()))
+						if (!(dialog != null && dialog.isShowing()))
 						{
-							if(!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+							if (!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
 							{
-								
-									dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-									dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+
+								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
 							}
 							else
 							{
@@ -382,7 +384,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
 			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
-			Animation anim =  AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
+			Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
 			anim.setDuration(1000);
 			findViewById(R.id.stealth_double_tap_tip).startAnimation(anim);
 		}
@@ -907,11 +909,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					anim.setDuration(600);
 					popup.setAnimation(anim);
 				}
-				
+
 				/*
 				 * if overflow popup is showing we should dismiss it
 				 */
-				if(overFlowWindow != null && overFlowWindow.isShowing())
+				if (overFlowWindow != null && overFlowWindow.isShowing())
 				{
 					overFlowWindow.dismiss();
 				}
@@ -1665,6 +1667,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 
+		addEmailLogItem(optionsList);
+
 		overFlowWindow = new PopupWindow(this);
 
 		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
@@ -1700,7 +1704,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					else
 					{
 						itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
-						itemImageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+						itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
 						itemImageView.setImageResource(R.drawable.ic_default_avatar);
 					}
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
@@ -1789,6 +1793,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
+				case 7:
+					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
+					Utils.executeAsyncTask(logsTask);
+					break;
 				}
 
 				if (intent != null)
@@ -1823,6 +1831,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				return onKeyUp(keyCode, event);
 			}
 		});
+	}
+
+	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
+	{
+		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 7));
 	}
 
 	@Override
@@ -1883,7 +1896,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		if (dialog != null)
 		{
-			if(dialog.isShowing())
+			if (dialog.isShowing())
 			{
 				dialog.dismiss();
 			}
@@ -1950,7 +1963,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				default:
 					break;
 				}
-				
+
 				dialogShowing = null;
 				dialog.dismiss();
 				HomeActivity.this.dialog = null;

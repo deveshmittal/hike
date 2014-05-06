@@ -14,6 +14,7 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -157,7 +158,7 @@ public class HikeFile
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL, null);
-		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
+		this.thumbnail = thumbnail == null ? HikeBitmapFactory.stringToDrawable(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		if(isSent)
 		{
@@ -192,7 +193,7 @@ public class HikeFile
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.isSent = isSent;
 	}
@@ -203,7 +204,7 @@ public class HikeFile
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
@@ -220,7 +221,7 @@ public class HikeFile
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.address = address;
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.isSent = isSent;
 	}
 
