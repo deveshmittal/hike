@@ -19,7 +19,7 @@
         android:layout_height="64dp"
         android:layout_alignParentRight="true"
         android:layout_below="@id/day_container"
-        android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
+        android:layout_marginRight="@dimen/chat_bubble_nudge_edge_spacing"
         android:layout_marginTop="2.5dp"
         android:background="@drawable/bg_ft_progress"
         android:gravity="center" >
@@ -73,7 +73,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@id/placeholder"
         android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         layout="@layout/message_time_status_ext" />
 
     <include
