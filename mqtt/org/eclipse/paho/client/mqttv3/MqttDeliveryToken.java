@@ -32,7 +32,7 @@ public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken {
 	}
 	
 	public MqttDeliveryToken(String logContext) {
-		//super(logContext);
+		super(logContext);
 	}
 
 	/**
