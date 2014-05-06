@@ -40,7 +40,8 @@ public class BitmapUtils
 	{
 		if (bitmap == null)
 		{
-			return null;
+			byte[] b = new byte[] { 0 };
+			return b;
 		}
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		bitmap.compress(format, quality, bao);
@@ -119,6 +120,9 @@ public class BitmapUtils
 	 */
 	public static int getBitmapSize(BitmapDrawable bd)
 	{
+		if (bd == null)
+			return 0;
+
 		return getBitmapSize(bd.getBitmap());
 	}
 
