@@ -19,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,6 +53,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	private CountDownSetter countDownSetter;
 	
 	private SparseBooleanArray itemsToAnimat;
+	
+	private boolean stealthFtueTipAnimated = false;
+	
+	private boolean resetStealthTipAnimated = false;
 
 	private enum ViewType
 	{
@@ -158,9 +163,17 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				@Override
 				public void onClick(View view)
 				{
+					stealthFtueTipAnimated = false;
 					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, pos);
 				}
 			});
+			if(!stealthFtueTipAnimated)
+			{
+				stealthFtueTipAnimated = true;
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				animation.setDuration(300);
+				parent.startAnimation(animation);
+			}
 			return v;
 		}
 		else if (viewType == ViewType.RESET_STEALTH_TIP)
@@ -196,6 +209,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				@Override
 				public void onClick(View view)
 				{
+					resetStealthTipAnimated = false;
 					resetCountDownSetter();
 
 					remove(conversation);
@@ -204,6 +218,15 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					Utils.cancelScheduledStealthReset(getContext());
 				}
 			});
+			
+			if(!resetStealthTipAnimated)
+			{
+				resetStealthTipAnimated = true;
+				final TranslateAnimation animation = new TranslateAnimation(0, 0, -70*Utils.densityMultiplier, 0);
+				animation.setDuration(300);
+				parent.startAnimation(animation);
+			}
+			
 			return v;
 		}
 
