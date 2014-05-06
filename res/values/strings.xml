@@ -1457,11 +1457,10 @@
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
-    <string name="introducing_stealth_mode">Introducing Hidden Mode!</string>
-    <string name="stealth_mode_popup_msg">You can now hide your private chats from the world and read them only with a password.\nTry it now!</string>
-    <string name="quick_setup">Quick setup</string>
-    <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Set up a password to access Hidden Mode. <b> Tap here on \'hi\' to begin. ]]></string>
-    <string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark it \'Hidden\'.</string>
+    <string name="introducing_stealth_mode">Introducing Hidden Mode</string>
+    <string name="stealth_mode_popup_msg">You can now hide your private chats from the world and read them only with a password.\n\nTry it now!</string>
+    <string name="quick_setup">Quick Setup</string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Set up a password to access Hidden Mode.<br> <br> <b> Tap on \'hi\' to begin.</b> ]]></string>
     <string name="alp_42447968_cmd_confirm">Confirm</string>
     <string name="alp_42447968_cmd_continue">Continue</string>
     <string name="alp_42447968_cmd_forgot_pattern">Forgot pattern?</string>
@@ -1487,8 +1486,6 @@
     
     <string name="mark_stealth">Hide Chat</string>
     <string name="unmark_stealth">Unhide Chat</string>
-    <string name="chat_marked_stealth">Chat Hidden</string>
-    <string name="chat_unmarked_stealth">Chat Unhidden</string>
     <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
     <string name="stealth_notification_message">You have a new notification</string>
     <string name="retry">Retry</string>
@@ -1496,7 +1493,7 @@
 	<string name="reset_complete_stealth_header">Reset Hidden Mode</string>
 	<string name="reset_complete_stealth_info">Forgot your password? Reset Hidden Mode. All hidden chats will be deleted.</string>
 	<string name="initiate_reset_stealth_header">Reset Hidden Mode</string>
-	<string name="initiate_reset_stealth_body">Hidden Mode will be reset in 30 minutes. All hidden chats will be deleted!\nContinue?</string>
+	<string name="initiate_reset_stealth_body">Hidden Mode will be reset in 30 minutes. All hidden chats will be deleted! Continue?</string>
 	<string name="resetting_complete_stealth_header">Resetting Hidden Mode</string>
 	<string name="resetting_complete_stealth_info">Tap to cancel.</string>
 	<string name="reset_stealth_tip"> <![CDATA[ <b> All hidden chats will be deleted in %1$s minutes </b> 
@@ -1505,5 +1502,8 @@
 	    ]]></string>
 	<string name="reset_stealth_confirmation">Resetting Hidden Mode will delete all your hidden Chats.\nAre you sure?</string>
 	<string name="stealth_mode_empty_conv_popup_msg">You can now hide your private chats from the world and read them only with a password. Start a new chat and try it out by tapping on \'hi\'!</string>
-	
+	<string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark a chat \'Hidden\'.</string>
+	<string name="chat_marked_stealth">You’ve hidden a chat.</string>
+    <string name="chat_unmarked_stealth">You’ve marked a chat visible.</string>
+		
 </resources>

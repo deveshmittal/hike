@@ -566,6 +566,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				preference.setSummary(R.string.reset_complete_stealth_info);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
+				
+				Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 			}
 			else
 			{
