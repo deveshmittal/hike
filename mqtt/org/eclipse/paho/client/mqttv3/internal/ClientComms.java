@@ -80,7 +80,7 @@ public class ClientComms {
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, int maxInflightMsgs) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client 	= client;
 		this.persistence = persistence;
@@ -89,7 +89,7 @@ public class ClientComms {
 		
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, maxInflightMsgs);
 
 		callback.setClientState(clientState);
 	}

@@ -133,10 +133,11 @@ public class ClientState {
 	private final String TAG = "clientState";
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, 
-			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
+			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender, int maxInflightMsgs) throws MqttException {
 		
 		Logger.d(TAG, "client id : " + clientComms.getClient().getClientId());
 
+		this.maxInflight = maxInflightMsgs;
 		inUseMsgIds = new Hashtable();
 		pendingMessages = new Vector(this.maxInflight);
 		pendingFlows = new Vector();
@@ -1172,5 +1173,15 @@ public class ClientState {
 		props.put("inboundQoS2", inboundQoS2);
 		props.put("tokens", tokenStore);
 		return props;
+	}
+	
+	public int getInflightMsgs()
+	{
+		return actualInFlight;
+	}
+	
+	public int getMaxInflightMsgs()
+	{
+		return maxInflight;
 	}
 }

@@ -163,8 +163,14 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 	
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
-		this(serverURI,clientId, persistence, new TimerPingSender());
+		this(serverURI,clientId, persistence, new TimerPingSender(), 100);
 	}
+	
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, int maxInflightMsgs) throws MqttException {
+		this(serverURI,clientId, persistence, new TimerPingSender(), maxInflightMsgs);
+	}
+	
+	
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
@@ -250,7 +256,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, int maxInflightMsgs) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
 
@@ -281,7 +287,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 
 		this.persistence.open(clientId, serverURI);
-		this.comms = new ClientComms(this, this.persistence, pingSender);
+		this.comms = new ClientComms(this, this.persistence, pingSender, maxInflightMsgs);
 		this.persistence.close();
 		this.topics = new Hashtable();
 
@@ -859,6 +865,16 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 */
 	public Debug getDebug() {
 		return new Debug(clientId,comms);
+	}
+	
+	public int getInflightMessages()
+	{
+		return comms.getClientState().getInflightMsgs();
+	}
+	
+	public int getMaxflightMessages()
+	{
+		return comms.getClientState().getMaxInflightMsgs();
 	}
 
 }
