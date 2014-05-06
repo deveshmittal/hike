@@ -5,7 +5,7 @@
     android:descendantFocusability="blocksDescendants"
     android:gravity="center_vertical"
     android:minHeight="30dp"
-    android:paddingBottom="2dp" >
+    android:paddingBottom="5dp" >
 
     <ViewStub
         android:id="@+id/day_stub"
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/day_container"
-        android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
+        android:layout_marginRight="@dimen/chat_bubble_nudge_edge_spacing"
         android:layout_marginTop="2.5dp"
         android:gravity="center_vertical|right"
         android:src="@drawable/ic_nudge_hike_sent" />
@@ -31,7 +31,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@id/nudge"
         android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         layout="@layout/message_time_status_ext" />
 
     <include

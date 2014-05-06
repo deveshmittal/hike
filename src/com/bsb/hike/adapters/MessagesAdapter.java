@@ -1242,7 +1242,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					thumbnail = hikeFile.getThumbnail();
 				}
 
-				if (thumbnail != null)
+				if (showThumbnail)
 				{
 					videoHolder.fileThumb.setBackgroundDrawable(thumbnail);
 				}
@@ -1253,7 +1253,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) videoHolder.fileThumb.getLayoutParams();
 
-				if (showThumbnail && thumbnail != null)
+				if (showThumbnail)
 				{
 					videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
@@ -1274,11 +1274,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	                {
 	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
 	                }
-				}
-				else
-				{
-					fileThumbParams.height = LayoutParams.WRAP_CONTENT;
-					fileThumbParams.width = LayoutParams.WRAP_CONTENT;
 				}
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				videoHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -1392,7 +1387,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					thumbnail = hikeFile.getThumbnail();
 				}
 
-				if (thumbnail != null)
+				if (showThumbnail)
 				{
 					imageHolder.fileThumb.setBackgroundDrawable(thumbnail);
 				}
@@ -1403,7 +1398,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) imageHolder.fileThumb.getLayoutParams();
 
-				if (showThumbnail && thumbnail != null)
+				if (showThumbnail)
 				{
 					imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
@@ -1424,11 +1419,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	                {
 	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
 	                }
-				}
-				else
-				{
-					fileThumbParams.height = LayoutParams.WRAP_CONTENT;
-					fileThumbParams.width = LayoutParams.WRAP_CONTENT;
 				}
 				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -1894,9 +1884,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder.sdrTipStub.setVisibility(View.GONE);
 				}
 			}
-			textHolder.messageContainer.setTag(convMessage);
-			textHolder.messageContainer.setOnClickListener(this);
-			textHolder.messageContainer.setOnLongClickListener(this);
 		}
 
 		// {
@@ -3695,7 +3682,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
+		//fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
+		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);;
 		fileThumb.setImageResource(0);
 	}
 

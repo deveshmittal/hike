@@ -13,7 +13,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 	
 	private static final int maxWidth = 265;
 	
-	private static final int widthTime12Hour = 76;
+	private static final int widthTime12Hour = 75;
 	
 	private static final int widthTime24Hour = 57;
 	
