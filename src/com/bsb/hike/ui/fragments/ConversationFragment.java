@@ -545,7 +545,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.mark_stealth).equals(option) || getString(R.string.unmark_stealth).equals(option))
 				{
 					boolean newStealthValue = !conv.isStealth();
-					Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
 					
 					/*
 					 * If stealth ftue conv tap tip is visible than remove it
@@ -561,6 +560,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 								break;
 							}
 						}
+					}
+					else
+					{
+						// We don't show this toast in during stealth ftue.
+						Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
 					}
 
 					if (stealthType == HikeConstants.STEALTH_ON_FAKE)
