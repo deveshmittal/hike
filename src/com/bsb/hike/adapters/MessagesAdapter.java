@@ -1885,9 +1885,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder.sdrTipStub.setVisibility(View.GONE);
 				}
 			}
-			textHolder.messageContainer.setTag(convMessage);
-			textHolder.messageContainer.setOnClickListener(this);
-			textHolder.messageContainer.setOnLongClickListener(this);
 		}
 
 		// {
