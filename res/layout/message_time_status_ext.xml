@@ -22,7 +22,7 @@
         android:id="@+id/status"
         android:layout_width="21dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="2dp"
+        android:layout_marginLeft="3dp"
         android:visibility="gone" />
 
 </LinearLayout>
