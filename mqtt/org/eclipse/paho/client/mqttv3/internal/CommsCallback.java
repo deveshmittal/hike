@@ -35,7 +35,7 @@ import com.bsb.hike.utils.Logger;
  * understood by the external API.
  */
 public class CommsCallback implements Runnable {
-	private static int INBOUND_QUEUE_SIZE = 10;
+	private static int INBOUND_QUEUE_SIZE = 100;
 	private MqttCallback mqttCallback;
 	private ClientComms clientComms;
 	private Vector messageQueue;
