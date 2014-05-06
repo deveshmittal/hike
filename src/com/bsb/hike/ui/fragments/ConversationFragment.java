@@ -397,7 +397,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					HikeAnalyticsEvent.sendStealthReset();
 					resetStealthMode();
 					dialog.dismiss();
-					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 				}
 
 				@Override
@@ -414,6 +413,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.cancelScheduledStealthReset(getActivity());
 
 					dialog.dismiss();
+					
+					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 				}
 			}, dialogStrings);
 		}
