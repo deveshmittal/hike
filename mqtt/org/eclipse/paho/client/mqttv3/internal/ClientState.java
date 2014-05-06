@@ -559,7 +559,7 @@ public class ClientState {
 					//Add a delta, since the timer and System.currentTimeMillis() is not accurate.
 					// A ping is outstanding but no packet has been received in KA so connection is deemed broken
 					//@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}
-					Logger.d(TAG, "timed out as no activity, already sent the ping but no response recieved,  lastoutboundactivity : "  + lastOutboundActivity + " lastinboundactivity : " + lastInboundActivity);
+					Logger.d(TAG, "timed out as no activity, already sent the ping but no response recieved,  lastoutboundactivity : " + lastOutboundActivity + " lastinboundactivity : " + lastInboundActivity);
 					
 					// A ping has already been sent. At this point, assume that the
 					// broker has hung and the TCP layer hasn't noticed.
