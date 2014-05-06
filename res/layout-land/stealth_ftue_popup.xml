@@ -39,6 +39,7 @@
                 android:layout_marginBottom="10dp"
                 android:text="@string/introducing_stealth_mode"
                 android:textColor="#ffffef"
+                android:textStyle="bold"
                 android:textSize="18sp" />
 
             <com.bsb.hike.view.CustomFontTextView
