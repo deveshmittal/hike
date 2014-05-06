@@ -136,7 +136,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE; // this is the time for which conn will remain open w/o messages
 
 	private static short connectionTimeoutSec = 60;
-	
+
 	private static volatile AtomicBoolean ipsChanged = new AtomicBoolean(false);
 
 	/*
@@ -572,7 +572,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				return;
 
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
-			
+
 			if (op == null || ipsChanged.get())
 			{
 				op = new MqttConnectOptions();
@@ -584,8 +584,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-				
-				if(ipsChanged.get())
+
+				if (ipsChanged.get())
 				{
 					ipsChanged.set(false);
 				}
@@ -639,7 +639,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			releaseWakeLock();
 		}
 	}
-	
+
 	private void setServerUris(MqttConnectOptions op)
 	{
 		String protocol = Utils.switchSSLOn(context) ? "ssl://" : "tcp://";
@@ -647,7 +647,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		SharedPreferences pref = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String ipString = pref.getString(HikeMessengerApp.MQTT_IPS, "");
 		JSONArray ipArray = null;
-		
+
 		try
 		{
 			ipArray = new JSONArray(ipString);
@@ -660,36 +660,27 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		if (null != ipArray && ipArray.length() > 0)
 		{
 			String serverURIs[] = new String[ipArray.length() + 1];
-			int len  = ipArray.length();
-			
+			int len = ipArray.length();
+
 			serverURIs[0] = protocol + brokerHostName + ":" + brokerPortNumber;
 			for (int i = 0; i < len; i++)
 			{
 				serverURIs[i + 1] = protocol + ipArray.optString(i) + ":" + brokerPortNumber;
 			}
-			
+
 			op.setServerURIs(serverURIs);
-		} 
+		}
 		else
 		{
-			
-			String serverURIs[] = 
-				{ 
-					protocol + brokerHostName + ":" + brokerPortNumber,
-					protocol + "54.251.180.0" + ":" + brokerPortNumber, 
-					protocol + "54.251.180.1" + ":" + brokerPortNumber, 
-					protocol + "54.251.180.2" + ":" + brokerPortNumber,
-					protocol + "54.251.180.3" + ":" + brokerPortNumber, 
-					protocol + "54.251.180.4" + ":" + brokerPortNumber, 
-					protocol + "54.251.180.5" + ":" + brokerPortNumber,
-					protocol + "54.251.180.6" + ":" + brokerPortNumber
-				};
-			
+
+			String serverURIs[] = { protocol + brokerHostName + ":" + brokerPortNumber, protocol + "54.251.180.0" + ":" + brokerPortNumber,
+					protocol + "54.251.180.1" + ":" + brokerPortNumber, protocol + "54.251.180.2" + ":" + brokerPortNumber, protocol + "54.251.180.3" + ":" + brokerPortNumber,
+					protocol + "54.251.180.4" + ":" + brokerPortNumber, protocol + "54.251.180.5" + ":" + brokerPortNumber, protocol + "54.251.180.6" + ":" + brokerPortNumber };
+
 			op.setServerURIs(serverURIs);
 		}
 
 	}
-	
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
 	public void disconnectOnMqttThread(final boolean reconnect)
@@ -790,14 +781,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void onSuccess(IMqttToken arg0)
 				{
-					reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
-					mqttConnStatus = MQTTConnectionStatus.CONNECTED;
-					Logger.d(TAG, "Client Connected ....");
-					cancelNetworkErrorTimer();
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
-					mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 					try
 					{
+						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
+						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
+						Logger.d(TAG, "Client Connected ....");
+						cancelNetworkErrorTimer();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
+						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
@@ -867,7 +858,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					}
 					catch (Exception e)
 					{
-						Logger.e(TAG, "Exception in connect failure callback",e);
+						Logger.e(TAG, "Exception in connect failure callback", e);
 					}
 					finally
 					{
@@ -1223,8 +1214,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		return false;
 	}
-	
-	public static void setIpsChanged(boolean isIpsChnaged){
+
+	public static void setIpsChanged(boolean isIpsChnaged)
+	{
 		ipsChanged.set(isIpsChnaged);
 	}
 
