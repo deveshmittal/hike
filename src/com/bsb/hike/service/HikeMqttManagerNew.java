@@ -730,14 +730,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		catch (MqttException e)
 		{
-			// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
-			e.printStackTrace();
-			handleDisconnect(reconnect);
+		// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
+		e.printStackTrace();
+		handleDisconnect(reconnect);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
-			handleDisconnect(reconnect);
+		e.printStackTrace();
+		handleDisconnect(reconnect);
 		}
 	}
 
@@ -795,7 +795,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						cancelNetworkErrorTimer();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
-						//scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
+						// scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
 
 					/*
@@ -805,7 +805,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						e.printStackTrace();
 						// if mqtt is not connected then only schedule connection check
-						if(!isConnected())
+						if (!isConnected())
 							scheduleNextConnectionCheck();
 					}
 					finally
@@ -1185,7 +1185,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
-			Logger.d(TAG, "Connection check happened from GCM");
+			Logger.d(TAG, "Connection check happened from GCM, client already connected ? : " + isConnected());
+			boolean reconnect = intent.getBooleanExtra("reconnect", false);
+			if (reconnect)
+			{
+				Logger.d(TAG, "Calling explicit disconnect after server GCM push");
+				disconnectOnMqttThread(true);
+				return;
+			}
 			connectOnMqttThread();
 		}
 		else if (intent.getAction().equals(HikePubSub.SSL_PREFERENCE_CHANGED))

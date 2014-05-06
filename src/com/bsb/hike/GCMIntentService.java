@@ -44,7 +44,12 @@ public class GCMIntentService extends GCMBaseIntentService
 
 		HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
 		app.connectToService();
-		LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION));
+		String reconnectVal = intent.getStringExtra("pushReconnect");
+		boolean reconnect = false;
+		Logger.d(getClass().getSimpleName(), "Server sent packet pushReconnect : " + reconnectVal);
+		if("1".equals(reconnectVal))
+			reconnect = true;
+		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
 	}
 
 	@Override
