@@ -1270,6 +1270,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
+					else if (fileThumbParams.width == maxWidth)
+	                {
+	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+	                }
 				}
 				else
 				{
@@ -1416,6 +1420,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
+					else if (fileThumbParams.width == maxWidth)
+	                {
+	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+	                }
 				}
 				else
 				{
