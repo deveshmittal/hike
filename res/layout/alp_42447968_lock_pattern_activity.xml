@@ -43,7 +43,7 @@
 		        android:layout_height="wrap_content"
 		        android:paddingRight="9dp" />
 	        
-	        <TextView
+	        <com.bsb.hike.view.CustomFontTextView
 		        android:id="@+id/alp_42447968_textview_info"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
