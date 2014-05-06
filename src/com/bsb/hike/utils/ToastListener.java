@@ -169,7 +169,14 @@ public class ToastListener implements Listener
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-			toaster.notifyFavorite(contactInfo);
+			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			{
+				this.toaster.notifyStealthMessage();
+			}
+			else
+			{
+				toaster.notifyFavorite(contactInfo);
+			}
 		}
 		else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type))
 		{

@@ -60,6 +60,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -76,6 +77,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -97,6 +99,7 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.MotionEvent;
@@ -1207,7 +1210,7 @@ public class Utils
 
 		return rotatedBitmap;
 	}
-	
+
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
 		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
@@ -1424,7 +1427,7 @@ public class Utils
 		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
 	}
-	
+
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
@@ -2002,6 +2005,7 @@ public class Utils
 
 	/**
 	 * This will return true when SSL toggle is on and connection type is WIFI
+	 * 
 	 * @param context
 	 * @return
 	 */
@@ -2422,9 +2426,9 @@ public class Utils
 
 		sendAppState();
 
-		if(resetStealth)
+		if (resetStealth)
 		{
-			if(HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+			if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
 			{
 				resetStealthMode(context);
 			}
@@ -3617,6 +3621,57 @@ public class Utils
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+	}
+
+	/**
+	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
+	 * 
+	 * @param context
+	 * @param soundId
+	 */
+	public static void playSoundFromRaw(Context context, int soundId)
+	{
+
+		Log.i("sound", "playing sound " + soundId);
+		MediaPlayer mp = new MediaPlayer();
+		mp.setAudioStreamType(AudioManager.STREAM_RING);
+		Resources res = context.getResources();
+		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
+
+		try
+		{
+			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+			afd.close();
+
+			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			{
+
+				@Override
+				public void onCompletion(MediaPlayer mp)
+				{
+					mp.release();
+
+				}
+			});
+			mp.prepare();
+			mp.start();
+
+		}
+		catch (IllegalArgumentException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalStateException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static final void cancelScheduledStealthReset(Context context)

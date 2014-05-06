@@ -241,7 +241,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
 				{
-					Toast.makeText(HomeActivity.this, R.string.stealth_ftue_conv_tip_showing, Toast.LENGTH_SHORT).show();
 					return;
 				}
 				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
@@ -385,7 +384,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
 			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
 			Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
-			anim.setDuration(1000);
+			anim.setDuration(300);
 			findViewById(R.id.stealth_double_tap_tip).startAnimation(anim);
 		}
 	}
@@ -1885,7 +1884,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			showAppropriateDialog();
 		}
-		if(overFlowWindow!= null && overFlowWindow.isShowing())
+		if (overFlowWindow != null && overFlowWindow.isShowing())
 		{
 			overFlowWindow.dismiss();
 			showOverFlowMenu();
