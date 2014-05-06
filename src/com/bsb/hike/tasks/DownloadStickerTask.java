@@ -193,7 +193,17 @@ public class DownloadStickerTask extends StickerTaskBase
 		File f = new File(largeStickerDir, stickerId);
 		Utils.saveBase64StringToFile(f, stickerData);
 
-		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE);
+		Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE);
+		Bitmap small = unscaledBitmap;
+
+		if (unscaledBitmap != null && SIZE_IMAGE < unscaledBitmap.getWidth() && SIZE_IMAGE < unscaledBitmap.getHeight())
+		{
+			small = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, SIZE_IMAGE, SIZE_IMAGE, Bitmap.Config.ARGB_8888, true);
+			if (unscaledBitmap != small)
+			{
+				unscaledBitmap.recycle();
+			}
+		}
 
 		if (small != null)
 		{

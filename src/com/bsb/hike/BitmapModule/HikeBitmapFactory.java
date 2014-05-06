@@ -872,6 +872,7 @@ public class HikeBitmapFactory
 		}
 
 		return small;
+
 	}
 
 	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int reqWidth, int reqHeight, Bitmap.Config config, Boolean filter)
@@ -881,29 +882,22 @@ public class HikeBitmapFactory
 			return null;
 		}
 
-		if (reqWidth < unscaledBitmap.getWidth() && reqHeight < unscaledBitmap.getHeight())
+		Rect srcRect = new Rect(0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
+
+		Rect reqRect = calculateReqRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), reqWidth, reqHeight);
+
+		Bitmap scaledBitmap = createBitmap(reqRect.width(), reqRect.height(), config);
+
+		if (scaledBitmap == null)
 		{
-			Rect srcRect = new Rect(0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
-
-			Rect reqRect = calculateReqRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), reqWidth, reqHeight);
-
-			Bitmap scaledBitmap = createBitmap(reqRect.width(), reqRect.height(), config);
-
-			if (scaledBitmap == null)
-			{
-				return null;
-			}
-
-			Canvas canvas = new Canvas(scaledBitmap);
-			Paint p = new Paint();
-			p.setFilterBitmap(filter);
-			canvas.drawBitmap(unscaledBitmap, srcRect, reqRect, p);
-			return scaledBitmap;
+			return null;
 		}
-		else
-		{
-			return unscaledBitmap;
-		}
+
+		Canvas canvas = new Canvas(scaledBitmap);
+		Paint p = new Paint();
+		p.setFilterBitmap(filter);
+		canvas.drawBitmap(unscaledBitmap, srcRect, reqRect, p);
+		return scaledBitmap;
 	}
 
 	private static Rect calculateReqRect(int srcWidth, int srcHeight, int reqWidth, int reqHeight)
