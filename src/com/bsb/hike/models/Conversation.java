@@ -194,7 +194,6 @@ public class Conversation implements Comparable<Conversation>
 		int result = 1;
 		result = prime * result + ((contactName == null) ? 0 : contactName.hashCode());
 		result = prime * result + (int) (convId ^ (convId >>> 32));
-		result = prime * result + ((messages == null) ? 0 : messages.hashCode());
 		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
 		result = prime * result + (onhike ? 1231 : 1237);
 		return result;
@@ -218,13 +217,6 @@ public class Conversation implements Comparable<Conversation>
 		else if (!contactName.equals(other.contactName))
 			return false;
 		if (convId != other.convId)
-			return false;
-		if (messages == null)
-		{
-			if (other.messages != null)
-				return false;
-		}
-		else if (!messages.equals(other.messages))
 			return false;
 		if (msisdn == null)
 		{
