@@ -894,6 +894,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	{
+
+		return null;
+	}
+
+	// private StringBuilder getQueryTOFetchContactInfo(String toAppend)
+	// {
+	// StringBuilder queryBuilder = new StringBuilder("SELECT " + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", " + DBConstants.ID + ", " + DBConstants.NAME + ", "
+	// + DBConstants.ONHIKE + ", " + DBConstants.PHONE + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.LAST_MESSAGED + ", "
+	// + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP);
+	// queryBuilder.append(toAppend);
+	//
+	// return queryBuilder
+	// }
+
 	public List<Pair<AtomicBoolean, ContactInfo>> getContactsForComposeScreen(boolean freeSMSOn, boolean fwdOrgroupChat, String userMsisdn, boolean nativeSMSOn)
 	{
 		StringBuilder selectionBuilder = new StringBuilder(DBConstants.MSISDN + " != 'null' AND " + DBConstants.MSISDN + " != " + DatabaseUtils.sqlEscapeString(userMsisdn));
