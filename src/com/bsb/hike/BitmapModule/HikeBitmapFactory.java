@@ -35,46 +35,60 @@ public class HikeBitmapFactory
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
 	{
-		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		if (output != null)
+		if (bitmap == null)
 		{
-			Canvas canvas = new Canvas(output);
-
-			final int color = 0xff424242;
-			final Paint paint = new Paint();
-			final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-			final RectF rectF = new RectF(rect);
-			final float roundPx = 4;
-
-			paint.setAntiAlias(true);
-			canvas.drawARGB(0, 0, 0, 0);
-			paint.setColor(color);
-			canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-			paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-			canvas.drawBitmap(bitmap, rect, rect, paint);
+			return null;
 		}
+
+		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+
+		if (output == null)
+		{
+			return null;
+		}
+
+		Canvas canvas = new Canvas(output);
+		final int color = 0xff424242;
+		final Paint paint = new Paint();
+		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+		final RectF rectF = new RectF(rect);
+		final float roundPx = 4;
+
+		paint.setAntiAlias(true);
+		canvas.drawARGB(0, 0, 0, 0);
+		paint.setColor(color);
+		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+		canvas.drawBitmap(bitmap, rect, rect, paint);
 		return output;
 	}
 
 	public static Bitmap getCircularBitmap(Bitmap bitmap)
 	{
-		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		if (output != null)
+		if (bitmap == null)
 		{
-			Canvas canvas = new Canvas(output);
-
-			final int color = 0xff424242;
-			final Paint paint = new Paint();
-			final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-			paint.setAntiAlias(true);
-			canvas.drawARGB(0, 0, 0, 0);
-			paint.setColor(color);
-			canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
-			paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-			canvas.drawBitmap(bitmap, rect, rect, paint);
+			return null;
 		}
+
+		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+
+		if (output == null)
+		{
+			return null;
+		}
+
+		Canvas canvas = new Canvas(output);
+		final int color = 0xff424242;
+		final Paint paint = new Paint();
+		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+		paint.setAntiAlias(true);
+		canvas.drawARGB(0, 0, 0, 0);
+		paint.setColor(color);
+		canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
+		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+		canvas.drawBitmap(bitmap, rect, rect, paint);
 		return output;
 	}
 
@@ -231,12 +245,13 @@ public class HikeBitmapFactory
 		 */
 		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), Config.ARGB_8888);
 
-		if (bitmap != null)
+		if (bitmap == null)
 		{
-			Canvas canvas = new Canvas(bitmap);
-			drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-			drawable.draw(canvas);
+			return null;
 		}
+		Canvas canvas = new Canvas(bitmap);
+		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+		drawable.draw(canvas);
 		return bitmap;
 	}
 
@@ -270,7 +285,8 @@ public class HikeBitmapFactory
 		{
 			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
 			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			return src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false);
+			src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false);
+			return src;
 		}
 		else
 			return src;
@@ -860,6 +876,11 @@ public class HikeBitmapFactory
 
 	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int reqWidth, int reqHeight, Bitmap.Config config, Boolean filter)
 	{
+		if (unscaledBitmap == null)
+		{
+			return null;
+		}
+
 		if (reqWidth < unscaledBitmap.getWidth() && reqHeight < unscaledBitmap.getHeight())
 		{
 			Rect srcRect = new Rect(0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
@@ -868,11 +889,15 @@ public class HikeBitmapFactory
 
 			Bitmap scaledBitmap = createBitmap(reqRect.width(), reqRect.height(), config);
 
+			if (scaledBitmap == null)
+			{
+				return null;
+			}
+
 			Canvas canvas = new Canvas(scaledBitmap);
 			Paint p = new Paint();
 			p.setFilterBitmap(filter);
 			canvas.drawBitmap(unscaledBitmap, srcRect, reqRect, p);
-
 			return scaledBitmap;
 		}
 		else
