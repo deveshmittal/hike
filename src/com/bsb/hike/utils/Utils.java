@@ -3868,4 +3868,12 @@ public class Utils
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
+	
+	public static long getOldTimestamp(int min)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, -min);
+		long old = cal.getTimeInMillis();
+		return old;
+	};
 }

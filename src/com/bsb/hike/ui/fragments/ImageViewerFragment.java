@@ -56,6 +56,8 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 	private int imageSize;
 
+	private String TAG = "ImageViewerFragment";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -133,8 +135,19 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 			else
 			{
 				File f = new File(basePath, Utils.getTempProfileImageFileName(key));
+
 				if (f.exists())
 				{
+					long fileTS = f.lastModified();
+					long oldTS = Utils.getOldTimestamp(5);
+					
+					if (fileTS < oldTS)
+					{
+						Logger.d(TAG, "Temp file is older than 5 minutes.Deleting temp file and downloading profile pic ");
+						Utils.removeTempProfileImage(key);
+						downloadImage = true;
+					}
+					
 					BitmapDrawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
 					imageView.setImageDrawable(drawable);
 				}
