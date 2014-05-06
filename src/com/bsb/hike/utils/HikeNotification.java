@@ -486,7 +486,7 @@ public class HikeNotification
 		{
 			if (playNativeJingle && playSound != 0)
 			{
-				mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.v1));
+				mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 			}
 			else if (playSound != 0)
 			{
