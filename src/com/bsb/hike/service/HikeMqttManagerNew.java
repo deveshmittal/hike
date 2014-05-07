@@ -787,7 +787,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
 						cancelNetworkErrorTimer();
-						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.CONNECTED_TO_MQTT, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 						// scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
