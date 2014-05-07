@@ -6,7 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -52,6 +54,7 @@ import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -60,7 +63,7 @@ import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application
+public class HikeMessengerApp extends Application implements HikePubSub.Listener
 {
 
 	public static enum CurrentState
@@ -330,6 +333,16 @@ public class HikeMessengerApp extends Application
 	
 	public static final String MQTT_IPS = "mqttIps";
 
+	public static final String STEALTH_ENCRYPTED_PATTERN = "stealthEncryptedPattern";
+
+	public static final String STEALTH_MODE = "stealthMode";
+
+	public static final String STEALTH_MODE_SETUP_DONE = "steatlhModeSetupDone";
+
+	public static final String SHOWING_STEALTH_FTUE_CONV_TIP = "showingStealthFtueConvTip";
+
+	public static final String RESET_COMPLETE_STEALTH_START_TIME = "resetCompleteStealthStartTime";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -341,6 +354,8 @@ public class HikeMessengerApp extends Application
 	private static Messenger mMessenger;
 
 	private static Map<String, TypingNotification> typingNotificationMap;
+
+	private static Set<String> stealthMsisdn;
 
 	private Messenger mService;
 
@@ -552,6 +567,11 @@ public class HikeMessengerApp extends Application
 			mEditor.commit();
 		}
 
+		/*
+		 * Resetting the stealth mode when the app starts. 
+		 */
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
 		try
@@ -642,6 +662,8 @@ public class HikeMessengerApp extends Application
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
+		stealthMsisdn = new HashSet<String>();
+
 		initialiseListeners();
 
 		mMessenger = new Messenger(new IncomingHandler());
@@ -693,6 +715,8 @@ public class HikeMessengerApp extends Application
 		 * Setting the last seen preference for the friends comparator.
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 	}
 
 	private static HikeLruCache cache;
@@ -791,6 +815,28 @@ public class HikeMessengerApp extends Application
 		return typingNotificationMap;
 	}
 
+	public static void addStealthMsisdn(String msisdn)
+	{
+		stealthMsisdn.add(msisdn);
+		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_MARKED, msisdn);
+	}
+
+	public static void removeStealthMsisdn(String msisdn)
+	{
+		stealthMsisdn.remove(msisdn);
+		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+	}
+
+	public static void clearStealthMsisdn()
+	{
+		stealthMsisdn.clear();
+	}
+
+	public static boolean isStealthMsisdn(String msisdn)
+	{
+		return stealthMsisdn.contains(msisdn);
+	}
+
 	public void initialiseListeners()
 	{
 		if (dbConversationListener == null)
@@ -804,6 +850,18 @@ public class HikeMessengerApp extends Application
 		if (activityTimeLogger == null)
 		{
 			activityTimeLogger = new ActivityTimeLogger();
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if(HikePubSub.CONNECTED_TO_MQTT.equals(type))
+		{
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			Utils.appStateChanged(this, false);
 		}
 	}
 }

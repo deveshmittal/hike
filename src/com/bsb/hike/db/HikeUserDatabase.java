@@ -38,6 +38,8 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.utils.ContactUtils;
@@ -485,6 +487,29 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 
 		return contactInfos.get(0);
+	}
+
+	public List<ContactInfo> getContactInfoFromMSISDN(String[] msisdn)
+	{
+		Cursor c = null;
+		List<ContactInfo> contactInfos = null;
+		try
+		{
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION, DBConstants.HIKE_JOIN_TIME,
+					DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN }, DBConstants.MSISDN + "=?", msisdn, null, null, null);
+			contactInfos = extractContactInfo(c);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
+		return contactInfos;
+
 	}
 
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
@@ -1263,23 +1288,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	private byte[] getRoundedBitmapBytes(byte[] data)
-	{
-
-		Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-		Bitmap roundedBitmap = Utils.getCircularBitmap(tempBitmap);
-
-		try
-		{
-			return Utils.bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
-		}
-		finally
-		{
-			tempBitmap.recycle();
-			roundedBitmap.recycle();
-		}
-	}
-
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
 		if (!isProfileImage)
@@ -1289,7 +1297,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			 */
 			Utils.removeLargerProfileImageForMsisdn(msisdn);
 
-			byte[] roundedData = getRoundedBitmapBytes(data);
+			byte[] roundedData = BitmapUtils.getRoundedBitmapBytes(data);
 
 			insertRoundedThumbnailData(mDb, msisdn, roundedData);
 		}
@@ -1320,7 +1328,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				return null;
 			}
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
-			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
+			
+			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
 		}
 		finally
 		{
@@ -1935,7 +1944,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					continue;
 				}
 
-				byte[] roundedData = getRoundedBitmapBytes(data);
+				byte[] roundedData = BitmapUtils.getRoundedBitmapBytes(data);
 
 				insertRoundedThumbnailData(db, msisdn, roundedData);
 			}

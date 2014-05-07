@@ -645,6 +645,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
 			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 			intent.setClass(context, ChatThread.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			context.startActivity(intent);
 		}
 	};

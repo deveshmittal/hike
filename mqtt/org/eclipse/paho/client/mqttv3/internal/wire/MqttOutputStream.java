@@ -74,4 +74,3 @@ public class MqttOutputStream extends OutputStream {
     	Logger.d(TAG, "writing mqtt wire message : " + message.toString());
 	}
 }
-

@@ -491,7 +491,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				}
 				data.put(HikeConstants.MESSAGE_ID, time);
 				data.put(HikeConstants.LIST, inviteArray);
-
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				if(calledFromFTUE)
 				{
 					JSONObject ftueData = new JSONObject();

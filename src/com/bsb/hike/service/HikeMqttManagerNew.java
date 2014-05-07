@@ -581,7 +581,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op.setCleanSession(false);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
-				setServerUris(op);
+//				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 
@@ -789,12 +789,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						cancelNetworkErrorTimer();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
-						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
-						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
-						Logger.d(TAG, "Client Connected ....");
-						cancelNetworkErrorTimer();
-						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_CONNECTED, null);
-						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
 						// scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
 					}
 
@@ -952,7 +946,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		try
 		{
 			Logger.d(TAG, "Current inflight msg count : " + mqtt.getInflightMessages());
-			while (mqtt.getInflightMessages() + 1 >= mqtt.getMaxflightMessages())
+			/*while (mqtt.getInflightMessages() + 1 >= mqtt.getMaxflightMessages())
 			{
 				try
 				{
@@ -964,7 +958,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			}*/
 			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListener()
 			{
 				@Override

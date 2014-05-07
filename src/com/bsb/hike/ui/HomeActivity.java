@@ -15,6 +15,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -35,6 +36,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
@@ -67,19 +69,25 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
+import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
@@ -100,7 +108,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
 	private ViewPager viewPager;
@@ -144,16 +152,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private boolean isAddFriendFtueShowing = false;
 
 	private int hikeContactsCount = -1;
-	
+
 	private int friendsListCount = -1;
-	
+
 	private int recommendedCount = -1;
-	
+
+	private HikeTip.TipType tipTypeShowing;
+
 	private FetchContactsTask fetchContactsTask;
-	
+
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
-			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED, HikePubSub.MQTT_CONNECTED };
+			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -170,9 +181,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
 		app.connectToService();
 
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setIcon(R.drawable.hike_logo_top_bar);
+		setupActionBar();
 
 		// Checking whether the state of the avatar and conv DB Upgrade settings
 		// is 1
@@ -192,8 +201,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			initialiseHomeScreen(savedInstanceState);
 		}
-		
-		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
+
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
 		{
 			if (savedInstanceState != null)
 			{
@@ -203,17 +212,86 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				hikeContactsCount = savedInstanceState.getInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT);
 				recommendedCount = savedInstanceState.getInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT);
 				Object o = getLastCustomNonConfigurationInstance();
-				if(o instanceof FetchContactsTask)
+				if (o instanceof FetchContactsTask)
 				{
 					fetchContactsTask = (FetchContactsTask) o;
 				}
 			}
-			if(friendsListCount == -1 && fetchContactsTask == null)
+			if (friendsListCount == -1 && fetchContactsTask == null)
 			{
 				fetchContactsTask = new FetchContactsTask();
 				Utils.executeAsyncTask(fetchContactsTask);
 			}
 		}
+	}
+
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.home_action_bar, null);
+
+		View logo = actionBarView.findViewById(R.id.hike_logo);
+		logo.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+				{
+					return;
+				}
+				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+				{
+					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
+					{
+						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+						tipTypeShowing = null;
+						LockPattern.createNewPattern(HomeActivity.this);
+					}
+					else
+					{
+						if (!(dialog != null && dialog.isShowing()))
+						{
+							if (!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+							{
+
+								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+							}
+							else
+							{
+								dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+							}
+						}
+					}
+				}
+				else
+				{
+					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
+					{
+						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+						tipTypeShowing = null;
+					}
+					final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+					if (stealthType == HikeConstants.STEALTH_OFF)
+					{
+						LockPattern.confirmPattern(HomeActivity.this);
+					}
+					else
+					{
+						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+						Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+					}
+				}
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState)
@@ -250,10 +328,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
-
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
-		initialiseViewPager();
+		initialiseViewPager(savedInstanceState);
 		initialiseTabs();
 
 		if (savedInstanceState == null && dialogShowing == null)
@@ -265,27 +342,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (dialogShowing != null)
 		{
-			switch (dialogShowing)
-			{
-			case SMS_CLIENT:
-				showSMSClientDialog();
-				break;
-
-			case SMS_SYNC_CONFIRMATION:
-			case SMS_SYNCING:
-				showSMSSyncDialog();
-				break;
-			case UPGRADE_POPUP:
-				showUpdatePopup(updateType);
-				break;
-			case FREE_INVITE_POPUP:
-				showFreeInviteDialog();
-				break;
-			case FILE_TRANSFER_POP_Up:
-				HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG);
-				
-				break;
-			}
+			showAppropriateDialog();
 		}
 
 		if (!AppRater.showingDialog() && dialogShowing == null)
@@ -305,6 +362,31 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
+	}
+
+	private void showStealthFtueTip(final boolean isSetPasswordTip)
+	{
+		ViewStub stealthTipViewStub = (ViewStub) findViewById(R.id.stealth_double_tap_tip_viewstub);
+		if (stealthTipViewStub != null)
+		{
+			stealthTipViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
+			{
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					showStealthFtueTip(isSetPasswordTip);
+				}
+			});
+			stealthTipViewStub.inflate();
+		}
+		else
+		{
+			tipTypeShowing = isSetPasswordTip ? TipType.STEALTH_FTUE_TIP_2 : TipType.STEALTH_FTUE_ENTER_PASS_TIP;
+			HikeTip.showTip(HomeActivity.this, tipTypeShowing, findViewById(R.id.stealth_double_tap_tip));
+			Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
+			anim.setDuration(300);
+			findViewById(R.id.stealth_double_tap_tip).startAnimation(anim);
+		}
 	}
 
 	@Override
@@ -650,16 +732,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private class FetchContactsTask extends AsyncTask<Void, Void, Void>
 	{
 		List<ContactInfo> hikeContacts = new ArrayList<ContactInfo>();
+
 		List<ContactInfo> friendsList = new ArrayList<ContactInfo>();
+
 		List<ContactInfo> recommendedContacts = new ArrayList<ContactInfo>();
-		
+
 		@Override
 		protected Void doInBackground(Void... arg0)
 		{
 			Utils.getRecommendedAndHikeContacts(HomeActivity.this, recommendedContacts, hikeContacts, friendsList);
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Void result)
 		{
@@ -669,7 +753,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			super.onPostExecute(result);
 		}
 	}
-	
+
 	@Override
 	protected void onResume()
 	{
@@ -679,7 +763,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		/*
 		 * We only show addfriends popup on second resume and also not on orientation changes
 		 */
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && friendsListCount!=-1 && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && friendsListCount != -1 && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
 		{
 			/*
 			 * we only show ftue popups if user doesn't friends over a certain limit
@@ -704,7 +788,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
 		popupViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
 		{
-			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(hikeContactsCount,recommendedCount);
+			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(hikeContactsCount, recommendedCount);
+
 			@Override
 			public void onInflate(ViewStub stub, View inflated)
 			{
@@ -752,7 +837,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						Editor editor = accountPrefs.edit();
 						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
 						editor.commit();
-						return ;
+						return;
 					}
 					popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
 					popUpTitle.setText(R.string.invite_friends);
@@ -824,6 +909,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					popup.setAnimation(anim);
 				}
 
+				/*
+				 * if overflow popup is showing we should dismiss it
+				 */
+				if (overFlowWindow != null && overFlowWindow.isShowing())
+				{
+					overFlowWindow.dismiss();
+				}
+
 			}
 		});
 		popupViewStub.inflate();
@@ -857,7 +950,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		outState.putInt(HikeConstants.Extras.FRIENDS_LIST_COUNT, friendsListCount);
 		outState.putInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT, hikeContactsCount);
 		outState.putInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT, recommendedCount);
-
 		super.onSaveInstanceState(outState);
 	}
 
@@ -1024,28 +1116,31 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean showUpdateIcon;
 
-	private void initialiseViewPager()
+	private void initialiseViewPager(Bundle outBundle)
 	{
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
 
 		List<Fragment> fragmentList = new ArrayList<Fragment>(headers.length);
-		fragmentList.add(getFragmentForIndex(0));
-		fragmentList.add(getFragmentForIndex(1));
-		fragmentList.add(getFragmentForIndex(2));
-
+		fragmentList.add(getFragmentForIndex(outBundle, 0));
+		fragmentList.add(getFragmentForIndex(outBundle, 1));
+		fragmentList.add(getFragmentForIndex(outBundle, 2));
+		viewPager.setOffscreenPageLimit(2);
 		viewPager.setAdapter(new HomeAdapter(getSupportFragmentManager(), fragmentList));
 		viewPager.setCurrentItem(1);
 	}
 
-	private Fragment getFragmentForIndex(int index)
+	private Fragment getFragmentForIndex(Bundle oBundle, int index)
 	{
+
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + index);
 		if (fragment == null)
 		{
 			switch (index)
 			{
 			case 0:
+
 				fragment = new UpdatesFragment();
+
 				break;
 
 			case 1:
@@ -1067,6 +1162,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		public HomeAdapter(FragmentManager fm, List<Fragment> fragments)
 		{
+
 			super(fm);
 			this.fragments = fragments;
 		}
@@ -1102,6 +1198,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object)
+		{
+			// TODO Auto-generated method stub
+			super.destroyItem(container, position, object);
+			viewPager.removeView(((Fragment) object).getView());
+		}
 	}
 
 	private void showUpdatePopup(final int updateType)
@@ -1383,12 +1486,42 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if (HikePubSub.MQTT_CONNECTED.equals(type))
+		else if (HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP.equals(type))
 		{
-			/*
-			 * Send a fg/bg packet on reconnecting.
-			 */
-			Utils.sendAppState(this.getApplicationContext());
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					showStealthFtueTip(true);
+				}
+			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					showStealthFtueTip(false);
+				}
+			});
+		}
+		else if (HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (viewPager.getCurrentItem() != 1)
+					{
+						viewPager.setCurrentItem(1);
+					}
+				}
+			});
 		}
 	}
 
@@ -1533,6 +1666,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 
+		addEmailLogItem(optionsList);
+
 		overFlowWindow = new PopupWindow(this);
 
 		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
@@ -1568,7 +1703,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					else
 					{
 						itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
-						itemImageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(msisdn, true));
+						itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
 						itemImageView.setImageResource(R.drawable.ic_default_avatar);
 					}
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
@@ -1657,6 +1792,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
+				case 7:
+					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
+					Utils.executeAsyncTask(logsTask);
+					break;
 				}
 
 				if (intent != null)
@@ -1693,6 +1832,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 	}
 
+	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
+	{
+		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 7));
+	}
+
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState)
 	{
@@ -1723,12 +1867,117 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			topBarIndicator.setVisibility(View.VISIBLE);
 		}
 	}
-	
+
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
 	{
 		return fetchContactsTask;
 	}
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		// TODO Auto-generated method stub
+		super.onConfigurationChanged(newConfig);
+		// handle dialogs here
+		if (dialogShowing != null)
+		{
+			showAppropriateDialog();
+		}
+		if (overFlowWindow != null && overFlowWindow.isShowing())
+		{
+			overFlowWindow.dismiss();
+			showOverFlowMenu();
+		}
+	}
 
+	private void showAppropriateDialog()
+	{
+		if (dialog != null)
+		{
+			if (dialog.isShowing())
+			{
+				dialog.dismiss();
+			}
+			else
+			{
+				return;
+			}
+		}
+		switch (dialogShowing)
+		{
+		case SMS_CLIENT:
+			showSMSClientDialog();
+			break;
+
+		case SMS_SYNC_CONFIRMATION:
+		case SMS_SYNCING:
+			showSMSSyncDialog();
+			break;
+		case UPGRADE_POPUP:
+			showUpdatePopup(updateType);
+			break;
+		case FREE_INVITE_POPUP:
+			showFreeInviteDialog();
+			break;
+		case FILE_TRANSFER_POP_Up:
+			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
+			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+			break;
+		case STEALTH_FTUE_EMPTY_STATE_POPUP:
+			dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+			break;
+		}
+	}
+
+	private HikeDialogListener getHomeActivityDialogListener()
+	{
+		return new HikeDialog.HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+				switch (dialogShowing)
+				{
+				case FILE_TRANSFER_POP_Up:
+					HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
+					break;
+				case STEALTH_FTUE_POPUP:
+					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+					break;
+
+				default:
+					break;
+				}
+
+				dialogShowing = null;
+				dialog.dismiss();
+				HomeActivity.this.dialog = null;
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+			}
+		};
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 }
