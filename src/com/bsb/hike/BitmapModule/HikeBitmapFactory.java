@@ -236,6 +236,11 @@ public class HikeBitmapFactory
 
 	public static Bitmap drawableToBitmap(Drawable drawable)
 	{
+		if (drawable == null)
+		{
+			return null;
+		}
+		
 		if (drawable instanceof BitmapDrawable)
 		{
 			return ((BitmapDrawable) drawable).getBitmap();
