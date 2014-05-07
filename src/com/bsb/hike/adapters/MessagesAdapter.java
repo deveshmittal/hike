@@ -1161,7 +1161,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				VideoViewHolder videoHolder = null;
 				if (viewType == ViewType.VIDEO_SENT)
 				{
-					if (v == null)
+					if ((v != null) && (v.getTag() instanceof VideoViewHolder))
+					{
+						videoHolder = (VideoViewHolder) v.getTag();
+					}
+					else
 					{
 						videoHolder = new VideoViewHolder();
 						v = inflateView(R.layout.message_sent_video, parent, false);
@@ -1184,14 +1188,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(videoHolder);
 					}
-					else
-					{
-						videoHolder = (VideoViewHolder) v.getTag();
-					}
 				}
 				else if (viewType == ViewType.VIDEO_RECEIVE)
 				{
-					if (v == null)
+					if ((v != null) && (v.getTag() instanceof VideoViewHolder))
+					{
+						videoHolder = (VideoViewHolder) v.getTag();
+					}
+					else
 					{
 						videoHolder = new VideoViewHolder();
 						v = inflateView(R.layout.message_receive_video, parent, false);
@@ -1218,10 +1222,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						videoHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						videoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(videoHolder);
-					}
-					else
-					{
-						videoHolder = (VideoViewHolder) v.getTag();
 					}
 				}
 				dayHolder = videoHolder;
@@ -1306,7 +1306,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				ImageViewHolder imageHolder = null;
 				if (viewType == ViewType.IMAGE_SENT)
 				{
-					if (v == null)
+					if ((v != null) && (v.getTag() instanceof ImageViewHolder))
+					{
+						imageHolder = (ImageViewHolder) v.getTag();
+					}
+					else
 					{
 						imageHolder = new ImageViewHolder();
 						v = inflateView(R.layout.message_sent_image, parent, false);
@@ -1327,14 +1331,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(imageHolder);
 					}
-					else
-					{
-						imageHolder = (ImageViewHolder) v.getTag();
-					}
 				}
 				else if (viewType == ViewType.IMAGE_RECEIVE)
 				{
-					if (v == null)
+					if ((v != null) && (v.getTag() instanceof ImageViewHolder))
+					{
+						imageHolder = (ImageViewHolder) v.getTag();
+					}
+					else
 					{
 						imageHolder = new ImageViewHolder();
 						v = inflateView(R.layout.message_receive_image, parent, false);
@@ -1359,10 +1363,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						imageHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						imageHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(imageHolder);
-					}
-					else
-					{
-						imageHolder = (ImageViewHolder) v.getTag();
 					}
 				}
 				dayHolder = imageHolder;
@@ -1672,7 +1672,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				FileViewHolder fileHolder = null;
 				if (viewType == ViewType.FILE_SENT)
 				{
-					if (v == null)
+					if ((v != null) && (v.getTag() instanceof FileViewHolder))
+					{
+						fileHolder = (FileViewHolder) v.getTag();
+					}
+					else
 					{
 						fileHolder = new FileViewHolder();
 						v = inflateView(R.layout.message_sent_file, parent, false);
@@ -1694,14 +1698,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.messageInfoStub = (ViewStub) v.findViewById(R.id.message_info_stub);
 						v.setTag(fileHolder);
 					}
-					else
-					{
-						fileHolder = (FileViewHolder) v.getTag();
-					}
 				}
 				else if (viewType == ViewType.FILE_RECEIVE)
 				{
-					if (v == null)
+					if ((v != null) && (v.getTag() instanceof FileViewHolder))
+					{
+						fileHolder = (FileViewHolder) v.getTag();
+					}
+					else
 					{
 						fileHolder = new FileViewHolder();
 						v = inflateView(R.layout.message_receive_file, parent, false);
@@ -1727,10 +1731,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileHolder.messageContainer = (ViewGroup) v.findViewById(R.id.message_container);
 						fileHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 						v.setTag(fileHolder);
-					}
-					else
-					{
-						fileHolder = (FileViewHolder) v.getTag();
 					}
 				}
 				dayHolder = fileHolder;
