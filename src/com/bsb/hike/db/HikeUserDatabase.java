@@ -918,7 +918,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			if (onHike == HikeConstants.NOT_ON_HIKE_VALUE)
 			{
 				queryBuilder.append(" AND ((" + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + " LIKE '+91%')");
-				if (favoriteType != FavoriteType.NOT_FRIEND && favoriteType != null)
+				if (favoriteType != FavoriteType.NOT_FRIEND)
 				{
 					queryBuilder.append(" OR (" + favoriteMsisdnColumnName + " LIKE '+91%')");
 				}
@@ -928,7 +928,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		else if (!nativeSMSOn)
 		{
 			queryBuilder.append(" AND ((" + DBConstants.ONHIKE + " =1) OR  (" + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + " LIKE '+91%')");
-			if (favoriteType != FavoriteType.NOT_FRIEND && favoriteType != null)
+			if (favoriteType != FavoriteType.NOT_FRIEND)
 			{
 				queryBuilder.append(" OR (" + favoriteMsisdnColumnName + " LIKE '+91%')");
 			}
