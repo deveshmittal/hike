@@ -339,7 +339,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		else if (HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type))
 		{
 			List<ContactInfo> friendsList = friendsAdapter.getFriendsList();
-			for (int i = 0; i < friendsList.size() - 1; i++)
+			for (int i = 0; i < friendsList.size(); i++)
 			{
 				String msisdn = friendsList.get(i).getMsisdn();
 				long lastSeenUpdated = 0;

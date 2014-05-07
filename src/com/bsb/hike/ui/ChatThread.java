@@ -2510,7 +2510,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
-					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle
+					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+					{
+						mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle
+					}
 					// return to
 					// sender
 

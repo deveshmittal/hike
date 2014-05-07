@@ -245,6 +245,7 @@ public class Conversation implements Comparable<Conversation>
 		{
 			object.put(HikeConstants.TYPE, type);
 			object.put(HikeConstants.TO, msisdn);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 		}
 		catch (JSONException e)
 		{

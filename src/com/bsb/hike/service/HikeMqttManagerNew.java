@@ -950,7 +950,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		try
 		{
 			Logger.d(TAG, "Current inflight msg count : " + mqtt.getInflightMessages());
-			while (mqtt.getInflightMessages() + 1 >= mqtt.getMaxflightMessages())
+			/*while (mqtt.getInflightMessages() + 1 >= mqtt.getMaxflightMessages())
 			{
 				try
 				{
@@ -962,7 +962,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			}*/
 			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListener()
 			{
 				@Override

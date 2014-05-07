@@ -694,6 +694,7 @@ public class ConvMessage
 		{
 			ids.put(String.valueOf(mappedMsgId));
 			object.put(HikeConstants.DATA, ids);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 			object.put(HikeConstants.TO, mMsisdn);
 		}

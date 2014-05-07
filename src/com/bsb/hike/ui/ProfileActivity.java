@@ -2000,6 +2000,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					msisdns.put(contactInfo.getMsisdn());
 
 					data.put(HikeConstants.MSISDNS, msisdns);
+					data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 
 					object.put(HikeConstants.DATA, data);
 				}
