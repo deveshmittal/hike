@@ -112,7 +112,17 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 			boolean isDisabled = data.optBoolean(HikeConstants.DISABLED_ST);
 			if (!isDisabled)
 			{
-				Bitmap thumbnail = HikeBitmapFactory.scaleDownBitmap(largeStickerPath, DownloadStickerTask.SIZE_IMAGE, DownloadStickerTask.SIZE_IMAGE);
+				Bitmap unscaledBitmap = HikeBitmapFactory.decodeSampledBitmapFromFile(largeStickerPath, DownloadStickerTask.SIZE_IMAGE, DownloadStickerTask.SIZE_IMAGE);
+				Bitmap thumbnail = unscaledBitmap;
+
+				if (unscaledBitmap != null && DownloadStickerTask.SIZE_IMAGE < unscaledBitmap.getWidth() && DownloadStickerTask.SIZE_IMAGE < unscaledBitmap.getHeight())
+				{
+					thumbnail = HikeBitmapFactory.createScaledBitmap(unscaledBitmap, DownloadStickerTask.SIZE_IMAGE, DownloadStickerTask.SIZE_IMAGE, Bitmap.Config.ARGB_8888, true);
+					if (unscaledBitmap != thumbnail)
+					{
+						unscaledBitmap.recycle();
+					}
+				}
 
 				if (thumbnail != null)
 				{

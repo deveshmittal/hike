@@ -569,7 +569,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.mark_stealth).equals(option) || getString(R.string.unmark_stealth).equals(option))
 				{
 					boolean newStealthValue = !conv.isStealth();
-
 					/*
 					 * If stealth ftue conv tap tip is visible than remove it
 					 */
