@@ -813,6 +813,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			int lastSeenIdx = c.getColumnIndex(DBConstants.LAST_SEEN);
 			int isOfflineIdx = c.getColumnIndex(DBConstants.IS_OFFLINE);
 			int inviteTimeIdx = c.getColumnIndex(DBConstants.INVITE_TIMESTAMP);
+			int favoriteTypeIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
 
 			Set<String> msisdnSet = null;
 
@@ -850,7 +851,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					contactInfo.setInviteTime(c.getLong(inviteTimeIdx));
 				}
 
-				contactInfo.setFavoriteType(favoriteType);
+				if(favoriteType == null && favoriteTypeIdx != -1)
+				{
+					contactInfo.setFavoriteType(FavoriteType.values()[c.getInt(favoriteTypeIdx)]);
+				}
+				else
+				{
+					contactInfo.setFavoriteType(favoriteType);
+				}
 
 				contactInfos.add(contactInfo);
 			}
@@ -887,7 +895,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 
 		String favTypeIn = favTypes.append(")").toString();
-		String toAppend = ", " + DBConstants.FAVORITES_TABLE + "." + DBConstants.MSISDN + " AS " + favoriteMsisdnColumnName + " FROM " + DBConstants.FAVORITES_TABLE
+		String toAppend =", " + DBConstants.FAVORITE_TYPE +  ", " + DBConstants.FAVORITES_TABLE + "." + DBConstants.MSISDN + " AS " + favoriteMsisdnColumnName + " FROM " + DBConstants.FAVORITES_TABLE
 				+ " LEFT OUTER JOIN " + DBConstants.USERS_TABLE + " ON " + DBConstants.FAVORITES_TABLE + "." + DBConstants.MSISDN + " = " + DBConstants.USERS_TABLE + "."
 				+ DBConstants.MSISDN + " WHERE " + DBConstants.FAVORITE_TYPE + " in " + favTypeIn + " AND " + favoriteMsisdnColumnName + " != "
 				+ DatabaseUtils.sqlEscapeString(myMsisdn) + " AND " + favoriteMsisdnColumnName + " NOT IN (SELECT " + DBConstants.BLOCK_TABLE + "." + DBConstants.MSISDN + " FROM "
