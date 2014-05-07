@@ -6642,7 +6642,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
-		View root = findViewById(R.id.chatThreadParentLayout);
+		View root = findViewById(R.id.chat_layout);
 		if (respectKeyboardVisiblity)
 		{
 			int statusBarHeight = getStatusBarHeight();
