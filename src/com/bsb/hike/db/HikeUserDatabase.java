@@ -1370,7 +1370,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
 			
-			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
+			return HikeBitmapFactory.getBitmapDrawable(mContext.getResources(), HikeBitmapFactory.decodeByteArray(icondata, 0, icondata.length));
 		}
 		finally
 		{
