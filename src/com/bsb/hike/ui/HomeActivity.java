@@ -228,6 +228,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
+		actionBar.setIcon(R.drawable.hike_logo_top_bar);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.home_action_bar, null);

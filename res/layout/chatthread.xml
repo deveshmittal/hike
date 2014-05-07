@@ -206,7 +206,7 @@
                 <ImageButton
                     android:id="@+id/send_message"
                     android:layout_width="48dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
                     android:background="?actionBarItemBackground"
@@ -217,7 +217,7 @@
                 <ImageButton
                     android:id="@+id/sticker_btn"
                     android:layout_width="48dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
                     android:background="?actionBarItemBackground"
