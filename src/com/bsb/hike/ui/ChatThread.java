@@ -46,7 +46,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -175,9 +175,6 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.service.HikeService;
-import com.bsb.hike.smartImageLoader.ImageWorker;
-import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -6418,9 +6415,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize));
+		
+		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
+		
+		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
 
-		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(bd.getBitmap()));
+		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
 
 		if (chatTheme.isTiled())
 		{
