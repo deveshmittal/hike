@@ -424,7 +424,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				/*
 				 * Update the urls to use ssl or not.
 				 */
-				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCHED_DATA_CONNECTION, null);
+				Utils.setupUri(this.getApplicationContext());
 
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);
@@ -799,7 +799,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 
 		Intent intent = new Intent(this, CountrySelectActivity.class);
-		this.startActivityForResult(intent, HikeConstants.SELECT_COUNTRY_REQUEST_CODE);
+	    this.startActivityForResult(intent, HikeConstants.ResultCodes.SELECT_COUNTRY);
 	}
 
 	private void prepareLayoutForGettingPin(long timeLeft)
@@ -1738,9 +1738,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
 			setProfileImage();
 			break;
-		case HikeConstants.SELECT_COUNTRY_REQUEST_CODE:
-			if (resultCode == RESULT_OK)
-			{
+		case HikeConstants.ResultCodes.SELECT_COUNTRY:	
+			if (resultCode == RESULT_OK) {
 				String countryName = data.getStringExtra(HikeConstants.Extras.SELECTED_COUNTRY);
 				selectCountry(countryName);
 			}

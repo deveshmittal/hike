@@ -131,11 +131,19 @@ public class ToastListener implements Listener
 					{
 						contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
 					}
-					/*
-					 * Check if this is a big picture message, else toast a normal push message
-					 */
-					Bitmap bigPicture = returnBigPicture(message, context);
-					this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+
+					if(message.getConversation().isStealth())
+					{
+						this.toaster.notifyStealthMessage();
+					}
+					else
+					{
+						/*
+						 * Check if this is a big picture message, else toast a normal push message
+						 */
+						Bitmap bigPicture = returnBigPicture(message, context);
+						this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+					}
 				}
 
 			}
@@ -161,7 +169,14 @@ public class ToastListener implements Listener
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-			toaster.notifyFavorite(contactInfo);
+			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			{
+				this.toaster.notifyStealthMessage();
+			}
+			else
+			{
+				toaster.notifyFavorite(contactInfo);
+			}
 		}
 		else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type))
 		{
@@ -222,6 +237,11 @@ public class ToastListener implements Listener
 			if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
 			{
 				Logger.d(getClass().getSimpleName(), "Group has been muted");
+				return;
+			}
+			if(message.getConversation().isStealth())
+			{
+				Logger.d(getClass().getSimpleName(), "this conversation is stealth");
 				return;
 			}
 			final Bitmap bigPicture = returnBigPicture(message, context);

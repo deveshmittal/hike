@@ -2,6 +2,7 @@ package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,19 +60,24 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -93,6 +99,7 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.MotionEvent;
@@ -109,7 +116,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -118,7 +124,6 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.SMSSyncState;
-import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
@@ -152,7 +157,6 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -724,6 +728,7 @@ public class Utils
 			data.put(HikeConstants.LogEvent.DEVICE, device);
 			data.put(HikeConstants.LogEvent.CARRIER, carrier);
 			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			object.put(HikeConstants.DATA, data);
 
 			return object;
@@ -766,6 +771,7 @@ public class Utils
 				}
 				editor.commit();
 				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 
 				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 				obj.put(HikeConstants.DATA, data);
@@ -983,6 +989,7 @@ public class Utils
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
@@ -1075,6 +1082,179 @@ public class Utils
 		}
 	}
 
+	public static Drawable stringToDrawable(String encodedString)
+	{
+		if (TextUtils.isEmpty(encodedString))
+		{
+			return null;
+		}
+		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
+		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+	}
+
+	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
+	{
+		Bitmap thumbnail = null;
+
+		int currentWidth = 0;
+		int currentHeight = 0;
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+
+		BitmapFactory.decodeFile(filePath, options);
+		currentHeight = options.outHeight;
+		currentWidth = options.outWidth;
+
+		if (dimensionLimit == -1)
+		{
+			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
+		}
+
+		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
+		options.inJustDecodeBounds = false;
+
+		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		/*
+		 * Should only happen when the external storage does not have enough free space
+		 */
+		if (thumbnail == null)
+		{
+			return null;
+		}
+		if (makeSquareThumbnail)
+		{
+			return makeSquareThumbnail(thumbnail, dimensionLimit);
+		}
+
+		return thumbnail;
+	}
+
+	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
+	{
+		Bitmap thumbnail = null;
+
+		int currentWidth = 0;
+		int currentHeight = 0;
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+
+		BitmapFactory.decodeFile(filePath, options);
+		currentHeight = options.outHeight;
+		currentWidth = options.outWidth;
+
+		if (dimensionLimit == -1)
+		{
+			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
+		}
+
+		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
+		options.inJustDecodeBounds = false;
+		if (applyBitmapConfig)
+		{
+			options.inPreferredConfig = Config.RGB_565;
+		}
+
+		thumbnail = BitmapFactory.decodeFile(filePath, options);
+		/*
+		 * Should only happen when the external storage does not have enough free space
+		 */
+		if (thumbnail == null)
+		{
+			return null;
+		}
+		if (makeSquareThumbnail)
+		{
+			return makeSquareThumbnail(thumbnail, dimensionLimit);
+		}
+
+		return thumbnail;
+	}
+
+	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
+	{
+		Bitmap rotatedBitmap = null;
+		Matrix m = new Matrix();
+		ExifInterface exif = null;
+		int orientation = 1;
+
+		try
+		{
+			if (path != null)
+			{
+				// Getting Exif information of the file
+				exif = new ExifInterface(path);
+			}
+			if (exif != null)
+			{
+				orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
+				switch (orientation)
+				{
+				case ExifInterface.ORIENTATION_ROTATE_270:
+					m.preRotate(270);
+					break;
+
+				case ExifInterface.ORIENTATION_ROTATE_90:
+					m.preRotate(90);
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_180:
+					m.preRotate(180);
+					break;
+				}
+				// Rotates the image according to the orientation
+				rotatedBitmap = HikeBitmapFactory.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return rotatedBitmap;
+	}
+
+	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
+	{
+		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
+
+		int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail.getWidth() - dimensionLimit) / 2) : 0;
+		int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail.getHeight() - dimensionLimit) / 2) : 0;
+
+		Logger.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
+		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
+
+		if (squareThumbnail != thumbnail)
+		{
+			thumbnail.recycle();
+		}
+		thumbnail = null;
+		return squareThumbnail;
+	}
+
+	public static Bitmap stringToBitmap(String thumbnailString)
+	{
+		byte[] encodeByte = Base64.decode(thumbnailString, Base64.DEFAULT);
+		return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+	}
+
+	public static boolean isThumbnailSquare(Bitmap thumbnail)
+	{
+		return (thumbnail.getWidth() == thumbnail.getHeight());
+	}
+
+	public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format)
+	{
+		return bitmapToBytes(bitmap, format, 50);
+	}
+
+	public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format, int quality)
+	{
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		bitmap.compress(format, quality, bao);
+		return bao.toByteArray();
+	}
+
 	public static String getRealPathFromUri(Uri contentUri, Activity activity)
 	{
 		String[] proj = { MediaStore.Images.Media.DATA };
@@ -1143,7 +1323,7 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, Bitmap.Config.RGB_565);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
@@ -1219,6 +1399,36 @@ public class Utils
 			}
 		}
 		return 0;
+	}
+
+	public static Bitmap rotateBitmap(Bitmap b, int degrees)
+	{
+		if (degrees != 0 && b != null)
+		{
+			Matrix m = new Matrix();
+			m.setRotate(degrees, (float) b.getWidth() / 2, (float) b.getHeight() / 2);
+			try
+			{
+				Bitmap b2 = Bitmap.createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
+				if (b != b2)
+				{
+					b.recycle();
+					b = b2;
+				}
+			}
+			catch (OutOfMemoryError e)
+			{
+				Logger.e("Utils", "Out of memory", e);
+			}
+		}
+		return b;
+	}
+
+	public static void setupUri(Context ctx)
+	{
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
+		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
 	}
 
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
@@ -1796,6 +2006,12 @@ public class Utils
 		return uri;
 	}
 
+	/**
+	 * This will return true when SSL toggle is on and connection type is WIFI
+	 * 
+	 * @param context
+	 * @return
+	 */
 	public static boolean switchSSLOn(Context context)
 	{
 		/*
@@ -2019,6 +2235,16 @@ public class Utils
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 	}
 
+	public static void showSoftKeyboard(Context context, View v)
+	{
+		if (v == null)
+		{
+			return;
+		}
+		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(v, InputMethodManager.RESULT_UNCHANGED_SHOWN);
+	}
+
 	public static void sendLocaleToServer(Context context)
 	{
 		JSONObject object = new JSONObject();
@@ -2027,6 +2253,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LOCALE, context.getResources().getConfiguration().locale.getLanguage());
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
@@ -2189,13 +2416,35 @@ public class Utils
 		return !TextUtils.isEmpty(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.NAME_SETTING, null));
 	}
 
-	public static void sendAppState(Context context)
+	public static void appStateChanged(Context context)
+	{
+		appStateChanged(context, true);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth)
 	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
 		}
 
+		sendAppState();
+
+		if (resetStealth)
+		{
+			if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+			{
+				resetStealthMode(context);
+			}
+			else
+			{
+				clearStealthResetTimer(context);
+			}
+		}
+	}
+
+	private static void sendAppState()
+	{
 		JSONObject object = new JSONObject();
 
 		try
@@ -2221,7 +2470,16 @@ public class Utils
 		{
 			Logger.w("AppState", "Invalid json", e);
 		}
+	}
 
+	private static void resetStealthMode(Context context)
+	{
+		StealthResetTimer.getInstance(context).resetStealthToggle();
+	}
+
+	private static void clearStealthResetTimer(Context context)
+	{
+		StealthResetTimer.getInstance(context).clearScheduledStealthToggleTimer();
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)
@@ -2388,87 +2646,6 @@ public class Utils
 		}
 	}
 
-	public static void showTip(final Activity activity, final TipType tipType, final View parentView)
-	{
-		showTip(activity, tipType, parentView, null);
-	}
-
-	public static void showTip(final Activity activity, final TipType tipType, final View parentView, String name)
-	{
-		parentView.setVisibility(View.VISIBLE);
-
-		View container = parentView.findViewById(R.id.tip_container);
-		TextView tipText = (TextView) parentView.findViewById(R.id.tip_text);
-		ImageButton closeTip = (ImageButton) parentView.findViewById(R.id.close);
-
-		switch (tipType)
-		{
-		case EMOTICON:
-			container.setBackgroundResource(R.drawable.bg_sticker_ftue);
-			tipText.setText(R.string.sticker_ftue_body);
-			break;
-		case LAST_SEEN:
-			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.last_seen_tip_friends);
-			break;
-		case MOOD:
-			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.moods_tip);
-			break;
-		case STATUS:
-			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(activity.getString(R.string.status_tip, name));
-			break;
-		case CHAT_BG_FTUE:
-			container.setBackgroundResource(R.drawable.bg_tip_top_right);
-			tipText.setText(R.string.chat_bg_ftue_tip);
-			break;
-		}
-		if (closeTip != null)
-		{
-			closeTip.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					closeTip(tipType, parentView, activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0));
-				}
-			});
-		}
-
-		parentView.setTag(tipType);
-	}
-
-	public static void closeTip(TipType tipType, View parentView, SharedPreferences preferences)
-	{
-		parentView.setVisibility(View.GONE);
-
-		Editor editor = preferences.edit();
-
-		switch (tipType)
-		{
-		case EMOTICON:
-			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
-			break;
-		case LAST_SEEN:
-			editor.putBoolean(HikeMessengerApp.SHOWN_LAST_SEEN_TIP, true);
-			break;
-		case MOOD:
-			editor.putBoolean(HikeMessengerApp.SHOWN_MOODS_TIP, true);
-			break;
-		case STATUS:
-			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case CHAT_BG_FTUE:
-			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-			editor.putBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, true);
-			break;
-		}
-
-		editor.commit();
-	}
-
 	public static void blockOrientationChange(Activity activity)
 	{
 		final int rotation = activity.getWindowManager().getDefaultDisplay().getOrientation();
@@ -2535,6 +2712,7 @@ public class Utils
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
+			data.put(HikeConstants.MESSAGE_ID,  Long.toString(System.currentTimeMillis()/1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
@@ -2865,6 +3043,7 @@ public class Utils
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
 
@@ -3086,6 +3265,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, HomeActivity.class);
 		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		return intent;
 	}
@@ -3338,6 +3518,7 @@ public class Utils
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		context.startActivity(intent);
 	}
 
@@ -3445,5 +3626,61 @@ public class Utils
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+	}
+
+	/**
+	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
+	 * 
+	 * @param context
+	 * @param soundId
+	 */
+	public static void playSoundFromRaw(Context context, int soundId)
+	{
+
+		Log.i("sound", "playing sound " + soundId);
+		MediaPlayer mp = new MediaPlayer();
+		mp.setAudioStreamType(AudioManager.STREAM_RING);
+		Resources res = context.getResources();
+		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
+
+		try
+		{
+			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+			afd.close();
+
+			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			{
+
+				@Override
+				public void onCompletion(MediaPlayer mp)
+				{
+					mp.release();
+
+				}
+			});
+			mp.prepare();
+			mp.start();
+
+		}
+		catch (IllegalArgumentException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalStateException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static final void cancelScheduledStealthReset(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
 }

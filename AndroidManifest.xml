@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="370"
-    android:versionName="2.9.0" >
+    android:versionCode="398"
+    android:versionName="2.9.5.8" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -77,7 +77,8 @@
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Home"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="adjustResize" 
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -201,7 +202,13 @@
         <activity android:name=".ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>
-
+        
+        <activity
+    		android:name="com.haibison.android.lockpattern.LockPatternActivity"
+    		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
+    		android:screenOrientation="user"
+    		android:theme="@style/Theme.CustomDialog" />
+        
         <receiver android:name=".service.BootService" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -260,6 +267,8 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/unobfuscated_map_api" />
+        
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
         <receiver android:name=".service.SmsMessageStatusReceiver" />
         <receiver

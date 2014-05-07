@@ -330,7 +330,6 @@
         <item name="android:actionOverflowButtonStyle">@style/OverflowMenu</item>
         <item name="actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
-    	<item name="android:windowAnimationStyle">@style/ActivityAnimation</item>
         <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
     </style>
     
@@ -395,7 +394,7 @@
         <item name="android:scrollHorizontally">true</item>
         <item name="android:singleLine">true</item>
         <item name="android:textColor">@color/actionbar_text</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">18dp</item>
         <item name="android:textStyle">bold|italic</item>
     </style>
 

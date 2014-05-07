@@ -662,7 +662,7 @@ public class HikeBitmapFactory
 		}
 	}
 
-	private static Bitmap createBitmap(Bitmap b, int i, int j, int width, int height, Matrix m, boolean c)
+	public static Bitmap createBitmap(Bitmap b, int i, int j, int width, int height, Matrix m, boolean c)
 	{
 		try
 		{
