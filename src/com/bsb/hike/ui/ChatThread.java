@@ -45,10 +45,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-<<<<<<< HEAD
-=======
 import android.graphics.Bitmap;
->>>>>>> 65524848825f487207ace9d423009623a4386758
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -179,10 +176,6 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
-<<<<<<< HEAD
-import com.bsb.hike.smartImageLoader.ImageWorker;
-=======
->>>>>>> 65524848825f487207ace9d423009623a4386758
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
