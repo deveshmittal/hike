@@ -3629,6 +3629,11 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 
+	public static boolean isPlayTickSound(Context context)
+	{
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, false));
+	}
+
 	/**
 	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
 	 * 
