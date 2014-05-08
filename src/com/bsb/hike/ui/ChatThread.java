@@ -2536,7 +2536,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-				Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+//				Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 				runOnUiThread(new Runnable()
 				{
 					@Override
@@ -2674,7 +2674,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ConvMessage msg = findMessageById(msgId);
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
-				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+//				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(mUpdateAdapter);
 			}
