@@ -67,6 +67,7 @@ public class TCPNetworkModule implements NetworkModule {
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			socket = factory.createSocket();
 			socket.connect(sockaddr, conTimeout*1000);
+			socket.setTcpNoDelay(true);
 		
 			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm. 
 			// This should not be required.

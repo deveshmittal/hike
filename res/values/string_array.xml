@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="vibratePrefKeys">
+        <item>Off</item>
+        <item>Default</item>
+        <item>Short</item>
+        <item>Long</item>
+    </string-array>
+    <string-array name="vibratePrefValues">
+        <item>@string/vib_off</item>
+        <item>@string/vib_default</item>
+        <item>@string/vib_short</item>
+        <item>@string/vib_long</item>
+    </string-array>
+
+</resources>

@@ -2068,7 +2068,8 @@ public class Utils
 
 	public static void vibrateNudgeReceived(Context context)
 	{
-		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.VIBRATE_PREF, true))
+		String VIB_OFF = context.getResources().getString(R.string.vib_off);
+		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, VIB_OFF)))
 		{
 			return;
 		}
