@@ -780,7 +780,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else if (getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE))
 			{
-				super.onBackPressed();
 				intent = new Intent(this, ChatThread.class);
 				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
 				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
@@ -789,7 +788,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 
 			saveDraft();
-			super.onBackPressed();
 		}
 		else
 		{
@@ -2538,7 +2536,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-				Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+//				Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 				runOnUiThread(new Runnable()
 				{
 					@Override
@@ -2676,7 +2674,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ConvMessage msg = findMessageById(msgId);
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
-				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+//				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(mUpdateAdapter);
 			}
