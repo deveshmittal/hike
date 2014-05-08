@@ -51,7 +51,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	ProgressDialog mDialog;
 
 	private boolean isDeleting;
-	
+
 	private BlockingTaskType blockingTaskType = BlockingTaskType.NONE;
 
 	@Override
@@ -76,7 +76,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask)
 		{
-			if(savedInstanceState != null){
+			if (savedInstanceState != null)
+			{
 				blockingTaskType = BlockingTaskType.values()[savedInstanceState.getInt(HikeConstants.Extras.BLOKING_TASK_TYPE)];
 			}
 			setBlockingTask((ActivityCallableTask) retained);
@@ -103,7 +104,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (unlinkFacebookPreference != null)
 		{
 			Session session = Session.getActiveSession();
-			if (session != null )
+			if (session != null)
 			{
 				unlinkFacebookPreference.setOnPreferenceClickListener(this);
 			}
@@ -255,7 +256,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (!task.isFinished())
 		{
 			mTask = task;
-			String message="";
+			String message = "";
 			switch (blockingTaskType)
 			{
 			case DELETING_ACCOUNT:
