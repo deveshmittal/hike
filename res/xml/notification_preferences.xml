@@ -2,11 +2,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/notifications" >
 
-    <ListPreference
+    <com.bsb.hike.view.IconListPreference
+        icon="preference_vibe"
         android:defaultValue="@string/vib_default"
         android:entries="@array/vibratePrefKeys"
         android:entryValues="@array/vibratePrefValues"
-        android:icon="@drawable/preference_vibe"
         android:key="vibratePrefList"
         android:layout="@layout/list_preference"
         android:summary="@string/vibrate_msg"
