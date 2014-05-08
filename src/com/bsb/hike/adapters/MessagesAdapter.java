@@ -3281,9 +3281,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			inflateNSetDay(convMessage, dayHolder);
 		}
-		else if (dayHolder.dayStub != null)
+		else if (dayHolder.dayStubInflated != null)
 		{
-			dayHolder.dayStub.setVisibility(View.GONE);
+			dayHolder.dayStubInflated.setVisibility(View.GONE);
 		}
 		return v;
 	}
@@ -3981,9 +3981,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			inflateNSetMessageInfo(getItem(position), detailHolder, clickableItem);
 		}
-		else if (detailHolder.messageInfoStub != null)
+		else if (detailHolder.messageInfoInflated != null)
 		{
-			detailHolder.messageInfoStub.setVisibility(View.GONE);
+			detailHolder.messageInfoInflated.setVisibility(View.GONE);
 		}
 	}
 
