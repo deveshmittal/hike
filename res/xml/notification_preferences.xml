@@ -15,13 +15,20 @@
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_sound"
         android:defaultValue="true"
+        android:key="tickSoundPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/tickSoundSummary"
+        android:title="@string/tickSoundTitle"
+        android:widgetLayout="@layout/checkbox_widget" />
+    <com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_sound"
+        android:defaultValue="true"
         android:key="soundPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/sound_msg"
         android:title="@string/sound"
-        android:widgetLayout="@layout/checkbox_widget" />    
-
-	<com.bsb.hike.view.IconCheckBoxPreference
+        android:widgetLayout="@layout/checkbox_widget" />
+    <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_led"
         android:defaultValue="true"
         android:key="ledPref"
