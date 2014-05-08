@@ -240,7 +240,7 @@ public class HikeBitmapFactory
 		{
 			return null;
 		}
-		
+
 		if (drawable instanceof BitmapDrawable)
 		{
 			return ((BitmapDrawable) drawable).getBitmap();
@@ -290,7 +290,7 @@ public class HikeBitmapFactory
 		{
 			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
 			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false);
+			src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false, true, true);
 			return src;
 		}
 		else
@@ -855,12 +855,22 @@ public class HikeBitmapFactory
 		}
 	}
 
-	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight)
+	/**
+	 * returns scaled down bitmap if finResMoreThanReq is set to true than return bitmap resolution will be atleast reqHeight and reqWidth and if set to false will be at most
+	 * reqWidth and reqHeight
+	 * 
+	 * @param filename
+	 * @param reqWidth
+	 * @param reqHeight
+	 * @param finResMore
+	 * @return
+	 */
+	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, boolean finResMoreThanReq, boolean scaleUp)
 	{
-		return scaleDownBitmap(filename, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
+		return scaleDownBitmap(filename, reqWidth, reqHeight, Bitmap.Config.ARGB_8888, finResMoreThanReq, scaleUp);
 	}
 
-	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, Bitmap.Config config)
+	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, Bitmap.Config config, boolean finResMoreThanReq, boolean scaleUp)
 	{
 		Bitmap unscaledBitmap = decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, config);
 
@@ -869,7 +879,7 @@ public class HikeBitmapFactory
 			return null;
 		}
 
-		Bitmap small = createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config, true);
+		Bitmap small = createScaledBitmap(unscaledBitmap, reqWidth, reqHeight, config, true, finResMoreThanReq, scaleUp);
 
 		if (unscaledBitmap != small)
 		{
@@ -880,43 +890,64 @@ public class HikeBitmapFactory
 
 	}
 
-	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int reqWidth, int reqHeight, Bitmap.Config config, Boolean filter)
+	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int reqWidth, int reqHeight, Bitmap.Config config, boolean filter, boolean finResMore, boolean scaleUp)
 	{
 		if (unscaledBitmap == null)
 		{
 			return null;
 		}
 
-		Rect srcRect = new Rect(0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
-
-		Rect reqRect = calculateReqRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), reqWidth, reqHeight);
-
-		Bitmap scaledBitmap = createBitmap(reqRect.width(), reqRect.height(), config);
-
-		if (scaledBitmap == null)
+		if (scaleUp || reqHeight < unscaledBitmap.getHeight() && reqWidth < unscaledBitmap.getWidth())
 		{
-			return null;
-		}
+			Rect srcRect = new Rect(0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
 
-		Canvas canvas = new Canvas(scaledBitmap);
-		Paint p = new Paint();
-		p.setFilterBitmap(filter);
-		canvas.drawBitmap(unscaledBitmap, srcRect, reqRect, p);
-		return scaledBitmap;
+			Rect reqRect = calculateReqRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), reqWidth, reqHeight, finResMore);
+
+			Bitmap scaledBitmap = createBitmap(reqRect.width(), reqRect.height(), config);
+
+			if (scaledBitmap == null)
+			{
+				return null;
+			}
+
+			Canvas canvas = new Canvas(scaledBitmap);
+			Paint p = new Paint();
+			p.setFilterBitmap(filter);
+			canvas.drawBitmap(unscaledBitmap, srcRect, reqRect, p);
+			return scaledBitmap;
+		}
+		else
+		{
+			return unscaledBitmap;
+		}
 	}
 
-	private static Rect calculateReqRect(int srcWidth, int srcHeight, int reqWidth, int reqHeight)
+	private static Rect calculateReqRect(int srcWidth, int srcHeight, int reqWidth, int reqHeight, boolean finResMore)
 	{
 		final float srcAspect = (float) srcWidth / (float) srcHeight;
 		final float dstAspect = (float) reqWidth / (float) reqHeight;
 
-		if (srcAspect > dstAspect)
+		if (finResMore)
 		{
-			return new Rect(0, 0, (int) (reqHeight * srcAspect), reqHeight);
+			if (srcAspect > dstAspect)
+			{
+				return new Rect(0, 0, (int) (reqHeight * srcAspect), reqHeight);
+			}
+			else
+			{
+				return new Rect(0, 0, reqWidth, (int) (reqWidth / srcAspect));
+			}
 		}
 		else
 		{
-			return new Rect(0, 0, reqWidth, (int) (reqWidth / srcAspect));
+			if (srcAspect > dstAspect)
+			{
+				return new Rect(0, 0, reqWidth, (int) (reqWidth / srcAspect));
+			}
+			else
+			{
+				return new Rect(0, 0, (int) (reqHeight * srcAspect), reqHeight);
+			}
 		}
 	}
 
