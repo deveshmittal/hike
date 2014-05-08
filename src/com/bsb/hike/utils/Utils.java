@@ -3683,4 +3683,12 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
+	
+	public static long getOldTimestamp(int min)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, -min);
+		long old = cal.getTimeInMillis();
+		return old;
+	};
 }
