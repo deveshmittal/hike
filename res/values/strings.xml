@@ -1484,8 +1484,6 @@
         <item quantity="other">Connect at least %1$d dots. Try again</item>
     </plurals>
     
-    <string name="mark_stealth">Hide Chat</string>
-    <string name="unmark_stealth">Unhide Chat</string>
     <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
     <string name="stealth_notification_message">You have a new notification</string>
     <string name="retry">Retry</string>
@@ -1505,5 +1503,7 @@
 	<string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark a chat \'Hidden\'.</string>
 	<string name="chat_marked_stealth">You’ve hidden a chat.</string>
     <string name="chat_unmarked_stealth">You’ve marked a chat visible.</string>
+    <string name="mark_stealth">Mark Chat as Hidden</string>
+    <string name="unmark_stealth">Mark Chat as Visible</string>
 		
 </resources>
