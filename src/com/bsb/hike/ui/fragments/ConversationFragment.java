@@ -61,6 +61,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -515,7 +516,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(conv.isStealth() ? R.string.unmark_stealth : R.string.mark_stealth));
 		}
-
+		if (!(conv instanceof GroupConversation))
+		{
+			optionsList.add(getString(R.string.viewcontact));
+		}
 		optionsList.add(getString(R.string.shortcut));
 		optionsList.add(getString(R.string.email_conversation));
 		if (conv instanceof GroupConversation)
@@ -565,6 +569,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 					DeleteAllConversations();
+				}
+				else if (getString(R.string.viewcontact).equals(option))
+				{
+					viewContacts(conv);
 				}
 				else if (getString(R.string.mark_stealth).equals(option) || getString(R.string.unmark_stealth).equals(option))
 				{
@@ -1640,5 +1648,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return v;
 		}
 		
+	}
+	
+	protected void viewContacts(Conversation conv) 
+	{
+		Intent intent = new Intent(getActivity(), ProfileActivity.class);
+		intent.putExtra(HikeConstants.Extras.CONTACT_INFO, conv.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, conv.isOnhike());
+		startActivity(intent);
 	}
 }
