@@ -6305,6 +6305,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			setActionModeTitle(mAdapter.getSelectedCount());
 		}
+		
+		/*
+		 * if chat bg ftue tip or last seen tip is visible we
+		 * should hide them in action mode
+		 */
+		if(tipView != null && tipView.getVisibility() == View.VISIBLE)
+		{
+			TipType tipType = (TipType) tipView.getTag();
+			if(tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
+			{
+				tipView.setVisibility(View.INVISIBLE);
+			}
+		}
 		return true;
 	}
 
@@ -6319,6 +6332,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mAdapter.removeSelection();
 		mOptionsList.clear();
 		setupActionBar(false);
+
+		/*
+		 * if we have hidden tips while initializing action mode
+		 * we should unhide them
+		 */
+		if(tipView != null && tipView.getVisibility() == View.INVISIBLE)
+		{
+			tipView.setVisibility(View.VISIBLE);
+		}
 		invalidateOptionsMenu();
 	}
 
