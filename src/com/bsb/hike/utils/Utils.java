@@ -730,7 +730,7 @@ public class Utils
 			data.put(HikeConstants.LogEvent.DEVICE, device);
 			data.put(HikeConstants.LogEvent.CARRIER, carrier);
 			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 			object.put(HikeConstants.DATA, data);
 
 			return object;
@@ -773,7 +773,7 @@ public class Utils
 				}
 				editor.commit();
 				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
-				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 				obj.put(HikeConstants.DATA, data);
@@ -991,7 +991,7 @@ public class Utils
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
@@ -1325,7 +1325,8 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, Bitmap.Config.RGB_565);
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
@@ -2256,7 +2257,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LOCALE, context.getResources().getConfiguration().locale.getLanguage());
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
@@ -2729,7 +2730,7 @@ public class Utils
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
-			data.put(HikeConstants.MESSAGE_ID,  Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
@@ -3700,7 +3701,7 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 	}
-	
+
 	public static long getOldTimestamp(int min)
 	{
 		Calendar cal = Calendar.getInstance();
