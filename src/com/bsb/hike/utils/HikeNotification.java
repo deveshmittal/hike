@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -35,7 +36,7 @@ import com.bsb.hike.ui.HomeActivity;
 
 public class HikeNotification
 {
-	public static final long[] NOTIFI_VIBRATE_TIME = new long[] { 0, 1000 }; // milis
+	private String VIB_OFF, VIB_DEF, VIB_SHORT, VIB_LONG;
 
 	public static final int HIKE_NOTIFICATION = 0;
 
@@ -68,6 +69,14 @@ public class HikeNotification
 		this.context = context;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.sharedPreferences = context.getSharedPreferences(HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
+		if (VIB_DEF == null)
+		{
+			Resources res = context.getResources();
+			VIB_OFF = res.getString(R.string.vib_off);
+			VIB_DEF = res.getString(R.string.vib_default);
+			VIB_SHORT = res.getString(R.string.vib_short);
+			VIB_LONG = res.getString(R.string.vib_long);
+		}
 	}
 
 	public void notifySMSPopup(final String bodyString)
@@ -498,6 +507,7 @@ public class HikeNotification
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
 		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND : 0;
@@ -508,9 +518,22 @@ public class HikeNotification
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
-		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, false))
+		if (!VIB_OFF.equals(vibrate))
 		{
-			mBuilder.setVibrate(NOTIFI_VIBRATE_TIME);
+			if (VIB_DEF.equals(vibrate))
+			{
+				mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+			}
+			else if (VIB_SHORT.equals(vibrate))
+			{
+				// short vibrate
+				mBuilder.setVibrate(new long[] { 0, 200, 100, 250 });
+			}
+			else if (VIB_LONG.equals(vibrate))
+			{
+				// long vibrate
+				mBuilder.setVibrate(new long[] { 0, 1000 });
+			}
 		}
 		if (!forceNotPlaySound)
 		{
