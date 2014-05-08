@@ -780,7 +780,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else if (getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE))
 			{
-				super.onBackPressed();
 				intent = new Intent(this, ChatThread.class);
 				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
 				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
@@ -789,7 +788,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 
 			saveDraft();
-			super.onBackPressed();
 		}
 		else
 		{
