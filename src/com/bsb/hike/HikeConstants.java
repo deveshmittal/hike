@@ -365,6 +365,8 @@ public class HikeConstants
 
 	public static final String VIBRATE_PREF_LIST = "vibratePrefList";
 
+	public static final String TICK_SOUND_PREF = "tickSoundPref";
+	
 	public static final String FREE_SMS_PREF = "freeSmsPref";
 
 	public static final String LED_PREF = "ledPref";
