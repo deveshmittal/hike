@@ -831,8 +831,10 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 				// Scale it to required size
 				int width = (int) getResources().getDimension(R.dimen.share_my_location_drawable_width);
 
-				Drawable scaled_dr = HikeBitmapFactory.getBitmapDrawable(getResources(), HikeBitmapFactory.createScaledBitmap(bitmap, width, width, Bitmap.Config.ARGB_8888, true));
+				Bitmap b = HikeBitmapFactory.createScaledBitmap(bitmap, width, width, Bitmap.Config.RGB_565, true, true, false);
+				Drawable scaled_dr = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
 
+				Logger.d("BitmapLocation","size : "+BitmapUtils.getBitmapSize(b));
 				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(scaled_dr, null, null, null);
 				holder.txt_itemName.setCompoundDrawablePadding((int) getResources().getDimension(R.dimen.share_my_location_drawable_padding));
 			}

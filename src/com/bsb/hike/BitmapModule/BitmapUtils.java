@@ -22,7 +22,7 @@ public class BitmapUtils
 	{
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(filename, options);
+		HikeBitmapFactory.decodeFile(filename, options);
 		return (float) (options.outWidth) / options.outHeight;
 	}
 
