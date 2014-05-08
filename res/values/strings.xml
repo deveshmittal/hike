@@ -1458,4 +1458,9 @@
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
     <string name="edit">Edit</string>
+    <string name="vib_off">Off</string>
+    <string name="vib_default">Default</string>
+    <string name="vib_short">Short</string>
+    <string name="vib_long">Long</string>
+
 </resources>
