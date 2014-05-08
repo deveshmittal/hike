@@ -16,8 +16,6 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -61,7 +59,6 @@ public class ClientComms {
 	private MqttPingSender		pingSender;
 	CommsTokenStore 			tokenStore;
 	boolean 					stoppingComms = false;
-	Map<Long, Long> messageMap = new HashMap<Long, Long>();
 
 	final static byte CONNECTED	= 0;
 	final static byte CONNECTING	= 1;
@@ -573,9 +570,9 @@ public class ClientComms {
 				// packet.
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
-				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream(), networkModule.getSocket(), messageMap);
+				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream(), networkModule.getSocket());
 				receiver.start("MQTT Rec: "+getClient().getClientId());
-				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream(), networkModule.getSocket(), messageMap);
+				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream(), networkModule.getSocket());
 				sender.start("MQTT Snd: "+getClient().getClientId());
 				callback.start("MQTT Call: "+getClient().getClientId());				
 				internalSend(conPacket, conToken);

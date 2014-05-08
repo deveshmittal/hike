@@ -44,19 +44,17 @@ public class CommsSender implements Runnable {
 	private CommsTokenStore tokenStore = null;
 	private Thread 	sendThread		= null;
 	private Socket socket = null;
-	private Map<Long , Long> messageMap = null;
 	
 	private final static String className = CommsSender.class.getName();
 	private final String TAG = "COMMSSENDER";
 	
 
-	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out, Socket socket, Map<Long, Long> messageMap) {
+	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out, Socket socket) {
 		this.socket = socket;
 		this.out = new MqttOutputStream(out);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
-		this.messageMap = messageMap;
 		
 	}
 	
@@ -124,7 +122,6 @@ public class CommsSender implements Runnable {
 								if(message instanceof MqttPublish){
 									Logger.d(TAG, "socket write started for message : " + ((MqttPublish) message).getMessage().toString());
 									Logger.d(TAG, "socket write started for message id : " + ((MqttPublish) message).getMessageId());
-									messageMap.put((long) ((MqttPublish) message).getMessageId(), System.currentTimeMillis());
 									logSocketProperties();
 								}
 								out.write(message);

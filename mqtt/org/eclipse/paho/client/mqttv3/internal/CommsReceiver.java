@@ -44,19 +44,17 @@ public class CommsReceiver implements Runnable {
 	private Thread recThread = null;
 	private volatile boolean receiving;
 	private Socket socket = null;
-	private Map<Long, Long> messageMap;
 	
 	private final static String className = CommsReceiver.class.getName();
 	private final String TAG = "CommsReciever";
 	
 
-	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in, Socket socket, Map<Long, Long> messageMap) {
+	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in, Socket socket) {
 		this.socket = socket;
 		this.in = new MqttInputStream(in);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
-		this.messageMap = messageMap;
 	}
 	
 	/**
@@ -120,11 +118,6 @@ public class CommsReceiver implements Runnable {
 				}else if(message instanceof MqttAck){
 					Logger.d(TAG, "socket read completed for ack : " + ((MqttAck) message).toString());
 					long key = ((MqttAck) message).getMessageId();
-					if(messageMap.containsKey(key)){
-						long time = System.currentTimeMillis() - ((long)messageMap.get(key));
-						messageMap.remove(key);
-						Logger.d("total time", "total time taken for message id: " + key + " is : " + time);
-					}
 				} else {
 					Logger.d(TAG, "socket read completed");
 				}
