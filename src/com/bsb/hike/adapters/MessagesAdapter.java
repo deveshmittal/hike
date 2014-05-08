@@ -3338,8 +3338,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
 			 */
 			overlay.setVisibility(View.VISIBLE);
+			overlay.setTag(position);
 			overlay.setOnClickListener(selectedStateOverlayClickListener);
-			overlay.setOnLongClickListener(this);
 
 			if (isSelected(position))
 			{
@@ -4230,7 +4230,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void onClick(View v)
 		{
-			v.performLongClick();
+			chatThread.showMessageContextMenu((Integer) v.getTag());
 			return;
 		}
 	};
