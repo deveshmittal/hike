@@ -1758,9 +1758,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			Toast.makeText(getApplicationContext(), R.string.image_failed, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
+
 		Bitmap tempBitmap = HikeBitmapFactory.scaleDownBitmap(mActivityState.destFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS,
-				HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565);
+				HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565, true, false);
 
 		mActivityState.profileBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);

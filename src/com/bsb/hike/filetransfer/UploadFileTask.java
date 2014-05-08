@@ -51,7 +51,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Logger;
@@ -160,27 +159,6 @@ public class UploadFileTask extends FileTransferBase
 		fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
 	}
 
-	private void calculateReqHeightAndWidth(String fileName)
-	{
-		float aspectRatio = BitmapUtils.getAspectRatioFromFile(fileName);
-		height = (int) (150 * Utils.densityMultiplier);
-		width = (int) (aspectRatio * height);
-
-		int maxWidth = (int) (250 * Utils.densityMultiplier);
-		int minWidth = (int) (119 * Utils.densityMultiplier);
-
-		if (width < minWidth)
-		{
-			width = minWidth;
-			height = (int) (aspectRatio * width);
-		}
-		else if (width > maxWidth)
-		{
-			width = maxWidth;
-			height = (int) (aspectRatio * width);
-		}
-	}
-
 	// private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long
 	// recordingDuration) throws FileTransferCancelledException, Exception
 	private void createConvMessage()
@@ -200,9 +178,8 @@ public class UploadFileTask extends FileTransferBase
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
-					calculateReqHeightAndWidth(destinationFile.getPath());
-
-					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), width, height, Bitmap.Config.RGB_565);
+					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
+							Bitmap.Config.RGB_565, false, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 
 					// Logger.d("UploadFileTask",
@@ -372,8 +349,8 @@ public class UploadFileTask extends FileTransferBase
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
-				calculateReqHeightAndWidth(selectedFile.getPath());
-				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), width, height, Bitmap.Config.RGB_565);
+				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
+						Bitmap.Config.RGB_565, false, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)

@@ -25,7 +25,7 @@ public class FileImageLoader extends ImageWorker
 	protected Bitmap processBitmap(String data)
 	{
 		String filePath = new String(data.substring(FILE_KEY_PREFIX.length()));
-		Bitmap b = HikeBitmapFactory.scaleDownBitmap(filePath, reqWidth, reqHeight, Bitmap.Config.RGB_565);
+		Bitmap b = HikeBitmapFactory.scaleDownBitmap(filePath, reqWidth, reqHeight, Bitmap.Config.RGB_565, true, false);
 		return b;
 	}
 

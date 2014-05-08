@@ -302,7 +302,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			}
 
 			Bitmap tempBitmap = HikeBitmapFactory.scaleDownBitmap(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS,
-					Bitmap.Config.RGB_565);
+					Bitmap.Config.RGB_565, true, false);
 
 			groupBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 			groupImage.setImageBitmap(HikeBitmapFactory.getCircularBitmap(tempBitmap));
@@ -311,9 +311,9 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 			 * Saving the icon in the DB.
 			 */
 			byte[] bytes = BitmapUtils.bitmapToBytes(tempBitmap, CompressFormat.JPEG, 100);
-			
+
 			tempBitmap.recycle();
-			
+
 			HikeUserDatabase.getInstance().setIcon(groupId, bytes, false);
 
 			break;
