@@ -12,6 +12,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -618,4 +619,33 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		return false;
 	}
 
+	@Override
+	@Deprecated
+	public void addPreferencesFromResource(int preferencesResId)
+	{
+		// TODO Auto-generated method stub
+		super.addPreferencesFromResource(preferencesResId);
+		switch (preferencesResId)
+		{
+		case R.xml.notification_preferences:
+			updateNotifPrefView();
+			break;
+		}
+	}
+
+	private void updateNotifPrefView()
+	{
+		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.VIBRATE_PREF_LIST);
+		lp.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		{
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				preference.setTitle(getString(R.string.vibrate) + " - " + (newValue.toString()));
+				return true;
+			}
+		});
+		lp.setTitle(lp.getTitle() + " - " + lp.getValue());
+	}
 }
