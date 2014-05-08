@@ -1505,5 +1505,9 @@
     <string name="chat_unmarked_stealth">You’ve marked a chat visible.</string>
     <string name="mark_stealth">Mark Chat as Hidden</string>
     <string name="unmark_stealth">Mark Chat as Visible</string>
-		
+    <string name="edit">Edit</string>
+    <string name="vib_off">Off</string>
+    <string name="vib_default">Default</string>
+    <string name="vib_short">Short</string>
+    <string name="vib_long">Long</string>
 </resources>
