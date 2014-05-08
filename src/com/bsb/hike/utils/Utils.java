@@ -50,6 +50,8 @@ import org.json.JSONObject;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -2419,14 +2421,28 @@ public class Utils
 
 	public static void appStateChanged(Context context)
 	{
-		appStateChanged(context, true);
+		appStateChanged(context, true, false);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth)
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
+		}
+
+		if (checkIfActuallyBackgrounded)
+		{
+			boolean isForegrounded = isAppForeground(context);
+
+			if (isForegrounded)
+			{
+				if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+				{
+					Logger.d("HikeAppState", "Wrong state! correcting it");
+					HikeMessengerApp.currentState = CurrentState.RESUMED;
+				}
+			}
 		}
 
 		sendAppState();
@@ -3692,4 +3708,23 @@ public class Utils
 		long old = cal.getTimeInMillis();
 		return old;
 	};
+
+	public static boolean isAppForeground(Context context)
+	{
+		long startTime = System.currentTimeMillis();
+		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
+		Iterator<RunningAppProcessInfo> i = l.iterator();
+		while (i.hasNext())
+		{
+			RunningAppProcessInfo info = i.next();
+
+			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
+			{
+				Log.d("HikeAppState", "Check time: " + (System.currentTimeMillis() - startTime));
+				return true;
+			}
+		}
+		return false;
+	}
 }
