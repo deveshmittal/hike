@@ -1510,4 +1510,6 @@
     <string name="vib_default">Default</string>
     <string name="vib_short">Short</string>
     <string name="vib_long">Long</string>
+    <string name="tickSoundTitle">Notification tones</string>
+    <string name="tickSoundSummary">Play sound for incoming and outgoing messages</string>
 </resources>
