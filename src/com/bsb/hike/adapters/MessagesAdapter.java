@@ -3452,6 +3452,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			dayHolder.dayStubInflated.setVisibility(View.VISIBLE);
 			setDay(dayHolder.dayStubInflated, dateFormatted);
 		}
 	}
@@ -4011,6 +4012,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			detailHolder.messageInfoInflated.setVisibility(View.VISIBLE);
 			setMessageInfo(message, detailHolder.messageInfoInflated, clickableItem);
 		}
 	}
