@@ -618,7 +618,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return Bitmap.createBitmap(width, height, con);
+			Bitmap b = Bitmap.createBitmap(width, height, con);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -628,7 +630,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return Bitmap.createBitmap(width, height, con);
+				Bitmap b = Bitmap.createBitmap(width, height, con);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -642,7 +646,10 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return Bitmap.createBitmap(thumbnail, startX, startY, i, j);
+			Bitmap b = Bitmap.createBitmap(thumbnail, startX, startY, i, j);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
+
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -652,7 +659,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return Bitmap.createBitmap(thumbnail, startX, startY, i, j);
+				Bitmap b = Bitmap.createBitmap(thumbnail, startX, startY, i, j);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -662,11 +671,13 @@ public class HikeBitmapFactory
 		}
 	}
 
-	public static Bitmap createBitmap(Bitmap b, int i, int j, int width, int height, Matrix m, boolean c)
+	public static Bitmap createBitmap(Bitmap bm, int i, int j, int width, int height, Matrix m, boolean c)
 	{
 		try
 		{
-			return Bitmap.createBitmap(b, i, j, width, height, m, c);
+			Bitmap b = Bitmap.createBitmap(bm, i, j, width, height, m, c);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -676,7 +687,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return Bitmap.createBitmap(b, i, j, width, height, m, c);
+				Bitmap b = Bitmap.createBitmap(bm, i, j, width, height, m, c);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -690,7 +703,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeFile(path);
+			Bitmap b =  BitmapFactory.decodeFile(path);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -700,7 +715,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeFile(path);
+				Bitmap b = BitmapFactory.decodeFile(path);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -714,7 +731,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeFile(path, opt);
+			Bitmap b = BitmapFactory.decodeFile(path, opt);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -724,7 +743,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeFile(path, opt);
+				Bitmap b = BitmapFactory.decodeFile(path, opt);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -738,7 +759,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeStream(is);
+			Bitmap b = BitmapFactory.decodeStream(is);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -748,7 +771,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeStream(is);
+				Bitmap b = BitmapFactory.decodeStream(is);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -762,7 +787,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeResource(res, id);
+			Bitmap b = BitmapFactory.decodeResource(res, id);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -772,7 +799,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeResource(res, id);
+				Bitmap b = BitmapFactory.decodeResource(res, id);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -786,7 +815,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeResource(res, id, opt);
+			Bitmap b = BitmapFactory.decodeResource(res, id, opt);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -796,7 +827,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeResource(res, id, opt);
+				Bitmap b = BitmapFactory.decodeResource(res, id, opt);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -810,7 +843,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeByteArray(data, offset, length);
+			Bitmap b = BitmapFactory.decodeByteArray(data, offset, length);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -820,7 +855,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeByteArray(data, offset, length);
+				Bitmap b = BitmapFactory.decodeByteArray(data, offset, length);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
@@ -834,7 +871,9 @@ public class HikeBitmapFactory
 	{
 		try
 		{
-			return BitmapFactory.decodeByteArray(data, offset, length, opt);
+			Bitmap b = BitmapFactory.decodeByteArray(data, offset, length, opt);
+			Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+			return b;
 		}
 		catch (OutOfMemoryError e)
 		{
@@ -844,7 +883,9 @@ public class HikeBitmapFactory
 
 			try
 			{
-				return BitmapFactory.decodeByteArray(data, offset, length, opt);
+				Bitmap b = BitmapFactory.decodeByteArray(data, offset, length, opt);
+				Logger.wtf(TAG, "Bitmap size when creating bitmap : " + BitmapUtils.getBitmapSize(b));
+				return b;
 			}
 			catch (OutOfMemoryError ex)
 			{
