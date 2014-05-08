@@ -3290,9 +3290,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			inflateNSetDay(convMessage, dayHolder);
 		}
-		else if (dayHolder.dayStub != null)
+		else if (dayHolder.dayStubInflated != null)
 		{
-			dayHolder.dayStub.setVisibility(View.GONE);
+			dayHolder.dayStubInflated.setVisibility(View.GONE);
 		}
 		return v;
 	}
@@ -3461,6 +3461,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			dayHolder.dayStubInflated.setVisibility(View.VISIBLE);
 			setDay(dayHolder.dayStubInflated, dateFormatted);
 		}
 	}
@@ -3797,14 +3798,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	Handler handler = new Handler();
 
-	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, long ts)
+	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, ConvMessage message)
 	{
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		long diff = (((long) System.currentTimeMillis() / 1000) - ts);
+		long diff = (((long) System.currentTimeMillis() / 1000) - message.getTimestamp());
 
 		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
 		{
@@ -3813,6 +3814,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			updateViewWindowForReadBy(message);
 			showUndeliveredTextAndSetClick(tv, container, iv, true);
 		}
 	}
@@ -3879,14 +3881,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (!current.isSMS())
 				{
-					scheduleUndeliveredText(tv, container, iv, current.getTimestamp());
+					scheduleUndeliveredText(tv, container, iv, current);
 				}
 				break;
 			case SENT_CONFIRMED:
 				tv.setText(context.getString(!current.isSMS() ? R.string.sent : R.string.sent_via_sms, current.getTimestampFormatted(false, context)));
 				if (!current.isSMS())
 				{
-					scheduleUndeliveredText(tv, container, iv, current.getTimestamp());
+					scheduleUndeliveredText(tv, container, iv, current);
 				}
 				break;
 			case SENT_DELIVERED:
@@ -3991,9 +3993,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			inflateNSetMessageInfo(getItem(position), detailHolder, clickableItem);
 		}
-		else if (detailHolder.messageInfoStub != null)
+		else if (detailHolder.messageInfoInflated != null)
 		{
-			detailHolder.messageInfoStub.setVisibility(View.GONE);
+			detailHolder.messageInfoInflated.setVisibility(View.GONE);
 		}
 	}
 
@@ -4021,6 +4023,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			detailHolder.messageInfoInflated.setVisibility(View.VISIBLE);
 			setMessageInfo(message, detailHolder.messageInfoInflated, clickableItem);
 		}
 	}
@@ -4037,16 +4040,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
+			updateViewWindowForReadBy(message);
 		}
 		else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
 		{
 			if (!message.isSMS())
 			{
-				scheduleUndeliveredText(messageInfo, clickableItem, sending, message.getTimestamp());
+				scheduleUndeliveredText(messageInfo, clickableItem, sending, message);
 			}
 		}
 	}
 
+	private void updateViewWindowForReadBy(ConvMessage message)
+	{
+		ConvMessage lastMessage = getItem(getCount()-1);
+		if(lastMessage.getMsgID() == message.getMsgID())
+		{
+			chatThread.updateViewWindowForReadBy();
+		}
+	}
 	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)
 	{
 		ConvMessage message = getItem(position);
@@ -4127,7 +4139,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if (!message.isSMS())
 				{
-					scheduleUndeliveredText(messageInfo, container, sending, message.getTimestamp());
+					scheduleUndeliveredText(messageInfo, container, sending, message);
 				}
 			}
 		}

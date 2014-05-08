@@ -5,7 +5,7 @@
     android:descendantFocusability="blocksDescendants"
     android:gravity="center_vertical|left"
     android:minHeight="30dp"
-    android:paddingBottom="2dp" >
+    android:paddingBottom="5dp" >
 
     <ViewStub
         android:id="@+id/day_stub"
@@ -13,63 +13,69 @@
         android:layout_height="wrap_content"
         android:layout="@layout/message_day_container" />
 
-    <include
-        android:id="@+id/avatar_container"
-        android:layout_width="@dimen/chatthread_avatar"
-        android:layout_height="@dimen/chatthread_avatar"
-        android:layout_below="@id/day_container"
-        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
-        android:layout_marginTop="2.5dp"
-        layout="@layout/message_sender_avatar" />
-
-    <include
-        android:id="@+id/sender_details"
+    <RelativeLayout
+        android:id="@+id/overlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/day_container"
-        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
-        android:layout_toRightOf="@id/avatar_container"
-        layout="@layout/message_sender_details" />
+        android:paddingBottom="2.5dp" >
 
-    <LinearLayout
-        android:id="@+id/placeholder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/sender_details"
-        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
-        android:layout_toRightOf="@id/avatar_container"
-        android:gravity="center"
-        android:orientation="vertical" >
+        <include
+            android:id="@+id/avatar_container"
+            android:layout_width="@dimen/chatthread_avatar"
+            android:layout_height="@dimen/chatthread_avatar"
+            android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+            android:layout_marginTop="2.5dp"
+            layout="@layout/message_sender_avatar" />
 
-        <ProgressBar
-            android:id="@+id/loading_progress"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:indeterminateDrawable="@drawable/loading"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/image"
+        <include
+            android:id="@+id/sender_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/sticker_1_hi"
-            android:visibility="gone" />
-    </LinearLayout>
+            android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+            android:layout_toRightOf="@id/avatar_container"
+            layout="@layout/message_sender_details" />
 
-    <include
-        android:id="@+id/time_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/placeholder"
-        android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
-        android:layout_toRightOf="@id/avatar_container"
-        layout="@layout/message_time_status_ext" />
+        <LinearLayout
+            android:id="@+id/placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/sender_details"
+            android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+            android:layout_toRightOf="@id/avatar_container"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <ProgressBar
+                android:id="@+id/loading_progress"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:indeterminateDrawable="@drawable/loading"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/sticker_1_hi"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <include
+            android:id="@+id/time_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/placeholder"
+            android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
+            android:layout_toRightOf="@id/avatar_container"
+            layout="@layout/message_time_status_ext" />
+    </RelativeLayout>
 
     <include
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignBottom="@id/time_status"
-        android:layout_below="@id/day_container"
+        android:layout_alignBottom="@id/overlay"
+        android:layout_alignTop="@id/overlay"
         layout="@layout/message_overlay" />
 
 </RelativeLayout>
