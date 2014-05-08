@@ -578,7 +578,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op = new MqttConnectOptions();
 				op.setUserName(uid);
 				op.setPassword(password.toCharArray());
-				op.setCleanSession(false);
+				op.setCleanSession(true);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
 				setServerUris(op);
