@@ -1898,6 +1898,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	public void updateViewWindowForReadBy()
+	{
+		if (mConversationsView.getLastVisiblePosition() >= (messages.size()-2))
+		{
+			mConversationsView.smoothScrollByOffset(1);;
+		}
+	}
+
 	private void setupSMSToggleButton()
 	{
 		TextView smsToggleSubtext = (TextView) findViewById(R.id.sms_toggle_subtext);
