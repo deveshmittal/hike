@@ -2,8 +2,6 @@ package com.bsb.hike.service;
 
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -74,6 +72,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private String brokerHostName;
 
 	private String clientId;
+
+	private volatile boolean pushConnect = false;
 
 	private String uid;
 
@@ -596,7 +596,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
-				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
+				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
@@ -730,14 +730,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		catch (MqttException e)
 		{
-		// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
-		e.printStackTrace();
-		handleDisconnect(reconnect);
+			// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
+			e.printStackTrace();
+			handleDisconnect(reconnect);
 		}
 		catch (Exception e)
 		{
-		e.printStackTrace();
-		handleDisconnect(reconnect);
+			e.printStackTrace();
+			handleDisconnect(reconnect);
 		}
 	}
 
@@ -783,6 +783,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 					try
 					{
+						pushConnect = false;
 						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
@@ -1190,6 +1191,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (reconnect)
 			{
 				Logger.d(TAG, "Calling explicit disconnect after server GCM push");
+				pushConnect = true;
 				disconnectOnMqttThread(true);
 				return;
 			}
