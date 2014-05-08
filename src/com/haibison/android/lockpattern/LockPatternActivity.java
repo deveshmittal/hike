@@ -49,6 +49,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.BuildConfig;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.haibison.android.lockpattern.util.IEncrypter;
 import com.haibison.android.lockpattern.util.InvalidEncrypterException;
 import com.haibison.android.lockpattern.util.LoadingDialog;
@@ -90,7 +91,7 @@ import com.haibison.android.lockpattern.widget.LockPatternView.DisplayMode;
  * @author Hai Bison
  * @since v1.0
  */
-public class LockPatternActivity extends Activity {
+public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
 
     private static final String CLASSNAME = LockPatternActivity.class.getName();
 
