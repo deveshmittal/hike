@@ -208,6 +208,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener, BackKeyListener
 {
 
+	private boolean activityVisible = true;
+
 	private enum DialogShowing
 	{
 		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
@@ -402,6 +404,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+		activityVisible = false;
 	}
 
 	@Override
@@ -414,6 +417,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	protected void onResume()
 	{
+		activityVisible = true;
 		super.onResume();
 		if (mAdapter != null)
 		{
@@ -2530,7 +2534,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-				if (Utils.isPlayTickSound(getApplicationContext()))
+				if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
 				{
 					Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 				}
