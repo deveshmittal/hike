@@ -184,12 +184,14 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 	public void onCanceled(Boolean data)
 	{
 		super.onCanceled(data);
+		Utils.removeTempProfileImage(key);
 	}
 
 	@Override
 	protected void onStopLoading()
 	{
 		cancelLoad();
+		Utils.removeTempProfileImage(key);
 	}
 
 }

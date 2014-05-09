@@ -47,6 +47,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -205,18 +206,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
-		adapter.executeFetchTask();
 		listView.setOnItemClickListener(this);
 
 		originalAdapterLength = adapter.getCount();
 
 		initTagEditText();
 
-		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
 		if (existingGroupId != null)
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
+		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+
+		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
+
+		adapter.executeFetchTask();
 	}
 
 	private void initTagEditText()
@@ -334,6 +338,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			else
 			{
+				/*
+				 * This would be true if the user entered a stealth msisdn and tried starting a chat with him/her in non stealth mode.
+				 */
+				if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+				{
+					int stealthMode = HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+					if (stealthMode != HikeConstants.STEALTH_ON)
+					{
+						return;
+					}
+				}
+
 				Utils.startChatThread(this, contactInfo);
 				finish();
 			}
@@ -695,7 +711,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				filePath = Utils.getRealPathFromUri(fileUri, this);
 			}
 
-			if(TextUtils.isEmpty(filePath))
+			if (TextUtils.isEmpty(filePath))
 			{
 				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 				return;

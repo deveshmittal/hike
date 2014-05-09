@@ -21,9 +21,6 @@ import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
 {
-
-	public static final int SMS_TOGGLE_ID = -119;
-
 	private long msgID; // this corresponds to msgID stored in sender's DB
 
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
@@ -697,6 +694,7 @@ public class ConvMessage
 		{
 			ids.put(String.valueOf(mappedMsgId));
 			object.put(HikeConstants.DATA, ids);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 			object.put(HikeConstants.TO, mMsisdn);
 		}
@@ -797,9 +795,5 @@ public class ConvMessage
 	public void setShouldShowPush(boolean shouldShowPush)
 	{
 		this.shouldShowPush = shouldShowPush;
-	}
-	
-	public boolean isSmsToggle(){
-		return msgID == ConvMessage.SMS_TOGGLE_ID;
 	}
 }

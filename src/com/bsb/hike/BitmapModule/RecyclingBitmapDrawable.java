@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bsb.hike.ui.utils;
+package com.bsb.hike.BitmapModule;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

@@ -43,12 +43,13 @@
     <LinearLayout
         android:id="@+id/contact_info"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/back"
         android:background="?actionBarItemBackground"
         android:clickable="true"
         android:orientation="vertical"
+        android:gravity="center_vertical"
         android:paddingLeft="4dp" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -72,7 +73,7 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="1"
             android:textStyle="normal"
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:visibility="gone" />
     </LinearLayout>
 
