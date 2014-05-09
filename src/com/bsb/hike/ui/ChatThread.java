@@ -205,7 +205,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener, BackKeyListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
 
 	private enum DialogShowing
@@ -1203,13 +1203,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
 		return showMessageContextMenu(mAdapter.getItem(position));
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
-	{
-		onItemLongClick(adapterView, view, position, id);
-		return;
 	}
 
 	public boolean showMessageContextMenu(ConvMessage message)
@@ -6273,8 +6266,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mOptionsList.put(R.id.forward_msgs, true);
 		mOptionsList.put(R.id.copy_msgs, true);
 		mOptionsList.put(R.id.action_mode_overflow_menu, false);
-		// this onItemClick should be unregistered when
-		mConversationsView.setOnItemClickListener(ChatThread.this);
 		if (mAdapter.getSelectedCount() > 0)
 		{
 			setActionModeTitle(mAdapter.getSelectedCount());
@@ -6301,8 +6292,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		selectedNonForwadableMsgs = 0;
 		selectedCancelableMsgs = 0;
 		setActionModeOn(false);
-		// removing the on item click listener
-		mConversationsView.setOnItemClickListener(null);
 		mAdapter.removeSelection();
 		mOptionsList.clear();
 		setupActionBar(false);
