@@ -64,7 +64,7 @@ public class HikeAppStateUtils
 			}
 			Logger.d(TAG, "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
-			Utils.appStateChanged(activity);
+			Utils.appStateChanged(activity, true, true);
 		}
 	}
 
