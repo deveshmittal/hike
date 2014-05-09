@@ -1510,4 +1510,6 @@
     <string name="vib_default">Default</string>
     <string name="vib_short">Short</string>
     <string name="vib_long">Long</string>
+    <string name="chat_unmarked_stealth_first">You’ve marked a chat visible. It’ll now be visible to anyone who opens hike.</string>
+    		
 </resources>
