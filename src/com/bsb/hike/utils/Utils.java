@@ -85,6 +85,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -2434,14 +2435,21 @@ public class Utils
 
 		if (checkIfActuallyBackgrounded)
 		{
-			boolean isForegrounded = isAppForeground(context);
+			boolean screenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+			Log.d("HikeAppState", "Screen On? " + screenOn);
 
-			if (isForegrounded)
+			if (screenOn)
 			{
-				if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+				boolean isForegrounded = isAppForeground(context);
+
+				if (isForegrounded)
 				{
-					Logger.d("HikeAppState", "Wrong state! correcting it");
-					HikeMessengerApp.currentState = CurrentState.RESUMED;
+					if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+					{
+						Logger.d("HikeAppState", "Wrong state! correcting it");
+						HikeMessengerApp.currentState = CurrentState.RESUMED;
+						return;
+					}
 				}
 			}
 		}
