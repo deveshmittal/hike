@@ -277,6 +277,27 @@ public class StickerManager
 				return "indianDownloadShown";
 			}
 		},
+		sports
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.sports;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_sports;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "sportsDownloadShown";
+			}
+		},
+		
 		humanoid2
 		{
 			@Override
