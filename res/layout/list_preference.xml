@@ -15,7 +15,7 @@
         android:paddingRight="5dp" >
 
         <ImageView
-            android:id="@+android:id/icon"
+            android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -27,7 +27,7 @@
             android:id="@+android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+android:id/icon"
+            android:layout_toRightOf="@id/icon"
             android:text="Title"
             android:textColor="@color/list_item_header"
             android:textSize="16sp"

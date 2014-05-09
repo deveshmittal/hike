@@ -3812,13 +3812,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
 		{
-			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container, iv);
+			showUndeliveredMessage = new ShowUndeliveredMessage(message, tv, container, iv);
 			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		}
 		else
 		{
-			updateViewWindowForReadBy(message);
-			showUndeliveredTextAndSetClick(tv, container, iv, true);
+			showUndeliveredTextAndSetClick(message, tv, container, iv, true);
 		}
 	}
 
@@ -4543,6 +4542,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private class ShowUndeliveredMessage implements Runnable
 	{
+		ConvMessage message;
 
 		TextView tv;
 
@@ -4550,8 +4550,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View container;
 
-		public ShowUndeliveredMessage(TextView tv, View container, ImageView iv)
+		public ShowUndeliveredMessage(ConvMessage message, TextView tv, View container, ImageView iv)
 		{
+			this.message = message;
 			this.tv = tv;
 			this.container = container;
 			this.iv = iv;
@@ -4567,12 +4568,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
 			if (isMessageUndelivered(lastSentMessage))
 			{
-				showUndeliveredTextAndSetClick(tv, container, iv, true);
+				showUndeliveredTextAndSetClick(message, tv, container, iv, true);
 			}
 		}
 	}
 
-	private void showUndeliveredTextAndSetClick(TextView tv, View container, ImageView iv, boolean fromHandler)
+	private void showUndeliveredTextAndSetClick(ConvMessage message, TextView tv, View container, ImageView iv, boolean fromHandler)
 	{
 		String undeliveredText = getUndeliveredTextRes();
 		if (!TextUtils.isEmpty(undeliveredText))
@@ -4587,6 +4588,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		container.setOnClickListener(this);
 
 		container.setOnLongClickListener(this);
+
+		updateViewWindowForReadBy(message);
 	}
 
 	private String getUndeliveredTextRes()
