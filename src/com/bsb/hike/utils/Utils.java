@@ -85,6 +85,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -101,7 +102,6 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.MotionEvent;
@@ -2434,14 +2434,21 @@ public class Utils
 
 		if (checkIfActuallyBackgrounded)
 		{
-			boolean isForegrounded = isAppForeground(context);
+			boolean screenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+			Logger.d("HikeAppState", "Screen On? " + screenOn);
 
-			if (isForegrounded)
+			if (screenOn)
 			{
-				if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+				boolean isForegrounded = isAppForeground(context);
+
+				if (isForegrounded)
 				{
-					Logger.d("HikeAppState", "Wrong state! correcting it");
-					HikeMessengerApp.currentState = CurrentState.RESUMED;
+					if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+					{
+						Logger.d("HikeAppState", "Wrong state! correcting it");
+						HikeMessengerApp.currentState = CurrentState.RESUMED;
+						return;
+					}
 				}
 			}
 		}
@@ -3655,7 +3662,7 @@ public class Utils
 	public static void playSoundFromRaw(Context context, int soundId)
 	{
 
-		Log.i("sound", "playing sound " + soundId);
+		Logger.i("sound", "playing sound " + soundId);
 		MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_RING);
 		Resources res = context.getResources();
@@ -3712,7 +3719,6 @@ public class Utils
 
 	public static boolean isAppForeground(Context context)
 	{
-		long startTime = System.currentTimeMillis();
 		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
 		Iterator<RunningAppProcessInfo> i = l.iterator();
@@ -3722,7 +3728,6 @@ public class Utils
 
 			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
 			{
-				Log.d("HikeAppState", "Check time: " + (System.currentTimeMillis() - startTime));
 				return true;
 			}
 		}

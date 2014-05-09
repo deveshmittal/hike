@@ -3508,6 +3508,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				}
 			}
+			else
+			{
+				if (detailHolder.senderName != null)
+				{
+					detailHolder.senderName.setTextColor(context.getResources().getColor(R.color.chat_color));
+				}
+				if (detailHolder.senderNameUnsaved != null)
+				{
+					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(R.color.unsaved_contact_name));
+				}
+			}
 			detailHolder.avatarImage.setVisibility(View.VISIBLE);
 			setAvatar(convMessage.getGroupParticipantMsisdn(), detailHolder.avatarImage);
 			detailHolder.avatarContainer.setVisibility(View.VISIBLE);
@@ -3542,6 +3553,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else
 				{
 					participantName.setText(name);
+					participantNameUnsaved.setVisibility(View.GONE);
 				}
 				participantDetails.setTag(convMessage);
 				participantDetails.setOnClickListener(contactClick);
