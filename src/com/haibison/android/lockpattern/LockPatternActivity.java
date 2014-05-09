@@ -463,7 +463,8 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
                 .getDisplayMode() : null;
         List<Cell> lastPattern = mLockPatternView != null ? mLockPatternView
                 .getPattern() : null;
-
+        
+        getSupportActionBar().hide();
         setContentView(R.layout.alp_42447968_lock_pattern_activity);
         UI.adjustDialogSizeForLargeScreens(getWindow(), ACTION_CREATE_PATTERN.equals(getIntent().getAction()));
         
