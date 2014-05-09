@@ -1536,7 +1536,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				setBubbleColor(convMessage, imageHolder.messageContainer);
-				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
 				setSelection(position, imageHolder.selectedStateOverlay);
 
