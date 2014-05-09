@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="399"
-    android:versionName="2.9.5.9" >
+    android:versionCode="400"
+    android:versionName="2.9.5.10" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -207,7 +207,7 @@
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
     		android:screenOrientation="user"
-    		android:theme="@style/Theme.CustomDialog" />
+    		android:theme="@style/LockPatternTheme" />
         
         <receiver android:name=".service.BootService" >
             <intent-filter>
