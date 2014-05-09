@@ -800,6 +800,7 @@ public class LockPatternActivity extends Activity {
         }
 
         finish();
+        overridePendingTransition(0, 0);
     }// finishWithResultOk()
 
     /**
@@ -841,6 +842,7 @@ public class LockPatternActivity extends Activity {
         }
 
         finish();
+        overridePendingTransition(0, 0);
     }// finishWithNegativeResult()
 
     /*
