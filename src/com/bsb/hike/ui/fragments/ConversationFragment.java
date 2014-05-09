@@ -524,7 +524,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			optionsList.add(getString(R.string.group_info));
 		}
 		optionsList.add(getString(R.string.shortcut));
-		optionsList.add(getString(R.string.email_conversation));
 		if (conv instanceof GroupConversation)
 		{
 			optionsList.add(getString(R.string.delete_leave));
@@ -533,7 +532,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.delete));
 		}
-
+		if (conv instanceof GroupConversation)
+		{	
+		optionsList.add(getString(R.string.clear_conversation));
+		}
+		optionsList.add(getString(R.string.email_conversation));
+		
+	
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
 
@@ -576,6 +581,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				else if (getString(R.string.viewcontact).equals(option))
 				{
 					viewContacts(conv);
+				}
+				else if (getString(R.string.clear_conversation).equals(option))
+				{
+					clearConversation(conv);
 				}
 				else if (getString(R.string.group_info).equals(option))
 				{
@@ -656,6 +665,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		return true;
 	}
 
+
+	protected void clearConversation(final Conversation conv) {
+		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(this.getActivity());
+		clearConfirmDialog.setHeader(R.string.clear_conversation);
+		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(conv.getMsisdn(), conv.getConvId()));
+				mAdapter.notifyDataSetChanged();
+				clearConfirmDialog.dismiss();
+			}
+		};
+
+		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+		clearConfirmDialog.setCancelButton(R.string.cancel);
+		clearConfirmDialog.show();
+		
+	}
 
 	private void fetchConversations()
 	{
