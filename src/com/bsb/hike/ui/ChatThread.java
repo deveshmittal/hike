@@ -1944,6 +1944,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		/*
+		 * Resetting the Orientation Change flag to be used again
+		 */
+		wasOrientationChanged = false;
 	}
 
 	public void updateViewWindowForReadBy()
