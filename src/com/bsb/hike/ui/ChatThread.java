@@ -512,7 +512,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			isActionModeOn = savedInstanceState.getBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, false);
 			if (isActionModeOn)
 			{
-				ArrayList<Integer> selectedPositions = savedInstanceState.getIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS);
+				long[] selectedPositions = savedInstanceState.getLongArray(HikeConstants.Extras.SELECTED_POSITIONS);
 				mAdapter.setPositionsSelected(selectedPositions);
 				selectedNonForwadableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS);
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
@@ -1204,7 +1204,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		return showMessageContextMenu(position);
+		return showMessageContextMenu(mAdapter.getItem(position));
 	}
 
 	@Override
@@ -1214,16 +1214,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return;
 	}
 
-	public boolean showMessageContextMenu(int position)
+	public boolean showMessageContextMenu(ConvMessage message)
 	{
 		dismissPopupWindow();
-		ConvMessage message = mAdapter.getItem(position);
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
 			return false;
 		}
-		mAdapter.toggleSelection(position);
-		boolean isMsgSelected = mAdapter.isSelected(position);
+		mAdapter.toggleSelection(message);
+		boolean isMsgSelected = mAdapter.isSelected(message);
 
 		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
 
@@ -5025,7 +5024,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (isActionModeOn)
 		{
 			outState.putBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, true);
-			outState.putIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS, new ArrayList<Integer>(mAdapter.getSelectedIds()));
+			outState.putLongArray(HikeConstants.Extras.SELECTED_POSITIONS, mAdapter.getSelectedMsgIdsLongArray());
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS, selectedNonForwadableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
@@ -6346,9 +6345,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public boolean onActionModeItemClicked(MenuItem item)
 	{
-		final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
-		final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
-		ConvMessage[] convMsgs;
+		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
@@ -6369,20 +6366,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onClick(View v)
 				{
-					Collections.sort(selectedMessagesIds);
-					ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
-					for (int i = convMsgs.length - 1; i >= 0; i--)
+					for (ConvMessage convMessage : selectedMessagesMap.values())
 					{
-						convMsgs[i] = mAdapter.getItem(selectedMessagesIds.get(i));
-						removeMessage(convMsgs[i]);
-						if (convMsgs[i].isFileTransferMessage())
+						removeMessage(convMessage);
+						if (convMessage.isFileTransferMessage())
 						{
-							if (convMsgs[i].isFileTransferMessage())
+							if (convMessage.isFileTransferMessage())
 							{
 								// @GM cancelTask has been changed
-								HikeFile hikeFile = convMsgs[i].getMetadata().getHikeFiles().get(0);
+								HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 								File file = hikeFile.getFile();
-								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMsgs[i].getMsgID(), file, convMsgs[i].isSent());
+								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
 								mAdapter.notifyDataSetChanged();
 							}
 						}
@@ -6397,9 +6391,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
-			Collections.sort(selectedMessagesIds);
-			convMsgs = new ConvMessage[selectedMessagesIds.size()];
-
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
@@ -6407,10 +6398,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONArray multipleMsgArray = new JSONArray();
 			try
 			{
-				for (int i = 0; i < convMsgs.length; i++)
+				for (ConvMessage message : selectedMessagesMap.values())
 				{
-					ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
-
 					JSONObject multiMsgFwdObject = new JSONObject();
 					if (message.isFileTransferMessage())
 					{
@@ -6466,12 +6455,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			startActivity(intent);
 			return true;
 		case R.id.copy_msgs:
-			Collections.sort(selectedMessagesIds);
-			convMsgs = new ConvMessage[selectedMessagesIds.size()];
-			String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
-			for (int i = 1; i < convMsgs.length; i++)
+			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			Collections.sort(selectedMsgIds);
+			String msgStr =selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
+			for (int i = 1; i < selectedMsgIds.size(); i++)
 			{
-				msgStr += "\n" + mAdapter.getItem(selectedMessagesIds.get(i)).getMessage();
+				msgStr += "\n" + selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage();
 			}
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			clipboard.setText(msgStr);
@@ -6479,8 +6468,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			destroyActionMode();
 			return true;
 		case R.id.action_mode_overflow_menu:
-			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
-			showActionModeOverflow(message);
+			for (ConvMessage convMessage : selectedMessagesMap.values())
+			{
+				showActionModeOverflow(convMessage);
+			}
 			return true;
 		default:
 			destroyActionMode();

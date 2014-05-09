@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -410,7 +411,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	// private StickerLoader largeStickerLoader;
 	private int mIconImageSize;
 
-	private Set<Integer> mSelectedItemsIds;
+	private Set<Long> mSelectedItemsIds;
 
 	private boolean isActionModeOn = false;
 
@@ -432,7 +433,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
 		this.chatTheme = ChatTheme.DEFAULT;
-		this.mSelectedItemsIds = new HashSet<Integer>();
+		this.mSelectedItemsIds = new HashSet<Long>();
 		setLastSentMessagePosition();
 		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 	}
@@ -931,7 +932,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
-			setSelection(position, stickerHolder.selectedStateOverlay);
+			setSelection(convMessage, stickerHolder.selectedStateOverlay);
 		}
 		else if (viewType == ViewType.NUDGE_SENT || viewType == ViewType.NUDGE_RECEIVE)
 		{
@@ -1000,7 +1001,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 			setTimeNStatus(position, nudgeHolder, true, nudgeHolder.nudge);
-			setSelection(position, nudgeHolder.selectedStateOverlay);
+			setSelection(convMessage, nudgeHolder.selectedStateOverlay);
 		}
 		else if (convMessage.isFileTransferMessage())
 		{
@@ -1151,7 +1152,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				setTimeNStatus(position, wtHolder, true, wtHolder.placeHolder);
-				setSelection(position, wtHolder.selectedStateOverlay);
+				setSelection(convMessage, wtHolder.selectedStateOverlay);
 
 				wtHolder.placeHolder.setTag(convMessage);
 				wtHolder.placeHolder.setOnClickListener(this);
@@ -1300,7 +1301,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, videoHolder.messageContainer);
 				setupFileState(videoHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, videoHolder, true, videoHolder.fileThumb);
-				setSelection(position, videoHolder.selectedStateOverlay);
+				setSelection(convMessage, videoHolder.selectedStateOverlay);
 
 				videoHolder.fileThumb.setTag(convMessage);
 				videoHolder.fileThumb.setOnClickListener(this);
@@ -1428,7 +1429,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
-				setSelection(position, imageHolder.selectedStateOverlay);
+				setSelection(convMessage, imageHolder.selectedStateOverlay);
 
 				imageHolder.fileThumb.setTag(convMessage);
 				imageHolder.fileThumb.setOnClickListener(this);
@@ -1543,7 +1544,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
-				setSelection(position, imageHolder.selectedStateOverlay);
+				setSelection(convMessage, imageHolder.selectedStateOverlay);
 
 				imageHolder.fileThumb.setTag(convMessage);
 				imageHolder.fileThumb.setOnClickListener(this);
@@ -1664,7 +1665,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
-				setSelection(position, fileHolder.selectedStateOverlay);
+				setSelection(convMessage, fileHolder.selectedStateOverlay);
 
 				fileHolder.fileThumb.setTag(convMessage);
 				fileHolder.fileThumb.setOnClickListener(this);
@@ -1777,7 +1778,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setupFileState(fileHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), true);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
-				setSelection(position, fileHolder.selectedStateOverlay);
+				setSelection(convMessage, fileHolder.selectedStateOverlay);
 
 				fileHolder.fileThumb.setTag(convMessage);
 				fileHolder.fileThumb.setOnClickListener(this);
@@ -1856,7 +1857,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			setBubbleColor(convMessage, textHolder.messageContainer);
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
-			setSelection(position, textHolder.selectedStateOverlay);
+			setSelection(convMessage, textHolder.selectedStateOverlay);
 
 			boolean showTip = false;
 
@@ -3330,7 +3331,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return inflater.inflate(resource, root, attachToRoot);
 	}
 
-	private void setSelection(int position, View overlay)
+	private void setSelection(ConvMessage convMessage, View overlay)
 	{
 		if (isActionModeOn)
 		{
@@ -3338,10 +3339,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
 			 */
 			overlay.setVisibility(View.VISIBLE);
-			overlay.setTag(position);
+			overlay.setTag(convMessage);
 			overlay.setOnClickListener(selectedStateOverlayClickListener);
 
-			if (isSelected(position))
+			if (isSelected(convMessage))
 			{
 				/*
 				 * If a message has been selected then background of selected state overlay will change to selected state color. otherwise this overlay will be transparent
@@ -4230,7 +4231,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void onClick(View v)
 		{
-			chatThread.showMessageContextMenu((Integer) v.getTag());
+			chatThread.showMessageContextMenu((ConvMessage) v.getTag());
 			return;
 		}
 	};
@@ -4467,7 +4468,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public boolean onLongClick(View view)
 	{
-		return false;
+		chatThread.showMessageContextMenu((ConvMessage) view.getTag());
+		return true;
 	}
 
 	@Override
@@ -5082,9 +5084,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return iconLoader;
 	}
 
-	public void toggleSelection(int position)
+	public void toggleSelection(ConvMessage convMsg)
 	{
-		selectView(position, !isSelected(position));
+		selectView(convMsg, !isSelected(convMsg));
 	}
 
 	public void removeSelection()
@@ -5093,23 +5095,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		notifyDataSetChanged();
 	}
 
-	public void selectView(int position, boolean value)
+	public void selectView(ConvMessage convMsg, boolean value)
 	{
 		if (value)
 		{
-			mSelectedItemsIds.add(position);
+			mSelectedItemsIds.add(convMsg.getMsgID());
 		}
 		else
 		{
-			mSelectedItemsIds.remove(position);
+			mSelectedItemsIds.remove(convMsg.getMsgID());
 		}
 
 		notifyDataSetChanged();
 	}
 
-	public void setPositionsSelected(ArrayList<Integer> selectedPositions)
+	public void setPositionsSelected(long[] selectedConvMsgsIds)
 	{
-		mSelectedItemsIds.addAll(selectedPositions);
+		for (long msgId : selectedConvMsgsIds)
+		{
+			mSelectedItemsIds.add(msgId);
+		}
 		notifyDataSetChanged();
 	}
 
@@ -5118,14 +5123,38 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return mSelectedItemsIds.size();
 	}
 
-	public Set<Integer> getSelectedIds()
+	public HashMap<Long, ConvMessage> getSelectedMessagesMap()
+	{
+		HashMap<Long, ConvMessage> selectedMsgs = new HashMap<Long, ConvMessage>();
+		for (ConvMessage convMessage : convMessages)
+		{
+			if(mSelectedItemsIds.contains(convMessage.getMsgID()))
+			{
+				selectedMsgs.put(convMessage.getMsgID(), convMessage);
+			}
+		}
+		return selectedMsgs;
+	}
+	
+	public long[] getSelectedMsgIdsLongArray()
+	{
+		long[] result = new long[mSelectedItemsIds.size()];
+		int i=0;
+		for (Long msgId : mSelectedItemsIds)
+		{
+			result[i++] = msgId;
+		}
+		return result;
+	}
+	
+	public Set<Long> getSelectedMessageIds()
 	{
 		return mSelectedItemsIds;
 	}
-
-	public boolean isSelected(int position)
+	
+	public boolean isSelected(ConvMessage convMsg)
 	{
-		return mSelectedItemsIds.contains(position);
+		return mSelectedItemsIds.contains(convMsg.getMsgID());
 	}
 
 	public void setActionMode(boolean isOn)
