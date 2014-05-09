@@ -3719,7 +3719,6 @@ public class Utils
 
 	public static boolean isAppForeground(Context context)
 	{
-		long startTime = System.currentTimeMillis();
 		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
 		Iterator<RunningAppProcessInfo> i = l.iterator();
@@ -3729,7 +3728,6 @@ public class Utils
 
 			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
 			{
-				Logger.d("HikeAppState", "Check time: " + (System.currentTimeMillis() - startTime));
 				return true;
 			}
 		}
