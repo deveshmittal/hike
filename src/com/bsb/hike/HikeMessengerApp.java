@@ -379,6 +379,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static volatile boolean networkError;
 
+	public Handler appStateHandler;
+
 	class IncomingHandler extends Handler
 	{
 		@Override
@@ -716,6 +718,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 
+		appStateHandler = new Handler();
+
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 	}
 
@@ -858,10 +862,20 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	{
 		if(HikePubSub.CONNECTED_TO_MQTT.equals(type))
 		{
+			appStateHandler.post(appStateChangedRunnable);
+		}
+	}
+
+	private Runnable appStateChangedRunnable = new Runnable()
+	{
+		
+		@Override
+		public void run()
+		{
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(this, false, false);
+			Utils.appStateChanged(HikeMessengerApp.this, false, false);
 		}
-	}
+	};
 }
