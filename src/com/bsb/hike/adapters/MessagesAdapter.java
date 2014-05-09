@@ -912,12 +912,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						stickerHolder.loader.setVisibility(View.VISIBLE);
 						stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+						stickerHolder.image.setVisibility(View.GONE);
+						stickerHolder.image.setImageDrawable(null);
 					}
 				}
 				else
 				{
 					stickerHolder.loader.setVisibility(View.VISIBLE);
 					stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+					stickerHolder.image.setVisibility(View.GONE);
+					stickerHolder.image.setImageDrawable(null);
 
 					/*
 					 * Download the sticker if not already downloading.
@@ -1541,7 +1545,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				setBubbleColor(convMessage, imageHolder.messageContainer);
-				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
 				setSelection(position, imageHolder.selectedStateOverlay);
 
