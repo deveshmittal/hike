@@ -177,26 +177,6 @@ public class StickerManager
 				return "expDownloadShown";
 			}
 		},
-		doggy
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.doggy;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_doggy;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "doggyDownloadShown";
-			}
-		},
 		love
 		{
 			@Override
@@ -217,24 +197,24 @@ public class StickerManager
 				return "loveDownloadShown";
 			}
 		},
-		angry
+		doggy
 		{
 			@Override
 			public int resId()
 			{
-				return R.drawable.angry;
+				return R.drawable.doggy;
 			}
 
 			@Override
 			public int previewResId()
 			{
-				return R.drawable.preview_angry;
+				return R.drawable.preview_doggy;
 			}
 
 			@Override
 			public String downloadPref()
 			{
-				return "angryDownloadShown";
+				return "doggyDownloadShown";
 			}
 		},
 		bollywood
@@ -315,6 +295,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "humanoid2DownloadShown";
+			}
+		},
+		angry
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.angry;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_angry;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "angryDownloadShown";
 			}
 		},
 		avatars
