@@ -342,6 +342,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String RESET_COMPLETE_STEALTH_START_TIME = "resetCompleteStealthStartTime";
 
+	public static final String SHOWN_FIRST_UNMARK_STEALTH_TOAST = "shownFirstUnmarkStealthToast";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

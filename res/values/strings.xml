@@ -1505,5 +1505,6 @@
     <string name="chat_unmarked_stealth">You’ve marked a chat visible.</string>
     <string name="mark_stealth">Mark Chat as Hidden</string>
     <string name="unmark_stealth">Mark Chat as Visible</string>
-		
+    <string name="chat_unmarked_stealth_first">You’ve marked a chat visible. It’ll now be visible to anyone who opens hike.</string>
+    		
 </resources>
