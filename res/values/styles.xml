@@ -591,4 +591,12 @@
 	    <item name="android:layout_marginBottom">8dp</item>
 	    <item name="android:layout_marginTop">8dp</item>
 	</style>
+	
+	<style name="LockPatternTheme" parent="@style/Theme.Sherlock">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+	</style>
 </resources>

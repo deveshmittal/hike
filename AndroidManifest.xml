@@ -207,7 +207,7 @@
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
     		android:screenOrientation="user"
-    		android:theme="@style/Theme.CustomDialog" />
+    		android:theme="@style/LockPatternTheme" />
         
         <receiver android:name=".service.BootService" >
             <intent-filter>
