@@ -76,7 +76,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{
 			Logger.d(TAG + getClass().getSimpleName(), "App was closed");
 			HikeMessengerApp.currentState = CurrentState.CLOSED;
-			Utils.appStateChanged(this);
+			Utils.appStateChanged(this.getApplicationContext());
 		}
 		else
 		{

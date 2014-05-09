@@ -17,7 +17,7 @@ public class HikeAppStateUtils
 		{
 			Logger.d(TAG, "App was opened");
 			HikeMessengerApp.currentState = CurrentState.OPENED;
-			Utils.appStateChanged(activity);
+			Utils.appStateChanged(activity.getApplicationContext());
 		}
 
 	}
@@ -33,7 +33,7 @@ public class HikeAppStateUtils
 		{
 			Logger.d(TAG, "App was resumed");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.appStateChanged(activity);
+			Utils.appStateChanged(activity.getApplicationContext());
 		}
 	}
 
@@ -64,7 +64,7 @@ public class HikeAppStateUtils
 			}
 			Logger.d(TAG, "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
-			Utils.appStateChanged(activity, true, true);
+			Utils.appStateChanged(activity.getApplicationContext(), true, true);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class HikeAppStateUtils
 		{
 			Logger.d(TAG, "App returning from activity with result");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.appStateChanged(activity);
+			Utils.appStateChanged(activity.getApplicationContext());
 		}
 	}
 
