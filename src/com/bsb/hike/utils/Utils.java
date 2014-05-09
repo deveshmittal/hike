@@ -102,7 +102,6 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.MotionEvent;
@@ -2436,7 +2435,7 @@ public class Utils
 		if (checkIfActuallyBackgrounded)
 		{
 			boolean screenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
-			Log.d("HikeAppState", "Screen On? " + screenOn);
+			Logger.d("HikeAppState", "Screen On? " + screenOn);
 
 			if (screenOn)
 			{
@@ -3663,7 +3662,7 @@ public class Utils
 	public static void playSoundFromRaw(Context context, int soundId)
 	{
 
-		Log.i("sound", "playing sound " + soundId);
+		Logger.i("sound", "playing sound " + soundId);
 		MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_RING);
 		Resources res = context.getResources();
@@ -3730,7 +3729,7 @@ public class Utils
 
 			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
 			{
-				Log.d("HikeAppState", "Check time: " + (System.currentTimeMillis() - startTime));
+				Logger.d("HikeAppState", "Check time: " + (System.currentTimeMillis() - startTime));
 				return true;
 			}
 		}
