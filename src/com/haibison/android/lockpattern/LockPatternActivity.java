@@ -806,6 +806,7 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         }
 
         finish();
+        overridePendingTransition(0, 0);
     }// finishWithResultOk()
 
     /**
@@ -847,6 +848,7 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         }
 
         finish();
+        overridePendingTransition(0, 0);
     }// finishWithNegativeResult()
 
     /*
