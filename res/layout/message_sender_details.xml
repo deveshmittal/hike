@@ -23,7 +23,7 @@
         android:layout_marginLeft="5dp"
         android:gravity="left"
         android:text="NAME"
-        android:textColor="#66000000"
+        android:textColor="@color/unsaved_contact_name"
         android:textSize="14sp"
         android:visibility="gone" />
 
