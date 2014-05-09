@@ -102,15 +102,14 @@ public class StickerManager
 	public final String[] LOCAL_STICKER_IDS_HUMANOID = { "001_love1.png", "002_love2.png", "003_teasing.png", "004_rofl.png", "005_bored.png", "006_angry.png", "007_strangle.png",
 			"008_shocked.png", "009_hurray.png", "010_yawning.png" };
 
-	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup, R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
-			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh, R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
+	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn, R.drawable.sticker_2_lol, R.drawable.sticker_3_rofl, R.drawable.sticker_4_lmao,
+			R.drawable.sticker_5_omg, R.drawable.sticker_6_brb, R.drawable.sticker_7_gtg, R.drawable.sticker_8_xoxo, };
 
-	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup, R.drawable.sticker_small_3_drooling,
-			R.drawable.sticker_small_4_devilsmile, R.drawable.sticker_small_5_sorry, R.drawable.sticker_small_6_urgh, R.drawable.sticker_small_7_confused,
-			R.drawable.sticker_small_8_dreaming };
+	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn_small, R.drawable.sticker_2_lol_small, R.drawable.sticker_3_rofl_small, R.drawable.sticker_4_lmao_small,
+			R.drawable.sticker_5_omg_small, R.drawable.sticker_6_brb_small, R.drawable.sticker_7_gtg_small, R.drawable.sticker_8_xoxo_small, };
 
-	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
-			"007_confused.png", "008_dreaming.png", };
+	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_gn.png", "002_lol.png", "003_rofl.png", "004_lmao.png", "005_omg.png", "006_brb.png",
+			"007_gtg.png", "008_xoxo.png", };
 
 	public enum StickerCategoryId
 	{
