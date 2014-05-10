@@ -1831,7 +1831,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		// add block view
-		if (contactInfo.isUnknownContact())
+		if (contactInfo != null && contactInfo.isUnknownContact())
 		{
 			mConversationsView.addHeaderView(LayoutInflater.from(ChatThread.this).inflate(R.layout.block_add_unknown_contact, null));
 		}
