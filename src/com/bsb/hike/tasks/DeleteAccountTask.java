@@ -54,6 +54,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
 
+		HikeMessengerApp.clearStealthMsisdn();
+
 		try
 		{
 			AccountUtils.deleteOrUnlinkAccount(this.delete);

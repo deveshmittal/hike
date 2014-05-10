@@ -49,11 +49,11 @@ public class UI {
         /**
          * Small.
          */
-        SMALL(.9f, .74f, .85f, .87f),
+        SMALL(.8f, .74f, .85f, .87f),
         /**
          * Normal.
          */
-        NORMAL(.9f, .74f, .85f, .87f),
+        NORMAL(.8f, .74f, .85f, .87f),
         /**
          * Large.
          */

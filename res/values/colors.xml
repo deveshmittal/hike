@@ -287,5 +287,6 @@
     <color name="white_alpha_48">#7bffffef</color>
     <color name="black_unknwon_contacts">#bab6ad</color>
     <color name="black_unknwon_contacts_pressed">#5f5e58</color>
+    <color name="unsaved_contact_name">#66000000</color>
 </resources>
 	
