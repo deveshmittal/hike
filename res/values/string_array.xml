@@ -13,5 +13,15 @@
         <item>@string/vib_short</item>
         <item>@string/vib_long</item>
     </string-array>
+    <string-array name="notificationSoundPrefKeys">
+        <item>Silent</item>
+        <item>Default</item>
+        <item>Hike Jingle</item>
+    </string-array>
+    <string-array name="notificationSoundPrefValues">
+        <item>@string/notif_sound_off</item>
+        <item>@string/notif_sound_default</item>
+        <item>@string/notif_sound_Hike</item>
+    </string-array>
 
 </resources>

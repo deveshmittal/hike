@@ -38,6 +38,8 @@ public class HikeNotification
 {
 	private String VIB_OFF, VIB_DEF, VIB_SHORT, VIB_LONG;
 
+	private String NOTIF_SOUND_OFF, NOTIF_SOUND_DEFAULT, NOTIF_SOUND_HIKE;
+
 	public static final int HIKE_NOTIFICATION = 0;
 
 	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
@@ -76,6 +78,9 @@ public class HikeNotification
 			VIB_DEF = res.getString(R.string.vib_default);
 			VIB_SHORT = res.getString(R.string.vib_short);
 			VIB_LONG = res.getString(R.string.vib_long);
+			NOTIF_SOUND_OFF = res.getString(R.string.notif_sound_off);
+			NOTIF_SOUND_DEFAULT = res.getString(R.string.notif_sound_default);
+			NOTIF_SOUND_HIKE = res.getString(R.string.notif_sound_Hike);
 		}
 	}
 
@@ -506,13 +511,8 @@ public class HikeNotification
 
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
-		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
-
-		final int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND : 0;
-
-		final boolean playNativeJingle = preferenceManager.getBoolean(HikeConstants.NATIVE_JINGLE_PREF, true);
 
 		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
@@ -537,13 +537,19 @@ public class HikeNotification
 		}
 		if (!forceNotPlaySound)
 		{
-			if (playNativeJingle && playSound != 0)
+			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+			if (shouldNotPlayNotification && !NOTIF_SOUND_OFF.equals(notifSond))
 			{
-				mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
-			}
-			else if (playSound != 0)
-			{
-				mBuilder.setDefaults(mBuilder.getNotification().defaults | playSound);
+
+				if (NOTIF_SOUND_HIKE.equals(notifSond))
+				{
+					mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
+				}
+				else
+				{
+					mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+				}
 			}
 			if (led)
 			{

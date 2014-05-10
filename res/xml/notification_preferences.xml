@@ -15,13 +15,12 @@
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_sound"
         android:defaultValue="true"
-        android:key="soundPref"
+        android:key="tickSoundPref"
         android:layout="@layout/icon_preference"
-        android:summary="@string/sound_msg"
-        android:title="@string/sound"
-        android:widgetLayout="@layout/checkbox_widget" />    
-
-	<com.bsb.hike.view.IconCheckBoxPreference
+        android:summary="@string/tickSoundSummary"
+        android:title="@string/tickSoundTitle"
+        android:widgetLayout="@layout/checkbox_widget" />
+    <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_led"
         android:defaultValue="true"
         android:key="ledPref"
@@ -30,16 +29,17 @@
         android:title="@string/led_notification"
         android:widgetLayout="@layout/checkbox_widget" />
 
-	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_hike_jingle"
-        android:defaultValue="true"
-        android:key="jinglePref"
-        android:layout="@layout/icon_preference"
-        android:summary="@string/native_jingle_info"
-        android:title="@string/native_jingle"
-        android:widgetLayout="@layout/checkbox_widget" />
-	
-	<com.bsb.hike.view.IconCheckBoxPreference
+    <ListPreference
+        android:defaultValue="@string/notif_sound_default"
+        android:entries="@array/notificationSoundPrefKeys"
+        android:entryValues="@array/notificationSoundPrefValues"
+        android:icon="@drawable/ic_hike_jingle"
+        android:key="notifSoundPref"
+        android:layout="@layout/list_preference"
+        android:summary="@string/notificationSoundSummary"
+        android:title="@string/notificationSoundTitle" />
+
+    <com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_status_notification"
         android:defaultValue="true"
         android:key="statusBooleanPref"
