@@ -1950,7 +1950,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (mConversationsView.getLastVisiblePosition() >= (messages.size()-2))
 		{
-			mConversationsView.smoothScrollByOffset(1);;
+			mConversationsView.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					mConversationsView.smoothScrollToPosition(messages.size() - 1);
+				}
+			});
 		}
 	}
 
