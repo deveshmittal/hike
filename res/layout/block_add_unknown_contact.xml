@@ -2,30 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/transparent_black"
+    android:background="@color/black_unknwon_contacts"
     android:orientation="horizontal" >
 
     <Button
-        android:onClick="blockUser"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@null"
+        android:background="@drawable/block_unknown_contact_button"
         android:gravity="center"
-        android:text="Block" />
+        android:onClick="blockUser"
+        android:text="Block"
+        android:textColor="@color/white" />
 
     <View
-        android:background="@color/white"
         android:layout_width="1dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/white" />
 
     <Button
-        android:onClick="addToContacts"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@null"
+        android:background="@drawable/block_unknown_contact_button"
         android:gravity="center"
-        android:text="Add" />
+        android:onClick="addToContacts"
+        android:text="Add"
+        android:textColor="@color/white" />
 
 </LinearLayout>
