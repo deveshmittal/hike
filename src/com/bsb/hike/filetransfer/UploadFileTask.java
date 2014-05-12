@@ -577,8 +577,7 @@ public class UploadFileTask extends FileTransferBase
 			end = start + chunkSize;
 		end--;
 
-		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
-		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		byte[] fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
 
 		while (end < length && responseJson == null)
 		{
@@ -593,9 +592,7 @@ public class UploadFileTask extends FileTransferBase
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
-
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
-			System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + chunkSize, boundary.length());
 			String responseString = send(contentRange, fileBytes);
 
 			if (end == (length - 1) && responseString != null)
@@ -617,7 +614,11 @@ public class UploadFileTask extends FileTransferBase
 						setChunkSize();
 						if(chunkSize > length)
 							chunkSize = (int) length;
-						
+						if(end != (start + chunkSize - 1))
+						{
+							end = (start + chunkSize - 1);
+							fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
+						}
 					}
 					else
 					{
@@ -643,8 +644,7 @@ public class UploadFileTask extends FileTransferBase
 					{
 						end--;
 						chunkSize = end - start + 1;
-						fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
-						System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+						fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
 					}
 				}
 			}
@@ -872,6 +872,14 @@ public class UploadFileTask extends FileTransferBase
 
 		}
 		return responseJson;
+	}
+
+	private byte[] setupFileBytes(String boundaryMesssage, String boundary, int chunkSize)
+	{
+		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
+		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + chunkSize, boundary.length());
+		return fileBytes;
 	}
 
 	String getBoundaryMessage()
