@@ -6754,7 +6754,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 		if (isLandscape)
 		{
-			View root = findViewById(R.id.chatThreadParentLayout);
+			View root = findViewById(R.id.chat_layout);
 
 			int statusBarHeight = getStatusBarHeight();
 			int maxHeight = root.getRootView().getHeight();
