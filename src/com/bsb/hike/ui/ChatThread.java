@@ -5184,6 +5184,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onDismiss()
 				{
+					/*
+					 * Hiding the black filler palette.
+					 */
+					findViewById(R.id.sticker_palette_filler).setVisibility(View.GONE);
 					resizeMainheight(0, false);
 					emoticonType = null;
 					attachmentWindow = null;
@@ -6673,6 +6677,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (root.getPaddingBottom() != emoticonPalHeight)
 		{
 			root.setPadding(0, 0, 0, emoticonPalHeight);
+			showPaletteFillerView(emoticonPalHeight);
 			return true;
 		}
 		return false;
@@ -6734,5 +6739,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		emoticonLayout.setLayoutParams(lp);
 		attachmentWindow.setHeight(lp.height);
 		resizeMainheight(lp.height, true);
+	}
+
+	/**
+	 * This method shows a empty black filler view that has the same height as the emoticon/sticker palette to improve the
+	 * palette popup transition.
+	 * @param height 
+	 */
+	private void showPaletteFillerView(int height)
+	{
+		View fillerView = findViewById(R.id.sticker_palette_filler);
+
+		android.widget.RelativeLayout.LayoutParams lp = (android.widget.RelativeLayout.LayoutParams) fillerView.getLayoutParams();
+		lp.height = height;
+
+		fillerView.setVisibility(View.VISIBLE);
 	}
 }
