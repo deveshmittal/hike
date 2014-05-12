@@ -6603,7 +6603,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
-		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
+		int inSampleSize = 1;
+		if(!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		{
+			inSampleSize = 2;
+		}
 		
 		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
 		
