@@ -1522,4 +1522,5 @@
     <string name="notif_sound_Hike">HikeJingle</string>
     <string name="notificationSoundTitle">Notification tones</string>
     <string name="notificationSoundSummary">Select a sound to play for a new notification message</string>
+    <string name="status">Status</string>
 </resources>
