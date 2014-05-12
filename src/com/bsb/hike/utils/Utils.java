@@ -168,7 +168,7 @@ public class Utils
 	public static Pattern msisdnRegex;
 
 	public static Pattern pinRegex;
-
+ 
 	public static String shortCodeIntent;
 
 	private static Animation mOutToRight;
@@ -180,6 +180,8 @@ public class Utils
 	private static TranslateAnimation mInFromRight;
 
 	public static float densityMultiplier = 1.0f;
+
+	public static int densityDpi;
 
 	private static Lock lockObj = new ReentrantLock();
 
@@ -802,6 +804,7 @@ public class Utils
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
 		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.densityDpi = displayMetrics.densityDpi;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -2365,29 +2368,26 @@ public class Utils
 	}
 
 	public static int getResolutionId()
-	{
-		int densityMultiplierX100 = (int) (densityMultiplier * 100);
-		Logger.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
-
-		if (densityMultiplierX100 > 200)
+	{	
+		switch(densityDpi)
 		{
-			return HikeConstants.XXHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 150)
-		{
-			return HikeConstants.XHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 100)
-		{
-			return HikeConstants.HDPI_ID;
-		}
-		else if (densityMultiplierX100 > 75)
-		{
+		case 120:
+		   return HikeConstants.LDPI_ID;
+		case 160:
 			return HikeConstants.MDPI_ID;
-		}
-		else
-		{
-			return HikeConstants.LDPI_ID;
+		case 240:
+			return HikeConstants.HDPI_ID;
+		case 320:
+			return HikeConstants.XHDPI_ID;
+		case 213:
+			return HikeConstants.HDPI_ID;
+		case 480:
+			return HikeConstants.XXHDPI_ID;
+		case 640:
+		case 400:
+			return HikeConstants.XXHDPI_ID;
+		default:
+			return HikeConstants.HDPI_ID;
 		}
 	}
 
