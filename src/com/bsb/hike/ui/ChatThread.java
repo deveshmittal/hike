@@ -6672,6 +6672,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		};
 	}
 
+	@Override
+	protected void onRestart()
+	{
+		super.onRestart();
+		int softInput = getWindow().getAttributes().softInputMode;
+		if (softInput != WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE && softInput != WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+		{
+			/*
+			 * Added this hack to add the emoticon/sticker palette padding when the android OS dismissed the keyboard on minimizing the app.
+			 */
+			if (attachmentWindow != null && emoticonLayout != null && attachmentWindow.getContentView() == emoticonLayout)
+			{
+				emoticonLayout.post(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						resizeMainheight(emoticonLayout.getHeight(), true);
+					}
+				});
+			}
+		}
+	}
+
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
 		View root = findViewById(R.id.chat_layout);
