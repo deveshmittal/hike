@@ -108,12 +108,17 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			mgr.cancelAll();
 
 			// redirect user to the welcome screen
-			listener.accountDeleted(true);
+			if (listener != null)
+			{
+				listener.accountDeleted(true);
+			}
 		}
 		else
 		{
-			listener.accountDeleted(false);
-
+			if (listener != null)
+			{
+				listener.accountDeleted(false);
+			}
 			int duration = Toast.LENGTH_LONG;
 			Toast toast = Toast.makeText(ctx,
 					this.delete ? ctx.getResources().getString(R.string.delete_account_failed) : ctx.getResources().getString(R.string.unlink_account_failed), duration);
