@@ -205,13 +205,20 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
 		if (resetStealthPreference != null)
 		{
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
-				resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
-			}
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				{
+					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
+					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
+				}
 
-			resetStealthPreference.setOnPreferenceClickListener(this);
+				resetStealthPreference.setOnPreferenceClickListener(this);
+			}
+			else
+			{
+				getPreferenceScreen().removePreference(resetStealthPreference);
+			}
 		}
 
 		setupActionBar(titleRes);
