@@ -208,6 +208,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener, BackKeyListener
 {
 
+	private boolean activityVisible = true;
+
 	private enum DialogShowing
 	{
 		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
@@ -218,6 +220,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
+
+	private String currentFileSelectionPath;
 
 	private String mContactName;
 
@@ -368,7 +372,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private int selectedNonTextMsgs = 0;
 
-	private int selectedNonForwadableMsgs = 0;
+	private int selectedNonForwadableMsgs = 0, shareableMessagesCount;
 
 	private int selectedCancelableMsgs = 0;
 
@@ -402,6 +406,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+		activityVisible = false;
 	}
 
 	@Override
@@ -414,6 +419,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	protected void onResume()
 	{
+		activityVisible = true;
 		super.onResume();
 		if (mAdapter != null)
 		{
@@ -1158,6 +1164,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		showOverlay(true);
 	}
 
+	public void blockUser(View v)
+	{
+		blockUser();
+	}
+
+	public void addToContacts(View v)
+	{
+		Utils.addToContacts(ChatThread.this, contactInfo.getMsisdn());
+	}
+
 	private void unblockUser()
 	{
 		mUserIsBlocked = false;
@@ -1205,7 +1221,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		return showMessageContextMenu(position);
+		return showMessageContextMenu(position - mConversationsView.getHeaderViewsCount());
 	}
 
 	@Override
@@ -1273,6 +1289,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					 * File Transfer is in progress. this can be canceled.
 					 */
 					selectedCancelableMsg(isMsgSelected);
+				}
+			}
+			else
+			{
+				if (isMsgSelected)
+				{
+					shareableMessagesCount++;
+					currentFileSelectionPath = hikeFile.getFilePath();
+				}
+				else
+				{
+					shareableMessagesCount--;
+					currentFileSelectionPath = null;
 				}
 			}
 		}
@@ -1804,6 +1833,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
+		// add block view
+		if (contactInfo != null && contactInfo.isUnknownContact())
+		{
+			mConversationsView.addHeaderView(LayoutInflater.from(ChatThread.this).inflate(R.layout.block_add_unknown_contact, null));
+		}
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
@@ -1947,11 +1981,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		/*
+		 * Resetting the Orientation Change flag to be used again
+		 */
+		wasOrientationChanged = false;
 	}
 
 	public void updateViewWindowForReadBy()
 	{
-		if (mConversationsView.getLastVisiblePosition() >= (messages.size()-2))
+		if (mConversationsView.getLastVisiblePosition() >= (messages.size() - 2))
 		{
 			mConversationsView.post(new Runnable()
 			{
@@ -2547,7 +2585,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-//				Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+				if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+				{
+					Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+				}
 				runOnUiThread(new Runnable()
 				{
 					@Override
@@ -2685,7 +2726,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ConvMessage msg = findMessageById(msgId);
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
-//				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+				if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+				{
+					Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+				}
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(mUpdateAdapter);
 			}
@@ -6290,6 +6334,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			mOptionsList.put(R.id.copy_msgs, false);
 		}
+		mOptionsList.put(R.id.share_msgs, shareableMessagesCount == 1 && mAdapter.getSelectedCount() == 1);
 		if (selectedNonForwadableMsgs > 0)
 		{
 			mOptionsList.put(R.id.forward_msgs, false);
@@ -6328,6 +6373,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mOptionsList.put(R.id.delete_msgs, true);
 		mOptionsList.put(R.id.forward_msgs, true);
 		mOptionsList.put(R.id.copy_msgs, true);
+		mOptionsList.put(R.id.share_msgs, true);
 		mOptionsList.put(R.id.action_mode_overflow_menu, false);
 		// this onItemClick should be unregistered when
 		mConversationsView.setOnItemClickListener(ChatThread.this);
@@ -6490,6 +6536,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
 			showActionModeOverflow(message);
 			return true;
+		case R.id.share_msgs:
+			if (currentFileSelectionPath != null)
+			{
+				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionPath);
+				currentFileSelectionPath = null;
+				shareableMessagesCount--;
+				mAdapter.removeSelection();
+				mAdapter.notifyDataSetChanged();
+				invalidateOptionsMenu();
+			}
+			else
+			{
+				Toast.makeText(ChatThread.this, "Some error occured!", Toast.LENGTH_SHORT).show();
+			}
+			return true;
 		default:
 			destroyActionMode();
 			return false;
@@ -6629,9 +6690,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
-		
+
 		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
-		
+
 		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
 
 		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));

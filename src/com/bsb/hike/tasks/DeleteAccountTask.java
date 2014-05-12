@@ -25,7 +25,12 @@ import com.google.android.gcm.GCMRegistrar;
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
 {
 
-	private HikePreferences activity;
+	public static interface DeleteAccountListener
+	{
+		public void accountDeleted(boolean isSuccess);
+	}
+
+	private DeleteAccountListener listener;
 
 	private boolean finished;
 
@@ -33,9 +38,9 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 	private Context ctx;
 
-	public DeleteAccountTask(HikePreferences activity, boolean delete, Context context)
+	public DeleteAccountTask(DeleteAccountListener activity, boolean delete, Context context)
 	{
-		this.activity = activity;
+		this.listener = activity;
 		this.delete = delete;
 		this.ctx = context;
 	}
@@ -46,8 +51,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		FileTransferManager.getInstance(ctx).shutDownAll();
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
-		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
-		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(activity).edit();
+		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
 
 		HikeMessengerApp.clearStealthMsisdn();
 
@@ -56,11 +61,11 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
 
 			// Unregister from GCM service
-			GCMRegistrar.unregister(activity.getApplicationContext());
+			GCMRegistrar.unregister(ctx.getApplicationContext());
 
-			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
+			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
 			app.disconnectFromService();
-			activity.stopService(new Intent(activity, HikeService.class));
+			ctx.stopService(new Intent(ctx, HikeService.class));
 
 			db.deleteAll();
 			convDb.deleteAll();
@@ -99,18 +104,24 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		if (result.booleanValue())
 		{
 			/* clear any toast notifications */
-			NotificationManager mgr = (NotificationManager) activity.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+			NotificationManager mgr = (NotificationManager) ctx.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 			mgr.cancelAll();
 
 			// redirect user to the welcome screen
-			activity.accountDeleted();
+			if (listener != null)
+			{
+				listener.accountDeleted(true);
+			}
 		}
 		else
 		{
-			activity.dismissProgressDialog();
+			if (listener != null)
+			{
+				listener.accountDeleted(false);
+			}
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(activity,
-					this.delete ? activity.getResources().getString(R.string.delete_account_failed) : activity.getResources().getString(R.string.unlink_account_failed), duration);
+			Toast toast = Toast.makeText(ctx,
+					this.delete ? ctx.getResources().getString(R.string.delete_account_failed) : ctx.getResources().getString(R.string.unlink_account_failed), duration);
 			toast.show();
 		}
 	}
@@ -118,7 +129,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	public void setActivity(Activity activity)
 	{
-		this.activity = (HikePreferences) activity;
+		this.listener = (DeleteAccountListener) activity;
 	}
 
 	@Override
