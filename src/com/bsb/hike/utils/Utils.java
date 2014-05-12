@@ -2371,20 +2371,20 @@ public class Utils
 	{	
 		switch(densityDpi)
 		{
-		case DisplayMetrics.DENSITY_LOW:
+		case 120:
 		   return HikeConstants.LDPI_ID;
-		case DisplayMetrics.DENSITY_MEDIUM:
+		case 160:
 			return HikeConstants.MDPI_ID;
-		case DisplayMetrics.DENSITY_HIGH:
+		case 240:
 			return HikeConstants.HDPI_ID;
-		case DisplayMetrics.DENSITY_XHIGH:		//API 9
+		case 320:
 			return HikeConstants.XHDPI_ID;
-		case DisplayMetrics.DENSITY_TV:			//API 13
+		case 213:
 			return HikeConstants.HDPI_ID;
-		case DisplayMetrics.DENSITY_XXHIGH:		//API 16
+		case 480:
 			return HikeConstants.XXHDPI_ID;
-		case DisplayMetrics.DENSITY_XXXHIGH:	//API 18
-		case DisplayMetrics.DENSITY_400:		//API 19
+		case 640:
+		case 400:
 			return HikeConstants.XXHDPI_ID;
 		default:
 			return HikeConstants.HDPI_ID;
