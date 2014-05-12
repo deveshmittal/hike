@@ -6350,6 +6350,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mOptionsList.put(R.id.delete_msgs, true);
 		mOptionsList.put(R.id.forward_msgs, true);
 		mOptionsList.put(R.id.copy_msgs, true);
+		mOptionsList.put(R.id.share_msgs, true);
 		mOptionsList.put(R.id.action_mode_overflow_menu, false);
 		// this onItemClick should be unregistered when
 		mConversationsView.setOnItemClickListener(ChatThread.this);
@@ -6518,6 +6519,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionPath);
 				currentFileSelectionPath = null;
 				shareableMessagesCount--;
+				mAdapter.removeSelection();
+				mAdapter.notifyDataSetChanged();
 				invalidateOptionsMenu();
 			}
 			else
