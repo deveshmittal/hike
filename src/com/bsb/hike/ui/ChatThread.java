@@ -5254,7 +5254,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				StickerCategoryId categoryId = category.categoryId;
 				if (StickerCategoryId.recent.equals(categoryId))
 					return;
-				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.doggy))
+				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.expressions))
 				{
 					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
 							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
@@ -5303,7 +5303,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					editor.putBoolean(category.categoryId.downloadPref(), true);
 					if (category.categoryId.equals(StickerCategoryId.recent) || category.categoryId.equals(StickerCategoryId.humanoid)
-							|| category.categoryId.equals(StickerCategoryId.doggy))
+							|| category.categoryId.equals(StickerCategoryId.expressions))
 					{
 						return;
 					}
@@ -5331,7 +5331,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onCancel(DialogInterface dialog)
 			{
 				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid)
-						&& !category.categoryId.equals(StickerCategoryId.doggy) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
+						&& !category.categoryId.equals(StickerCategoryId.expressions) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
 				{
 					int idx = 0;
 					if (StickerManager.getInstance().getRecentStickerList().size() == 0)
@@ -5386,7 +5386,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
 			stickerBtnBg = R.drawable.doggy_btn;
-			stickerBtnText = android.R.string.ok;
+			stickerBtnText = R.string.download;
 			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
 
@@ -5414,7 +5414,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.exp_bg);
 
 			stickerBtnBg = R.drawable.exp_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = android.R.string.ok;
 			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.exp_btn_text_shadow);
 
@@ -5536,6 +5536,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			dividerBg = getResources().getColor(R.color.angry_div);
 			break;
+		case sports:
+			resParentBg = getResources().getColor(R.color.sports_bg);
+
+			stickerBtnBg = R.drawable.sports_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.sports_btn_text);
+			stickerBtnShadowColor = getResources().getColor(R.color.sports_btn_text_shadow);
+
+			categoryText = "Sports";
+			categoryTextColor = getResources().getColor(R.color.sports_text);
+			categoryTextShadowColor = getResources().getColor(R.color.sports_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.sports_div);
+			break;	
 		}
 
 		parentDrawable.setColor(resParentBg);

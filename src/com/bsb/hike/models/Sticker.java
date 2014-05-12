@@ -69,7 +69,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		/*
 		 * Only set sticker index if the category is a local one
 		 */
-		if (category != null && category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy))
+		if (category != null && category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.expressions))
 		{
 			/*
 			 * Making sure there is an '_' character in the sticker name.
@@ -87,7 +87,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 					Logger.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
 				}
 
-				if ((category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
+				if ((category.categoryId.equals(StickerCategoryId.expressions) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS.length)
 						|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
 				{
 					this.stickerIndex = stickerNumber - 1;
@@ -111,12 +111,12 @@ public class Sticker implements Serializable, Comparable<Sticker>
 						return true;
 				}
 			}
-			else if (category.categoryId == StickerCategoryId.doggy)
+			else if (category.categoryId == StickerCategoryId.expressions)
 			{
-				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY.length;
+				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS.length;
 				for (int i = 0; i < count; i++)
 				{
-					if (StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY[i].equals(stickerId))
+					if (StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS[i].equals(stickerId))
 						return true;
 				}
 			}

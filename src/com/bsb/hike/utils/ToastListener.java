@@ -351,9 +351,9 @@ public class ToastListener implements Listener
 				{
 					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()];
 				}
-				else if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+				else if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
 				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker.getStickerIndex()];
+					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[sticker.getStickerIndex()];
 				}
 
 				if (resourceId > 0)
