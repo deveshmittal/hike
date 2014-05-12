@@ -2,14 +2,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/notifications" >
 
-    <com.bsb.hike.view.IconCheckBoxPreference
+    <com.bsb.hike.view.IconListPreference
         icon="preference_vibe"
-        android:defaultValue="true"
-        android:key="vibratePref"
-        android:layout="@layout/icon_preference"
+        android:defaultValue="@string/vib_default"
+        android:entries="@array/vibratePrefKeys"
+        android:entryValues="@array/vibratePrefValues"
+        android:key="vibratePrefList"
+        android:layout="@layout/list_preference"
         android:summary="@string/vibrate_msg"
-        android:title="@string/vibrate"
-        android:widgetLayout="@layout/checkbox_widget" />
+        android:title="@string/vibrate" />
+
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_sound"
         android:defaultValue="true"

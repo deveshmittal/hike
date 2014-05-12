@@ -33,7 +33,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.TipType;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -50,6 +50,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -227,7 +228,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			layoutParams.rightMargin = marginRight;
 
 			tipView.setLayoutParams(layoutParams);
-			Utils.showTip(this, TipType.MOOD, tipView);
+			HikeTip.showTip(this, TipType.MOOD, tipView);
 		}
 	}
 
@@ -436,7 +437,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		if (tipView != null)
 		{
-			Utils.closeTip(TipType.MOOD, tipView, preferences);
+			HikeTip.closeTip(TipType.MOOD, tipView, preferences);
 		}
 		if (emojiParent.getVisibility() == View.VISIBLE)
 		{

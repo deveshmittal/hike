@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
@@ -25,12 +24,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
-		{
-			Logger.d(TAG + getClass().getSimpleName(), "App was opened");
-			HikeMessengerApp.currentState = CurrentState.OPENED;
-			Utils.sendAppState(this);
-		}
+		HikeAppStateUtils.onCreate(this);
 		super.onCreate(savedInstanceState);
 
 	}
@@ -38,19 +32,14 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	protected void onResume()
 	{
+		HikeAppStateUtils.onResume(this);
 		super.onResume();
-		com.facebook.Settings.publishInstallAsync(this, HikeConstants.APP_FACEBOOK_ID);
 	}
 
 	@Override
 	protected void onStart()
 	{
-		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
-		{
-			Logger.d(TAG + getClass().getSimpleName(), "App was resumed");
-			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.sendAppState(this);
-		}
+		HikeAppStateUtils.onStart(this);
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
 	}
@@ -67,7 +56,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		}
 		else
 		{
-			HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
+			HikeAppStateUtils.onBackPressed();
 			super.onBackPressed();
 		}
 	}
@@ -83,30 +72,15 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	protected void onStop()
 	{
-		Logger.d(TAG + getClass().getSimpleName(), "OnStop");
-		if (HikeMessengerApp.currentState == CurrentState.NEW_ACTIVITY)
+		if ((HikeMessengerApp.currentState == CurrentState.BACK_PRESSED) && (this instanceof HomeActivity))
 		{
-			Logger.d(TAG + getClass().getSimpleName(), "App was going to another activity");
-			HikeMessengerApp.currentState = CurrentState.RESUMED;
-		}
-		else if (HikeMessengerApp.currentState == CurrentState.BACK_PRESSED)
-		{
-			if (this instanceof HomeActivity)
-			{
-				Logger.d(TAG + getClass().getSimpleName(), "App was closed");
-				HikeMessengerApp.currentState = CurrentState.CLOSED;
-				Utils.sendAppState(this);
-			}
-			else
-			{
-				HikeMessengerApp.currentState = CurrentState.RESUMED;
-			}
+			Logger.d(TAG + getClass().getSimpleName(), "App was closed");
+			HikeMessengerApp.currentState = CurrentState.CLOSED;
+			Utils.appStateChanged(this.getApplicationContext());
 		}
 		else
 		{
-			Logger.d(TAG + getClass().getSimpleName(), "App was backgrounded");
-			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
-			Utils.sendAppState(this);
+			HikeAppStateUtils.onStop(this);
 		}
 		super.onStop();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SHOW_IMAGE, this);
@@ -115,36 +89,29 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	public void finish()
 	{
-		HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
+		HikeAppStateUtils.finish();
 		super.finish();
 	}
 
 	@Override
 	public void startActivityFromFragment(Fragment fragment, Intent intent, int requestCode)
 	{
-		HikeMessengerApp.currentState = requestCode == -1 || requestCode == HikeConstants.SHARE_LOCATION_CODE || requestCode == HikeConstants.CROP_RESULT ? CurrentState.NEW_ACTIVITY
-				: CurrentState.BACKGROUNDED;
+		HikeMessengerApp.currentState = CurrentState.NEW_ACTIVITY;
 		super.startActivityFromFragment(fragment, intent, requestCode);
 	}
 
 	@Override
 	public void startActivityForResult(Intent intent, int requestCode)
 	{
-		HikeMessengerApp.currentState = requestCode == -1 || requestCode == HikeConstants.SHARE_LOCATION_CODE || requestCode == HikeConstants.CROP_RESULT ? CurrentState.NEW_ACTIVITY
-				: CurrentState.BACKGROUNDED;
+		HikeAppStateUtils.startActivityForResult();
 		super.startActivityForResult(intent, requestCode);
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
+		HikeAppStateUtils.onActivityResult(this);
 		super.onActivityResult(requestCode, resultCode, data);
-		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED)
-		{
-			Logger.d(TAG + getClass().getSimpleName(), "App returning from activity with result");
-			HikeMessengerApp.currentState = CurrentState.RESUMED;
-			Utils.sendAppState(this);
-		}
 	}
 
 	@Override
