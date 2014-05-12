@@ -442,16 +442,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeViewWatcher.setBtnEnabled();
 			mComposeView.requestFocus();
 		}
-		new Handler().postDelayed(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				showPopUpIfRequired();
-
-			}
-		}, 50);
 	}
 
 	private void showPopUpIfRequired()
@@ -721,6 +711,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Object o = getLastCustomNonConfigurationInstance();
 			Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 			onNewIntent(intent);
+		}
+
+		if (savedInstanceState != null)
+		{
+			mHandler.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					showPopUpIfRequired();
+				}
+			});
 		}
 
 		/* registering localbroadcast manager */
