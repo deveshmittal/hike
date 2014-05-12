@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -1503,10 +1504,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private ConvMessage findMessageById(long msgId)
 	{
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
+		for (Entry<String, Conversation> conversationEntry : mConversationsByMSISDN.entrySet())
 		{
-			Conversation conversation = mAdapter.getItem(i);
+			Conversation conversation = conversationEntry.getValue();
 			if (conversation == null)
 			{
 				continue;

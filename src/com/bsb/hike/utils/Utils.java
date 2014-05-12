@@ -2435,6 +2435,11 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen)
+	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
@@ -2461,7 +2466,7 @@ public class Utils
 			}
 		}
 
-		sendAppState();
+		sendAppState(context, requestBulkLastSeen);
 
 		if (resetStealth)
 		{
@@ -2476,7 +2481,7 @@ public class Utils
 		}
 	}
 
-	private static void sendAppState()
+	private static void sendAppState(Context context, boolean requestBulkLastSeen)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2489,8 +2494,10 @@ public class Utils
 
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED, HikeMessengerApp.currentState == CurrentState.OPENED);
-				data.put(HikeConstants.BULK_LAST_SEEN, true); // adding this for
-																// bulk
+				/*
+				 * We only request the bulk last seen if the last seen preference is on.
+				 */
+				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
 			}
 			else

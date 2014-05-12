@@ -2561,6 +2561,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public void removeStickerCategory(String categoryId)
+	{
+		mDb.delete(DBConstants.STICKERS_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+	}
 
 	public void stickerUpdateAvailable(String categoryId)
 	{
@@ -2647,9 +2652,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void insertDoggyStickerCategory()
+	public void insertExpressionsStickerCategory()
 	{
-		addOrUpdateStickerCategory(StickerCategoryId.doggy.name(), StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length, false);
+		addOrUpdateStickerCategory(StickerCategoryId.expressions.name(), StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS.length, false);
 	}
 
 	public void insertHumanoidStickerCategory()

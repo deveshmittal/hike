@@ -149,7 +149,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static SignupTask getSignupTask(Activity activity)
 	{
-		if (signupTask == null)
+		if (signupTask == null || signupTask.isCancelled())
 		{
 			signupTask = new SignupTask(activity);
 		}

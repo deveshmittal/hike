@@ -526,6 +526,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			countryPicker.setEnabled(false);
 			selectedCountryPicker.setEnabled(false);
+			enterEditText.setEnabled(false);
 		}
 		if (callmeBtn != null)
 		{
@@ -548,6 +549,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			countryPicker.setEnabled(true);
 			selectedCountryPicker.setEnabled(true);
+			enterEditText.setEnabled(true);
 		}
 		if (callmeBtn != null)
 		{
@@ -780,6 +782,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		countryPicker.setEnabled(true);
 		selectedCountryPicker.setEnabled(true);
+		enterEditText.setEnabled(true);
 
 		setupCountryCodeData();
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
