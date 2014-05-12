@@ -2,10 +2,10 @@
 <resources>
 
     <string-array name="vibratePrefKeys">
-        <item>Off</item>
-        <item>Default</item>
-        <item>Short</item>
-        <item>Long</item>
+        <item>@string/vib_off_key</item>
+        <item>@string/vib_default_key</item>
+        <item>@string/vib_short_key</item>
+        <item>@string/vib_long_key</item>
     </string-array>
     <string-array name="vibratePrefValues">
         <item>@string/vib_off</item>
@@ -14,9 +14,9 @@
         <item>@string/vib_long</item>
     </string-array>
     <string-array name="notificationSoundPrefKeys">
-        <item>Silent</item>
-        <item>Default</item>
-        <item>Hike Jingle</item>
+        <item>@string/notif_sound_off_key</item>
+        <item>@string/notif_sound_default_key</item>
+        <item>@string/notif_sound_Hike_key</item>
     </string-array>
     <string-array name="notificationSoundPrefValues">
         <item>@string/notif_sound_off</item>

@@ -32,4 +32,13 @@
     <integer name="alp_42447968_pkey_display_max_retries_default">5</integer>
     <integer name="alp_42447968_pkey_display_captcha_wired_dots_default">4</integer>
 
+    <string name="vib_off">Off</string>
+    <string name="vib_default">Default</string>
+    <string name="vib_short">Short</string>
+    <string name="vib_long">Long</string>
+    <string name="notif_sound_off">Off</string>
+    <string name="notif_sound_default">Default</string>
+    <string name="notif_sound_Hike">HikeJingle</string>
+    <string name="notificationSoundTitle">Notification tones</string>
+
 </resources>
