@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -113,7 +114,7 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 	public void deleteAccountClicked(View v)
 	{
 		String phoneNu = phoneNum.getText().toString();
-		if ("".equals(phoneNu))
+		if (TextUtils.isEmpty(phoneNu))
 		{
 			phoneNum.setBackgroundResource(R.drawable.bg_phone_bar);
 			phoneNum.startAnimation(AnimationUtils.loadAnimation(DeleteAccount.this, R.anim.shake));
