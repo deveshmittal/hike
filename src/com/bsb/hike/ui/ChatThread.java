@@ -205,7 +205,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, OnItemClickListener, BackKeyListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
 
 	private boolean activityVisible = true;
@@ -376,8 +376,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private int selectedCancelableMsgs = 0;
 
-	private boolean onTouchActionDownCalled = false;
-
 	private boolean isActionModeOn = false;
 
 	private TextView mActionModeTitle;
@@ -508,7 +506,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			isActionModeOn = savedInstanceState.getBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, false);
 			if (isActionModeOn)
 			{
-				ArrayList<Integer> selectedPositions = savedInstanceState.getIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS);
+				long[] selectedPositions = savedInstanceState.getLongArray(HikeConstants.Extras.SELECTED_POSITIONS);
 				mAdapter.setPositionsSelected(selectedPositions);
 				selectedNonForwadableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS);
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
@@ -1221,26 +1219,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		return showMessageContextMenu(position - mConversationsView.getHeaderViewsCount());
+		return showMessageContextMenu(mAdapter.getItem(position - mConversationsView.getHeaderViewsCount()));
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
-	{
-		onItemLongClick(adapterView, view, position, id);
-		return;
-	}
-
-	public boolean showMessageContextMenu(int position)
+	public boolean showMessageContextMenu(ConvMessage message)
 	{
 		dismissPopupWindow();
-		ConvMessage message = mAdapter.getItem(position);
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
 		{
 			return false;
 		}
-		mAdapter.toggleSelection(position);
-		boolean isMsgSelected = mAdapter.isSelected(position);
+		mAdapter.toggleSelection(message);
+		boolean isMsgSelected = mAdapter.isSelected(message);
 
 		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
 
@@ -1971,13 +1961,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
 			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
-				{
-					showChatBgFtueTip();
-				}
-				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 				{
 					showStickerFtueTip();
+				}
+				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
+				{
+					showChatBgFtueTip();
 				}
 			}
 		}
@@ -5086,7 +5076,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (isActionModeOn)
 		{
 			outState.putBoolean(HikeConstants.Extras.IS_ACTION_MODE_ON, true);
-			outState.putIntegerArrayList(HikeConstants.Extras.SELECTED_POSITIONS, new ArrayList<Integer>(mAdapter.getSelectedIds()));
+			outState.putLongArray(HikeConstants.Extras.SELECTED_POSITIONS, mAdapter.getSelectedMsgIdsLongArray());
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS, selectedNonForwadableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
@@ -5324,7 +5314,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				StickerCategoryId categoryId = category.categoryId;
 				if (StickerCategoryId.recent.equals(categoryId))
 					return;
-				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.doggy))
+				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.expressions))
 				{
 					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
 							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
@@ -5373,7 +5363,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					editor.putBoolean(category.categoryId.downloadPref(), true);
 					if (category.categoryId.equals(StickerCategoryId.recent) || category.categoryId.equals(StickerCategoryId.humanoid)
-							|| category.categoryId.equals(StickerCategoryId.doggy))
+							|| category.categoryId.equals(StickerCategoryId.expressions))
 					{
 						return;
 					}
@@ -5401,7 +5391,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onCancel(DialogInterface dialog)
 			{
 				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid)
-						&& !category.categoryId.equals(StickerCategoryId.doggy) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
+						&& !category.categoryId.equals(StickerCategoryId.expressions) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
 				{
 					int idx = 0;
 					if (StickerManager.getInstance().getRecentStickerList().size() == 0)
@@ -5456,7 +5446,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
 			stickerBtnBg = R.drawable.doggy_btn;
-			stickerBtnText = android.R.string.ok;
+			stickerBtnText = R.string.download;
 			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
 
@@ -5484,7 +5474,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.exp_bg);
 
 			stickerBtnBg = R.drawable.exp_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = android.R.string.ok;
 			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.exp_btn_text_shadow);
 
@@ -5606,6 +5596,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			dividerBg = getResources().getColor(R.color.angry_div);
 			break;
+		case sports:
+			resParentBg = getResources().getColor(R.color.sports_bg);
+
+			stickerBtnBg = R.drawable.sports_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.sports_btn_text);
+			stickerBtnShadowColor = getResources().getColor(R.color.sports_btn_text_shadow);
+
+			categoryText = "Sports";
+			categoryTextColor = getResources().getColor(R.color.sports_text);
+			categoryTextShadowColor = getResources().getColor(R.color.sports_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.sports_div);
+			break;	
 		}
 
 		parentDrawable.setColor(resParentBg);
@@ -5769,29 +5773,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
-		switch (event.getAction())
-		{
-		/*
-		 * This is to handle the case. when user long taps on a clickable item in chatthread. and even if longclick event is consumed. ACTION_UP event is triggered which eventually
-		 * triggers onitemclick for the view which is not desired.
-		 */
-		case MotionEvent.ACTION_DOWN:
-		{
-			onTouchActionDownCalled = true;
-			break;
-		}
-		case MotionEvent.ACTION_UP:
-		{
-			if (isActionModeOn && !onTouchActionDownCalled)
-			{
-				/*
-				 * This is the case when ACTION_UP is called without calling ACTION_DOWN first. in this case we should not consider ACTION_UP as click event and just let it pass.
-				 */
-				return true;
-			}
-			onTouchActionDownCalled = false;
-		}
-		}
 		return gestureDetector.onTouchEvent(event);
 	}
 
@@ -6375,11 +6356,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mOptionsList.put(R.id.copy_msgs, true);
 		mOptionsList.put(R.id.share_msgs, true);
 		mOptionsList.put(R.id.action_mode_overflow_menu, false);
-		// this onItemClick should be unregistered when
-		mConversationsView.setOnItemClickListener(ChatThread.this);
 		if (mAdapter.getSelectedCount() > 0)
 		{
 			setActionModeTitle(mAdapter.getSelectedCount());
+		}
+		
+		/*
+		 * if chat bg ftue tip or last seen tip is visible we
+		 * should hide them in action mode
+		 */
+		if(tipView != null && tipView.getVisibility() == View.VISIBLE)
+		{
+			TipType tipType = (TipType) tipView.getTag();
+			if(tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
+			{
+				tipView.setVisibility(View.INVISIBLE);
+			}
 		}
 		return true;
 	}
@@ -6390,19 +6382,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		selectedNonForwadableMsgs = 0;
 		selectedCancelableMsgs = 0;
 		setActionModeOn(false);
-		// removing the on item click listener
-		mConversationsView.setOnItemClickListener(null);
 		mAdapter.removeSelection();
 		mOptionsList.clear();
 		setupActionBar(false);
+
+		/*
+		 * if we have hidden tips while initializing action mode
+		 * we should unhide them
+		 */
+		if(tipView != null && tipView.getVisibility() == View.INVISIBLE)
+		{
+			tipView.setVisibility(View.VISIBLE);
+		}
 		invalidateOptionsMenu();
 	}
 
 	public boolean onActionModeItemClicked(MenuItem item)
 	{
-		final Set<Integer> selectedMessagesIdsSet = mAdapter.getSelectedIds();
-		final ArrayList<Integer> selectedMessagesIds = new ArrayList<Integer>(selectedMessagesIdsSet);
-		ConvMessage[] convMsgs;
+		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
@@ -6423,20 +6420,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onClick(View v)
 				{
-					Collections.sort(selectedMessagesIds);
-					ConvMessage[] convMsgs = new ConvMessage[selectedMessagesIds.size()];
-					for (int i = convMsgs.length - 1; i >= 0; i--)
+					for (ConvMessage convMessage : selectedMessagesMap.values())
 					{
-						convMsgs[i] = mAdapter.getItem(selectedMessagesIds.get(i));
-						removeMessage(convMsgs[i]);
-						if (convMsgs[i].isFileTransferMessage())
+						removeMessage(convMessage);
+						if (convMessage.isFileTransferMessage())
 						{
-							if (convMsgs[i].isFileTransferMessage())
+							if (convMessage.isFileTransferMessage())
 							{
 								// @GM cancelTask has been changed
-								HikeFile hikeFile = convMsgs[i].getMetadata().getHikeFiles().get(0);
+								HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 								File file = hikeFile.getFile();
-								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMsgs[i].getMsgID(), file, convMsgs[i].isSent());
+								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
 								mAdapter.notifyDataSetChanged();
 							}
 						}
@@ -6451,9 +6445,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
-			Collections.sort(selectedMessagesIds);
-			convMsgs = new ConvMessage[selectedMessagesIds.size()];
-
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
@@ -6461,10 +6452,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONArray multipleMsgArray = new JSONArray();
 			try
 			{
-				for (int i = 0; i < convMsgs.length; i++)
+				for (ConvMessage message : selectedMessagesMap.values())
 				{
-					ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(i));
-
 					JSONObject multiMsgFwdObject = new JSONObject();
 					if (message.isFileTransferMessage())
 					{
@@ -6520,12 +6509,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			startActivity(intent);
 			return true;
 		case R.id.copy_msgs:
-			Collections.sort(selectedMessagesIds);
-			convMsgs = new ConvMessage[selectedMessagesIds.size()];
-			String msgStr = mAdapter.getItem(selectedMessagesIds.get(0)).getMessage();
-			for (int i = 1; i < convMsgs.length; i++)
+			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			Collections.sort(selectedMsgIds);
+			String msgStr =selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
+			for (int i = 1; i < selectedMsgIds.size(); i++)
 			{
-				msgStr += "\n" + mAdapter.getItem(selectedMessagesIds.get(i)).getMessage();
+				msgStr += "\n" + selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage();
 			}
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			clipboard.setText(msgStr);
@@ -6533,8 +6522,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			destroyActionMode();
 			return true;
 		case R.id.action_mode_overflow_menu:
-			ConvMessage message = mAdapter.getItem(selectedMessagesIds.get(0));
-			showActionModeOverflow(message);
+			for (ConvMessage convMessage : selectedMessagesMap.values())
+			{
+				showActionModeOverflow(convMessage);
+			}
 			return true;
 		case R.id.share_msgs:
 			if (currentFileSelectionPath != null)
@@ -6689,8 +6680,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
-		int inSampleSize = Utils.densityMultiplier < 2 ? 2 : 1;
-
+		int inSampleSize = 1;
+		if(!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		{
+			inSampleSize = 2;
+		}
+		
 		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
 
 		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);

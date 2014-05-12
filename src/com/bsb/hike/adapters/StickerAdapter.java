@@ -309,9 +309,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 			long t1 = System.currentTimeMillis();
 			stickersList = new ArrayList<Sticker>();
-			if (category.categoryId.equals(StickerCategoryId.doggy))
+			if (category.categoryId.equals(StickerCategoryId.expressions))
 			{
-				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY);
+				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS);
 			}
 			else if (category.categoryId.equals(StickerCategoryId.humanoid))
 			{

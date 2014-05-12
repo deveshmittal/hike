@@ -32,6 +32,7 @@ import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -46,6 +47,7 @@ import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.gcm.GCMRegistrar;
 
 public class HikeService extends Service
@@ -284,9 +286,9 @@ public class HikeService extends Service
 			sm.removeHumanoidSticker();
 		}
 
-		if (!preferenceManager.getBoolean(StickerManager.DOGGY_CATEGORY_INSERT_TO_DB, false))
+		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
 		{
-			sm.insertDoggyCategory();
+			sm.insertExpressionsCategory();
 		}
 
 		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false))
@@ -316,6 +318,25 @@ public class HikeService extends Service
 			sm.deleteDefaultDownloadedStickers();
 			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true);
 			settings.edit().commit();
+		}
+		/*
+		 * this code path will be for users upgrading to the build where we make expressions a default loaded category
+		 */
+		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, false))
+		{
+			sm.deleteDefaultDownloadedExpressionsStickers();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true);
+			settings.edit().commit();
+			
+			if(sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
+			{
+				HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
+				StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
+			}
+			else
+			{
+				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
+			}
 		}
 	}
 
