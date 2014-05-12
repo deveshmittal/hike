@@ -221,7 +221,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 			}
 			else
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, id);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_IMAGE_DOWNLOADED, id);
 			}
 
 			if (this.name == null)
