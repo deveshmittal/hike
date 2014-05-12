@@ -209,7 +209,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
 		if (resetStealthPreference != null)
 		{
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 			{
 				resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
 				resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
@@ -308,8 +308,57 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Logger.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF))
 		{
-			Intent i = new Intent(getApplicationContext(), DeleteAccount.class);
-			startActivity(i);
+			// Intent i = new Intent(getApplicationContext(), DeleteAccount.class);
+			// startActivity(i);
+
+			final CustomAlertDialog secondConfirmDialog = new CustomAlertDialog(HikePreferences.this);
+			final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(HikePreferences.this);
+			firstConfirmDialog.setHeader(R.string.are_you_sure);
+			firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);
+			View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					secondConfirmDialog.show();
+					firstConfirmDialog.dismiss();
+				}
+			};
+
+			View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					firstConfirmDialog.dismiss();
+				}
+			};
+
+			firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
+			firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
+			firstConfirmDialog.show();
+
+			secondConfirmDialog.setHeader(R.string.please_confirm);
+			secondConfirmDialog.setBody(R.string.delete_confirm_msg_2);
+			View.OnClickListener secondDialogYesClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, true, getApplicationContext());
+					blockingTaskType = BlockingTaskType.DELETING_ACCOUNT;
+					setBlockingTask(task);
+					Utils.executeBoolResultAsyncTask(task);
+					secondConfirmDialog.dismiss();
+				}
+			};
+
+			secondConfirmDialog.setOkButton(R.string.yes, secondDialogYesClickListener);
+			secondConfirmDialog.setCancelButton(R.string.no);
+
 		}
 		else if (preference.getKey().equals(HikeConstants.UNLINK_PREF))
 		{
@@ -518,7 +567,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.RESET_STEALTH_PREF.equals(preference.getKey()))
 		{
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 			{
 				Utils.cancelScheduledStealthReset(this);
 
@@ -526,7 +575,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				preference.setSummary(R.string.reset_complete_stealth_info);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
-				
+
 				Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 			}
 			else
