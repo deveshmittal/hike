@@ -956,7 +956,7 @@ public class UploadFileTask extends FileTransferBase
 		catch (Exception e)
 		{
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if (retryAttempts >= MAX_RETRY_ATTEMPTS)
+			if (retryAttempts >= MAX_RETRY_ATTEMPTS || e.getMessage() == null)
 			{
 				error();
 				res = null;
