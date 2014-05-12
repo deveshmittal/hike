@@ -1025,6 +1025,14 @@ public class Utils
 		context.startActivity(s);
 	}
 
+	public static void startShareImageIntent(Context context, String imagePath)
+	{
+		Intent s = new Intent(android.content.Intent.ACTION_SEND);
+		s.setType("image/*");
+		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
+		context.startActivity(s);
+	}
+
 	public static void bytesToFile(byte[] bytes, File dst)
 	{
 		OutputStream out = null;
@@ -3651,6 +3659,19 @@ public class Utils
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+	}
+
+	public static void addToContacts(Activity context, String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		context.startActivity(i);
+	}
+
+	public static boolean isPlayTickSound(Context context)
+	{
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, false));
 	}
 
 	/**

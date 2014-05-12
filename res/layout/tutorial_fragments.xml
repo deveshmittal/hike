@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="754" >
+    android:weightSum="572" >
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/tutorial_title"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="240"
+        android:layout_weight="200"
         android:text="@string/tutorial1_header_title"
         android:layout_marginBottom="8dp"
         android:clickable="true" 
@@ -19,7 +19,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="418"
+        android:layout_weight="372"
         android:orientation="vertical" >
         
         <ImageView

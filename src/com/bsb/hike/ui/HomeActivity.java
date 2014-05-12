@@ -488,7 +488,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
 		updateOverFlowMenuNotification();
-		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener()
+		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -1649,7 +1649,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
-
+		optionsList.add(new OverFlowMenuItem(getString(R.string.new_chat), 7));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
@@ -1794,6 +1794,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				case 7:
+					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
