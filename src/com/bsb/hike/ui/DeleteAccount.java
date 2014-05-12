@@ -25,6 +25,8 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 
 	ProgressDialog progressDialog;
 
+	DeleteAccountTask task;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -32,6 +34,18 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 		setContentView(R.layout.delete_account_confirmation);
 		initViewComponents();
 		setupActionBar();
+		handleOrientationChanegs();
+	}
+
+	private void handleOrientationChanegs()
+	{
+
+		task = (DeleteAccountTask) getLastCustomNonConfigurationInstance();
+		if (task != null)
+		{
+			showProgressDialog();
+			task.setActivity(this);
+		}
 	}
 
 	private void setupActionBar()
@@ -116,7 +130,7 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 			public void onClick(View v)
 			{
 				firstConfirmDialog.dismiss();
-				DeleteAccountTask task = new DeleteAccountTask(DeleteAccount.this, true, getApplicationContext());
+				task = new DeleteAccountTask(DeleteAccount.this, true, getApplicationContext());
 
 				Utils.executeBoolResultAsyncTask(task);
 				showProgressDialog();
@@ -149,6 +163,7 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 		Intent dltIntent = new Intent(this, HomeActivity.class);
 		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(dltIntent);
+		task = null;
 	}
 
 	private void showProgressDialog()
@@ -176,6 +191,28 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 		{
 			dismissProgressDialog();
 		}
-
+		task = null;
 	}
+
+	@Override
+	public Object onRetainCustomNonConfigurationInstance()
+	{
+		// TODO Auto-generated method stub
+		return task;
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		if (progressDialog != null)
+		{
+			progressDialog.cancel();
+		}
+		if (task != null)
+		{
+			task.setActivity(null);
+		}
+		super.onDestroy();
+	}
+
 }
