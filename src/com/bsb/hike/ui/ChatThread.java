@@ -5229,15 +5229,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						return false;
 					}
 				});
+
+				/*
+				 * Setting the current selection to the last message.
+				 */
+				mConversationsView.post(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						mConversationsView.setSelection(messages.size() - 1);
+					}
+				});
 			}
 			else
 			{
 				attachmentWindow = null;
 			}
-			/*
-			 * Making sure we keep the same selection as we did before showing the sticker/emoticon layout.
-			 */
-			mConversationsView.setSelection(selection);
 		}
 
 	}
