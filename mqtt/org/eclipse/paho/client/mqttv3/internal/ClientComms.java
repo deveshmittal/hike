@@ -457,22 +457,44 @@ public class ClientComms {
 		}
 	}
 
-	public boolean isConnected() {
-		return conState == CONNECTED;
+	public boolean isConnected()
+	{
+		synchronized (conLock)
+		{
+			return conState == CONNECTED;
+		}
 	}
 
-	public boolean isConnecting() {
-		return conState == CONNECTING;
-	}
-	public boolean isDisconnected() {
-		return conState == DISCONNECTED;
+	public boolean isConnecting()
+	{
+		synchronized (conLock)
+		{
+			return conState == CONNECTING;
+		}
 	}
 
-	public boolean isDisconnecting() {
-		return conState == DISCONNECTING;
+	public boolean isDisconnected()
+	{
+		synchronized (conLock)
+		{
+			return conState == DISCONNECTED;
+		}
 	}
-	public boolean isClosed() {
-		return conState == CLOSED;
+
+	public boolean isDisconnecting()
+	{
+		synchronized (conLock)
+		{
+			return conState == DISCONNECTING;
+		}
+	}
+
+	public boolean isClosed()
+	{
+		synchronized (conLock)
+		{
+			return conState == CLOSED;
+		}
 	}
 
 
