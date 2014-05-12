@@ -8,7 +8,7 @@
         android:title="@string/delete"/>
     <item
         android:id="@+id/share_msgs"
-        android:icon="@drawable/actionbar_ic_copy"
+        android:icon="@drawable/share_icon"
         android:showAsAction="always"
         android:title="@string/share"
         android:visible="false"/>
