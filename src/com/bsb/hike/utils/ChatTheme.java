@@ -99,6 +99,386 @@ public enum ChatTheme
 		
 	},
 
+	FIFA
+	{
+
+		@Override
+		public String bgId()
+		{
+			return "35";
+		}
+
+		@Override
+		public int headerBgResId()
+		{
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId()
+		{
+			return R.drawable.ic_ct_fifa_preview;
+		}
+
+		@Override
+		public int bgResId()
+		{
+			return R.drawable.bg_ct_fifa;
+		}
+
+		@Override
+		public int bubbleResId()
+		{
+			return R.drawable.ic_bubble_forest_study_sporty_fifa;
+		}
+
+		@Override
+		public boolean isTiled()
+		{
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId()
+		{
+			return R.drawable.ic_nudge_sent_custom_forest_study_sporty_fifa;
+		}
+
+		@Override
+		public boolean isAnimated()
+		{
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId()
+		{
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId()
+		{
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId()
+		{
+			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_forest_study_sporty_fifa;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
+		}
+
+	},
+
+	IPL
+	{
+
+		@Override
+		public String bgId()
+		{
+			return "36";
+		}
+
+		@Override
+		public int headerBgResId()
+		{
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId()
+		{
+			return R.drawable.ic_ct_ipl_preview;
+		}
+
+		@Override
+		public int bgResId()
+		{
+			return R.drawable.bg_ct_ipl;
+		}
+
+		@Override
+		public int bubbleResId()
+		{
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
+		}
+
+		@Override
+		public boolean isTiled()
+		{
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId()
+		{
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
+		}
+
+		@Override
+		public boolean isAnimated()
+		{
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId()
+		{
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId()
+		{
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId()
+		{
+			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
+		}
+
+	},
+	
+	GEOMETRIC_1
+	{
+
+		@Override
+		public String bgId()
+		{
+			return "37";
+		}
+
+		@Override
+		public int headerBgResId()
+		{
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId()
+		{
+			return R.drawable.ic_ct_geometric_1_preview;
+		}
+
+		@Override
+		public int bgResId()
+		{
+			return R.drawable.bg_ct_geometric_1;
+		}
+
+		@Override
+		public int bubbleResId()
+		{
+			return R.drawable.ic_bubble_smiley_geometric1;
+		}
+
+		@Override
+		public boolean isTiled()
+		{
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId()
+		{
+			return R.drawable.ic_nudge_sent_custom_smiley_geometric1;
+		}
+
+		@Override
+		public boolean isAnimated()
+		{
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId()
+		{
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId()
+		{
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId()
+		{
+			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_smiley_geometric1;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
+		}
+
+	},
+	
+	BLURRED_LIGHT
+	{
+
+		@Override
+		public String bgId()
+		{
+			return "38";
+		}
+
+		@Override
+		public int headerBgResId()
+		{
+			return R.drawable.bg_header_transparent;
+		}
+
+		@Override
+		public int previewResId()
+		{
+			return R.drawable.ic_ct_blurred_light_preview;
+		}
+
+		@Override
+		public int bgResId()
+		{
+			return R.drawable.bg_ct_blurred_light;
+		}
+
+		@Override
+		public int bubbleResId()
+		{
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
+		}
+
+		@Override
+		public boolean isTiled()
+		{
+			return false;
+		}
+
+		@Override
+		public int sentNudgeResId()
+		{
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
+		}
+
+		@Override
+		public boolean isAnimated()
+		{
+			return false;
+		}
+
+		@Override
+		public int receivedNudgeResId()
+		{
+			return R.drawable.ic_nudge_receive_custom;
+		}
+
+		@Override
+		public int inLineUpdateBGResId()
+		{
+			return R.drawable.bg_status_chat_thread_custom_theme;
+		}
+
+		@Override
+		public int systemMessageLayoutId()
+		{
+			return R.layout.participant_info_custom;
+		}
+		
+		@Override
+		public int bubbleColor()
+		{
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
+		}
+
+		@Override
+		public int smsToggleBgRes()
+		{
+			return R.drawable.bg_sms_toggle_custom_theme;
+		}
+
+		@Override
+		public int multiSelectBubbleColor()
+		{
+			return R.color.light_black_transparent;
+		}
+
+		@Override
+		public int offlineMsgTextColor()
+		{
+			return R.color.white;
+		}
+
+	},
+	
 	SPRING
 	{
 
@@ -129,7 +509,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_forest_study_sporty;
+			return R.drawable.ic_bubble_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -141,7 +521,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+			return R.drawable.ic_nudge_sent_custom_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -171,7 +551,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_forest_study_sporty;
+			return R.color.bubble_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -889,7 +1269,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_smiley_cheers_pets_sporty_cupcakes;
+			return R.drawable.ic_bubble_smiley_geometric1;
 		}
 
 		@Override
@@ -930,7 +1310,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+			return R.color.bubble_smiley_geometric1;
 		}
 
 		@Override
@@ -1268,7 +1648,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1280,7 +1660,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1310,7 +1690,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1456,7 +1836,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1468,7 +1848,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1498,7 +1878,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1614,7 +1994,6 @@ public enum ChatTheme
 		}
 
 	},
-
 	SMILEY
 	{
 
@@ -1645,7 +2024,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_smiley_cheers_pets_sporty_cupcakes;
+			return R.drawable.ic_bubble_smiley_geometric1;
 		}
 
 		@Override
@@ -1657,7 +2036,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_smiley_cheers_pets_sporty_cupcakes;
+			return R.drawable.ic_nudge_sent_custom_smiley_geometric1;
 		}
 
 		@Override
@@ -1687,7 +2066,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_smiley_cheers_pets_sporty_cupcakes;
+			return R.color.bubble_smiley_geometric1;
 		}
 
 		@Override
@@ -1927,7 +2306,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1939,7 +2318,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -1969,7 +2348,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -2021,7 +2400,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_forest_study_sporty;
+			return R.drawable.ic_bubble_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -2033,7 +2412,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+			return R.drawable.ic_nudge_sent_custom_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -2063,7 +2442,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_forest_study_sporty;
+			return R.color.bubble_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -2209,7 +2588,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -2221,7 +2600,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -2251,7 +2630,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -2397,7 +2776,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_forest_study_sporty;
+			return R.drawable.ic_bubble_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -2409,7 +2788,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_forest_study_sporty;
+			return R.drawable.ic_nudge_sent_custom_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -2439,7 +2818,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_forest_study_sporty;
+			return R.color.bubble_forest_study_sporty_fifa;
 		}
 
 		@Override
@@ -2491,7 +2870,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -2503,7 +2882,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_love_floral_bikers_kisses_valentines_girly;
+			return R.drawable.ic_nudge_sent_custom_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
@@ -2533,7 +2912,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_love_floral_bikers_kisses_valentines_girly;
+			return R.color.bubble_love_floral_kisses_valentines_girly_ipl_blurredlight;
 		}
 
 		@Override
