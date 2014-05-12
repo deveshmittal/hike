@@ -280,8 +280,6 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name="com.bsb.hike.ui.DeleteAccount" >
-        </activity>
     </application>
 
 </manifest>
