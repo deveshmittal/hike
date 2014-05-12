@@ -511,7 +511,7 @@ public class HikeNotification
 
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
-		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
+		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, getOldVibratePref(preferenceManager));
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
 		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
@@ -538,7 +538,7 @@ public class HikeNotification
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, getOldSoundPref(preferenceManager));
 			if (shouldNotPlayNotification && !NOTIF_SOUND_OFF.equals(notifSond))
 			{
 
@@ -557,6 +557,40 @@ public class HikeNotification
 			}
 		}
 		return mBuilder;
+	}
+
+	/*
+	 * This function is to respect old vibrate preference before vib list pref , if previous was on send, VIB Default else return VIB_OFF
+	 */
+	private String getOldVibratePref(SharedPreferences preferenceManager)
+	{
+		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true))
+		{
+			return VIB_DEF;
+		}
+		else
+		{
+			return VIB_OFF;
+		}
+	}
+
+	/*
+	 * This function is to respect old sound preference before sound list pref , if previous was on then check for hike jingle, else return SOUND_OFF
+	 */
+	private String getOldSoundPref(SharedPreferences preferenceManager)
+	{
+		if (preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true))
+		{
+			if (preferenceManager.getBoolean(HikeConstants.HIKE_JINGLE_PREF, true))
+			{
+				return NOTIF_SOUND_HIKE;
+			}
+			return NOTIF_SOUND_DEFAULT;
+		}
+		else
+		{
+			return NOTIF_SOUND_OFF;
+		}
 	}
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
