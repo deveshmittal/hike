@@ -96,7 +96,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		selectedGrid.setOnScrollListener(this);
 		selectedGrid.setOnItemClickListener(this);
 
-		pagerAdapter = new GalleryPagerAdapter();
+		pagerAdapter = new GalleryPagerAdapter(actualSize);
 		selectedPager.setAdapter(pagerAdapter);
 		selectedPager.setOnPageChangeListener(this);
 
@@ -265,10 +265,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		int viewerWidth;
 
-		public GalleryPagerAdapter()
+		public GalleryPagerAdapter(int size_image)
 		{
 			layoutInflater = LayoutInflater.from(GallerySelectionViewer.this);
-			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this);
+			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this, size_image);
 
 			int padding = 2 * getResources().getDimensionPixelSize(R.dimen.gallery_selection_padding);
 
@@ -313,7 +313,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 			galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 
-			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView, false, true);
+			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getFilePath(), galleryImageView, false, true);
 
 			setupButtonSpacing(galleryImageView, removeImage);
 
