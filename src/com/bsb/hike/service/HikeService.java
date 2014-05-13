@@ -316,8 +316,7 @@ public class HikeService extends Service
 		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, false))
 		{
 			sm.deleteDefaultDownloadedStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true);
-			settings.edit().commit();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true).commit();
 		}
 		/*
 		 * this code path will be for users upgrading to the build where we make expressions a default loaded category
