@@ -33,6 +33,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
+import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -42,7 +43,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
 
-public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener
+public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, DeleteAccountListener
 {
 
 	private enum BlockingTaskType
@@ -208,13 +209,20 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
 		if (resetStealthPreference != null)
 		{
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
-				resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
-			}
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				{
+					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
+					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
+				}
 
-			resetStealthPreference.setOnPreferenceClickListener(this);
+				resetStealthPreference.setOnPreferenceClickListener(this);
+			}
+			else
+			{
+				getPreferenceScreen().removePreference(resetStealthPreference);
+			}
 		}
 
 		setupActionBar(titleRes);
@@ -307,6 +315,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Logger.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF))
 		{
+			// Intent i = new Intent(getApplicationContext(), DeleteAccount.class);
+			// startActivity(i);
+
 			final CustomAlertDialog secondConfirmDialog = new CustomAlertDialog(HikePreferences.this);
 			final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(HikePreferences.this);
 			firstConfirmDialog.setHeader(R.string.are_you_sure);
@@ -563,7 +574,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.RESET_STEALTH_PREF.equals(preference.getKey()))
 		{
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 			{
 				Utils.cancelScheduledStealthReset(this);
 
@@ -571,7 +582,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				preference.setSummary(R.string.reset_complete_stealth_info);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
-				
+
 				Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 			}
 			else
@@ -723,5 +734,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 		});
 		lp.setTitle(lp.getTitle() + " - " + lp.getValue());
+	}
+
+	@Override
+	public void accountDeleted(boolean isSuccess)
+	{
+		if (isSuccess)
+		{
+			accountDeleted();
+		}
+		else
+		{
+			dismissProgressDialog();
+		}
+
 	}
 }

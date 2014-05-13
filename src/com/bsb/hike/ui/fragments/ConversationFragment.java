@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -475,6 +476,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		prefUtil.removeData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE);
 		prefUtil.removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
 		prefUtil.removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+		prefUtil.removeData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST);
 	}
 
 	@Override
@@ -586,8 +588,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					else
 					{
-						// We don't show this toast in during stealth ftue.
-						Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
+						// We don't show this toast during stealth ftue setup.
+						if(newStealthValue)
+						{
+							Toast.makeText(getActivity(), R.string.chat_marked_stealth, Toast.LENGTH_SHORT).show();
+						}
+						else if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST, false))
+						{
+							Toast.makeText(getActivity(), R.string.chat_unmarked_stealth_first, Toast.LENGTH_LONG).show();
+							HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST, true);
+						}
+						else
+						{
+							Toast.makeText(getActivity(), R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
+						}
 					}
 
 					if (stealthType == HikeConstants.STEALTH_ON_FAKE)
@@ -1490,10 +1504,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private ConvMessage findMessageById(long msgId)
 	{
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
+		for (Entry<String, Conversation> conversationEntry : mConversationsByMSISDN.entrySet())
 		{
-			Conversation conversation = mAdapter.getItem(i);
+			Conversation conversation = conversationEntry.getValue();
 			if (conversation == null)
 			{
 				continue;

@@ -205,8 +205,8 @@
 
                 <ImageButton
                     android:id="@+id/send_message"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="49dp"
+                    android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
                     android:background="?actionBarItemBackground"
@@ -216,8 +216,8 @@
 
                 <ImageButton
                     android:id="@+id/sticker_btn"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="49dp"
+                    android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
                     android:background="?actionBarItemBackground"
@@ -323,6 +323,14 @@
             </RelativeLayout>
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
+
+    <View
+        android:id="@+id/sticker_palette_filler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black"
+        android:visibility="gone" />
 
     <include layout="@layout/dark_overlay" />
 

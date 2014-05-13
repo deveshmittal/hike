@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
-        android:background="?actionBarItemBackground"
+        android:background="@drawable/bg_overflow_menu_selector"
         android:orientation="horizontal" >
 
         <ImageView
@@ -46,7 +46,7 @@
         android:layout_height="fill_parent"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/back"
-        android:background="?actionBarItemBackground"
+        android:background="@drawable/bg_overflow_menu_selector"
         android:clickable="true"
         android:orientation="vertical"
         android:gravity="center_vertical"

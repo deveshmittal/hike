@@ -85,6 +85,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -101,7 +102,6 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.MotionEvent;
@@ -168,7 +168,7 @@ public class Utils
 	public static Pattern msisdnRegex;
 
 	public static Pattern pinRegex;
-
+ 
 	public static String shortCodeIntent;
 
 	private static Animation mOutToRight;
@@ -180,6 +180,8 @@ public class Utils
 	private static TranslateAnimation mInFromRight;
 
 	public static float densityMultiplier = 1.0f;
+
+	public static int densityDpi;
 
 	private static Lock lockObj = new ReentrantLock();
 
@@ -802,6 +804,7 @@ public class Utils
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
 		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.densityDpi = displayMetrics.densityDpi;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -1022,6 +1025,14 @@ public class Utils
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
 		s.setType("text/plain");
 		s.putExtra(Intent.EXTRA_TEXT, message);
+		context.startActivity(s);
+	}
+
+	public static void startShareImageIntent(Context context, String imagePath)
+	{
+		Intent s = new Intent(android.content.Intent.ACTION_SEND);
+		s.setType("image/*");
+		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
 		context.startActivity(s);
 	}
 
@@ -2365,29 +2376,26 @@ public class Utils
 	}
 
 	public static int getResolutionId()
-	{
-		int densityMultiplierX100 = (int) (densityMultiplier * 100);
-		Logger.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
-
-		if (densityMultiplierX100 > 200)
+	{	
+		switch(densityDpi)
 		{
-			return HikeConstants.XXHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 150)
-		{
-			return HikeConstants.XHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 100)
-		{
-			return HikeConstants.HDPI_ID;
-		}
-		else if (densityMultiplierX100 > 75)
-		{
+		case 120:
+		   return HikeConstants.LDPI_ID;
+		case 160:
 			return HikeConstants.MDPI_ID;
-		}
-		else
-		{
-			return HikeConstants.LDPI_ID;
+		case 240:
+			return HikeConstants.HDPI_ID;
+		case 320:
+			return HikeConstants.XHDPI_ID;
+		case 213:
+			return HikeConstants.HDPI_ID;
+		case 480:
+			return HikeConstants.XXHDPI_ID;
+		case 640:
+		case 400:
+			return HikeConstants.XXHDPI_ID;
+		default:
+			return HikeConstants.HDPI_ID;
 		}
 	}
 
@@ -2427,6 +2435,11 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen)
+	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
@@ -2434,19 +2447,26 @@ public class Utils
 
 		if (checkIfActuallyBackgrounded)
 		{
-			boolean isForegrounded = isAppForeground(context);
+			boolean screenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+			Logger.d("HikeAppState", "Screen On? " + screenOn);
 
-			if (isForegrounded)
+			if (screenOn)
 			{
-				if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+				boolean isForegrounded = isAppForeground(context);
+
+				if (isForegrounded)
 				{
-					Logger.d("HikeAppState", "Wrong state! correcting it");
-					HikeMessengerApp.currentState = CurrentState.RESUMED;
+					if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+					{
+						Logger.d("HikeAppState", "Wrong state! correcting it");
+						HikeMessengerApp.currentState = CurrentState.RESUMED;
+						return;
+					}
 				}
 			}
 		}
 
-		sendAppState();
+		sendAppState(context, requestBulkLastSeen);
 
 		if (resetStealth)
 		{
@@ -2461,7 +2481,7 @@ public class Utils
 		}
 	}
 
-	private static void sendAppState()
+	private static void sendAppState(Context context, boolean requestBulkLastSeen)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2474,8 +2494,10 @@ public class Utils
 
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED, HikeMessengerApp.currentState == CurrentState.OPENED);
-				data.put(HikeConstants.BULK_LAST_SEEN, true); // adding this for
-																// bulk
+				/*
+				 * We only request the bulk last seen if the last seen preference is on.
+				 */
+				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
 			}
 			else
@@ -3646,6 +3668,19 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 
+	public static void addToContacts(Activity context, String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		context.startActivity(i);
+	}
+
+	public static boolean isPlayTickSound(Context context)
+	{
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, false));
+	}
+
 	/**
 	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
 	 * 
@@ -3655,7 +3690,7 @@ public class Utils
 	public static void playSoundFromRaw(Context context, int soundId)
 	{
 
-		Log.i("sound", "playing sound " + soundId);
+		Logger.i("sound", "playing sound " + soundId);
 		MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_RING);
 		Resources res = context.getResources();
@@ -3712,7 +3747,6 @@ public class Utils
 
 	public static boolean isAppForeground(Context context)
 	{
-		long startTime = System.currentTimeMillis();
 		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
 		Iterator<RunningAppProcessInfo> i = l.iterator();
@@ -3722,7 +3756,6 @@ public class Utils
 
 			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
 			{
-				Log.d("HikeAppState", "Check time: " + (System.currentTimeMillis() - startTime));
 				return true;
 			}
 		}

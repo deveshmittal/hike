@@ -566,6 +566,11 @@ public class ConvMessage
 				else
 				{
 					data.put(HikeConstants.MESSAGE_ID, msgID);
+
+					if(mConversation.isStealth() && isSent())
+					{
+						data.put(HikeConstants.STEALTH, true);
+					}
 				}
 
 				object.put(HikeConstants.TO, mMsisdn);

@@ -524,7 +524,6 @@
 	                android:id="@+id/sticker_image"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
-	                android:src="@drawable/sticker_1_hi"
 	                android:layout_below="@id/participant_details"
 	                android:paddingLeft="5dp"
 	                android:visibility="gone" />
