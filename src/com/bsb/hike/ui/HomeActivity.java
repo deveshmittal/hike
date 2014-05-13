@@ -1795,6 +1795,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case 7:
 					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
+					break;
+				case 8:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
@@ -1836,7 +1838,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
 	{
-		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 7));
+		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 8));
 	}
 
 	@Override
