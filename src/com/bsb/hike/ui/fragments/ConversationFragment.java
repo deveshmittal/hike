@@ -552,15 +552,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{	
 			optionsList.add(getString(R.string.clear_whole_conversation));
 		}
-		optionsList.add(getString(R.string.email_conversation));
-		
-		
-		if (conv.getContactName() != null)
-		{
-			optionsList.add(getString(R.string.shortcut));
-		}
-
 		optionsList.add(getString(R.string.email_conversations));
+		
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
