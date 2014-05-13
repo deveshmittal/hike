@@ -15,7 +15,7 @@ public class HikeAppStateUtils
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
 		{
-			Logger.d(TAG, "App was opened");
+			Logger.d(TAG + activity.getClass().getSimpleName(), "App was opened. Sending packet");
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.appStateChanged(activity.getApplicationContext());
 		}
@@ -25,13 +25,14 @@ public class HikeAppStateUtils
 	public static void onResume(Activity activity)
 	{
 		com.facebook.Settings.publishInstallAsync(activity, HikeConstants.APP_FACEBOOK_ID);
+		Logger.d(TAG + activity.getClass().getSimpleName(), "App was resumed");
 	}
 
 	public static void onStart(Activity activity)
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
 		{
-			Logger.d(TAG, "App was resumed");
+			Logger.d(TAG + activity.getClass().getSimpleName(), "App was started. Sending packet");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.appStateChanged(activity.getApplicationContext());
 		}
@@ -44,7 +45,7 @@ public class HikeAppStateUtils
 
 	public static void onStop(Activity activity)
 	{
-		Logger.d(TAG, "OnStop");
+		Logger.d(TAG + activity.getClass().getSimpleName(), "OnStop");
 		if (HikeMessengerApp.currentState == CurrentState.NEW_ACTIVITY)
 		{
 			Logger.d(TAG, "App was going to another activity");
@@ -62,7 +63,7 @@ public class HikeAppStateUtils
 				HikeMessengerApp.currentState = CurrentState.RESUMED;
 				return;
 			}
-			Logger.d(TAG, "App was backgrounded");
+			Logger.d(TAG + activity.getClass().getSimpleName(), "App was backgrounded. Sending packet");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;
 			Utils.appStateChanged(activity.getApplicationContext(), true, true);
 		}
@@ -73,16 +74,17 @@ public class HikeAppStateUtils
 		HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
 	}
 
-	public static void startActivityForResult()
+	public static void startActivityForResult(Activity activity)
 	{
 		HikeMessengerApp.currentState = CurrentState.NEW_ACTIVITY;
+		Logger.d(TAG + activity.getClass().getSimpleName(), "startActivityForResult. Previous state: " + HikeMessengerApp.currentState);
 	}
 
 	public static void onActivityResult(Activity activity)
 	{
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED)
 		{
-			Logger.d(TAG, "App returning from activity with result");
+			Logger.d(TAG + activity.getClass().getSimpleName(), "App returning from activity with result. Sending packet");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 			Utils.appStateChanged(activity.getApplicationContext());
 		}
