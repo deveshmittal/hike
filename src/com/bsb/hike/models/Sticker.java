@@ -247,6 +247,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 			stickerId = in.readUTF();
 			category = new StickerCategory();
 			category.deSerializeObj(in);
+			setupIndexForSwapedCategories();
 		}
 		catch (IOException e)
 		{
