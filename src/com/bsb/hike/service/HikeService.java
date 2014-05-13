@@ -325,8 +325,7 @@ public class HikeService extends Service
 		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, false))
 		{
 			sm.deleteDefaultDownloadedExpressionsStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true);
-			settings.edit().commit();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true).commit();
 			
 			if(sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
 			{
