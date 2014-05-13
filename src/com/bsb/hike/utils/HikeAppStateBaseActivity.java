@@ -35,6 +35,13 @@ public abstract class HikeAppStateBaseActivity extends Activity
 	}
 
 	@Override
+	protected void onRestart()
+	{
+		HikeAppStateUtils.onRestart(this);
+		super.onRestart();
+	}
+
+	@Override
 	public void onBackPressed()
 	{
 		HikeAppStateUtils.onBackPressed();

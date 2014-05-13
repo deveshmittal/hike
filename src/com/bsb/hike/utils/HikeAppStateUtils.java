@@ -38,6 +38,27 @@ public class HikeAppStateUtils
 		}
 	}
 
+	public static void onRestart(Activity activity)
+	{
+		Logger.d(TAG + activity.getClass().getSimpleName(), "App was restarted.");
+		/*
+		 * This code was added for the case when an activity is opened when the app is in the background.
+		 * Here we check is the screen is on and if it is, we send an fg packet.
+		 */
+		if (HikeMessengerApp.currentState == CurrentState.NEW_ACTIVITY_IN_BG)
+		{
+			boolean isScreenOn = Utils.isScreenOn(activity.getApplicationContext());
+			Logger.d(TAG + activity.getClass().getSimpleName(), "App was restarted. Is Screen on? " + isScreenOn);
+			if (!isScreenOn)
+			{
+				return;
+			}
+			Logger.d(TAG + activity.getClass().getSimpleName(), "App was restarted. Sending packet");
+			HikeMessengerApp.currentState = CurrentState.RESUMED;
+			Utils.appStateChanged(activity.getApplicationContext());
+		}
+	}
+
 	public static void onBackPressed()
 	{
 		HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
@@ -55,9 +76,9 @@ public class HikeAppStateUtils
 		{
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 		}
-		else
+		else if (HikeMessengerApp.currentState != CurrentState.BACKGROUNDED && HikeMessengerApp.currentState != CurrentState.CLOSED && HikeMessengerApp.currentState != CurrentState.NEW_ACTIVITY_IN_BG)
 		{
-			if(Utils.isHoneycombOrHigher() && activity.isChangingConfigurations())
+			if (Utils.isHoneycombOrHigher() && activity.isChangingConfigurations())
 			{
 				Logger.d(TAG, "App was going to another activity");
 				HikeMessengerApp.currentState = CurrentState.RESUMED;
@@ -76,8 +97,15 @@ public class HikeAppStateUtils
 
 	public static void startActivityForResult(Activity activity)
 	{
-		HikeMessengerApp.currentState = CurrentState.NEW_ACTIVITY;
 		Logger.d(TAG + activity.getClass().getSimpleName(), "startActivityForResult. Previous state: " + HikeMessengerApp.currentState);
+		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED || HikeMessengerApp.currentState == CurrentState.CLOSED)
+		{
+			HikeMessengerApp.currentState = CurrentState.NEW_ACTIVITY_IN_BG;
+		}
+		else
+		{
+			HikeMessengerApp.currentState = CurrentState.NEW_ACTIVITY;
+		}
 	}
 
 	public static void onActivityResult(Activity activity)

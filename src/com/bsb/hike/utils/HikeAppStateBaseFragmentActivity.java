@@ -45,6 +45,13 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	}
 
 	@Override
+	protected void onRestart()
+	{
+		HikeAppStateUtils.onRestart(this);
+		super.onRestart();
+	}
+
+	@Override
 	public void onBackPressed()
 	{
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag(IMAGE_FRAGMENT_TAG);

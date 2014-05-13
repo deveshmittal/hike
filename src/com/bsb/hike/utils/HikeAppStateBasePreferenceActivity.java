@@ -32,6 +32,13 @@ public abstract class HikeAppStateBasePreferenceActivity extends SherlockPrefere
 	}
 
 	@Override
+	protected void onRestart()
+	{
+		HikeAppStateUtils.onRestart(this);
+		super.onRestart();
+	}
+
+	@Override
 	public void onBackPressed()
 	{
 		HikeAppStateUtils.onBackPressed();
