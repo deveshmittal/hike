@@ -336,6 +336,7 @@ public class HikeService extends Service
 			{
 				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
 			}
+			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), sm.OLD_HARDCODED_STICKER_IDS_DOGGY);
 		}
 	}
 
