@@ -68,7 +68,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static enum CurrentState
 	{
-		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED
+		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED, NEW_ACTIVITY_IN_BG
 	}
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";

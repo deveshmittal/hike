@@ -597,4 +597,15 @@
         <item name="android:windowIsFloating">true</item>
         <item name="windowActionBar">true</item>
 	</style>
+	
+	<style name="BlockAddUnknownContact">
+	    <item name="android:layout_width">0dp</item>
+	    <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/block_unknown_contact_button</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/block_add_unknown</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold|italic</item>
+	</style>
 </resources>

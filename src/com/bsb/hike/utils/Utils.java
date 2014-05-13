@@ -2447,7 +2447,7 @@ public class Utils
 
 		if (checkIfActuallyBackgrounded)
 		{
-			boolean screenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+			boolean screenOn = isScreenOn(context);
 			Logger.d("HikeAppState", "Screen On? " + screenOn);
 
 			if (screenOn)
@@ -2479,6 +2479,11 @@ public class Utils
 				clearStealthResetTimer(context);
 			}
 		}
+	}
+
+	public static boolean isScreenOn(Context context)
+	{
+		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
 	private static void sendAppState(Context context, boolean requestBulkLastSeen)

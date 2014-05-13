@@ -22,6 +22,8 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.Intents.Insert;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,6 +64,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -517,17 +520,42 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(conv.isStealth() ? R.string.unmark_stealth : R.string.mark_stealth));
 		}
+		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
+		{
+			optionsList.add(getString(R.string.add_to_contacts));
+			optionsList.add(getString(R.string.add_to_contacts_existing));
+		}
+		if (!(conv instanceof GroupConversation))
+		{
+			if (conv.getContactName() != null)
+			{
+				optionsList.add(getString(R.string.viewcontact));
+			}
+		}
+		else
+		{
+			optionsList.add(getString(R.string.group_info));
+		}
+		if (conv.getContactName() != null)
+		{
+			optionsList.add(getString(R.string.shortcut));
 
-		optionsList.add(getString(R.string.shortcut));
-		optionsList.add(getString(R.string.email_conversation));
+		}
+
 		if (conv instanceof GroupConversation)
 		{
 			optionsList.add(getString(R.string.delete_leave));
 		}
 		else
 		{
-			optionsList.add(getString(R.string.delete));
+			optionsList.add(getString(R.string.delete_chat));
 		}
+		if (conv instanceof GroupConversation)
+		{	
+			optionsList.add(getString(R.string.clear_whole_conversation));
+		}
+		optionsList.add(getString(R.string.email_conversations));
+		
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -547,7 +575,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(getSherlockActivity(), conv);
 				}
-				else if (getString(R.string.delete).equals(option))
+				else if (getString(R.string.delete_chat).equals(option))
 				{
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
@@ -558,7 +586,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 					leaveGroup(conv);
 				}
-				else if (getString(R.string.email_conversation).equals(option))
+				else if (getString(R.string.email_conversations).equals(option))
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
 					Utils.executeConvAsyncTask(task, conv);
@@ -567,6 +595,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 					DeleteAllConversations();
+				}
+				else if (getString(R.string.viewcontact).equals(option))
+				{
+					viewContacts(conv);
+				}
+				else if (getString(R.string.clear_whole_conversation).equals(option))
+				{
+					clearConversation(conv);
+				}
+				else if (getString(R.string.add_to_contacts).equals(option))
+				{
+					addToContacts(conv.getMsisdn());
+				}
+				else if (getString(R.string.add_to_contacts_existing).equals(option))
+				{
+					addToContactsExisting(conv.getMsisdn());
+				}
+
+				else if (getString(R.string.group_info).equals(option))
+				{
+					if (!((GroupConversation) conv).getIsGroupAlive())
+					{
+						return;
+					}
+					viewGroupInfo(conv);
 				}
 				else if (getString(R.string.mark_stealth).equals(option) || getString(R.string.unmark_stealth).equals(option))
 				{
@@ -649,6 +702,29 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		AlertDialog alertDialog = builder.show();
 		alertDialog.getListView().setDivider(getResources().getDrawable(R.drawable.ic_thread_divider_profile));
 		return true;
+	}
+
+
+	protected void clearConversation(final Conversation conv) {
+		final CustomAlertDialog clearConfirmDialog = new CustomAlertDialog(this.getActivity());
+		clearConfirmDialog.setHeader(R.string.clear_conversation);
+		clearConfirmDialog.setBody(R.string.confirm_clear_conversation);
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(conv.getMsisdn(), conv.getConvId()));
+				mAdapter.notifyDataSetChanged();
+				clearConfirmDialog.dismiss();
+			}
+		};
+
+		clearConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+		clearConfirmDialog.setCancelButton(R.string.cancel);
+		clearConfirmDialog.show();
+		
 	}
 
 	private void fetchConversations()
@@ -1654,4 +1730,35 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		
 	}
+	
+	protected void viewContacts(Conversation conv) 
+	{
+		Intent intent = new Intent(getActivity(), ProfileActivity.class);
+		intent.putExtra(HikeConstants.Extras.CONTACT_INFO, conv.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, conv.isOnhike());
+		startActivity(intent);
+	}
+	protected void viewGroupInfo(Conversation conv) {
+		Intent intent = new Intent(getActivity(), ProfileActivity.class);
+		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
+		startActivity(intent);
+	}
+
+	private void addToContacts(String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT);
+		i.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		startActivity(i);
+	}
+
+	private void addToContactsExisting(String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		startActivity(i);
+	}
+
 }
