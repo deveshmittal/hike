@@ -534,6 +534,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.group_info));
 		}
+		if (conv.getContactName() != null)
+		{
+			optionsList.add(getString(R.string.shortcut));
+
+		}
 
 		if (conv instanceof GroupConversation)
 		{
@@ -541,11 +546,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
-			optionsList.add(getString(R.string.delete));
+			optionsList.add(getString(R.string.delete_chat));
 		}
 		if (conv instanceof GroupConversation)
 		{	
-		optionsList.add(getString(R.string.clear_conversation));
+			optionsList.add(getString(R.string.clear_whole_conversation));
 		}
 		optionsList.add(getString(R.string.email_conversation));
 		
@@ -554,6 +559,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.shortcut));
 		}
+
+		optionsList.add(getString(R.string.email_conversations));
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -573,7 +580,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.ADD_SHORTCUT);
 					Utils.createShortcut(getSherlockActivity(), conv);
 				}
-				else if (getString(R.string.delete).equals(option))
+				else if (getString(R.string.delete_chat).equals(option))
 				{
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
@@ -584,7 +591,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
 					leaveGroup(conv);
 				}
-				else if (getString(R.string.email_conversation).equals(option))
+				else if (getString(R.string.email_conversations).equals(option))
 				{
 					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask(getSherlockActivity(), ConversationFragment.this);
 					Utils.executeConvAsyncTask(task, conv);
@@ -598,7 +605,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					viewContacts(conv);
 				}
-				else if (getString(R.string.clear_conversation).equals(option))
+				else if (getString(R.string.clear_whole_conversation).equals(option))
 				{
 					clearConversation(conv);
 				}

@@ -660,7 +660,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							}
 						}
 					});
-					builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
+					builder.setNegativeButton(R.string.edit, new DialogInterface.OnClickListener()
 					{
 
 						@Override
