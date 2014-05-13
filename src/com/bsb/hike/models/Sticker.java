@@ -31,6 +31,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		this.stickerId = stickerId;
 		this.stickerIndex = stickerIndex;
 		this.category = category;
+		setupIndexForSwapedCategories();
 	}
 
 	public Sticker(StickerCategory category, String stickerId)
@@ -57,6 +58,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		this.stickerId = stickerId;
 		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
 		this.stickerIndex = stickerIdx;
+		setupIndexForSwapedCategories();
 	}
 
 	public boolean isUnknownSticker()
@@ -245,11 +247,36 @@ public class Sticker implements Serializable, Comparable<Sticker>
 			stickerId = in.readUTF();
 			category = new StickerCategory();
 			category.deSerializeObj(in);
+			setupIndexForSwapedCategories();
 		}
 		catch (IOException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 * We save sticker index -1 for all non-hardcoded stickers
+	 * in message metadata. So when moving doggy to non-hardcoded
+	 * and expressions to hardcoded. all doggy sticker will now
+	 * be stickerIndex -1 and all hardcoded expressions will
+	 * have a non negetive index value
+	 */
+	private void setupIndexForSwapedCategories()
+	{
+		if (category != null)
+		{
+			if(category.categoryId.equals(StickerCategoryId.doggy))
+			{
+				this.stickerIndex = -1;
+				return;
+			}
+			if(category.categoryId.equals(StickerCategoryId.expressions) && stickerIndex == -1)
+			{
+				setupStickerindex(category, stickerId);
+				return;
+			}
 		}
 	}
 }
