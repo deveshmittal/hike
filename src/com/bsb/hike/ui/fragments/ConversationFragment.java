@@ -21,6 +21,8 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.Intents.Insert;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -516,14 +518,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(conv.isStealth() ? R.string.unmark_stealth : R.string.mark_stealth));
 		}
+		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
+		{
+			optionsList.add(getString(R.string.add_to_contacts));
+			optionsList.add(getString(R.string.add_to_contacts_existing));
+		}
 		if (!(conv instanceof GroupConversation))
 		{
-			optionsList.add(getString(R.string.viewcontact));
-		}else
+			if (conv.getContactName() != null)
+			{
+				optionsList.add(getString(R.string.viewcontact));
+			}
+		}
+		else
 		{
 			optionsList.add(getString(R.string.group_info));
 		}
-		optionsList.add(getString(R.string.shortcut));
+
 		if (conv instanceof GroupConversation)
 		{
 			optionsList.add(getString(R.string.delete_leave));
@@ -538,7 +549,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		optionsList.add(getString(R.string.email_conversation));
 		
-	
+		
+		if (conv.getContactName() != null)
+		{
+			optionsList.add(getString(R.string.shortcut));
+		}
+
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
 
@@ -586,6 +602,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					clearConversation(conv);
 				}
+				else if (getString(R.string.add_to_contacts).equals(option))
+				{
+					addToContacts(conv.getMsisdn());
+				}
+				else if (getString(R.string.add_to_contacts_existing).equals(option))
+				{
+					addToContactsExisting(conv.getMsisdn());
+				}
+
 				else if (getString(R.string.group_info).equals(option))
 				{
 					if (!((GroupConversation) conv).getIsGroupAlive())
@@ -1706,4 +1731,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, conv.getMsisdn());
 		startActivity(intent);
 	}
+
+	private void addToContacts(String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT);
+		i.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		startActivity(i);
+	}
+
+	private void addToContactsExisting(String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		startActivity(i);
+	}
+
 }

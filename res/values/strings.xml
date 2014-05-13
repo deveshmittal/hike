@@ -1506,5 +1506,6 @@
     <string name="mark_stealth">Mark Chat as Hidden</string>
     <string name="unmark_stealth">Mark Chat as Visible</string>
     <string name="viewcontact">View Contact</string>
+    <string name="add_to_contacts_existing">Add to existing contact</string>
 		
 </resources>
