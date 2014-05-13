@@ -46,6 +46,13 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 	}
 
 	@Override
+	protected void onPause()
+	{
+		HikeAppStateUtils.onPause(this);
+		super.onPause();
+	}
+
+	@Override
 	protected void onStop()
 	{
 		HikeAppStateUtils.onStop(this);

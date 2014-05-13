@@ -11,7 +11,6 @@ import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
 
 public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener
@@ -77,18 +76,16 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	}
 
 	@Override
+	protected void onPause()
+	{
+		HikeAppStateUtils.onPause(this);
+		super.onPause();
+	}
+
+	@Override
 	protected void onStop()
 	{
-		if ((HikeMessengerApp.currentState == CurrentState.BACK_PRESSED) && (this instanceof HomeActivity))
-		{
-			Logger.d(TAG + getClass().getSimpleName(), "App was closed");
-			HikeMessengerApp.currentState = CurrentState.CLOSED;
-			Utils.appStateChanged(this.getApplicationContext());
-		}
-		else
-		{
-			HikeAppStateUtils.onStop(this);
-		}
+		HikeAppStateUtils.onStop(this);
 		super.onStop();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SHOW_IMAGE, this);
 	}
