@@ -3,6 +3,7 @@ package com.bsb.hike.view;
 import android.content.Context;
 import android.text.Layout;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -18,22 +19,29 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 	private static final int widthTime24Hour = 33;
 	
 	private static final int widthMargin = 2;
-	
+
 	private static final int heightTime = 16;
+
+	private static final int minOutMargin = 88;
+	
+	private Context context;
 
 	public CustomReceiveMessageTextView(Context context)
 	{
 		super(context);
+		this.context = context;
 	}
 
 	public CustomReceiveMessageTextView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
+		this.context = context;
 	}
 
 	public CustomReceiveMessageTextView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
+		this.context = context;
 	}
 
 	@Override
@@ -70,7 +78,6 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 				{
 					return;
 				}
-
 				linesMaxWidth = Math.max(linesMaxWidth, (int) Math.ceil(lineWidth));
 			}
 
@@ -84,9 +91,22 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			{
 				widthAddition = widthTime12Hour;
 			}
-
-			if((int) (((widthAddition + widthMargin) * Utils.densityMultiplier) + lastLineWidth) < (int)(maxWidth * Utils.densityMultiplier))
-			//if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
+			DisplayMetrics displaymetrics = context.getResources().getDisplayMetrics();
+			int height = displaymetrics.heightPixels;
+			int width = displaymetrics.widthPixels;
+			int widthInDP = (int)(width / Utils.densityMultiplier);
+			Logger.d("gaurav","width in dp" + widthInDP);
+			int max_width = Math.min((widthInDP - minOutMargin),maxWidth);
+			if(linesMaxWidth>= (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth))
+			{
+				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
+				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				parentHeight = viewHeight;
+				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
+				this.setMeasuredDimension(linesMaxWidth, parentHeight);
+			}
+			else if((int) (((widthAddition + widthMargin) * Utils.densityMultiplier) + lastLineWidth) < (int)(max_width * Utils.densityMultiplier))
 			{
 				int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
 				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
