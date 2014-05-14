@@ -2840,16 +2840,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if (this.mContactNumber.equals(contactInfo.getMsisdn()))
 			{
-				// remove block header if present
-				if (messages != null && messages.size() > 0)
-				{
-					ConvMessage cm = messages.get(0);
-					if (cm.isBlockAddHeader())
-					{
-						messages.remove(0);
-						mAdapter.notifyDataSetChanged();
-					}
-				}
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
 				this.mLabel = contactInfo.getName();
@@ -2859,6 +2849,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					public void run()
 					{
 						mLabelView.setText(mLabel);
+
+						// remove block header if present
+						if (messages != null && messages.size() > 0)
+						{
+							ConvMessage cm = messages.get(0);
+							if (cm.isBlockAddHeader())
+							{
+								messages.remove(0);
+								mAdapter.notifyDataSetChanged();
+							}
+						}
 					}
 				});
 			}
