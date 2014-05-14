@@ -582,14 +582,48 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (getString(R.string.delete_chat).equals(option))
 				{
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-					Utils.executeConvAsyncTask(task, conv);
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+							Utils.executeConvAsyncTask(task, conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.no);
+					deleteConfirmDialog.show();
 				}
 				else if (getString(R.string.delete_leave).equals(option))
 				{
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					leaveGroup(conv);
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							leaveGroup(conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.cancel);
+					deleteConfirmDialog.show();
 				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
