@@ -288,7 +288,12 @@ public class HikeNotification
 
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
-		notificationManager.notify(notificationId, mBuilder.getNotification());
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			notificationManager.notify(notificationId, mBuilder.getNotification());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime : System.currentTimeMillis();
+		}
 	}
 
 	public void notifyFavorite(final ContactInfo contactInfo)
