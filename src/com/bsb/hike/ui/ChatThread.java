@@ -208,6 +208,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
 
+	private boolean screenOffEvent;
+
 	private boolean activityVisible = true;
 
 	private enum DialogShowing
@@ -521,6 +523,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		unregisterReceiver(screenOffBR);
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
 			Editor editor = prefs.edit();
@@ -734,6 +737,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
 		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
+		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+		Logger.i("chatthread", "on create end");
 	}
 
 	private void clearTempData()
@@ -5282,7 +5287,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
+				Logger.d("chatthread", "window token is null -- trying to show emoticon pallette");
 				attachmentWindow = null;
+				emoticonType = null;
 			}
 		}
 
@@ -6710,12 +6717,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onGlobalLayout()
 			{
-				Log.i("keybpard", "global layout listener");
+				Log.i("chatthread", "global layout listener");
 				View root = findViewById(R.id.chatThreadParentLayout);
-				Log.i("keybpard", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
+				Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
 				int rootHeight = root.getHeight();
-				int temp = root.getRootView().getHeight() - rootHeight - getStatusBarHeight();
-				if (temp > rootHeight / 3)
+				int rootViewHeight = root.getRootView().getHeight();
+				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
+				if (temp > rootViewHeight / 3)
 				{
 					possibleKeyboardHeight = temp;
 					isKeyboardOpen = true;
@@ -6732,25 +6740,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onRestart()
 	{
 		super.onRestart();
-		int softInput = getWindow().getAttributes().softInputMode;
-		if (softInput != WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE && softInput != WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+		/*
+		 * This method will be called either user is returning after pressing home or screen lock ,
+		 * 
+		 * IF USER came after pressing home, then soft keyboard respects softinputstate , i.e : if keyboard was visible or but softinputmode visible is set , then soft keyboard
+		 * will become visible
+		 * 
+		 * But if it is called after screen lock , then soft input keyboard maintains its state , it doesnot change, if it was visible earlier, it will be visible this time as well
+		 * , so we simply return as it does not effect our sticker pallete -- gauravKhanna
+		 */
+
+		if (screenOffEvent)
 		{
-			/*
-			 * Added this hack to add the emoticon/sticker palette padding when the android OS dismissed the keyboard on minimizing the app.
-			 */
-			if (attachmentWindow != null && emoticonLayout != null && attachmentWindow.getContentView() == emoticonLayout)
-			{
-				emoticonLayout.post(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						resizeMainheight(emoticonLayout.getHeight(), true);
-					}
-				});
-			}
+			screenOffEvent = false;
+			return;
 		}
+		Logger.i("chatthread", "on restart");
+
+		int softInput = getWindow().getAttributes().softInputMode;
+		if (softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE || softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+		{
+			// keyboard will come for sure
+			if (isEmoticonPalleteVisible())
+			{
+				resizeMainheight(0, false);
+			}
+			return;
+		}
+		// mean last time it was above keyboard, so no guarantee of keyboard, simply discard it
+		if (isEmoticonPalleteVisible() && findViewById(R.id.chat_layout).getPaddingBottom() == 0)
+		{
+			dismissPopupWindow();
+
+		}
+
+	}
+
+	private boolean isEmoticonPalleteVisible()
+	{
+		return attachmentWindow != null && emoticonLayout != null && attachmentWindow.getContentView() == emoticonLayout;
 	}
 
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
@@ -6848,4 +6876,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		fillerView.setVisibility(View.VISIBLE);
 	}
+
+	private BroadcastReceiver screenOffBR = new BroadcastReceiver()
+	{
+
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			Logger.d("chatthread", "on receive called screenoff");
+			screenOffEvent = true;
+		}
+	};
 }
