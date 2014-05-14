@@ -1169,7 +1169,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void blockUser(View v)
 	{
-		blockUser();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
 	}
 
