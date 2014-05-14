@@ -110,6 +110,9 @@ public class StickerManager
 
 	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_gn.png", "002_lol.png", "003_rofl.png", "004_lmao.png", "005_omg.png", "006_brb.png",
 			"007_gtg.png", "008_xoxo.png", };
+	
+	public final String[] OLD_HARDCODED_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
+			"007_confused.png", "008_dreaming.png", };
 
 	public enum StickerCategoryId
 	{
@@ -1036,6 +1039,14 @@ public class StickerManager
 		catch (Exception e)
 		{
 
+		}
+	}
+	
+	public void removeStickersFromRecents(String categoryName, String[] stickerIds)
+	{
+		for (String stickerId : stickerIds)
+		{
+			recentStickers.remove(new Sticker(categoryName, stickerId));
 		}
 	}
 }

@@ -879,4 +879,59 @@
     <string name="last_seen_proper_casing">Dernier vu</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Plus grand, meilleur pièces jointes</string>
+    <string name="introducing_stealth_mode">Présentation du mode caché</string>
+    <string name="stealth_mode_popup_msg">Tu peux désormais masquer tes tchats privés et les lire uniquement en entrant un mot de passe.\n\nEssaie !</string>
+    <string name="quick_setup">Configuration rapide</string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Ton tchat a été masqué ! Configure un mot de passe pour accéder au mode caché.<br> <br> <b> Touche \'salut\' pour commencer.</b> ]]></string>
+    <string name="alp_42447968_cmd_confirm">Confirmer</string>
+    <string name="alp_42447968_cmd_continue">Continuer</string>
+    <string name="alp_42447968_cmd_forgot_pattern">Schéma oublié ?</string>
+    <string name="alp_42447968_cmd_retry">Retry</string>
+    <string name="alp_42447968_loading">Chargement...</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cell_added">Téléphone ajouté</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cleared">Schéma annulé</string>
+    <string name="alp_42447968_lockscreen_access_pattern_detected">Schéma terminé</string>
+    <string name="alp_42447968_lockscreen_access_pattern_start">Schéma commencé</string>
+    <string name="alp_42447968_msg_connect_4dots">Relie au moins 4 points. Recommence.</string>
+    <string name="alp_42447968_msg_draw_an_unlock_pattern">Dessine ton schéma de déverrouillage unique</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock">Dessine un schéma pour déverrouiller</string>
+    <string name="alp_42447968_msg_pattern_recorded">Schéma enregistré</string>
+    <string name="alp_42447968_msg_redraw_pattern_to_confirm">Redessine ton schéma pour confirmer</string>
+    <string name="alp_42447968_msg_release_finger_when_done">Relève le doigt quand tu as terminé</string>
+    <string name="alp_42447968_msg_try_again">Tes schémas ne correspondent pas. Recommence.</string>
+    <string name="alp_42447968_msg_your_new_unlock_pattern">Ton nouveau schéma de déverrouillage</string>
+
+    <plurals name="alp_42447968_pmsg_connect_x_dots">
+        <item quantity="one">Connect at least %1$d dot. Try again</item>
+        <item quantity="other">Connect at least %1$d dots. Try again</item>
+    </plurals>
+    
+    <string name="stealth_enter_pass_tip">Configuration terminée ! Touche \"bonjour\" pour accéder à tes tchats cachés.</string>
+    <string name="stealth_notification_message">Tu as une nouvelle alerte</string>
+    <string name="retry">Retry</string>
+
+	<string name="reset_complete_stealth_header">Reset Hidden Mode</string>
+	<string name="reset_complete_stealth_info">Tu as oublié ton mot de passe ? Réinitialise le mode caché. Tous les tchats cachés seront supprimés.</string>
+	<string name="initiate_reset_stealth_header">Reset Hidden Mode</string>
+	<string name="initiate_reset_stealth_body">Le mode caché sera réinitialisé dans 30 minutes. Tous les tchats cachés seront supprimés ! Continuer ?</string>
+	<string name="resetting_complete_stealth_header">Réinitialisation du mode caché</string>
+	<string name="resetting_complete_stealth_info">Touche pour annuler</string>
+	<string name="reset_stealth_tip"> <![CDATA[ <b>Tous les tchats cachés seront supprimés dans %1$s minutes </b> 
+	  ]]></string>
+	<string name="tap_to_reset_stealth_tip"><![CDATA[ <b> Touche ici pour réinitialiser le mode caché maintenant ! </b> 
+	  ]]></string>
+	<string name="reset_stealth_confirmation">La réinitialisation du mode caché va supprimer tous tes tchats cachés.\nContinuer ?</string>
+	<string name="stealth_mode_empty_conv_popup_msg">Tu peux désormais cacher tes tchats privés et les lire uniquement après avoir entré un mot de passe. Commence un nouveau tchat et essaye ce mode en touchant \"bonjour\" !</string>
+	<string name="stealth_tap_and_hold_tip">Touche longuement un tchat pour le marquer comme  \'Masqué\'.</string>
+	<string name="chat_marked_stealth">Tu as masqué un tchat.</string>
+    <string name="chat_unmarked_stealth">Tu as marqué un tchat comme visible.</string>
+    <string name="mark_stealth">Marquer tchat comme caché</string>
+    <string name="unmark_stealth">Marquer tchat comme visible</string>
+    <string name="edit">Edit</string>
+    <string name="vib_off">Non</string>
+    <string name="vib_default">Par défaut</string>
+    <string name="vib_short">Court</string>
+    <string name="vib_long">Long</string>
+    <string name="chat_unmarked_stealth_first">Tu as marqué un tchat comme visible. Quiconque lancera hike pourra le voir.</string>
+    
 </resources>

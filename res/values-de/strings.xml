@@ -872,4 +872,59 @@
     <string name="last_seen_proper_casing">Zuletzt gesehen</string>
     <string name="status_updates_proper_casing">Status-Updates</string>
     <string name="bigger_better_attachments">Größer, besser Anhänge</string>
+        <string name="introducing_stealth_mode">Neu: der Geheimmodus!</string>
+    <string name="stealth_mode_popup_msg">Du kannst jetzt deine privaten Chats vor der Öffentlichkeit verbergen und sie mit einem Passwort schützen.\n\nProbiere es jetzt aus!</string>
+    <string name="quick_setup">Schnellstarthilfe</string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Dein Chat wurde verborgen! Richte ein Passwort ein, um in den Geheimmodus zu gelangen. <br> <br> <b>Tippe hier auf \'Hi\', um loszulegen.</b> ]]></string>
+    <string name="alp_42447968_cmd_confirm">Bestätigen</string>
+    <string name="alp_42447968_cmd_continue">Fortfahren</string>
+    <string name="alp_42447968_cmd_forgot_pattern">Muster vergessen?</string>
+    <string name="alp_42447968_cmd_retry">Erneut versuchen</string>
+    <string name="alp_42447968_loading">Lädt...</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cell_added">Handy hinzugefügt</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cleared">Muster gelöscht</string>
+    <string name="alp_42447968_lockscreen_access_pattern_detected">Muster beendet</string>
+    <string name="alp_42447968_lockscreen_access_pattern_start">Muster begonnen</string>
+    <string name="alp_42447968_msg_connect_4dots">Verbinde mind. 4 Punkte. Versuche es noch einmal.</string>
+    <string name="alp_42447968_msg_draw_an_unlock_pattern">Wähle dein persönliches Entsperrmuster</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock">Gib dein Entsperrmuster ein</string>
+    <string name="alp_42447968_msg_pattern_recorded">Muster gespeichert</string>
+    <string name="alp_42447968_msg_redraw_pattern_to_confirm">Wiederhole dein Entsperrmuster</string>
+    <string name="alp_42447968_msg_release_finger_when_done">Lass deinen Finger los, wenn du fertig bist</string>
+    <string name="alp_42447968_msg_try_again">Die Muster stimmen nicht überein. Versuche es noch einmal.</string>
+    <string name="alp_42447968_msg_your_new_unlock_pattern">Dein neues Entsperrmuster</string>
+
+    <plurals name="alp_42447968_pmsg_connect_x_dots">
+        <item quantity="one">Connect at least %1$d dot. Try again</item>
+        <item quantity="other">Connect at least %1$d dots. Try again</item>
+    </plurals>
+    
+    <string name="stealth_enter_pass_tip">Die Einrichtung ist jetzt fertig! Tippe auf „Hi“, um deine verborgenen Chats aufzurufen.</string>
+    <string name="stealth_notification_message">Du hast eine neue Benachrichtigung</string>
+    <string name="retry">Erneut versuchen</string>
+
+	<string name="reset_complete_stealth_header">Geheimmodus zurücksetzen</string>
+	<string name="reset_complete_stealth_info">Passwort vergessen? Setze den Geheimmodus zurück. Alle verborgenen Chats gehen dann verloren.</string>
+	<string name="initiate_reset_stealth_header">Geheimmodus zurücksetzen</string>
+	<string name="initiate_reset_stealth_body">Der Geheimmodus wird in 30 Minuten zurückgesetzt. Alle verborgenen Chats werden dann gelöscht! Weiter?</string>
+	<string name="resetting_complete_stealth_header">Geheimmodus wird zurückgesetzt</string>
+	<string name="resetting_complete_stealth_info">Zum Abbrechen tippen.</string>
+	<string name="reset_stealth_tip"> <![CDATA[ <b> Alle verborgenen Chats werden in %1$s Minuten gelöscht </b> 
+	  ]]></string>
+	<string name="tap_to_reset_stealth_tip"><![CDATA[ <b> Tippe hier, um den Geheimmodus jetzt zurückzusetzen! </b> 
+	  ]]></string>
+	<string name="reset_stealth_confirmation">Mit dem Zurücksetzen des Geheimmodus gehen all deine verborgenen Chats verloren.\nSicher?</string>
+	<string name="stealth_mode_empty_conv_popup_msg">Du kannst jetzt deine privaten Chats vor der Öffentlichkeit verbergen und sie mit einem Passwort schützen. Starte einen neuen Chat, tippe auf „Hi“ und probiere es einfach mal aus!</string>
+	<string name="stealth_tap_and_hold_tip">Tippe lange auf einen Chat, um ihn zu verbergen.</string>
+	<string name="chat_marked_stealth">Du hast einen Chat verborgen.</string>
+    <string name="chat_unmarked_stealth">Du hast einen Chat als sichtbar markiert.</string>
+    <string name="mark_stealth">Chat als verborgen markieren</string>
+    <string name="unmark_stealth">Chat als sichtbar markieren</string>
+    <string name="edit">Edit</string>
+    <string name="vib_off">Aus</string>
+    <string name="vib_default">Standard</string>
+    <string name="vib_short">Kurz</string>
+    <string name="vib_long">Lang</string>
+    <string name="chat_unmarked_stealth_first">Du hast einen Chat als sichtbar markiert. Jetzt kann ihn jeder sehen, der hike öffnet.</string>
+    
 </resources>

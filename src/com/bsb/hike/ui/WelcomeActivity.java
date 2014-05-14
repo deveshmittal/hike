@@ -117,6 +117,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
 		mIndicator.setViewPager(mPager);
 		mIndicator.setOnPageChangeListener(onPageChangeListener);
+		ImageView micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
+		micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
 	}
 
 	public void onHikeIconClicked(View v)
@@ -282,23 +284,23 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			View parent = LayoutInflater.from(WelcomeActivity.this).inflate(R.layout.tutorial_fragments, null);
 			TextView tutorialHeader = (TextView) parent.findViewById(R.id.tutorial_title);
 			ImageView tutorialImage = (ImageView) parent.findViewById(R.id.tutorial_img);
-			ImageView micromaxImage = (ImageView) parent.findViewById(R.id.ic_micromax);
+			ImageView platformIcons = (ImageView) parent.findViewById(R.id.platform_icons);
 			switch (position)
 			{
 			case 0:
 				tutorialHeader.setText(R.string.tutorial1_header_title);
 				tutorialImage.setImageResource(R.drawable.tutorial1_img);
-				micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
+				platformIcons.setVisibility(View.VISIBLE);
 				break;
 			case 1:
 				tutorialHeader.setText(R.string.tutorial2_header_title);
 				tutorialImage.setImageResource(R.drawable.tutorial2_img);
-				micromaxImage.setVisibility(View.GONE);
+				platformIcons.setVisibility(View.GONE);
 				break;
 			case 2:
 				tutorialHeader.setText(R.string.tutorial3_header_title);
 				tutorialImage.setImageResource(R.drawable.tutorial3_img);
-				micromaxImage.setVisibility(View.GONE);
+				platformIcons.setVisibility(View.GONE);
 				break;
 			}
 			((ViewPager) container).addView(parent);

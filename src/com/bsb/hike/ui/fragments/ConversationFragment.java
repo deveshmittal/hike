@@ -50,6 +50,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -542,6 +543,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		}
 
+		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
+		{
+			optionsList.add(HikeUserDatabase.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
+		}
 		if (conv instanceof GroupConversation)
 		{
 			optionsList.add(getString(R.string.delete_leave));
@@ -577,14 +582,48 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (getString(R.string.delete_chat).equals(option))
 				{
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-					Utils.executeConvAsyncTask(task, conv);
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+							Utils.executeConvAsyncTask(task, conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.no);
+					deleteConfirmDialog.show();
 				}
 				else if (getString(R.string.delete_leave).equals(option))
 				{
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					leaveGroup(conv);
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							leaveGroup(conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.cancel);
+					deleteConfirmDialog.show();
 				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
@@ -695,6 +734,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						changeConversationsVisibility();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, null);
 					}
+				}
+				else if (getString(R.string.block_title).equals(option))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, conv.getMsisdn());
+				}
+				else if (getString(R.string.unblock_title).equals(option))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, conv.getMsisdn());
 				}
 			}
 		});
