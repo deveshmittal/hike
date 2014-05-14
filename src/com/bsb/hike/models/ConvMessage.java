@@ -21,6 +21,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
 {
+	private boolean isBlockAddHeader;
+
 	private long msgID; // this corresponds to msgID stored in sender's DB
 
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
@@ -800,5 +802,15 @@ public class ConvMessage
 	public void setShouldShowPush(boolean shouldShowPush)
 	{
 		this.shouldShowPush = shouldShowPush;
+	}
+
+	public void setBlockAddHeader(boolean isBlockAddHeader)
+	{
+		this.isBlockAddHeader = isBlockAddHeader;
+	}
+
+	public boolean isBlockAddHeader()
+	{
+		return isBlockAddHeader;
 	}
 }
