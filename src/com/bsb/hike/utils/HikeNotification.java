@@ -539,7 +539,7 @@ public class HikeNotification
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, getOldSoundPref(preferenceManager));
-			if (shouldNotPlayNotification && !NOTIF_SOUND_OFF.equals(notifSond))
+			if (!shouldNotPlayNotification && !NOTIF_SOUND_OFF.equals(notifSond))
 			{
 
 				if (NOTIF_SOUND_HIKE.equals(notifSond))

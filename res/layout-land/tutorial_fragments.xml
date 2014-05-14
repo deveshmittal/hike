@@ -8,7 +8,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="675"
+        android:layout_weight="560"
         android:gravity="right|bottom"
         android:orientation="vertical"
         android:paddingLeft="20dp" >
@@ -24,7 +24,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="509"
+        android:layout_weight="624"
         android:gravity="center_vertical"
         android:orientation="vertical"
         android:paddingLeft="@dimen/tutorial_fragment_header_padding_left" >
@@ -42,12 +42,11 @@
             style="@style/SignupHeader" />
 
         <ImageView
-            android:id="@+id/ic_micromax"
+            android:src="@drawable/icons_platforms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/micromax_logo"
-            android:visibility="gone" />
+            android:layout_gravity="center_vertical" />
+        
     </LinearLayout>
 
 </LinearLayout>
