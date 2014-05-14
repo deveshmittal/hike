@@ -1176,7 +1176,7 @@ public class MqttMessagesManager
 					userDb.updateLastSeenTime(msisdn, lastSeenTime);
 					userDb.updateIsOffline(msisdn, (int) isOffline);
 
-					HikeMessengerApp.lastSeenFriendsMap.put(msisdn, Long.valueOf(lastSeenTime));
+					HikeMessengerApp.lastSeenFriendsMap.put(msisdn, new Pair<Integer, Long>(isOffline, lastSeenTime));
 
 				}
 				pubSub.publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
