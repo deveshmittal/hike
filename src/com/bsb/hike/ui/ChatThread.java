@@ -1989,7 +1989,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void addUnkownContactBlockHeader()
 	{
-		mAdapter.notifyDataSetChanged();
 		if (contactInfo != null && contactInfo.isUnknownContact())
 		{
 			if (messages != null && messages.size() > 0)
@@ -2002,8 +2001,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				cm = new ConvMessage(0, 0l, 0l);
 				cm.setBlockAddHeader(true);
 				messages.add(0, cm);
-				mAdapter.notifyDataSetChanged();
-
 			}
 		}
 	}
@@ -5245,39 +5242,39 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 
 			// emotype is same , so same view clicked
-
-			int selection = mConversationsView.getLastVisiblePosition();
-			attachmentWindow = new PopupWindow(ChatThread.this);
-			updateEmoticonPallateHeight();
-			attachmentWindow.setContentView(emoticonLayout);
-			Log.i("keyboard", "showing at emoticon anchor");
-			attachmentWindow.setWidth(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-
-			attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-			attachmentWindow.setOutsideTouchable(true);
-			attachmentWindow.setFocusable(false);
-			attachmentWindow.setOnDismissListener(new OnDismissListener()
-			{
-
-				@Override
-				public void onDismiss()
-				{
-					/*
-					 * Hiding the black filler palette.
-					 */
-					findViewById(R.id.sticker_palette_filler).setVisibility(View.GONE);
-					resizeMainheight(0, false);
-					emoticonType = null;
-					attachmentWindow = null;
-				}
-			});
-			// attachmentWindow.showAsDropDown(anchor, 0, 0);
-			View anchor = findViewById(R.id.chatThreadParentLayout);
-
-			anchor.setVisibility(View.VISIBLE);
 			// it is possible that window token is null when activity is rotated, will occur rarely
+			View anchor = findViewById(R.id.chatThreadParentLayout);
 			if (anchor.getWindowToken() != null)
 			{
+				int selection = mConversationsView.getLastVisiblePosition();
+				attachmentWindow = new PopupWindow(ChatThread.this);
+				updateEmoticonPallateHeight();
+				attachmentWindow.setContentView(emoticonLayout);
+				Log.i("keyboard", "showing at emoticon anchor");
+				attachmentWindow.setWidth(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+
+				attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+				attachmentWindow.setOutsideTouchable(true);
+				attachmentWindow.setFocusable(false);
+				attachmentWindow.setOnDismissListener(new OnDismissListener()
+				{
+
+					@Override
+					public void onDismiss()
+					{
+						/*
+						 * Hiding the black filler palette.
+						 */
+						findViewById(R.id.sticker_palette_filler).setVisibility(View.GONE);
+						resizeMainheight(0, false);
+						emoticonType = null;
+						attachmentWindow = null;
+					}
+				});
+				// attachmentWindow.showAsDropDown(anchor, 0, 0);
+
+				anchor.setVisibility(View.VISIBLE);
+
 				attachmentWindow.showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
 				attachmentWindow.setTouchInterceptor(new OnTouchListener()
 				{
