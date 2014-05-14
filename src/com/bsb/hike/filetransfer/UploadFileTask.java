@@ -179,7 +179,7 @@ public class UploadFileTask extends FileTransferBase
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							Bitmap.Config.RGB_565, false, false);
+							Bitmap.Config.RGB_565, true, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 
 					// Logger.d("UploadFileTask",
@@ -350,7 +350,7 @@ public class UploadFileTask extends FileTransferBase
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-						Bitmap.Config.RGB_565, false, false);
+						Bitmap.Config.RGB_565, true, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
