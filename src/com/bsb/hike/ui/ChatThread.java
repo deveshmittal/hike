@@ -1170,6 +1170,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void blockUser(View v)
 	{
 		blockUser();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
 	}
 
 	public void addToContacts(View v)
@@ -1230,7 +1231,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean showMessageContextMenu(ConvMessage message)
 	{
 		dismissPopupWindow();
-		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
 		{
 			return false;
 		}
@@ -1747,14 +1748,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		setupActionBar(true);
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
-
+		boolean addBlockHeader = false;
 		if (!(mConversation instanceof GroupConversation))
 		{
 			contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mContactNumber, false);
 
 			favoriteType = contactInfo.getFavoriteType();
 
-			if (!mConversation.isOnhike())
+			if (mConversation.isOnhike())
+			{
+				addBlockHeader = true;
+			}
+			else
 			{
 				HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/profile/" + mContactNumber, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
 				{
@@ -1768,6 +1773,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
 							if (hikeJoinTime > 0)
 							{
+								addUnkownContactBlockHeader();
 								hikeJoinTime = Utils.applyServerTimeOffset(ChatThread.this, hikeJoinTime);
 
 								HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mContactNumber, hikeJoinTime));
@@ -1827,12 +1833,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
-		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
-		// add block view
-		if (contactInfo != null && contactInfo.isUnknownContact())
+		if (addBlockHeader)
 		{
-			mConversationsView.addHeaderView(LayoutInflater.from(ChatThread.this).inflate(R.layout.block_add_unknown_contact, null));
+			addUnkownContactBlockHeader();
 		}
+		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
@@ -1980,6 +1985,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Resetting the Orientation Change flag to be used again
 		 */
 		wasOrientationChanged = false;
+	}
+
+	private void addUnkownContactBlockHeader()
+	{
+		mAdapter.notifyDataSetChanged();
+		if (contactInfo != null && contactInfo.isUnknownContact())
+		{
+			if (messages != null && messages.size() > 0)
+			{
+				ConvMessage cm = messages.get(0);
+				if (cm.isBlockAddHeader())
+				{
+					return;
+				}
+				cm = new ConvMessage(0, 0l, 0l);
+				cm.setBlockAddHeader(true);
+				messages.add(0, cm);
+				mAdapter.notifyDataSetChanged();
+
+			}
+		}
 	}
 
 	public void updateViewWindowForReadBy()
@@ -2813,6 +2839,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if (this.mContactNumber.equals(contactInfo.getMsisdn()))
 			{
+				// remove block header if present
+				if (messages != null && messages.size() > 0)
+				{
+					ConvMessage cm = messages.get(0);
+					if (cm.isBlockAddHeader())
+					{
+						messages.remove(0);
+						mAdapter.notifyDataSetChanged();
+					}
+				}
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
 				this.mLabel = contactInfo.getName();
@@ -5820,7 +5856,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-			final int startIndex = 0;
+			final int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
