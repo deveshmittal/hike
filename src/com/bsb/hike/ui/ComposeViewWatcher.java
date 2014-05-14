@@ -158,7 +158,6 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 
 	public void sendEndTyping()
 	{
-		mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
 		mTextLastChanged = 0;
 	}
 

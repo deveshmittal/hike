@@ -38,6 +38,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -375,7 +376,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	private ActivityTimeLogger activityTimeLogger;
 
-	public static Map<String, Long> lastSeenFriendsMap;
+	public static Map<String, Pair<Integer, Long>> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
 
@@ -419,7 +420,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		mPubSubInstance = new HikePubSub();
 		if (HikeMessengerApp.lastSeenFriendsMap == null)
 		{
-			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
+			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Pair<Integer, Long>>();
 		}
 	}
 

@@ -337,20 +337,11 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		else if (HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type))
 		{
 			List<ContactInfo> friendsList = friendsAdapter.getFriendsList();
-			for (int i = 0; i < friendsList.size(); i++)
-			{
-				String msisdn = friendsList.get(i).getMsisdn();
-				long lastSeenUpdated = 0;
-				if (HikeMessengerApp.lastSeenFriendsMap.get(msisdn) != null)
-				{
-					lastSeenUpdated = HikeMessengerApp.lastSeenFriendsMap.get(msisdn).longValue();
-					long lastSeenPrevious = friendsList.get(i).getLastSeenTime();
-					if (lastSeenUpdated > lastSeenPrevious)
-					{
-						friendsList.get(i).setLastSeenTime(lastSeenUpdated);
-					}
-				}
-			}
+			List<ContactInfo> friendsStealthList = friendsAdapter.getStealthFriendsList();
+
+			updateLastSeenTimeInBulk(friendsList);
+			updateLastSeenTimeInBulk(friendsStealthList);
+
 			if (!isAdded())
 			{
 				return;
@@ -492,6 +483,29 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 					friendsAdapter.clearStealthLists();
 				}
 			});
+		}
+	}
+
+	private void updateLastSeenTimeInBulk(List<ContactInfo> contactList)
+	{
+		for (ContactInfo contactInfo : contactList)
+		{
+			String msisdn = contactInfo.getMsisdn();
+			if (HikeMessengerApp.lastSeenFriendsMap.containsKey(msisdn))
+			{
+				Pair<Integer, Long> lastSeenValuePair = HikeMessengerApp.lastSeenFriendsMap.get(msisdn);
+
+				int isOffline = lastSeenValuePair.first;
+
+				long updatedLastSeenValue = lastSeenValuePair.second;
+				long previousLastSeen = contactInfo.getLastSeenTime();
+
+				if (updatedLastSeenValue > previousLastSeen)
+				{
+					contactInfo.setLastSeenTime(updatedLastSeenValue);
+				}
+				contactInfo.setOffline(isOffline);
+			}
 		}
 	}
 
