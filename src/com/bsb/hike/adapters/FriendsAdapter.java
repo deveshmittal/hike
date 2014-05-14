@@ -695,23 +695,46 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void refreshGroupList(List<ContactInfo> newGroupList, int groupIndex)
 	{
 		List<ContactInfo> groupList = null;
+		List<ContactInfo> stealthList = null;
 		switch (groupIndex)
 		{
 		case FRIEND_INDEX:
 			groupList = friendsList;
+			stealthList = friendsStealthList;
 			break;
 		case HIKE_INDEX:
 			groupList = hikeContactsList;
+			stealthList = hikeStealthContactsList;
 			break;
 		case SMS_INDEX:
 			groupList = smsContactsList;
+			stealthList = smsStealthContactsList;
 			break;
 		}
 		groupList.clear();
+		stealthList.clear();
 
 		groupList.addAll(newGroupList);
+		setupStealthListAndRemoveFromActualList(groupList, stealthList);
 
 		makeCompleteList(false);
+	}
+
+	private void setupStealthListAndRemoveFromActualList(List<ContactInfo> contactList, List<ContactInfo> stealthList)
+	{
+		int stealthMode = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+		for(Iterator<ContactInfo> iterator = contactList.iterator(); iterator.hasNext();)
+		{
+			ContactInfo contactInfo = iterator.next();
+			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			{
+				stealthList.add(contactInfo);
+				if(stealthMode != HikeConstants.STEALTH_ON)
+				{
+					iterator.remove();
+				}
+			}
+		}
 	}
 
 	public void removeFromGroup(ContactInfo contactInfo, int groupIndex)
