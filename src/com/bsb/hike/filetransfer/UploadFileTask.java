@@ -179,7 +179,7 @@ public class UploadFileTask extends FileTransferBase
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							Bitmap.Config.RGB_565, false, false);
+							Bitmap.Config.RGB_565, true, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 
 					// Logger.d("UploadFileTask",
@@ -350,7 +350,7 @@ public class UploadFileTask extends FileTransferBase
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-						Bitmap.Config.RGB_565, false, false);
+						Bitmap.Config.RGB_565, true, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
@@ -979,6 +979,7 @@ public class UploadFileTask extends FileTransferBase
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
 			if (retryAttempts >= MAX_RETRY_ATTEMPTS || e.getMessage() == null)
 			{
@@ -1091,10 +1092,12 @@ public class UploadFileTask extends FileTransferBase
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
-		// if (result == FTResult.SUCCESS)
-		// {
-		// ((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
-		// }
+
+		if (result == FTResult.SUCCESS)
+		{
+			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
+		}
+
 		else if (result != FTResult.PAUSED)
 		{
 			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled

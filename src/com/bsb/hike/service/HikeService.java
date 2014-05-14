@@ -316,8 +316,7 @@ public class HikeService extends Service
 		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, false))
 		{
 			sm.deleteDefaultDownloadedStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true);
-			settings.edit().commit();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true).commit();
 		}
 		/*
 		 * this code path will be for users upgrading to the build where we make expressions a default loaded category
@@ -325,8 +324,7 @@ public class HikeService extends Service
 		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, false))
 		{
 			sm.deleteDefaultDownloadedExpressionsStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true);
-			settings.edit().commit();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true).commit();
 			
 			if(sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
 			{
@@ -337,6 +335,7 @@ public class HikeService extends Service
 			{
 				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
 			}
+			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), sm.OLD_HARDCODED_STICKER_IDS_DOGGY);
 		}
 	}
 

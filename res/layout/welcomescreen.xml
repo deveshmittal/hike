@@ -6,42 +6,9 @@
     android:orientation="vertical"
     android:weightSum="1038" >
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_gravity="right|top"
-        android:minWidth="70dp"
-        android:orientation="horizontal" >
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:background="#eaeced" />
-
-        <LinearLayout
-            android:id="@+id/terms_and_conditions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="right|top"
-            android:background="@drawable/bg_overflow_menu_selector"
-            android:orientation="horizontal" >
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom"
-                android:gravity="center"
-                android:paddingLeft="11dp"
-                android:paddingRight="11dp"
-                android:text="@string/terms"
-                android:textColor="#adb2b9"
-                android:textSize="16sp" />
-        </LinearLayout>
-    </LinearLayout>
-
+    <include
+        layout="@layout/welcome_activity_topbar" />
+    
     <LinearLayout
         android:id="@+id/hike_logo_container"
         android:layout_width="match_parent"
@@ -55,15 +22,7 @@
             android:id="@+id/tutorial_pager"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="572" />
-
-        <ImageView
-            android:src="@drawable/icons_platforms"
-            android:layout_width="match_parent"
-			android:layout_gravity="center_horizontal"
-			android:scaleType="centerInside"
-            android:layout_height="0dp"
-            android:layout_weight="182" />
+            android:layout_weight="754" />
 
         <com.viewpagerindicator.IconPageIndicator
             android:id="@+id/tutorial_indicator"

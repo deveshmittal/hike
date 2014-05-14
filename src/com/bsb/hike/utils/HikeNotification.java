@@ -288,7 +288,12 @@ public class HikeNotification
 
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
-		notificationManager.notify(notificationId, mBuilder.getNotification());
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			notificationManager.notify(notificationId, mBuilder.getNotification());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime : System.currentTimeMillis();
+		}
 	}
 
 	public void notifyFavorite(final ContactInfo contactInfo)
@@ -518,37 +523,40 @@ public class HikeNotification
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
-		if (!VIB_OFF.equals(vibrate))
-		{
-			if (VIB_DEF.equals(vibrate))
-			{
-				mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-			}
-			else if (VIB_SHORT.equals(vibrate))
-			{
-				// short vibrate
-				mBuilder.setVibrate(new long[] { 0, 200, 100, 250 });
-			}
-			else if (VIB_LONG.equals(vibrate))
-			{
-				// long vibrate
-				mBuilder.setVibrate(new long[] { 0, 1000 });
-			}
-		}
+		
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, getOldSoundPref(preferenceManager));
-			if (shouldNotPlayNotification && !NOTIF_SOUND_OFF.equals(notifSond))
+			if (!shouldNotPlayNotification)
 			{
-
-				if (NOTIF_SOUND_HIKE.equals(notifSond))
-				{
-					mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
+				if(!NOTIF_SOUND_OFF.equals(notifSond)){
+					if (NOTIF_SOUND_HIKE.equals(notifSond))
+					{
+						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
+					}
+					else
+					{
+						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+					}
 				}
-				else
+				
+				if (!VIB_OFF.equals(vibrate))
 				{
-					mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+					if (VIB_DEF.equals(vibrate))
+					{
+						mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+					}
+					else if (VIB_SHORT.equals(vibrate))
+					{
+						// short vibrate
+						mBuilder.setVibrate(new long[] { 0, 200, 100, 250 });
+					}
+					else if (VIB_LONG.equals(vibrate))
+					{
+						// long vibrate
+						mBuilder.setVibrate(new long[] { 0, 1000 });
+					}
 				}
 			}
 			if (led)

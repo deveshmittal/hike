@@ -208,6 +208,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
 
+	private boolean screenOffEvent;
+
 	private boolean activityVisible = true;
 
 	private enum DialogShowing
@@ -521,6 +523,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		unregisterReceiver(screenOffBR);
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
 			Editor editor = prefs.edit();
@@ -734,6 +737,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
 		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
+		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+		Logger.i("chatthread", "on create end");
 	}
 
 	private void clearTempData()
@@ -1165,6 +1170,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void blockUser(View v)
 	{
 		blockUser();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
 	}
 
 	public void addToContacts(View v)
@@ -1225,7 +1231,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean showMessageContextMenu(ConvMessage message)
 	{
 		dismissPopupWindow();
-		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null)
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
 		{
 			return false;
 		}
@@ -1742,14 +1748,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		setupActionBar(true);
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
-
+		boolean addBlockHeader = false;
 		if (!(mConversation instanceof GroupConversation))
 		{
 			contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mContactNumber, false);
 
 			favoriteType = contactInfo.getFavoriteType();
 
-			if (!mConversation.isOnhike())
+			if (mConversation.isOnhike())
+			{
+				addBlockHeader = true;
+			}
+			else
 			{
 				HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/profile/" + mContactNumber, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
 				{
@@ -1763,6 +1773,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
 							if (hikeJoinTime > 0)
 							{
+								addUnkownContactBlockHeader();
 								hikeJoinTime = Utils.applyServerTimeOffset(ChatThread.this, hikeJoinTime);
 
 								HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mContactNumber, hikeJoinTime));
@@ -1824,9 +1835,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		// add block view
-		if (contactInfo != null && contactInfo.isUnknownContact() && contactInfo.isOnhike() && mConversationsView.getHeaderViewsCount() != 0)
+		if (addBlockHeader)
 		{
-			mConversationsView.addHeaderView(LayoutInflater.from(ChatThread.this).inflate(R.layout.block_add_unknown_contact, null));
+			addUnkownContactBlockHeader();
 		}
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
@@ -1975,6 +1986,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Resetting the Orientation Change flag to be used again
 		 */
 		wasOrientationChanged = false;
+	}
+
+	private void addUnkownContactBlockHeader()
+	{
+		if (contactInfo != null && contactInfo.isUnknownContact())
+		{
+			if (messages != null && messages.size() > 0)
+			{
+				ConvMessage cm = messages.get(0);
+				if (cm.isBlockAddHeader())
+				{
+					return;
+				}
+				cm = new ConvMessage(0, 0l, 0l);
+				cm.setBlockAddHeader(true);
+				messages.add(0, cm);
+				if (mAdapter != null)
+				{
+					mAdapter.notifyDataSetChanged();
+				}
+			}
+		}
 	}
 
 	public void updateViewWindowForReadBy()
@@ -2808,6 +2841,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if (this.mContactNumber.equals(contactInfo.getMsisdn()))
 			{
+				// remove block header if present
+				if (messages != null && messages.size() > 0)
+				{
+					ConvMessage cm = messages.get(0);
+					if (cm.isBlockAddHeader())
+					{
+						messages.remove(0);
+						mAdapter.notifyDataSetChanged();
+					}
+				}
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
 				this.mLabel = contactInfo.getName();
@@ -5204,39 +5247,39 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 
 			// emotype is same , so same view clicked
-
-			int selection = mConversationsView.getLastVisiblePosition();
-			attachmentWindow = new PopupWindow(ChatThread.this);
-			updateEmoticonPallateHeight();
-			attachmentWindow.setContentView(emoticonLayout);
-			Log.i("keyboard", "showing at emoticon anchor");
-			attachmentWindow.setWidth(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-
-			attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-			attachmentWindow.setOutsideTouchable(true);
-			attachmentWindow.setFocusable(false);
-			attachmentWindow.setOnDismissListener(new OnDismissListener()
-			{
-
-				@Override
-				public void onDismiss()
-				{
-					/*
-					 * Hiding the black filler palette.
-					 */
-					findViewById(R.id.sticker_palette_filler).setVisibility(View.GONE);
-					resizeMainheight(0, false);
-					emoticonType = null;
-					attachmentWindow = null;
-				}
-			});
-			// attachmentWindow.showAsDropDown(anchor, 0, 0);
-			View anchor = findViewById(R.id.chatThreadParentLayout);
-
-			anchor.setVisibility(View.VISIBLE);
 			// it is possible that window token is null when activity is rotated, will occur rarely
+			View anchor = findViewById(R.id.chatThreadParentLayout);
 			if (anchor.getWindowToken() != null)
 			{
+				int selection = mConversationsView.getLastVisiblePosition();
+				attachmentWindow = new PopupWindow(ChatThread.this);
+				updateEmoticonPallateHeight();
+				attachmentWindow.setContentView(emoticonLayout);
+				Log.i("keyboard", "showing at emoticon anchor");
+				attachmentWindow.setWidth(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+
+				attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+				attachmentWindow.setOutsideTouchable(true);
+				attachmentWindow.setFocusable(false);
+				attachmentWindow.setOnDismissListener(new OnDismissListener()
+				{
+
+					@Override
+					public void onDismiss()
+					{
+						/*
+						 * Hiding the black filler palette.
+						 */
+						findViewById(R.id.sticker_palette_filler).setVisibility(View.GONE);
+						resizeMainheight(0, false);
+						emoticonType = null;
+						attachmentWindow = null;
+					}
+				});
+				// attachmentWindow.showAsDropDown(anchor, 0, 0);
+
+				anchor.setVisibility(View.VISIBLE);
+
 				attachmentWindow.showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
 				attachmentWindow.setTouchInterceptor(new OnTouchListener()
 				{
@@ -5282,7 +5325,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
+				Logger.d("chatthread", "window token is null -- trying to show emoticon pallette");
 				attachmentWindow = null;
+				emoticonType = null;
 			}
 		}
 
@@ -5813,7 +5858,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
-			final int startIndex = 0;
+			final int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
+
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
@@ -6710,12 +6756,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onGlobalLayout()
 			{
-				Log.i("keybpard", "global layout listener");
+				Log.i("chatthread", "global layout listener");
 				View root = findViewById(R.id.chatThreadParentLayout);
-				Log.i("keybpard", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
+				Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
 				int rootHeight = root.getHeight();
-				int temp = root.getRootView().getHeight() - rootHeight - getStatusBarHeight();
-				if (temp > rootHeight / 3)
+				int rootViewHeight = root.getRootView().getHeight();
+				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
+				if (temp > rootViewHeight / 3)
 				{
 					possibleKeyboardHeight = temp;
 					isKeyboardOpen = true;
@@ -6732,25 +6779,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onRestart()
 	{
 		super.onRestart();
-		int softInput = getWindow().getAttributes().softInputMode;
-		if (softInput != WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE && softInput != WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+		/*
+		 * This method will be called either user is returning after pressing home or screen lock ,
+		 * 
+		 * IF USER came after pressing home, then soft keyboard respects softinputstate , i.e : if keyboard was visible or but softinputmode visible is set , then soft keyboard
+		 * will become visible
+		 * 
+		 * But if it is called after screen lock , then soft input keyboard maintains its state , it doesnot change, if it was visible earlier, it will be visible this time as well
+		 * , so we simply return as it does not effect our sticker pallete -- gauravKhanna
+		 */
+
+		if (screenOffEvent)
 		{
-			/*
-			 * Added this hack to add the emoticon/sticker palette padding when the android OS dismissed the keyboard on minimizing the app.
-			 */
-			if (attachmentWindow != null && emoticonLayout != null && attachmentWindow.getContentView() == emoticonLayout)
-			{
-				emoticonLayout.post(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						resizeMainheight(emoticonLayout.getHeight(), true);
-					}
-				});
-			}
+			screenOffEvent = false;
+			return;
 		}
+		Logger.i("chatthread", "on restart");
+
+		int softInput = getWindow().getAttributes().softInputMode;
+		if (softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE || softInput == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+		{
+			// keyboard will come for sure
+			if (isEmoticonPalleteVisible())
+			{
+				resizeMainheight(0, false);
+			}
+			return;
+		}
+		// mean last time it was above keyboard, so no guarantee of keyboard, simply discard it
+		if (isEmoticonPalleteVisible() && findViewById(R.id.chat_layout).getPaddingBottom() == 0)
+		{
+			dismissPopupWindow();
+
+		}
+
+	}
+
+	private boolean isEmoticonPalleteVisible()
+	{
+		return attachmentWindow != null && emoticonLayout != null && attachmentWindow.getContentView() == emoticonLayout;
 	}
 
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
@@ -6848,4 +6915,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		fillerView.setVisibility(View.VISIBLE);
 	}
+
+	private BroadcastReceiver screenOffBR = new BroadcastReceiver()
+	{
+
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			Logger.d("chatthread", "on receive called screenoff");
+			screenOffEvent = true;
+		}
+	};
 }

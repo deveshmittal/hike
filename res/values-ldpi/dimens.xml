@@ -27,5 +27,6 @@
 	<dimen name="stealth_ftue_pu_img_margin_top">14dp</dimen>
 	<dimen name="stealth_setup_des_margin_bottom">8dp</dimen>
 	<dimen name="stealth_ftue_pu_msg_margin_bottom">10dp</dimen>
+	<dimen name="platform_icon_margin_bottom">10dp</dimen>
     
 </resources>

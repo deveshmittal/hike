@@ -104,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 {
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD
 	};
 
 	private static class DayHolder
@@ -658,6 +658,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
+		}
+		else if (convMessage.isBlockAddHeader())
+		{
+			Logger.i("chatthread", "getview type unknown header");
+			type = ViewType.UNKNOWN_BLOCK_ADD;
 		}
 		else if (convMessage.getTypingNotification() != null)
 		{
@@ -3289,6 +3294,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.removeAllViews();
 			participantInfoHolder.container.addView(participantInfo);
 			dayHolder = participantInfoHolder;
+		}
+		else if (viewType == ViewType.UNKNOWN_BLOCK_ADD)
+		{
+			Logger.i("chatthread", "getview of unknown header");
+			if (convertView == null)
+			{
+				convertView = inflater.inflate(R.layout.block_add_unknown_contact, null);
+			}
+			return convertView;
 		}
 		if (showDayIndicator(position))
 		{
