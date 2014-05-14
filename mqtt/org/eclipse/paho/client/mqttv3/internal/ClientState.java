@@ -1184,4 +1184,9 @@ public class ClientState {
 	{
 		return maxInflight;
 	}
+	
+	public void setPersistence(MqttClientPersistence persistence)
+	{
+		this.persistence  = persistence;
+	}
 }

@@ -295,7 +295,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
-		setBrokerHostPort(Utils.switchSSLOn(context));
 		isConnRunnable = new IsMqttConnectedCheckRunnable();
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
@@ -573,6 +572,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
 
+			setBrokerHostPort(connectUsingSSL);
+			
 			if (op == null || ipsChanged.get())
 			{
 				op = new MqttConnectOptions();
@@ -608,6 +609,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (isNetworkAvailable())
 			{
 				acquireWakeLock(connectionTimeoutSec);
+				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
+				mqtt.setServerURI(protocol + brokerHostName + ":" + brokerPortNumber);
+				if (connectUsingSSL)
+					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
 			}
@@ -1165,7 +1170,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (isNetwork)
 			{
 				boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
-				setBrokerHostPort(shouldConnectUsingSSL);
 				boolean isSSLConnected = isSSLAlreadyOn();
 				// reconnect using SSL as currently not connected using SSL
 				if (shouldConnectUsingSSL && !isSSLConnected)
@@ -1197,7 +1201,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 * ssl settings toggled so disconnect and reconnect mqtt
 			 */
 			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
-			setBrokerHostPort(shouldConnectUsingSSL);
 			boolean isSSLConnected = isSSLAlreadyOn();
 			Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
 			// reconnect using SSL as currently not connected using SSL

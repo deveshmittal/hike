@@ -580,6 +580,33 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	public String getServerURI() {
 		return serverURI;
 	}
+	
+	public void setServerURI(String serverURI) throws MqttException
+	{
+		// check if supplied url and the url we using are different
+		// if they are different then we have to open a new persistence
+		// so closing old persistence and initializing new persistence
+		// we have to provide new persistence to clientcomms and clientstate classes as well
+		// so made setPersistence function in them to set the new value of persistence
+		
+		if (null != this.serverURI && (!this.serverURI.equals(serverURI)))
+		{
+			this.serverURI = serverURI;
+			if (null != this.persistence)
+			{
+
+				this.persistence.close();
+
+				this.persistence = null;
+
+				this.persistence = new MemoryPersistence();
+				persistence.open(clientId, serverURI);
+				comms.setPersistence(persistence);
+
+			}
+		}
+	}
+	
 
 	/**
 	 * Get a topic object which can be used to publish messages.
