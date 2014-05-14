@@ -50,6 +50,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -542,6 +543,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		}
 
+		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
+		{
+			optionsList.add(HikeUserDatabase.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
+		}
 		if (conv instanceof GroupConversation)
 		{
 			optionsList.add(getString(R.string.delete_leave));
@@ -695,6 +700,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						changeConversationsVisibility();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, null);
 					}
+				}
+				else if (getString(R.string.block_title).equals(option))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, conv.getMsisdn());
+				}
+				else if (getString(R.string.unblock_title).equals(option))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, conv.getMsisdn());
 				}
 			}
 		});
