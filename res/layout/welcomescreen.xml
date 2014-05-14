@@ -22,15 +22,7 @@
             android:id="@+id/tutorial_pager"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="572" />
-
-        <ImageView
-            android:src="@drawable/icons_platforms"
-            android:layout_width="match_parent"
-			android:layout_gravity="center_horizontal"
-			android:scaleType="centerInside"
-            android:layout_height="0dp"
-            android:layout_weight="182" />
+            android:layout_weight="754" />
 
         <com.viewpagerindicator.IconPageIndicator
             android:id="@+id/tutorial_indicator"
