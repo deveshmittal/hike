@@ -682,4 +682,11 @@ public class ClientComms {
 
 		shutdownConnection(null, mex);
 	}
+	
+	public void setPersistence(MqttClientPersistence persistence)
+	{
+		this.persistence = persistence;
+		clientState.setPersistence(persistence);
+		
+	}
 }
