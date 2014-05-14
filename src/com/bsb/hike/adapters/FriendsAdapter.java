@@ -1219,6 +1219,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		return friendsList;
 	}
 
+	public List<ContactInfo> getStealthFriendsList()
+	{
+		return friendsStealthList;
+	}
+
 	public void setFriendsList(List<ContactInfo> friendsList)
 	{
 		this.friendsList = friendsList;
