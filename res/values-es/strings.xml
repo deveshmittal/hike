@@ -881,4 +881,59 @@
     <string name="last_seen_proper_casing">Último visto</string>
     <string name="status_updates_proper_casing">Actualizaciones de estado</string>
     <string name="bigger_better_attachments">Más grande, mejor adjuntos</string>
+    <string name="introducing_stealth_mode">Nuevo modo oculto</string>
+    <string name="stealth_mode_popup_msg">Ahora puedes ocultar tus chats privados y leerlos solo mediante una contraseña.\n\n¡Pruébalo ya!</string>
+    <string name="quick_setup">Configuración rápida</string>
+    <string name="stealth_double_tap_tip"><![CDATA[ El chat se ha ocultado. Configura una contraseña para acceder al modo oculto.<br> <br> <b> Toca \'hi\' para empezar.</b> ]]></string>
+    <string name="alp_42447968_cmd_confirm">Confirmar</string>
+    <string name="alp_42447968_cmd_continue">Continuar</string>
+    <string name="alp_42447968_cmd_forgot_pattern">¿Has olvidado el patrón?</string>
+    <string name="alp_42447968_cmd_retry">Retry</string>
+    <string name="alp_42447968_loading">Cargando...</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cell_added">Número de teléfono añadido</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cleared">Patrón borrado</string>
+    <string name="alp_42447968_lockscreen_access_pattern_detected">Patrón completo</string>
+    <string name="alp_42447968_lockscreen_access_pattern_start">Patrón iniciado</string>
+    <string name="alp_42447968_msg_connect_4dots">Conecta al menos 4 puntos. Inténtalo de nuevo.</string>
+    <string name="alp_42447968_msg_draw_an_unlock_pattern">Dibuja tu patrón de desbloqueo exclusivo</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock">Dibuja el patrón para desbloquear</string>
+    <string name="alp_42447968_msg_pattern_recorded">Patrón grabado</string>
+    <string name="alp_42447968_msg_redraw_pattern_to_confirm">Vuelve a dibujar tu patrón para confirmar</string>
+    <string name="alp_42447968_msg_release_finger_when_done">Suelta el dedo cuando hayas terminado</string>
+    <string name="alp_42447968_msg_try_again">Tus patrones no coinciden. Inténtalo de nuevo.</string>
+    <string name="alp_42447968_msg_your_new_unlock_pattern">Tu nuevo patrón de desbloqueo</string>
+
+    <plurals name="alp_42447968_pmsg_connect_x_dots">
+        <item quantity="one">Connect at least %1$d dot. Try again</item>
+        <item quantity="other">Connect at least %1$d dots. Try again</item>
+    </plurals>
+    
+    <string name="stealth_enter_pass_tip">La configuración se ha completado. Toca en \"hi\" para acceder a tus chats ocultos.</string>
+    <string name="stealth_notification_message">Tienes una notificación nueva</string>
+    <string name="retry">Retry</string>
+
+	<string name="reset_complete_stealth_header">Reset Hidden Mode</string>
+	<string name="reset_complete_stealth_info">¿Has olvidado la contraseña? Restaura el modo oculto. Todos los chats ocultos se borrarán.</string>
+	<string name="initiate_reset_stealth_header">Reset Hidden Mode</string>
+	<string name="initiate_reset_stealth_body">El modo oculto se restaurará dentro de 30 minutos. Todos los chats ocultos se borrarán. ¿Quieres continuar?</string>
+	<string name="resetting_complete_stealth_header">Restaurando el modo oculto</string>
+	<string name="resetting_complete_stealth_info">Toca para cancelar.</string>
+	<string name="reset_stealth_tip"> <![CDATA[ <b> Todos los chats ocultos se borrarán en %1$s minutos </b> 
+	  ]]></string>
+	<string name="tap_to_reset_stealth_tip"><![CDATA[ <b> Toca aquí para restaurar el modo oculto. </b> 
+	  ]]></string>
+	<string name="reset_stealth_confirmation">Al restaurar el modo oculto se borrarán todos los chats ocultos.\n¿Estás seguro?</string>
+	<string name="stealth_mode_empty_conv_popup_msg">Ahora puedes ocultar los chats privados al mundo y leerlos solo con una contraseña. Inicia un nuevo chat y pruébalo tocando en \"hi\".</string>
+	<string name="stealth_tap_and_hold_tip">Mantén un chat para marcarlo como \'oculto\'.</string>
+	<string name="chat_marked_stealth">Has ocultado un chat.</string>
+    <string name="chat_unmarked_stealth">Has marcado un chat como visible.</string>
+    <string name="mark_stealth">Marcar chat como oculto</string>
+    <string name="unmark_stealth">Marcar chat como visible</string>
+    <string name="edit">Edit</string>
+    <string name="vib_off">Apagado</string>
+    <string name="vib_default">Predeterminado</string>
+    <string name="vib_short">Corto</string>
+    <string name="vib_long">Largo</string>
+    <string name="chat_unmarked_stealth_first">Has marcado un chat como visible. Ahora será visible para cualquier usuario que abra hike.</string>
+    
 </resources>
