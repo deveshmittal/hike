@@ -6419,6 +6419,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void destroyActionMode()
 	{
+		currentFileSelectionPath = null;
+		shareableMessagesCount = 0;
 		selectedNonTextMsgs = 0;
 		selectedNonForwadableMsgs = 0;
 		selectedCancelableMsgs = 0;
@@ -6572,11 +6574,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (currentFileSelectionPath != null)
 			{
 				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionPath);
-				currentFileSelectionPath = null;
-				shareableMessagesCount--;
-				mAdapter.removeSelection();
-				mAdapter.notifyDataSetChanged();
-				invalidateOptionsMenu();
+				destroyActionMode();
 			}
 			else
 			{
