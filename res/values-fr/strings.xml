@@ -951,7 +951,7 @@
     <string name="delete_chat">Supprimer tchat</string>
     <string name="clear_whole_conversation">Effacer toute la conversation</string>
     <string name="email_conversations">Conversation e-mail</string>
-    <string name="unlink_account_failed">hike n'a pas pu déconnecter ton compte. Recommence.</string>
+    <string name="unlink_account_failed">hike n\'a pas pu déconnecter ton compte. Recommence.</string>
     <string name="deleting_account">Suppression du compte...</string>
     <string name="unlink_hinttext">Efface tous les messages et les profils de cet appareil.</string>
     <string name="unlink_account">Réinitialiser le compte</string>
