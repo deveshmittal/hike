@@ -1044,12 +1044,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
 
-			optionsList.add(new OverFlowMenuItem(getString(R.string.clear_conversation), 5));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.email_conversation), 3));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.shortcut), 4));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.add_shortcut), 4));
 
 		dismissPopupWindow();
 
