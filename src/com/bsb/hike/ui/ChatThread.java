@@ -5366,12 +5366,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
 							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
 					{
-						showStickerPreviewDialog(category);
+						postToHandlerStickerPreviewDialog(category);
+
 					}
 				}
 				else if (!prefs.getBoolean(categoryId.downloadPref(), false))
 				{
-					showStickerPreviewDialog(category);
+					postToHandlerStickerPreviewDialog(category);
 				}
 			}
 		}
@@ -5386,6 +5387,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		}
 	};
+
+	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
+	{
+		new Handler().post(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				showStickerPreviewDialog(category);
+
+			}
+		});
+	}
 
 	private void showStickerPreviewDialog(final StickerCategory category)
 	{
@@ -5449,8 +5464,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 
 		dialog.show();
+		Logger.i("chatthread", "show called for stickerpreviewdialog");
 		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
 		{
+			// whenever dialog comes,it hides keyboard, so we need to make sure screen is properly resized to show emoticon pallette
+			// calling hide keyboard for edge cases , exceptional devices where keyboard not goes automatically
+			Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 			resizeMainheight(attachmentWindow.getHeight(), false);
 		}
 	}
@@ -6408,15 +6427,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			setActionModeTitle(mAdapter.getSelectedCount());
 		}
-		
+
 		/*
-		 * if chat bg ftue tip or last seen tip is visible we
-		 * should hide them in action mode
+		 * if chat bg ftue tip or last seen tip is visible we should hide them in action mode
 		 */
-		if(tipView != null && tipView.getVisibility() == View.VISIBLE)
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
 			TipType tipType = (TipType) tipView.getTag();
-			if(tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
+			if (tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
 			{
 				tipView.setVisibility(View.INVISIBLE);
 			}
@@ -6822,6 +6840,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
+		Logger.i("chatthread", "trying to resize main height with bottom padding");
 		View root = findViewById(R.id.chat_layout);
 		if (respectKeyboardVisiblity)
 		{
@@ -6831,11 +6850,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// keyboard open
 			if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
 			{
+				Logger.i("chatthread", "resize main height not needed");
 				return false;
 			}
 		}
 		if (root.getPaddingBottom() != emoticonPalHeight)
 		{
+			Logger.i("chatthread", "resize main height with bottom padding " + emoticonPalHeight);
 			root.setPadding(0, 0, 0, emoticonPalHeight);
 			showPaletteFillerView(emoticonPalHeight);
 			return true;
