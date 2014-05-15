@@ -880,5 +880,93 @@
     <string name="tap_plus_add_favorites">Somente seus favoritos podem ver seu "Último visto" e "Atualizações de Status". Toque em \'+\' para adicionar aos favoritos.</string>
     <string name="last_seen_proper_casing">Último visto</string>
     <string name="status_updates_proper_casing">Atualizações de Status</string>
-	<string name="bigger_better_attachments">Maior, melhor anexos</string>    
+	<string name="bigger_better_attachments">Maior, melhor anexos</string>   
+	<string name="introducing_stealth_mode">Apresentando o Modo Oculto</string>
+    <string name="stealth_mode_popup_msg">Agora você pode esconder suas conversas particulares do mundo e ler apenas com uma senha.\n\nExperimente agora!</string>
+    <string name="quick_setup">Configuração rápida</string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Sua conversa está oculta! Defina uma senha para acessar o Modo Oculto.<br> <br> <b> Toque em \'hi\' para começar.</b> ]]></string>
+    <string name="alp_42447968_cmd_confirm">Confirmar</string>
+    <string name="alp_42447968_cmd_continue">Continuar</string>
+    <string name="alp_42447968_cmd_forgot_pattern">Esqueceu o padrão?</string>
+    <string name="alp_42447968_cmd_retry">Tentar novamente</string>
+    <string name="alp_42447968_loading">Carregando...</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cell_added">Celular adicionado</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cleared">Padrão removido</string>
+    <string name="alp_42447968_lockscreen_access_pattern_detected">Padrão concluído</string>
+    <string name="alp_42447968_lockscreen_access_pattern_start">Padrão iniciado</string>
+    <string name="alp_42447968_msg_connect_4dots">Conecte pelo menos 4 pontos. Tente novamente.</string>
+    <string name="alp_42447968_msg_draw_an_unlock_pattern">Desenhe um padrão de desbloqueio exclusivo</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock">Desenhe o padrão para desbloquear</string>
+    <string name="alp_42447968_msg_pattern_recorded">Padrão registrado</string>
+    <string name="alp_42447968_msg_redraw_pattern_to_confirm">Desenhe o padrão novamente para confirmá-lo</string>
+    <string name="alp_42447968_msg_release_finger_when_done">Retire o dedo ao concluir</string>
+    <string name="alp_42447968_msg_try_again">Os padrões não coincidem. Tente novamente.</string>
+    <string name="alp_42447968_msg_your_new_unlock_pattern">Seu novo padrão de desbloqueio</string>
+
+    <plurals name="alp_42447968_pmsg_connect_x_dots">
+        <item quantity="one">Connect at least %1$d dot. Try again</item>
+        <item quantity="other">Connect at least %1$d dots. Try again</item>
+    </plurals>
+    
+    <string name="stealth_enter_pass_tip">A configuração está concluída! Toque em \'hi\' para acessar as conversas ocultas.</string>
+    <string name="stealth_notification_message">Você tem uma nova notificação</string>
+    <string name="retry">Tentar novamente</string>
+
+	<string name="reset_complete_stealth_header">Redefinir Modo Oculto</string>
+	<string name="reset_complete_stealth_info">Esqueceu a senha? Redefina o Modo Oculto. Todas as conversas ocultas serão excluídas.</string>
+	<string name="initiate_reset_stealth_header">Redefinir Modo Oculto</string>
+	<string name="initiate_reset_stealth_body">O Modo Oculto será redefinido em 30 minutos. Todas as conversas ocultas serão excluídas! Continuar?</string>
+	<string name="resetting_complete_stealth_header">Redefinindo Modo Oculto</string>
+	<string name="resetting_complete_stealth_info">Toque para cancelar.</string>
+	<string name="reset_stealth_tip"> <![CDATA[ <b> Todas as conversas ocultas serão excluídas em %1$s minutos </b> 
+	  ]]></string>
+	<string name="tap_to_reset_stealth_tip"><![CDATA[ <b> Toque aqui para redefinir o Modo Oculto agora! </b> 
+	  ]]></string>
+	<string name="reset_stealth_confirmation">Redefinir o Modo Oculto excluirá todas as conversas ocultas.\nTem certeza?</string>
+	<string name="stealth_mode_empty_conv_popup_msg">Agora você pode ocultar conversas particulares do mundo e lê-las somente com uma senha. Comece uma nova conversa e experimente, tocando em \'hi\'!</string>
+	<string name="stealth_tap_and_hold_tip">Toque e mantenha pressionada uma conversa para torná-la \'Oculta\'.</string>
+	<string name="chat_marked_stealth">Você ocultou uma conversa.</string>
+    <string name="chat_unmarked_stealth">Você marcou uma conversa como visível.</string>
+    <string name="mark_stealth">Marcar conversa como oculta</string>
+    <string name="unmark_stealth">Marcar conversa como visível</string>
+    <string name="edit">Edit</string>
+    <string name="vib_off_key">Desligado</string>
+    <string name="vib_default_key">Padrão</string>
+    <string name="vib_short_key">Curto</string>
+    <string name="vib_long_key">Longo</string>
+    <string name="chat_unmarked_stealth_first">Você marcou uma conversa como visível. Agora ela estará visível a todos que abrirem o hike.</string>
+    <string name="delete_account_heading">AO EXCLUIR SUA CONTA, VOCÊ</string>
+    <string name="delete_account_description">Excluirá todas as suas mensagens, SMS grátis e recompensas hike</string>
+    <string name="delete_account_heading_2">Para excluir sua conta, insira as seguintes informações</string>
+    <string name="delete_my_account">EXCLUIR MINHA CONTA</string>
+    <string name="tickSoundTitle">Tons de conversa</string>
+    <string name="tickSoundSummary">Reproduzir som ao receber e enviar mensagens</string>
+    <string name="notif_sound_off_key">Desligado</string>
+    <string name="notif_sound_default_key">Padrão</string>
+    <string name="notif_sound_Hike_key">JingleHike</string>
+    <string name="notificationSoundTitle">Tons de notificação</string>
+    <string name="notificationSoundSummary">Selecione um som para ser reproduzido na notificação de nova mensagem</string>
+    <string name="status">Status</string>
+	<string name="getting_started">Começando...</string>
+    <string name="viewcontact">Ver contato</string>
+    <string name="add_to_contacts_existing">Adicionar em contato existente</string>
+    <string name="delete_chat">Excluir conversa</string>
+    <string name="clear_whole_conversation">Limpar toda a conversa</string>
+    <string name="email_conversations">Conversa por email</string>
+    <string name="unlink_account_failed">O hike não pôde sair de sua conta. Tente novamente.</string>
+    <string name="deleting_account">Excluindo conta...</string>
+    <string name="unlink_hinttext">Limpar suas mensagens e seu perfil deste aparelho.</string>
+    <string name="unlink_account">Redefinir conta</string>
+    <string name="unlink_account_button">Redefinir</string>
+    <string name="delete_account_msg">Excluir sua conta do hike.</string>
+    <string name="unlink_confirmation">Tem certeza que deseja redefinir sua conta?</string>
+    <string name="unlinking_account">Redefinindo...</string>
+     <string name="delete_confirm_msg_1">Isso excluirá todas as suas mensagens, saldo de SMS e qualquer recompensa hike.</string>
+     <string name="delete_confirm_msg_2">Tem certeza que deseja continuar? Esta ação é irreversível.</string>
+     <string name="shortcut">Adicionar atalho para a conversa</string>
+     <string name="add_to_contacts">Adic. contato</string>
+     <string name="delete_leave">Excluir e sair do grupo</string>
+     <string name="confirm_delete_chat_msg">Excluir conversa com \"%1$s\"? </string>
+     <string name="confirm_delete_group_msg">Excluir e sair do grupo \"%1$s\"?</string>
+	
 </resources>

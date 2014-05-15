@@ -1029,8 +1029,6 @@ public class HikeConstants
 
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
 
-		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
-
 		public static final String DIALOG_SHOWING = "dialogShowing";
 
 		public static final String SMS_ID = "smsId";
@@ -1104,6 +1102,10 @@ public class HikeConstants
 		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
 
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
+
+		public static final String SELECTED_SHARABLE_MSGS_COUNT = "selectedCancelableMsgsCount";
+		
+		public static final String SELECTED_SHARABLE_MSGS_PATH = "selectedCancelableMsgsPath";
 
 		public static final String SELECTED_COUNTRY = "selectedCountry";
 
