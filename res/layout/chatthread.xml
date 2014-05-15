@@ -144,9 +144,10 @@
                 <include layout="@layout/tool_tip" />
             </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/new_message_indicator"
-                android:layout_width="148dp"
+                android:layout_width="wrap_content"
+                android:minWidth="148dp"
                 android:layout_height="34dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
@@ -155,9 +156,9 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
-            </RelativeLayout>
+            </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/scroll_bottom_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
@@ -168,9 +169,9 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
-            </RelativeLayout>
+            </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/scroll_top_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
@@ -181,7 +182,7 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
-            </RelativeLayout>
+            </LinearLayout>
             
             <View
                 android:layout_width="match_parent"
