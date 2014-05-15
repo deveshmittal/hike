@@ -171,10 +171,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		{
 			ContactInfo contactInfo = iter.next();
 			/*
-			 * if case of group contactInfo.getId() will retrun groupId,
-			 * which is treated as msisdn for groups.
+			 * if case of group contactInfo.getId() will retrun groupId, which is treated as msisdn for groups.
 			 */
-			String msisdn = isGroupTask?contactInfo.getId():contactInfo.getMsisdn(); 
+			String msisdn = isGroupTask ? contactInfo.getId() : contactInfo.getMsisdn();
 			if (HikeMessengerApp.isStealthMsisdn(msisdn))
 			{
 				stealthList.add(contactInfo);
