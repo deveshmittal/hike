@@ -5701,6 +5701,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return emoticonViewPager.getCurrentItem();
 	}
 
+	public EmoticonType getCurrentEmoticonType()
+	{
+		return emoticonType;
+	}
+
 	private void setupEmoticonLayout(EmoticonType emoticonType, int pageNum, int[] categoryResIds)
 	{
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
