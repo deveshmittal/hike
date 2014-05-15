@@ -1105,6 +1105,10 @@ public class HikeConstants
 
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
 
+		public static final String SELECTED_SHARABLE_MSGS_COUNT = "selectedCancelableMsgsCount";
+		
+		public static final String SELECTED_SHARABLE_MSGS_PATH = "selectedCancelableMsgsPath";
+
 		public static final String SELECTED_COUNTRY = "selectedCountry";
 
 		public static final String MANUAL_SYNC = "manualSync";
