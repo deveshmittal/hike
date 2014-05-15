@@ -3683,7 +3683,7 @@ public class Utils
 
 	public static boolean isPlayTickSound(Context context)
 	{
-		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, false));
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
 	}
 
 	/**
