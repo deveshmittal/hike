@@ -888,6 +888,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					iter.remove();
 				}
 			}
+
+			if (mAdapter.getCount() == 0)
+			{
+				setEmptyState();
+			}
 		}
 		else
 		{
