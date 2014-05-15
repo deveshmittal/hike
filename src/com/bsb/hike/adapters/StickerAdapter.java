@@ -417,6 +417,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				}
 
 				int currentIdx = ((ChatThread) activity).getCurrentPage();
+				if (currentIdx == -1)
+				{
+					return;
+				}
+
 				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 				if (stickersList.isEmpty() || !category.categoryId.equals(sc.categoryId)
 						|| !activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(category.categoryId.downloadPref(), false) || category.hasReachedEnd())
