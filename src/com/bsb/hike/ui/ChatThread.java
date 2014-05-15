@@ -513,6 +513,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				selectedNonForwadableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS);
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
 				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
+				shareableMessagesCount = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT);
+				currentFileSelectionPath = savedInstanceState.getString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH);
+
 				setupActionModeActionBar();
 				invalidateOptionsMenu();
 			}
@@ -5118,6 +5121,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS, selectedNonForwadableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
+			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH, currentFileSelectionPath);
 		}
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
 		{
