@@ -515,7 +515,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			break;
 		case R.id.new_update:
 			intent = new Intent(this, StatusUpdate.class);
-			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN, true);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
@@ -1800,7 +1799,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case 8:
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
-					intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN, true);
 					break;
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
