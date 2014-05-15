@@ -205,6 +205,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	@Override
 	protected void onPostExecute(Void result)
 	{
+		/*
+		 * Clearing all the lists initially to ensure we remove any existing contacts in the list that might be there because of the 'ai' packet.
+		 */
+		clearAllLists();
+
 		if (fetchGroups)
 		{
 			groupsList.addAll(groupTaskList);
@@ -224,5 +229,21 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		friendsAdapter.setListFetchedOnce(true);
 
 		friendsAdapter.makeCompleteList(true);
+	}
+
+	private void clearAllLists()
+	{
+		if (fetchGroups)
+		{
+			groupsList.clear();
+			filteredGroupsList.clear();
+		}
+
+		friendsList.clear();
+		hikeContactsList.clear();
+		smsContactsList.clear();
+		filteredFriendsList.clear();
+		filteredHikeContactsList.clear();
+		filteredSmsContactsList.clear();
 	}
 }
