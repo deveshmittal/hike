@@ -329,6 +329,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private PagerAdapter emoticonsAdapter;
 
+	private StickerAdapter stickerAdapter;
+
 	private boolean wasOrientationChanged = false;
 
 	private GestureDetector gestureDetector;
@@ -533,9 +535,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
-		if (emoticonsAdapter != null && (emoticonsAdapter instanceof StickerAdapter))
+		if (stickerAdapter != null)
 		{
-			((StickerAdapter) emoticonsAdapter).unregisterListeners();
+			stickerAdapter.unregisterListeners();
 		}
 
 		if (mComposeViewWatcher != null)
@@ -5674,7 +5676,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void updateStickerCategoryUI(StickerCategory category, boolean failed, DownloadType downloadTypeBeforeFail)
 	{
-		if (emoticonsAdapter == null && (emoticonsAdapter instanceof StickerAdapter))
+		if (stickerAdapter == null)
 		{
 			return;
 		}
@@ -5686,7 +5688,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		((StickerAdapter) emoticonsAdapter).setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
+		stickerAdapter.setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
 
 	}
 
@@ -5704,14 +5706,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		if (emoticonType != EmoticonType.STICKERS)
 		{
-			emoticonsAdapter = new EmoticonAdapter(this, mComposeView, isPortrait, categoryResIds);
+			if(emoticonsAdapter == null)
+			{
+				emoticonsAdapter = new EmoticonAdapter(this, mComposeView, isPortrait, categoryResIds);
+			}
+			emoticonViewPager.setAdapter(emoticonsAdapter);
 		}
 		else
 		{
-			emoticonsAdapter = new StickerAdapter(this, isPortrait);
+			if(stickerAdapter == null)
+			{
+				stickerAdapter = new StickerAdapter(this, isPortrait);
+			}
+			emoticonViewPager.setAdapter(stickerAdapter);
 		}
 
-		emoticonViewPager.setAdapter(emoticonsAdapter);
 		int actualPageNum = pageNum;
 		if (emoticonType == EmoticonType.STICKERS && pageNum == 0)
 		{
