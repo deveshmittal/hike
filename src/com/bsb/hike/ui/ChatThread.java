@@ -5394,7 +5394,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
 	{
-		new Handler().post(new Runnable()
+		mHandler.post(new Runnable()
 		{
 
 			@Override
