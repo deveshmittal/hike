@@ -513,6 +513,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				selectedNonForwadableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS);
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
 				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
+				shareableMessagesCount = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT);
+				currentFileSelectionPath = savedInstanceState.getString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH);
+
 				setupActionModeActionBar();
 				invalidateOptionsMenu();
 			}
@@ -5123,6 +5126,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_FORWARDABLE_MSGS, selectedNonForwadableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
+			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH, currentFileSelectionPath);
 		}
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
 		{
@@ -5157,100 +5162,101 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void onEmoticonBtnClicked(final View v, int whichSubcategory, boolean backPressed)
 	{
-		if (showingChatThemePicker)
+		// it is possible that window token is null when activity is rotated, will occur rarely
+		View anchor = findViewById(R.id.chatThreadParentLayout);
+		if (anchor.getWindowToken() != null)
 		{
-			return;
-		}
-		// boolean controls whether we switch from sticker to emo or vice versa
-		emoticonLayout = emoticonLayout == null ? (ViewGroup) LayoutInflater.from(getApplicationContext()).inflate(R.layout.emoticon_layout, null) : emoticonLayout;
-
-		emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
-
-		View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-
-		if (v != null)
-		{
-			int[] tabDrawables = null;
-
-			if (v.getId() == R.id.sticker_btn)
-			{
-				if (emoticonType == EmoticonType.STICKERS)
-				{
-					// view not changed , exit with dismiss dialog
-					dismissPopupWindow();
-					return;
-				}
-				if (tipView != null)
-				{
-					TipType viewTipType = (TipType) tipView.getTag();
-					if (viewTipType == TipType.EMOTICON)
-					{
-						HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-						Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
-						tipView = null;
-					}
-				}
-				if (emoticonType != EmoticonType.STICKERS)
-				{
-					emoticonType = EmoticonType.STICKERS;
-				}
-				eraseKey.setVisibility(View.GONE);
-			}
-			else
-			{
-				if (emoticonType == EmoticonType.EMOTICON)
-				{
-					dismissPopupWindow();
-					return;
-				}
-				int offset = 0;
-				int emoticonsListSize = 0;
-				tabDrawables = new int[] { R.drawable.ic_recents_emo, R.drawable.emo_1_tab, R.drawable.emo_2_tab, R.drawable.emo_3_tab, R.drawable.emo_4_tab,
-						EmoticonConstants.EMOJI_RES_IDS[0], EmoticonConstants.EMOJI_RES_IDS[109], EmoticonConstants.EMOJI_RES_IDS[162], EmoticonConstants.EMOJI_RES_IDS[294],
-						EmoticonConstants.EMOJI_RES_IDS[392] };
-				if (emoticonType != EmoticonType.EMOTICON)
-				{
-					emoticonType = EmoticonType.EMOTICON;
-				}
-				emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-
-				/*
-				 * Checking whether we have a few emoticons in the recents category. If not we show the next tab emoticons.
-				 */
-				if (whichSubcategory == 0)
-				{
-					int startOffset = offset;
-					int endOffset = startOffset + emoticonsListSize;
-					int recentEmoticonsSizeReq = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT
-							: EmoticonAdapter.MAX_EMOTICONS_PER_ROW_LANDSCAPE;
-					int[] recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType(startOffset, endOffset, recentEmoticonsSizeReq);
-					if (recentEmoticons.length < recentEmoticonsSizeReq)
-					{
-						whichSubcategory++;
-					}
-				}
-				eraseKey.setVisibility(View.VISIBLE);
-				eraseKey.setOnClickListener(new OnClickListener()
-				{
-
-					@Override
-					public void onClick(View view)
-					{
-						mComposeView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
-					}
-				});
-			}
-			setupEmoticonLayout(emoticonType, whichSubcategory, tabDrawables);
-			if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+			if (showingChatThemePicker)
 			{
 				return;
 			}
+			// boolean controls whether we switch from sticker to emo or vice versa
+			emoticonLayout = emoticonLayout == null ? (ViewGroup) LayoutInflater.from(getApplicationContext()).inflate(R.layout.emoticon_layout, null) : emoticonLayout;
 
-			// emotype is same , so same view clicked
-			// it is possible that window token is null when activity is rotated, will occur rarely
-			View anchor = findViewById(R.id.chatThreadParentLayout);
-			if (anchor.getWindowToken() != null)
+			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
+
+			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
+
+			if (v != null)
 			{
+				int[] tabDrawables = null;
+
+				if (v.getId() == R.id.sticker_btn)
+				{
+					if (emoticonType == EmoticonType.STICKERS)
+					{
+						// view not changed , exit with dismiss dialog
+						dismissPopupWindow();
+						return;
+					}
+					if (tipView != null)
+					{
+						TipType viewTipType = (TipType) tipView.getTag();
+						if (viewTipType == TipType.EMOTICON)
+						{
+							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+							tipView = null;
+						}
+					}
+					if (emoticonType != EmoticonType.STICKERS)
+					{
+						emoticonType = EmoticonType.STICKERS;
+					}
+					eraseKey.setVisibility(View.GONE);
+				}
+				else
+				{
+					if (emoticonType == EmoticonType.EMOTICON)
+					{
+						dismissPopupWindow();
+						return;
+					}
+					int offset = 0;
+					int emoticonsListSize = 0;
+					tabDrawables = new int[] { R.drawable.ic_recents_emo, R.drawable.emo_1_tab, R.drawable.emo_2_tab, R.drawable.emo_3_tab, R.drawable.emo_4_tab,
+							EmoticonConstants.EMOJI_RES_IDS[0], EmoticonConstants.EMOJI_RES_IDS[109], EmoticonConstants.EMOJI_RES_IDS[162], EmoticonConstants.EMOJI_RES_IDS[294],
+							EmoticonConstants.EMOJI_RES_IDS[392] };
+					if (emoticonType != EmoticonType.EMOTICON)
+					{
+						emoticonType = EmoticonType.EMOTICON;
+					}
+					emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+
+					/*
+					 * Checking whether we have a few emoticons in the recents category. If not we show the next tab emoticons.
+					 */
+					if (whichSubcategory == 0)
+					{
+						int startOffset = offset;
+						int endOffset = startOffset + emoticonsListSize;
+						int recentEmoticonsSizeReq = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT
+								: EmoticonAdapter.MAX_EMOTICONS_PER_ROW_LANDSCAPE;
+						int[] recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType(startOffset, endOffset, recentEmoticonsSizeReq);
+						if (recentEmoticons.length < recentEmoticonsSizeReq)
+						{
+							whichSubcategory++;
+						}
+					}
+					eraseKey.setVisibility(View.VISIBLE);
+					eraseKey.setOnClickListener(new OnClickListener()
+					{
+
+						@Override
+						public void onClick(View view)
+						{
+							mComposeView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+						}
+					});
+				}
+				setupEmoticonLayout(emoticonType, whichSubcategory, tabDrawables);
+				if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
+				{
+					return;
+				}
+
+				// emotype is same , so same view clicked
+
 				int selection = mConversationsView.getLastVisiblePosition();
 				attachmentWindow = new PopupWindow(ChatThread.this);
 				updateEmoticonPallateHeight();
@@ -5323,12 +5329,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				});
 			}
-			else
-			{
-				Logger.d("chatthread", "window token is null -- trying to show emoticon pallette");
-				attachmentWindow = null;
-				emoticonType = null;
-			}
+
+		}
+		else
+		{
+			Logger.d("chatthread", "window token is null -- trying to show emoticon pallette");
+			attachmentWindow = null;
+			emoticonType = null;
 		}
 
 	}
@@ -5364,12 +5371,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
 							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
 					{
-						showStickerPreviewDialog(category);
+						postToHandlerStickerPreviewDialog(category);
+
 					}
 				}
 				else if (!prefs.getBoolean(categoryId.downloadPref(), false))
 				{
-					showStickerPreviewDialog(category);
+					postToHandlerStickerPreviewDialog(category);
 				}
 			}
 		}
@@ -5384,6 +5392,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		}
 	};
+
+	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
+	{
+		new Handler().post(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				showStickerPreviewDialog(category);
+
+			}
+		});
+	}
 
 	private void showStickerPreviewDialog(final StickerCategory category)
 	{
@@ -5447,8 +5469,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 
 		dialog.show();
+		Logger.i("chatthread", "show called for stickerpreviewdialog");
 		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
 		{
+			// whenever dialog comes,it hides keyboard, so we need to make sure screen is properly resized to show emoticon pallette
+			// calling hide keyboard for edge cases , exceptional devices where keyboard not goes automatically
+			Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 			resizeMainheight(attachmentWindow.getHeight(), false);
 		}
 	}
@@ -6406,15 +6432,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			setActionModeTitle(mAdapter.getSelectedCount());
 		}
-		
+
 		/*
-		 * if chat bg ftue tip or last seen tip is visible we
-		 * should hide them in action mode
+		 * if chat bg ftue tip or last seen tip is visible we should hide them in action mode
 		 */
-		if(tipView != null && tipView.getVisibility() == View.VISIBLE)
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
 			TipType tipType = (TipType) tipView.getTag();
-			if(tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
+			if (tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
 			{
 				tipView.setVisibility(View.INVISIBLE);
 			}
@@ -6424,6 +6449,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void destroyActionMode()
 	{
+		currentFileSelectionPath = null;
+		shareableMessagesCount = 0;
 		selectedNonTextMsgs = 0;
 		selectedNonForwadableMsgs = 0;
 		selectedCancelableMsgs = 0;
@@ -6577,11 +6604,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (currentFileSelectionPath != null)
 			{
 				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionPath);
-				currentFileSelectionPath = null;
-				shareableMessagesCount--;
-				mAdapter.removeSelection();
-				mAdapter.notifyDataSetChanged();
-				invalidateOptionsMenu();
+				destroyActionMode();
 			}
 			else
 			{
@@ -6822,6 +6845,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
+		Logger.i("chatthread", "trying to resize main height with bottom padding");
 		View root = findViewById(R.id.chat_layout);
 		if (respectKeyboardVisiblity)
 		{
@@ -6831,11 +6855,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// keyboard open
 			if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
 			{
+				Logger.i("chatthread", "resize main height not needed");
 				return false;
 			}
 		}
 		if (root.getPaddingBottom() != emoticonPalHeight)
 		{
+			Logger.i("chatthread", "resize main height with bottom padding " + emoticonPalHeight);
 			root.setPadding(0, 0, 0, emoticonPalHeight);
 			showPaletteFillerView(emoticonPalHeight);
 			return true;
