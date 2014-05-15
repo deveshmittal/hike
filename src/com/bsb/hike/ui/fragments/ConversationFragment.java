@@ -452,9 +452,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		removeResetStealthTipIfExists();
 
-		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-		task.execute(stealthConversations.toArray(new Conversation[0]));
-
 		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		resetStealthPreferences();
@@ -468,6 +465,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_RESET_COMPLETE, null);
 		}
+
+		/*
+		 * Calling the delete conversation task in the end to ensure that we first publish the reset event. If the delete task was published at first, it was causing a threading
+		 * issue where the contacts in the friends fragment were getting removed and not added again.
+		 */
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+		task.execute(stealthConversations.toArray(new Conversation[0]));
 	}
 
 	private void resetStealthPreferences()
