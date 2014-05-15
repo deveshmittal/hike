@@ -3317,12 +3317,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeView.setHint("0 Free SMS left...");
 			mComposeView.setEnabled(false);
 			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.emo_btn).setVisibility(View.GONE);
 		}
 		else
 		{
-			findViewById(R.id.group_info_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.emo_btn).setVisibility(View.VISIBLE);
 		}
-		findViewById(R.id.emo_btn).setVisibility(View.GONE);
 
 		boolean show = mConversationDb.wasOverlayDismissed(mConversation.getMsisdn());
 		if (!show)
