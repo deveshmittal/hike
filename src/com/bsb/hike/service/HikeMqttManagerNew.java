@@ -613,6 +613,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				mqtt.setServerURI(protocol + brokerHostName + ":" + brokerPortNumber);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+				else
+					op.setSocketFactory(null);
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
 			}

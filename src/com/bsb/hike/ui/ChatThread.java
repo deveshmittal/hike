@@ -1260,17 +1260,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				if (isMsgSelected)
+				HikeFileType ftype = hikeFile.getHikeFileType();
+				// we donot support location and contact sharing
+				if (ftype != HikeFileType.LOCATION && ftype != HikeFileType.CONTACT)
 				{
-					shareableMessagesCount++;
-					currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
-					currentFileSelectionMimeType = hikeFile.getFileTypeString();
-				}
-				else
-				{
-					shareableMessagesCount--;
-					currentFileSelectionPath = null;
-					currentFileSelectionMimeType = null;
+					if (isMsgSelected)
+					{
+						shareableMessagesCount++;
+						currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
+						currentFileSelectionMimeType = hikeFile.getFileTypeString();
+					}
+					else
+					{
+						shareableMessagesCount--;
+						currentFileSelectionPath = null;
+						currentFileSelectionMimeType = null;
+					}
 				}
 			}
 		}
@@ -4652,7 +4657,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					String fileUriString = selectedFileUri.toString();
 					if (fileUriString.startsWith(fileUriStart))
 					{
-						selectedFile = new File(URI.create(fileUriString));
+						selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 						/*
 						 * Done to fix the issue in a few Sony devices.
 						 */
