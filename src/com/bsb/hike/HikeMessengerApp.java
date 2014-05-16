@@ -316,8 +316,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
 
-	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
-
 	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
 
 	public static final String SHOWN_SDR_INTRO_TIP = "shownSdrIntroTip";
