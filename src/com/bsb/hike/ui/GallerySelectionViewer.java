@@ -358,7 +358,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		{
 			int postion = (Integer) v.getTag();
 			galleryItems.remove(postion);
-			galleryGridItems.remove(postion + 1);
+			galleryGridItems.remove(postion);
 
 			gridAdapter.notifyDataSetChanged();
 			pagerAdapter.notifyDataSetChanged();

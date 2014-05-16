@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -116,7 +115,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -165,7 +163,6 @@ import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -328,6 +325,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private EmoticonType emoticonType;
 
 	private PagerAdapter emoticonsAdapter;
+
+	private StickerAdapter stickerAdapter;
 
 	private boolean wasOrientationChanged = false;
 
@@ -536,9 +535,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
-		if (emoticonsAdapter != null && (emoticonsAdapter instanceof StickerAdapter))
+		if (stickerAdapter != null)
 		{
-			((StickerAdapter) emoticonsAdapter).unregisterListeners();
+			stickerAdapter.unregisterListeners();
 		}
 
 		if (mComposeViewWatcher != null)
@@ -3318,12 +3317,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeView.setHint("0 Free SMS left...");
 			mComposeView.setEnabled(false);
 			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.emo_btn).setVisibility(View.GONE);
 		}
 		else
 		{
-			findViewById(R.id.group_info_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.emo_btn).setVisibility(View.VISIBLE);
 		}
-		findViewById(R.id.emo_btn).setVisibility(View.GONE);
 
 		boolean show = mConversationDb.wasOverlayDismissed(mConversation.getMsisdn());
 		if (!show)
@@ -5395,7 +5394,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
 	{
-		new Handler().post(new Runnable()
+		mHandler.post(new Runnable()
 		{
 
 			@Override
@@ -5700,7 +5699,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void updateStickerCategoryUI(StickerCategory category, boolean failed, DownloadType downloadTypeBeforeFail)
 	{
-		if (emoticonsAdapter == null && (emoticonsAdapter instanceof StickerAdapter))
+		if (stickerAdapter == null)
 		{
 			return;
 		}
@@ -5712,7 +5711,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		((StickerAdapter) emoticonsAdapter).setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
+		stickerAdapter.setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
 
 	}
 
@@ -5725,19 +5724,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return emoticonViewPager.getCurrentItem();
 	}
 
+	public EmoticonType getCurrentEmoticonType()
+	{
+		return emoticonType;
+	}
+
 	private void setupEmoticonLayout(EmoticonType emoticonType, int pageNum, int[] categoryResIds)
 	{
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		if (emoticonType != EmoticonType.STICKERS)
 		{
-			emoticonsAdapter = new EmoticonAdapter(this, mComposeView, isPortrait, categoryResIds);
+			if(emoticonsAdapter == null)
+			{
+				emoticonsAdapter = new EmoticonAdapter(this, mComposeView, isPortrait, categoryResIds);
+			}
+			emoticonViewPager.setAdapter(emoticonsAdapter);
 		}
 		else
 		{
-			emoticonsAdapter = new StickerAdapter(this, isPortrait);
+			if(stickerAdapter == null)
+			{
+				stickerAdapter = new StickerAdapter(this, isPortrait);
+			}
+			emoticonViewPager.setAdapter(stickerAdapter);
 		}
 
-		emoticonViewPager.setAdapter(emoticonsAdapter);
 		int actualPageNum = pageNum;
 		if (emoticonType == EmoticonType.STICKERS && pageNum == 0)
 		{

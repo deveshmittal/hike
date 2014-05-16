@@ -29,7 +29,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -453,9 +452,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		removeResetStealthTipIfExists();
 
-		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-		task.execute(stealthConversations.toArray(new Conversation[0]));
-
 		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		resetStealthPreferences();
@@ -469,6 +465,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_RESET_COMPLETE, null);
 		}
+
+		/*
+		 * Calling the delete conversation task in the end to ensure that we first publish the reset event. If the delete task was published at first, it was causing a threading
+		 * issue where the contacts in the friends fragment were getting removed and not added again.
+		 */
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+		task.execute(stealthConversations.toArray(new Conversation[0]));
 	}
 
 	private void resetStealthPreferences()
@@ -731,7 +734,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					if (!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 					{
 						HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-						changeConversationsVisibility();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, null);
 					}
 				}
@@ -884,6 +887,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					iter.remove();
 				}
+			}
+
+			if (mAdapter.getCount() == 0)
+			{
+				setEmptyState();
 			}
 		}
 		else

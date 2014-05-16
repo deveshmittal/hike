@@ -3300,7 +3300,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Logger.i("chatthread", "getview of unknown header");
 			if (convertView == null)
 			{
-				convertView = inflater.inflate(R.layout.block_add_unknown_contact, null);
+				convertView = inflater.inflate(R.layout.block_add_unknown_contact, parent, false);
 			}
 			return convertView;
 		}
