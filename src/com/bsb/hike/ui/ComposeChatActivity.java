@@ -636,7 +636,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						String filePath;
 						if (fileUriString.startsWith(fileUriStart))
 						{
-							File selectedFile = new File(URI.create(fileUriString));
+							File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 							/*
 							 * Done to fix the issue in a few Sony devices.
 							 */
@@ -700,7 +700,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			else if (fileUriString.startsWith(fileUriStart))
 			{
-				File selectedFile = new File(URI.create(fileUriString));
+				File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 				/*
 				 * Done to fix the issue in a few Sony devices.
 				 */
