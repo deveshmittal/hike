@@ -1291,15 +1291,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				if (isMsgSelected)
+				HikeFileType ftype = hikeFile.getHikeFileType();
+				// we donot support location and contact sharing
+				if (ftype != HikeFileType.LOCATION && ftype != HikeFileType.CONTACT)
 				{
-					shareableMessagesCount++;
-					currentFileSelectionPath = hikeFile.getFilePath();
-				}
-				else
-				{
-					shareableMessagesCount--;
-					currentFileSelectionPath = null;
+					if (isMsgSelected)
+					{
+						shareableMessagesCount++;
+						currentFileSelectionPath = hikeFile.getFilePath();
+					}
+					else
+					{
+						shareableMessagesCount--;
+						currentFileSelectionPath = null;
+					}
 				}
 			}
 		}
