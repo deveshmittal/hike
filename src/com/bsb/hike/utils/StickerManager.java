@@ -86,7 +86,7 @@ public class StickerManager
 	public static final String ADD_NO_MEDIA_FILE_FOR_STICKERS = "addNoMediaFileForStickers";
 
 	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
-	
+
 	public static final String DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER = "delDefaultDownloadedExpressionsStickers";
 
 	public static int RECENT_STICKERS_COUNT = 30;
@@ -105,12 +105,12 @@ public class StickerManager
 	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn, R.drawable.sticker_2_lol, R.drawable.sticker_3_rofl, R.drawable.sticker_4_lmao,
 			R.drawable.sticker_5_omg, R.drawable.sticker_6_brb, R.drawable.sticker_7_gtg, R.drawable.sticker_8_xoxo, };
 
-	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn_small, R.drawable.sticker_2_lol_small, R.drawable.sticker_3_rofl_small, R.drawable.sticker_4_lmao_small,
-			R.drawable.sticker_5_omg_small, R.drawable.sticker_6_brb_small, R.drawable.sticker_7_gtg_small, R.drawable.sticker_8_xoxo_small, };
+	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn_small, R.drawable.sticker_2_lol_small, R.drawable.sticker_3_rofl_small,
+			R.drawable.sticker_4_lmao_small, R.drawable.sticker_5_omg_small, R.drawable.sticker_6_brb_small, R.drawable.sticker_7_gtg_small, R.drawable.sticker_8_xoxo_small, };
 
-	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_gn.png", "002_lol.png", "003_rofl.png", "004_lmao.png", "005_omg.png", "006_brb.png",
-			"007_gtg.png", "008_xoxo.png", };
-	
+	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_gn.png", "002_lol.png", "003_rofl.png", "004_lmao.png", "005_omg.png", "006_brb.png", "007_gtg.png",
+			"008_xoxo.png", };
+
 	public final String[] OLD_HARDCODED_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
 			"007_confused.png", "008_dreaming.png", };
 
@@ -300,7 +300,7 @@ public class StickerManager
 				return "sportsDownloadShown";
 			}
 		},
-		
+
 		humanoid2
 		{
 			@Override
@@ -451,7 +451,7 @@ public class StickerManager
 			return !".nomedia".equalsIgnoreCase(fileName);
 		}
 	};
-	
+
 	public Map<String, StickerTaskBase> stickerTaskMap;
 
 	private Set<Sticker> recentStickers;
@@ -735,7 +735,7 @@ public class StickerManager
 	{
 		boolean rem = recentStickers.remove(st);
 
-		Logger.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+		Logger.d(getClass().getSimpleName(), "Sticker removed from recents : " + rem);
 
 		// remove the sticker from cache too, recycling stuff is handled by the cache itself
 		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context));
@@ -824,14 +824,14 @@ public class StickerManager
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
 		if (path == null)
 			return false;
-		
+
 		File categoryDir = new File(path + HikeConstants.SMALL_STICKER_ROOT);
 		if (categoryDir.exists())
 		{
 			String[] stickerIds = categoryDir.list(stickerFileFilter);
-			if(stickerIds.length > 0)
+			if (stickerIds.length > 0)
 				return true;
-			else 
+			else
 				return false;
 		}
 		return false;
@@ -908,7 +908,7 @@ public class StickerManager
 				}
 				catch (Exception e)
 				{
-					Logger.e(getClass().getSimpleName(),"Exception while deserializing sticker",e);
+					Logger.e(getClass().getSimpleName(), "Exception while deserializing sticker", e);
 				}
 			}
 			in.close();
@@ -953,7 +953,7 @@ public class StickerManager
 					}
 					catch (Exception e)
 					{
-						Logger.e(getClass().getSimpleName(), "Exception while serializing a sticker : "+st.getStickerId(), e);
+						Logger.e(getClass().getSimpleName(), "Exception while serializing a sticker : " + st.getStickerId(), e);
 					}
 				}
 			}
@@ -1006,14 +1006,14 @@ public class StickerManager
 	{
 		try
 		{
-			String dirPath  = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
+			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
 			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			for(String stId : LOCAL_STICKER_IDS_HUMANOID)
+			for (String stId : LOCAL_STICKER_IDS_HUMANOID)
 			{
-				File st = new File(largeStickerDir,stId);
+				File st = new File(largeStickerDir, stId);
 				Utils.deleteFile(st);
-				st = new File(smallStickerDir,stId);
+				st = new File(smallStickerDir, stId);
 				Utils.deleteFile(st);
 			}
 		}
@@ -1022,19 +1022,19 @@ public class StickerManager
 
 		}
 	}
-	
+
 	public void deleteDefaultDownloadedExpressionsStickers()
 	{
 		try
 		{
-			String dirPath  = getStickerDirectoryForCategoryId(context, StickerCategoryId.expressions.name());
+			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.expressions.name());
 			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			for(String stId : LOCAL_STICKER_IDS_EXPRESSIONS)
+			for (String stId : LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
-				File st = new File(largeStickerDir,stId);
+				File st = new File(largeStickerDir, stId);
 				Utils.deleteFile(st);
-				st = new File(smallStickerDir,stId);
+				st = new File(smallStickerDir, stId);
 				Utils.deleteFile(st);
 			}
 		}
@@ -1043,7 +1043,7 @@ public class StickerManager
 
 		}
 	}
-	
+
 	public void removeStickersFromRecents(String categoryName, String[] stickerIds)
 	{
 		for (String stickerId : stickerIds)
