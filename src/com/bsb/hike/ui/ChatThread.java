@@ -767,46 +767,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && this.mConversation != null)
-		{
-			if ((mConversation instanceof GroupConversation))
-			{
-				Utils.incrementNumTimesScreenOpen(prefs, HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP);
-			}
-			else if (!this.mConversation.isOnhike())
-			{
-				Utils.incrementNumTimesScreenOpen(prefs, HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE);
-			}
-		}
-		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE)
-		{
+		selectedFile = null;
 
-			selectedFile = null;
+		Intent intent = new Intent(this, HomeActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 
-			Intent intent = null;
-			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && !getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE)
-					&& !getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)
-					&& !getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false))
-			{
-				intent = new Intent(this, HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-			}
-			else if (getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE))
-			{
-				intent = new Intent(this, ChatThread.class);
-				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
-				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-			}
-
-			saveDraft();
-		}
-		else
-		{
-			// onEmoticonBtnClicked(null, 0, true);
-		}
+		saveDraft();
 		super.onBackPressed();
 	}
 
