@@ -339,7 +339,10 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 		bd = HikeBitmapFactory.getBitmapDrawable(mResources, stickerBitmap);
 
-		putInCache(path, bd);
+		if (bd != null)
+		{
+			putInCache(path, bd);
+		}
 		return bd;
 	}
 
