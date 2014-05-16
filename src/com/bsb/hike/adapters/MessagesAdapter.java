@@ -702,6 +702,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		long startTime = System.currentTimeMillis();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
@@ -1281,9 +1282,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
 					else if (fileThumbParams.width == maxWidth)
-	                {
-	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
-	                }
+					{
+						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
 				}
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				videoHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -1426,9 +1427,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
 					else if (fileThumbParams.width == maxWidth)
-	                {
-	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
-	                }
+					{
+						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
 				}
 				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -3312,6 +3313,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			dayHolder.dayStubInflated.setVisibility(View.GONE);
 		}
+		Logger.i("chatthread", "position " + position + " time taken : " + (System.currentTimeMillis() - startTime));
 		return v;
 	}
 
@@ -3713,8 +3715,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		//fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
-		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);;
+		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
+		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
+		;
 		fileThumb.setImageResource(0);
 	}
 
@@ -4082,12 +4085,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void updateViewWindowForReadBy(ConvMessage message)
 	{
-		ConvMessage lastMessage = getItem(getCount()-1);
-		if(lastMessage.getMsgID() == message.getMsgID())
+		ConvMessage lastMessage = getItem(getCount() - 1);
+		if (lastMessage.getMsgID() == message.getMsgID())
 		{
 			chatThread.updateViewWindowForReadBy();
 		}
 	}
+
 	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)
 	{
 		ConvMessage message = getItem(position);
@@ -4197,10 +4201,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else if (lastIndex == 1)
 			{
 				/*
-				 * We increment the last index if its one since we can
-				 * accommodate another name in this case. 
+				 * We increment the last index if its one since we can accommodate another name in this case.
 				 */
-				lastIndex ++;
+				lastIndex++;
 				moreNamesThanMaxCount = true;
 			}
 			else if (lastIndex > 0)
@@ -5172,30 +5175,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		HashMap<Long, ConvMessage> selectedMsgs = new HashMap<Long, ConvMessage>();
 		for (ConvMessage convMessage : convMessages)
 		{
-			if(mSelectedItemsIds.contains(convMessage.getMsgID()))
+			if (mSelectedItemsIds.contains(convMessage.getMsgID()))
 			{
 				selectedMsgs.put(convMessage.getMsgID(), convMessage);
 			}
 		}
 		return selectedMsgs;
 	}
-	
+
 	public long[] getSelectedMsgIdsLongArray()
 	{
 		long[] result = new long[mSelectedItemsIds.size()];
-		int i=0;
+		int i = 0;
 		for (Long msgId : mSelectedItemsIds)
 		{
 			result[i++] = msgId;
 		}
 		return result;
 	}
-	
+
 	public Set<Long> getSelectedMessageIds()
 	{
 		return mSelectedItemsIds;
 	}
-	
+
 	public boolean isSelected(ConvMessage convMsg)
 	{
 		return mSelectedItemsIds.contains(convMsg.getMsgID());
