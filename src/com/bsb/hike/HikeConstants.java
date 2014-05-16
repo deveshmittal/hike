@@ -600,9 +600,9 @@ public class HikeConstants
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 5 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 6 * 1000;
 
-	public static final int RESEND_TYPING_TIME = 3 * 1000;
+	public static final int RESEND_TYPING_TIME = 4 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
@@ -833,7 +833,9 @@ public class HikeConstants
 	public static final String RESET = "reset";
 	
 	public static final String STEALTH = "stlth";
-	
+
+	public static final String FILE_SHARE_PREFIX = "file://";
+
 	public static final String SHARE_CONTACT_CONTENT_TYPE = "text/x-vcard";
 	
 	public static final class ResultCodes
@@ -1128,6 +1130,8 @@ public class HikeConstants
 		public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
+
+		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
 	}
 
 	public static final class LogEvent

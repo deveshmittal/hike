@@ -224,55 +224,36 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		return hash;
 	}
 
-	public void serializeObj(ObjectOutputStream out)
+	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
-		try
-		{
-			out.writeInt(stickerIndex);
-			out.writeUTF(stickerId);
-			category.serializeObj(out);
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		out.writeInt(stickerIndex);
+		out.writeUTF(stickerId);
+		category.serializeObj(out);
 	}
 
-	public void deSerializeObj(ObjectInputStream in)
+	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
-		try
-		{
-			stickerIndex = in.readInt();
-			stickerId = in.readUTF();
-			category = new StickerCategory();
-			category.deSerializeObj(in);
-			setupIndexForSwapedCategories();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		stickerIndex = in.readInt();
+		stickerId = in.readUTF();
+		category = new StickerCategory();
+		category.deSerializeObj(in);
+		setupIndexForSwapedCategories();
 	}
-	
+
 	/*
-	 * We save sticker index -1 for all non-hardcoded stickers
-	 * in message metadata. So when moving doggy to non-hardcoded
-	 * and expressions to hardcoded. all doggy sticker will now
-	 * be stickerIndex -1 and all hardcoded expressions will
-	 * have a non negetive index value
+	 * We save sticker index -1 for all non-hardcoded stickers in message metadata. So when moving doggy to non-hardcoded and expressions to hardcoded. all doggy sticker will now
+	 * be stickerIndex -1 and all hardcoded expressions will have a non negetive index value
 	 */
 	private void setupIndexForSwapedCategories()
 	{
 		if (category != null)
 		{
-			if(category.categoryId.equals(StickerCategoryId.doggy))
+			if (category.categoryId.equals(StickerCategoryId.doggy))
 			{
 				this.stickerIndex = -1;
 				return;
 			}
-			if(category.categoryId.equals(StickerCategoryId.expressions) && stickerIndex == -1)
+			if (category.categoryId.equals(StickerCategoryId.expressions) && stickerIndex == -1)
 			{
 				setupStickerindex(category, stickerId);
 				return;

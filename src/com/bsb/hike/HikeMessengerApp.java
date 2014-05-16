@@ -304,9 +304,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
 
-	public static final String GREENBLUE_DETAILS_SENT = "whatsappDetailsSent";
+	public static final String GREENBLUE_DETAILS_SENT = "gbDetailsSent";
 
-	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeWhatsapp";
+	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeGb";
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
@@ -315,8 +315,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
 
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
-
-	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
 
 	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
 
@@ -708,6 +706,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			editor.commit();
 		}
 
+		/*
+		 * Replacing GB keys' strings.
+		 */
+		if (!settings.contains(GREENBLUE_DETAILS_SENT))
+		{
+			replaceGBKeys();
+		}
+
 		makeNoMediaFiles();
 
 		hikeBotNamesMap = new HashMap<String, String>();
@@ -724,6 +730,17 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+	}
+
+	private void replaceGBKeys()
+	{
+		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance(this);
+
+		boolean gbDetailsSent = preferenceUtil.getData("whatsappDetailsSent", false);
+		int lastGBBackoffTime = preferenceUtil.getData("lastBackOffTimeWhatsapp", 0);
+
+		preferenceUtil.saveData(GREENBLUE_DETAILS_SENT, gbDetailsSent);
+		preferenceUtil.saveData(LAST_BACK_OFF_TIME_GREENBLUE, lastGBBackoffTime);
 	}
 
 	private static HikeLruCache cache;

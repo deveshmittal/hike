@@ -25,7 +25,6 @@ import android.os.Looper;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
 import com.bsb.hike.GCMIntentService;
@@ -41,7 +40,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
-import com.bsb.hike.thor.ThorThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
@@ -132,7 +130,7 @@ public class HikeService extends Service
 	private PostDeviceDetails postDeviceDetails;
 
 	private PostGreenBlueDetails postGreenBlueDetails;
-	
+
 	private PostSignupProfilePic postSignupProfilePic;
 
 	private HikeMqttManagerNew mMqttManager;
@@ -244,15 +242,14 @@ public class HikeService extends Service
 			registerReceiver(postGreenBlueDetails, new IntentFilter(SEND_GB_DETAILS_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
-		
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, null) !=null && postSignupProfilePic ==null)
+
+		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, null) != null && postSignupProfilePic == null)
 		{
 			postSignupProfilePic = new PostSignupProfilePic();
 			registerReceiver(postSignupProfilePic, new IntentFilter(POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
 			sendBroadcast(new Intent(POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
 		}
-		
-		LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(localBroadcastThor, new IntentFilter(HikeMessengerApp.THOR_DETAILS_SENT));
+
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
 		{
 			Logger.d(getClass().getSimpleName(), "SYNCING");
@@ -325,8 +322,8 @@ public class HikeService extends Service
 		{
 			sm.deleteDefaultDownloadedExpressionsStickers();
 			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true).commit();
-			
-			if(sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
+
+			if (sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
 			{
 				HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
 				StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
@@ -360,21 +357,10 @@ public class HikeService extends Service
 				e.printStackTrace();
 			}
 		}
-		if (Utils.hasGingerbread())
-			runThor();
 		// return START_NOT_STICKY - we want this Service to be left running
 		// unless explicitly stopped, and it's process is killed, we want it to
 		// be restarted
 		return START_STICKY;
-	}
-
-	private void runThor()
-	{
-		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.THOR_DETAILS_SENT, false))
-		{
-			Thread thor = new Thread(new ThorThread(getApplicationContext()));
-			thor.start();
-		}
 	}
 
 	@Override
@@ -382,6 +368,7 @@ public class HikeService extends Service
 	{
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
+
 		mMqttManager.destroyMqtt();
 		this.mMqttManager = null;
 		// inform the app that the app has successfully disconnected
@@ -433,14 +420,13 @@ public class HikeService extends Service
 			unregisterReceiver(postGreenBlueDetails);
 			postGreenBlueDetails = null;
 		}
-		
+
 		if (postSignupProfilePic != null)
 		{
 			unregisterReceiver(postSignupProfilePic);
 			postSignupProfilePic = null;
 		}
-		
-		LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastThor);
+
 	}
 
 	/************************************************************************/
@@ -761,7 +747,7 @@ public class HikeService extends Service
 			sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
 	};
-	
+
 	private Runnable sendSignupProfilePicToServer = new Runnable()
 	{
 		@Override
@@ -871,50 +857,6 @@ public class HikeService extends Service
 		}
 	}
 
-	private BroadcastReceiver localBroadcastThor = new BroadcastReceiver()
-	{
-		@Override
-		public void onReceive(Context context, Intent intent)
-		{
-			if (intent.getAction().equals(HikeMessengerApp.THOR_DETAILS_SENT))
-			{
-				String b = intent.getStringExtra(ThorThread.THOR);
-				if (b != null)
-				{
-					try
-					{
-						JSONObject obj = new JSONObject();
-						obj.put(ThorThread.THOR, b);
-						HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/thor", RequestType.OTHER, new HikeHttpCallback()
-						{
-							public void onSuccess(JSONObject response)
-							{
-								Logger.d("PostInfo", "Thor info sent successfully");
-								Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-								editor.putBoolean(HikeMessengerApp.THOR_DETAILS_SENT, true);
-								editor.commit();
-							}
-
-							public void onFailure()
-							{
-								Logger.d("PostInfo", "Thor info could not be sent");
-							}
-						});
-						hikeHttpRequest.setJSONData(obj);
-
-						Logger.d("PostInfo", "Executing thor request...");
-						HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
-						Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
-					}
-					catch (JSONException e)
-					{
-						Logger.e(getClass().getSimpleName(), "JsonException in sending Thor details", e);
-					}
-				}
-			}
-		}
-	};
-	
 	class PostSignupProfilePic extends BroadcastReceiver
 	{
 
@@ -933,7 +875,7 @@ public class HikeService extends Service
 			{
 				public void onSuccess(JSONObject response)
 				{
-					SharedPreferences prefs =  context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+					SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 					Editor editor = prefs.edit();
 					editor.remove(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 					editor.commit();

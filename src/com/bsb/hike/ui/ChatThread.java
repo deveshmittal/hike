@@ -222,6 +222,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private String currentFileSelectionPath;
 
+	private String currentFileSelectionMimeType;
+
 	private String mContactName;
 
 	private String mContactNumber;
@@ -514,6 +516,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
 				shareableMessagesCount = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT);
 				currentFileSelectionPath = savedInstanceState.getString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH);
+				currentFileSelectionMimeType = savedInstanceState.getString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_MIME_TYPE);
 
 				setupActionModeActionBar();
 				invalidateOptionsMenu();
@@ -767,46 +770,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && this.mConversation != null)
-		{
-			if ((mConversation instanceof GroupConversation))
-			{
-				Utils.incrementNumTimesScreenOpen(prefs, HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP);
-			}
-			else if (!this.mConversation.isOnhike())
-			{
-				Utils.incrementNumTimesScreenOpen(prefs, HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE);
-			}
-		}
-		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE)
-		{
+		selectedFile = null;
 
-			selectedFile = null;
+		Intent intent = new Intent(this, HomeActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 
-			Intent intent = null;
-			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && !getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE)
-					&& !getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)
-					&& !getIntent().getBooleanExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false))
-			{
-				intent = new Intent(this, HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-			}
-			else if (getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE))
-			{
-				intent = new Intent(this, ChatThread.class);
-				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
-				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-			}
-
-			saveDraft();
-		}
-		else
-		{
-			// onEmoticonBtnClicked(null, 0, true);
-		}
+		saveDraft();
 		super.onBackPressed();
 	}
 
@@ -1290,15 +1260,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				if (isMsgSelected)
+				HikeFileType ftype = hikeFile.getHikeFileType();
+				// we donot support location and contact sharing
+				if (ftype != HikeFileType.LOCATION && ftype != HikeFileType.CONTACT)
 				{
-					shareableMessagesCount++;
-					currentFileSelectionPath = hikeFile.getFilePath();
-				}
-				else
-				{
-					shareableMessagesCount--;
-					currentFileSelectionPath = null;
+					if (isMsgSelected)
+					{
+						shareableMessagesCount++;
+						currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
+						currentFileSelectionMimeType = hikeFile.getFileTypeString();
+					}
+					else
+					{
+						shareableMessagesCount--;
+						currentFileSelectionPath = null;
+						currentFileSelectionMimeType = null;
+					}
 				}
 			}
 		}
@@ -1867,18 +1844,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// scrolling to
 			// the bottom of the chat thread
 			mConversationsView.setOnScrollListener(getOnScrollListenerForEmmaThread());
-		}
-
-		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE)
-		{
-			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up_noalpha);
-			alphaIn.setDuration(400);
-			mBottomView.setAnimation(alphaIn);
-			mBottomView.setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			mBottomView.setVisibility(View.VISIBLE);
 		}
 
 		if (mConversation.getUnreadCount() > 0)
@@ -5127,6 +5092,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
 			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH, currentFileSelectionPath);
+			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_MIME_TYPE, currentFileSelectionMimeType);
 		}
 		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
 		{
@@ -6460,6 +6426,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void destroyActionMode()
 	{
+		currentFileSelectionMimeType = null;
 		currentFileSelectionPath = null;
 		shareableMessagesCount = 0;
 		selectedNonTextMsgs = 0;
@@ -6614,7 +6581,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.share_msgs:
 			if (currentFileSelectionPath != null)
 			{
-				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionPath);
+				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionMimeType, currentFileSelectionPath);
 				destroyActionMode();
 			}
 			else
@@ -6772,7 +6739,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
 
-		if (chatTheme.isTiled())
+		if (bd != null && chatTheme.isTiled())
 		{
 			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 		}
