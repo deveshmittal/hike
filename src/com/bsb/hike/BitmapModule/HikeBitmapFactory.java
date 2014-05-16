@@ -269,10 +269,13 @@ public class HikeBitmapFactory
 			try
 			{
 				Bitmap b2 = createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
-				if (b != b2)
+				if (b2 != null)
 				{
-					b.recycle();
-					b = b2;
+					if (b != b2)
+					{
+						b.recycle();
+						b = b2;
+					}
 				}
 			}
 			catch (OutOfMemoryError e)

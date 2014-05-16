@@ -6692,7 +6692,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
 
-		if (chatTheme.isTiled())
+		if (bd != null && chatTheme.isTiled())
 		{
 			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 		}
