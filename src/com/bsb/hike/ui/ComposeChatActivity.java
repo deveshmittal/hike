@@ -688,6 +688,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
+			if(type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
+			{
+				//TODO need to handle this case of contact sharing
+				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
 			fileUri = Utils.makePicasaUri(fileUri);
