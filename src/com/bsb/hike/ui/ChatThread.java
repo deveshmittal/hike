@@ -1841,18 +1841,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mConversationsView.setOnScrollListener(getOnScrollListenerForEmmaThread());
 		}
 
-		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE)
-		{
-			Animation alphaIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up_noalpha);
-			alphaIn.setDuration(400);
-			mBottomView.setAnimation(alphaIn);
-			mBottomView.setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			mBottomView.setVisibility(View.VISIBLE);
-		}
-
 		if (mConversation.getUnreadCount() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
