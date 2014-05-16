@@ -833,7 +833,9 @@ public class HikeConstants
 	public static final String RESET = "reset";
 	
 	public static final String STEALTH = "stlth";
-	
+
+	public static final String FILE_SHARE_PREFIX = "file://";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1126,6 +1128,8 @@ public class HikeConstants
 		public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
+
+		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
 	}
 
 	public static final class LogEvent
