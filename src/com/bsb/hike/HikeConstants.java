@@ -600,9 +600,9 @@ public class HikeConstants
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 5 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 6 * 1000;
 
-	public static final int RESEND_TYPING_TIME = 3 * 1000;
+	public static final int RESEND_TYPING_TIME = 4 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
