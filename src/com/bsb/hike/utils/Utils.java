@@ -3747,4 +3747,15 @@ public class Utils
 		}
 		return false;
 	}
+
+	public static String replaceUrlSpaces(String fileUriString)
+	{
+		/*
+		 * In some phones URI is received with spaces in file path
+		 * we should first replace all these spaces with %20 than
+		 * pass it on to URI.create() method. URI.create() method
+		 * treats space as an invalid charactor in URI. 
+		 */
+		return fileUriString.replace(" ", "%20");
+	}
 }
