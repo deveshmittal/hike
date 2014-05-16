@@ -16,6 +16,7 @@ public class HikeAnalyticsEvent
 	 */
 	public static void sendStealthMsisdns(Set<String> enabledMsisdn, Set<String> disabledMsisnd)
 	{
+		// TODO use array instead of sets here.
 		JSONObject object = new JSONObject();
 		try
 		{

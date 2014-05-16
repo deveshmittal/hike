@@ -539,6 +539,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private void removeStealthContactFromList(List<ContactInfo> contactList)
 	{
+		// TODO improve the searching here.
 		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
 		{
 			ContactInfo contactInfo = iter.next();
