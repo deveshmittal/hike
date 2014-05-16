@@ -908,7 +908,7 @@ public class StickerManager
 				}
 				catch (Exception e)
 				{
-
+					Logger.e(getClass().getSimpleName(),"Exception while deserializing sticker",e);
 				}
 			}
 			in.close();
@@ -943,15 +943,17 @@ public class StickerManager
 			synchronized (recentStickers)
 			{
 				Iterator<Sticker> it = list.iterator();
+				Sticker st = null;
 				while (it.hasNext())
 				{
 					try
 					{
-						it.next().serializeObj(out);
+						st = it.next();
+						st.serializeObj(out);
 					}
 					catch (Exception e)
 					{
-
+						Logger.e(getClass().getSimpleName(), "Exception while serializing a sticker : "+st.getStickerId(), e);
 					}
 				}
 			}
