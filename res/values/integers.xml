@@ -2,7 +2,7 @@
 <resources>
 	<integer name="max_length_message">10000</integer>
 	<integer name="max_length_name">20</integer>
-	<integer name="max_length_group_name">30</integer>
+	<integer name="max_length_group_name">50</integer>
 	<integer name="profile_signup_weight1">154</integer>
 	<integer name="profile_signup_weight2">90</integer>
 	<integer name="profile_signup_weight3">276</integer>
