@@ -459,18 +459,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				showFilePicker(Utils.getExternalStorageState());
 			}
-			if (savedInstanceState.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING))
-			{
-
-				int emoticonTypeOrdinal = savedInstanceState.getInt(HikeConstants.Extras.EMOTICON_TYPE, -1);
-				if (emoticonTypeOrdinal != -1)
-				{
-					EmoticonType type = EmoticonType.values()[emoticonTypeOrdinal];
-
-					View emoticonLayout = findViewById(type == EmoticonType.STICKERS ? R.id.sticker_btn : R.id.emo_btn);
-					onEmoticonBtnClicked(emoticonLayout, savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, 0), false);
-				}
-			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING))
 			{
 				recordStartTime = savedInstanceState.getLong(HikeConstants.Extras.RECORDER_START_TIME);
@@ -5075,9 +5063,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// For preventing the tool tip from animating again if its already
 		// showing
 		outState.putBoolean(HikeConstants.Extras.OVERLAY_SHOWING, mOverlayLayout.getVisibility() == View.VISIBLE);
-		outState.putBoolean(HikeConstants.Extras.EMOTICON_SHOWING, attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout);
-		outState.putInt(HikeConstants.Extras.EMOTICON_TYPE, emoticonType != null ? emoticonType.ordinal() : -1);
-		outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, emoticonViewPager != null ? emoticonViewPager.getCurrentItem() : -1);
+		if (isEmoticonPalleteVisible())
+		{
+			dismissPopupWindow();
+		}
 		outState.putBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING, filePickerDialog != null && filePickerDialog.isShowing());
 		outState.putBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING, recordingDialog != null && recordingDialog.isShowing());
 		outState.putLong(HikeConstants.Extras.RECORDER_START_TIME, updateRecordingDuration != null ? updateRecordingDuration.getStartTime() : 0);
