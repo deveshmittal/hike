@@ -783,7 +783,7 @@
     <string name="contacts_sync_started">"संपर्क सिंक करना आरंभ"</string>
     <string name="add_friends_listview_header">"आपके hike पर %1$s संपर्क हैं \n। अच्छी बात है!"</string>
     <string name="recommended_contacts_section">सिफारिश किए गए संपर्क</string>
-    <string name="ftue_invite_friends_msg">अपने दोस्तों को Hike पर लाएँ और हमेशा के लिए मुफ्त मैसेजिंग का मज़ा लें! इसमें शामिल होनेवाले हर दोस्त के लिए आपको *20 का टॉकटाइम भी मिलता है।</string>
+    <string name="ftue_invite_friends_msg">अपने दोस्तों को Hike पर लाएँ और हमेशा के लिए मुफ्त मैसेजिंग का मज़ा लें!</string>
     <string name="start_inviting_friends">दोस्तों को आमंत्रित करना शुरू करें</string>
     <string name="add_count_btn">जोड़ें(%1$s)</string>
     <string name="all_contacts">सभी संपर्क</string>
