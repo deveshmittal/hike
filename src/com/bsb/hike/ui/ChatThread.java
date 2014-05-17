@@ -3178,10 +3178,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return null;
 		}
 
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
+		for (ConvMessage msg : messages)
 		{
-			ConvMessage msg = mAdapter.getItem(i);
 			if (msg == null)
 			{
 				continue;
