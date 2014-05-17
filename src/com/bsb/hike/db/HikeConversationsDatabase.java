@@ -1530,7 +1530,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				long msgId = c.getLong(msgIdIdx);
 				long mappedMsgId = c.getLong(mappedMsgIdIdx);
-				ids.put(String.valueOf(mappedMsgId));
+				if(mappedMsgId != 0){
+					ids.put(String.valueOf(mappedMsgId));
+				}
 				sb.append(msgId);
 				if (!c.isLast())
 				{
@@ -1547,6 +1549,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MESSAGE_ID + " in " + sb.toString(), null);
 
 			Logger.d("HIKE CONVERSATION DB ", "Rows Updated : " + rowsAffected);
+			if(ids.length() == 0)
+			{
+				return null;
+			}
 			return ids;
 		}
 		finally
