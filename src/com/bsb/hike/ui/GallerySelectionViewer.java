@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -326,9 +327,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		private void setupButtonSpacing(ImageView galleryImageView, ImageButton removeImage)
 		{
+			Drawable drawable = galleryImageView.getDrawable();
+			if (drawable == null)
+			{
+				return;
+			}
 
-			int drawableHeight = galleryImageView.getDrawable().getIntrinsicHeight();
-			int drawableWidth = galleryImageView.getDrawable().getIntrinsicWidth();
+			int drawableHeight = drawable.getIntrinsicHeight();
+			int drawableWidth = drawable.getIntrinsicWidth();
 
 			int imageWidth;
 			int imageHeight;
