@@ -78,6 +78,8 @@ import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -3714,6 +3716,20 @@ public class Utils
 		catch (IOException e)
 		{
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void playDefaultNotificationSound(Context context)
+	{
+		try
+		{
+			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			Ringtone r = RingtoneManager.getRingtone(context, notification);
+			r.play();
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 	}
