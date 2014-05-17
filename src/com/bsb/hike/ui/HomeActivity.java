@@ -1648,7 +1648,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		myProfileImage = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
-		optionsList.add(new OverFlowMenuItem(getString(R.string.new_chat), 7));
+
+		/*
+		 * removing out new chat option for now
+		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
@@ -1793,9 +1796,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
-					break;
-				case 7:
-					intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
 					break;
 				case 8:
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
