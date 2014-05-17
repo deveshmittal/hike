@@ -2175,7 +2175,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			mLastSeenView.setText(lastSeenString);
-			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
+		//	mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
 		}
 
 		setAvatar();
@@ -2993,7 +2993,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					else
 					{
 						mLastSeenView.setText(lastSeenString);
-						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
+						//mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
 					}
 				}
 			});
