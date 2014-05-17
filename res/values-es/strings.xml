@@ -930,10 +930,10 @@
     <string name="mark_stealth">Marcar chat como oculto</string>
     <string name="unmark_stealth">Marcar chat como visible</string>
     <string name="edit">Edit</string>
-    <string name="vib_off">Apagado</string>
-    <string name="vib_default">Predeterminado</string>
-    <string name="vib_short">Corto</string>
-    <string name="vib_long">Largo</string>
+    <string name="vib_off_key">Apagado</string>
+    <string name="vib_default_key">Predeterminado</string>
+    <string name="vib_short_key">Corto</string>
+    <string name="vib_long_key">Largo</string>
     <string name="chat_unmarked_stealth_first">Has marcado un chat como visible. Ahora será visible para cualquier usuario que abra hike.</string>
     <string name="delete_account_heading">SI ELIMINAS TU CUENTA</string>
     <string name="delete_account_description">se borrarán todos tus mensajes, SMS gratuitos y las recompensas de hike</string>
