@@ -64,6 +64,10 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 		else
 		{
 			File file = new File(filePath);
+			if (file.length() == 0)
+			{
+				return;
+			}
 			FileTransferManager.getInstance(context).uploadFile(msisdn, file, fileType, hikeFileType, false, false, onHike, -1);
 		}
 	}
