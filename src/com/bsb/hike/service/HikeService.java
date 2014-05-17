@@ -825,7 +825,7 @@ public class HikeService extends Service
 		{
 			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false))
 			{
-				Logger.d("PostInfo", "info details sent");
+				Logger.d("greenblue", "greenblue info details already sent");
 				return;
 			}
 
@@ -837,7 +837,7 @@ public class HikeService extends Service
 			{
 				public void onSuccess(JSONObject response)
 				{
-					Logger.d("PostInfo", "info sent successfully");
+					Logger.d("greenblue", "greenblue info details sent successfully");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, true);
 					editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, 0);
@@ -846,7 +846,7 @@ public class HikeService extends Service
 
 				public void onFailure()
 				{
-					Logger.d("PostInfo", "info could not be sent");
+					Logger.d("greenblue", "greenblue info could not be sent");
 					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_GREENBLUE, sendGreenBlueDetailsToServer);
 				}
 			});
