@@ -921,10 +921,10 @@
     <string name="mark_stealth">Chat als verborgen markieren</string>
     <string name="unmark_stealth">Chat als sichtbar markieren</string>
     <string name="edit">Edit</string>
-    <string name="vib_off">Aus</string>
-    <string name="vib_default">Standard</string>
-    <string name="vib_short">Kurz</string>
-    <string name="vib_long">Lang</string>
+    <string name="vib_off_key">Aus</string>
+    <string name="vib_default_key">Standard</string>
+    <string name="vib_short_key">Kurz</string>
+    <string name="vib_long_key">Lang</string>
     <string name="chat_unmarked_stealth_first">Du hast einen Chat als sichtbar markiert. Jetzt kann ihn jeder sehen, der hike öffnet.</string>
     <string name="delete_account_heading">DURCH LÖSCHEN DEINES KONTOS WERDEN</string>
     <string name="delete_account_description">all deine Nachrichten, Frei-SMS und hike-Belohnungen gelöscht</string>
