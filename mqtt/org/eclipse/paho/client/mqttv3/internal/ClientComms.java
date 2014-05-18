@@ -19,7 +19,6 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
-
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -40,103 +39,130 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import com.bsb.hike.utils.Logger;
 
 /**
- * Handles client communications with the server.  Sends and receives MQTT V3
- * messages.
+ * Handles client communications with the server. Sends and receives MQTT V3 messages.
  */
-public class ClientComms {
-	public static String 		VERSION = "${project.version}";
-	public static String 		BUILD_LEVEL = "L${build.level}";
+public class ClientComms
+{
+	public static String VERSION = "${project.version}";
 
-	private IMqttAsyncClient 	client;
-	private int 			networkModuleIndex;
-	private NetworkModule[]		networkModules;
-	CommsReceiver 				receiver;
-	CommsSender 				sender;
-	CommsCallback 				callback;
-	ClientState	 				clientState;
-	MqttConnectOptions			conOptions;
+	public static String BUILD_LEVEL = "L${build.level}";
+
+	private IMqttAsyncClient client;
+
+	private int networkModuleIndex;
+
+	private NetworkModule[] networkModules;
+
+	CommsReceiver receiver;
+
+	CommsSender sender;
+
+	CommsCallback callback;
+
+	ClientState clientState;
+
+	MqttConnectOptions conOptions;
+
 	private MqttClientPersistence persistence;
-	private MqttPingSender		pingSender;
-	CommsTokenStore 			tokenStore;
-	boolean 					stoppingComms = false;
 
-	final static byte CONNECTED	= 0;
-	final static byte CONNECTING	= 1;
-	final static byte DISCONNECTING	= 2;
-	final static byte DISCONNECTED	= 3;
-	final static byte CLOSED	= 4;
+	private MqttPingSender pingSender;
 
-	private byte 	conState = DISCONNECTED;
-	Object       conLock = new Object();  	// Used to synchronize connection state
-	private boolean closePending  = false;
+	CommsTokenStore tokenStore;
+
+	boolean stoppingComms = false;
+
+	final static byte CONNECTED = 0;
+
+	final static byte CONNECTING = 1;
+
+	final static byte DISCONNECTING = 2;
+
+	final static byte DISCONNECTED = 3;
+
+	final static byte CLOSED = 4;
+
+	private byte conState = DISCONNECTED;
+
+	Object conLock = new Object(); // Used to synchronize connection state
+
+	private boolean closePending = false;
 
 	final static String className = ClientComms.class.getName();
+
 	private final String TAG = "CLIENTCOMMS";
 
 	/**
-	 * Creates a new ClientComms object, using the specified module to handle
-	 * the network calls.
+	 * Creates a new ClientComms object, using the specified module to handle the network calls.
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, int maxInflightMsgs) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, int maxInflightMsgs) throws MqttException
+	{
 		this.conState = DISCONNECTED;
-		this.client 	= client;
+		this.client = client;
 		this.persistence = persistence;
 		this.pingSender = pingSender;
 		this.pingSender.init(this);
-		
+
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
-		this.callback 	= new CommsCallback(this);
+		this.callback = new CommsCallback(this);
 		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, maxInflightMsgs);
 
 		callback.setClientState(clientState);
 	}
 
 	/**
-	 * Sends a message to the server. Does not check if connected this validation must be done
-	 * by invoking routines.
+	 * Sends a message to the server. Does not check if connected this validation must be done by invoking routines.
+	 * 
 	 * @param message
 	 * @param token
 	 * @throws MqttException
 	 */
-	void internalSend(MqttWireMessage message, MqttToken token) throws MqttException {
+	void internalSend(MqttWireMessage message, MqttToken token) throws MqttException
+	{
 		final String methodName = "internalSend";
-		//@TRACE 200=internalSend key={0} message={1} token={2}
-		
+		// @TRACE 200=internalSend key={0} message={1} token={2}
 
-		if (token.getClient() == null ) {
+		if (token.getClient() == null)
+		{
 			// Associate the client with the token - also marks it as in use.
 			token.internalTok.setClient(getClient());
-		} else {
+		}
+		else
+		{
 			// Token is already in use - cannot reuse
-			//@TRACE 213=fail: token in use: key={0} message={1} token={2}
+			// @TRACE 213=fail: token in use: key={0} message={1} token={2}
 			Logger.d(TAG, "Token is already in use - cannot reuse");
 
 			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
 		}
 
-		try {
+		try
+		{
 			// Persist if needed and send the message
 			this.clientState.send(message, token);
-		} catch(MqttException e) {
-			if (message instanceof MqttPublish) {
-				this.clientState.undo((MqttPublish)message);
+		}
+		catch (MqttException e)
+		{
+			if (message instanceof MqttPublish)
+			{
+				this.clientState.undo((MqttPublish) message);
 			}
 			throw e;
 		}
 	}
 
 	/**
-	 * Sends a message to the broker if in connected state, but only waits for the message to be
-	 * stored, before returning.
+	 * Sends a message to the broker if in connected state, but only waits for the message to be stored, before returning.
 	 */
-	public void sendNoWait(MqttWireMessage message, MqttToken token) throws MqttException {
+	public void sendNoWait(MqttWireMessage message, MqttToken token) throws MqttException
+	{
 		final String methodName = "sendNoWait";
-		if (isConnected() ||
-				(!isConnected() && message instanceof MqttConnect) ||
-				(isDisconnecting() && message instanceof MqttDisconnect)) {
+		if (isConnected() || (!isConnected() && message instanceof MqttConnect) || (isDisconnecting() && message instanceof MqttDisconnect))
+		{
 			this.internalSend(message, token);
-		} else {
-			//@TRACE 208=failed: not connected
+		}
+		else
+		{
+			// @TRACE 208=failed: not connected
 			Logger.d(TAG, "send failed , not connected");
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
@@ -144,25 +170,35 @@ public class ClientComms {
 
 	/**
 	 * Close and tidy up.
-	 *
-	 * Call each main class and let it tidy up e.g. releasing the token
-	 * store which normally survives a disconnect.
-	 * @throws MqttException  if not disconnected
+	 * 
+	 * Call each main class and let it tidy up e.g. releasing the token store which normally survives a disconnect.
+	 * 
+	 * @throws MqttException
+	 *             if not disconnected
 	 */
-	public void close() throws MqttException {
+	public void close() throws MqttException
+	{
 		final String methodName = "close";
-		synchronized (conLock) {
-			if (!isClosed()) {
+		synchronized (conLock)
+		{
+			if (!isClosed())
+			{
 				// Must be disconnected before close can take place
-				if (!isDisconnected()) {
-					//@TRACE 224=failed: not disconnected
+				if (!isDisconnected())
+				{
+					// @TRACE 224=failed: not disconnected
 					Logger.d(TAG, "close failed not disconnected");
 
-					if (isConnecting()) {
+					if (isConnecting())
+					{
 						throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
-					} else if (isConnected()) {
+					}
+					else if (isConnected())
+					{
 						throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
-					} else if (isDisconnecting()) {
+					}
+					else if (isDisconnecting())
+					{
 						closePending = true;
 						return;
 					}
@@ -187,27 +223,23 @@ public class ClientComms {
 	}
 
 	/**
-	 * Sends a connect message and waits for an ACK or NACK.
-	 * Connecting is a special case which will also start up the
-	 * network connection, receive thread, and keep alive thread.
+	 * Sends a connect message and waits for an ACK or NACK. Connecting is a special case which will also start up the network connection, receive thread, and keep alive thread.
 	 */
-	public void connect(MqttConnectOptions options, MqttToken token) throws MqttException {
+	public void connect(MqttConnectOptions options, MqttToken token) throws MqttException
+	{
 		final String methodName = "connect";
-		synchronized (conLock) {
-			if (isDisconnected() && !closePending) {
-				//@TRACE 214=state=CONNECTING
+		synchronized (conLock)
+		{
+			if (isDisconnected() && !closePending)
+			{
+				// @TRACE 214=state=CONNECTING
 
 				conState = CONNECTING;
 
 				this.conOptions = options;
 
-				MqttConnect connect = new MqttConnect(client.getClientId(),
-						options.isCleanSession(),
-						options.getKeepAliveInterval(),
-						options.getUserName(),
-						options.getPassword(),
-						options.getWillMessage(),
-						options.getWillDestination());
+				MqttConnect connect = new MqttConnect(client.getClientId(), options.isCleanSession(), options.getKeepAliveInterval(), options.getUserName(), options.getPassword(),
+						options.getWillMessage(), options.getWillDestination());
 
 				this.clientState.setKeepAliveSecs(options.getKeepAliveInterval());
 				this.clientState.setCleanSession(options.isCleanSession());
@@ -216,27 +248,38 @@ public class ClientComms {
 				ConnectBG conbg = new ConnectBG(this, token, connect);
 				conbg.start();
 			}
-			else {
+			else
+			{
 				// @TRACE 207=connect failed: not disconnected {0}
 				Logger.d(TAG, "connect failed : not disconnected");
-				if (isClosed() || closePending) {
+				if (isClosed() || closePending)
+				{
 					throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
-				} else if (isConnecting()) {
+				}
+				else if (isConnecting())
+				{
 					throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
-				} else if (isDisconnecting()) {
+				}
+				else if (isDisconnecting())
+				{
 					throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
-				} else {
+				}
+				else
+				{
 					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
 				}
 			}
 		}
 	}
 
-	public void connectComplete( MqttConnack cack, MqttException mex) throws MqttException {
+	public void connectComplete(MqttConnack cack, MqttException mex) throws MqttException
+	{
 		final String methodName = "connectComplete";
 		int rc = cack.getReturnCode();
-		synchronized (conLock) {
-			if (rc == 0) {
+		synchronized (conLock)
+		{
+			if (rc == 0)
+			{
 				// We've successfully connected
 				// @TRACE 215=state=CONNECTED
 				Logger.d(TAG, "client successfully connected");
@@ -251,26 +294,26 @@ public class ClientComms {
 	}
 
 	/**
-	 * Shuts down the connection to the server.
-	 * This may have been invoked as a result of a user calling disconnect or
-	 * an abnormal disconnection.  The method may be invoked multiple times
-	 * in parallel as each thread when it receives an error uses this method
-	 * to ensure that shutdown completes successfully.
+	 * Shuts down the connection to the server. This may have been invoked as a result of a user calling disconnect or an abnormal disconnection. The method may be invoked multiple
+	 * times in parallel as each thread when it receives an error uses this method to ensure that shutdown completes successfully.
 	 */
-	public void shutdownConnection(MqttToken token, MqttException reason) {
+	public void shutdownConnection(MqttToken token, MqttException reason)
+	{
 		final String methodName = "shutdownConnection";
 		boolean wasConnected;
-		MqttToken endToken = null; 		//Token to notify after disconnect completes
+		MqttToken endToken = null; // Token to notify after disconnect completes
 
 		// This method could concurrently be invoked from many places only allow it
 		// to run once.
-		synchronized(conLock) {
-			if (stoppingComms || closePending) {
+		synchronized (conLock)
+		{
+			if (stoppingComms || closePending)
+			{
 				return;
 			}
 			stoppingComms = true;
 
-			//@TRACE 216=state=DISCONNECTING
+			// @TRACE 216=state=DISCONNECTING
 			Logger.d(TAG, "setting constate to DISCONNECTING");
 
 			wasConnected = (isConnected() || isDisconnecting());
@@ -279,28 +322,40 @@ public class ClientComms {
 
 		// Update the token with the reason for shutdown if it
 		// is not already complete.
-		if (token != null && !token.isComplete()) {
+		if (token != null && !token.isComplete())
+		{
 			token.internalTok.setException(reason);
 		}
 
 		// Stop the thread that is used to call the user back
 		// when actions complete
-		if (callback!= null) {callback.stop(); }
+		if (callback != null)
+		{
+			callback.stop();
+		}
 
 		// Stop the network module, send and receive now not possible
-		try {
-			if (networkModules != null) {
+		try
+		{
+			if (networkModules != null)
+			{
 				NetworkModule networkModule = networkModules[networkModuleIndex];
-				if (networkModule != null) {
+				if (networkModule != null)
+				{
 					networkModule.stop();
 				}
 			}
-		} catch (Exception ioe) {
+		}
+		catch (Exception ioe)
+		{
 			// Ignore as we are shutting down
 		}
 
 		// Stop the thread that handles inbound work from the network
-		if (receiver != null) {receiver.stop();}
+		if (receiver != null)
+		{
+			receiver.stop();
+		}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
 		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
@@ -310,54 +365,75 @@ public class ClientComms {
 		// the end
 		endToken = handleOldTokens(token, reason);
 
-		try {
+		try
+		{
 			// Clean session handling and tidy up
 			clientState.disconnected(reason);
-		}catch(Exception ex) {
+		}
+		catch (Exception ex)
+		{
 			// Ignore as we are shutting down
 		}
 
-		if (sender != null) { sender.stop(); }
-		
-		if (pingSender != null){
+		if (sender != null)
+		{
+			sender.stop();
+		}
+
+		if (pingSender != null)
+		{
 			pingSender.stop();
 		}
 
-		try {
-			if (persistence != null) {persistence.close();}
-		}catch(Exception ex) {
+		try
+		{
+			if (persistence != null)
+			{
+				persistence.close();
+			}
+		}
+		catch (Exception ex)
+		{
 			// Ignore as we are shutting down
 		}
 		// All disconnect logic has been completed allowing the
 		// client to be marked as disconnected.
-		synchronized(conLock) {
-			//@TRACE 217=state=DISCONNECTED
-			Logger.d(TAG ,"setting constate to : DISCONNECTED");
+		synchronized (conLock)
+		{
+			// @TRACE 217=state=DISCONNECTED
+			Logger.d(TAG, "setting constate to : DISCONNECTED");
 
 			conState = DISCONNECTED;
 			stoppingComms = false;
 		}
 
-		// Internal disconnect processing has completed.  If there
+		// Internal disconnect processing has completed. If there
 		// is a disconnect token or a connect in error notify
 		// it now. This is done at the end to allow a new connect
 		// to be processed and now throw a currently disconnecting error.
 		// any outstanding tokens and unblock any waiters
-		if (endToken != null & callback != null) {
+		if (endToken != null & callback != null)
+		{
 			callback.asyncOperationComplete(endToken);
 		}
 
-		if (wasConnected && callback != null) {
+		if (wasConnected && callback != null)
+		{
 			// Let the user know client has disconnected either normally or abnormally
 			callback.connectionLost(reason);
 		}
 
 		// While disconnecting, close may have been requested - try it now
-		synchronized(conLock) {
-			if (closePending) {
-				try {
+		synchronized (conLock)
+		{
+			if (closePending)
+			{
+				try
+				{
 					close();
-				} catch (Exception e) { // ignore any errors as closing
+				}
+				catch (Exception e)
+				{ // ignore any errors as closing
 				}
 			}
 		}
@@ -368,90 +444,112 @@ public class ClientComms {
 	// need to be notified and waiters unblocked. Store the
 	// disconnect or connect token to notify after disconnect is
 	// complete.
-	private MqttToken handleOldTokens(MqttToken token, MqttException reason) {
+	private MqttToken handleOldTokens(MqttToken token, MqttException reason)
+	{
 		final String methodName = "handleOldTokens";
-		//@TRACE 222=>
+		// @TRACE 222=>
 
 		MqttToken tokToNotifyLater = null;
-		try {
+		try
+		{
 			// First the token that was related to the disconnect / shutdown may
 			// not be in the token table - temporarily add it if not
-			if (token != null) {
-				if (tokenStore.getToken(token.internalTok.getKey())==null) {
+			if (token != null)
+			{
+				if (tokenStore.getToken(token.internalTok.getKey()) == null)
+				{
 					tokenStore.saveToken(token, token.internalTok.getKey());
 				}
 			}
 
 			Vector toksToNot = clientState.resolveOldTokens(reason);
 			Enumeration toksToNotE = toksToNot.elements();
-			while(toksToNotE.hasMoreElements()) {
-				MqttToken tok = (MqttToken)toksToNotE.nextElement();
+			while (toksToNotE.hasMoreElements())
+			{
+				MqttToken tok = (MqttToken) toksToNotE.nextElement();
 
-				if (tok.internalTok.getKey().equals(MqttDisconnect.KEY) ||
-						tok.internalTok.getKey().equals(MqttConnect.KEY)) {
+				if (tok.internalTok.getKey().equals(MqttDisconnect.KEY) || tok.internalTok.getKey().equals(MqttConnect.KEY))
+				{
 					// Its con or discon so remember and notify @ end of disc routine
 					tokToNotifyLater = tok;
-				} else {
+				}
+				else
+				{
 					// notify waiters and callbacks of outstanding tokens
 					// that a problem has occurred and disconnect is in
 					// progress
 					callback.asyncOperationComplete(tok);
 				}
 			}
-		}catch(Exception ex) {
+		}
+		catch (Exception ex)
+		{
 			// Ignore as we are shutting down
 		}
 		return tokToNotifyLater;
 	}
 
-	public void disconnect(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token) throws MqttException {
+	public void disconnect(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token) throws MqttException
+	{
 		final String methodName = "disconnect";
-		synchronized (conLock){
-			if (isClosed()) {
-				//@TRACE 223=failed: in closed state
+		synchronized (conLock)
+		{
+			if (isClosed())
+			{
+				// @TRACE 223=failed: in closed state
 				Logger.d(TAG, "disconnect failed, cause : " + "in closed state");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
-			} else if (isDisconnected()) {
-				//@TRACE 211=failed: already disconnected
+			}
+			else if (isDisconnected())
+			{
+				// @TRACE 211=failed: already disconnected
 				Logger.d(TAG, "disconnect failed, cause : " + "already disconnected");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED);
-			} else if (isDisconnecting()) {
-				//@TRACE 219=failed: already disconnecting
+			}
+			else if (isDisconnecting())
+			{
+				// @TRACE 219=failed: already disconnecting
 				Logger.d(TAG, "disconnect failed, cause : " + "already disconnecting");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
-			} else if (Thread.currentThread() == callback.getThread()) {
-				//@TRACE 210=failed: called on callback thread
+			}
+			else if (Thread.currentThread() == callback.getThread())
+			{
+				// @TRACE 210=failed: called on callback thread
 				Logger.d(TAG, "disconnect failed, cause : " + "called on callback thread");
 				// Not allowed to call disconnect() from the callback, as it will deadlock.
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECT_PROHIBITED);
 			}
 
-			//@TRACE 218=state=DISCONNECTING
-			Logger.d(TAG ,"setting constate state : DISCONNECTING");
+			// @TRACE 218=state=DISCONNECTING
+			Logger.d(TAG, "setting constate state : DISCONNECTING");
 			conState = DISCONNECTING;
-			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token);
+			DisconnectBG discbg = new DisconnectBG(disconnect, quiesceTimeout, token);
 			discbg.start();
 		}
 	}
-	
+
 	/**
 	 * Disconnect the connection and reset all the states.
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException
+	{
 		// Allow current inbound and outbound work to complete
 		clientState.quiesce(quiesceTimeout);
 		MqttToken token = new MqttToken(client.getClientId());
-		try {
+		try
+		{
 			// Send disconnect packet
 			internalSend(new MqttDisconnect(), token);
 
 			// Wait util the disconnect packet sent with timeout
 			token.waitForCompletion(disconnectTimeout);
 		}
-		catch (Exception ex) {
+		catch (Exception ex)
+		{
 			// ignore, probably means we failed to send the disconnect packet.
 		}
-		finally {
+		finally
+		{
 			token.internalTok.markComplete(null, null);
 			shutdownConnection(token, null);
 		}
@@ -497,50 +595,68 @@ public class ClientComms {
 		}
 	}
 
-
-	public void setCallback(MqttCallback mqttCallback) {
+	public void setCallback(MqttCallback mqttCallback)
+	{
 		this.callback.setCallback(mqttCallback);
 	}
 
-	protected MqttTopic getTopic(String topic) {
+	protected MqttTopic getTopic(String topic)
+	{
 		return new MqttTopic(topic, this);
 	}
-	public void setNetworkModuleIndex(int index) {
+
+	public void setNetworkModuleIndex(int index)
+	{
 		this.networkModuleIndex = index;
 	}
-	public int getNetworkModuleIndex() {
+
+	public int getNetworkModuleIndex()
+	{
 		return networkModuleIndex;
 	}
-	public NetworkModule[] getNetworkModules() {
+
+	public NetworkModule[] getNetworkModules()
+	{
 		return networkModules;
 	}
-	public void setNetworkModules(NetworkModule[] networkModules) {
+
+	public void setNetworkModules(NetworkModule[] networkModules)
+	{
 		this.networkModules = networkModules;
 	}
-	public MqttDeliveryToken[] getPendingDeliveryTokens() {
+
+	public MqttDeliveryToken[] getPendingDeliveryTokens()
+	{
 		return tokenStore.getOutstandingDelTokens();
 	}
-	protected void deliveryComplete(MqttPublish msg) throws MqttPersistenceException {
+
+	protected void deliveryComplete(MqttPublish msg) throws MqttPersistenceException
+	{
 		this.clientState.deliveryComplete(msg);
 	}
 
-	public IMqttAsyncClient getClient() {
+	public IMqttAsyncClient getClient()
+	{
 		return client;
 	}
 
-	public long getKeepAlive() {
+	public long getKeepAlive()
+	{
 		return this.clientState.getKeepAlive();
 	}
 
-	public ClientState getClientState() {
+	public ClientState getClientState()
+	{
 		return clientState;
 	}
 
-	public MqttConnectOptions getConOptions() {
+	public MqttConnectOptions getConOptions()
+	{
 		return conOptions;
 	}
 
-	public Properties getDebug() {
+	public Properties getDebug()
+	{
 		Properties props = new Properties();
 		props.put("conState", new Integer(conState));
 		props.put("serverURI", getClient().getServerURI());
@@ -549,43 +665,50 @@ public class ClientComms {
 		return props;
 	}
 
-
-
 	// Kick off the connect processing in the background so that it does not block. For instance
 	// the socket could take time to create.
-	private class ConnectBG implements Runnable {
-		ClientComms 	clientComms = null;
-		Thread 			cBg = null;
-		MqttToken 		conToken;
-		MqttConnect 	conPacket;
+	private class ConnectBG implements Runnable
+	{
+		ClientComms clientComms = null;
 
-		ConnectBG(ClientComms cc, MqttToken cToken, MqttConnect cPacket) {
+		Thread cBg = null;
+
+		MqttToken conToken;
+
+		MqttConnect conPacket;
+
+		ConnectBG(ClientComms cc, MqttToken cToken, MqttConnect cPacket)
+		{
 			clientComms = cc;
-			conToken 	= cToken;
-			conPacket 	= cPacket;
-			cBg = new Thread(this, "MQTT Con: "+getClient().getClientId());
+			conToken = cToken;
+			conPacket = cPacket;
+			cBg = new Thread(this, "MQTT Con: " + getClient().getClientId());
 		}
 
-		void start() {
+		void start()
+		{
 			cBg.start();
 		}
 
-		public void run() {
+		public void run()
+		{
 			final String methodName = "connectBG:run";
 			MqttException mqttEx = null;
-			//@TRACE 220=>
+			// @TRACE 220=>
 
-			try {
+			try
+			{
 				// Reset an exception on existing delivery tokens.
 				// This will have been set if disconnect occured before delivery was
 				// fully processed.
 				MqttDeliveryToken[] toks = tokenStore.getOutstandingDelTokens();
-				for (int i=0; i<toks.length; i++) {
+				for (int i = 0; i < toks.length; i++)
+				{
 					toks[i].internalTok.setException(null);
 				}
 
 				// Save the connect token in tokenStore as failure can occur before send
-				tokenStore.saveToken(conToken,conPacket);
+				tokenStore.saveToken(conToken, conPacket);
 
 				// Connect to the server at the network level e.g. TCP socket and then
 				// start the background processing threads before sending the connect
@@ -593,22 +716,27 @@ public class ClientComms {
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
 				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream(), networkModule.getSocket());
-				receiver.start("MQTT Rec: "+getClient().getClientId());
+				receiver.start("MQTT Rec: " + getClient().getClientId());
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream(), networkModule.getSocket());
-				sender.start("MQTT Snd: "+getClient().getClientId());
-				callback.start("MQTT Call: "+getClient().getClientId());				
+				sender.start("MQTT Snd: " + getClient().getClientId());
+				callback.start("MQTT Call: " + getClient().getClientId());
 				internalSend(conPacket, conToken);
-			} catch (MqttException ex) {
-				//@TRACE 212=connect failed: unexpected exception
+			}
+			catch (MqttException ex)
+			{
+				// @TRACE 212=connect failed: unexpected exception
 				Logger.d(TAG, "connect failed : unxpected exception , cause : " + ex.getCause());
 				mqttEx = ex;
-			} catch (Exception ex) {
-				//@TRACE 209=connect failed: unexpected exception
+			}
+			catch (Exception ex)
+			{
+				// @TRACE 209=connect failed: unexpected exception
 				Logger.d(TAG, "connect failed : unxpected exception , cause : " + ex.getCause());
-				mqttEx =  ExceptionHelper.createMqttException(ex);
+				mqttEx = ExceptionHelper.createMqttException(ex);
 			}
 
-			if (mqttEx != null) {
+			if (mqttEx != null)
+			{
 				shutdownConnection(conToken, mqttEx);
 			}
 		}
@@ -616,77 +744,95 @@ public class ClientComms {
 
 	// Kick off the disconnect processing in the background so that it does not block. For instance
 	// the quiesce
-	private class DisconnectBG implements Runnable {
+	private class DisconnectBG implements Runnable
+	{
 		Thread dBg = null;
+
 		MqttDisconnect disconnect;
+
 		long quiesceTimeout;
+
 		MqttToken token;
 
-		DisconnectBG(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token ) {
+		DisconnectBG(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token)
+		{
 			this.disconnect = disconnect;
 			this.quiesceTimeout = quiesceTimeout;
 			this.token = token;
 		}
 
-		void start() {
-			dBg = new Thread(this, "MQTT Disc: "+getClient().getClientId());
+		void start()
+		{
+			dBg = new Thread(this, "MQTT Disc: " + getClient().getClientId());
 			dBg.start();
 		}
-		
-		public void run() {
+
+		public void run()
+		{
 			final String methodName = "disconnectBG:run";
-			//@TRACE 221=>
+			// @TRACE 221=>
 
 			// Allow current inbound and outbound work to complete
 			clientState.quiesce(quiesceTimeout);
-			try {
+			try
+			{
 				internalSend(disconnect, token);
 				token.internalTok.waitUntilSent();
 			}
-			catch (MqttException ex) {
+			catch (MqttException ex)
+			{
 			}
-			finally {
+			finally
+			{
 				token.internalTok.markComplete(null, null);
 				shutdownConnection(token, null);
 			}
 		}
 	}
-	
+
 	/*
-	 * Check and send a ping if needed and check for ping timeout.
-	 * Need to send a ping if nothing has been sent or received 
-	 * in the last keepalive interval.
+	 * Check and send a ping if needed and check for ping timeout. Need to send a ping if nothing has been sent or received in the last keepalive interval.
 	 */
-	public MqttToken checkForActivity(){
+	public MqttToken checkForActivity()
+	{
 		MqttToken token = null;
-		try{
+		try
+		{
 			token = clientState.checkForActivity();
-		}catch(MqttException e){
+		}
+		catch (MqttException e)
+		{
 			handleRunException(e);
-		}catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			handleRunException(e);
 		}
 		return token;
-	}	
-	
-	private void handleRunException(Exception ex) {
+	}
+
+	private void handleRunException(Exception ex)
+	{
 		final String methodName = "handleRunException";
-		//@TRACE 804=exception
+		// @TRACE 804=exception
 		Logger.d(TAG, "excpetion occured , shutting down connection : " + ex.getCause());
 		MqttException mex;
-		if ( !(ex instanceof MqttException)) {
+		if (!(ex instanceof MqttException))
+		{
 			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
-		} else {
-			mex = (MqttException)ex;
+		}
+		else
+		{
+			mex = (MqttException) ex;
 		}
 
 		shutdownConnection(null, mex);
 	}
-	
+
 	public void setPersistence(MqttClientPersistence persistence)
 	{
 		this.persistence = persistence;
 		clientState.setPersistence(persistence);
-		
+
 	}
 }

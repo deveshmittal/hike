@@ -15,23 +15,26 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
-
 /**
  * Abstract super-class of all acknowledgement messages.
  */
-public abstract class MqttAck extends MqttWireMessage {
-	public MqttAck(byte type) {
+public abstract class MqttAck extends MqttWireMessage
+{
+	public MqttAck(byte type)
+	{
 		super(type);
 	}
-	
-	protected byte getMessageInfo() {
+
+	protected byte getMessageInfo()
+	{
 		return 0;
 	}
 
 	/**
 	 * @return String representation of the wire message
 	 */
-	public String toString() {
+	public String toString()
+	{
 		return super.toString() + " msgId " + msgId;
 	}
 }
