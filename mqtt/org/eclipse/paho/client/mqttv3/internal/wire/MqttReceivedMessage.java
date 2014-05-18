@@ -17,21 +17,25 @@ package org.eclipse.paho.client.mqttv3.internal.wire;
 
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-public class MqttReceivedMessage extends MqttMessage {
-	
+public class MqttReceivedMessage extends MqttMessage
+{
+
 	private int messageId;
-	
-	public void setMessageId(int msgId) {
+
+	public void setMessageId(int msgId)
+	{
 		this.messageId = msgId;
 	}
 
-	public int getMessageId() {
+	public int getMessageId()
+	{
 		return messageId;
 	}
-	
+
 	// This method exists here to get around the protected visibility of the
 	// super class method.
-	public void setDuplicate(boolean value) {
+	public void setDuplicate(boolean value)
+	{
 		super.setDuplicate(value);
 	}
 }

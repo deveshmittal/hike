@@ -16,36 +16,44 @@
 package org.eclipse.paho.client.mqttv3;
 
 /**
- * Thrown when a client is not authorized to perform an operation, or
- * if there is a problem with the security configuration.
+ * Thrown when a client is not authorized to perform an operation, or if there is a problem with the security configuration.
  */
-public class MqttSecurityException extends MqttException {
+public class MqttSecurityException extends MqttException
+{
 	private static final long serialVersionUID = 300L;
 
 	/**
-	 * Constructs a new <code>MqttSecurityException</code> with the specified code
-	 * as the underlying reason.
-	 * @param reasonCode the reason code for the exception.
+	 * Constructs a new <code>MqttSecurityException</code> with the specified code as the underlying reason.
+	 * 
+	 * @param reasonCode
+	 *            the reason code for the exception.
 	 */
-	public MqttSecurityException(int reasonCode) {
+	public MqttSecurityException(int reasonCode)
+	{
 		super(reasonCode);
 	}
 
 	/**
-	 * Constructs a new <code>MqttSecurityException</code> with the specified 
-	 * <code>Throwable</code> as the underlying reason.
-	 * @param cause the underlying cause of the exception.
+	 * Constructs a new <code>MqttSecurityException</code> with the specified <code>Throwable</code> as the underlying reason.
+	 * 
+	 * @param cause
+	 *            the underlying cause of the exception.
 	 */
-	public MqttSecurityException(Throwable cause) {
+	public MqttSecurityException(Throwable cause)
+	{
 		super(cause);
 	}
+
 	/**
-	 * Constructs a new <code>MqttSecurityException</code> with the specified 
-	 * code and <code>Throwable</code> as the underlying reason.
-	 * @param reasonCode the reason code for the exception.
-	 * @param cause the underlying cause of the exception.
+	 * Constructs a new <code>MqttSecurityException</code> with the specified code and <code>Throwable</code> as the underlying reason.
+	 * 
+	 * @param reasonCode
+	 *            the reason code for the exception.
+	 * @param cause
+	 *            the underlying cause of the exception.
 	 */
-	public MqttSecurityException(int reasonCode, Throwable cause) {
+	public MqttSecurityException(int reasonCode, Throwable cause)
+	{
 		super(reasonCode, cause);
 	}
 }

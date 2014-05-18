@@ -22,33 +22,38 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 /**
  * An on-the-wire representation of an MQTT PINGREQ message.
  */
-public class MqttPingReq extends MqttWireMessage {
-	public MqttPingReq() {
+public class MqttPingReq extends MqttWireMessage
+{
+	public MqttPingReq()
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
 	}
 
-	public MqttPingReq(byte info, byte[] variableHeader) throws IOException {
+	public MqttPingReq(byte info, byte[] variableHeader) throws IOException
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
 	}
-	
+
 	/**
-	 * Returns <code>false</code> as message IDs are not required for MQTT
-	 * PINGREQ messages.
+	 * Returns <code>false</code> as message IDs are not required for MQTT PINGREQ messages.
 	 */
-	public boolean isMessageIdRequired() {
+	public boolean isMessageIdRequired()
+	{
 		return false;
 	}
 
-	protected byte[] getVariableHeader() throws MqttException {
+	protected byte[] getVariableHeader() throws MqttException
+	{
 		return new byte[0];
 	}
-	
-	protected byte getMessageInfo() {
+
+	protected byte getMessageInfo()
+	{
 		return 0;
 	}
-	
-	public String getKey() {
+
+	public String getKey()
+	{
 		return new String("Ping");
 	}
 }
-
