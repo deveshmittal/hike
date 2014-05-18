@@ -471,6 +471,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
+		case R.id.show_people:
+			break;	
 		}
 
 		if (intent != null)

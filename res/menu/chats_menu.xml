@@ -7,6 +7,11 @@
         android:showAsAction="always"
         android:title="@string/start_new_chat"/>
     <item
+        android:id="@+id/show_people"
+        android:icon="@drawable/ic_show_people"
+        android:showAsAction="always"
+        android:title="@string/people"/>
+    <item
         android:id="@+id/overflow_menu"
         android:actionLayout="@layout/overflow_icon_view"
         android:showAsAction="always"
