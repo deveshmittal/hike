@@ -24,10 +24,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -50,9 +46,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -62,7 +58,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -78,8 +73,6 @@ import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
-import com.bsb.hike.ui.fragments.FriendsFragment;
-import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
@@ -89,8 +82,6 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.viewpagerindicator.IconPagerAdapter;
-import com.viewpagerindicator.TabPageIndicator;
 
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
@@ -111,13 +102,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
-	private ViewPager viewPager;
-
 	private DialogShowing dialogShowing;
-
-	private int[] headers = { R.string.updates, R.string.chats, R.string.contacts_upper_case };
-
-	private int[] tabIcons = { R.drawable.updates_tab, R.drawable.chats_tab, R.drawable.friends_tab };
 
 	private boolean deviceDetailsSent;
 
@@ -160,6 +145,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private HikeTip.TipType tipTypeShowing;
 
 	private FetchContactsTask fetchContactsTask;
+	
+	private ConversationFragment mainFragment;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -256,7 +243,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						if (!(dialog != null && dialog.isShowing()))
 						{
-							if (!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
+							if (!mainFragment.hasNoConversation())
 							{
 
 								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
@@ -331,7 +318,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
-		initialiseViewPager(savedInstanceState);
+		setupMainFragment(savedInstanceState);
 		initialiseTabs();
 
 		if (savedInstanceState == null && dialogShowing == null)
@@ -363,6 +350,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
+	}
+
+	private void setupMainFragment(Bundle savedInstanceState)
+	{
+		if (savedInstanceState != null) {
+            return;
+        }
+        mainFragment = new ConversationFragment();
+        
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.home_screen, mainFragment).commit();
+		
 	}
 
 	private void showStealthFtueTip(final boolean isSetPasswordTip)
@@ -438,54 +437,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean setupMenuOptions(Menu menu)
 	{
+		getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
 
-		if (viewPager == null)
-		{
-			return false;
-		}
-
-		switch (viewPager.getCurrentItem())
-		{
-		case UPDATES_TAB_INDEX:
-			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
-			break;
-		case CHATS_TAB_INDEX:
-			getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
-			break;
-		case FRIENDS_TAB_INDEX:
-			getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
-			final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-			searchView.setQueryHint(getString(R.string.search_hint));
-			searchView.setIconifiedByDefault(false);
-			searchView.setIconified(false);
-			searchView.setOnQueryTextListener(onQueryTextListener);
-			searchView.clearFocus();
-
-			MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint);
-
-			searchItem.setIcon(R.drawable.ic_top_bar_search).setActionView(searchView)
-					.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-
-			searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
-			{
-
-				@Override
-				public boolean onMenuItemActionExpand(MenuItem item)
-				{
-					return true;
-				}
-
-				@Override
-				public boolean onMenuItemActionCollapse(MenuItem item)
-				{
-					searchView.setQuery("", true);
-					return true;
-				}
-			});
-			break;
-		default:
-			return false;
-		}
 		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
 		updateOverFlowMenuNotification();
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new View.OnClickListener()
@@ -530,25 +483,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
-	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener()
-	{
-
-		@Override
-		public boolean onQueryTextSubmit(String query)
-		{
-			return false;
-		}
-
-		@Override
-		public boolean onQueryTextChange(String newText)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY, newText);
-			return true;
-		}
-	};
-
-	private TabPageIndicator tabIndicator;
 
 	private Intent getGamingIntent()
 	{
@@ -1000,16 +934,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	@SuppressLint("NewApi")
 	private void initialiseTabs()
 	{
-		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
-
-		int position = getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1);
-		tabIndicator.setViewPager(viewPager, position);
-		tabIndicator.setOnPageChangeListener(onPageChangeListener);
-
-		onPageChangeListener.onPageSelected(position);
-
 		invalidateOptionsMenu();
-		setBackground();
 	}
 
 	int initialRed = 231;
@@ -1024,19 +949,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	int finalBlue = 255;
 
-	private void setBackground()
-	{
-		int position = viewPager.getCurrentItem();
-		if (position == 0)
-		{
-			parentLayout.setBackgroundColor(getResources().getColor(R.color.updates_bg));
-		}
-		else
-		{
-			parentLayout.setBackgroundColor(getResources().getColor(R.color.white));
-		}
-	}
-
 	@SuppressLint("NewApi")
 	/*
 	 * Implemented to add a fade change in color when switching between updates tab and other tabs
@@ -1048,7 +960,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		public void onPageSelected(int position)
 		{
 			invalidateOptionsMenu();
-			setBackground();
 
 			/*
 			 * Sending a blank query search to ensure all friends are shown.
@@ -1071,7 +982,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
 
-				tabIndicator.notifyDataSetChanged();
 			}
 
 			if (position != CHATS_TAB_INDEX)
@@ -1116,96 +1026,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean showUpdateIcon;
 
-	private void initialiseViewPager(Bundle outBundle)
-	{
-		viewPager = (ViewPager) findViewById(R.id.viewpager);
-
-		List<Fragment> fragmentList = new ArrayList<Fragment>(headers.length);
-		fragmentList.add(getFragmentForIndex(outBundle, 0));
-		fragmentList.add(getFragmentForIndex(outBundle, 1));
-		fragmentList.add(getFragmentForIndex(outBundle, 2));
-		viewPager.setOffscreenPageLimit(2);
-		viewPager.setAdapter(new HomeAdapter(getSupportFragmentManager(), fragmentList));
-		viewPager.setCurrentItem(1);
-	}
-
-	private Fragment getFragmentForIndex(Bundle oBundle, int index)
-	{
-
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + index);
-		if (fragment == null)
-		{
-			switch (index)
-			{
-			case 0:
-
-				fragment = new UpdatesFragment();
-
-				break;
-
-			case 1:
-				fragment = new ConversationFragment();
-				break;
-
-			case 2:
-				fragment = new FriendsFragment();
-				break;
-			}
-		}
-		return fragment;
-	}
-
-	private class HomeAdapter extends FragmentPagerAdapter implements IconPagerAdapter
-	{
-
-		List<Fragment> fragments;
-
-		public HomeAdapter(FragmentManager fm, List<Fragment> fragments)
-		{
-
-			super(fm);
-			this.fragments = fragments;
-		}
-
-		@Override
-		public Fragment getItem(int position)
-		{
-			return fragments.get(position);
-		}
-
-		@Override
-		public int getCount()
-		{
-			return fragments.size();
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position)
-		{
-			return getString(headers[position]);
-		}
-
-		@Override
-		public int getIconResId(int index)
-		{
-			if (index == UPDATES_TAB_INDEX && showUpdateIcon)
-			{
-				return R.drawable.ic_new_update;
-			}
-			else
-			{
-				return tabIcons[index];
-			}
-		}
-
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object)
-		{
-			// TODO Auto-generated method stub
-			super.destroyItem(container, position, object);
-			viewPager.removeView(((Fragment) object).getView());
-		}
-	}
 
 	private void showUpdatePopup(final int updateType)
 	{
@@ -1516,10 +1336,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					if (viewPager.getCurrentItem() != 1)
-					{
-						viewPager.setCurrentItem(1);
-					}
 				}
 			});
 		}
@@ -1531,7 +1347,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		@Override
 		public void run()
 		{
-			tabIndicator.notifyDataSetChanged();
 		}
 	};
 
@@ -1675,7 +1490,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		overFlowWindow = new PopupWindow(this);
 
-		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
+		FrameLayout homeScreen = (FrameLayout) findViewById(R.id.home_screen);
 
 		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, homeScreen, false);
 
