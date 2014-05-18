@@ -988,6 +988,7 @@ public class MqttMessagesManager
 				editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false);
 				editor.commit();
 				context.sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
+				Logger.d("greenblue", "greenblue post info packet recieved");
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type))

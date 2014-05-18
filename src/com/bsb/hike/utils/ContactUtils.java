@@ -562,7 +562,9 @@ public class ContactUtils
 				String newSelection = (Phone.CONTACT_ID + " IN " + greenblueContactIds.toString());
 
 				phoneContactsCursor = context.getContentResolver().query(Phone.CONTENT_URI, newProjection, newSelection, null, Phone.NUMBER + " DESC");
-
+				
+				Logger.d("greenblue", "greenblue count = " + phoneContactsCursor.getCount());
+				
 				if (phoneContactsCursor.getCount() > 0)
 				{
 					setGreenBlueContacs(phoneContactsCursor, contactinfos);
@@ -593,13 +595,17 @@ public class ContactUtils
 			greenBlueContacts.add(number);
 		}
 
+		StringBuilder sb = new StringBuilder();
 		for (ContactInfo contact : contactinfos)
 		{
 			if (greenBlueContacts.contains(contact.getPhoneNum()))
 			{
 				contact.setOnGreenBlue(true);
+				sb.append(contact.getPhoneNum()+",");
 			}
 		}
+		//for testing purposes
+		Logger.d("greenblue", "greenblue List = "+sb.toString());
 	}
 
 }
