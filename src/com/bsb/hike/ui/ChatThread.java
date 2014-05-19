@@ -6439,6 +6439,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean onActionModeItemClicked(MenuItem item)
 	{
 		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds;
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
@@ -6484,6 +6485,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			Collections.sort(selectedMsgIds);
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
@@ -6491,8 +6494,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONArray multipleMsgArray = new JSONArray();
 			try
 			{
-				for (ConvMessage message : selectedMessagesMap.values())
+				for (int i = 0; i < selectedMsgIds.size(); i++)
 				{
+					ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(i));
 					JSONObject multiMsgFwdObject = new JSONObject();
 					if (message.isFileTransferMessage())
 					{
@@ -6548,7 +6552,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			startActivity(intent);
 			return true;
 		case R.id.copy_msgs:
-			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
 			String msgStr =selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
 			for (int i = 1; i < selectedMsgIds.size(); i++)
