@@ -565,7 +565,7 @@ public class MqttAsyncClient implements IMqttAsyncClient
 		catch (MqttException ex)
 		{
 			// @TRACE 105=< exception
-			Logger.d(TAG, "Exception in disconnect : " + ex.getCause());
+			Logger.e(TAG, "Exception in disconnect : " + ex);
 			throw ex;
 		}
 		// @TRACE 108=<
