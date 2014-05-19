@@ -338,7 +338,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			return;
 		}
 
-		updateExtraList();
+		/*
+		 * removed extra items from friends screen
+		 */
 
 		friendsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredFriendsList.size()), context.getString(R.string.favorites_upper_case), FRIEND_PHONE_NUM);
 		updateFriendsList(friendsSection, true, true);
