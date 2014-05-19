@@ -811,6 +811,26 @@ public class ClientComms
 		return token;
 	}
 
+	/**
+	 *  This fucntion will check if there is an ack or incoming message in out - in window
+	 *  If no msg or ack then we disconnect and reconnect.
+	 */
+	public void checkActivity()
+	{
+		try
+		{
+			clientState.checkActivity();
+		}
+		catch (MqttException e)
+		{
+			handleRunException(e);
+		}
+		catch (Exception e)
+		{
+			handleRunException(e);
+		}
+	}
+	
 	private void handleRunException(Exception ex)
 	{
 		final String methodName = "handleRunException";

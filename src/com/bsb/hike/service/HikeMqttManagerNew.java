@@ -103,6 +103,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private DisconnectRunnable disConnectRunnable;
 
+	private ActivityCheckRunnable activityChkRunnable;
+
 	private HikeMqttPersistence persistence = null;
 
 	private WakeLock wakelock = null;
@@ -159,6 +161,26 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	public enum ServerConnectionStatus
 	{
 		ACCEPTED, UNACCEPTABLE_PROTOCOL_VERSION, IDENTIFIER_REJECTED, SERVER_UNAVAILABLE, BAD_USERNAME_OR_PASSWORD, NOT_AUTHORIZED, UNKNOWN
+	}
+
+	private class ActivityCheckRunnable implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			if (mqtt != null)
+			{
+				try
+				{
+					mqtt.checkActivity();
+					scheduleNextActivityCheck();
+				}
+				catch (Exception e)
+				{
+					Logger.e(TAG, "Exception in ActivityCheckRunnable", e);
+				}
+			}
+		}
 	}
 
 	private class IsMqttConnectedCheckRunnable implements Runnable
@@ -298,6 +320,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		isConnRunnable = new IsMqttConnectedCheckRunnable();
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
+		activityChkRunnable = new ActivityCheckRunnable();
 	}
 
 	/*
@@ -470,6 +493,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
+	private void scheduleNextActivityCheck()
+	{
+		try
+		{
+			mqttThreadHandler.removeCallbacks(activityChkRunnable);
+			mqttThreadHandler.postDelayed(activityChkRunnable, 62 * 1000);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	private void scheduleNextConnectionCheck()
 	{
 		scheduleNextConnectionCheck(HikeConstants.MAX_RECONNECT_TIME);
@@ -573,7 +609,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
 
 			setBrokerHostPort(connectUsingSSL);
-			
+
 			if (op == null || ipsChanged.get())
 			{
 				op = new MqttConnectOptions();
@@ -759,6 +795,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			e.printStackTrace();
 		}
+
 		mqtt = null;
 		op = null;
 		mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
@@ -797,7 +834,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						cancelNetworkErrorTimer();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.CONNECTED_TO_MQTT, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
-						// scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
+						scheduleNextActivityCheck(); // after successfull connect, reschedule for next conn check
 					}
 
 					/*

@@ -729,6 +729,11 @@ public class MqttAsyncClient implements IMqttAsyncClient
 		return token;
 	}
 
+	public void checkActivity()
+	{
+		comms.checkActivity();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

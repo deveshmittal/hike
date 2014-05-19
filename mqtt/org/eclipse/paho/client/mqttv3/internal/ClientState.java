@@ -113,6 +113,8 @@ public class ClientState
 
 	private boolean quiescing = false;
 
+	private long lastOutBoundQOS1 = 0;
+
 	private long lastOutboundActivity = 0;
 
 	private long lastInboundActivity = 0;
@@ -134,6 +136,8 @@ public class ClientState
 	private MqttPingSender pingSender = null;
 
 	private final static String className = ClientState.class.getName();
+
+	private static final long INACTIVITY_TIMEOUT = 60 * 1000;
 
 	private final String TAG = "clientState";
 
@@ -220,7 +224,7 @@ public class ClientState
 		catch (MqttException ex)
 		{
 			// @TRACE 602=key={0} exception
-			Logger.e(TAG, "exception in restore message, cause : " , ex);
+			Logger.e(TAG, "exception in restore message, cause : ", ex);
 			if (ex.getCause() instanceof EOFException)
 			{
 				// Premature end-of-file means that the message is corrupted
@@ -640,8 +644,7 @@ public class ClientState
 						Logger.d(TAG, "ping not outstanding , nextping time : " + nextPingTime);
 					}
 				}
-				else if (!clientComms.receiver.isReceiving() && (time - lastPing >= keepAlive + delta) && (time - lastInboundActivity >= keepAlive + delta)
-						&& (time - lastOutboundActivity >= keepAlive + delta))
+				else if ((time - lastPing >= keepAlive + delta) && (time - lastInboundActivity >= keepAlive + delta) && (time - lastOutboundActivity >= keepAlive + delta))
 				{
 					// any of the conditions is true means the client is active
 					// lastInboundActivity will be updated once receiving is done.
@@ -649,7 +652,7 @@ public class ClientState
 					// A ping is outstanding but no packet has been received in KA so connection is deemed broken
 					// @TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}
 					Logger.e(TAG, "timed out as no activity, already sent the ping but no response recieved,  lastoutboundactivity : " + lastOutboundActivity
-							+ " lastinboundactivity : " + lastInboundActivity);
+							+ " lastOutboundQOS1 : " + lastOutBoundQOS1 + " lastinboundactivity : " + lastInboundActivity);
 
 					// A ping has already been sent. At this point, assume that the
 					// broker has hung and the TCP layer hasn't noticed.
@@ -662,6 +665,17 @@ public class ClientState
 		}
 
 		return token;
+	}
+
+	public void checkActivity() throws MqttException
+	{
+		synchronized (pingOutstanding)
+		{
+			if ((lastOutBoundQOS1 - lastInboundActivity >= INACTIVITY_TIMEOUT))
+			{
+				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			}
+		}
 	}
 
 	/**
@@ -830,6 +844,15 @@ public class ClientState
 				tokenStore.removeToken(message);
 				checkQuiesceLock();
 			}
+			else
+			// this is QOS 1 or 2
+			{
+				lastOutBoundQOS1 = System.currentTimeMillis();
+			}
+		}
+		else if (message instanceof MqttPingReq)
+		{
+			lastOutBoundQOS1 = System.currentTimeMillis();
 		}
 	}
 
