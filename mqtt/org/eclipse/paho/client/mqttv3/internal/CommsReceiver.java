@@ -235,14 +235,15 @@ public class CommsReceiver implements Runnable
 				Logger.d(TAG, "is socket channel connected : " + socket.getChannel().isRegistered());
 				Logger.d(TAG, "socket channel validOps: " + socket.getChannel().validOps());
 			}
+			Logger.d(TAG, "is socket closed : " + socket.isClosed() + "  is socket connected : " + socket.isConnected() + "  is socket input shutdown : " + socket.isInputShutdown() + "  is socket output shutdown : " + socket.isOutputShutdown());
 			//Logger.d(TAG, "is socket keep alive on: " + socket.getKeepAlive());
 			//Logger.d(TAG, "is socket tcp no delay on: " + socket.getTcpNoDelay());
 			//Logger.d(TAG, "is socket OOBline enabled : " + socket.getOOBInline());
 			//Logger.d(TAG, "is socket bound : " + socket.isBound());
-			Logger.d(TAG, "is socket closed : " + socket.isClosed());
-			Logger.d(TAG, "is socket connected : " + socket.isConnected());
-			Logger.d(TAG, "is socket input shutdown : " + socket.isInputShutdown());
-			Logger.d(TAG, "is socket output shutdown : " + socket.isOutputShutdown());
+			//Logger.d(TAG, "is socket closed : " + socket.isClosed());
+			//Logger.d(TAG, "is socket connected : " + socket.isConnected());
+			//Logger.d(TAG, "is socket input shutdown : " + socket.isInputShutdown());
+			//Logger.d(TAG, "is socket output shutdown : " + socket.isOutputShutdown());
 			//Logger.d(TAG, "socket receive buffer size : " + socket.getReceiveBufferSize());
 			//Logger.d(TAG, "socket send buffer size : " + socket.getSendBufferSize());
 			//Logger.d(TAG, "socket linger timeout : " + socket.getSoLinger());
