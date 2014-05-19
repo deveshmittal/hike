@@ -205,6 +205,9 @@
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
+            android:name="com.bsb.hike.ui.PeopleActivity" >
+        </activity>
+        <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
     		android:screenOrientation="user"

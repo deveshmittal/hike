@@ -1530,5 +1530,6 @@
      <string name="clear_chat">Clear Chat</string>
      <string name="add_shortcut">Add Shortcut</string>
      <string name="people">People</string>
+     <string name="timeline">Timeline</string>
      
 </resources>
