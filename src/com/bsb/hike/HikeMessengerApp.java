@@ -574,7 +574,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 * Resetting the stealth mode when the app starts. 
 		 */
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-
+		performPreferenceTransition();
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
 		try
@@ -898,4 +898,17 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false);
 		}
 	};
+
+	private void performPreferenceTransition()
+	{
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!pref.getBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, false))
+		{
+			Editor edit = pref.edit();
+			edit.putString(HikeConstants.NOTIF_SOUND_PREF, Utils.getOldSoundPref(this));
+			edit.putString(HikeConstants.VIBRATE_PREF_LIST, Utils.getOldVibratePref(this));
+			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
+			edit.commit();
+		}
+	}
 }
