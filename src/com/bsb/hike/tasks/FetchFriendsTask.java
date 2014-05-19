@@ -15,6 +15,7 @@ import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -67,6 +68,8 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	private boolean creatingOrEditingGroup = false;
 
 	private int stealthMode;
+
+	private Map<String, StatusMessage> lastStatusMessagesMap;
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> filteredFriendsList,
@@ -157,6 +160,8 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		addToStealthList(hikeTaskList, hikeStealthContactsList, false);
 		addToStealthList(smsTaskList, smsStealthContactsList, false);
 
+		lastStatusMessagesMap = HikeConversationsDatabase.getInstance().getLastStatusMessages(true, HikeConstants.STATUS_TYPE_LIST_TO_FETCH, friendTaskList);
+		
 		return null;
 	}
 
@@ -213,6 +218,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		{
 			groupsList.addAll(groupTaskList);
 		}
+		friendsAdapter.initiateLastStatusMessagesMap(lastStatusMessagesMap);
 		friendsList.addAll(friendTaskList);
 		hikeContactsList.addAll(hikeTaskList);
 		smsContactsList.addAll(smsTaskList);

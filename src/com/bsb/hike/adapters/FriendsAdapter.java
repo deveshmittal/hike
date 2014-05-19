@@ -2,8 +2,10 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,10 +33,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -132,6 +136,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected ListView listView;
 
 	private boolean isFiltered;
+	
+	private Map<String, StatusMessage> lastStatusMessagesMap;
 
 	public FriendsAdapter(Context context, ListView listView)
 	{
@@ -158,6 +164,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
+		
+		lastStatusMessagesMap = new HashMap<String, StatusMessage>();
 
 		listFetchedOnce = false;
 	}
@@ -892,6 +900,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			{
 				TextView lastSeen = (TextView) convertView.findViewById(R.id.last_seen);
 				ImageView avatarFrame = (ImageView) convertView.findViewById(R.id.avatar_frame);
+				ImageView statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 
 				lastSeen.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				lastSeen.setVisibility(View.GONE);
@@ -904,22 +913,55 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					inviteBtn.setVisibility(View.GONE);
 				}
 
-				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND && lastSeenPref)
+				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
 				{
-					String lastSeenString = Utils.getLastSeenTimeAsString(context, contactInfo.getLastSeenTime(), contactInfo.getOffline());
-					if (!TextUtils.isEmpty(lastSeenString))
+					lastSeen.setVisibility(View.VISIBLE);
+					StatusMessage lastStatusMessage = lastStatusMessagesMap.get(contactInfo.getMsisdn());
+					if(lastStatusMessage != null)
 					{
-						if (contactInfo.getOffline() == 0)
+						lastSeen.setTextColor(context.getResources().getColor(R.color.list_item_blue_subtext));
+						switch (lastStatusMessage.getStatusMessageType())
 						{
-							lastSeen.setTextColor(context.getResources().getColor(R.color.action_bar_disabled_text));
-							avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
+						case TEXT:
+							lastSeen.setText("\""+lastStatusMessage.getText()+"\"");
+							if (lastStatusMessage.hasMood())
+							{
+								statusMood.setVisibility(View.VISIBLE);
+								statusMood.setImageResource(EmoticonConstants.moodMapping.get(lastStatusMessage.getMoodId()));
+							}
+							else
+							{
+								statusMood.setVisibility(View.GONE);
+							}
+							break;
+
+						case PROFILE_PIC:
+							lastSeen.setText(R.string.changed_profile);
+							statusMood.setVisibility(View.GONE);
+							break;
+
+						default:
+							break;
 						}
-						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(lastSeenString);
 					}
+					else
+					{
+						lastSeen.setText(contactInfo.getMsisdn());
+						statusMood.setVisibility(View.GONE);
+					}
+				}
+				else if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED)
+				{
+					lastSeen.setVisibility(View.VISIBLE);
+					lastSeen.setText(contactInfo.getMsisdn());
+					statusMood.setVisibility(View.GONE);
 				}
 				else
 				{
+					if(statusMood != null)
+					{
+						statusMood.setVisibility(View.GONE);
+					}
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
@@ -957,6 +999,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 						addBtn.setTag(contactInfo);
 						addBtn.setOnClickListener(addOnClickListener);
 					}
+					
 				}
 			}
 			else
@@ -1280,5 +1323,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			listView.setEmptyView(emptyView);
 		}
+	}
+	
+	public void initiateLastStatusMessagesMap(Map<String, StatusMessage> lastStatusMessagesMap)
+	{
+		this.lastStatusMessagesMap.putAll(lastStatusMessagesMap);
 	}
 }
