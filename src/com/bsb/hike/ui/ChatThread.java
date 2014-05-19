@@ -2410,6 +2410,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
 			mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
+			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 			/*
 			 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
 			 */
@@ -2425,8 +2426,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				// {
 				// mConversationsView.setSelection(lastReadIndex - 1);
 				// }
-
-				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 				JSONObject object = new JSONObject();
 				try
