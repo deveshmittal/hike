@@ -18,18 +18,24 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class ResourceBundleCatalog extends MessageCatalog {
-	
+public class ResourceBundleCatalog extends MessageCatalog
+{
+
 	private ResourceBundle bundle;
-	
-	public ResourceBundleCatalog() throws MissingResourceException {
+
+	public ResourceBundleCatalog() throws MissingResourceException
+	{
 		bundle = ResourceBundle.getBundle("org.eclipse.paho.client.mqttv3.internal.nls.messages");
 	}
 
-	protected String getLocalizedMessage(int id) {
-		try {
+	protected String getLocalizedMessage(int id)
+	{
+		try
+		{
 			return bundle.getString(Integer.toString(id));
-		} catch(MissingResourceException mre) {
+		}
+		catch (MissingResourceException mre)
+		{
 			return "MqttException";
 		}
 	}

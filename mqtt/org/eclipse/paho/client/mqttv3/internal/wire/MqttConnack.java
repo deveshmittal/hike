@@ -24,10 +24,12 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 /**
  * An on-the-wire representation of an MQTT CONNACK.
  */
-public class MqttConnack extends MqttAck {
+public class MqttConnack extends MqttAck
+{
 	private int returnCode;
-	
-	public MqttConnack(byte info, byte[] variableHeader) throws IOException {
+
+	public MqttConnack(byte info, byte[] variableHeader) throws IOException
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
 		DataInputStream dis = new DataInputStream(bais);
@@ -35,28 +37,33 @@ public class MqttConnack extends MqttAck {
 		returnCode = dis.readUnsignedByte();
 		dis.close();
 	}
-	
-	public int getReturnCode() {
+
+	public int getReturnCode()
+	{
 		return returnCode;
 	}
 
-	protected byte[] getVariableHeader() throws MqttException {
+	protected byte[] getVariableHeader() throws MqttException
+	{
 		// Not needed, as the client never encodes a CONNACK
 		return new byte[0];
 	}
-	
+
 	/**
 	 * Returns whether or not this message needs to include a message ID.
 	 */
-	public boolean isMessageIdRequired() {
+	public boolean isMessageIdRequired()
+	{
 		return false;
 	}
-	
-	public String getKey() {
+
+	public String getKey()
+	{
 		return new String("Con");
 	}
-	
-	public String toString() {
+
+	public String toString()
+	{
 		return super.toString() + " return code: " + returnCode;
 	}
 }

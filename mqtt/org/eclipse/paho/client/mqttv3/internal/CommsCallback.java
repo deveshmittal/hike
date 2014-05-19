@@ -28,45 +28,61 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 
 import com.bsb.hike.utils.Logger;
 
-
 /**
- * Bridge between Receiver and the external API. This class gets called by
- * Receiver, and then converts the comms-centric MQTT message objects into ones
- * understood by the external API.
+ * Bridge between Receiver and the external API. This class gets called by Receiver, and then converts the comms-centric MQTT message objects into ones understood by the external
+ * API.
  */
-public class CommsCallback implements Runnable {
+public class CommsCallback implements Runnable
+{
 	private static int INBOUND_QUEUE_SIZE = 100;
+
 	private MqttCallback mqttCallback;
+
 	private ClientComms clientComms;
+
 	private Vector messageQueue;
+
 	private Vector completeQueue;
+
 	public boolean running = false;
+
 	private boolean quiescing = false;
+
 	private Object lifecycle = new Object();
+
 	private Thread callbackThread;
+
 	private Object workAvailable = new Object();
+
 	private Object spaceAvailable = new Object();
+
 	private ClientState clientState;
 
 	final static String className = CommsCallback.class.getName();
+
 	private final String TAG = "COMMSCALLBACK";
 
-	CommsCallback(ClientComms clientComms) {
+	CommsCallback(ClientComms clientComms)
+	{
 		this.clientComms = clientComms;
 		this.messageQueue = new Vector(INBOUND_QUEUE_SIZE);
 		this.completeQueue = new Vector(INBOUND_QUEUE_SIZE);
 	}
 
-	public void setClientState(ClientState clientState) {
+	public void setClientState(ClientState clientState)
+	{
 		this.clientState = clientState;
 	}
 
 	/**
 	 * Starts up the Callback thread.
 	 */
-	public void start(String threadName) {
-		synchronized (lifecycle) {
-			if (running == false) {
+	public void start(String threadName)
+	{
+		synchronized (lifecycle)
+		{
+			if (running == false)
+			{
 				// Praparatory work before starting the background thread.
 				// For safety ensure any old events are cleared.
 				messageQueue.clear();
@@ -81,26 +97,33 @@ public class CommsCallback implements Runnable {
 	}
 
 	/**
-	 * Stops the callback thread. 
-	 * This call will block until stop has completed.
+	 * Stops the callback thread. This call will block until stop has completed.
 	 */
-	public void stop() {
+	public void stop()
+	{
 		final String methodName = "stop";
-		synchronized (lifecycle) {
-			if (running) {
+		synchronized (lifecycle)
+		{
+			if (running)
+			{
 				// @TRACE 700=stopping
 				Logger.d(TAG, "callback thread stop started");
 				running = false;
-				if (!Thread.currentThread().equals(callbackThread)) {
-					try {
-						synchronized (workAvailable) {
+				if (!Thread.currentThread().equals(callbackThread))
+				{
+					try
+					{
+						synchronized (workAvailable)
+						{
 							// @TRACE 701=notify workAvailable and wait for run
 							// to finish
 							workAvailable.notifyAll();
 						}
 						// Wait for the thread to finish.
 						callbackThread.join();
-					} catch (InterruptedException ex) {
+					}
+					catch (InterruptedException ex)
+					{
 					}
 				}
 			}
@@ -110,69 +133,88 @@ public class CommsCallback implements Runnable {
 		}
 	}
 
-	public void setCallback(MqttCallback mqttCallback) {
+	public void setCallback(MqttCallback mqttCallback)
+	{
 		this.mqttCallback = mqttCallback;
 	}
 
-	public void run() {
+	public void run()
+	{
 		final String methodName = "run";
-		while (running) {
-			try {
+		while (running)
+		{
+			try
+			{
 				// If no work is currently available, then wait until there is some...
-				try {
-					synchronized (workAvailable) {
-						if (running & messageQueue.isEmpty()
-								&& completeQueue.isEmpty()) {
+				try
+				{
+					synchronized (workAvailable)
+					{
+						if (running & messageQueue.isEmpty() && completeQueue.isEmpty())
+						{
 							// @TRACE 704=wait for workAvailable
 							workAvailable.wait();
 						}
 					}
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e)
+				{
 				}
 
-				if (running) {
+				if (running)
+				{
 					// Check for deliveryComplete callbacks...
 					MqttToken token = null;
-					synchronized (completeQueue) {
-					    if (!completeQueue.isEmpty()) {
-						    // First call the delivery arrived callback if needed
-						    token = (MqttToken) completeQueue.elementAt(0);
-						    completeQueue.removeElementAt(0);
-					    }
+					synchronized (completeQueue)
+					{
+						if (!completeQueue.isEmpty())
+						{
+							// First call the delivery arrived callback if needed
+							token = (MqttToken) completeQueue.elementAt(0);
+							completeQueue.removeElementAt(0);
+						}
 					}
-					if (null != token) {
+					if (null != token)
+					{
 						handleActionComplete(token);
 					}
-					
+
 					// Check for messageArrived callbacks...
 					MqttPublish message = null;
-					synchronized (messageQueue) {
-					    if (!messageQueue.isEmpty()) {
-						    // Note, there is a window on connect where a publish
-						    // could arrive before we've
-						    // finished the connect logic.
+					synchronized (messageQueue)
+					{
+						if (!messageQueue.isEmpty())
+						{
+							// Note, there is a window on connect where a publish
+							// could arrive before we've
+							// finished the connect logic.
 							message = (MqttPublish) messageQueue.elementAt(0);
 
 							messageQueue.removeElementAt(0);
-					    }
+						}
 					}
-					if (null != message) {
+					if (null != message)
+					{
 						handleMessage(message);
 					}
 				}
 
-				if (quiescing) {
+				if (quiescing)
+				{
 					clientState.checkQuiesceLock();
 				}
 
-				synchronized (spaceAvailable) {
+				synchronized (spaceAvailable)
+				{
 					// Notify the spaceAvailable lock, to say that there's now
 					// some space on the queue...
 
 					// @TRACE 706=notify spaceAvailable
 					spaceAvailable.notifyAll();
 				}
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex)
+			{
 				// Users code could throw an Error or Exception e.g. in the case
 				// of class NoClassDefFoundError
 				// @TRACE 714=callback threw exception
@@ -183,34 +225,37 @@ public class CommsCallback implements Runnable {
 		}
 	}
 
-	private void handleActionComplete(MqttToken token)
-			throws MqttException {
+	private void handleActionComplete(MqttToken token) throws MqttException
+	{
 		final String methodName = "handleActionComplete";
-		synchronized (token) {
+		synchronized (token)
+		{
 			// @TRACE 705=callback and notify for key={0}
-			
+
 			// Unblock any waiters and if pending complete now set completed
 			token.internalTok.notifyComplete();
-			
- 			if (!token.internalTok.isNotified()) {
- 				// If a callback is registered and delivery has finished 
- 				// call delivery complete callback. 
-				if ( mqttCallback != null 
-					&& token instanceof MqttDeliveryToken 
-					&& token.isComplete()) {
-						mqttCallback.deliveryComplete((MqttDeliveryToken) token);
+
+			if (!token.internalTok.isNotified())
+			{
+				// If a callback is registered and delivery has finished
+				// call delivery complete callback.
+				if (mqttCallback != null && token instanceof MqttDeliveryToken && token.isComplete())
+				{
+					mqttCallback.deliveryComplete((MqttDeliveryToken) token);
 				}
 				// Now call async action completion callbacks
 				fireActionEvent(token);
 			}
-			
+
 			// Set notified so we don't tell the user again about this action.
-			if ( token instanceof MqttDeliveryToken && token.isComplete()) {
+			if (token instanceof MqttDeliveryToken && token.isComplete())
+			{
 				token.internalTok.setNotified(true);
 			}
 
-			if (token.isComplete()) {
-				// Finish by doing any post processing such as delete 
+			if (token.isComplete())
+			{
+				// Finish by doing any post processing such as delete
 				// from persistent store but only do so if the action
 				// is complete
 				clientState.notifyComplete(token);
@@ -219,51 +264,60 @@ public class CommsCallback implements Runnable {
 	}
 
 	/**
-	 * This method is called when the connection to the server is lost. If there
-	 * is no cause then it was a clean disconnect. The connectionLost callback
-	 * will be invoked if registered and run on the thread that requested
-	 * shutdown e.g. receiver or sender thread. If the request was a user
-	 * initiated disconnect then the disconnect token will be notified.
+	 * This method is called when the connection to the server is lost. If there is no cause then it was a clean disconnect. The connectionLost callback will be invoked if
+	 * registered and run on the thread that requested shutdown e.g. receiver or sender thread. If the request was a user initiated disconnect then the disconnect token will be
+	 * notified.
 	 * 
-	 * @param cause  the reason behind the loss of connection.
+	 * @param cause
+	 *            the reason behind the loss of connection.
 	 */
-	public void connectionLost(MqttException cause) {
+	public void connectionLost(MqttException cause)
+	{
 		final String methodName = "connectionLost";
 		// If there was a problem and a client callback has been set inform
 		// the connection lost listener of the problem.
-		try {
-			if (mqttCallback != null && cause != null) {
+		try
+		{
+			if (mqttCallback != null && cause != null)
+			{
 				// @TRACE 708=call connectionLost
 				Logger.d(TAG, "Connection lost occured");
 				mqttCallback.connectionLost(cause);
 			}
-		} catch (java.lang.Throwable t) {
-			// Just log the fact that a throwable has caught connection lost 
+		}
+		catch (java.lang.Throwable t)
+		{
+			// Just log the fact that a throwable has caught connection lost
 			// is called during shutdown processing so no need to do anything else
 			// @TRACE 720=exception from connectionLost {0}
-			
+
 		}
 	}
 
 	/**
-	 * An action has completed - if a completion listener has been set on the
-	 * token then invoke it with the outcome of the action.
+	 * An action has completed - if a completion listener has been set on the token then invoke it with the outcome of the action.
 	 * 
 	 * @param token
 	 */
-	public void fireActionEvent(MqttToken token) {
+	public void fireActionEvent(MqttToken token)
+	{
 		final String methodName = "fireActionEvent";
 
-		if (token != null) {
+		if (token != null)
+		{
 			IMqttActionListener asyncCB = token.getActionCallback();
-			if (asyncCB != null) {
-				if (token.getException() == null) {
+			if (asyncCB != null)
+			{
+				if (token.getException() == null)
+				{
 					// @TRACE 716=call onSuccess key={0}
-					
+
 					asyncCB.onSuccess(token);
-				} else {
+				}
+				else
+				{
 					// @TRACE 717=call onFailure key {0}
-					
+
 					asyncCB.onFailure(token, token.getException());
 				}
 			}
@@ -271,36 +325,43 @@ public class CommsCallback implements Runnable {
 	}
 
 	/**
-	 * This method is called when a message arrives on a topic. Messages are
-	 * only added to the queue for inbound messages if the client is not
-	 * quiescing.
+	 * This method is called when a message arrives on a topic. Messages are only added to the queue for inbound messages if the client is not quiescing.
 	 * 
 	 * @param sendMessage
 	 *            the MQTT SEND message.
 	 */
-	public void messageArrived(MqttPublish sendMessage) {
+	public void messageArrived(MqttPublish sendMessage)
+	{
 		final String methodName = "messageArrived";
-		if (mqttCallback != null) {
+		if (mqttCallback != null)
+		{
 			// If we already have enough messages queued up in memory, wait
-			// until some more queue space becomes available. This helps 
-			// the client protect itself from getting flooded by messages 
+			// until some more queue space becomes available. This helps
+			// the client protect itself from getting flooded by messages
 			// from the server.
-			synchronized (spaceAvailable) {
-				while (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
-					try {
+			synchronized (spaceAvailable)
+			{
+				while (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE)
+				{
+					try
+					{
 						// @TRACE 709=wait for spaceAvailable
-						
+
 						spaceAvailable.wait();
-					} catch (InterruptedException ex) {
+					}
+					catch (InterruptedException ex)
+					{
 					}
 				}
 			}
-			if (!quiescing) {
+			if (!quiescing)
+			{
 				messageQueue.addElement(sendMessage);
 				// Notify the CommsCallback thread that there's work to do...
-				synchronized (workAvailable) {
+				synchronized (workAvailable)
+				{
 					// @TRACE 710=new msg avail, notify workAvailable
-					
+
 					workAvailable.notifyAll();
 				}
 			}
@@ -308,42 +369,47 @@ public class CommsCallback implements Runnable {
 	}
 
 	/**
-	 * Let the call back thread quiesce. Prevent new inbound messages being
-	 * added to the process queue and let existing work quiesce. (until the
-	 * thread is told to shutdown).
+	 * Let the call back thread quiesce. Prevent new inbound messages being added to the process queue and let existing work quiesce. (until the thread is told to shutdown).
 	 */
-	public void quiesce() {
+	public void quiesce()
+	{
 		final String methodName = "quiesce";
 		this.quiescing = true;
-		synchronized (spaceAvailable) {
+		synchronized (spaceAvailable)
+		{
 			// @TRACE 711=quiesce notify spaceAvailable
-			
+
 			// Unblock anything waiting for space...
 			spaceAvailable.notifyAll();
 		}
 	}
 
-	public boolean isQuiesced() {
-		if (quiescing && completeQueue.size() == 0 && messageQueue.size() == 0) {
+	public boolean isQuiesced()
+	{
+		if (quiescing && completeQueue.size() == 0 && messageQueue.size() == 0)
+		{
 			return true;
 		}
 		return false;
 	}
 
-	private void handleMessage(MqttPublish publishMessage)
-			throws MqttException, Exception {
+	private void handleMessage(MqttPublish publishMessage) throws MqttException, Exception
+	{
 		final String methodName = "handleMessage";
-		// If quisecing process any pending messages. 
-		if (mqttCallback != null) {
+		// If quisecing process any pending messages.
+		if (mqttCallback != null)
+		{
 			String destName = publishMessage.getTopicName();
 
 			// @TRACE 713=call messageArrived key={0} topic={1}
-			
+
 			mqttCallback.messageArrived(destName, publishMessage.getMessage());
-			if (publishMessage.getMessage().getQos() == 1) {
-				this.clientComms.internalSend(new MqttPubAck(publishMessage),
-						new MqttToken(clientComms.getClient().getClientId()));
-			} else if (publishMessage.getMessage().getQos() == 2) {
+			if (publishMessage.getMessage().getQos() == 1)
+			{
+				this.clientComms.internalSend(new MqttPubAck(publishMessage), new MqttToken(clientComms.getClient().getClientId()));
+			}
+			else if (publishMessage.getMessage().getQos() == 2)
+			{
 				this.clientComms.deliveryComplete(publishMessage);
 				MqttPubComp pubComp = new MqttPubComp(publishMessage);
 				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
@@ -351,28 +417,36 @@ public class CommsCallback implements Runnable {
 		}
 	}
 
-	public void asyncOperationComplete(MqttToken token) {
+	public void asyncOperationComplete(MqttToken token)
+	{
 		final String methodName = "asyncOperationComplete";
 
-		if (running) {
+		if (running)
+		{
 			// invoke callbacks on callback thread
 			completeQueue.addElement(token);
-			synchronized (workAvailable) {
+			synchronized (workAvailable)
+			{
 				// @TRACE 715=new workAvailable. key={0}
-				
+
 				workAvailable.notifyAll();
 			}
-		} else {
+		}
+		else
+		{
 			// invoke async callback on invokers thread
-			try {
+			try
+			{
 				handleActionComplete(token);
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex)
+			{
 				// Users code could throw an Error or Exception e.g. in the case
 				// of class NoClassDefFoundError
 				// @TRACE 719=callback threw ex:
 				Logger.d(TAG, "problem in asyncopcomplete shutting down, cause : " + ex.getCause());
 				// Shutdown likely already in progress but no harm to confirm
-				System.err.println("problem in asyncopcomplete "+ex);
+				System.err.println("problem in asyncopcomplete " + ex);
 				ex.printStackTrace();
 				clientComms.shutdownConnection(null, new MqttException(ex));
 			}
@@ -383,7 +457,8 @@ public class CommsCallback implements Runnable {
 	/**
 	 * Returns the thread used by this callback.
 	 */
-	protected Thread getThread() {
+	protected Thread getThread()
+	{
 		return callbackThread;
 	}
 }
