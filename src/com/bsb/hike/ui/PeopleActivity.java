@@ -130,6 +130,8 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		switch (item.getItemId())
 		{
 		case R.id.show_timeline:
+			intent = new Intent(this, TimelineActivity.class);
+			
 			break;	
 		}
 

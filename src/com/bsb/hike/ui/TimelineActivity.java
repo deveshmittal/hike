@@ -1,0 +1,93 @@
+package com.bsb.hike.ui;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
+import com.bsb.hike.ui.fragments.UpdatesFragment;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+
+public class TimelineActivity extends HikeAppStateBaseFragmentActivity implements Listener
+{
+	UpdatesFragment mainFragment;
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		initialiseTimelineScreen(savedInstanceState);
+	}
+
+	private void initialiseTimelineScreen(Bundle savedInstanceState)
+	{
+
+		setContentView(R.layout.timeline);
+		setupMainFragment(savedInstanceState);
+		setupActionBar();
+	}
+
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setIcon(R.drawable.hike_logo_top_bar);
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+		actionBarView.findViewById(R.id.seprator).setVisibility(View.GONE);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(R.string.timeline);
+
+		backContainer.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				onBackPressed();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+	}
+
+
+	private void setupMainFragment(Bundle savedInstanceState)
+	{
+		if (savedInstanceState != null) {
+            return;
+        }
+		
+        mainFragment = new UpdatesFragment();
+        
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_frame, mainFragment).commit();
+		
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		return super.onOptionsItemSelected(item);
+	}
+}
