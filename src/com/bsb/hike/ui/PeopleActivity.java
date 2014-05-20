@@ -39,7 +39,7 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
-		actionBar.setIcon(R.drawable.hike_logo_top_bar);
+		actionBar.setIcon(R.drawable.ic_top_bar_search);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
