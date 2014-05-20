@@ -21,35 +21,40 @@ import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 /**
  * Utility class to help create exceptions of the correct type.
  */
-public class ExceptionHelper {
-	public static MqttException createMqttException(int reasonCode) {
-		if ((reasonCode == MqttException.REASON_CODE_FAILED_AUTHENTICATION) || 
-			(reasonCode == MqttException.REASON_CODE_NOT_AUTHORIZED)) {
+public class ExceptionHelper
+{
+	public static MqttException createMqttException(int reasonCode)
+	{
+		if ((reasonCode == MqttException.REASON_CODE_FAILED_AUTHENTICATION) || (reasonCode == MqttException.REASON_CODE_NOT_AUTHORIZED))
+		{
 			return new MqttSecurityException(reasonCode);
 		}
-		
+
 		return new MqttException(reasonCode);
 	}
 
-	public static MqttException createMqttException(Throwable cause) {
-		if (cause.getClass().getName().equals("java.security.GeneralSecurityException")) {
+	public static MqttException createMqttException(Throwable cause)
+	{
+		if (cause.getClass().getName().equals("java.security.GeneralSecurityException"))
+		{
 			return new MqttSecurityException(cause);
 		}
 		return new MqttException(cause);
 	}
-	
+
 	/**
-	 * Returns whether or not the specified class is available to the current
-	 * class loader.  This is used to protect the code against using Java SE
-	 * APIs on Java ME.
+	 * Returns whether or not the specified class is available to the current class loader. This is used to protect the code against using Java SE APIs on Java ME.
 	 */
-	public static boolean isClassAvailable(String className) {
+	public static boolean isClassAvailable(String className)
+	{
 		boolean result = false;
-		try {
+		try
+		{
 			Class.forName(className);
 			result = true;
 		}
-		catch (ClassNotFoundException ex) {
+		catch (ClassNotFoundException ex)
+		{
 		}
 		return result;
 	}

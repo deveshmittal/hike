@@ -25,42 +25,48 @@ import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 
 import com.bsb.hike.utils.Logger;
 
-
 /**
- * An <code>MqttInputStream</code> lets applications read instances of
- * <code>MqttWireMessage</code>. 
+ * An <code>MqttInputStream</code> lets applications read instances of <code>MqttWireMessage</code>.
  */
-public class MqttInputStream extends InputStream {
+public class MqttInputStream extends InputStream
+{
 	private static final String className = MqttInputStream.class.getName();
+
 	private final String TAG = "MQTTINPUTSTREAM";
+
 	private DataInputStream in;
 
-	public MqttInputStream(InputStream in) {
+	public MqttInputStream(InputStream in)
+	{
 		this.in = new DataInputStream(in);
 	}
-	
-	public int read() throws IOException {
+
+	public int read() throws IOException
+	{
 		return in.read();
 	}
-	
-	public int available() throws IOException {
+
+	public int available() throws IOException
+	{
 		return in.available();
 	}
-	
-	public void close() throws IOException {
+
+	public void close() throws IOException
+	{
 		in.close();
 	}
-	
+
 	/**
 	 * Reads an <code>MqttWireMessage</code> from the stream.
 	 */
-	public MqttWireMessage readMqttWireMessage() throws IOException, MqttException {
-		final String methodName ="readMqttWireMessage";
+	public MqttWireMessage readMqttWireMessage() throws IOException, MqttException
+	{
+		final String methodName = "readMqttWireMessage";
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();
 		byte first = in.readByte();
 		byte type = (byte) ((first >>> 4) & 0x0F);
-		if ((type < MqttWireMessage.MESSAGE_TYPE_CONNECT) ||
-			(type > MqttWireMessage.MESSAGE_TYPE_DISCONNECT)) {
+		if ((type < MqttWireMessage.MESSAGE_TYPE_CONNECT) || (type > MqttWireMessage.MESSAGE_TYPE_DISCONNECT))
+		{
 			// Invalid MQTT message type...
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_INVALID_MESSAGE);
 		}
@@ -68,12 +74,12 @@ public class MqttInputStream extends InputStream {
 		bais.write(first);
 		// bit silly, we decode it then encode it
 		bais.write(MqttWireMessage.encodeMBI(remLen));
-		byte[] packet = new byte[(int)(bais.size()+remLen)];
-		in.readFully(packet,bais.size(),packet.length - bais.size());
+		byte[] packet = new byte[(int) (bais.size() + remLen)];
+		in.readFully(packet, bais.size(), packet.length - bais.size());
 		byte[] header = bais.toByteArray();
-		System.arraycopy(header,0,packet,0, header.length);
+		System.arraycopy(header, 0, packet, 0, header.length);
 		MqttWireMessage message = MqttWireMessage.createWireMessage(packet);
-		// @TRACE 501= received {0} 
+		// @TRACE 501= received {0}
 		Logger.d(TAG, "Mqtt wire message read : " + message.toString());
 		return message;
 	}

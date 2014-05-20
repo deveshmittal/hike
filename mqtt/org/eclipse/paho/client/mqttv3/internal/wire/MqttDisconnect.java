@@ -22,33 +22,40 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 /**
  * An on-the-wire representation of an MQTT DISCONNECT message.
  */
-public class MqttDisconnect extends MqttWireMessage {
-	public static String KEY="Disc";
-	
-	public MqttDisconnect() {
+public class MqttDisconnect extends MqttWireMessage
+{
+	public static String KEY = "Disc";
+
+	public MqttDisconnect()
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
 	}
 
-	public MqttDisconnect(byte info, byte[] variableHeader) throws IOException {
+	public MqttDisconnect(byte info, byte[] variableHeader) throws IOException
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
 	}
-	
-	protected byte getMessageInfo() {
+
+	protected byte getMessageInfo()
+	{
 		return (byte) 0;
 	}
 
-	protected byte[] getVariableHeader() throws MqttException {
+	protected byte[] getVariableHeader() throws MqttException
+	{
 		return new byte[0];
 	}
 
 	/**
 	 * Returns whether or not this message needs to include a message ID.
 	 */
-	public boolean isMessageIdRequired() {
+	public boolean isMessageIdRequired()
+	{
 		return false;
 	}
-	
-	public String getKey() {
+
+	public String getKey()
+	{
 		return new String(KEY);
 	}
 }

@@ -2221,6 +2221,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
+				Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
+
 				saveDraft();
 
 				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
@@ -2408,6 +2410,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
 			mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
+			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 			/*
 			 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
 			 */
@@ -2423,8 +2426,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				// {
 				// mConversationsView.setSelection(lastReadIndex - 1);
 				// }
-
-				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 				JSONObject object = new JSONObject();
 				try
@@ -6440,6 +6441,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public boolean onActionModeItemClicked(MenuItem item)
 	{
 		final HashMap<Long, ConvMessage> selectedMessagesMap = mAdapter.getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds;
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
@@ -6485,6 +6487,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			Collections.sort(selectedMsgIds);
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
@@ -6492,8 +6496,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONArray multipleMsgArray = new JSONArray();
 			try
 			{
-				for (ConvMessage message : selectedMessagesMap.values())
+				for (int i = 0; i < selectedMsgIds.size(); i++)
 				{
+					ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(i));
 					JSONObject multiMsgFwdObject = new JSONObject();
 					if (message.isFileTransferMessage())
 					{
@@ -6549,7 +6554,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			startActivity(intent);
 			return true;
 		case R.id.copy_msgs:
-			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
 			String msgStr =selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
 			for (int i = 1; i < selectedMsgIds.size(); i++)

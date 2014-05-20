@@ -2080,7 +2080,7 @@ public class Utils
 	public static void vibrateNudgeReceived(Context context)
 	{
 		String VIB_OFF = context.getResources().getString(R.string.vib_off);
-		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, VIB_OFF)))
+		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, getOldVibratePref(context))))
 		{
 			return;
 		}
@@ -3757,5 +3757,50 @@ public class Utils
 		 * treats space as an invalid charactor in URI. 
 		 */
 		return fileUriString.replace(" ", "%20");
+	}
+
+	/*
+	 * This function is to respect old vibrate preference before vib list pref , if previous was on send, VIB Default else return VIB_OFF
+	 */
+	public static String getOldVibratePref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String vibOff = res.getString(R.string.vib_off);
+		String vibDef = res.getString(R.string.vib_default);
+
+		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true))
+		{
+			return vibDef;
+		}
+		else
+		{
+			return vibOff;
+		}
+	}
+
+	/*
+	 * This function is to respect old sound preference before sound list pref , if previous was on then check for hike jingle, else return SOUND_OFF
+	 */
+	public static String getOldSoundPref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String notifSoundOff = res.getString(R.string.notif_sound_off);
+		String notifSoundDefault = res.getString(R.string.notif_sound_default);
+		String notifSoundHike = res.getString(R.string.notif_sound_Hike);
+
+		if (preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true))
+		{
+			if (preferenceManager.getBoolean(HikeConstants.HIKE_JINGLE_PREF, true))
+			{
+				return notifSoundHike;
+			}
+			return notifSoundDefault;
+		}
+		else
+		{
+			return notifSoundOff;
+		}
 	}
 }

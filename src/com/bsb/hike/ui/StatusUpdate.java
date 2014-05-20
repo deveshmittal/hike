@@ -259,6 +259,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			@Override
 			public void onClick(View v)
 			{
+				Utils.hideSoftKeyboard(StatusUpdate.this, statusTxt);
 				onBackPressed();
 			}
 		});

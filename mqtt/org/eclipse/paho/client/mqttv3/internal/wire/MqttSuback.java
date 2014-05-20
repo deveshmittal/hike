@@ -21,40 +21,45 @@ import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
-
 /**
  * An on-the-wire representation of an MQTT SUBACK.
  */
-public class MqttSuback extends MqttAck {
-	private int[] grantedQos;		// Not currently made available to anyone. 
-	
-	public MqttSuback(byte info, byte[] data) throws IOException {
+public class MqttSuback extends MqttAck
+{
+	private int[] grantedQos; // Not currently made available to anyone.
+
+	public MqttSuback(byte info, byte[] data) throws IOException
+	{
 		super(MqttWireMessage.MESSAGE_TYPE_SUBACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
 		int index = 0;
-		grantedQos = new int[data.length-2];
+		grantedQos = new int[data.length - 2];
 		int qos = dis.read();
-		while (qos != -1) {
+		while (qos != -1)
+		{
 			grantedQos[index] = qos;
 			index++;
 			qos = dis.read();
 		}
 		dis.close();
 	}
-	
-	protected byte[] getVariableHeader() throws MqttException {
+
+	protected byte[] getVariableHeader() throws MqttException
+	{
 		// Not needed, as the client never encodes a SUBACK
 		return new byte[0];
 	}
 
-	public String toString() {
-    String rc = super.toString() + " granted Qos";
-    for (int i = 0; i < grantedQos.length; ++i) {
-    	rc += " " + grantedQos[i];
-    }
-    return rc;
-  }
+	public String toString()
+	{
+		String rc = super.toString() + " granted Qos";
+		for (int i = 0; i < grantedQos.length; ++i)
+		{
+			rc += " " + grantedQos[i];
+		}
+		return rc;
+	}
 
 }

@@ -802,7 +802,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			c = mDb.query(DBConstants.MESSAGES_TABLE + "," + DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE },
 					DBConstants.MESSAGES_TABLE + "." + DBConstants.MAPPED_MSG_ID + "=? AND " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE + "=? AND "
-							+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?",
+							+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=? AND " + DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + "="
+							+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID,
 					new String[] { Long.toString(conv.getMappedMsgID()), conv.getMessage(), conv.getMsisdn() }, null, null, null);
 			int count = c.getCount();
 			return (count != 0);
@@ -1530,7 +1531,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				long msgId = c.getLong(msgIdIdx);
 				long mappedMsgId = c.getLong(mappedMsgIdIdx);
-				if(mappedMsgId != 0){
+				if(mappedMsgId > 0){
 					ids.put(String.valueOf(mappedMsgId));
 				}
 				sb.append(msgId);
