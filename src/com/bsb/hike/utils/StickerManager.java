@@ -22,7 +22,6 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
@@ -88,6 +87,8 @@ public class StickerManager
 	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
 
 	public static final String DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER = "delDefaultDownloadedExpressionsStickers";
+	
+	private static final String TAG = "StickerManager";
 
 	public static int RECENT_STICKERS_COUNT = 30;
 
@@ -735,7 +736,7 @@ public class StickerManager
 	{
 		boolean rem = recentStickers.remove(st);
 
-		Logger.d(getClass().getSimpleName(), "Sticker removed from recents : " + rem);
+		Logger.d(TAG, "Sticker removed from recents : " + rem);
 
 		// remove the sticker from cache too, recycling stuff is handled by the cache itself
 		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context));
@@ -790,11 +791,13 @@ public class StickerManager
 		 * If the directory is not available in both cases, we return the external storage's path if external storage is available. Else we return the internal storage's path.
 		 */
 		boolean externalAvailable = false;
-		if (Utils.getExternalStorageState() == ExternalStorageState.WRITEABLE)
+		ExternalStorageState st = Utils.getExternalStorageState();
+		Logger.d(TAG, "External Storage state : " + st.name());
+		if (st == ExternalStorageState.WRITEABLE)
 		{
 			externalAvailable = true;
 			String stickerDirPath = getExternalStickerDirectoryForCategoryId(context, catId);
-
+			Logger.d(TAG,"Sticker dir path : " + stickerDirPath);
 			if (stickerDirPath == null)
 			{
 				return null;
@@ -804,18 +807,23 @@ public class StickerManager
 
 			if (stickerDir.exists())
 			{
+				Logger.d(TAG, "Sticker Dir exists .... so returning");
 				return stickerDir.getPath();
 			}
 		}
 		File stickerDir = new File(getInternalStickerDirectoryForCategoryId(context, catId));
+		Logger.d(TAG, "Checking Internal Storage dir : " + stickerDir.getAbsolutePath());
 		if (stickerDir.exists())
 		{
+			Logger.d(TAG, "Internal Storage dir exist so returning it.");
 			return stickerDir.getPath();
 		}
 		if (externalAvailable)
 		{
+			Logger.d(TAG, "Returning external storage dir.");
 			return getExternalStickerDirectoryForCategoryId(context, catId);
 		}
+		Logger.d(TAG, "Returning internal storage dir.");
 		return getInternalStickerDirectoryForCategoryId(context, catId);
 	}
 
@@ -884,6 +892,7 @@ public class StickerManager
 		try
 		{
 			long t1 = System.currentTimeMillis();
+			Logger.d(TAG, "Calling function get sorted list for category : " + catId.name());
 			String extDir = getStickerDirectoryForCategoryId(context, catId.name());
 			File dir = new File(extDir);
 			if (!dir.exists())
@@ -908,17 +917,17 @@ public class StickerManager
 				}
 				catch (Exception e)
 				{
-					Logger.e(getClass().getSimpleName(), "Exception while deserializing sticker", e);
+					Logger.e(TAG, "Exception while deserializing sticker", e);
 				}
 			}
 			in.close();
 			fileIn.close();
 			long t2 = System.currentTimeMillis();
-			Logger.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
+			Logger.d(TAG, "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Logger.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			Logger.e(TAG, "Exception while reading category file.", e);
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
@@ -953,7 +962,7 @@ public class StickerManager
 					}
 					catch (Exception e)
 					{
-						Logger.e(getClass().getSimpleName(), "Exception while serializing a sticker : " + st.getStickerId(), e);
+						Logger.e(TAG, "Exception while serializing a sticker : " + st.getStickerId(), e);
 					}
 				}
 			}
@@ -961,11 +970,11 @@ public class StickerManager
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
-			Logger.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
+			Logger.d(TAG, "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Logger.e(getClass().getSimpleName(), "Exception while saving category file.", e);
+			Logger.e(TAG, "Exception while saving category file.", e);
 		}
 	}
 
