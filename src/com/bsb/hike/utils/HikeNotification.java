@@ -516,21 +516,23 @@ public class HikeNotification
 
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
-		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, Utils.getOldVibratePref(context));
+		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
 		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
-		
+
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, Utils.getOldSoundPref(context));
+			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 			if (!shouldNotPlayNotification)
 			{
-				if(!NOTIF_SOUND_OFF.equals(notifSond)){
+				Logger.i("notif", "sound " + notifSond);
+				if (!NOTIF_SOUND_OFF.equals(notifSond))
+				{
 					if (NOTIF_SOUND_HIKE.equals(notifSond))
 					{
 						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
@@ -540,12 +542,12 @@ public class HikeNotification
 						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
 					}
 				}
-				
+
 				if (!VIB_OFF.equals(vibrate))
 				{
 					if (VIB_DEF.equals(vibrate))
 					{
-						mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_VIBRATE);
 					}
 					else if (VIB_SHORT.equals(vibrate))
 					{

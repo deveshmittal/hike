@@ -1526,4 +1526,9 @@ public class HikeConstants
 		INTRO_VIEWED, STICKER_VIEWED, CHAT_BG_VIEWED
 	}
 
+	/**
+	 * while updating from sound/vibrate single pref to list pref (from app 2.9.0 to ) , we need to respect old setting set by user, so if are done this transition , we will set
+	 * this key to true in preference
+	 */
+	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
 }
