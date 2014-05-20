@@ -734,6 +734,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 		});
 		lp.setTitle(lp.getTitle() + " - " + lp.getValue());
+
+		ListPreference sound = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
+		sound.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		{
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
+				return true;
+			}
+		});
+		sound.setTitle(sound.getTitle() + " - " + sound.getValue());
 	}
 
 	@Override
