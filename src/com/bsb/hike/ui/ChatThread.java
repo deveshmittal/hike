@@ -5796,8 +5796,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
 
-			metadata.put(StickerManager.STICKER_INDEX, sticker.getStickerIndex());
-
 			convMessage.setMetadata(metadata);
 			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
 		}
