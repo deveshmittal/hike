@@ -720,6 +720,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		initHikeLruCache(getApplicationContext());
 
 		/*
