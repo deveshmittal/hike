@@ -1525,6 +1525,7 @@
      <string name="photo">GALLERY</string>
      <string name="video">VIDEOS</string>
      <string name="location_option">LOCATION</string>
+     <string name="sync_contacts">Refresh contacts</string>
     
     
 		
