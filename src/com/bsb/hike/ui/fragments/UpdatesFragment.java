@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
@@ -33,6 +34,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -72,8 +74,27 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 		ListView updatesList = (ListView) parent.findViewById(android.R.id.list);
 		updatesList.setEmptyView(parent.findViewById(android.R.id.empty));
+		setupListHeader(updatesList);
 
 		return parent;
+	}
+
+	private void setupListHeader(ListView listView)
+	{
+		View header = LayoutInflater.from(getActivity()).inflate(
+				R.layout.timeline_list_header, null);
+		header.setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				Intent intent = new Intent(getActivity(), StatusUpdate.class);
+				startActivity(intent);
+			}
+		});
+		TextView headerTextView = (TextView) header.findViewById(R.id.header_txt);
+		listView.addHeaderView(header);
 	}
 
 	@Override
