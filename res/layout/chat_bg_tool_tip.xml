@@ -3,7 +3,8 @@
  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tip_container"
     android:layout_width="208dp"
-    android:layout_height="67dp"
+    android:layout_height="wrap_content"
+    android:minHeight="67dp"
     android:background="@drawable/bg_sticker_ftue"
     android:orientation="horizontal"
     android:weightSum="10" >

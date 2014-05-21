@@ -31,7 +31,7 @@
             android:layout_marginRight="5dp"
             android:text="@string/bigger_better_attachments"
             android:textColor="#33312e"
-            android:textSize="18sp" />
+            android:textSize="18dp" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
             android:gravity="center"
             android:text="@string/file_transfer_pop_up_text"
             android:textColor="#566167"
-            android:textSize="14sp" />
+            android:textSize="14dp" />
 
         <View
             android:layout_width="match_parent"
@@ -60,7 +60,7 @@
             android:padding="14dp"
             android:text="Awesome"
             android:textColor="#0f8fe1"
-            android:textSize="16sp"
+            android:textSize="16dp"
             android:textStyle="bold" />
     </LinearLayout>
 

@@ -104,7 +104,7 @@ public class HikeConstants
 	public static final String FILE_NAME = "fn";
 
 	public static final String FILE_KEY = "fk";
-	
+
 	public static final String FILE_PATH = "fp";
 
 	public static final String CREDITS = "credits";
@@ -144,6 +144,8 @@ public class HikeConstants
 	public static final String MSISDNS = "msisdns";
 
 	public static final String REWARDS_TOKEN = "reward_token";
+	
+	public static final String MQTT_IP_ADDRESSES = "ip";
 
 	public static final String SHOW_REWARDS = "show_rewards";
 
@@ -300,13 +302,13 @@ public class HikeConstants
 	public static final String SMS = "sms";
 
 	public static final String UI_EVENT = "uiEvent";
-	
+
 	public static final String CRC_EVENT = "crc";
-	
+
 	public static final String MD5_HASH = "md5";
-	
+
 	public static final String FILE_SIZE = "fs";
-	
+
 	public static final String DOWNLOAD = "dwnld";
 
 	public static final String LOGEVENT_TAG = "mob";
@@ -363,6 +365,14 @@ public class HikeConstants
 
 	public static final String VIBRATE_PREF = "vibratePref";
 
+	public static final String HIKE_JINGLE_PREF = "jinglePref";
+
+	public static final String NOTIF_SOUND_PREF = "notifSoundPref";
+
+	public static final String VIBRATE_PREF_LIST = "vibratePrefList";
+
+	public static final String TICK_SOUND_PREF = "tickSoundPref";
+
 	public static final String FREE_SMS_PREF = "freeSmsPref";
 
 	public static final String LED_PREF = "ledPref";
@@ -382,6 +392,8 @@ public class HikeConstants
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
+
+	public static final String RESET_STEALTH_PREF = "resetStealthPref";
 
 	public static final String REQUEST_DP = "rdp";
 
@@ -412,6 +424,8 @@ public class HikeConstants
 	public static final String FTUE_HIKEBOT_MSISDN = "+hike1+";
 
 	public static final String FTUE_GAMING_MSISDN = "+hike2+";
+
+	public static final String FTUE_HIKE_DAILY = "+hike3+";
 
 	public static final String UNLINK_PREF = "unlinkAccount";
 
@@ -509,7 +523,7 @@ public class HikeConstants
 	public static final int PIN_CAPTURE_TIME = 10 * 1000;
 
 	public static final int CALL_ME_WAIT_TIME = 150 * 1000;
-	
+
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
@@ -588,9 +602,9 @@ public class HikeConstants
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 3 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 6 * 1000;
 
-	public static final int RESEND_TYPING_TIME = 2 * 1000;
+	public static final int RESEND_TYPING_TIME = 4 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
@@ -649,7 +663,7 @@ public class HikeConstants
 
 	// Picasa URI prefix for creating convMessage
 	public static final String PICASA_PREFIX = "picasaUri:";
-	
+
 	// Gmail URI prefix for all devices
 	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
@@ -755,7 +769,7 @@ public class HikeConstants
 
 	public static final String MICROMAX = "MICROMAX";
 
-	public static final int MAX_READ_BY_NAMES = 3;
+	public static final int MAX_READ_BY_NAMES = 4;
 
 	public static final int LDPI_ID = 4;
 
@@ -789,21 +803,52 @@ public class HikeConstants
 	public static final int LED_LIGHTS_ON_MS = 300;
 
 	public static final int LED_LIGHTS_OFF_MS = 1000;
-	
+
 	public static final int JOINED_HIKE_STATUS_ID = -1;
-	
+
 	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
-	
+
 	public static final String SCREEN = "screen";
 
 	public static final String FTUE = "ftue";
-	
+
 	public static final int MAX_FAST_SCROLL_VISIBLE_POSITION = 6;
+
+	public static final int STEALTH_OFF = 0;
+
+	public static final int STEALTH_ON_FAKE = 1;
+
+	public static final int STEALTH_ON = 2;
+
+	public static final long RESET_COMPLETE_STEALTH_TIME_MS = 30 * 60 * 1000;
 	
+	public static final String ENABLED = "enabled";
+	
+	public static final String ENABLED_STEALTH = "en";
+
+	public static final String DISABLED_STEALTH = "di";
+	
+	public static final String RESET = "reset";
+	
+	public static final String STEALTH = "stlth";
+
+	public static final String FILE_SHARE_PREFIX = "file://";
+
+	public static final String SHARE_CONTACT_CONTENT_TYPE = "text/x-vcard";
+	
+	public static final class ResultCodes
+	{
+		public static final int SELECT_COUNTRY = 4001;
+		
+		public static final int CREATE_LOCK_PATTERN = 4002;
+
+		public static final int CONFIRM_LOCK_PATTERN = 4003;
+	}
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -990,8 +1035,6 @@ public class HikeConstants
 
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
 
-		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
-
 		public static final String DIALOG_SHOWING = "dialogShowing";
 
 		public static final String SMS_ID = "smsId";
@@ -1045,7 +1088,7 @@ public class HikeConstants
 		public static final String CHAT_THEME_WINDOW_OPEN = "chatThemeWindowOpen";
 
 		public static final String SELECTED_THEME = "selectedTheme";
-		
+
 		public static final String BLOKING_TASK_TYPE = "blockingTaskType";
 
 		public static final String MULTIPLE_MSG_OBJECT = "multipleMsgObject";
@@ -1057,14 +1100,18 @@ public class HikeConstants
 		public static final String FILE_PATHS = "filePaths";
 
 		public static final String IS_ACTION_MODE_ON = "isActionModeOn";
-		
+
 		public static final String SELECTED_POSITIONS = "selectedPositions";
 
 		public static final String SELECTED_NON_FORWARDABLE_MSGS = "selectedNonForwadableMsgs";
-		
+
 		public static final String SELECTED_NON_TEXT_MSGS = "selectedNonTextMsgs";
-		
+
 		public static final String SELECTED_CANCELABLE_MSGS = "selectedCancelableMsgs";
+
+		public static final String SELECTED_SHARABLE_MSGS_COUNT = "selectedCancelableMsgsCount";
+		
+		public static final String SELECTED_SHARABLE_MSGS_PATH = "selectedCancelableMsgsPath";
 
 		public static final String SELECTED_COUNTRY = "selectedCountry";
 
@@ -1085,6 +1132,8 @@ public class HikeConstants
 		public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
+
+		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
 	}
 
 	public static final class LogEvent
@@ -1287,12 +1336,25 @@ public class HikeConstants
 		 * Sticker Ftue
 		 */
 		public static final String STICKER_FTUE_BTN_CLICK = "stickerFtueBtnClick";
-		
+
 		public static final String FTUE_TUTORIAL_STICKER_VIEWED = "ftueTutorialStickerViewed";
-		
+
 		public static final String FTUE_TUTORIAL_CBG_VIEWED = "ftueTutorialCbgViewed";
 
 		public static final String START_HIKING = "startHiking";
+		
+		public static final String QUICK_SETUP_CLICK = "quickSetupClick";
+		
+		public static final String STEALTH_FTUE_DONE = "stlthFtueDone";
+		
+		public static final String RESET_STEALTH_INIT = "resetStlthInit";
+		
+		public static final String RESET_STEALTH_CANCEL = "resetStlthCancel";
+		
+		public static final String ENTER_WRONG_STEALTH_MODE = "entWrongStlth";
+		
+		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
+		
 	}
 
 	public static final class MqttMessageTypes
@@ -1396,6 +1458,11 @@ public class HikeConstants
 		public static final String GROUP_OWNER_CHANGE = "goc";
 
 		public static final String REQUEST_DP = "rdp";
+		
+		public static final String STEALTH = "stlth";
+
+		public static final String TOGGLE_STEALTH = "ts";
+
 	}
 
 	public static final class SMSNative
@@ -1440,29 +1507,30 @@ public class HikeConstants
 		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
 	}
 
-	public static enum TipType
-	{
-		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE
-	}
-
 	public static enum EmoticonType
 	{
 		EMOTICON, STICKERS
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
-	
-	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3, R.string.male_selected_string_4, R.string.male_selected_string_5 };
-	
-	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3, R.string.female_selected_string_4, R.string.female_selected_string_5 };
 
-	//TODO need to finalize this with AM
+	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3,
+			R.string.male_selected_string_4, R.string.male_selected_string_5 };
+
+	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3,
+			R.string.female_selected_string_4, R.string.female_selected_string_5 };
+
+	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
-	
+
 	public static enum WelcomeTutorial
 	{
 		INTRO_VIEWED, STICKER_VIEWED, CHAT_BG_VIEWED
 	}
 
-
+	/**
+	 * while updating from sound/vibrate single pref to list pref (from app 2.9.0 to ) , we need to respect old setting set by user, so if are done this transition , we will set
+	 * this key to true in preference
+	 */
+	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
 }

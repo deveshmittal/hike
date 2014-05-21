@@ -35,7 +35,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:text="@string/sent_txt"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -65,7 +65,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:text="@string/delivered_txt"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -95,7 +95,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:text="@string/read_txt"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>

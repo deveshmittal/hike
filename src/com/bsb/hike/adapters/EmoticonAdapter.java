@@ -14,10 +14,11 @@ import android.widget.GridView;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
-public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener, StickerEmoticonIconPagerAdapter
+public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter
 {
 
 	public final int MAX_EMOTICONS_PER_ROW;
@@ -95,25 +96,10 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		emoticonGrid.setNumColumns(MAX_EMOTICONS_PER_ROW);
 		emoticonGrid.setVerticalScrollBarEnabled(false);
 		emoticonGrid.setHorizontalScrollBarEnabled(false);
-		emoticonGrid.setAdapter(new EmoticonPageAdapter(activity, emoticonSubCategories, emoticonResIds, position, idOffset));
-		emoticonGrid.setOnItemClickListener(this);
+		emoticonGrid.setAdapter(new EmoticonPageAdapter(activity, emoticonSubCategories, emoticonResIds, position, idOffset, composeBox));
 
 		((ViewPager) container).addView(emoticonPage);
 		return emoticonPage;
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
-	{
-		int emoticonIndex = (Integer) arg1.getTag();
-		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
-		// We don't add an emoticon if the compose box is near its maximum
-		// length of characters
-		if (composeBox.length() >= activity.getResources().getInteger(R.integer.max_length_message) - 20)
-		{
-			return;
-		}
-		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -96,7 +97,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		selectedGrid.setOnScrollListener(this);
 		selectedGrid.setOnItemClickListener(this);
 
-		pagerAdapter = new GalleryPagerAdapter();
+		pagerAdapter = new GalleryPagerAdapter(actualSize);
 		selectedPager.setAdapter(pagerAdapter);
 		selectedPager.setOnPageChangeListener(this);
 
@@ -265,10 +266,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		int viewerWidth;
 
-		public GalleryPagerAdapter()
+		public GalleryPagerAdapter(int size_image)
 		{
 			layoutInflater = LayoutInflater.from(GallerySelectionViewer.this);
-			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this);
+			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this, size_image);
 
 			int padding = 2 * getResources().getDimensionPixelSize(R.dimen.gallery_selection_padding);
 
@@ -313,7 +314,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 			galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 
-			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView, false, true);
+			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getFilePath(), galleryImageView, false, true);
 
 			setupButtonSpacing(galleryImageView, removeImage);
 
@@ -326,9 +327,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		private void setupButtonSpacing(ImageView galleryImageView, ImageButton removeImage)
 		{
+			Drawable drawable = galleryImageView.getDrawable();
+			if (drawable == null)
+			{
+				return;
+			}
 
-			int drawableHeight = galleryImageView.getDrawable().getIntrinsicHeight();
-			int drawableWidth = galleryImageView.getDrawable().getIntrinsicWidth();
+			int drawableHeight = drawable.getIntrinsicHeight();
+			int drawableWidth = drawable.getIntrinsicWidth();
 
 			int imageWidth;
 			int imageHeight;
@@ -358,7 +364,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		{
 			int postion = (Integer) v.getTag();
 			galleryItems.remove(postion);
-			galleryGridItems.remove(postion + 1);
+			galleryGridItems.remove(postion);
 
 			gridAdapter.notifyDataSetChanged();
 			pagerAdapter.notifyDataSetChanged();

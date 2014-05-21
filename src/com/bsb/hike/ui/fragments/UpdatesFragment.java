@@ -33,6 +33,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -150,9 +151,18 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			return;
 		}
 
+		if (HikeMessengerApp.isStealthMsisdn(statusMessage.getMsisdn()))
+		{
+			int stealthMode = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			if (stealthMode != HikeConstants.STEALTH_ON)
+			{
+				return;
+			}
+		}
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		intent.setClass(getActivity(), ChatThread.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 	}
 
@@ -197,9 +207,11 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 					if (!olderMessages.isEmpty())
 					{
+						int scrollOffset = getListView().getChildAt(0).getTop();
+
 						statusMessages.addAll(statusMessages.size(), olderMessages);
 						centralTimelineAdapter.notifyDataSetChanged();
-						getListView().setSelection(firstVisibleItem);
+						getListView().setSelectionFromTop(firstVisibleItem, scrollOffset);
 					}
 					else
 					{
