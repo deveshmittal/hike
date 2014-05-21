@@ -153,7 +153,9 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.google.android.maps.GeoPoint;
@@ -3308,10 +3310,25 @@ public class Utils
 		return returnVal;
 	}
 
-	public static Intent getHomeActivityIntent(Context context, final int tabIndex)
+	public static Intent getHomeActivityIntent(Context context)
 	{
 		final Intent intent = new Intent(context, HomeActivity.class);
-		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getPeopleActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, PeopleActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getTimelineActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, TimelineActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		return intent;

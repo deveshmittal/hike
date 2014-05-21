@@ -86,12 +86,6 @@ import com.bsb.hike.utils.Utils;
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
 
-	public static final int UPDATES_TAB_INDEX = 0;
-
-	public static final int CHATS_TAB_INDEX = 1;
-
-	public static final int FRIENDS_TAB_INDEX = 2;
-
 	public static List<ContactInfo> ftueList = new ArrayList<ContactInfo>(0);
 
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
@@ -940,95 +934,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		invalidateOptionsMenu();
 	}
 
-	int initialRed = 231;
-
-	int initialGreen = 226;
-
-	int initialBlue = 214;
-
-	int finalRed = 255;
-
-	int finalGreen = 255;
-
-	int finalBlue = 255;
-
-	@SuppressLint("NewApi")
-	/*
-	 * Implemented to add a fade change in color when switching between updates tab and other tabs
-	 */
-	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
-	{
-
-		@Override
-		public void onPageSelected(int position)
-		{
-			invalidateOptionsMenu();
-
-			/*
-			 * Sending a blank query search to ensure all friends are shown.
-			 */
-			if (position == CHATS_TAB_INDEX)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY, "");
-			}
-
-			if (position == UPDATES_TAB_INDEX)
-			{
-				showUpdateIcon = false;
-
-				SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-				if (prefs.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0) > 0 || prefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0) > 0)
-				{
-					Utils.resetUnseenStatusCount(prefs);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_NOTIFICATION_COUNTER, null);
-				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
-
-			}
-
-			if (position != CHATS_TAB_INDEX)
-			{
-				long firstViewFtueTs = accountPrefs.getLong(HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, 0);
-				if (firstViewFtueTs == 0)
-				{
-					Editor editor = accountPrefs.edit();
-					editor.putLong(HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, System.currentTimeMillis() / 1000);
-					editor.commit();
-				}
-			}
-		}
-
-		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-		{
-			if (position != 0)
-			{
-				return;
-			}
-
-			int percent = (int) (positionOffset * 100);
-			if (percent % 2 != 0)
-			{
-				return;
-			}
-
-			int red = initialRed + (int) (((finalRed - initialRed) * percent) / 100);
-			int green = initialGreen + (int) (((finalGreen - initialGreen) * percent) / 100);
-			int blue = initialBlue + (int) (((finalBlue - initialBlue) * percent) / 100);
-
-			parentLayout.setBackgroundColor(Color.argb(255, red, green, blue));
-		}
-
-		@Override
-		public void onPageScrollStateChanged(int state)
-		{
-
-		}
-	};
-
 	private boolean showUpdateIcon;
-
 
 	private void showUpdatePopup(final int updateType)
 	{
