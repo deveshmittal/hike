@@ -163,6 +163,7 @@ import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -263,6 +264,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View mOverlayLayout;
 
 	private ArrayList<ConvMessage> messages;
+	
+	private static HashMap<Long, ConvMessage> messageMap;
 
 	private CustomLinearLayout chatLayout;
 
@@ -583,7 +586,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow = null;
 		}
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
-
+		messageMap.clear();
+		messageMap = null;
 	}
 
 	@Override
@@ -1125,6 +1129,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
 				messages.clear();
+				messageMap.clear();
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 			}
@@ -1372,6 +1377,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mAdapter != null)
 		{
 			messages.clear();
+			messageMap.clear();
 			mAdapter.notifyDataSetChanged();
 		}
 
@@ -1795,6 +1801,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * make a copy of the message list since it's used internally by the adapter
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+		if(messageMap != null)
+		{
+			messageMap.clear();
+		}
+		messageMap = new HashMap<Long, ConvMessage>();
+		addtoMessageMap(0, messages.size());
 
 		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
@@ -1957,6 +1969,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		wasOrientationChanged = false;
 	}
 
+	private void addtoMessageMap(int from, int to)
+	{
+		for(int i = to - 1; i >= from; i--)
+		{
+			ConvMessage msg = messages.get(i);
+			if(msg.getState() == State.SENT_DELIVERED_READ)
+			{
+				break;
+			}
+			addtoMessageMap(msg);
+		}
+	}
+
+	public static void addtoMessageMap(ConvMessage msg)
+	{
+		State msgState = msg.getState();
+
+		if(msg.getMsgID() <= 0)
+		{
+			return;
+		}
+		if(msg.isSent())
+		{
+			if (msg.isSMS())
+			{
+				if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
+			}
+			else
+			{
+				if(msgState != State.SENT_DELIVERED_READ)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
+			}
+		}
+	}
 	private void addUnkownContactBlockHeader()
 	{
 		if (contactInfo != null && contactInfo.isUnknownContact())
@@ -2699,6 +2750,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 					msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
+					messageMap.remove(ids[i]);
 				}
 			}
 			runOnUiThread(mUpdateAdapter);
@@ -3187,25 +3239,26 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ConvMessage findMessageById(long msgID)
 	{
-		if (mAdapter == null)
-		{
-			return null;
-		}
-
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
-		{
-			ConvMessage msg = mAdapter.getItem(i);
-			if (msg == null)
-			{
-				continue;
-			}
-			if (msg.getMsgID() == msgID)
-			{
-				return msg;
-			}
-		}
-		return null;
+		return messageMap.get(msgID);
+//		if (mAdapter == null)
+//		{
+//			return null;
+//		}
+//
+//		int count = mAdapter.getCount();
+//		for (int i = 0; i < count; ++i)
+//		{
+//			ConvMessage msg = mAdapter.getItem(i);
+//			if (msg == null)
+//			{
+//				continue;
+//			}
+//			if (msg.getMsgID() == msgID)
+//			{
+//				return msg;
+//			}
+//		}
+//		return null;
 	}
 
 	public String getContactNumber()
@@ -3422,6 +3475,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				messages.remove(messages.size() - 1);
 			}
 			mAdapter.addMessage(convMessage);
+			addtoMessageMap(messages.size() - 1 ,messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -5901,6 +5955,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 
 						mAdapter.addMessages(result, startIndex);
+						addtoMessageMap(startIndex, startIndex + result.size());
 						mAdapter.notifyDataSetChanged();
 						mConversationsView.setSelectionFromTop(firstVisibleItem + result.size(), scrollOffset);
 					}

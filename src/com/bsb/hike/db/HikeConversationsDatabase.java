@@ -47,6 +47,7 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -865,6 +866,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv.setConversation(conversation);
 			}
 			conv.setMsgID(msgId);
+			ChatThread.addtoMessageMap(conv);
 
 			if (conv.isFileTransferMessage() && conv.getConversation() != null)
 			{
