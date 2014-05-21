@@ -21,6 +21,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +88,8 @@ public class UploadFileTask extends FileTransferBase
 	private int num = 0;
 
 	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
+	
+	private int bufferSize = 1;
 
 	private int height;
 
@@ -582,6 +585,7 @@ public class UploadFileTask extends FileTransferBase
 		setChunkSize();
 		if (chunkSize > length)
 			chunkSize = (int) length;
+		setBufferSize();
 
 		String boundaryMesssage = getBoundaryMessage();
 		String boundary = "\r\n--" + BOUNDARY + "--\r\n";
@@ -599,7 +603,7 @@ public class UploadFileTask extends FileTransferBase
 			if (_state != FTState.IN_PROGRESS) // this is to check if user has PAUSED or cancelled the upload
 				break;
 
-			Logger.d(getClass().getSimpleName(), "bytes " + start + "-" + end + "/" + length + "/" + chunkSize);
+			Logger.d(getClass().getSimpleName(), "bytes " + start + "-" + end + "/" + length + ";  chunk:" + chunkSize + ";  buffer:" + bufferSize);
 			boolean resetAndUpdate = false;
 			int bytesRead = raf.read(fileBytes, boundaryMesssage.length(), chunkSize);
 			if (bytesRead == -1)
@@ -634,6 +638,7 @@ public class UploadFileTask extends FileTransferBase
 							end = (start + chunkSize - 1);
 							fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
 						}
+						setBufferSize();
 					}
 					else
 					{
@@ -888,6 +893,13 @@ public class UploadFileTask extends FileTransferBase
 		}
 		return responseJson;
 	}
+	
+	private void setBufferSize()
+	{
+		bufferSize = 1;
+		while((bufferSize * 2) < chunkSize)
+			bufferSize *= 2;
+	}
 
 	private byte[] setupFileBytes(String boundaryMesssage, String boundary, int chunkSize)
 	{
@@ -948,6 +960,9 @@ public class UploadFileTask extends FileTransferBase
 	private String send(String contentRange, byte[] fileBytes)
 	{
 		HttpClient client = new DefaultHttpClient();
+		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
+		//client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+		Long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
 		try
@@ -1001,7 +1016,8 @@ public class UploadFileTask extends FileTransferBase
 //				retry = false;
 //			}
 		}
-
+		time = System.currentTimeMillis() - time;
+		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s");
 		return res;
 	}
 
