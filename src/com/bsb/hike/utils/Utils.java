@@ -1184,6 +1184,11 @@ public class Utils
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
 	{
+		if (bitmap  == null)
+		{
+			return null;
+		}
+
 		Bitmap rotatedBitmap = null;
 		Matrix m = new Matrix();
 		ExifInterface exif = null;
