@@ -625,7 +625,7 @@ public class ClientState
 					{
 
 						// @TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
-						Logger.d(TAG, "inserting ping in pending flows , lastoutboundactivity time : " + lastInboundActivity + " lastinboundactivitytime : " + lastInboundActivity);
+						Logger.d(TAG, "inserting ping in pending flows , lastoutboundactivity time : " + lastOutboundActivity + " lastinboundactivitytime : " + lastInboundActivity);
 						pingOutstanding = Boolean.TRUE;
 						lastPing = time;
 						token = new MqttToken(clientComms.getClient().getClientId());
@@ -670,9 +670,10 @@ public class ClientState
 	public void checkActivity() throws MqttException
 	{
 		synchronized (pingOutstanding)
-		{
+		{	
 			if ((lastOutBoundQOS1 - lastInboundActivity >= INACTIVITY_TIMEOUT))
 			{
+				Logger.e(TAG, "not recieved ack for 1 min so disconnecting");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
 			}
 		}
