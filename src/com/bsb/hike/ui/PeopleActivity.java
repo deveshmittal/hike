@@ -162,6 +162,15 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 			return true;
 		}
 	};
+	
+	@Override
+	public void onBackPressed()
+	{
+		Intent intent = new Intent(PeopleActivity.this, HomeActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 
+		super.onBackPressed();
+	}
 
 }

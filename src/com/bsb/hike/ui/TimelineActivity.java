@@ -10,9 +10,11 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 public class TimelineActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
@@ -109,5 +111,14 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		Intent intent = new Intent(TimelineActivity.this, HomeActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 
+		super.onBackPressed();
+	}
 }
