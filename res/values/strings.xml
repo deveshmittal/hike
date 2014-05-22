@@ -18,7 +18,6 @@
     <string name="preferences">Preferences</string>
     <string name="resend">Resend</string>
     <string name="delete_account_failed">hike couldn\'t delete your account. Please try again.</string>
-    <string name="unlink_account_failed">hike couldn\'t logout your account. Please try again</string>
     <string name="hike_network_connection">Network Connection</string>
     <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
     <string name="notconnected_no_internet">Boss, check the internet!</string>
@@ -43,7 +42,6 @@
     <string name="terms_privacy">Terms and Privacy</string>
     <string name="invite_now">Invite now</string>
     <string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
-    <string name="shortcut">Add Shortcut</string>
     <string name="earn_200_sms">Invite friends, earn more free SMS.</string>
     <string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. For %1$s to receive hike messages, %1$s needs to opt-in to hike by giving a missed call to %2$s.\n\nYou\'ll get an extra 10 free SMS\' per month if %1$s opts-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
     <string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
@@ -64,7 +62,6 @@
     <string name="tap_share">Tap to share your unique invite URL:</string>
     <string name="done">Done</string>
     <string name="group_chat">Group Chat</string>
-    <string name="add_to_contacts">Add to Contacts</string>
     <string name="new_message">New Message</string>
     <string name="add_group">Add to Group</string>
     <string name="invite_share_message">I\'m using hike, an awesome new free messaging app! Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
@@ -113,7 +110,6 @@
     <string name="preview">Preview</string>
     <string name="error_recording">Audio could not be recorded.</string>
     <string name="done_rec">Done recording</string>
-    <string name="delete_leave">Delete and leave group</string>
     <string name="tap_to_record">TAP TO RECORD</string>
     <string name="tap_to_play">TAP TO PLAY</string>
     <string name="playing">PLAYING</string>
@@ -358,7 +354,6 @@
     <string name="confirm">Confirm</string>
     <string name="recent_updates">Recent Updates</string>
     <string name="whats_up_user">What\'s up, %1$s?</string>
-    <string name="status">Status</string>
     <string name="waiting_for_accept">Waiting for %1$s to accept your friend request</string>
     <string name="status_update">Status update</string>
     <string name="remove_friend">Remove</string>
@@ -373,7 +368,6 @@
     <string name="mute_group">Mute Group</string>
     <string name="unmute_group">Unmute Group</string>
     <string name="account">Account</string>
-    <string name="deleting_account">Deleting Account</string>
     <string name="enter_num">Please enter your phone number</string>
     <string name="enter_pin">Please enter the PIN</string>
     <string name="enter_name">Please enter your name</string>
@@ -597,7 +591,6 @@
     <string name="terms_privacy">Terms and Privacy</string>
     <string name="invite_now">Invite now</string>
     <string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
-    <string name="shortcut">Add Shortcut</string>
     <string name="earn_200_sms">Invite friends, earn more free SMS.</string>
     <string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. For %1$s to receive hike messages, %1$s needs to opt-in to hike by giving a missed call to %2$s.\n\nYou\'ll get an extra 10 free SMS\' per month if %1$s opts-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
     <string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
@@ -618,7 +611,6 @@
     <string name="tap_share">Tap to share your unique invite URL:</string>
     <string name="done">Done</string>
     <string name="group_chat">Group Chat</string>
-    <string name="add_to_contacts">Add to Contacts</string>
     <string name="new_message">New Message</string>
     <string name="new_group">New Group</string>
     <string name="add_group">Add to Group</string>
@@ -668,7 +660,6 @@
     <string name="preview">Preview</string>
     <string name="error_recording">Audio could not be recorded.</string>
     <string name="done_rec">Done recording</string>
-    <string name="delete_leave">Delete and leave group</string>
     <string name="tap_to_record">TAP TO RECORD</string>
     <string name="tap_to_play">TAP TO PLAY</string>
     <string name="playing">PLAYING</string>
@@ -914,7 +905,6 @@
     <string name="confirm">Confirm</string>
     <string name="recent_updates">Recent Updates</string>
     <string name="whats_up_user">What\'s up, %1$s?</string>
-    <string name="status">Status</string>
     <string name="waiting_for_accept">Waiting for %1$s to accept your friend request</string>
     <string name="status_update">Status update</string>
     <string name="remove_friend">Remove</string>
@@ -929,7 +919,6 @@
     <string name="mute_group">Mute Group</string>
     <string name="unmute_group">Unmute Group</string>
     <string name="account">Account</string>
-    <string name="deleting_account">Deleting Account</string>
     <string name="enter_num">Please enter your phone number</string>
     <string name="enter_pin">Please enter the PIN</string>
     <string name="enter_name">Please enter your name</string>
@@ -1199,7 +1188,6 @@
     <string name="feedback_on_hike">Feedback on hike for Android</string>
     <string name="privacy_setting">Privacy</string>
     <string name="privacy_setting_hinttext">Your Hike privacy Settings</string>
-    <string name="unlink_hinttext">Logout your Hike account from this device</string>
     <string name="notifications_hintext">Notifications for Hike activity</string>
     <string name="feedback_hinttext">Give us feedback</string>
     <string name="faq_hinttext">Frequently Asked Questions</string>
@@ -1219,10 +1207,6 @@
     <string name="work_in_progress">Updating Hike</string>
     <string name="upgrading_to_a_new_and_improvd_hike">Please wait while we make a few changes.</string>
     <string name="protip_games">games</string>
-    <string name="unlink_account">Logout</string>
-    <string name="delete_account_msg">Permanently delete your account :(</string>
-    <string name="unlink_confirmation">Are you sure you want to log out of your hike account on this device?</string>
-    <string name="unlinking_account">Logging out your Hike Account</string>
     <string name="ftue_grid_string">Start a conversation with one\nof your friends.</string>
     <string name="remind">Remind</string>
     <string name="invited">...Invited</string>
@@ -1288,9 +1272,7 @@
     <string name="Two">2</string>
     <string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>
     <string name="are_you_sure">Are you sure?</string>
-    <string name="delete_confirm_msg_1">Deleting your account will delete all your data, free SMS and any hike rewards.</string>
     <string name="please_confirm">Please Confirm</string>
-    <string name="delete_confirm_msg_2">This action is irreversible. Are you sure you want to delete your account?</string>
     <string name="email_body">Hi,\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\nWith hike\'s hilarious new stickers, you\'ll surely never send another plain boring message!\nhike also gives you the choice of Privacy with Last Seen so that you can keep you close friends closer.\n\nDownload it now http://hike.in and join the fun!</string>
     <string name="twitter_msg">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now http://hike.in #gethike</string>
     <string name="native_sms_invite_1">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now and lets chat for free http://hike.in</string>
@@ -1357,7 +1339,7 @@
     <string name="contacts_sync_started">"Contacts sync started"</string>
     <string name="add_friends_listview_header">"You have got %1$s contacts \n on hike. Nice!"</string>
     <string name="recommended_contacts_section">RECOMMENDED CONTACTS</string>
-    <string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever! You also get a talktime of *20 for each friend who joins.</string>
+    <string name="ftue_invite_friends_msg">Get your friends on Hike and enjoy free messaging forever!</string>
     <string name="start_inviting_friends">Start inviting friends</string>
     <string name="add_count_btn">Add(%1$s)</string>
     <string name="all_contacts">ALL CONTACTS</string>
@@ -1460,4 +1442,95 @@
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
+    <string name="introducing_stealth_mode">Introducing Hidden Mode</string>
+    <string name="stealth_mode_popup_msg">You can now hide your private chats from the world and read them only with a password.\n\nTry it now!</string>
+    <string name="quick_setup">Quick Setup</string>
+    <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Set up a password to access Hidden Mode.<br> <br> <b> Tap on \'hi\' to begin.</b> ]]></string>
+    <string name="alp_42447968_cmd_confirm">Confirm</string>
+    <string name="alp_42447968_cmd_continue">Continue</string>
+    <string name="alp_42447968_cmd_forgot_pattern">Forgot pattern?</string>
+    <string name="alp_42447968_cmd_retry">Retry</string>
+    <string name="alp_42447968_loading">Loading…</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cell_added">Cell added</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cleared">Pattern cleared</string>
+    <string name="alp_42447968_lockscreen_access_pattern_detected">Pattern completed</string>
+    <string name="alp_42447968_lockscreen_access_pattern_start">Pattern started</string>
+    <string name="alp_42447968_msg_connect_4dots">Connect at least 4 dots. Try again.</string>
+    <string name="alp_42447968_msg_draw_an_unlock_pattern">Draw your unique unlock pattern</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock">Draw pattern to unlock</string>
+    <string name="alp_42447968_msg_pattern_recorded">Pattern recorded</string>
+    <string name="alp_42447968_msg_redraw_pattern_to_confirm">Redraw your pattern to confirm</string>
+    <string name="alp_42447968_msg_release_finger_when_done">Release finger when done</string>
+    <string name="alp_42447968_msg_try_again">Your patterns don’t match. Try again.</string>
+    <string name="alp_42447968_msg_your_new_unlock_pattern">Your new unlock pattern</string>
+
+    <plurals name="alp_42447968_pmsg_connect_x_dots">
+        <item quantity="one">Connect at least %1$d dot. Try again</item>
+        <item quantity="other">Connect at least %1$d dots. Try again</item>
+    </plurals>
+    
+    <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
+    <string name="stealth_notification_message">You have a new notification</string>
+    <string name="retry">Retry</string>
+
+	<string name="reset_complete_stealth_header">Reset Hidden Mode</string>
+	<string name="reset_complete_stealth_info">Forgot your password? Reset Hidden Mode. All hidden chats will be deleted.</string>
+	<string name="initiate_reset_stealth_header">Reset Hidden Mode</string>
+	<string name="initiate_reset_stealth_body">Hidden Mode will be reset in 30 minutes. All hidden chats will be deleted! Continue?</string>
+	<string name="resetting_complete_stealth_header">Resetting Hidden Mode</string>
+	<string name="resetting_complete_stealth_info">Tap to cancel.</string>
+	<string name="reset_stealth_tip"> <![CDATA[ <b> All hidden chats will be deleted in %1$s minutes </b> 
+	    ]]></string>
+	<string name="tap_to_reset_stealth_tip"><![CDATA[ <b> Tap here to reset Hidden Mode now! </b> 
+	    ]]></string>
+	<string name="reset_stealth_confirmation">Resetting Hidden Mode will delete all your hidden Chats.\nAre you sure?</string>
+	<string name="stealth_mode_empty_conv_popup_msg">You can now hide your private chats from the world and read them only with a password. Start a new chat and try it out by tapping on \'hi\'!</string>
+	<string name="stealth_tap_and_hold_tip">Tap and hold on a chat to mark a chat \'Hidden\'.</string>
+	<string name="chat_marked_stealth">You’ve hidden a chat.</string>
+    <string name="chat_unmarked_stealth">You’ve marked a chat visible.</string>
+    <string name="mark_stealth">Mark Chat as Hidden</string>
+    <string name="unmark_stealth">Mark Chat as Visible</string>
+    <string name="edit">Edit</string>
+    <string name="vib_off_key">Off</string>
+    <string name="vib_default_key">Default</string>
+    <string name="vib_short_key">Short</string>
+    <string name="vib_long_key">Long</string>
+    <string name="delete_account_heading">DELETING YOUR ACCOUNT WILL</string>
+    <string name="delete_account_description">Delete all your messages, free SMS and hike rewards</string>
+    <string name="delete_account_heading_2">To delete your account, enter the following details</string>
+    <string name="delete_my_account">DELETE MY ACOOUNT</string>
+    <string name="chat_unmarked_stealth_first">You’ve marked a chat visible. It’ll now be visible to anyone who opens hike.</string>
+    <string name="tickSoundTitle">Conversation tones</string>
+    <string name="tickSoundSummary">Play sound for incoming and outgoing messages</string>
+    <string name="notif_sound_off_key">Off</string>
+    <string name="notif_sound_default_key">Default</string>
+    <string name="notif_sound_Hike_key">HikeJingle</string>
+    <string name="notificationSoundTitle">Notification tones</string>
+    <string name="notificationSoundSummary">Select a sound to play for a new notification message</string>
+    <string name="status">Status</string>
+	<string name="getting_started">Getting Started..</string>
+    <string name="viewcontact">View contact</string>
+    <string name="add_to_contacts_existing">Add to existing contact</string>
+    <string name="delete_chat">Delete chat</string>
+    <string name="clear_whole_conversation">Clear whole conversation</string>
+    <string name="email_conversations">Email conversation</string>
+    <string name="unlink_account_failed">hike couldn\'t logout your account. Please try again</string>
+    <string name="deleting_account">Deleting Account...</string>
+    <string name="unlink_hinttext">Clear your messages and profile from this device.</string>
+    <string name="unlink_account">Reset Account</string>
+    <string name="unlink_account_button">Reset</string>
+    <string name="delete_account_msg">Delete your Hike account.</string>
+    <string name="unlink_confirmation">Are you sure you want to reset your account?</string>
+    <string name="unlinking_account">Resetting...</string>
+     <string name="delete_confirm_msg_1">This will delete all your messages, SMS balance and any hike rewards.</string>
+     <string name="delete_confirm_msg_2">Are you sure want to continue? This action is irreversible.</string>
+     <string name="shortcut">Add conversation shortcut</string>
+     <string name="add_to_contacts">Add to contacts</string>
+     <string name="delete_leave">Delete and exit group</string>
+     <string name="confirm_delete_chat_msg">Delete chat with \"%1$s\"? </string>
+     <string name="confirm_delete_group_msg">Delete and exit \"%1$s\" group?</string>
+     <string name="email_chat">Email Chat</string>
+     <string name="clear_chat">Clear Chat</string>
+     <string name="add_shortcut">Add Shortcut</string>
+     
 </resources>

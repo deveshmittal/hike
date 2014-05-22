@@ -22,7 +22,6 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
@@ -39,7 +38,7 @@ public class StickerManager
 
 	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
 
-	public static final String DOGGY_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
+	public static final String EXPRESSIONS_CATEGORY_INSERT_TO_DB = "defaultExpressionsCategoryInsertedToDB";
 
 	public static final String HUMANOID_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
 
@@ -87,6 +86,10 @@ public class StickerManager
 
 	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
 
+	public static final String DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER = "delDefaultDownloadedExpressionsStickers";
+	
+	private static final String TAG = "StickerManager";
+
 	public static int RECENT_STICKERS_COUNT = 30;
 
 	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1, R.drawable.sticker_10_love2, R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
@@ -100,14 +103,16 @@ public class StickerManager
 	public final String[] LOCAL_STICKER_IDS_HUMANOID = { "001_love1.png", "002_love2.png", "003_teasing.png", "004_rofl.png", "005_bored.png", "006_angry.png", "007_strangle.png",
 			"008_shocked.png", "009_hurray.png", "010_yawning.png" };
 
-	public final int[] LOCAL_STICKER_RES_IDS_DOGGY = { R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup, R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
-			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh, R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
+	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn, R.drawable.sticker_2_lol, R.drawable.sticker_3_rofl, R.drawable.sticker_4_lmao,
+			R.drawable.sticker_5_omg, R.drawable.sticker_6_brb, R.drawable.sticker_7_gtg, R.drawable.sticker_8_xoxo, };
 
-	public final int[] LOCAL_STICKER_SMALL_RES_IDS_DOGGY = { R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup, R.drawable.sticker_small_3_drooling,
-			R.drawable.sticker_small_4_devilsmile, R.drawable.sticker_small_5_sorry, R.drawable.sticker_small_6_urgh, R.drawable.sticker_small_7_confused,
-			R.drawable.sticker_small_8_dreaming };
+	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn_small, R.drawable.sticker_2_lol_small, R.drawable.sticker_3_rofl_small,
+			R.drawable.sticker_4_lmao_small, R.drawable.sticker_5_omg_small, R.drawable.sticker_6_brb_small, R.drawable.sticker_7_gtg_small, R.drawable.sticker_8_xoxo_small, };
 
-	public final String[] LOCAL_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
+	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_gn.png", "002_lol.png", "003_rofl.png", "004_lmao.png", "005_omg.png", "006_brb.png", "007_gtg.png",
+			"008_xoxo.png", };
+
+	public final String[] OLD_HARDCODED_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
 			"007_confused.png", "008_dreaming.png", };
 
 	public enum StickerCategoryId
@@ -156,26 +161,6 @@ public class StickerManager
 				return "humanoidDownloadShown";
 			}
 		},
-		doggy
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.doggy;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_doggy;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "doggyDownloadShown";
-			}
-		},
 		expressions
 		{
 			@Override
@@ -216,24 +201,24 @@ public class StickerManager
 				return "loveDownloadShown";
 			}
 		},
-		angry
+		doggy
 		{
 			@Override
 			public int resId()
 			{
-				return R.drawable.angry;
+				return R.drawable.doggy;
 			}
 
 			@Override
 			public int previewResId()
 			{
-				return R.drawable.preview_angry;
+				return R.drawable.preview_doggy;
 			}
 
 			@Override
 			public String downloadPref()
 			{
-				return "angryDownloadShown";
+				return "doggyDownloadShown";
 			}
 		},
 		bollywood
@@ -296,6 +281,27 @@ public class StickerManager
 				return "indianDownloadShown";
 			}
 		},
+		sports
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.sports;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_sports;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "sportsDownloadShown";
+			}
+		},
+
 		humanoid2
 		{
 			@Override
@@ -314,6 +320,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "humanoid2DownloadShown";
+			}
+		},
+		angry
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.angry;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_angry;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "angryDownloadShown";
 			}
 		},
 		avatars
@@ -426,7 +452,7 @@ public class StickerManager
 			return !".nomedia".equalsIgnoreCase(fileName);
 		}
 	};
-	
+
 	public Map<String, StickerTaskBase> stickerTaskMap;
 
 	private Set<Sticker> recentStickers;
@@ -539,11 +565,11 @@ public class StickerManager
 
 	private void removeCategoryFromRecents(StickerCategory category)
 	{
-		if (category.categoryId.equals(StickerCategoryId.doggy))
+		if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
-			for (int i = 0; i < LOCAL_STICKER_IDS_DOGGY.length; i++)
+			for (int i = 0; i < LOCAL_STICKER_IDS_EXPRESSIONS.length; i++)
 			{
-				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_DOGGY[i], i));
+				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_EXPRESSIONS[i], i));
 			}
 		}
 		else if (category.categoryId.equals(StickerCategoryId.humanoid))
@@ -570,11 +596,11 @@ public class StickerManager
 		}
 	}
 
-	public void insertDoggyCategory()
+	public void insertExpressionsCategory()
 	{
-		HikeConversationsDatabase.getInstance().insertDoggyStickerCategory();
+		HikeConversationsDatabase.getInstance().insertExpressionsStickerCategory();
 		Editor editor = preferenceManager.edit();
-		editor.putBoolean(DOGGY_CATEGORY_INSERT_TO_DB, true);
+		editor.putBoolean(EXPRESSIONS_CATEGORY_INSERT_TO_DB, true);
 		editor.commit();
 	}
 
@@ -588,7 +614,7 @@ public class StickerManager
 
 	public void resetReachedEndForDefaultStickers()
 	{
-		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.doggy.name(), false);
+		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.expressions.name(), false);
 		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.humanoid.name(), false);
 		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
@@ -710,7 +736,7 @@ public class StickerManager
 	{
 		boolean rem = recentStickers.remove(st);
 
-		Logger.d(getClass().getSimpleName(),"Sticker removed from recents : " + rem);
+		Logger.d(TAG, "Sticker removed from recents : " + rem);
 
 		// remove the sticker from cache too, recycling stuff is handled by the cache itself
 		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context));
@@ -765,11 +791,13 @@ public class StickerManager
 		 * If the directory is not available in both cases, we return the external storage's path if external storage is available. Else we return the internal storage's path.
 		 */
 		boolean externalAvailable = false;
-		if (Utils.getExternalStorageState() == ExternalStorageState.WRITEABLE)
+		ExternalStorageState st = Utils.getExternalStorageState();
+		Logger.d(TAG, "External Storage state : " + st.name());
+		if (st == ExternalStorageState.WRITEABLE)
 		{
 			externalAvailable = true;
 			String stickerDirPath = getExternalStickerDirectoryForCategoryId(context, catId);
-
+			Logger.d(TAG,"Sticker dir path : " + stickerDirPath);
 			if (stickerDirPath == null)
 			{
 				return null;
@@ -779,18 +807,23 @@ public class StickerManager
 
 			if (stickerDir.exists())
 			{
+				Logger.d(TAG, "Sticker Dir exists .... so returning");
 				return stickerDir.getPath();
 			}
 		}
 		File stickerDir = new File(getInternalStickerDirectoryForCategoryId(context, catId));
+		Logger.d(TAG, "Checking Internal Storage dir : " + stickerDir.getAbsolutePath());
 		if (stickerDir.exists())
 		{
+			Logger.d(TAG, "Internal Storage dir exist so returning it.");
 			return stickerDir.getPath();
 		}
 		if (externalAvailable)
 		{
+			Logger.d(TAG, "Returning external storage dir.");
 			return getExternalStickerDirectoryForCategoryId(context, catId);
 		}
+		Logger.d(TAG, "Returning internal storage dir.");
 		return getInternalStickerDirectoryForCategoryId(context, catId);
 	}
 
@@ -799,14 +832,14 @@ public class StickerManager
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
 		if (path == null)
 			return false;
-		
+
 		File categoryDir = new File(path + HikeConstants.SMALL_STICKER_ROOT);
 		if (categoryDir.exists())
 		{
 			String[] stickerIds = categoryDir.list(stickerFileFilter);
-			if(stickerIds.length > 0)
+			if (stickerIds.length > 0)
 				return true;
-			else 
+			else
 				return false;
 		}
 		return false;
@@ -859,6 +892,7 @@ public class StickerManager
 		try
 		{
 			long t1 = System.currentTimeMillis();
+			Logger.d(TAG, "Calling function get sorted list for category : " + catId.name());
 			String extDir = getStickerDirectoryForCategoryId(context, catId.name());
 			File dir = new File(extDir);
 			if (!dir.exists())
@@ -883,17 +917,17 @@ public class StickerManager
 				}
 				catch (Exception e)
 				{
-
+					Logger.e(TAG, "Exception while deserializing sticker", e);
 				}
 			}
 			in.close();
 			fileIn.close();
 			long t2 = System.currentTimeMillis();
-			Logger.d(getClass().getSimpleName(), "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
+			Logger.d(TAG, "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Logger.e(getClass().getSimpleName(), "Exception while reading category file.", e);
+			Logger.e(TAG, "Exception while reading category file.", e);
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 		}
 		return list;
@@ -918,15 +952,17 @@ public class StickerManager
 			synchronized (recentStickers)
 			{
 				Iterator<Sticker> it = list.iterator();
+				Sticker st = null;
 				while (it.hasNext())
 				{
 					try
 					{
-						it.next().serializeObj(out);
+						st = it.next();
+						st.serializeObj(out);
 					}
 					catch (Exception e)
 					{
-
+						Logger.e(TAG, "Exception while serializing a sticker : " + st.getStickerId(), e);
 					}
 				}
 			}
@@ -934,11 +970,11 @@ public class StickerManager
 			out.close();
 			fileOut.close();
 			long t2 = System.currentTimeMillis();
-			Logger.d(getClass().getSimpleName(), "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
+			Logger.d(TAG, "Time in ms to save sticker list of category : " + catId + " to file :" + (t2 - t1));
 		}
 		catch (Exception e)
 		{
-			Logger.e(getClass().getSimpleName(), "Exception while saving category file.", e);
+			Logger.e(TAG, "Exception while saving category file.", e);
 		}
 	}
 
@@ -979,31 +1015,49 @@ public class StickerManager
 	{
 		try
 		{
-			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.doggy.name());
+			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
 			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
 			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-				for(String stId : LOCAL_STICKER_IDS_DOGGY)
-				{
-					File st = new File(largeStickerDir,stId);
-					Utils.deleteFile(st);
-					st = new File(smallStickerDir,stId);
-					Utils.deleteFile(st);
-				}
-			
-			dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
-			largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
-			smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			for(String stId : LOCAL_STICKER_IDS_HUMANOID)
+			for (String stId : LOCAL_STICKER_IDS_HUMANOID)
 			{
-				File st = new File(largeStickerDir,stId);
+				File st = new File(largeStickerDir, stId);
 				Utils.deleteFile(st);
-				st = new File(smallStickerDir,stId);
+				st = new File(smallStickerDir, stId);
 				Utils.deleteFile(st);
 			}
 		}
 		catch (Exception e)
 		{
 
+		}
+	}
+
+	public void deleteDefaultDownloadedExpressionsStickers()
+	{
+		try
+		{
+			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.expressions.name());
+			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+			for (String stId : LOCAL_STICKER_IDS_EXPRESSIONS)
+			{
+				File st = new File(largeStickerDir, stId);
+				Utils.deleteFile(st);
+				st = new File(smallStickerDir, stId);
+				Utils.deleteFile(st);
+			}
+		}
+		catch (Exception e)
+		{
+
+		}
+	}
+
+	public void removeStickersFromRecents(String categoryName, String[] stickerIds)
+	{
+		for (String stickerId : stickerIds)
+		{
+			recentStickers.remove(new Sticker(categoryName, stickerId));
 		}
 	}
 }

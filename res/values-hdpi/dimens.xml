@@ -23,4 +23,7 @@
 	<dimen name="addfriend_popup_title_padding_right">10dp</dimen>
 	<dimen name="addfriend_popup_title_margin_bottom">6dp</dimen>
 	<dimen name="addfriend_popup_btn_margin_bottom">12dp</dimen>
+	<dimen name="stealth_ftue_pu_img_margin_bottom">16dp</dimen>
+	<dimen name="stealth_ftue_pu_img_margin_top">26dp</dimen>
+	
 </resources>

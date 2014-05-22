@@ -1,7 +1,7 @@
 package com.bsb.hike.tasks;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +17,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 
 public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
@@ -43,6 +44,14 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	private List<ContactInfo> smsContactsList;
 
+	private List<ContactInfo> groupsStealthList;
+
+	private List<ContactInfo> friendsStealthList;
+
+	private List<ContactInfo> hikeStealthContactsList;
+
+	private List<ContactInfo> smsStealthContactsList;
+
 	private List<ContactInfo> filteredGroupsList;
 
 	private List<ContactInfo> filteredFriendsList;
@@ -55,16 +64,22 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	private boolean fetchGroups = false;
 
+	private boolean creatingOrEditingGroup = false;
+
+	private int stealthMode;
+
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
-			List<ContactInfo> filteredFriendsList, List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList)
+			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> filteredFriendsList,
+			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList)
 	{
-		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, null, null, null,
-				false, null);
+		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList, smsStealthContactsList, filteredFriendsList,
+				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, false, null, false);
 	}
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
-			List<ContactInfo> filteredFriendsList, List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList,
-			List<ContactInfo> filteredGroupsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId)
+			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> filteredFriendsList,
+			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList, List<ContactInfo> groupsStealthList,
+			List<ContactInfo> filteredGroupsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGroup)
 	{
 		this.friendsAdapter = friendsAdapter;
 
@@ -75,6 +90,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		this.hikeContactsList = hikeContactsList;
 		this.smsContactsList = smsContactsList;
 
+		this.groupsStealthList = groupsStealthList;
+		this.friendsStealthList = friendsStealthList;
+		this.hikeStealthContactsList = hikeStealthContactsList;
+		this.smsStealthContactsList = smsStealthContactsList;
+
 		this.filteredGroupsList = filteredGroupsList;
 		this.filteredFriendsList = filteredFriendsList;
 		this.filteredHikeContactsList = filteredHikeContactsList;
@@ -84,6 +104,10 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		this.fetchGroups = fetchGroups;
 		this.existingGroupId = existingGroupId;
+
+		this.creatingOrEditingGroup = creatingOrEditingGroup;
+
+		this.stealthMode = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 	}
 
 	@Override
@@ -98,14 +122,13 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		if (fetchGroups)
 		{
 			groupTaskList = HikeConversationsDatabase.getInstance().getGroupNameAndParticipantsAsContacts(context);
+			addToStealthList(groupTaskList, groupsStealthList, true);
 		}
 
 		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
-		friendTaskList = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn);
-		friendTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false));
-		friendTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
-		friendTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
+		friendTaskList = hikeUserDatabase.getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED, FavoriteType.REQUEST_SENT,
+				FavoriteType.REQUEST_SENT_REJECTED }, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false);
 		Collections.sort(friendTaskList, ContactInfo.lastSeenTimeComparator);
 
 		hikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn);
@@ -130,32 +153,62 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
 			}
 		}
+		addToStealthList(friendTaskList, friendsStealthList, false);
+		addToStealthList(hikeTaskList, hikeStealthContactsList, false);
+		addToStealthList(smsTaskList, smsStealthContactsList, false);
 
 		return null;
 	}
 
-	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, GroupParticipant> groupParticipants)
+	private void addToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList, boolean isGroupTask)
 	{
-		List<Integer> indicesToRemove = new ArrayList<Integer>();
-
-		for (int i = contactList.size() - 1; i >= 0; i--)
+		if (creatingOrEditingGroup)
 		{
-			ContactInfo contactInfo = contactList.get(i);
-			if (groupParticipants.containsKey(contactInfo.getMsisdn()))
-			{
-				indicesToRemove.add(i);
-			}
+			return;
 		}
 
-		for (Integer i : indicesToRemove)
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
 		{
-			contactList.remove(i.intValue());
+			ContactInfo contactInfo = iter.next();
+			/*
+			 * if case of group contactInfo.getId() will retrun groupId, which is treated as msisdn for groups.
+			 */
+			String msisdn = isGroupTask ? contactInfo.getId() : contactInfo.getMsisdn();
+			if (HikeMessengerApp.isStealthMsisdn(msisdn))
+			{
+				stealthList.add(contactInfo);
+
+				/*
+				 * If stealth mode is currently off, we should remove these contacts from the list.
+				 */
+				if (stealthMode != HikeConstants.STEALTH_ON)
+				{
+					iter.remove();
+				}
+			}
+		}
+	}
+
+	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, GroupParticipant> groupParticipants)
+	{
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
+		{
+			ContactInfo contactInfo = iter.next();
+			if (groupParticipants.containsKey(contactInfo.getMsisdn()))
+			{
+				iter.remove();
+			}
 		}
 	}
 
 	@Override
 	protected void onPostExecute(Void result)
 	{
+		/*
+		 * Clearing all the lists initially to ensure we remove any existing contacts in the list that might be there because of the 'ai' packet.
+		 */
+		clearAllLists();
+
 		if (fetchGroups)
 		{
 			groupsList.addAll(groupTaskList);
@@ -175,5 +228,21 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		friendsAdapter.setListFetchedOnce(true);
 
 		friendsAdapter.makeCompleteList(true);
+	}
+
+	private void clearAllLists()
+	{
+		if (fetchGroups)
+		{
+			groupsList.clear();
+			filteredGroupsList.clear();
+		}
+
+		friendsList.clear();
+		hikeContactsList.clear();
+		smsContactsList.clear();
+		filteredFriendsList.clear();
+		filteredHikeContactsList.clear();
+		filteredSmsContactsList.clear();
 	}
 }

@@ -6,7 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -36,8 +38,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Pair;
 
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
@@ -53,6 +55,7 @@ import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -61,12 +64,12 @@ import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application implements Listener
+public class HikeMessengerApp extends Application implements HikePubSub.Listener
 {
 
 	public static enum CurrentState
 	{
-		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED
+		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED, NEW_ACTIVITY_IN_BG
 	}
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
@@ -301,9 +304,9 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
 
-	public static final String GREENBLUE_DETAILS_SENT = "whatsappDetailsSent";
+	public static final String GREENBLUE_DETAILS_SENT = "gbDetailsSent";
 
-	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeWhatsapp";
+	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeGb";
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
@@ -312,8 +315,6 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
 
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
-
-	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
 
 	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
 
@@ -328,6 +329,20 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
 	public static final String SHOWN_ADD_FAVORITE_TIP = "shownAddFavoriteTip";
+	
+	public static final String MQTT_IPS = "mqttIps";
+
+	public static final String STEALTH_ENCRYPTED_PATTERN = "stealthEncryptedPattern";
+
+	public static final String STEALTH_MODE = "stealthMode";
+
+	public static final String STEALTH_MODE_SETUP_DONE = "steatlhModeSetupDone";
+
+	public static final String SHOWING_STEALTH_FTUE_CONV_TIP = "showingStealthFtueConvTip";
+
+	public static final String RESET_COMPLETE_STEALTH_START_TIME = "resetCompleteStealthStartTime";
+
+	public static final String SHOWN_FIRST_UNMARK_STEALTH_TOAST = "shownFirstUnmarkStealthToast";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -340,6 +355,8 @@ public class HikeMessengerApp extends Application implements Listener
 	private static Messenger mMessenger;
 
 	private static Map<String, TypingNotification> typingNotificationMap;
+
+	private static Set<String> stealthMsisdn;
 
 	private Messenger mService;
 
@@ -357,11 +374,13 @@ public class HikeMessengerApp extends Application implements Listener
 
 	private ActivityTimeLogger activityTimeLogger;
 
-	public static Map<String, Long> lastSeenFriendsMap;
+	public static Map<String, Pair<Integer, Long>> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
 
 	public static volatile boolean networkError;
+
+	public Handler appStateHandler;
 
 	class IncomingHandler extends Handler
 	{
@@ -399,7 +418,7 @@ public class HikeMessengerApp extends Application implements Listener
 		mPubSubInstance = new HikePubSub();
 		if (HikeMessengerApp.lastSeenFriendsMap == null)
 		{
-			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
+			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Pair<Integer, Long>>();
 		}
 	}
 
@@ -551,6 +570,11 @@ public class HikeMessengerApp extends Application implements Listener
 			mEditor.commit();
 		}
 
+		/*
+		 * Resetting the stealth mode when the app starts. 
+		 */
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+		performPreferenceTransition();
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
 		try
@@ -641,6 +665,8 @@ public class HikeMessengerApp extends Application implements Listener
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
+		stealthMsisdn = new HashSet<String>();
+
 		initialiseListeners();
 
 		mMessenger = new Messenger(new IncomingHandler());
@@ -680,20 +706,42 @@ public class HikeMessengerApp extends Application implements Listener
 			editor.commit();
 		}
 
-		makeNoMediaFiles();
+		/*
+		 * Replacing GB keys' strings.
+		 */
+		if (!settings.contains(GREENBLUE_DETAILS_SENT))
+		{
+			replaceGBKeys();
+		}
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
+		makeNoMediaFiles();
 
 		hikeBotNamesMap = new HashMap<String, String>();
 		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		initHikeLruCache(getApplicationContext());
 
 		/*
 		 * Setting the last seen preference for the friends comparator.
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+
+		appStateHandler = new Handler();
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+	}
+
+	private void replaceGBKeys()
+	{
+		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance(this);
+
+		boolean gbDetailsSent = preferenceUtil.getData("whatsappDetailsSent", false);
+		int lastGBBackoffTime = preferenceUtil.getData("lastBackOffTimeWhatsapp", 0);
+
+		preferenceUtil.saveData(GREENBLUE_DETAILS_SENT, gbDetailsSent);
+		preferenceUtil.saveData(LAST_BACK_OFF_TIME_GREENBLUE, lastGBBackoffTime);
 	}
 
 	private static HikeLruCache cache;
@@ -792,6 +840,28 @@ public class HikeMessengerApp extends Application implements Listener
 		return typingNotificationMap;
 	}
 
+	public static void addStealthMsisdn(String msisdn)
+	{
+		stealthMsisdn.add(msisdn);
+		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_MARKED, msisdn);
+	}
+
+	public static void removeStealthMsisdn(String msisdn)
+	{
+		stealthMsisdn.remove(msisdn);
+		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+	}
+
+	public static void clearStealthMsisdn()
+	{
+		stealthMsisdn.clear();
+	}
+
+	public static boolean isStealthMsisdn(String msisdn)
+	{
+		return stealthMsisdn.contains(msisdn);
+	}
+
 	public void initialiseListeners()
 	{
 		if (dbConversationListener == null)
@@ -811,12 +881,35 @@ public class HikeMessengerApp extends Application implements Listener
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type))
+		if(HikePubSub.CONNECTED_TO_MQTT.equals(type))
 		{
-			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			boolean isWifiConnection = object != null ? (Boolean) object : Utils.switchSSLOn(getApplicationContext());
+			appStateHandler.post(appStateChangedRunnable);
+		}
+	}
 
-			Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), isWifiConnection);
+	private Runnable appStateChangedRunnable = new Runnable()
+	{
+		
+		@Override
+		public void run()
+		{
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false);
+		}
+	};
+
+	private void performPreferenceTransition()
+	{
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!pref.getBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, false))
+		{
+			Editor edit = pref.edit();
+			edit.putString(HikeConstants.NOTIF_SOUND_PREF, Utils.getOldSoundPref(this));
+			edit.putString(HikeConstants.VIBRATE_PREF_LIST, Utils.getOldVibratePref(this));
+			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
+			edit.commit();
 		}
 	}
 }

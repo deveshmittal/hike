@@ -175,8 +175,7 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 			keypp = key + ProfileAdapter.PROFILE_PIC_SUFFIX;
 
 		HikeMessengerApp.getLruCache().remove(keypp);
-
-		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, key);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_IMAGE_DOWNLOADED, key);
 		return Boolean.TRUE;
 	}
 
@@ -184,12 +183,14 @@ public class ProfileImageLoader extends AsyncTaskLoader<Boolean>
 	public void onCanceled(Boolean data)
 	{
 		super.onCanceled(data);
+		Utils.removeTempProfileImage(key);
 	}
 
 	@Override
 	protected void onStopLoading()
 	{
 		cancelLoad();
+		Utils.removeTempProfileImage(key);
 	}
 
 }

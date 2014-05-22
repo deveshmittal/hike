@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chatThreadParentLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
@@ -37,13 +38,18 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="@dimen/st__action_bar_default_height"
+            android:layout_marginTop="@dimen/chat_thread_margin_top"
             android:layout_weight="30" >
+
+            <include
+                android:id="@+id/sms_toggle_button"
+                layout="@layout/sms_toggle_item" />
 
             <ListView
                 android:id="@+id/conversations_list"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:layout_below="@id/sms_toggle_button"
                 android:cacheColorHint="#00000000"
                 android:divider="@null"
                 android:fadingEdge="none"
@@ -138,9 +144,10 @@
                 <include layout="@layout/tool_tip" />
             </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/new_message_indicator"
-                android:layout_width="148dp"
+                android:layout_width="wrap_content"
+                android:minWidth="148dp"
                 android:layout_height="34dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
@@ -149,9 +156,9 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
-            </RelativeLayout>
+            </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/scroll_bottom_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
@@ -162,9 +169,9 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
-            </RelativeLayout>
+            </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/scroll_top_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
@@ -175,13 +182,15 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/new_message_indicator" />
-            </RelativeLayout>
-        </RelativeLayout>
+            </LinearLayout>
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#14292d2e"
+                android:layout_alignParentBottom="true" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#14292d2e" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/bottom_panel"
@@ -197,22 +206,22 @@
 
                 <ImageButton
                     android:id="@+id/send_message"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="49dp"
+                    android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="@drawable/compose_view_btn_selector"
+                    android:background="?actionBarItemBackground"
                     android:onClick="onSendClick"
                     android:src="@drawable/ic_walkie_talkie"
                     android:state_enabled="false" />
 
                 <ImageButton
                     android:id="@+id/sticker_btn"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="49dp"
+                    android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/compose_view_btn_selector"
+                    android:background="?actionBarItemBackground"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker" />
@@ -264,7 +273,6 @@
                             android:paddingTop="11dp"
                             android:src="@drawable/smiley_selector" />
                     </LinearLayout>
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -314,18 +322,16 @@
                     android:gravity="center_horizontal"
                     android:visibility="invisible" />
             </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/emoticon_layout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/emoticon_pallete"
-                android:layout_below="@id/compose_container"
-                android:visibility="gone" >
-
-                <include layout="@layout/emoticon_layout" />
-            </RelativeLayout>
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
+
+    <View
+        android:id="@+id/sticker_palette_filler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black"
+        android:visibility="gone" />
 
     <include layout="@layout/dark_overlay" />
 
