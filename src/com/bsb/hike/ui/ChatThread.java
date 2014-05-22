@@ -393,8 +393,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	int currentFirstVisibleItem = Integer.MAX_VALUE;
 
-	private boolean receiversRegistered = false;
-
 	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
 
 	@Override
@@ -518,6 +516,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		unregisterReceiver(screenOffBR);
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
 			Editor editor = prefs.edit();
@@ -525,19 +524,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			editor.commit();
 		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-
-		/*
-		 * Only unregister if the receivers were registered in the first place
-		 */
-		if (receiversRegistered)
-		{
-			unregisterReceiver(screenOffBR);
-			LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-			LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
-
-			receiversRegistered = false;
-		}
-
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
 		if (stickerAdapter != null)
 		{
 			stickerAdapter.unregisterListeners();
@@ -743,9 +731,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
 		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-
-		receiversRegistered = true;
-
 		Logger.i("chatthread", "on create end");
 	}
 
@@ -5810,8 +5795,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			metadata.put(StickerManager.CATEGORY_ID, sticker.getCategory().categoryId.name());
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
-
-			metadata.put(StickerManager.STICKER_INDEX, sticker.getStickerIndex());
 
 			convMessage.setMetadata(metadata);
 			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
