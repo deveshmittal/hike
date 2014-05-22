@@ -542,11 +542,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			optionsList.add(getString(R.string.group_info));
 		}
-		if (conv.getContactName() != null)
+		// Removing shortcut option for nokia
+		/*if (conv.getContactName() != null)
 		{
 			optionsList.add(getString(R.string.shortcut));
 
-		}
+		}*/
 
 		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
 		{
