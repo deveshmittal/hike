@@ -1142,9 +1142,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			}
 			if (mMqttHandlerLooper != null)
 			{
-				if (Utils.hasKitKat())
-					mMqttHandlerLooper.quitSafely();
-				else
+				//if (Utils.hasKitKat())
+				//	mMqttHandlerLooper.quitSafely();
+				//else
 					mMqttHandlerLooper.quit();
 			}
 			mqttMessageManager.close();

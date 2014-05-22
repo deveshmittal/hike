@@ -132,10 +132,15 @@ public class BitmapUtils
 			return 0;
 		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
 		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
+		/*
+		 * commenting out this path because currently for nokia android code will
+		 * never enter to this path. later on if Nokia build target can be set to
+		 * 19(KITKAT or above) we can uncomment this.
+		 */
+		/*if (Utils.hasKitKat())
 		{
 			return bitmap.getAllocationByteCount();
-		}
+		}*/
 
 		if (Utils.hasHoneycombMR1())
 		{
