@@ -1084,24 +1084,32 @@ public class ClientState
 
 	protected void notifyResult(MqttWireMessage ack, MqttToken token, MqttException ex)
 	{
-		final String methodName = "notifyResult";
-		// unblock any threads waiting on the token
-		token.internalTok.markComplete(ack, ex);
-
-		// Let the user know an async operation has completed and then remove the token
-		if (ack != null && ack instanceof MqttAck && !(ack instanceof MqttPubRec))
+		try
 		{
-			// @TRACE 648=key{0}, msg={1}, excep={2}
 
-			callback.asyncOperationComplete(token);
+			final String methodName = "notifyResult";
+			// unblock any threads waiting on the token
+			token.internalTok.markComplete(ack, ex);
+
+			// Let the user know an async operation has completed and then remove the token
+			if (ack != null && ack instanceof MqttAck && !(ack instanceof MqttPubRec))
+			{
+				// @TRACE 648=key{0}, msg={1}, excep={2}
+
+				callback.asyncOperationComplete(token);
+			}
+			// There are cases where there is no ack as the operation failed before
+			// an ack was received
+			if (ack == null)
+			{
+				// @TRACE 649=key={0},excep={1}
+
+				callback.asyncOperationComplete(token);
+			}
 		}
-		// There are cases where there is no ack as the operation failed before
-		// an ack was received
-		if (ack == null)
+		catch (Exception e)
 		{
-			// @TRACE 649=key={0},excep={1}
-
-			callback.asyncOperationComplete(token);
+			Logger.e(TAG, "Exception occured", e);
 		}
 	}
 
