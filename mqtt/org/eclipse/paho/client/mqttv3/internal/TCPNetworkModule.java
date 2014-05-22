@@ -111,6 +111,14 @@ public class TCPNetworkModule implements NetworkModule
 	{
 		if (socket != null)
 		{
+			if(socket.getOutputStream() != null)
+			{
+				socket.shutdownOutput();
+			}
+			if(socket.getInputStream() != null)
+			{
+				socket.shutdownInput();
+			}
 			socket.close();
 		}
 	}
