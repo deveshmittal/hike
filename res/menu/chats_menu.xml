@@ -7,10 +7,12 @@
         android:showAsAction="always"
         android:title="@string/start_new_chat"/>
     <item
-        android:id="@+id/show_people"
-        android:icon="@drawable/ic_show_people"
+        android:id="@+id/show_timeline"
+        android:icon="@drawable/ic_show_timeline"
         android:showAsAction="always"
-        android:title="@string/people"/>
+        android:title="@string/timeline"
+        android:menuCategory="secondary" >
+    </item>
     <item
         android:id="@+id/overflow_menu"
         android:actionLayout="@layout/overflow_icon_view"

@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,6 +76,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
+		getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -88,6 +90,24 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		return super.onOptionsItemSelected(item);
+		Intent intent = null;
+
+		switch (item.getItemId())
+		{
+			case R.id.show_people:
+				intent = new Intent(this, PeopleActivity.class);
+				break;	
+		}
+
+		if (intent != null)
+		{
+			startActivity(intent);
+			return true;
+		}
+		else
+		{
+			return super.onOptionsItemSelected(item);
+		}
 	}
+
 }
