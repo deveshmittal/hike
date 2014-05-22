@@ -67,7 +67,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private Context context;
 
-	private SharedPreferences settings;
+	private static SharedPreferences settings;
 
 	private String brokerHostName;
 
@@ -140,6 +140,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private static short connectionTimeoutSec = 60;
 
 	private static volatile AtomicBoolean ipsChanged = new AtomicBoolean(false);
+	
+	private volatile static String[] serverURIs = null;
+	
+	private int serverUriIndex = 0;
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -341,6 +345,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		filter.addAction(HikePubSub.SSL_PREFERENCE_CHANGED);
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
+		setServerUris();
 		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 15 * 1000); // this is just for testing
 	}
 
@@ -608,9 +613,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
 
-			setBrokerHostPort(connectUsingSSL);
+			//setBrokerHostPort(connectUsingSSL);
 
-			if (op == null || ipsChanged.get())
+			if (op == null)
 			{
 				op = new MqttConnectOptions();
 				op.setUserName(uid);
@@ -618,14 +623,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				op.setCleanSession(true);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
-//				setServerUris(op);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-
-				if (ipsChanged.get())
-				{
-					ipsChanged.set(false);
-				}
 			}
 
 			if (mqtt == null)
@@ -646,7 +645,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			{
 				acquireWakeLock(connectionTimeoutSec);
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
-				mqtt.setServerURI(protocol + brokerHostName + ":" + brokerPortNumber);
+				mqtt.setServerURI(protocol + getServerUri(connectUsingSSL));
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 				else
@@ -683,12 +682,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	private void setServerUris(MqttConnectOptions op)
+	public static void setServerUris()
 	{
-		String protocol = Utils.switchSSLOn(context) ? "ssl://" : "tcp://";
-
-		SharedPreferences pref = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String ipString = pref.getString(HikeMessengerApp.MQTT_IPS, "");
+		
+		String ipString = settings.getString(HikeMessengerApp.MQTT_IPS, "");
 		JSONArray ipArray = null;
 
 		try
@@ -702,27 +699,48 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		if (null != ipArray && ipArray.length() > 0)
 		{
-			String serverURIs[] = new String[ipArray.length() + 1];
+			serverURIs = new String[ipArray.length() + 1];
 			int len = ipArray.length();
 
-			serverURIs[0] = protocol + brokerHostName + ":" + brokerPortNumber;
+			serverURIs[0] = PRODUCTION_BROKER_HOST_NAME;
 			for (int i = 0; i < len; i++)
 			{
-				serverURIs[i + 1] = protocol + ipArray.optString(i) + ":" + brokerPortNumber;
+				serverURIs[i + 1] = ipArray.optString(i);
 			}
-
-			op.setServerURIs(serverURIs);
 		}
 		else
 		{
-
-			String serverURIs[] = { protocol + brokerHostName + ":" + brokerPortNumber, protocol + "54.251.180.0" + ":" + brokerPortNumber,
-					protocol + "54.251.180.1" + ":" + brokerPortNumber, protocol + "54.251.180.2" + ":" + brokerPortNumber, protocol + "54.251.180.3" + ":" + brokerPortNumber,
-					protocol + "54.251.180.4" + ":" + brokerPortNumber, protocol + "54.251.180.5" + ":" + brokerPortNumber, protocol + "54.251.180.6" + ":" + brokerPortNumber };
-
-			op.setServerURIs(serverURIs);
+			serverURIs = new String[8];
+			
+			serverURIs[0] = PRODUCTION_BROKER_HOST_NAME;
+			serverURIs[1] = "54.251.180.0";
+			serverURIs[2] = "54.251.180.1";
+			serverURIs[3] = "54.251.180.2";
+			serverURIs[4] = "54.251.180.3";
+			serverURIs[5] = "54.251.180.4";
+			serverURIs[6] = "54.251.180.5";
+			serverURIs[7] = "54.251.180.6";
 		}
 
+	}
+	
+	private String getServerUri(boolean ssl)
+	{
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+
+		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
+
+		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : PRODUCTION_BROKER_PORT_NUMBER) : (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
+				: STAGING_BROKER_PORT_NUMBER);
+		
+		if (!production)
+		{
+			return brokerHostName + ":" + brokerPortNumber;
+		}
+		
+		return serverURIs[serverUriIndex] + ":" + brokerPortNumber;
+		
+		
 	}
 
 	// This function should be called always from external classes inorder to run connect on MQTT thread
@@ -787,6 +805,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private void handleDisconnect(boolean reconnect)
 	{
 		forceDisconnect = false;
+		serverUriIndex = 0;
 		try
 		{
 			mqtt.close();
@@ -834,6 +853,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						cancelNetworkErrorTimer();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.CONNECTED_TO_MQTT, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
+						serverUriIndex = 0;
 						scheduleNextActivityCheck(); // after successfull connect, reschedule for next conn check
 					}
 
@@ -878,13 +898,20 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 						}
 						mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON;
-
+						
+						Logger.d(TAG, "DNS Exception : " + ex.getCause());
 						/*
 						 * if something has failed, we wait for one keep-alive period before trying again in a real implementation, you would probably want to keep count of how
 						 * many times you attempt this, and stop trying after a certain number, or length of time - rather than keep trying forever. a failure is often an
 						 * intermittent network issue, however, so some limited retry is a good idea
 						 */
-						if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
+						if(ex.getCause() != null && ex.getCause().toString().contains("UnknownHostException"))
+						{
+							Logger.e(TAG, "DNS Failure , Connect using ips");
+							serverUriIndex = (serverUriIndex + 1) % (serverURIs.length);
+							scheduleNextConnectionCheck(0);
+						}
+						else if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
 						{
 							int reConnTime = getConnRetryTime();
 							Logger.d(TAG, "Reconnect time (sec): " + reConnTime);
@@ -949,6 +976,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				public void connectionLost(Throwable arg0)
 				{
 					Logger.w(TAG, "Connection Lost : " + arg0.getMessage());
+					serverUriIndex = 0;
 					scheduleNetworkErrorTimer();
 					connectOnMqttThread();
 				}
@@ -1261,10 +1289,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		return false;
 	}
-
-	public static void setIpsChanged(boolean isIpsChnaged)
+	
+	public static void saveAndSet(JSONArray ipArray)
 	{
-		ipsChanged.set(isIpsChnaged);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(HikeMessengerApp.MQTT_IPS, ipArray.toString());
+		editor.commit();
+		setServerUris();
 	}
 
 	// This class is just for testing .....
