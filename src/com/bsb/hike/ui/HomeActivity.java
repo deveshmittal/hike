@@ -1377,7 +1377,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * removing out new chat option for now
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
-
+		
+		optionsList.add(new OverFlowMenuItem(getString(R.string.favorites), 10));
+		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
@@ -1528,6 +1530,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
+				case 10:
+					intent = new Intent(HomeActivity.this, PeopleActivity.class);
+					break;	
 				}
 
 				if (intent != null)
