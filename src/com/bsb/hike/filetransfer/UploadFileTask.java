@@ -484,6 +484,7 @@ public class UploadFileTask extends FileTransferBase
 
 			// The file was just uploaded to the servers, we want to publish
 			// this event
+			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
 
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
@@ -1107,11 +1108,6 @@ public class UploadFileTask extends FileTransferBase
 		{
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-		}
-
-		if (result == FTResult.SUCCESS)
-		{
-			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
 		}
 
 		else if (result != FTResult.PAUSED)

@@ -2919,6 +2919,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				try
 				{
 					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+					adapterMessage.setTimestamp(convMessage.getTimestamp());
 				}
 				catch (JSONException e)
 				{
