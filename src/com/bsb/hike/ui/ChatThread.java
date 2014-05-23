@@ -1362,7 +1362,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mAdapter != null)
 		{
 			messages.clear();
-			messageMap.clear();
 			mAdapter.notifyDataSetChanged();
 		}
 
@@ -1959,10 +1958,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		for(int i = to - 1; i >= from; i--)
 		{
 			ConvMessage msg = messages.get(i);
-			if(msg.getState() == State.SENT_DELIVERED_READ)
-			{
-				break;
-			}
 			addtoMessageMap(msg);
 		}
 	}
@@ -1977,22 +1972,58 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if(msg.isSent())
 		{
-			if (msg.isSMS())
+			try
 			{
-				if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
+				if(msg.isFileTransferMessage())
 				{
-					messageMap.put(msg.getMsgID(),msg);
+					if(TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+					{
+						messageMap.put(msg.getMsgID(),msg);
+						return;
+					}
+				}
+				if (msg.isSMS())
+				{
+					if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
+					{
+						messageMap.put(msg.getMsgID(),msg);
+					}
+				}
+				else
+				{
+					if(msgState != State.SENT_DELIVERED_READ)
+					{
+						messageMap.put(msg.getMsgID(),msg);
+					}
 				}
 			}
-			else
+			catch(Exception e)
 			{
-				if(msgState != State.SENT_DELIVERED_READ)
+				e.printStackTrace();
+				if(messageMap == null)
 				{
+					messageMap = new HashMap<Long, ConvMessage>();
 					messageMap.put(msg.getMsgID(),msg);
-				}
+				}	
 			}
 		}
 	}
+	
+	private void removeFromMessageMap(ConvMessage msg)
+	{
+		if(msg.isFileTransferMessage())
+		{
+			if(!TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+			{
+				messageMap.remove(msg.getMsgID());
+			}
+		}
+		else
+		{
+			messageMap.remove(msg.getMsgID());
+		}
+	}
+
 	private void addUnkownContactBlockHeader()
 	{
 		if (contactInfo != null && contactInfo.isUnknownContact())
@@ -2734,8 +2765,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
-					messageMap.remove(ids[i]);
+					if(msg.isGroupChat())
+					{
+						msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
+					}
+					removeFromMessageMap(msg);
 				}
 			}
 			runOnUiThread(mUpdateAdapter);
