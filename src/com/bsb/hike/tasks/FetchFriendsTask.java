@@ -160,7 +160,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		addToStealthList(hikeTaskList, hikeStealthContactsList, false);
 		addToStealthList(smsTaskList, smsStealthContactsList, false);
 
-		lastStatusMessagesMap = HikeConversationsDatabase.getInstance().getLastStatusMessages(true, HikeConstants.STATUS_TYPE_LIST_TO_FETCH, friendTaskList);
+		lastStatusMessagesMap = HikeConversationsDatabase.getInstance().getLastStatusMessages(false, HikeConstants.STATUS_TYPE_LIST_TO_FETCH, friendTaskList);
 		
 		return null;
 	}
