@@ -574,8 +574,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow = null;
 		}
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
-		messageMap.clear();
-		messageMap = null;
+		if(messageMap != null)
+		{
+			messageMap.clear();
+			messageMap = null;
+		}
+
 	}
 
 	@Override
@@ -3259,7 +3263,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ConvMessage findMessageById(long msgID)
 	{
-		return messageMap.get(msgID);
+		try
+		{
+			return messageMap.get(msgID);
+		}
+		catch(Exception e)
+		{
+			return null;
+		}
 //		if (mAdapter == null)
 //		{
 //			return null;
