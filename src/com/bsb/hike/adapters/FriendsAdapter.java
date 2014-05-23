@@ -967,7 +967,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 					{
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.favorite_request_pending);
+						lastSeen.setText(contactInfo.getMsisdn());
 
 						if (!contactInfo.isOnhike())
 						{
