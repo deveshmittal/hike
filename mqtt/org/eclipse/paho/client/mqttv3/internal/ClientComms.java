@@ -823,6 +823,7 @@ public class ClientComms
 		}
 		catch (MqttException e)
 		{
+			callback.fastReconnect();
 			handleRunException(e);
 		}
 		catch (Exception e)

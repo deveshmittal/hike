@@ -293,6 +293,15 @@ public class CommsCallback implements Runnable
 
 		}
 	}
+	
+	public void fastReconnect()
+	{
+		if (mqttCallback != null)
+		{
+			Logger.e(TAG, "Fast Disconnect");
+			mqttCallback.fastReconnect();
+		}
+	}
 
 	/**
 	 * An action has completed - if a completion listener has been set on the token then invoke it with the outcome of the action.

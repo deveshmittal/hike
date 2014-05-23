@@ -622,6 +622,11 @@ public class MqttAsyncClient implements IMqttAsyncClient
 	{
 		return clientId;
 	}
+	
+	public void setClientId(String clientId)
+	{
+		this.clientId = clientId;
+	}
 
 	/*
 	 * (non-Javadoc)

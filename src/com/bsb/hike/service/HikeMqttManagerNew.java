@@ -144,6 +144,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private volatile static String[] serverURIs = null;
 	
 	private int serverUriIndex = 0;
+	
+	private volatile short fastReconnect = 0;
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -632,7 +634,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
-				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
+				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect + ":" + fastReconnect, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
@@ -645,6 +647,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			{
 				acquireWakeLock(connectionTimeoutSec);
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
+				Logger.d(TAG, "Connect using pushconnect : " + pushConnect + "  fast disconnect : " + fastReconnect);
+				mqtt.setClientId(clientId + ":" + pushConnect + ":" + fastReconnect);
 				mqtt.setServerURI(protocol + getServerUri(connectUsingSSL));
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
@@ -847,6 +851,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					try
 					{
 						pushConnect = false;
+						fastReconnect = 0;
 						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
@@ -979,6 +984,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					serverUriIndex = 0;
 					scheduleNetworkErrorTimer();
 					connectOnMqttThread();
+				}
+
+				@Override
+				public void fastReconnect()
+				{
+					// TODO Auto-generated method stub
+					
+					fastReconnect = 1;
 				}
 			};
 		}
