@@ -1331,4 +1331,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		this.lastStatusMessagesMap.putAll(lastStatusMessagesMap);
 	}
+	
+	public Map<String, StatusMessage> getLastStatusMessagesMap()
+	{
+		return lastStatusMessagesMap;
+	}
 }

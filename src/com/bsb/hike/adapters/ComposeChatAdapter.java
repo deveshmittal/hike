@@ -19,8 +19,11 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
@@ -120,11 +123,53 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 			if (viewType == ViewType.NEW_CONTACT)
 			{
+				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(statusForEmptyContactInfo);
+				holder.statusMood.setVisibility(View.GONE);
+			}
+			else if(contactInfo.getFavoriteType() == FavoriteType.FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+			{
+				holder.status.setText("is friend");
+				StatusMessage lastStatusMessage = getLastStatusMessagesMap().get(contactInfo.getMsisdn());
+				if(lastStatusMessage != null)
+				{
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_blue_subtext));
+					switch (lastStatusMessage.getStatusMessageType())
+					{
+					case TEXT:
+						holder.status.setText("\""+lastStatusMessage.getText()+"\"");
+						if (lastStatusMessage.hasMood())
+						{
+							holder.statusMood.setVisibility(View.VISIBLE);
+							holder.statusMood.setImageResource(EmoticonConstants.moodMapping.get(lastStatusMessage.getMoodId()));
+						}
+						else
+						{
+							holder.statusMood.setVisibility(View.GONE);
+						}
+						break;
+
+					case PROFILE_PIC:
+						holder.status.setText(R.string.changed_profile);
+						holder.statusMood.setVisibility(View.GONE);
+						break;
+
+					default:
+						break;
+					}
+				}
+				else
+				{
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+					holder.status.setText(contactInfo.getMsisdn());
+					holder.statusMood.setVisibility(View.GONE);
+				}
 			}
 			else
 			{
+				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(contactInfo.getMsisdn());
+				holder.statusMood.setVisibility(View.GONE);
 			}
 
 			if (contactInfo.isUnknownContact())
@@ -176,6 +221,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			holder.userImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.status = (TextView) convertView.findViewById(R.id.number);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
 			convertView.setTag(holder);
 			break;
@@ -192,6 +238,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		TextView status;
 
 		CheckBox checkbox;
+		
+		ImageView statusMood;
 	}
 
 	@Override
