@@ -172,5 +172,19 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		super.onBackPressed();
 	}
+	
+	@Override
+	protected void onResume()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+		super.onResume();
+	}
+	
+	@Override
+	protected void onPause()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+		super.onPause();
+	}
 
 }

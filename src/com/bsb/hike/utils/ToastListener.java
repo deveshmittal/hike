@@ -35,6 +35,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
@@ -169,6 +170,10 @@ public class ToastListener implements Listener
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+			if (activity instanceof PeopleActivity) 
+			{
+				return;
+			}
 			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
 				this.toaster.notifyStealthMessage();
