@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -103,7 +104,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 {
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD
 	};
 
 	private static class DayHolder
@@ -410,7 +411,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	// private StickerLoader largeStickerLoader;
 	private int mIconImageSize;
 
-	private Set<Integer> mSelectedItemsIds;
+	private Set<Long> mSelectedItemsIds;
 
 	private boolean isActionModeOn = false;
 
@@ -432,7 +433,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
 		this.chatTheme = ChatTheme.DEFAULT;
-		this.mSelectedItemsIds = new HashSet<Integer>();
+		this.mSelectedItemsIds = new HashSet<Long>();
 		setLastSentMessagePosition();
 		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 	}
@@ -658,6 +659,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			type = ViewType.UNREAD_COUNT;
 		}
+		else if (convMessage.isBlockAddHeader())
+		{
+			Logger.i("chatthread", "getview type unknown header");
+			type = ViewType.UNKNOWN_BLOCK_ADD;
+		}
 		else if (convMessage.getTypingNotification() != null)
 		{
 			type = ViewType.TYPING_NOTIFICATION;
@@ -696,6 +702,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		long startTime = System.currentTimeMillis();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
@@ -853,12 +860,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if (sticker.getStickerIndex() != -1)
 			{
 				stickerHolder.image.setVisibility(View.VISIBLE);
-				if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
+				if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
 				{
 					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 					int idx = sticker.getStickerIndex();
 					if (idx >= 0)
-						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[idx]);
+						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
 				}
 				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 				{
@@ -912,12 +919,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						stickerHolder.loader.setVisibility(View.VISIBLE);
 						stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+						stickerHolder.image.setVisibility(View.GONE);
+						stickerHolder.image.setImageDrawable(null);
 					}
 				}
 				else
 				{
 					stickerHolder.loader.setVisibility(View.VISIBLE);
 					stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+					stickerHolder.image.setVisibility(View.GONE);
+					stickerHolder.image.setImageDrawable(null);
 
 					/*
 					 * Download the sticker if not already downloading.
@@ -931,7 +942,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
-			setSelection(position, stickerHolder.selectedStateOverlay);
+			setSelection(convMessage, stickerHolder.selectedStateOverlay);
 		}
 		else if (viewType == ViewType.NUDGE_SENT || viewType == ViewType.NUDGE_RECEIVE)
 		{
@@ -1000,7 +1011,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 			setTimeNStatus(position, nudgeHolder, true, nudgeHolder.nudge);
-			setSelection(position, nudgeHolder.selectedStateOverlay);
+			setSelection(convMessage, nudgeHolder.selectedStateOverlay);
 		}
 		else if (convMessage.isFileTransferMessage())
 		{
@@ -1151,7 +1162,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				setTimeNStatus(position, wtHolder, true, wtHolder.placeHolder);
-				setSelection(position, wtHolder.selectedStateOverlay);
+				setSelection(convMessage, wtHolder.selectedStateOverlay);
 
 				wtHolder.placeHolder.setTag(convMessage);
 				wtHolder.placeHolder.setOnClickListener(this);
@@ -1271,9 +1282,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
 					else if (fileThumbParams.width == maxWidth)
-	                {
-	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
-	                }
+					{
+						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
 				}
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				videoHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -1300,7 +1311,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, videoHolder.messageContainer);
 				setupFileState(videoHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, videoHolder, true, videoHolder.fileThumb);
-				setSelection(position, videoHolder.selectedStateOverlay);
+				setSelection(convMessage, videoHolder.selectedStateOverlay);
 
 				videoHolder.fileThumb.setTag(convMessage);
 				videoHolder.fileThumb.setOnClickListener(this);
@@ -1416,9 +1427,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
 					else if (fileThumbParams.width == maxWidth)
-	                {
-	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
-	                }
+					{
+						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
 				}
 				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -1428,7 +1439,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, imageHolder.messageContainer);
 				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
-				setSelection(position, imageHolder.selectedStateOverlay);
+				setSelection(convMessage, imageHolder.selectedStateOverlay);
 
 				imageHolder.fileThumb.setTag(convMessage);
 				imageHolder.fileThumb.setOnClickListener(this);
@@ -1541,9 +1552,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 
 				setBubbleColor(convMessage, imageHolder.messageContainer);
-				setupFileState(imageHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), false);
 				setTimeNStatus(position, imageHolder, true, imageHolder.fileThumb);
-				setSelection(position, imageHolder.selectedStateOverlay);
+				setSelection(convMessage, imageHolder.selectedStateOverlay);
 
 				imageHolder.fileThumb.setTag(convMessage);
 				imageHolder.fileThumb.setOnClickListener(this);
@@ -1664,7 +1674,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
-				setSelection(position, fileHolder.selectedStateOverlay);
+				setSelection(convMessage, fileHolder.selectedStateOverlay);
 
 				fileHolder.fileThumb.setTag(convMessage);
 				fileHolder.fileThumb.setOnClickListener(this);
@@ -1777,7 +1787,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setBubbleColor(convMessage, fileHolder.messageContainer);
 				setupFileState(fileHolder, fss, convMessage.getMsgID(), hikeFile, convMessage.isSent(), true);
 				setTimeNStatus(position, fileHolder, false, fileHolder.messageContainer);
-				setSelection(position, fileHolder.selectedStateOverlay);
+				setSelection(convMessage, fileHolder.selectedStateOverlay);
 
 				fileHolder.fileThumb.setTag(convMessage);
 				fileHolder.fileThumb.setOnClickListener(this);
@@ -1856,7 +1866,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 			setBubbleColor(convMessage, textHolder.messageContainer);
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
-			setSelection(position, textHolder.selectedStateOverlay);
+			setSelection(convMessage, textHolder.selectedStateOverlay);
 
 			boolean showTip = false;
 
@@ -3286,14 +3296,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.addView(participantInfo);
 			dayHolder = participantInfoHolder;
 		}
+		else if (viewType == ViewType.UNKNOWN_BLOCK_ADD)
+		{
+			Logger.i("chatthread", "getview of unknown header");
+			if (convertView == null)
+			{
+				convertView = inflater.inflate(R.layout.block_add_unknown_contact, parent, false);
+			}
+			return convertView;
+		}
 		if (showDayIndicator(position))
 		{
 			inflateNSetDay(convMessage, dayHolder);
 		}
-		else if (dayHolder.dayStub != null)
+		else if (dayHolder.dayStubInflated != null)
 		{
-			dayHolder.dayStub.setVisibility(View.GONE);
+			dayHolder.dayStubInflated.setVisibility(View.GONE);
 		}
+		Logger.i("chatthread", "position " + position + " time taken : " + (System.currentTimeMillis() - startTime));
 		return v;
 	}
 
@@ -3330,7 +3350,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return inflater.inflate(resource, root, attachToRoot);
 	}
 
-	private void setSelection(int position, View overlay)
+	private void setSelection(ConvMessage convMessage, View overlay)
 	{
 		if (isActionModeOn)
 		{
@@ -3338,10 +3358,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
 			 */
 			overlay.setVisibility(View.VISIBLE);
+			overlay.setTag(convMessage);
 			overlay.setOnClickListener(selectedStateOverlayClickListener);
-			overlay.setOnLongClickListener(this);
 
-			if (isSelected(position))
+			if (isSelected(convMessage))
 			{
 				/*
 				 * If a message has been selected then background of selected state overlay will change to selected state color. otherwise this overlay will be transparent
@@ -3461,6 +3481,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			dayHolder.dayStubInflated.setVisibility(View.VISIBLE);
 			setDay(dayHolder.dayStubInflated, dateFormatted);
 		}
 	}
@@ -3504,6 +3525,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
 				}
 			}
+			else
+			{
+				if (detailHolder.senderName != null)
+				{
+					detailHolder.senderName.setTextColor(context.getResources().getColor(R.color.chat_color));
+				}
+				if (detailHolder.senderNameUnsaved != null)
+				{
+					detailHolder.senderNameUnsaved.setTextColor(context.getResources().getColor(R.color.unsaved_contact_name));
+				}
+			}
 			detailHolder.avatarImage.setVisibility(View.VISIBLE);
 			setAvatar(convMessage.getGroupParticipantMsisdn(), detailHolder.avatarImage);
 			detailHolder.avatarContainer.setVisibility(View.VISIBLE);
@@ -3538,6 +3570,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				else
 				{
 					participantName.setText(name);
+					participantNameUnsaved.setVisibility(View.GONE);
 				}
 				participantDetails.setTag(convMessage);
 				participantDetails.setOnClickListener(contactClick);
@@ -3682,8 +3715,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		//fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
-		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);;
+		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
+		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
+		;
 		fileThumb.setImageResource(0);
 	}
 
@@ -3797,23 +3831,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	Handler handler = new Handler();
 
-	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, long ts)
+	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, ConvMessage message, View inflated)
 	{
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		long diff = (((long) System.currentTimeMillis() / 1000) - ts);
+		long diff = (((long) System.currentTimeMillis() / 1000) - message.getTimestamp());
 
 		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
 		{
-			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container, iv);
+			showUndeliveredMessage = new ShowUndeliveredMessage(message, tv, container, iv, inflated);
 			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		}
 		else
 		{
-			showUndeliveredTextAndSetClick(tv, container, iv, true);
+			showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
 		}
 	}
 
@@ -3843,79 +3877,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		previousMessageCalendar.setTimeInMillis(previous.getTimestamp() * 1000);
 
 		return (previousMessageCalendar.get(Calendar.DAY_OF_YEAR) != currentMessageCalendar.get(Calendar.DAY_OF_YEAR));
-	}
-
-	private void setSDRAndTimestamp(int position, TextView tv, ImageView iv, View container)
-	{
-		/*
-		 * We show the time stamp in the status message separately so no need to show this time stamp.
-		 */
-		if (ViewType.values()[getItemViewType(position)] == ViewType.STATUS_MESSAGE)
-		{
-			return;
-		}
-		tv.setVisibility(View.VISIBLE);
-		if (iv != null)
-		{
-			iv.setVisibility(View.GONE);
-		}
-
-		tv.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
-
-		ConvMessage current = getItem(position);
-		if (current.isSent() && (position == lastSentMessagePosition))
-		{
-			switch (current.getState())
-			{
-			case SENT_UNCONFIRMED:
-				tv.setVisibility(View.GONE);
-				iv.setVisibility(View.VISIBLE);
-
-				AnimationDrawable ad = (AnimationDrawable) context.getResources().getDrawable(isDefaultTheme ? R.drawable.sending : R.drawable.sending_custom);
-				iv.setImageDrawable(ad);
-				ad.setCallback(iv);
-				ad.setVisible(true, true);
-				ad.start();
-
-				if (!current.isSMS())
-				{
-					scheduleUndeliveredText(tv, container, iv, current.getTimestamp());
-				}
-				break;
-			case SENT_CONFIRMED:
-				tv.setText(context.getString(!current.isSMS() ? R.string.sent : R.string.sent_via_sms, current.getTimestampFormatted(false, context)));
-				if (!current.isSMS())
-				{
-					scheduleUndeliveredText(tv, container, iv, current.getTimestamp());
-				}
-				break;
-			case SENT_DELIVERED:
-				tv.setText(R.string.delivered);
-				break;
-			case SENT_DELIVERED_READ:
-				if (!isGroupChat)
-				{
-					tv.setText(R.string.read);
-				}
-				else
-				{
-					setReadByForGroup(current, tv);
-				}
-				break;
-			}
-		}
-		else
-		{
-
-			ConvMessage next = position == getCount() - 1 ? null : getItem(position + 1);
-
-			if (next == null || (next.isSent() != current.isSent()) || (next.getTimestamp() - current.getTimestamp() > 2 * 60))
-			{
-				tv.setText(current.getTimestampFormatted(false, context));
-				return;
-			}
-			tv.setVisibility(View.GONE);
-		}
 	}
 
 	private void setTimeNStatus(int position, DetailViewHolder detailHolder, boolean ext, View clickableItem)
@@ -3991,9 +3952,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			inflateNSetMessageInfo(getItem(position), detailHolder, clickableItem);
 		}
-		else if (detailHolder.messageInfoStub != null)
+		else if (detailHolder.messageInfoInflated != null)
 		{
-			detailHolder.messageInfoStub.setVisibility(View.GONE);
+			detailHolder.messageInfoInflated.setVisibility(View.GONE);
 		}
 	}
 
@@ -4021,6 +3982,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
+			detailHolder.messageInfoInflated.setVisibility(View.VISIBLE);
 			setMessageInfo(message, detailHolder.messageInfoInflated, clickableItem);
 		}
 	}
@@ -4032,104 +3994,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		messageInfo.setVisibility(View.GONE);
 		sending.setVisibility(View.GONE);
+		inflated.setVisibility(View.GONE);
 		if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
 		{
+			inflated.setVisibility(View.VISIBLE);
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
+			updateViewWindowForReadBy(message);
 		}
 		else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
 		{
 			if (!message.isSMS())
 			{
-				scheduleUndeliveredText(messageInfo, clickableItem, sending, message.getTimestamp());
+				scheduleUndeliveredText(messageInfo, clickableItem, sending, message, inflated);
 			}
 		}
 	}
 
-	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)
+	private void updateViewWindowForReadBy(ConvMessage message)
 	{
-		ConvMessage message = getItem(position);
-
-		time.setText(message.getTimestampFormatted(false, context));
-		time.setVisibility(View.VISIBLE);
-		if (message.isSent())
+		ConvMessage lastMessage = getItem(getCount() - 1);
+		if (lastMessage.getMsgID() == message.getMsgID())
 		{
-			if (message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
-			{
-				if (ext)
-				{
-					status.setImageResource(R.drawable.ic_clock_white);
-				}
-				else
-				{
-					status.setImageResource(R.drawable.ic_clock);
-				}
-			}
-			else if (ext)
-			{
-				switch (message.getState())
-				{
-				case SENT_UNCONFIRMED:
-					status.setImageResource(R.drawable.ic_clock_white);
-					break;
-				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick_white);
-					break;
-				case SENT_DELIVERED:
-					status.setImageResource(R.drawable.ic_double_tick_white);
-					break;
-				case SENT_DELIVERED_READ:
-					status.setImageResource(R.drawable.ic_double_tick_r_white);
-					break;
-				default:
-					break;
-				}
-			}
-			else
-			{
-				switch (message.getState())
-				{
-				case SENT_UNCONFIRMED:
-					status.setImageResource(R.drawable.ic_clock);
-					break;
-				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick);
-					break;
-				case SENT_DELIVERED:
-					status.setImageResource(R.drawable.ic_double_tick);
-					break;
-				case SENT_DELIVERED_READ:
-					status.setImageResource(R.drawable.ic_double_tick_r);
-					break;
-				default:
-					break;
-				}
-			}
-			status.setScaleType(ScaleType.CENTER);
-			status.setVisibility(View.VISIBLE);
-		}
-
-		if (messageTimeStatus != null)
-			messageTimeStatus.setVisibility(View.VISIBLE);
-
-		if ((message.getState() != null) && (position == lastSentMessagePosition))
-		{
-			messageInfo.setText("");
-			messageInfo.setVisibility(View.VISIBLE);
-			if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
-			{
-				// messageInfo.setVisibility(View.VISIBLE);
-				messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
-				setReadByForGroup(message, messageInfo);
-			}
-			else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
-			{
-				if (!message.isSMS())
-				{
-					scheduleUndeliveredText(messageInfo, container, sending, message.getTimestamp());
-				}
-			}
+			chatThread.updateViewWindowForReadBy();
 		}
 	}
 
@@ -4156,10 +4044,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else if (lastIndex == 1)
 			{
 				/*
-				 * We increment the last index if its one since we can
-				 * accommodate another name in this case. 
+				 * We increment the last index if its one since we can accommodate another name in this case.
 				 */
-				lastIndex ++;
+				lastIndex++;
 				moreNamesThanMaxCount = true;
 			}
 			else if (lastIndex > 0)
@@ -4230,7 +4117,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void onClick(View v)
 		{
-			v.performLongClick();
+			chatThread.showMessageContextMenu((ConvMessage) v.getTag());
 			return;
 		}
 	};
@@ -4467,7 +4354,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public boolean onLongClick(View view)
 	{
-		return false;
+		chatThread.showMessageContextMenu((ConvMessage) view.getTag());
+		return true;
 	}
 
 	@Override
@@ -4528,6 +4416,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private class ShowUndeliveredMessage implements Runnable
 	{
+		ConvMessage message;
 
 		TextView tv;
 
@@ -4535,11 +4424,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View container;
 
-		public ShowUndeliveredMessage(TextView tv, View container, ImageView iv)
+		View inflated;
+
+		public ShowUndeliveredMessage(ConvMessage message, TextView tv, View container, ImageView iv, View inflated)
 		{
+			this.message = message;
 			this.tv = tv;
 			this.container = container;
 			this.iv = iv;
+			this.inflated = inflated;
 		}
 
 		@Override
@@ -4552,17 +4445,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
 			if (isMessageUndelivered(lastSentMessage))
 			{
-				showUndeliveredTextAndSetClick(tv, container, iv, true);
+				showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
 			}
 		}
 	}
 
-	private void showUndeliveredTextAndSetClick(TextView tv, View container, ImageView iv, boolean fromHandler)
+	private void showUndeliveredTextAndSetClick(ConvMessage message, TextView tv, View container, ImageView iv, boolean fromHandler, View inflated)
 	{
 		String undeliveredText = getUndeliveredTextRes();
 		if (!TextUtils.isEmpty(undeliveredText))
 		{
 			iv.setVisibility(View.GONE);
+			inflated.setVisibility(View.VISIBLE);
 			tv.setVisibility(View.VISIBLE);
 			tv.setText(undeliveredText);
 		}
@@ -4572,6 +4466,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		container.setOnClickListener(this);
 
 		container.setOnLongClickListener(this);
+
+		updateViewWindowForReadBy(message);
 	}
 
 	private String getUndeliveredTextRes()
@@ -5082,9 +4978,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return iconLoader;
 	}
 
-	public void toggleSelection(int position)
+	public void toggleSelection(ConvMessage convMsg)
 	{
-		selectView(position, !isSelected(position));
+		selectView(convMsg, !isSelected(convMsg));
 	}
 
 	public void removeSelection()
@@ -5093,23 +4989,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		notifyDataSetChanged();
 	}
 
-	public void selectView(int position, boolean value)
+	public void selectView(ConvMessage convMsg, boolean value)
 	{
 		if (value)
 		{
-			mSelectedItemsIds.add(position);
+			mSelectedItemsIds.add(convMsg.getMsgID());
 		}
 		else
 		{
-			mSelectedItemsIds.remove(position);
+			mSelectedItemsIds.remove(convMsg.getMsgID());
 		}
 
 		notifyDataSetChanged();
 	}
 
-	public void setPositionsSelected(ArrayList<Integer> selectedPositions)
+	public void setPositionsSelected(long[] selectedConvMsgsIds)
 	{
-		mSelectedItemsIds.addAll(selectedPositions);
+		for (long msgId : selectedConvMsgsIds)
+		{
+			mSelectedItemsIds.add(msgId);
+		}
 		notifyDataSetChanged();
 	}
 
@@ -5118,14 +5017,38 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return mSelectedItemsIds.size();
 	}
 
-	public Set<Integer> getSelectedIds()
+	public HashMap<Long, ConvMessage> getSelectedMessagesMap()
+	{
+		HashMap<Long, ConvMessage> selectedMsgs = new HashMap<Long, ConvMessage>();
+		for (ConvMessage convMessage : convMessages)
+		{
+			if (mSelectedItemsIds.contains(convMessage.getMsgID()))
+			{
+				selectedMsgs.put(convMessage.getMsgID(), convMessage);
+			}
+		}
+		return selectedMsgs;
+	}
+
+	public long[] getSelectedMsgIdsLongArray()
+	{
+		long[] result = new long[mSelectedItemsIds.size()];
+		int i = 0;
+		for (Long msgId : mSelectedItemsIds)
+		{
+			result[i++] = msgId;
+		}
+		return result;
+	}
+
+	public Set<Long> getSelectedMessageIds()
 	{
 		return mSelectedItemsIds;
 	}
 
-	public boolean isSelected(int position)
+	public boolean isSelected(ConvMessage convMsg)
 	{
-		return mSelectedItemsIds.contains(position);
+		return mSelectedItemsIds.contains(convMsg.getMsgID());
 	}
 
 	public void setActionMode(boolean isOn)

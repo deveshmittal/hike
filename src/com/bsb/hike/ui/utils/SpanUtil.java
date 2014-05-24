@@ -26,8 +26,12 @@ public class SpanUtil
 
 	private static ImageSpan getImageSpan(Context context, View view)
 	{
-		// create bitmap drawable for imagespan 
+		// create bitmap drawable for imagespan
 		BitmapDrawable bmpDrawable = HikeBitmapFactory.getBitmapDrawable(context.getResources(), HikeBitmapFactory.getBitMapFromTV(view));
+		if (bmpDrawable == null)
+		{
+			return null;
+		}
 		bmpDrawable.setBounds(0, 0, bmpDrawable.getIntrinsicWidth(), bmpDrawable.getIntrinsicHeight());
 		return new ImageSpan(bmpDrawable);
 	}

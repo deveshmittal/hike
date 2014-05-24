@@ -259,6 +259,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			@Override
 			public void onClick(View v)
 			{
+				Utils.hideSoftKeyboard(StatusUpdate.this, statusTxt);
 				onBackPressed();
 			}
 		});
@@ -278,7 +279,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private void setTitle()
 	{
-		title.setText(moodParent.getVisibility() == View.VISIBLE ? R.string.moods : R.string.new_update);
+		title.setText(moodParent.getVisibility() == View.VISIBLE ? R.string.moods : R.string.status);
 	}
 
 	private Runnable cancelStatusPost = new Runnable()

@@ -30,81 +30,98 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import com.bsb.hike.utils.Logger;
 
 /**
- * A network module for connecting over TCP. 
+ * A network module for connecting over TCP.
  */
-public class TCPNetworkModule implements NetworkModule {
+public class TCPNetworkModule implements NetworkModule
+{
 	protected Socket socket;
+
 	private SocketFactory factory;
+
 	private String host;
+
 	private int port;
+
 	private int conTimeout;
-	
+
 	final static String className = TCPNetworkModule.class.getName();
+
 	private final String TAG = "TCPNETWORKMODULE";
-	
+
 	/**
-	 * Constructs a new TCPNetworkModule using the specified host and
-	 * port.  The supplied SocketFactory is used to supply the network
-	 * socket.
+	 * Constructs a new TCPNetworkModule using the specified host and port. The supplied SocketFactory is used to supply the network socket.
 	 */
-	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext) {
+	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext)
+	{
 		this.factory = factory;
 		this.host = host;
 		this.port = port;
-		
+
 	}
 
 	/**
 	 * Starts the module, by creating a TCP socket to the server.
 	 */
-	public void start() throws IOException, MqttException {
+	public void start() throws IOException, MqttException
+	{
 		final String methodName = "start";
-		try {
-//			InetAddress localAddr = InetAddress.getLocalHost();
-//			socket = factory.createSocket(host, port, localAddr, 0);
+		try
+		{
+			// InetAddress localAddr = InetAddress.getLocalHost();
+			// socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
-			
+
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			socket = factory.createSocket();
-			socket.connect(sockaddr, conTimeout*1000);
-		
-			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm. 
+			socket.setTcpNoDelay(true);
+			socket.setSoTimeout(6 * 60 * 1000); // setting socket timeout to 6 mins
+			socket.connect(sockaddr, conTimeout * 1000);
+
+			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
 			// This should not be required.
-//			socket.setTcpNoDelay(true);	// TCP_NODELAY on, which means we do not use Nagle's algorithm
+			// socket.setTcpNoDelay(true); // TCP_NODELAY on, which means we do not use Nagle's algorithm
 		}
-		catch (ConnectException ex) {
-			//@TRACE 250=Failed to create TCP socket
+		catch (ConnectException ex)
+		{
+			// @TRACE 250=Failed to create TCP socket
 			Logger.d(TAG, "failed to create TCP Socket");
 			throw new MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR, ex);
 		}
 	}
 
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream() throws IOException
+	{
 		return socket.getInputStream();
 	}
-	
-	public OutputStream getOutputStream() throws IOException {
+
+	public OutputStream getOutputStream() throws IOException
+	{
 		return socket.getOutputStream();
 	}
-	
-	public Socket getSocket() {
+
+	public Socket getSocket()
+	{
 		return socket;
 	}
 
 	/**
 	 * Stops the module, by closing the TCP socket.
 	 */
-	public void stop() throws IOException {
-		if (socket != null) {
+	public void stop() throws IOException
+	{
+		if (socket != null)
+		{
 			socket.close();
 		}
 	}
-	
+
 	/**
 	 * Set the maximum time to wait for a socket to be established
+	 * 
 	 * @param timeout
 	 */
-	public void setConnectTimeout(int timeout) {
+	public void setConnectTimeout(int timeout)
+	{
 		this.conTimeout = timeout;
 	}
 }

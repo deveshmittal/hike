@@ -47,9 +47,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -83,6 +83,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -99,9 +100,7 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Pair;
-import android.util.Patterns;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -166,7 +165,7 @@ public class Utils
 	public static Pattern msisdnRegex;
 
 	public static Pattern pinRegex;
-
+ 
 	public static String shortCodeIntent;
 
 	private static Animation mOutToRight;
@@ -178,6 +177,8 @@ public class Utils
 	private static TranslateAnimation mInFromRight;
 
 	public static float densityMultiplier = 1.0f;
+
+	public static int densityDpi;
 
 	private static Lock lockObj = new ReentrantLock();
 
@@ -728,7 +729,7 @@ public class Utils
 			data.put(HikeConstants.LogEvent.DEVICE, device);
 			data.put(HikeConstants.LogEvent.CARRIER, carrier);
 			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 			object.put(HikeConstants.DATA, data);
 
 			return object;
@@ -771,7 +772,7 @@ public class Utils
 				}
 				editor.commit();
 				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
-				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 				obj.put(HikeConstants.DATA, data);
@@ -800,6 +801,7 @@ public class Utils
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
 		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.densityDpi = displayMetrics.densityDpi;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -989,7 +991,7 @@ public class Utils
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
@@ -1020,6 +1022,14 @@ public class Utils
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
 		s.setType("text/plain");
 		s.putExtra(Intent.EXTRA_TEXT, message);
+		context.startActivity(s);
+	}
+
+	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
+	{
+		Intent s = new Intent(android.content.Intent.ACTION_SEND);
+		s.setType(mimeType);
+		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
 		context.startActivity(s);
 	}
 
@@ -1174,6 +1184,11 @@ public class Utils
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
 	{
+		if (bitmap  == null)
+		{
+			return null;
+		}
+
 		Bitmap rotatedBitmap = null;
 		Matrix m = new Matrix();
 		ExifInterface exif = null;
@@ -1323,7 +1338,8 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, Bitmap.Config.RGB_565);
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
@@ -2068,7 +2084,8 @@ public class Utils
 
 	public static void vibrateNudgeReceived(Context context)
 	{
-		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.VIBRATE_PREF, true))
+		String VIB_OFF = context.getResources().getString(R.string.vib_off);
+		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, getOldVibratePref(context))))
 		{
 			return;
 		}
@@ -2253,7 +2270,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LOCALE, context.getResources().getConfiguration().locale.getLanguage());
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
@@ -2361,29 +2378,26 @@ public class Utils
 	}
 
 	public static int getResolutionId()
-	{
-		int densityMultiplierX100 = (int) (densityMultiplier * 100);
-		Logger.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
-
-		if (densityMultiplierX100 > 200)
+	{	
+		switch(densityDpi)
 		{
-			return HikeConstants.XXHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 150)
-		{
-			return HikeConstants.XHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 100)
-		{
-			return HikeConstants.HDPI_ID;
-		}
-		else if (densityMultiplierX100 > 75)
-		{
+		case 120:
+		   return HikeConstants.LDPI_ID;
+		case 160:
 			return HikeConstants.MDPI_ID;
-		}
-		else
-		{
-			return HikeConstants.LDPI_ID;
+		case 240:
+			return HikeConstants.HDPI_ID;
+		case 320:
+			return HikeConstants.XHDPI_ID;
+		case 213:
+			return HikeConstants.HDPI_ID;
+		case 480:
+			return HikeConstants.XXHDPI_ID;
+		case 640:
+		case 400:
+			return HikeConstants.XXHDPI_ID;
+		default:
+			return HikeConstants.HDPI_ID;
 		}
 	}
 
@@ -2418,17 +2432,43 @@ public class Utils
 
 	public static void appStateChanged(Context context)
 	{
-		appStateChanged(context, true);
+		appStateChanged(context, true, false);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth)
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
+	{
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen)
 	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
 		}
 
-		sendAppState();
+		if (checkIfActuallyBackgrounded)
+		{
+			boolean screenOn = isScreenOn(context);
+			Logger.d("HikeAppState", "Screen On? " + screenOn);
+
+			if (screenOn)
+			{
+				boolean isForegrounded = isAppForeground(context);
+
+				if (isForegrounded)
+				{
+					if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+					{
+						Logger.d("HikeAppState", "Wrong state! correcting it");
+						HikeMessengerApp.currentState = CurrentState.RESUMED;
+						return;
+					}
+				}
+			}
+		}
+
+		sendAppState(context, requestBulkLastSeen);
 
 		if (resetStealth)
 		{
@@ -2443,7 +2483,12 @@ public class Utils
 		}
 	}
 
-	private static void sendAppState()
+	public static boolean isScreenOn(Context context)
+	{
+		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+	}
+
+	private static void sendAppState(Context context, boolean requestBulkLastSeen)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2456,8 +2501,10 @@ public class Utils
 
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED, HikeMessengerApp.currentState == CurrentState.OPENED);
-				data.put(HikeConstants.BULK_LAST_SEEN, true); // adding this for
-																// bulk
+				/*
+				 * We only request the bulk last seen if the last seen preference is on.
+				 */
+				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
 			}
 			else
@@ -2712,7 +2759,7 @@ public class Utils
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
-			data.put(HikeConstants.MESSAGE_ID,  Long.toString(System.currentTimeMillis()/1000));
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
@@ -3060,7 +3107,7 @@ public class Utils
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
-		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.ARGB_8888, false);
+		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.ARGB_8888, false, true, true);
 		bitmap = null;
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
@@ -3181,7 +3228,7 @@ public class Utils
 			Logger.w("LE", "Invalid json");
 		}
 	}
-
+	
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3195,7 +3242,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-
+			
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
@@ -3493,22 +3540,6 @@ public class Utils
 		return false;
 	}
 
-	public static String getEmail(Context context)
-	{
-		String email = null;
-		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-		Account[] accounts = AccountManager.get(context).getAccounts();
-		for (Account account : accounts)
-		{
-			if (emailPattern.matcher(account.name).matches())
-			{
-				email = account.name;
-				break;
-			}
-		}
-		return email;
-	}
-
 	public static void startChatThread(Context context, ContactInfo contactInfo)
 	{
 		Intent intent = new Intent(context, ChatThread.class);
@@ -3628,6 +3659,19 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 	}
 
+	public static void addToContacts(Activity context, String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		context.startActivity(i);
+	}
+
+	public static boolean isPlayTickSound(Context context)
+	{
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
+	}
+
 	/**
 	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
 	 * 
@@ -3637,7 +3681,7 @@ public class Utils
 	public static void playSoundFromRaw(Context context, int soundId)
 	{
 
-		Log.i("sound", "playing sound " + soundId);
+		Logger.i("sound", "playing sound " + soundId);
 		MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_RING);
 		Resources res = context.getResources();
@@ -3682,5 +3726,86 @@ public class Utils
 	public static final void cancelScheduledStealthReset(Context context)
 	{
 		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+	}
+
+	public static long getOldTimestamp(int min)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, -min);
+		long old = cal.getTimeInMillis();
+		return old;
+	};
+
+	public static boolean isAppForeground(Context context)
+	{
+		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
+		Iterator<RunningAppProcessInfo> i = l.iterator();
+		while (i.hasNext())
+		{
+			RunningAppProcessInfo info = i.next();
+
+			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static String replaceUrlSpaces(String fileUriString)
+	{
+		/*
+		 * In some phones URI is received with spaces in file path
+		 * we should first replace all these spaces with %20 than
+		 * pass it on to URI.create() method. URI.create() method
+		 * treats space as an invalid charactor in URI. 
+		 */
+		return fileUriString.replace(" ", "%20");
+	}
+
+	/*
+	 * This function is to respect old vibrate preference before vib list pref , if previous was on send, VIB Default else return VIB_OFF
+	 */
+	public static String getOldVibratePref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String vibOff = res.getString(R.string.vib_off);
+		String vibDef = res.getString(R.string.vib_default);
+
+		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true))
+		{
+			return vibDef;
+		}
+		else
+		{
+			return vibOff;
+		}
+	}
+
+	/*
+	 * This function is to respect old sound preference before sound list pref , if previous was on then check for hike jingle, else return SOUND_OFF
+	 */
+	public static String getOldSoundPref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String notifSoundOff = res.getString(R.string.notif_sound_off);
+		String notifSoundDefault = res.getString(R.string.notif_sound_default);
+		String notifSoundHike = res.getString(R.string.notif_sound_Hike);
+
+		if (preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true))
+		{
+			if (preferenceManager.getBoolean(HikeConstants.HIKE_JINGLE_PREF, true))
+			{
+				return notifSoundHike;
+			}
+			return notifSoundDefault;
+		}
+		else
+		{
+			return notifSoundOff;
+		}
 	}
 }

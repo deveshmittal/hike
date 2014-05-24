@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -28,7 +29,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -49,6 +49,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -451,9 +452,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		removeResetStealthTipIfExists();
 
-		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-		task.execute(stealthConversations.toArray(new Conversation[0]));
-
 		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		resetStealthPreferences();
@@ -467,6 +465,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_RESET_COMPLETE, null);
 		}
+
+		/*
+		 * Calling the delete conversation task in the end to ensure that we first publish the reset event. If the delete task was published at first, it was causing a threading
+		 * issue where the contacts in the friends fragment were getting removed and not added again.
+		 */
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+		task.execute(stealthConversations.toArray(new Conversation[0]));
 	}
 
 	private void resetStealthPreferences()
@@ -478,6 +483,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		prefUtil.removeData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE);
 		prefUtil.removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
 		prefUtil.removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+		prefUtil.removeData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST);
 	}
 
 	@Override
@@ -540,6 +546,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		}
 
+		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
+		{
+			optionsList.add(HikeUserDatabase.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
+		}
 		if (conv instanceof GroupConversation)
 		{
 			optionsList.add(getString(R.string.delete_leave));
@@ -575,14 +585,48 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				else if (getString(R.string.delete_chat).equals(option))
 				{
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
-					Utils.executeConvAsyncTask(task, conv);
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_chat_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+							Utils.executeConvAsyncTask(task, conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.no);
+					deleteConfirmDialog.show();
 				}
 				else if (getString(R.string.delete_leave).equals(option))
 				{
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-					leaveGroup(conv);
+					final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getActivity());
+					deleteConfirmDialog.setHeader(R.string.delete);
+					deleteConfirmDialog.setBody(getString(R.string.confirm_delete_group_msg, conv.getLabel()));
+					
+					View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+					{
+
+						@Override
+						public void onClick(View v)
+						{
+							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
+							leaveGroup(conv);
+							deleteConfirmDialog.dismiss();
+						}
+					};
+
+					deleteConfirmDialog.setOkButton(android.R.string.ok, dialogOkClickListener);
+					deleteConfirmDialog.setCancelButton(R.string.cancel);
+					deleteConfirmDialog.show();
 				}
 				else if (getString(R.string.email_conversations).equals(option))
 				{
@@ -639,8 +683,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					else
 					{
-						// We don't show this toast in during stealth ftue.
-						Toast.makeText(getActivity(), newStealthValue ? R.string.chat_marked_stealth : R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
+						// We don't show this toast during stealth ftue setup.
+						if(newStealthValue)
+						{
+							Toast.makeText(getActivity(), R.string.chat_marked_stealth, Toast.LENGTH_SHORT).show();
+						}
+						else if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST, false))
+						{
+							Toast.makeText(getActivity(), R.string.chat_unmarked_stealth_first, Toast.LENGTH_LONG).show();
+							HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST, true);
+						}
+						else
+						{
+							Toast.makeText(getActivity(), R.string.chat_unmarked_stealth, Toast.LENGTH_SHORT).show();
+						}
 					}
 
 					if (stealthType == HikeConstants.STEALTH_ON_FAKE)
@@ -678,9 +734,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					if (!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 					{
 						HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-						changeConversationsVisibility();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
 						HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, null);
 					}
+				}
+				else if (getString(R.string.block_title).equals(option))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, conv.getMsisdn());
+				}
+				else if (getString(R.string.unblock_title).equals(option))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, conv.getMsisdn());
 				}
 			}
 		});
@@ -823,6 +887,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					iter.remove();
 				}
+			}
+
+			if (mAdapter.getCount() == 0)
+			{
+				setEmptyState();
 			}
 		}
 		else
@@ -1566,10 +1635,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private ConvMessage findMessageById(long msgId)
 	{
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
+		for (Entry<String, Conversation> conversationEntry : mConversationsByMSISDN.entrySet())
 		{
-			Conversation conversation = mAdapter.getItem(i);
+			Conversation conversation = conversationEntry.getValue();
 			if (conversation == null)
 			{
 				continue;

@@ -2,45 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1038"
     android:background="@color/white"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="1038" >
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:minWidth="70dp"
-        android:layout_height="48dp"
-        android:layout_gravity="right|top"
-        android:orientation="horizontal" >
-        
-	    <View
-	        android:layout_width="1dp"
-	        android:layout_height="match_parent"
-	        android:layout_gravity="bottom"
-	        android:layout_marginTop="8dp"
-	        android:layout_marginBottom="8dp"
-	        android:background="#eaeced" />
-	        
-	    <LinearLayout
-	        android:id="@+id/terms_and_conditions"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
-	        android:layout_gravity="right|top"
-	        android:orientation="horizontal"
-	        android:background="@drawable/bg_overflow_menu_selector" >
-	
-	        <com.bsb.hike.view.CustomFontTextView
-	            android:layout_width="match_parent"
-	            android:layout_height="match_parent"
-	            android:layout_gravity="bottom"
-	            android:gravity="center"
-	            android:paddingRight="11dp"
-	            android:paddingLeft="11dp"
-	            android:text="@string/terms"
-	            android:textColor="#adb2b9"
-	            android:textSize="16sp" />
-	    </LinearLayout>
-    </LinearLayout>
+    <include
+        layout="@layout/welcome_activity_topbar" />
     
     <LinearLayout
         android:id="@+id/hike_logo_container"
@@ -55,22 +22,22 @@
             android:id="@+id/tutorial_pager"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="754" /> 
+            android:layout_weight="754" />
 
         <com.viewpagerindicator.IconPageIndicator
             android:id="@+id/tutorial_indicator"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="112"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:layout_weight="112" />
     </LinearLayout>
-    
+
     <RelativeLayout
         android:id="@+id/tc_continue_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:gravity="top"
         android:layout_weight="192"
+        android:gravity="top"
         android:visibility="visible" >
 
         <com.bsb.hike.view.CustomFontButton
@@ -107,16 +74,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:paddingLeft="10dp"
                 android:layout_marginLeft="3dp"
+                android:paddingLeft="10dp"
                 android:singleLine="true"
-            	android:textColor="@drawable/signup_btn_text"
-            	android:textSize="15sp"
-            	android:textStyle="bold|italic"
-                android:text="@string/pulling_digits_signup" />
+                android:text="@string/getting_started"
+                android:textColor="@drawable/signup_btn_text"
+                android:textSize="15sp"
+                android:textStyle="bold|italic" />
         </LinearLayout>
-
     </RelativeLayout>
 
-    
 </LinearLayout>

@@ -13,6 +13,7 @@
     <ListView
         android:id="@id/android:list"
         style="@style/HomeList"
+        android:dividerHeight="0dp"
         android:divider="@null" />
 
 </RelativeLayout>

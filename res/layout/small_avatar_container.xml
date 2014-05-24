@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/avatar_container"
     android:layout_width="@dimen/chatthread_avatar"
-    android:layout_height="@dimen/chatthread_avatar" >
+    android:layout_height="@dimen/chatthread_avatar"
+    android:layout_marginLeft="@dimen/chat_bubble_edge_spacing" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/avatar"

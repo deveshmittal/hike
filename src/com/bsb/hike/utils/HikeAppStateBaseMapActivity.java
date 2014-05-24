@@ -32,10 +32,24 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 	}
 
 	@Override
+	protected void onRestart()
+	{
+		HikeAppStateUtils.onRestart(this);
+		super.onRestart();
+	}
+
+	@Override
 	public void onBackPressed()
 	{
 		HikeAppStateUtils.onBackPressed();
 		super.onBackPressed();
+	}
+
+	@Override
+	protected void onPause()
+	{
+		HikeAppStateUtils.onPause(this);
+		super.onPause();
 	}
 
 	@Override
@@ -55,7 +69,7 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity
 	@Override
 	public void startActivityForResult(Intent intent, int requestCode)
 	{
-		HikeAppStateUtils.startActivityForResult();
+		HikeAppStateUtils.startActivityForResult(this);
 		super.startActivityForResult(intent, requestCode);
 	}
 

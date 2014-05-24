@@ -1176,7 +1176,7 @@ public class MqttMessagesManager
 					userDb.updateLastSeenTime(msisdn, lastSeenTime);
 					userDb.updateIsOffline(msisdn, (int) isOffline);
 
-					HikeMessengerApp.lastSeenFriendsMap.put(msisdn, Long.valueOf(lastSeenTime));
+					HikeMessengerApp.lastSeenFriendsMap.put(msisdn, new Pair<Integer, Long>(isOffline, lastSeenTime));
 
 				}
 				pubSub.publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
@@ -1397,20 +1397,9 @@ public class MqttMessagesManager
 			{
 				/*
 				 * This exception is thrown for unknown themes. Show an unsupported message
+				 * Now in this case, we don't do anything. if user doesn't have certain theme
+				 * that chatthread will keep on current applied theme.
 				 */
-				String message = context.getString(R.string.unknown_chat_theme);
-				ConvMessage convMessage = Utils.makeConvMessage(null, id, message, true, State.RECEIVED_UNREAD);
-				convDb.addConversationMessages(convMessage);
-
-				/*
-				 * Return if there is no conversation mapped to this message
-				 */
-				if (convMessage.getConversation() == null)
-				{
-					return;
-				}
-
-				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_OWNER_CHANGE.equals(type))

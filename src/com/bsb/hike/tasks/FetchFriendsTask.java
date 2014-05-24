@@ -122,7 +122,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		if (fetchGroups)
 		{
 			groupTaskList = HikeConversationsDatabase.getInstance().getGroupNameAndParticipantsAsContacts(context);
-			addToStealthList(groupTaskList, groupsStealthList);
+			addToStealthList(groupTaskList, groupsStealthList, true);
 		}
 
 		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
@@ -153,14 +153,14 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
 			}
 		}
-		addToStealthList(friendTaskList, friendsStealthList);
-		addToStealthList(hikeTaskList, hikeStealthContactsList);
-		addToStealthList(smsTaskList, smsStealthContactsList);
+		addToStealthList(friendTaskList, friendsStealthList, false);
+		addToStealthList(hikeTaskList, hikeStealthContactsList, false);
+		addToStealthList(smsTaskList, smsStealthContactsList, false);
 
 		return null;
 	}
 
-	private void addToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList)
+	private void addToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList, boolean isGroupTask)
 	{
 		if (creatingOrEditingGroup)
 		{
@@ -170,8 +170,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
 		{
 			ContactInfo contactInfo = iter.next();
-
-			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			/*
+			 * if case of group contactInfo.getId() will retrun groupId, which is treated as msisdn for groups.
+			 */
+			String msisdn = isGroupTask ? contactInfo.getId() : contactInfo.getMsisdn();
+			if (HikeMessengerApp.isStealthMsisdn(msisdn))
 			{
 				stealthList.add(contactInfo);
 
@@ -201,6 +204,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	@Override
 	protected void onPostExecute(Void result)
 	{
+		/*
+		 * Clearing all the lists initially to ensure we remove any existing contacts in the list that might be there because of the 'ai' packet.
+		 */
+		clearAllLists();
+
 		if (fetchGroups)
 		{
 			groupsList.addAll(groupTaskList);
@@ -220,5 +228,21 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		friendsAdapter.setListFetchedOnce(true);
 
 		friendsAdapter.makeCompleteList(true);
+	}
+
+	private void clearAllLists()
+	{
+		if (fetchGroups)
+		{
+			groupsList.clear();
+			filteredGroupsList.clear();
+		}
+
+		friendsList.clear();
+		hikeContactsList.clear();
+		smsContactsList.clear();
+		filteredFriendsList.clear();
+		filteredHikeContactsList.clear();
+		filteredSmsContactsList.clear();
 	}
 }

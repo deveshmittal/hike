@@ -112,7 +112,8 @@
                     android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                     android:textColor="@color/list_item_header"
                     android:textColorHint="@color/description_lightgrey"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:maxLength="@integer/status_text_limit" />
             </RelativeLayout>
         </RelativeLayout>
 

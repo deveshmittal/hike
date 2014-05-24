@@ -10,7 +10,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="8dp"
         android:gravity="left|center_vertical"
         android:orientation="horizontal"
         android:visibility="gone" />
@@ -19,7 +18,7 @@
         android:id="@+id/typing"
         android:layout_width="46dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
         android:layout_toRightOf="@+id/typing_avatar_container"
         android:background="@drawable/ic_bubble_white_selector"
         android:scaleType="centerInside"

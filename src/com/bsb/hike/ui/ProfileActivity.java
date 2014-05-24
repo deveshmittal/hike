@@ -122,13 +122,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private SharedPreferences preferences;
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED };
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
 
-	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED };
+	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
+			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
 
 	private GroupConversation groupConversation;
 
@@ -943,7 +944,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = HikeBitmapFactory.scaleDownBitmap(mActivityState.destFilePath, HikeConstants.PROFILE_IMAGE_DIMENSIONS,
-					HikeConstants.PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565);
+					HikeConstants.PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565, true, false);
 
 			if (smallerBitmap == null)
 			{
@@ -1227,7 +1228,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					String fileUriString = selectedFileUri.toString();
 					if (fileUriString.startsWith(fileUriStart))
 					{
-						selectedFileIcon = new File(URI.create(fileUriString));
+						selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 						/*
 						 * Done to fix the issue in a few Sony devices.
 						 */
@@ -1574,15 +1575,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			return;
 		}
 		Utils.logEvent(this, HikeConstants.LogEvent.MENU_ADD_TO_CONTACTS);
-		addToContacts(mLocalMSISDN);
-	}
-
-	private void addToContacts(String msisdn)
-	{
-		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
-		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-		i.putExtra(Insert.PHONE, msisdn);
-		startActivity(i);
+		Utils.addToContacts(this, mLocalMSISDN);
 	}
 
 	public void onInviteToHikeClicked(View v)
@@ -1884,6 +1877,20 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 			});
 		}
+		else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type))
+		{
+			if (mLocalMSISDN.equals((String) object))
+			{
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						profileAdapter.notifyDataSetChanged();
+					}
+				});
+			}
+		}
 	}
 
 	private ProfileItem getJoinedHikeStatus(ContactInfo contactInfo)
@@ -1960,7 +1967,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					}
 					else if (getString(R.string.add_to_contacts).equals(option))
 					{
-						addToContacts(contactInfo.getMsisdn());
+						Utils.addToContacts(ProfileActivity.this, contactInfo.getMsisdn());
 					}
 					else if (getString(R.string.remove_from_group).equals(option))
 					{

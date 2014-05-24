@@ -49,6 +49,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.BuildConfig;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.haibison.android.lockpattern.util.IEncrypter;
 import com.haibison.android.lockpattern.util.InvalidEncrypterException;
 import com.haibison.android.lockpattern.util.LoadingDialog;
@@ -90,7 +91,7 @@ import com.haibison.android.lockpattern.widget.LockPatternView.DisplayMode;
  * @author Hai Bison
  * @since v1.0
  */
-public class LockPatternActivity extends Activity {
+public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
 
     private static final String CLASSNAME = LockPatternActivity.class.getName();
 
@@ -462,6 +463,11 @@ public class LockPatternActivity extends Activity {
                 .getDisplayMode() : null;
         List<Cell> lastPattern = mLockPatternView != null ? mLockPatternView
                 .getPattern() : null;
+                
+        if(getSupportActionBar() != null)
+        {
+        	getSupportActionBar().hide();
+        }
 
         setContentView(R.layout.alp_42447968_lock_pattern_activity);
         UI.adjustDialogSizeForLargeScreens(getWindow(), ACTION_CREATE_PATTERN.equals(getIntent().getAction()));
@@ -800,6 +806,7 @@ public class LockPatternActivity extends Activity {
         }
 
         finish();
+        overridePendingTransition(0, 0);
     }// finishWithResultOk()
 
     /**
@@ -841,6 +848,7 @@ public class LockPatternActivity extends Activity {
         }
 
         finish();
+        overridePendingTransition(0, 0);
     }// finishWithNegativeResult()
 
     /*

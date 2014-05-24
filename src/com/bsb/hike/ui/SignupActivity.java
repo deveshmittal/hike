@@ -532,6 +532,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			countryPicker.setEnabled(false);
 			selectedCountryPicker.setEnabled(false);
+			enterEditText.setEnabled(false);
 		}
 		if (callmeBtn != null)
 		{
@@ -554,6 +555,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			countryPicker.setEnabled(true);
 			selectedCountryPicker.setEnabled(true);
+			enterEditText.setEnabled(true);
 		}
 		if (callmeBtn != null)
 		{
@@ -786,6 +788,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		countryPicker.setEnabled(true);
 		selectedCountryPicker.setEnabled(true);
+		enterEditText.setEnabled(true);
 
 		setupCountryCodeData();
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -1674,7 +1677,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					String fileUriString = selectedFileUri.toString();
 					if (fileUriString.startsWith(fileUriStart))
 					{
-						selectedFileIcon = new File(URI.create(fileUriString));
+						selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 						/*
 						 * Done to fix the issue in a few Sony devices.
 						 */
@@ -1764,9 +1767,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			Toast.makeText(getApplicationContext(), R.string.image_failed, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
+
 		Bitmap tempBitmap = HikeBitmapFactory.scaleDownBitmap(mActivityState.destFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS,
-				HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565);
+				HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, Bitmap.Config.RGB_565, true, false);
 
 		mActivityState.profileBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);

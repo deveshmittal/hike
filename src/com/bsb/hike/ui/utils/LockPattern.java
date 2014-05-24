@@ -89,6 +89,7 @@ public class LockPattern
 		i.putExtra(LockPatternActivity.EXTRA_THEME, getThemeForLockPatternActivity());
 		i.putExtra(Settings.Security.METADATA_AUTO_SAVE_PATTERN, true);
 		i.putExtra(Settings.Display.METADATA_MIN_WIRED_DOTS, mBarMinWiredDots);
+		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		activity.startActivityForResult(i, HikeConstants.ResultCodes.CREATE_LOCK_PATTERN);
 	}// onClick()
 
@@ -100,6 +101,7 @@ public class LockPattern
 		i.putExtra(LockPatternActivity.EXTRA_THEME, getThemeForLockPatternActivity());
 		i.putExtra(Settings.Security.METADATA_AUTO_SAVE_PATTERN, true);
 		i.putExtra(Settings.Display.METADATA_MIN_WIRED_DOTS, mBarMaxTries);
+		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		activity.startActivityForResult(i, HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN);
 	}// onClick()
 

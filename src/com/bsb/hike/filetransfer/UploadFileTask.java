@@ -51,7 +51,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.Logger;
@@ -160,27 +159,6 @@ public class UploadFileTask extends FileTransferBase
 		fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
 	}
 
-	private void calculateReqHeightAndWidth(String fileName)
-	{
-		float aspectRatio = BitmapUtils.getAspectRatioFromFile(fileName);
-		height = (int) (150 * Utils.densityMultiplier);
-		width = (int) (aspectRatio * height);
-
-		int maxWidth = (int) (250 * Utils.densityMultiplier);
-		int minWidth = (int) (119 * Utils.densityMultiplier);
-
-		if (width < minWidth)
-		{
-			width = minWidth;
-			height = (int) (aspectRatio * width);
-		}
-		else if (width > maxWidth)
-		{
-			width = maxWidth;
-			height = (int) (aspectRatio * width);
-		}
-	}
-
 	// private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long
 	// recordingDuration) throws FileTransferCancelledException, Exception
 	private void createConvMessage()
@@ -200,9 +178,8 @@ public class UploadFileTask extends FileTransferBase
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
-					calculateReqHeightAndWidth(destinationFile.getPath());
-
-					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), width, height, Bitmap.Config.RGB_565);
+					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
+							Bitmap.Config.RGB_565, true, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 
 					// Logger.d("UploadFileTask",
@@ -372,8 +349,8 @@ public class UploadFileTask extends FileTransferBase
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
-				calculateReqHeightAndWidth(selectedFile.getPath());
-				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), width, height, Bitmap.Config.RGB_565);
+				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
+						Bitmap.Config.RGB_565, true, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
@@ -615,8 +592,7 @@ public class UploadFileTask extends FileTransferBase
 			end = start + chunkSize;
 		end--;
 
-		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
-		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		byte[] fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
 
 		while (end < length && responseJson == null)
 		{
@@ -631,9 +607,7 @@ public class UploadFileTask extends FileTransferBase
 				raf.close();
 				throw new IOException("Exception in partial read. files ended");
 			}
-
 			String contentRange = "bytes " + start + "-" + end + "/" + length;
-			System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + chunkSize, boundary.length());
 			String responseString = send(contentRange, fileBytes);
 
 			if (end == (length - 1) && responseString != null)
@@ -655,7 +629,11 @@ public class UploadFileTask extends FileTransferBase
 						setChunkSize();
 						if (chunkSize > length)
 							chunkSize = (int) length;
-
+						if(end != (start + chunkSize - 1))
+						{
+							end = (start + chunkSize - 1);
+							fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
+						}
 					}
 					else
 					{
@@ -681,8 +659,7 @@ public class UploadFileTask extends FileTransferBase
 					{
 						end--;
 						chunkSize = end - start + 1;
-						fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
-						System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+						fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
 					}
 				}
 			}
@@ -912,6 +889,14 @@ public class UploadFileTask extends FileTransferBase
 		return responseJson;
 	}
 
+	private byte[] setupFileBytes(String boundaryMesssage, String boundary, int chunkSize)
+	{
+		byte[] fileBytes = new byte[boundaryMesssage.length() + chunkSize + boundary.length()];
+		System.arraycopy(boundaryMesssage.getBytes(), 0, fileBytes, 0, boundaryMesssage.length());
+		System.arraycopy(boundary.getBytes(), 0, fileBytes, boundaryMesssage.length() + chunkSize, boundary.length());
+		return fileBytes;
+	}
+
 	String getBoundaryMessage()
 	{
 		String sendingFileType = "";
@@ -973,6 +958,7 @@ public class UploadFileTask extends FileTransferBase
 			post.addHeader("X-SESSION-ID", X_SESSION_ID);
 			post.addHeader("X-CONTENT-RANGE", contentRange);
 			post.addHeader("Cookie", "user=" + token + ";uid=" + uId);
+			Logger.d(getClass().getSimpleName(),"user=" + token + ";uid=" + uId);
 			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
 			// byte[] postBytes = getPostBytes(fileBytes);
@@ -993,8 +979,9 @@ public class UploadFileTask extends FileTransferBase
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if (retryAttempts >= MAX_RETRY_ATTEMPTS)
+			if (retryAttempts >= MAX_RETRY_ATTEMPTS || e.getMessage() == null)
 			{
 				error();
 				res = null;
@@ -1105,10 +1092,12 @@ public class UploadFileTask extends FileTransferBase
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
-		// if (result == FTResult.SUCCESS)
-		// {
-		// ((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
-		// }
+
+		if (result == FTResult.SUCCESS)
+		{
+			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
+		}
+
 		else if (result != FTResult.PAUSED)
 		{
 			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled

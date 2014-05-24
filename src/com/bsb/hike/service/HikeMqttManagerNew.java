@@ -2,8 +2,6 @@ package com.bsb.hike.service;
 
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -74,6 +72,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private String brokerHostName;
 
 	private String clientId;
+
+	private volatile boolean pushConnect = false;
 
 	private String uid;
 
@@ -295,7 +295,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
-		setBrokerHostPort(Utils.switchSSLOn(context));
 		isConnRunnable = new IsMqttConnectedCheckRunnable();
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
@@ -573,12 +572,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
 
+			setBrokerHostPort(connectUsingSSL);
+			
 			if (op == null || ipsChanged.get())
 			{
 				op = new MqttConnectOptions();
 				op.setUserName(uid);
 				op.setPassword(password.toCharArray());
-				op.setCleanSession(false);
+				op.setCleanSession(true);
 				op.setKeepAliveInterval((short) keepAliveSeconds);
 				op.setConnectionTimeout(connectionTimeoutSec);
 //				setServerUris(op);
@@ -596,7 +597,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
-				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
+				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
@@ -608,6 +609,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (isNetworkAvailable())
 			{
 				acquireWakeLock(connectionTimeoutSec);
+				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
+				mqtt.setServerURI(protocol + brokerHostName + ":" + brokerPortNumber);
+				if (connectUsingSSL)
+					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+				else
+					op.setSocketFactory(null);
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
 			}
@@ -730,14 +737,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		catch (MqttException e)
 		{
-		// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
-		e.printStackTrace();
-		handleDisconnect(reconnect);
+			// we dont need to handle MQTT exception here as we reconnect depends on reconnect var
+			e.printStackTrace();
+			handleDisconnect(reconnect);
 		}
 		catch (Exception e)
 		{
-		e.printStackTrace();
-		handleDisconnect(reconnect);
+			e.printStackTrace();
+			handleDisconnect(reconnect);
 		}
 	}
 
@@ -783,6 +790,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 					try
 					{
+						pushConnect = false;
 						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
@@ -1164,7 +1172,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (isNetwork)
 			{
 				boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
-				setBrokerHostPort(shouldConnectUsingSSL);
 				boolean isSSLConnected = isSSLAlreadyOn();
 				// reconnect using SSL as currently not connected using SSL
 				if (shouldConnectUsingSSL && !isSSLConnected)
@@ -1184,6 +1191,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (reconnect)
 			{
 				Logger.d(TAG, "Calling explicit disconnect after server GCM push");
+				pushConnect = true;
 				disconnectOnMqttThread(true);
 				return;
 			}
@@ -1195,7 +1203,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 * ssl settings toggled so disconnect and reconnect mqtt
 			 */
 			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
-			setBrokerHostPort(shouldConnectUsingSSL);
 			boolean isSSLConnected = isSSLAlreadyOn();
 			Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
 			// reconnect using SSL as currently not connected using SSL

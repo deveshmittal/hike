@@ -488,7 +488,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
 		updateOverFlowMenuNotification();
-		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener()
+		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -515,7 +515,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			break;
 		case R.id.new_update:
 			intent = new Intent(this, StatusUpdate.class);
-			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN, true);
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
@@ -1650,6 +1649,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// myProfileImage = IconCacheManager.getInstance().getIconForMSISDN(
 		// msisdn, true);
 
+		/*
+		 * removing out new chat option for now
+		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
@@ -1666,6 +1668,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
+		
+		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
 		addEmailLogItem(optionsList);
 
@@ -1793,7 +1797,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
-				case 7:
+				case 8:
+					intent = new Intent(HomeActivity.this, StatusUpdate.class);
+					break;
+				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
@@ -1835,7 +1842,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
 	{
-		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 7));
+		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
 	}
 
 	@Override

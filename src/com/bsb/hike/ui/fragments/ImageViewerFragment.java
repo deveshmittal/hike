@@ -58,6 +58,8 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 
 	private int imageSize;
 
+	private String TAG = "ImageViewerFragment";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -112,7 +114,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 				BitmapDrawable drawable = HikeMessengerApp.getLruCache().get(mappedId);
 				if (drawable == null)
 				{
-					Bitmap b = HikeBitmapFactory.scaleDownBitmap(basePath + "/" + fileName, imageSize, imageSize, Bitmap.Config.RGB_565);
+					Bitmap b = HikeBitmapFactory.scaleDownBitmap(basePath + "/" + fileName, imageSize, imageSize, Bitmap.Config.RGB_565,true,false);
 					if (b != null)
 					{
 						drawable = HikeBitmapFactory.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(), b);
@@ -135,8 +137,19 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 			else
 			{
 				File f = new File(basePath, Utils.getTempProfileImageFileName(key));
+
 				if (f.exists())
 				{
+					long fileTS = f.lastModified();
+					long oldTS = Utils.getOldTimestamp(5);
+					
+					if (fileTS < oldTS)
+					{
+						Logger.d(TAG, "Temp file is older than 5 minutes.Deleting temp file and downloading profile pic ");
+						Utils.removeTempProfileImage(key);
+						downloadImage = true;
+					}
+					
 					BitmapDrawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(key);
 					imageView.setImageDrawable(drawable);
 				}
@@ -203,7 +216,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		if (file.exists())
 		{
 			drawable = HikeBitmapFactory.getBitmapDrawable(this.getActivity().getApplicationContext().getResources(),
-					HikeBitmapFactory.scaleDownBitmap(basePath + "/" + fileName, imageSize, imageSize, Bitmap.Config.RGB_565));
+					HikeBitmapFactory.scaleDownBitmap(basePath + "/" + fileName, imageSize, imageSize, Bitmap.Config.RGB_565,true,false));
 			imageView.setImageDrawable(drawable);
 		}
 
