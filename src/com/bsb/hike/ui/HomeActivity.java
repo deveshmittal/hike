@@ -121,6 +121,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private PopupWindow overFlowWindow;
 
 	private TextView topBarIndicator;
+	
+	private TextView timelineTopBarIndicator;
 
 	private Drawable myProfileImage;
 
@@ -443,6 +445,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				showOverFlowMenu();
 			}
 		});
+		
+		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
+		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
+		timelineTopBarIndicator.setVisibility(View.VISIBLE);
+		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class);
+				startActivity(intent);
+			}
+		});
 
 		return true;
 	}
@@ -465,9 +480,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 			break;
-		case R.id.show_timeline:
-			intent = new Intent(this, TimelineActivity.class);
-			break;	
 		}
 
 		if (intent != null)

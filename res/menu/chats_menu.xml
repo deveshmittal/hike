@@ -8,10 +8,9 @@
         android:title="@string/start_new_chat"/>
     <item
         android:id="@+id/show_timeline"
-        android:icon="@drawable/ic_show_timeline"
+        android:actionLayout="@layout/overflow_icon_view"
         android:showAsAction="always"
-        android:title="@string/timeline"
-        android:menuCategory="secondary" >
+        android:title="@string/timeline" >
     </item>
     <item
         android:id="@+id/overflow_menu"
