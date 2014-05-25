@@ -312,7 +312,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
-		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
 		setupMainFragment(savedInstanceState);
 		initialiseTabs();
@@ -448,7 +447,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		
 		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
 		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
-		timelineTopBarIndicator.setVisibility(View.VISIBLE);
+		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false));
 		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -1049,8 +1048,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onEventReceived(type, object);
 		if (HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT.equals(type))
 		{
-			showUpdateIcon = true;
-			runOnUiThread(refreshTabIcon);
+			runOnUiThread( new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false));
+				}
+			});
 		}
 		else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE))
 		{
@@ -1261,15 +1267,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			});
 		}
 	}
-
-	Runnable refreshTabIcon = new Runnable()
-	{
-
-		@Override
-		public void run()
-		{
-		}
-	};
 
 	private class GetFTUEContactsTask extends AsyncTask<Void, Void, List<ContactInfo>>
 	{
@@ -1729,4 +1726,24 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+	
+
+	public void updateTimelineNotificationCount(int count)
+	{
+		if(count > 9)
+		{
+			timelineTopBarIndicator.setVisibility(View.VISIBLE);
+			timelineTopBarIndicator.setText("9+");
+		}
+		else if(count > 0)
+		{
+			timelineTopBarIndicator.setVisibility(View.VISIBLE);
+			timelineTopBarIndicator.setText(String.valueOf(count));
+		}
+		else
+		{
+			timelineTopBarIndicator.setVisibility(View.GONE);
+		}
+	}
+	
 }

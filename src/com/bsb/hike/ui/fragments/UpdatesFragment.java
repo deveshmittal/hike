@@ -283,7 +283,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		{
 			final StatusMessage statusMessage = (StatusMessage) object;
 			final int startIndex = getStartIndex();
-			Utils.resetUnseenStatusCount(prefs);
 
 			if (!isAdded())
 			{

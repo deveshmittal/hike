@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 
 public class TimelineActivity extends HikeAppStateBaseFragmentActivity implements Listener
@@ -128,6 +130,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	@Override
 	protected void onResume()
 	{
+		Utils.resetUnseenStatusCount(this);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 		super.onResume();
 	}

@@ -3071,12 +3071,11 @@ public class Utils
 		}
 	}
 
-	public static void resetUnseenStatusCount(SharedPreferences prefs)
+	public static void resetUnseenStatusCount(Context context)
 	{
-		Editor editor = prefs.edit();
-		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		editor.commit();
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
