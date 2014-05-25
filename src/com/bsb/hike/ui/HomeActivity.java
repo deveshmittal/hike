@@ -40,8 +40,11 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -447,7 +450,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		
 		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
 		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
-		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false));
+		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), true);
 		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -1054,7 +1057,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false));
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), false);
 				}
 			});
 		}
@@ -1728,7 +1731,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	}
 	
 
-	public void updateTimelineNotificationCount(int count)
+	public void updateTimelineNotificationCount(int count, boolean showAnimation)
 	{
 		if(count > 9)
 		{
@@ -1739,11 +1742,63 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			timelineTopBarIndicator.setVisibility(View.VISIBLE);
 			timelineTopBarIndicator.setText(String.valueOf(count));
+			if(showAnimation)
+			{
+				(new Handler()).post(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+					}
+				});
+			}
 		}
 		else
 		{
 			timelineTopBarIndicator.setVisibility(View.GONE);
 		}
+	}
+	
+	private Animation getNotificationIndicatorAnim()
+	{
+		AnimationSet animSet = new AnimationSet(true);
+		float a = 0.6f;
+		float b = 1.15f;
+		float c = 0.8f;
+		float d = 1.07f;
+		float e = 1f;
+		Animation anim0 = new ScaleAnimation(1, a, 1, a, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		anim0.setInterpolator(new AccelerateInterpolator(2f));
+		anim0.setDuration(150);
+		animSet.addAnimation(anim0);
+
+		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		anim1.setInterpolator(new AccelerateInterpolator(2f));
+		anim1.setDuration(200);
+		anim1.setStartOffset(anim0.getDuration());
+		animSet.addAnimation(anim1);
+
+		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		anim2.setInterpolator(new AccelerateInterpolator(-1f));
+		anim2.setDuration(150);
+		anim2.setStartOffset(anim0.getDuration() + anim1.getDuration());
+		animSet.addAnimation(anim2);
+
+		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		anim2.setInterpolator(new AccelerateInterpolator(1f));
+		anim3.setDuration(150);
+		anim3.setStartOffset(anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
+		animSet.addAnimation(anim3);
+
+		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		anim4.setInterpolator(new AccelerateInterpolator(1f));
+		anim4.setDuration(150);
+		anim4.setStartOffset(anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
+		animSet.addAnimation(anim4);
+
+		return animSet;
 	}
 	
 }
