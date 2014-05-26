@@ -1027,6 +1027,7 @@ public class UploadFileTask extends FileTransferBase
 	{
 		HttpClient client = new DefaultHttpClient();
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
 		//client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 		Long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
