@@ -186,13 +186,20 @@ public class UploadFileTask extends FileTransferBase
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
 							Bitmap.Config.RGB_565, true, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
-
+					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
+					{
+						thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
+					}
 					// Logger.d("UploadFileTask",
 					// "thumbnail size : " + BitmapUtils.getBitmapSize(thumbnail) + "  height : " + thumbnail.getHeight() + "   width : " + thumbnail.getWidth());
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
 					thumbnail = ThumbnailUtils.createVideoThumbnail(destinationFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
+					{
+						thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
+					}
 				}
 				if (thumbnail != null)
 				{
@@ -401,8 +408,21 @@ public class UploadFileTask extends FileTransferBase
 		mThread = Thread.currentThread();
 		try
 		{
-			initFileUpload();
-			isFileKeyValid();
+			if (isFileKeyValid())
+			{
+				try
+				{
+					initFileUpload();
+				}
+				catch (Exception e)
+				{
+					
+				}
+			}
+			else
+			{
+				initFileUpload();
+			}
 		}
 		catch (FileTransferCancelledException e)
 		{
