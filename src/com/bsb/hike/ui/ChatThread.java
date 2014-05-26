@@ -5186,7 +5186,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else if (!prefs.getBoolean(categoryId.downloadPref(), false))
 				{
-					postToHandlerStickerPreviewDialog(category);
+					/*
+					 * Now we don't show sticker preview dialog for hardcoded categories
+					 */
+					prefs.edit().putBoolean(category.categoryId.downloadPref(), true).commit();
+					return;
 				}
 			}
 		}
