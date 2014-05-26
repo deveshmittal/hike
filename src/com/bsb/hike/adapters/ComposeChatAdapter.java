@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +51,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private List<ContactInfo> newContactsList;
 
 	private boolean isCreatingOrEditingGroup;
+	
+	private boolean lastSeenPref;
 
 	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId)
 	{
@@ -65,6 +68,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		groupsList = new ArrayList<ContactInfo>(0);
 		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 	}
 
 	public void setIsCreatingOrEditingGroup(boolean b)
@@ -126,6 +130,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(statusForEmptyContactInfo);
 				holder.statusMood.setVisibility(View.GONE);
+				holder.onlineIndicator.setVisibility(View.GONE);
 			}
 			else if(contactInfo.getFavoriteType() == FavoriteType.FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
 			{
@@ -164,12 +169,22 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 					holder.status.setText(contactInfo.getMsisdn());
 					holder.statusMood.setVisibility(View.GONE);
 				}
+				if(lastSeenPref && contactInfo.getOffline() == 0)
+				{
+					holder.onlineIndicator.setVisibility(View.VISIBLE);
+					holder.onlineIndicator.setImageResource(R.drawable.ic_online_blue_dot);
+				}
+				else
+				{
+					holder.onlineIndicator.setVisibility(View.GONE);
+				}
 			}
 			else
 			{
 				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(contactInfo.getMsisdn());
 				holder.statusMood.setVisibility(View.GONE);
+				holder.onlineIndicator.setVisibility(View.GONE);
 			}
 
 			if (contactInfo.isUnknownContact())
@@ -223,6 +238,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			holder.status = (TextView) convertView.findViewById(R.id.number);
 			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
 			convertView.setTag(holder);
 			break;
 		}
@@ -240,6 +256,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		CheckBox checkbox;
 		
 		ImageView statusMood;
+		
+		ImageView onlineIndicator;
 	}
 
 	@Override
