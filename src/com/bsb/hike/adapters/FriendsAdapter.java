@@ -346,7 +346,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		updateFriendsList(friendsSection, true, true);
 		if (isHikeContactsPresent())
 		{
-			hikeContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredHikeContactsList.size()), context.getString(R.string.hike_contacts), CONTACT_PHONE_NUM);
+			hikeContactsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredHikeContactsList.size()), context.getString(R.string.add_favorites_upper_case), CONTACT_PHONE_NUM);
 			updateHikeContactList(hikeContactsSection);
 		}
 		if (showSMSContacts)
