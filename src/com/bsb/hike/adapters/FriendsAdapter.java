@@ -1055,6 +1055,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			headerName.setText(contactInfo.getName());
 			headerCount.setText(contactInfo.getMsisdn());
+			if(contactInfo.getPhoneNum().equals(FRIEND_PHONE_NUM))
+			{
+				headerName.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_favorites_star), null, null, null);
+				headerName.setCompoundDrawablePadding((int) context.getResources().getDimension(R.dimen.favorites_star_icon_drawable_padding));
+			}
+			else
+			{
+				headerName.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			}
 			break;
 
 		case EXTRA:
