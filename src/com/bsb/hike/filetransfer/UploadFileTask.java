@@ -10,10 +10,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -63,8 +66,6 @@ public class UploadFileTask extends FileTransferBase
 
 	private Uri picasaUri = null;
 
-	private URL mUrl;
-
 	private String fileType;
 
 	private String token;
@@ -95,7 +96,7 @@ public class UploadFileTask extends FileTransferBase
 
 	private int width;
 
-	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
+	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
 		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType);
@@ -108,6 +109,7 @@ public class UploadFileTask extends FileTransferBase
 		this.isRecording = isRecording;
 		this.isForwardMsg = isForwardMsg;
 		this.isRecipientOnhike = isRecipientOnHike;
+		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
@@ -184,13 +186,20 @@ public class UploadFileTask extends FileTransferBase
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
 							Bitmap.Config.RGB_565, true, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
-
+					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
+					{
+						thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
+					}
 					// Logger.d("UploadFileTask",
 					// "thumbnail size : " + BitmapUtils.getBitmapSize(thumbnail) + "  height : " + thumbnail.getHeight() + "   width : " + thumbnail.getWidth());
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
 					thumbnail = ThumbnailUtils.createVideoThumbnail(destinationFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
+					{
+						thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
+					}
 				}
 				if (thumbnail != null)
 				{
@@ -399,7 +408,21 @@ public class UploadFileTask extends FileTransferBase
 		mThread = Thread.currentThread();
 		try
 		{
-			initFileUpload();
+			if (isFileKeyValid())
+			{
+				try
+				{
+					initFileUpload();
+				}
+				catch (Exception e)
+				{
+					
+				}
+			}
+			else
+			{
+				initFileUpload();
+			}
 		}
 		catch (FileTransferCancelledException e)
 		{
@@ -567,9 +590,16 @@ public class UploadFileTask extends FileTransferBase
 				responseJson = fst.getResponseJson();
 				return responseJson;
 			}
-			X_SESSION_ID = fst.getSessionId();
-			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
+			if (mStart > 0)
+			{
+				X_SESSION_ID = fst.getSessionId();
+			}
+			else
+			{
+				X_SESSION_ID = UUID.randomUUID().toString();
+			}
+			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 		}
 		long length = sourceFile.length();
 		if (mStart >= length)
@@ -943,6 +973,49 @@ public class UploadFileTask extends FileTransferBase
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
 	}
+	
+	private boolean isFileKeyValid()
+	{
+		if(TextUtils.isEmpty(fileKey))
+			return false;
+		
+		try
+		{
+			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+			URLConnection conn = initConn();
+			long start = 0;
+			String byteRange = start + "-";
+			try
+			{
+				conn.setRequestProperty("Range", "bytes=" + byteRange);
+				conn.setConnectTimeout(10000);
+			}
+			catch (Exception e)
+			{
+
+			}
+			conn.connect();
+			int resCode = AccountUtils.ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
+			// Make sure the response code is in the 200 range.
+			if (resCode / 100 != 2)
+			{
+				fileKey = null;
+				return false;
+			}
+			else
+			{
+				fileSize = conn.getContentLength();
+				return true;
+			}
+		}
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fileKey = null;
+			return false;
+		}
+	}
 
 	/*
 	 * this function was created to notify the UI but is not required for now. Not deleted if required again
@@ -962,6 +1035,7 @@ public class UploadFileTask extends FileTransferBase
 	{
 		HttpClient client = new DefaultHttpClient();
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
 		//client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 		Long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
