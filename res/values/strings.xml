@@ -312,11 +312,11 @@
     <string name="start_typing_new">Start typing a name or number...</string>
     <string name="gck_help">Tap and hold a participant to remove them from the group</string>
     <string name="change_group_image">%1$s changed the group image.</string>
-    <string name="contact">Contact</string>
+    <string name="contact">CONTACT</string>
     <string name="faq">FAQs</string>
     <string name="feeling_lazy">Feeling lazy? We\'ll do it for you</string>
     <string name="connect_fb">Connect with Facebook</string>
-    <string name="camera">Camera</string>
+    <string name="camera">CAMERA</string>
     <string name="gallery">Gallery</string>
     <string name="fb_app_id">425850510764995</string>
     <string name="choose_picture">Choose a picture</string>
@@ -863,11 +863,11 @@
     <string name="start_typing_new">Start typing a name or number...</string>
     <string name="gck_help">Tap and hold a participant to remove them from the group</string>
     <string name="change_group_image">%1$s changed the group image.</string>
-    <string name="contact">Contact</string>
+    <string name="contact">CONTACT</string>
     <string name="faq">FAQs</string>
     <string name="feeling_lazy">Feeling lazy? We\'ll do it for you</string>
     <string name="connect_fb">Connect with Facebook</string>
-    <string name="camera">Camera</string>
+    <string name="camera">CAMERA</string>
     <string name="gallery">Gallery</string>
     <string name="fb_app_id">425850510764995</string>
     <string name="choose_picture">Choose a picture</string>
@@ -1140,7 +1140,7 @@
     <string name="tap_chat">Tap to chat</string>
     <string name="tap_sms">Tap to send SMS</string>
     <string name="photo">Photo</string>
-    <string name="audio">Audio</string>
+    <string name="audio">AUDIO</string>
     <string name="video">Video</string>
     <string name="location">Location</string>
     <string name="places_api_key">AIzaSyBMpi-RNcG5enYGvdag0F4UXTmboawXDZM</string>
@@ -1299,7 +1299,7 @@
     <string name="system_root">System Root</string>
     <string name="sd_card">SD Card</string>
     <string name="multi_file_creation">Attaching files...</string>
-    <string name="file">File</string>
+    <string name="file">FILE</string>
     <string name="file_msg_received">Sent you a file</string>
     <string name="file_msg_sent">File</string>
     <string name="copied">Copied</string>
@@ -1524,6 +1524,11 @@
      <string name="shortcut">Add conversation shortcut</string>
      <string name="add_to_contacts">Add to contacts</string>
      <string name="delete_leave">Delete and exit group</string>
+     <string name="group_participant_info">You can add upto 50 people to a group</string>
+     <string name="photo">GALLERY</string>
+     <string name="video">VIDEOS</string>
+     <string name="location_option">LOCATION</string>
+     <string name="sync_contacts">Refresh contacts</string>
      <string name="confirm_delete_chat_msg">Delete chat with \"%1$s\"? </string>
      <string name="confirm_delete_group_msg">Delete and exit \"%1$s\" group?</string>
      <string name="email_chat">Email Chat</string>

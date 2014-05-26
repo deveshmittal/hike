@@ -2080,7 +2080,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			mLastSeenView.setText(lastSeenString);
-			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
+		//	mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
 		}
 
 		setAvatar();
@@ -2916,7 +2916,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					else
 					{
 						mLastSeenView.setText(lastSeenString);
-						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
+						//mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
 					}
 				}
 			});
@@ -3809,18 +3809,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.camera), 0, R.drawable.ic_attach_camera));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.photo), 1, R.drawable.ic_attach_pic));
-		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.audio), 3, R.drawable.ic_attach_music));
-		if (canShareLocation)
-		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.location), 4, R.drawable.ic_attach_location));
-		}
+		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
 		if (canShareContacts)
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.contact), 5, R.drawable.ic_attach_contact));
 		}
-		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
-
+		if (canShareLocation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.location_option), 4, R.drawable.ic_attach_location));
+		}
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);

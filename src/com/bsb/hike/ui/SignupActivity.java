@@ -194,6 +194,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private HashMap<String, String> languageMap = new HashMap<String, String>();
 
+	private ImageView arrow;
+
+	private TextView postText;
+
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
@@ -352,6 +356,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		mActionBarTitle = (TextView) actionBarView.findViewById(R.id.title);
 		nextBtn = actionBarView.findViewById(R.id.done_container);
+		arrow = (ImageView) actionBarView.findViewById(R.id.arrow);
+		postText = (TextView) actionBarView.findViewById(R.id.next_btn);
 		nextBtnContainer = actionBarView.findViewById(R.id.next_btn_container);
 
 		nextBtn.setOnClickListener(new OnClickListener()
@@ -513,7 +519,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		loadingLayout.setVisibility(View.VISIBLE);
 		infoTxt.setVisibility(View.GONE);
-		nextBtn.setEnabled(false);
+		toggleActionBarElementsEnable(false);
 		if (invalidNum != null)
 		{
 			invalidNum.setVisibility(View.GONE);
@@ -544,7 +550,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			infoTxt.setVisibility(View.VISIBLE);
 		}
-		nextBtn.setEnabled(true);
+		toggleActionBarElementsEnable(true);
 		if (countryPicker != null)
 		{
 			countryPicker.setEnabled(true);
@@ -567,7 +573,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			loadingLayout.setVisibility(View.GONE);
 			infoTxt.setVisibility(View.VISIBLE);
-			nextBtn.setEnabled(true);
+			toggleActionBarElementsEnable(true);
 			invalidNum.setVisibility(View.VISIBLE);
 			return;
 		}
@@ -603,7 +609,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				loadingLayout.setVisibility(View.GONE);
 				infoTxt.setVisibility(View.VISIBLE);
-				nextBtn.setEnabled(true);
+				toggleActionBarElementsEnable(true);
 				invalidNum.setVisibility(View.VISIBLE);
 			}
 			else if (viewFlipper.getDisplayedChild() == GENDER)
@@ -755,7 +761,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			loadingLayout.setVisibility(View.GONE);
 		}
-		nextBtn.setEnabled(true);
+		toggleActionBarElementsEnable(true);
 		setupActionBarTitle();
 	}
 
@@ -1013,7 +1019,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private void resetViewFlipper()
 	{
 		errorDialog = null;
-		nextBtn.setEnabled(true);
+		toggleActionBarElementsEnable(true);
 		viewFlipper.setVisibility(View.VISIBLE);
 		removeAnimation();
 		viewFlipper.setDisplayedChild(NUMBER);
@@ -1035,7 +1041,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private void showErrorMsg()
 	{
-		nextBtn.setEnabled(false);
+		toggleActionBarElementsEnable(false);
 		if (loadingLayout != null)
 		{
 			loadingLayout.setVisibility(View.GONE);
@@ -1245,7 +1251,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
 				callmeBtn.setEnabled(true);
-				nextBtn.setEnabled(true);
+				toggleActionBarElementsEnable(true);
 				enterEditText.setText("");
 			}
 			// Manual entry for pin
@@ -1260,7 +1266,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				verifiedPin.setVisibility(View.VISIBLE);
 				loadingLayout.setVisibility(View.GONE);
-				nextBtn.setEnabled(false);
+				toggleActionBarElementsEnable(false);
 				/*
 				 * after verifying pin we would wait for 2 second to get user to the next screen and show him/her that pin is verified
 				 */
@@ -1919,6 +1925,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			enterEditText.setText(pin);
 			submitClicked();
 		}
+	}
+	
+	public void toggleActionBarElementsEnable( boolean enabled)
+	{
+		nextBtn.setEnabled(enabled);
+		arrow.setEnabled(enabled);
+		postText.setEnabled(enabled);
 	}
 
 }
