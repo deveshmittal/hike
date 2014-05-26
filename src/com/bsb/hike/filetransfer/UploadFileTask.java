@@ -589,9 +589,16 @@ public class UploadFileTask extends FileTransferBase
 				responseJson = fst.getResponseJson();
 				return responseJson;
 			}
-			X_SESSION_ID = fst.getSessionId();
-			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
+			if (mStart > 0)
+			{
+				X_SESSION_ID = fst.getSessionId();
+			}
+			else
+			{
+				X_SESSION_ID = UUID.randomUUID().toString();
+			}
+			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 		}
 		long length = sourceFile.length();
 		if (mStart >= length)
