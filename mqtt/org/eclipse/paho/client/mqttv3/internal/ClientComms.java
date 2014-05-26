@@ -130,7 +130,7 @@ public class ClientComms
 		{
 			// Token is already in use - cannot reuse
 			// @TRACE 213=fail: token in use: key={0} message={1} token={2}
-			Logger.d(TAG, "Token is already in use - cannot reuse");
+			Logger.e(TAG, "Token is already in use - cannot reuse");
 
 			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
 		}
@@ -163,7 +163,7 @@ public class ClientComms
 		else
 		{
 			// @TRACE 208=failed: not connected
-			Logger.d(TAG, "send failed , not connected");
+			Logger.e(TAG, "send failed , not connected");
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
 	}
@@ -187,7 +187,7 @@ public class ClientComms
 				if (!isDisconnected())
 				{
 					// @TRACE 224=failed: not disconnected
-					Logger.d(TAG, "close failed not disconnected");
+					Logger.e(TAG, "close failed not disconnected");
 
 					if (isConnecting())
 					{
@@ -251,7 +251,7 @@ public class ClientComms
 			else
 			{
 				// @TRACE 207=connect failed: not disconnected {0}
-				Logger.d(TAG, "connect failed : not disconnected");
+				Logger.e(TAG, "connect failed : not disconnected");
 				if (isClosed() || closePending)
 				{
 					throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
@@ -289,7 +289,7 @@ public class ClientComms
 		}
 
 		// @TRACE 204=connect failed: rc={0}
-		Logger.d(TAG, "connected failed , rc is not zero");
+		Logger.e(TAG, "connected failed , rc is not zero", mex);
 		throw mex;
 	}
 
@@ -497,25 +497,25 @@ public class ClientComms
 			if (isClosed())
 			{
 				// @TRACE 223=failed: in closed state
-				Logger.d(TAG, "disconnect failed, cause : " + "in closed state");
+				Logger.e(TAG, "disconnect failed, cause : " + "in closed state");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
 			}
 			else if (isDisconnected())
 			{
 				// @TRACE 211=failed: already disconnected
-				Logger.d(TAG, "disconnect failed, cause : " + "already disconnected");
+				Logger.e(TAG, "disconnect failed, cause : " + "already disconnected");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED);
 			}
 			else if (isDisconnecting())
 			{
 				// @TRACE 219=failed: already disconnecting
-				Logger.d(TAG, "disconnect failed, cause : " + "already disconnecting");
+				Logger.e(TAG, "disconnect failed, cause : " + "already disconnecting");
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
 			}
 			else if (Thread.currentThread() == callback.getThread())
 			{
 				// @TRACE 210=failed: called on callback thread
-				Logger.d(TAG, "disconnect failed, cause : " + "called on callback thread");
+				Logger.e(TAG, "disconnect failed, cause : " + "called on callback thread");
 				// Not allowed to call disconnect() from the callback, as it will deadlock.
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECT_PROHIBITED);
 			}
@@ -725,13 +725,13 @@ public class ClientComms
 			catch (MqttException ex)
 			{
 				// @TRACE 212=connect failed: unexpected exception
-				Logger.d(TAG, "connect failed : unxpected exception , cause : " + ex.getCause());
+				Logger.e(TAG, "connect failed : unxpected exception , cause : " , ex);
 				mqttEx = ex;
 			}
 			catch (Exception ex)
 			{
 				// @TRACE 209=connect failed: unexpected exception
-				Logger.d(TAG, "connect failed : unxpected exception , cause : " + ex.getCause());
+				Logger.e(TAG, "connect failed : unxpected exception , cause : " , ex);
 				mqttEx = ExceptionHelper.createMqttException(ex);
 			}
 
@@ -811,11 +811,32 @@ public class ClientComms
 		return token;
 	}
 
+	/**
+	 *  This fucntion will check if there is an ack or incoming message in out - in window
+	 *  If no msg or ack then we disconnect and reconnect.
+	 */
+	public void checkActivity()
+	{
+		try
+		{
+			clientState.checkActivity();
+		}
+		catch (MqttException e)
+		{
+			callback.fastReconnect();
+			handleRunException(e);
+		}
+		catch (Exception e)
+		{
+			handleRunException(e);
+		}
+	}
+	
 	private void handleRunException(Exception ex)
 	{
 		final String methodName = "handleRunException";
 		// @TRACE 804=exception
-		Logger.d(TAG, "excpetion occured , shutting down connection : " + ex.getCause());
+		Logger.e(TAG, "excpetion occured , shutting down connection : " , ex);
 		MqttException mex;
 		if (!(ex instanceof MqttException))
 		{
