@@ -12,6 +12,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
@@ -68,7 +69,7 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 			{
 				return;
 			}
-			FileTransferManager.getInstance(context).uploadFile(msisdn, file, fileType, hikeFileType, false, false, onHike, -1);
+			FileTransferManager.getInstance(context).uploadFile(msisdn, file, null, fileType, hikeFileType, false, false, onHike, -1);
 		}
 	}
 }

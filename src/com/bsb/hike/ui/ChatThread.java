@@ -163,6 +163,7 @@ import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -263,6 +264,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View mOverlayLayout;
 
 	private ArrayList<ConvMessage> messages;
+	
+	private static HashMap<Long, ConvMessage> messageMap;
 
 	private CustomLinearLayout chatLayout;
 
@@ -567,6 +570,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow = null;
 		}
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
+		if(messageMap != null)
+		{
+			messageMap.clear();
+			messageMap = null;
+		}
 
 	}
 
@@ -1102,6 +1110,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
 				messages.clear();
+				if(messageMap != null)
+				{
+					messageMap.clear();
+				}
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 			}
@@ -1224,7 +1236,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				fss = FileTransferManager.getInstance(getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
 			}
-			if (!(!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded()))
+			if((message.isSent() && TextUtils.isEmpty(hikeFile.getFileKey())) || (!message.isSent() && !hikeFile.wasFileDownloaded()))
 			{
 				/*
 				 * This message is not downloaded or uplpaded yet. this can't be forwarded
@@ -1411,6 +1423,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 
 				String fileKey = null;
+				if(intent.hasExtra(HikeConstants.Extras.FILE_KEY))
+				{
+					fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				}
 				String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
 				String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
 
@@ -1429,7 +1445,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else
 				{
-					initiateFileTransferFromIntentData(fileType, filePath, isRecording, recordingDuration);
+					initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
 				}
 
 				// Making sure the file does not get forwarded again on
@@ -1456,6 +1472,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
 						{
 							String fileKey = null;
+							if(msgExtrasJson.has(HikeConstants.Extras.FILE_KEY))
+							{
+								fileKey = msgExtrasJson.getString(HikeConstants.Extras.FILE_KEY);
+							}
+							else
+							{
+							}
 							String filePath = msgExtrasJson.getString(HikeConstants.Extras.FILE_PATH);
 							String fileType = msgExtrasJson.getString(HikeConstants.Extras.FILE_TYPE);
 
@@ -1476,7 +1499,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							}
 							else
 							{
-								initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+								initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
 							}
 						}
 						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -1565,10 +1588,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
 	{
-		initiateFileTransferFromIntentData(fileType, filePath, false, -1);
+		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1);
 	}
 
-	private void initiateFileTransferFromIntentData(String fileType, String filePath, boolean isRecording, long recordingDuration)
+	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration)
 	{
 		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
@@ -1580,7 +1603,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
 		}
 
 	}
@@ -1772,6 +1795,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * make a copy of the message list since it's used internally by the adapter
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+		if(messageMap != null)
+		{
+			messageMap.clear();
+		}
+		messageMap = new HashMap<Long, ConvMessage>();
+		addtoMessageMap(0, messages.size());
 
 		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
@@ -1907,6 +1936,73 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Resetting the Orientation Change flag to be used again
 		 */
 		wasOrientationChanged = false;
+	}
+
+	private void addtoMessageMap(int from, int to)
+	{
+		for(int i = to - 1; i >= from; i--)
+		{
+			ConvMessage msg = messages.get(i);
+			addtoMessageMap(msg);
+		}
+	}
+
+	public static void addtoMessageMap(ConvMessage msg)
+	{
+		State msgState = msg.getState();
+
+		if(msg.getMsgID() <= 0)
+		{
+			return;
+		}
+		if(msg.isSent())
+		{
+			if (messageMap == null)
+			{
+				messageMap = new HashMap<Long, ConvMessage>();
+			}
+
+			if(msg.isFileTransferMessage())
+			{
+				if(TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+				{
+					messageMap.put(msg.getMsgID(),msg);
+					return;
+				}
+			}
+			if (msg.isSMS())
+			{
+				if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
+			}
+			else
+			{
+				if(msgState != State.SENT_DELIVERED_READ)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
+			}
+		}
+	}
+	
+	private void removeFromMessageMap(ConvMessage msg)
+	{
+		if(messageMap == null)
+			return;
+
+		if(msg.isFileTransferMessage())
+		{
+			if(!TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+			{
+				messageMap.remove(msg.getMsgID());
+			}
+		}
+		else
+		{
+			messageMap.remove(msg.getMsgID());
+		}
 	}
 
 	private void addUnkownContactBlockHeader()
@@ -2556,7 +2652,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
+					if(msg.isGroupChat())
+					{
+						msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
+					}
+					removeFromMessageMap(msg);
 				}
 			}
 			runOnUiThread(mUpdateAdapter);
@@ -2706,6 +2806,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				try
 				{
 					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+					adapterMessage.setTimestamp(convMessage.getTimestamp());
 				}
 				catch (JSONException e)
 				{
@@ -3045,25 +3146,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ConvMessage findMessageById(long msgID)
 	{
-		if (mAdapter == null)
-		{
+		if(messageMap == null)
 			return null;
-		}
 
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
-		{
-			ConvMessage msg = mAdapter.getItem(i);
-			if (msg == null)
-			{
-				continue;
-			}
-			if (msg.getMsgID() == msgID)
-			{
-				return msg;
-			}
-		}
-		return null;
+		return messageMap.get(msgID);
 	}
 
 	public String getContactNumber()
@@ -3280,6 +3366,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				messages.remove(messages.size() - 1);
 			}
 			mAdapter.addMessage(convMessage);
+			addtoMessageMap(messages.size() - 1 ,messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -4236,7 +4323,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					return;
 				}
-				initialiseFileTransfer(selectedFile.getPath(), HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, recordedTime, false);
+				initialiseFileTransfer(selectedFile.getPath(), null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, recordedTime, false);
 			}
 		});
 
@@ -4526,8 +4613,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Logger.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
-
-			initialiseFileTransfer(filePath, hikeFileType, null, false, -1, false);
+			initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false);
 		}
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
 		{
@@ -4821,7 +4907,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		contactDialog.show();
 	}
 
-	private void initialiseFileTransfer(String filePath, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration, boolean isForwardingFile)
+	private void initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration, boolean isForwardingFile)
 	{
 		clearTempData();
 		if (filePath == null)
@@ -4837,7 +4923,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Toast.makeText(getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileType, hikeFileType, isRecording, isForwardingFile, mConversation.isOnhike(),
+		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile, mConversation.isOnhike(),
 				recordingDuration);
 	}
 
@@ -5741,6 +5827,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 
 						mAdapter.addMessages(result, startIndex);
+						addtoMessageMap(startIndex, startIndex + result.size());
 						mAdapter.notifyDataSetChanged();
 						mConversationsView.setSelectionFromTop(firstVisibleItem + result.size(), scrollOffset);
 					}
