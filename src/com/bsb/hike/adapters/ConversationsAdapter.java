@@ -255,8 +255,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 
-			ImageView avatarframe = (ImageView) v.findViewById(R.id.avatar_frame);
-
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
 
 			TextView unreadIndicator = (TextView) v.findViewById(R.id.unread_indicator);
@@ -270,13 +268,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				int resId = message.getImageState();
 				if (resId > 0)
 				{
-					avatarframe.setImageDrawable(null);
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				}
 				else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
 				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
 					unreadIndicator.setVisibility(View.VISIBLE);
 
 					unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
@@ -292,12 +288,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				}
 				else
 				{
-					avatarframe.setImageDrawable(null);
 				}
 			}
 			else
 			{
-				avatarframe.setImageDrawable(null);
 			}
 
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
