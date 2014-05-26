@@ -48,7 +48,7 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		actionBarView.findViewById(R.id.seprator).setVisibility(View.GONE);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(R.string.people);
+		title.setText(R.string.favorites);
 
 		backContainer.setOnClickListener(new View.OnClickListener()
 		{

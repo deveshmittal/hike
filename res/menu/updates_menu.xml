@@ -10,7 +10,7 @@
         android:id="@+id/show_people"
         android:icon="@drawable/ic_show_people"
         android:showAsAction="always"
-        android:title="@string/people"/>
+        android:title="@string/favorites"/>
     <item
         android:id="@+id/overflow_menu"
         android:actionLayout="@layout/overflow_icon_view"
