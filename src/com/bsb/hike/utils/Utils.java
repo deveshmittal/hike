@@ -3669,7 +3669,8 @@ public class Utils
 
 	public static boolean isPlayTickSound(Context context)
 	{
-		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
+		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+		return !am.isMusicActive() && (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
 	}
 
 	/**
