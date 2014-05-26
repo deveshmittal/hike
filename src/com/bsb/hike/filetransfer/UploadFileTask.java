@@ -10,10 +10,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -63,8 +66,6 @@ public class UploadFileTask extends FileTransferBase
 
 	private Uri picasaUri = null;
 
-	private URL mUrl;
-
 	private String fileType;
 
 	private String token;
@@ -95,7 +96,7 @@ public class UploadFileTask extends FileTransferBase
 
 	private int width;
 
-	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
+	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
 		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType);
@@ -108,6 +109,7 @@ public class UploadFileTask extends FileTransferBase
 		this.isRecording = isRecording;
 		this.isForwardMsg = isForwardMsg;
 		this.isRecipientOnhike = isRecipientOnHike;
+		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
@@ -400,6 +402,7 @@ public class UploadFileTask extends FileTransferBase
 		try
 		{
 			initFileUpload();
+			isFileKeyValid();
 		}
 		catch (FileTransferCancelledException e)
 		{
@@ -941,6 +944,49 @@ public class UploadFileTask extends FileTransferBase
 		res.append("Content-Disposition: form-data; name=\"").append("file").append("\"; filename=\"").append(name).append("\"\r\n").append("Content-Type: ")
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
+	}
+	
+	private boolean isFileKeyValid()
+	{
+		if(TextUtils.isEmpty(fileKey))
+			return false;
+		
+		try
+		{
+			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+			URLConnection conn = initConn();
+			long start = 0;
+			String byteRange = start + "-";
+			try
+			{
+				conn.setRequestProperty("Range", "bytes=" + byteRange);
+				conn.setConnectTimeout(10000);
+			}
+			catch (Exception e)
+			{
+
+			}
+			conn.connect();
+			int resCode = AccountUtils.ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
+			// Make sure the response code is in the 200 range.
+			if (resCode / 100 != 2)
+			{
+				fileKey = null;
+				return false;
+			}
+			else
+			{
+				fileSize = conn.getContentLength();
+				return true;
+			}
+		}
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fileKey = null;
+			return false;
+		}
 	}
 
 	/*
