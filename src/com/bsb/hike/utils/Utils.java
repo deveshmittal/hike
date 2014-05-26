@@ -3670,7 +3670,9 @@ public class Utils
 	public static boolean isPlayTickSound(Context context)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		return !am.isMusicActive() && (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
+		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
+				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
 	}
 
 	/**
@@ -3808,5 +3810,10 @@ public class Utils
 		{
 			return notifSoundOff;
 		}
+	}
+
+	public static int getFreeSMSCount(Context context)
+	{
+		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, context.MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
 	}
 }
