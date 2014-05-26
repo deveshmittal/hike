@@ -2439,10 +2439,10 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
-		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true);
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen)
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		if (!isUserAuthenticated(context))
 		{
@@ -2470,7 +2470,7 @@ public class Utils
 			}
 		}
 
-		sendAppState(context, requestBulkLastSeen);
+		sendAppState(context, requestBulkLastSeen, dueToConnect);
 
 		if (resetStealth)
 		{
@@ -2490,7 +2490,7 @@ public class Utils
 		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
-	private static void sendAppState(Context context, boolean requestBulkLastSeen)
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2509,7 +2509,7 @@ public class Utils
 				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
 			}
-			else
+			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 			}
