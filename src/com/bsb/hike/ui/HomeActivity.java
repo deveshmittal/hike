@@ -477,11 +477,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
-		case R.id.new_update:
-			intent = new Intent(this, StatusUpdate.class);
-
-			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
-			break;
 		}
 
 		if (intent != null)

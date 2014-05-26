@@ -103,6 +103,11 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 			case R.id.show_people:
 				intent = new Intent(this, PeopleActivity.class);
 				break;	
+			case R.id.new_update:
+				intent = new Intent(this, StatusUpdate.class);
+
+				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
+				break;
 		}
 
 		if (intent != null)
