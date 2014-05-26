@@ -947,10 +947,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		case R.id.chat_bg:
 			setupThemePicker(null);
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
-			{
-				closeChatBgFtueTip();
-			}
 			break;
 		case R.id.attachment:
 			if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
@@ -1930,10 +1926,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					showStickerFtueTip();
 				}
-				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
-				{
-					showChatBgFtueTip();
-				}
 			}
 		}
 		/*
@@ -2119,37 +2111,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		};
-	}
-
-	private void showChatBgFtueTip()
-	{
-		tipView = findViewById(R.id.chat_bg_ftue_tip);
-		tipView.setOnTouchListener(new OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1)
-			{
-				// disabling on touch gesture for sticker ftue tip
-				// so that we do not send an unnecessary nudge on a
-				// double tap on tipview.
-				return true;
-			}
-		});
-		HikeTip.showTip(this, TipType.CHAT_BG_FTUE, tipView);
-	}
-
-	private void closeChatBgFtueTip()
-	{
-		if (tipView != null)
-		{
-			TipType viewTipType = (TipType) tipView.getTag();
-			if (viewTipType == TipType.CHAT_BG_FTUE)
-			{
-				tipView.clearAnimation();
-				HikeTip.closeTip(TipType.CHAT_BG_FTUE, tipView, prefs);
-				tipView = null;
-			}
-		}
 	}
 
 	private void showStickerFtueTip()
@@ -3689,11 +3650,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		attachmentsGridView.setAdapter(gridAdapter);
 
 		int selection = temporaryTheme.ordinal();
-		if (tipView != null)
-		{
-			TipType viewTipType = (TipType) tipView.getTag();
-			selection = viewTipType == TipType.CHAT_BG_FTUE ? 0 : temporaryTheme.ordinal();
-		}
 		attachmentsGridView.setSelection(selection);
 
 		attachmentsGridView.setOnItemClickListener(new OnItemClickListener()
@@ -6404,7 +6360,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
 			TipType tipType = (TipType) tipView.getTag();
-			if (tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
+			if (tipType == TipType.LAST_SEEN)
 			{
 				tipView.setVisibility(View.INVISIBLE);
 			}
