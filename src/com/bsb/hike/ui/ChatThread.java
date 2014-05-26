@@ -473,10 +473,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 				smsDialog = Utils.showSMSSyncDialog(this, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
 			}
-			if (savedInstanceState.getBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, false))
-			{
-				showStickerFtueTip();
-			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, false))
 			{
 				final ChatTheme chatTheme = ChatTheme.values()[savedInstanceState.getInt(HikeConstants.Extras.SELECTED_THEME, 0)];
@@ -1822,14 +1818,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setChatTheme(selectedTheme);
 		}
 
-		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN))
-		{
-			// In case of Emma HikeBot we show sticker Ftue tip only on
-			// scrolling to
-			// the bottom of the chat thread
-			mConversationsView.setOnScrollListener(getOnScrollListenerForEmmaThread());
-		}
-
 		if (mConversation.getUnreadCount() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
@@ -1915,19 +1903,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			runOnUiThread(new SetTypingText(true, HikeMessengerApp.getTypingNotificationSet().get(mContactNumber)));
 		}
 
-		/*
-		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
-		 */
-		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
-		{
-			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
-			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
-				{
-					showStickerFtueTip();
-				}
-			}
-		}
 		/*
 		 * Resetting the Orientation Change flag to be used again
 		 */
@@ -2065,69 +2040,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				getIntent().removeExtra(HikeConstants.Extras.FROM_CHAT_THEME_FTUE);
 			}
 		}, 1200);
-	}
-
-	/*
-	 * In case of Emma hikebot we show sticker ftue tip only on scrolling to the bottom of the emma chatthread
-	 */
-	private OnScrollListener getOnScrollListenerForEmmaThread()
-	{
-		return new OnScrollListener()
-		{
-			@Override
-			public void onScrollStateChanged(AbsListView arg0, int scrollState)
-			{
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-			{
-				ChatThread.this.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
-				if (view.getChildAt(view.getChildCount() - 1) != null && view.getLastVisiblePosition() == view.getAdapter().getCount() - 1
-						&& view.getChildAt(view.getChildCount() - 1).getBottom() <= view.getHeight())
-				{
-					if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
-					{
-						// variable hideTip is for hiding the sticker tip
-						// for the first auto scroll from bottom to top of emma
-						// thread.
-						// after that if user manually scroll the emma thread
-						// from top
-						// to bottom than we show the tip and keep it showing
-						// than on
-						boolean hideTip = false;
-						if (tipView == null)
-						{
-							hideTip = true;
-						}
-
-						showStickerFtueTip();
-
-						if (hideTip)
-						{
-							tipView.setVisibility(View.GONE);
-						}
-					}
-				}
-			}
-		};
-	}
-
-	private void showStickerFtueTip()
-	{
-		tipView = findViewById(R.id.emoticon_tip);
-		tipView.setOnTouchListener(new OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1)
-			{
-				// disabling on touch gesture for sticker ftue tip
-				// so that we do not send an unnecessary nudge on a
-				// double tap on tipview.
-				return true;
-			}
-		});
-		HikeTip.showTip(this, TipType.EMOTICON, tipView);
 	}
 
 	private void setupActionBar(boolean initialising)
@@ -5040,10 +4952,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH, currentFileSelectionPath);
 			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_MIME_TYPE, currentFileSelectionMimeType);
 		}
-		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
-		{
-			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, true);
-		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
 			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
@@ -5099,16 +5007,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						// view not changed , exit with dismiss dialog
 						dismissPopupWindow();
 						return;
-					}
-					if (tipView != null)
-					{
-						TipType viewTipType = (TipType) tipView.getTag();
-						if (viewTipType == TipType.EMOTICON)
-						{
-							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
-							tipView = null;
-						}
 					}
 					if (emoticonType != EmoticonType.STICKERS)
 					{
