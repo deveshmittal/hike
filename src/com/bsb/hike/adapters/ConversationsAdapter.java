@@ -60,7 +60,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	private enum ViewType
 	{
-		CONVERSATION, GROUP_CHAT_TIP, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP
 	}
 
 	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
@@ -87,8 +87,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		{
 			switch (((ConversationTip) conversation).getTipType())
 			{
-			case ConversationTip.GROUP_CHAT_TIP:
-				return ViewType.GROUP_CHAT_TIP.ordinal();
 			case ConversationTip.STEALTH_FTUE_TIP:
 				return ViewType.STEALTH_FTUE_TIP_VIEW.ordinal();
 			case ConversationTip.RESET_STEALTH_TIP:
@@ -115,9 +113,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			case CONVERSATION:
 				v = inflater.inflate(mResourceId, parent, false);
 				break;
-			case GROUP_CHAT_TIP:
-				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
-				break;
 			case STEALTH_FTUE_TIP_VIEW:
 			case RESET_STEALTH_TIP:
 				v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
@@ -127,32 +122,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			}
 		}
 
-		if (viewType == ViewType.GROUP_CHAT_TIP)
-		{
-			TextView tip = (TextView) v.findViewById(R.id.tip);
-
-			String tipString = context.getString(R.string.tap_top_right_group_chat);
-			String tipReplaceString = "*";
-
-			SpannableStringBuilder ssb = new SpannableStringBuilder(tipString);
-			ssb.setSpan(new ImageSpan(context, R.drawable.ic_group_tip_menu), tipString.indexOf(tipReplaceString), tipString.indexOf(tipReplaceString) + tipReplaceString.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-			tip.setText(ssb);
-
-			View close = v.findViewById(R.id.close);
-			close.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View view)
-				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_GROUP_CHAT_TIP, null);
-				}
-			});
-
-			return v;
-		}
 		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
 		{
 			View close = v.findViewById(R.id.close);
