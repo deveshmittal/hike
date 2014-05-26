@@ -893,6 +893,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			ImageView avatar = (ImageView) convertView.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
+			ImageView onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
 
 			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
 
@@ -901,13 +902,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			if (viewType == ViewType.FRIEND || viewType == ViewType.FRIEND_REQUEST || viewType == ViewType.FTUE_CONTACT)
 			{
 				TextView lastSeen = (TextView) convertView.findViewById(R.id.last_seen);
-				ImageView avatarFrame = (ImageView) convertView.findViewById(R.id.avatar_frame);
 				ImageView statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 
 				lastSeen.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				lastSeen.setVisibility(View.GONE);
-
-				avatarFrame.setImageDrawable(null);
 
 				TextView inviteBtn = (TextView) convertView.findViewById(R.id.invite_btn);
 				if (inviteBtn != null)
@@ -951,15 +949,30 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 						lastSeen.setText(contactInfo.getMsisdn());
 						statusMood.setVisibility(View.GONE);
 					}
+					
+					if(lastSeenPref && contactInfo.getOffline() == 0)
+					{
+						onlineIndicator.setVisibility(View.VISIBLE);
+						onlineIndicator.setImageResource(R.drawable.ic_online_blue_dot);
+					}
+					else
+					{
+						onlineIndicator.setVisibility(View.GONE);
+					}
 				}
 				else if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED)
 				{
 					lastSeen.setVisibility(View.VISIBLE);
 					lastSeen.setText(contactInfo.getMsisdn());
 					statusMood.setVisibility(View.GONE);
+					onlineIndicator.setVisibility(View.GONE);
 				}
 				else
 				{
+					if(onlineIndicator != null)
+					{
+						onlineIndicator.setVisibility(View.GONE);
+					}
 					if(statusMood != null)
 					{
 						statusMood.setVisibility(View.GONE);

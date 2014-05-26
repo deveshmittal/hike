@@ -23,8 +23,13 @@
                 style="@style/AvatarStyle.Padding" />
 
             <ImageView
-                android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle" />
+        		android:id="@+id/online_indicator"
+        		android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:layout_gravity="bottom|right"
+        		android:scaleType="centerInside"
+        		android:layout_marginBottom="7dp" />
+            
         </FrameLayout>
 
         <com.bsb.hike.view.CustomFontTextView
