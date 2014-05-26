@@ -115,6 +115,16 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			TextView count = (TextView) convertView.findViewById(R.id.count);
 			count.setText(contactInfo.getMsisdn());
 			// set section heading
+			if(contactInfo.getPhoneNum().equals(FRIEND_PHONE_NUM))
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_favorites_star), null, null, null);
+				tv.setCompoundDrawablePadding((int) context.getResources().getDimension(R.dimen.favorites_star_icon_drawable_padding));
+			}
+			else
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			}
+
 		}
 		else if (viewType == ViewType.EXTRA)
 		{
