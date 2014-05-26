@@ -72,19 +72,22 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	private Map<String, StatusMessage> lastStatusMessagesMap;
 	
 	private boolean fetchSmsContacts;
+	
+	boolean checkFavTypeInComparision;
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> filteredFriendsList,
-			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts)
+			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision)
 	{
 		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList, smsStealthContactsList, filteredFriendsList,
-				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, false, null, false, fetchSmsContacts);
+				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision);
 	}
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> filteredFriendsList,
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList, List<ContactInfo> groupsStealthList,
-			List<ContactInfo> filteredGroupsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou, boolean fetchSmsContacts)
+			List<ContactInfo> filteredGroupsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou, 
+			boolean fetchSmsContacts, boolean checkFavTypeInComparision)
 	{
 		this.friendsAdapter = friendsAdapter;
 
@@ -113,6 +116,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		this.creatingOrEditingGroup = creatingOrEditingGroup;
 		
 		this.fetchSmsContacts = fetchSmsContacts;
+		this.checkFavTypeInComparision = checkFavTypeInComparision;
 
 		this.stealthMode = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 	}
@@ -136,7 +140,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		friendTaskList = hikeUserDatabase.getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED, FavoriteType.REQUEST_SENT,
 				FavoriteType.REQUEST_SENT_REJECTED }, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false);
-		Collections.sort(friendTaskList, ContactInfo.lastSeenTimeComparator);
+		Collections.sort(friendTaskList, checkFavTypeInComparision ? ContactInfo.lastSeenTimeComparator : ContactInfo.lastSeenTimeComparatorWithoutFav);
 
 		hikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn);
 		hikeTaskList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, myMsisdn, nativeSMSOn, true));

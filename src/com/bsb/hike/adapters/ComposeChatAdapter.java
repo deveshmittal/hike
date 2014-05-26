@@ -86,7 +86,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
 				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList,
-				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true);
+				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
