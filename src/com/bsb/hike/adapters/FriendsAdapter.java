@@ -149,7 +149,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		this.context = context;
 		this.contactFilter = new ContactFilter();
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
-		this.showSMSContacts = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.FREE_SMS_PREF, true) || Utils.getSendSmsPref(context);
+		/*
+		 * Now we never show sms contacts section in people screen.
+		 */
+		//this.showSMSContacts = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.FREE_SMS_PREF, true) || Utils.getSendSmsPref(context);
+		this.showSMSContacts = false;
 
 		completeList = new ArrayList<ContactInfo>();
 
@@ -174,7 +178,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList);
+				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
