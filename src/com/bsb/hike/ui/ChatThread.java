@@ -1118,7 +1118,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
 				messages.clear();
-				messageMap.clear();
+				if(messageMap != null)
+				{
+					messageMap.clear();
+				}
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 			}
@@ -1976,45 +1979,41 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if(msg.isSent())
 		{
-			try
+			if (messageMap == null)
 			{
-				if(msg.isFileTransferMessage())
+				messageMap = new HashMap<Long, ConvMessage>();
+			}
+
+			if(msg.isFileTransferMessage())
+			{
+				if(TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
 				{
-					if(TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
-					{
-						messageMap.put(msg.getMsgID(),msg);
-						return;
-					}
-				}
-				if (msg.isSMS())
-				{
-					if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
-					{
-						messageMap.put(msg.getMsgID(),msg);
-					}
-				}
-				else
-				{
-					if(msgState != State.SENT_DELIVERED_READ)
-					{
-						messageMap.put(msg.getMsgID(),msg);
-					}
+					messageMap.put(msg.getMsgID(),msg);
+					return;
 				}
 			}
-			catch(Exception e)
+			if (msg.isSMS())
 			{
-				e.printStackTrace();
-				if(messageMap == null)
+				if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
 				{
-					messageMap = new HashMap<Long, ConvMessage>();
 					messageMap.put(msg.getMsgID(),msg);
-				}	
+				}
+			}
+			else
+			{
+				if(msgState != State.SENT_DELIVERED_READ)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
 			}
 		}
 	}
 	
 	private void removeFromMessageMap(ConvMessage msg)
 	{
+		if(messageMap == null)
+			return;
+
 		if(msg.isFileTransferMessage())
 		{
 			if(!TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
@@ -3263,33 +3262,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ConvMessage findMessageById(long msgID)
 	{
-		try
-		{
-			return messageMap.get(msgID);
-		}
-		catch(Exception e)
-		{
+		if(messageMap == null)
 			return null;
-		}
-//		if (mAdapter == null)
-//		{
-//			return null;
-//		}
-//
-//		int count = mAdapter.getCount();
-//		for (int i = 0; i < count; ++i)
-//		{
-//			ConvMessage msg = mAdapter.getItem(i);
-//			if (msg == null)
-//			{
-//				continue;
-//			}
-//			if (msg.getMsgID() == msgID)
-//			{
-//				return msg;
-//			}
-//		}
-//		return null;
+
+		return messageMap.get(msgID);
 	}
 
 	public String getContactNumber()
