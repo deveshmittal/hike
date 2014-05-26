@@ -97,7 +97,7 @@ public class HikeNotification
 		/*
 		 * invoke the chat thread here. The free SMS invite switch popup should already be showing here ideally by now.
 		 */
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + FREE_SMS_POPUP_NOTIFICATION_ID)));
@@ -116,7 +116,7 @@ public class HikeNotification
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
 		// we've got to invoke the timeline here
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + PROTIP_NOTIFICATION_ID)));
@@ -278,7 +278,7 @@ public class HikeNotification
 		String text = message;
 
 		// we've got to invoke the timeline here
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
@@ -304,7 +304,7 @@ public class HikeNotification
 
 		final long timeStamp = System.currentTimeMillis() / 1000;
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.FRIENDS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getPeopleActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -332,7 +332,7 @@ public class HikeNotification
 
 		final long timeStamp = statusMessage.getTimeStamp();
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -391,7 +391,7 @@ public class HikeNotification
 
 		final int icon = returnSmallIcon();
 		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
@@ -404,7 +404,7 @@ public class HikeNotification
 
 		final int notificationId = (int) timeStamp;
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();

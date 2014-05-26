@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        style="@style/UpdatesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/header_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:minHeight="45dp"
+            android:text="Tap to update status"
+            android:textSize="15dp" />
+    </RelativeLayout>
+
+</LinearLayout>

@@ -153,7 +153,9 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.google.android.maps.GeoPoint;
@@ -2437,10 +2439,10 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
-		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true);
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen)
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		if (!isUserAuthenticated(context))
 		{
@@ -2468,7 +2470,7 @@ public class Utils
 			}
 		}
 
-		sendAppState(context, requestBulkLastSeen);
+		sendAppState(context, requestBulkLastSeen, dueToConnect);
 
 		if (resetStealth)
 		{
@@ -2488,7 +2490,7 @@ public class Utils
 		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
-	private static void sendAppState(Context context, boolean requestBulkLastSeen)
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2507,7 +2509,7 @@ public class Utils
 				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
 			}
-			else
+			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 			}
@@ -3069,12 +3071,11 @@ public class Utils
 		}
 	}
 
-	public static void resetUnseenStatusCount(SharedPreferences prefs)
+	public static void resetUnseenStatusCount(Context context)
 	{
-		Editor editor = prefs.edit();
-		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		editor.commit();
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
@@ -3308,10 +3309,25 @@ public class Utils
 		return returnVal;
 	}
 
-	public static Intent getHomeActivityIntent(Context context, final int tabIndex)
+	public static Intent getHomeActivityIntent(Context context)
 	{
 		final Intent intent = new Intent(context, HomeActivity.class);
-		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getPeopleActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, PeopleActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getTimelineActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, TimelineActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		return intent;

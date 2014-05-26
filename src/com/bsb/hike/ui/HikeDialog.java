@@ -11,8 +11,6 @@ import com.bsb.hike.R;
 
 public class HikeDialog
 {
-	public static final int FILE_TRANSFER_DIALOG = 1;
-
 	public static final int FAVORITE_ADDED_DIALOG = 2;
 
 	public static final int STEALTH_FTUE_DIALOG = 3;
@@ -31,8 +29,6 @@ public class HikeDialog
 
 		switch (whichDialog)
 		{
-		case FILE_TRANSFER_DIALOG:
-			return showFileTransferPOPUp(context, listener);
 		case FAVORITE_ADDED_DIALOG:
 			return showAddedAsFavoriteDialog(context, listener, data);
 		case STEALTH_FTUE_DIALOG:
@@ -45,34 +41,6 @@ public class HikeDialog
 
 		return null;
 
-	}
-
-	private static Dialog showFileTransferPOPUp(Context context, final HikeDialogListener listener)
-	{
-		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.file_transfer_tutorial_pop_up);
-		dialog.setCancelable(true);
-
-		View okBtn = dialog.findViewById(R.id.awesomeButton);
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				if (listener != null)
-				{
-					listener.neutralClicked(dialog);
-				}
-				else
-				{
-					dialog.dismiss();
-				}
-			}
-		});
-
-		dialog.show();
-		return dialog;
 	}
 
 	private static Dialog showAddedAsFavoriteDialog(Context context, final HikeDialogListener listener, Object... data)

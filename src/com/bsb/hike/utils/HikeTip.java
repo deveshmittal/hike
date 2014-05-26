@@ -16,7 +16,7 @@ public class HikeTip
 {
 	public static enum TipType
 	{
-		EMOTICON, LAST_SEEN, STATUS, MOOD, CHAT_BG_FTUE, STEALTH_FTUE_TIP_2, STEALTH_FTUE_ENTER_PASS_TIP
+		LAST_SEEN, STATUS, MOOD, STEALTH_FTUE_TIP_2, STEALTH_FTUE_ENTER_PASS_TIP
 	}
 
 	public static void showTip(final Activity activity, final TipType tipType, final View parentView)
@@ -34,10 +34,6 @@ public class HikeTip
 
 		switch (tipType)
 		{
-		case EMOTICON:
-			container.setBackgroundResource(R.drawable.bg_sticker_ftue);
-			tipText.setText(R.string.sticker_ftue_body);
-			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(R.string.last_seen_tip_friends);
@@ -49,10 +45,6 @@ public class HikeTip
 		case STATUS:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
 			tipText.setText(activity.getString(R.string.status_tip, name));
-			break;
-		case CHAT_BG_FTUE:
-			container.setBackgroundResource(R.drawable.bg_tip_top_right);
-			tipText.setText(R.string.chat_bg_ftue_tip);
 			break;
 		case STEALTH_FTUE_TIP_2:
 			parentView.setBackgroundResource(R.drawable.bg_stealth_tip);
@@ -89,9 +81,6 @@ public class HikeTip
 
 		switch (tipType)
 		{
-		case EMOTICON:
-			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
-			break;
 		case LAST_SEEN:
 			editor.putBoolean(HikeMessengerApp.SHOWN_LAST_SEEN_TIP, true);
 			break;
@@ -100,10 +89,6 @@ public class HikeTip
 			break;
 		case STATUS:
 			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case CHAT_BG_FTUE:
-			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-			editor.putBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, true);
 			break;
 		}
 

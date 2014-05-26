@@ -896,7 +896,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
 		}
 	};
 
