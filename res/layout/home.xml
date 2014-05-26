@@ -18,13 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
      
-        <ImageView 
-             android:id="@+id/action_bar_img"
-             android:layout_width= "match_parent"
-             android:layout_height="48dp"
-             android:visibility="gone"
-             android:scaleType="fitXY" />
-        
     </FrameLayout>
     
     <com.bsb.hike.view.CustomFontTextView
@@ -35,12 +28,6 @@
     	android:textSize="15sp"
     	android:textColor="@color/white"
     	android:gravity="center"/>
-    
-    <ViewStub android:id="@+id/addfriends_popup_viewstub"
-         android:inflatedId="@+id/addfriend_popup"
-         android:layout="@layout/addfriends_pop_up"
-         android:layout_width="match_parent"
-         android:layout_height="match_parent" />
     
     <ViewStub android:id="@+id/stealth_double_tap_tip_viewstub"
          android:inflatedId="@+id/stealth_double_tap_tip"

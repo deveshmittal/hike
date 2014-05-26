@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -25,11 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -96,7 +91,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -130,8 +125,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private Drawable myProfileImage;
 
 	private View ftueAddFriendWindow;
-
-	private boolean shouldShowAddFriendsPopup = true;
 
 	private boolean isAddFriendFtueShowing = false;
 
@@ -181,33 +174,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
 
-		shouldShowAddFriendsPopup = false;
-
 		if (!showingProgress)
 		{
 			initialiseHomeScreen(savedInstanceState);
-		}
-
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
-		{
-			if (savedInstanceState != null)
-			{
-				shouldShowAddFriendsPopup = savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING);
-				isAddFriendFtueShowing = shouldShowAddFriendsPopup;
-				friendsListCount = savedInstanceState.getInt(HikeConstants.Extras.FRIENDS_LIST_COUNT);
-				hikeContactsCount = savedInstanceState.getInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT);
-				recommendedCount = savedInstanceState.getInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT);
-				Object o = getLastCustomNonConfigurationInstance();
-				if (o instanceof FetchContactsTask)
-				{
-					fetchContactsTask = (FetchContactsTask) o;
-				}
-			}
-			if (friendsListCount == -1 && fetchContactsTask == null)
-			{
-				fetchContactsTask = new FetchContactsTask();
-				Utils.executeAsyncTask(fetchContactsTask);
-			}
 		}
 	}
 
@@ -300,11 +269,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 		}
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
-		{
-			// if chat bg ftue is not shown show this on the highest priority
-			dialogShowing = DialogShowing.ADD_FRIEND_FTUE_POPUP;
-		}
 		else if (!HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, false))
 		{
 			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
@@ -700,167 +664,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onResume();
 		checkNShowNetworkError();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
-		/*
-		 * We only show addfriends popup on second resume and also not on orientation changes
-		 */
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && friendsListCount != -1 && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
-		{
-			/*
-			 * we only show ftue popups if user doesn't friends over a certain limit
-			 */
-			if (friendsListCount < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
-			{
-				showFTUEAddFtriendsPopup();
-			}
-			else
-			{
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-				editor.commit();
-			}
-		}
-		shouldShowAddFriendsPopup = true;
-	}
-
-	private void showFTUEAddFtriendsPopup()
-	{
-
-		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
-		popupViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
-		{
-			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(hikeContactsCount, recommendedCount);
-
-			@Override
-			public void onInflate(ViewStub stub, View inflated)
-			{
-				ftueAddFriendWindow = inflated;
-				ImageView popUpImage = (ImageView) ftueAddFriendWindow.findViewById(R.id.popup_img);
-				TextView popUpTitle = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_title);
-				TextView popUpMsg = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_msg);
-				Button popUpAddButton = (Button) ftueAddFriendWindow.findViewById(R.id.add_btn);
-
-				if (isAddFriendsPopup)
-				{
-					popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
-
-					String titleString = getResources().getString(R.string.add_favorites_popup_msg);
-					Spannable titleStringSpan = new SpannableString(titleString);
-
-					String statusUpdatesString = getResources().getString(R.string.blue_status_updates);
-					int startSpan = titleString.indexOf(statusUpdatesString);
-					int endSpan = startSpan + statusUpdatesString.length();
-					if (startSpan >= 0)
-					{
-						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					String lastSeenString = getResources().getString(R.string.red_last_seen);
-					startSpan = titleString.indexOf(lastSeenString);
-					endSpan = startSpan + lastSeenString.length();
-					if (startSpan >= 0)
-					{
-						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.red_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					popUpTitle.setText(R.string.favorites_on_hike_tut);
-					popUpMsg.setText(titleStringSpan);
-					popUpAddButton.setText(R.string.start_adding_favorites);
-					/*
-					 * This tag value true represents weather this popup is Add Friends popup and false represents that this popup is invite Friends popup
-					 */
-					popUpAddButton.setTag(true);
-				}
-				else
-				{
-					if (!accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, "").startsWith(HikeConstants.INDIA_COUNTRY_CODE))
-					{
-						Editor editor = accountPrefs.edit();
-						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-						editor.commit();
-						return;
-					}
-					popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
-					popUpTitle.setText(R.string.invite_friends);
-
-					String titleString = getResources().getString(R.string.ftue_invite_friends_msg);
-					Spannable titleStringSpan = new SpannableString(titleString);
-
-					int startSpan = titleString.indexOf("20");
-					int endSpan = startSpan + 2;
-					if (startSpan >= 0)
-					{
-						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					startSpan = titleString.indexOf("*");
-					endSpan = startSpan + 1;
-					if (startSpan > 0)
-					{
-						titleStringSpan.setSpan(new ImageSpan(HomeActivity.this, R.drawable.ic_rupee), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					popUpMsg.setText(titleStringSpan);
-					popUpAddButton.setText(R.string.start_inviting_friends);
-					popUpAddButton.setTag(false);
-				}
-
-				findViewById(R.id.popup_black_overlay).setOnClickListener(null);
-				popUpAddButton.setOnClickListener(new OnClickListener()
-				{
-
-					@Override
-					public void onClick(View v)
-					{
-						boolean isAddFriendsPopup = (Boolean) v.getTag();
-						Intent intent = new Intent(HomeActivity.this, isAddFriendsPopup ? AddFriendsActivity.class : HikeListActivity.class);
-						intent.putExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, true);
-						startActivity(intent);
-						Editor editor = accountPrefs.edit();
-						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-						editor.commit();
-						(new Handler()).postDelayed(new Runnable()
-						{
-
-							@Override
-							public void run()
-							{
-								getSupportActionBar().show();
-								findViewById(R.id.action_bar_img).setVisibility(View.GONE);
-							}
-						}, 800);
-						ftueAddFriendWindow.setVisibility(View.GONE);
-					}
-				});
-
-				ftueAddFriendWindow.setVisibility(View.VISIBLE);
-				findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
-				findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
-				getSupportActionBar().hide();
-
-				/*
-				 * here if condition is used to not show this slide up animation on orientation changes
-				 */
-				if (!isAddFriendFtueShowing)
-				{
-					View popup = ftueAddFriendWindow.findViewById(R.id.popup);
-					Animation anim = AnimationUtils.loadAnimation(HomeActivity.this, R.anim.slide_up_noalpha);
-					anim.setInterpolator(new AccelerateDecelerateInterpolator());
-					anim.setDuration(600);
-					popup.setAnimation(anim);
-				}
-
-				/*
-				 * if overflow popup is showing we should dismiss it
-				 */
-				if (overFlowWindow != null && overFlowWindow.isShowing())
-				{
-					overFlowWindow.dismiss();
-				}
-
-			}
-		});
-		popupViewStub.inflate();
-
 	}
 
 	@Override
@@ -886,7 +689,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
 		}
 		outState.putBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING, overFlowWindow != null && overFlowWindow.isShowing());
-		outState.putBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING, ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE);
 		outState.putInt(HikeConstants.Extras.FRIENDS_LIST_COUNT, friendsListCount);
 		outState.putInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT, hikeContactsCount);
 		outState.putInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT, recommendedCount);
