@@ -122,7 +122,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			}
 		}
 
-		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
+		if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
 		{
 			View close = v.findViewById(R.id.close);
 			final int pos = position;
