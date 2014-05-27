@@ -366,7 +366,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
 		}
 	}
 
