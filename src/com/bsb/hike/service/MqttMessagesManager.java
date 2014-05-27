@@ -17,6 +17,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -925,12 +926,12 @@ public class MqttMessagesManager
 					this.pubSub.publish(HikePubSub.SHOW_FREE_INVITE_SMS, bundle);
 				}
 			}
-			if(data.has(HikeConstants.MQTT_IP_ADDRESSES)){
+			if(data.has(HikeConstants.MQTT_IP_ADDRESSES))
+			{
 				JSONArray ipArray = data.getJSONArray(HikeConstants.MQTT_IP_ADDRESSES);
 				if (null != ipArray && ipArray.length() > 0)
 				{
-					editor.putString(HikeMessengerApp.MQTT_IPS, ipArray.toString());
-					HikeMqttManagerNew.setIpsChanged(true);
+					LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.IPS_CHANGED).putExtra("ips", ipArray.toString()));
 				}
 			}
 
