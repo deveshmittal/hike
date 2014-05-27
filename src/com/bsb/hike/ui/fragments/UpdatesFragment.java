@@ -158,7 +158,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
-		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
+		StatusMessage statusMessage = centralTimelineAdapter.getItem(position - getListView().getHeaderViewsCount());
 		if (statusMessage.getId() == CentralTimelineAdapter.FTUE_ITEM_ID || (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) || (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP))
 		{
