@@ -1440,6 +1440,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					{
 						conv.setIsStealth(false);
 						HikeConversationsDatabase.getInstance().toggleStealth(conv.getMsisdn(), false);
+						HikeMessengerApp.removeStealthMsisdn(conv.getMsisdn());
 					}
 					displayedConversations.addAll(stealthConversations);
 					stealthConversations.clear();
