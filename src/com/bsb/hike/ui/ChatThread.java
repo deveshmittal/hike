@@ -3014,39 +3014,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			ContactInfo newContactInfo = (ContactInfo) object;
 
-			if (!mContactNumber.equals(newContactInfo.getMsisdn()) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen())
-			{
-				return;
-			}
-
-			/*
-			 * Updating the class's contactinfo object
-			 */
-			contactInfo.setOffline(newContactInfo.getOffline());
-			contactInfo.setLastSeenTime(newContactInfo.getLastSeenTime());
-
-			final String lastSeenString = Utils.getLastSeenTimeAsString(this, contactInfo.getLastSeenTime(), contactInfo.getOffline(), false, true);
-
-			isOnline = contactInfo.getOffline() == 0;
-
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					if (lastSeenString == null)
-					{
-						mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
-						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-					}
-					else
-					{
-						mLastSeenView.setText(lastSeenString);
-						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
-					}
-				}
-			});
+			updateLastSeen(newContactInfo.getMsisdn(), newContactInfo.getOffline(), newContactInfo.getLastSeenTime());
 		}
 		else if (HikePubSub.SEND_SMS_PREF_TOGGLED.equals(type))
 		{
@@ -6922,4 +6890,42 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			screenOffEvent = true;
 		}
 	};
+
+	private void updateLastSeen(String msisdn, int offline, long lastSeenTime)
+	{
+		if (!mContactNumber.equals(msisdn) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen())
+		{
+			return;
+		}
+
+		/*
+		 * Updating the class's contactinfo object
+		 */
+		contactInfo.setOffline(offline);
+		contactInfo.setLastSeenTime(lastSeenTime);
+
+		final String lastSeenString = Utils.getLastSeenTimeAsString(this, lastSeenTime, offline, false, true);
+
+		isOnline = contactInfo.getOffline() == 0;
+
+		runOnUiThread(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				if (lastSeenString == null)
+				{
+					mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
+					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+				}
+				else
+				{
+					mLastSeenView.setText(lastSeenString);
+					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
+				}
+
+			}
+		});
+	}
 }
