@@ -2502,9 +2502,9 @@ public class Utils
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED, HikeMessengerApp.currentState == CurrentState.OPENED);
 				/*
-				 * We only request the bulk last seen if the last seen preference is on.
+				 * We don't need to request for the bulk last seen from here anymore. We have the HTTP call for this.
 				 */
-				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
+				data.put(HikeConstants.BULK_LAST_SEEN, false);
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
