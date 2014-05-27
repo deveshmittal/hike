@@ -47,7 +47,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.STEALTH_CONVERSATION_MARKED,
-			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE };
+			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE, HikePubSub.APP_FOREGROUNDED };
 
 	private SharedPreferences preferences;
 
@@ -494,6 +494,31 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				{
 					friendsAdapter.addStealthContacts();
 					friendsAdapter.clearStealthLists();
+				}
+			});
+		}
+		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					if (lastSeenScheduler == null)
+					{
+						lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
+					}
+					else
+					{
+						lastSeenScheduler.stop();
+					}
+					lastSeenScheduler.start();
 				}
 			});
 		}

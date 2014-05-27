@@ -93,6 +93,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private LastSeenScheduler lastSeenScheduler;
 
+	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED };
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -144,9 +146,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		init();
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
 		lastSeenScheduler = new LastSeenScheduler(this, true);
 		lastSeenScheduler.start();
+
+		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 	}
 
 	private boolean shouldInitiateFileTransfer()
@@ -246,13 +249,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			progressDialog.dismiss();
 			progressDialog = null;
 		}
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
 
 		if (lastSeenScheduler != null)
 		{
 			lastSeenScheduler.stop();
 			lastSeenScheduler = null;
 		}
+
+		HikeMessengerApp.getPubSub().removeListeners(this, hikePubSubListeners);
 		super.onDestroy();
 	}
 
@@ -786,6 +790,27 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						progressDialog.dismiss();
 						progressDialog = null;
 					}
+				}
+			});
+		}
+		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					if (lastSeenScheduler == null)
+					{
+						lastSeenScheduler = new LastSeenScheduler(ComposeChatActivity.this, true);
+					}
+					else
+					{
+						lastSeenScheduler.stop();
+					}
+					lastSeenScheduler.start();
 				}
 			});
 		}

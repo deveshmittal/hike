@@ -2506,6 +2506,8 @@ public class Utils
 				 */
 				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
 			}
 			else
 			{
