@@ -35,6 +35,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Utils;
 
 public class FriendsFragment extends SherlockListFragment implements Listener, OnItemLongClickListener
@@ -49,6 +50,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE };
 
 	private SharedPreferences preferences;
+
+	private LastSeenScheduler lastSeenScheduler;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -74,6 +77,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		preferences = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
+		lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
+		lastSeenScheduler.start();
 	}
 
 	@Override
@@ -88,6 +94,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		{
 			friendsAdapter.destroy();
 		}
+
+		if (lastSeenScheduler != null)
+		{
+			lastSeenScheduler.stop();
+			lastSeenScheduler = null;
+		}
+
 		super.onDestroy();
 	}
 

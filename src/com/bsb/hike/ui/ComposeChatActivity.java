@@ -48,6 +48,7 @@ import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -89,6 +90,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private volatile InitiateMultiFileTransferTask fileTransferTask;
 
 	private ProgressDialog progressDialog;
+
+	private LastSeenScheduler lastSeenScheduler;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -142,6 +145,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		init();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+		lastSeenScheduler = new LastSeenScheduler(this, true);
+		lastSeenScheduler.start();
 	}
 
 	private boolean shouldInitiateFileTransfer()
@@ -242,6 +247,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			progressDialog = null;
 		}
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+
+		if (lastSeenScheduler != null)
+		{
+			lastSeenScheduler.stop();
+			lastSeenScheduler = null;
+		}
 		super.onDestroy();
 	}
 
