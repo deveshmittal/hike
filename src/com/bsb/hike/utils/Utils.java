@@ -3851,4 +3851,27 @@ public class Utils
 			HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
 		}
 	}
+
+	public static void updateLastSeenTimeInBulk(List<ContactInfo> contactList)
+	{
+		for (ContactInfo contactInfo : contactList)
+		{
+			String msisdn = contactInfo.getMsisdn();
+			if (HikeMessengerApp.lastSeenFriendsMap.containsKey(msisdn))
+			{
+				Pair<Integer, Long> lastSeenValuePair = HikeMessengerApp.lastSeenFriendsMap.get(msisdn);
+
+				int isOffline = lastSeenValuePair.first;
+
+				long updatedLastSeenValue = lastSeenValuePair.second;
+				long previousLastSeen = contactInfo.getLastSeenTime();
+
+				if (updatedLastSeenValue > previousLastSeen)
+				{
+					contactInfo.setLastSeenTime(updatedLastSeenValue);
+				}
+				contactInfo.setOffline(isOffline);
+			}
+		}
+	}
 }

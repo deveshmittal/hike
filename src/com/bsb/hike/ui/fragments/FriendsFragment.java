@@ -339,8 +339,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			List<ContactInfo> friendsList = friendsAdapter.getFriendsList();
 			List<ContactInfo> friendsStealthList = friendsAdapter.getStealthFriendsList();
 
-			updateLastSeenTimeInBulk(friendsList);
-			updateLastSeenTimeInBulk(friendsStealthList);
+			Utils.updateLastSeenTimeInBulk(friendsList);
+			Utils.updateLastSeenTimeInBulk(friendsStealthList);
 
 			if (!isAdded())
 			{
@@ -483,29 +483,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 					friendsAdapter.clearStealthLists();
 				}
 			});
-		}
-	}
-
-	private void updateLastSeenTimeInBulk(List<ContactInfo> contactList)
-	{
-		for (ContactInfo contactInfo : contactList)
-		{
-			String msisdn = contactInfo.getMsisdn();
-			if (HikeMessengerApp.lastSeenFriendsMap.containsKey(msisdn))
-			{
-				Pair<Integer, Long> lastSeenValuePair = HikeMessengerApp.lastSeenFriendsMap.get(msisdn);
-
-				int isOffline = lastSeenValuePair.first;
-
-				long updatedLastSeenValue = lastSeenValuePair.second;
-				long previousLastSeen = contactInfo.getLastSeenTime();
-
-				if (updatedLastSeenValue > previousLastSeen)
-				{
-					contactInfo.setLastSeenTime(updatedLastSeenValue);
-				}
-				contactInfo.setOffline(isOffline);
-			}
 		}
 	}
 
