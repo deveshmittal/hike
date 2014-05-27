@@ -3,7 +3,9 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -813,6 +815,23 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					lastSeenScheduler.start();
 				}
 			});
+		}
+		else if (HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type))
+		{
+			List<ContactInfo> friendsList = adapter.getFriendsList();
+
+			Utils.updateLastSeenTimeInBulk(friendsList);
+
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Collections.sort(adapter.getFriendsList(), ContactInfo.lastSeenTimeComparator);
+					adapter.makeCompleteList(false);
+				}
+			});
+
 		}
 	}
 
