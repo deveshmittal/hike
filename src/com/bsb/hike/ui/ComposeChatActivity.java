@@ -280,7 +280,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 				return;
 			}
-			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_GROUP)
+			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_GROUP && !adapter.isContactAdded(contactInfo))
 			{
 				showToast(getString(R.string.maxContactInGroupErr, HikeConstants.MAX_CONTACTS_IN_GROUP));
 				return;
