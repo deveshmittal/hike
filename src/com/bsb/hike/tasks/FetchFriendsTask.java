@@ -74,9 +74,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	private int stealthMode;
 
 	private Map<String, StatusMessage> lastStatusMessagesMap;
-	
+
 	private boolean fetchSmsContacts;
-	
+
 	boolean checkFavTypeInComparision;
 
 	private boolean nativeSMSOn;
@@ -92,7 +92,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> filteredFriendsList,
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList, List<ContactInfo> groupsStealthList,
-			List<ContactInfo> filteredGroupsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou, 
+			List<ContactInfo> filteredGroupsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou,
 			boolean fetchSmsContacts, boolean checkFavTypeInComparision)
 	{
 		this.friendsAdapter = friendsAdapter;
@@ -120,7 +120,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		this.existingGroupId = existingGroupId;
 
 		this.creatingOrEditingGroup = creatingOrEditingGroup;
-		
+
 		this.fetchSmsContacts = fetchSmsContacts;
 		this.checkFavTypeInComparision = checkFavTypeInComparision;
 
@@ -219,7 +219,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 			removeContactsFromList(friendTaskList, groupParticipants);
 			removeContactsFromList(hikeTaskList, groupParticipants);
-			if(fetchSmsContacts)
+			if (fetchSmsContacts)
 			{
 				removeContactsFromList(smsTaskList, groupParticipants);
 			}
@@ -233,7 +233,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 		addToStealthList(friendTaskList, friendsStealthList, false);
 		addToStealthList(hikeTaskList, hikeStealthContactsList, false);
-		if(fetchSmsContacts)
+		if (fetchSmsContacts)
 		{
 			addToStealthList(smsTaskList, smsStealthContactsList, false);
 		}
@@ -322,7 +322,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		friendsAdapter.initiateLastStatusMessagesMap(lastStatusMessagesMap);
 		friendsList.addAll(friendTaskList);
 		hikeContactsList.addAll(hikeTaskList);
-		if(fetchSmsContacts)
+		if (fetchSmsContacts)
 		{
 			smsContactsList.addAll(smsTaskList);
 		}
@@ -333,7 +333,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 		filteredFriendsList.addAll(friendTaskList);
 		filteredHikeContactsList.addAll(hikeTaskList);
-		if(fetchSmsContacts)
+		if (fetchSmsContacts)
 		{
 			filteredSmsContactsList.addAll(smsTaskList);
 		}
