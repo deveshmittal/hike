@@ -2366,21 +2366,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	
 	public Map<String, StatusMessage> getLastStatusMessages(boolean timelineUpdatesOnly, StatusMessage.StatusMessageType[] smTypes, List<ContactInfo> contactList)
 	{
+		Map<String, StatusMessage> statusMessagesMap = new HashMap<String, StatusMessage>();
+
+		if (contactList == null || contactList.isEmpty())
+		{
+			return statusMessagesMap;
+		}
 		String[] columns = new String[] { DBConstants.STATUS_ID, DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN, DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
 				DBConstants.TIMESTAMP, DBConstants.MOOD_ID, DBConstants.TIME_OF_DAY };
 
 		StringBuilder selection = new StringBuilder();
 
 		StringBuilder msisdnSelection = null;
-		if (contactList != null)
+		msisdnSelection = new StringBuilder("(");
+		for (ContactInfo contactInfo : contactList)
 		{
-			msisdnSelection = new StringBuilder("(");
-			for (ContactInfo contactInfo : contactList)
-			{
-				msisdnSelection.append(DatabaseUtils.sqlEscapeString(contactInfo.getMsisdn()) + ",");
-			}
-			msisdnSelection.replace(msisdnSelection.lastIndexOf(","), msisdnSelection.length(), ")");
+			msisdnSelection.append(DatabaseUtils.sqlEscapeString(contactInfo.getMsisdn()) + ",");
 		}
+		msisdnSelection.replace(msisdnSelection.lastIndexOf(","), msisdnSelection.length(), ")");
 
 		if (!TextUtils.isEmpty(msisdnSelection))
 		{
@@ -2416,8 +2419,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			c = mDb.query(DBConstants.STATUS_TABLE, columns, selection.toString(), null, groupby, havingSelection, orderBy);
 
-			Map<String, StatusMessage> statusMessagesMap = new HashMap<String, StatusMessage>();
-
 			int idIdx = c.getColumnIndex(DBConstants.STATUS_ID);
 			int mappedIdIdx = c.getColumnIndex(DBConstants.STATUS_MAPPED_ID);
 			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
@@ -2436,7 +2437,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				statusMessagesMap.put(msisdn, statusMessage);
 
 			}
-			return statusMessagesMap;
 		}
 		finally
 		{
@@ -2445,6 +2445,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
+		return statusMessagesMap;
 	}
 
 	public void setMessageIdForStatus(String statusId, long messageId)
