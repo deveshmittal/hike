@@ -35,8 +35,6 @@ import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends FileTransferBase
 {
-	private URL mUrl;
-
 	private File tempDownloadedFile;
 
 	private boolean showToast;
@@ -117,18 +115,6 @@ public class DownloadFileTask extends FileTransferBase
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		return FTResult.DOWNLOAD_FAILED;
-	}
-
-	private URLConnection initConn() throws IOException
-	{
-		URLConnection conn = (HttpURLConnection) mUrl.openConnection();
-		if (AccountUtils.ssl)
-		{
-			((HttpsURLConnection) conn).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-		}
-		AccountUtils.addUserAgent(conn);
-		AccountUtils.setNoTransform(conn);;
-		return conn;
 	}
 
 	// we can extend this later to multiple download threads (if required)

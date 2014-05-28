@@ -193,7 +193,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
-			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, HikePubSub.DISMISS_GROUP_CHAT_TIP,
+			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED };
 
@@ -378,10 +378,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			switch (((ConversationTip) conv).getTipType())
 			{
-			case ConversationTip.GROUP_CHAT_TIP:
-				((HomeActivity) getActivity()).showOverFlowMenu();
-				removeGroupChatTip(conv);
-				break;
 			case ConversationTip.STEALTH_FTUE_TIP:
 				break;
 			case ConversationTip.RESET_STEALTH_TIP:
@@ -790,13 +786,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (prefs.getLong(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
 			displayedConversations.add(new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
-		}
-		else if (!conversationList.isEmpty() && !prefs.getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false))
-		{
-			/*
-			 * Add item for group chat tip.
-			 */
-			displayedConversations.add(new ConversationTip(ConversationTip.GROUP_CHAT_TIP));
 		}
 
 		displayedConversations.addAll(conversationList);
@@ -1377,33 +1366,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			String msisdn = (String) object;
 			clearConversation(msisdn);
 		}
-		else if (HikePubSub.DISMISS_GROUP_CHAT_TIP.equals(type))
-		{
-			if (mAdapter == null || mAdapter.isEmpty())
-			{
-				return;
-			}
-			final Conversation conversation = mAdapter.getItem(0);
-			if (!(conversation instanceof ConversationTip && ((ConversationTip) conversation).isGroupChatTip()))
-			{
-				return;
-			}
-
-			if (getActivity() == null)
-			{
-				return;
-			}
-			getActivity().runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					removeGroupChatTip(conversation);
-				}
-			});
-
-		}
 		else if (HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP.equals(type))
 		{
 			if (mAdapter == null || mAdapter.isEmpty())
@@ -1549,18 +1511,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!displayedConversations.isEmpty())
 		{
 			conv = displayedConversations.get(0);
-			if (conv instanceof ConversationTip && ((ConversationTip) conv).isGroupChatTip())
-			{
-				if (displayedConversations.size() > 1)
-				{
-					mAdapter.remove(conv);
-					ConversationFragment.this.run();
-				}
-				else
-				{
-					conv = null;
-				}
-			}
 		}
 		return conv;
 	}
@@ -1582,19 +1532,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		showingStealthFtueConvTip = false;
 		mAdapter.remove(conversation);
 		ConversationFragment.this.run();
-	}
-
-	private void removeGroupChatTip(Conversation conversation)
-	{
-		/*
-		 * If conversation is null, it is the group chat tip
-		 */
-		mAdapter.remove(conversation);
-		ConversationFragment.this.run();
-
-		Editor editor = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, true);
-		editor.commit();
 	}
 
 	private void clearConversation(String msisdn)

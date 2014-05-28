@@ -84,7 +84,7 @@ public class TCPNetworkModule implements NetworkModule
 		catch (ConnectException ex)
 		{
 			// @TRACE 250=Failed to create TCP socket
-			Logger.d(TAG, "failed to create TCP Socket");
+			Logger.e(TAG, "failed to create TCP Socket", ex);
 			throw new MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR, ex);
 		}
 	}
@@ -111,6 +111,14 @@ public class TCPNetworkModule implements NetworkModule
 	{
 		if (socket != null)
 		{
+			if(socket.getOutputStream() != null)
+			{
+				socket.shutdownOutput();
+			}
+			if(socket.getInputStream() != null)
+			{
+				socket.shutdownInput();
+			}
 			socket.close();
 		}
 	}

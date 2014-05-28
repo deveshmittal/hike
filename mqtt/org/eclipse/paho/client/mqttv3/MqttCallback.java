@@ -69,5 +69,7 @@ public interface MqttCallback
 	 *            the delivery token associated with the message.
 	 */
 	public void deliveryComplete(IMqttDeliveryToken token);
+	
+	public void fastReconnect();
 
 }

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="412"
-    android:versionName="2.9.6" >
+    android:versionCode="451"
+    android:versionName="2.9.6.51" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -203,6 +203,12 @@
         <activity
             android:name="com.bsb.hike.ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.PeopleActivity" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.TimelineActivity" >
         </activity>
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"

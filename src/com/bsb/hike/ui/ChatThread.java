@@ -163,6 +163,7 @@ import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -263,6 +264,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View mOverlayLayout;
 
 	private ArrayList<ConvMessage> messages;
+	
+	private static HashMap<Long, ConvMessage> messageMap;
 
 	private CustomLinearLayout chatLayout;
 
@@ -473,10 +476,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 				smsDialog = Utils.showSMSSyncDialog(this, dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
 			}
-			if (savedInstanceState.getBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, false))
-			{
-				showStickerFtueTip();
-			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, false))
 			{
 				final ChatTheme chatTheme = ChatTheme.values()[savedInstanceState.getInt(HikeConstants.Extras.SELECTED_THEME, 0)];
@@ -571,6 +570,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow = null;
 		}
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
+		if(messageMap != null)
+		{
+			messageMap.clear();
+			messageMap = null;
+		}
 
 	}
 
@@ -947,10 +951,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		case R.id.chat_bg:
 			setupThemePicker(null);
-			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
-			{
-				closeChatBgFtueTip();
-			}
 			break;
 		case R.id.attachment:
 			if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
@@ -1110,6 +1110,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
 				messages.clear();
+				if(messageMap != null)
+				{
+					messageMap.clear();
+				}
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 			}
@@ -1232,7 +1236,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				fss = FileTransferManager.getInstance(getApplicationContext()).getDownloadFileState(message.getMsgID(), file);
 			}
-			if (!(!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded()))
+			if((message.isSent() && TextUtils.isEmpty(hikeFile.getFileKey())) || (!message.isSent() && !hikeFile.wasFileDownloaded()))
 			{
 				/*
 				 * This message is not downloaded or uplpaded yet. this can't be forwarded
@@ -1419,6 +1423,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 
 				String fileKey = null;
+				if(intent.hasExtra(HikeConstants.Extras.FILE_KEY))
+				{
+					fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				}
 				String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
 				String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
 
@@ -1437,7 +1445,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else
 				{
-					initiateFileTransferFromIntentData(fileType, filePath, isRecording, recordingDuration);
+					initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
 				}
 
 				// Making sure the file does not get forwarded again on
@@ -1464,6 +1472,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
 						{
 							String fileKey = null;
+							if(msgExtrasJson.has(HikeConstants.Extras.FILE_KEY))
+							{
+								fileKey = msgExtrasJson.getString(HikeConstants.Extras.FILE_KEY);
+							}
+							else
+							{
+							}
 							String filePath = msgExtrasJson.getString(HikeConstants.Extras.FILE_PATH);
 							String fileType = msgExtrasJson.getString(HikeConstants.Extras.FILE_TYPE);
 
@@ -1484,7 +1499,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							}
 							else
 							{
-								initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+								initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
 							}
 						}
 						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -1573,10 +1588,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
 	{
-		initiateFileTransferFromIntentData(fileType, filePath, false, -1);
+		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1);
 	}
 
-	private void initiateFileTransferFromIntentData(String fileType, String filePath, boolean isRecording, long recordingDuration)
+	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration)
 	{
 		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
@@ -1588,7 +1603,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			initialiseFileTransfer(filePath, hikeFileType, fileType, isRecording, recordingDuration, true);
+			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
 		}
 
 	}
@@ -1780,6 +1795,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * make a copy of the message list since it's used internally by the adapter
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+		if(messageMap != null)
+		{
+			messageMap.clear();
+		}
+		messageMap = new HashMap<Long, ConvMessage>();
+		addtoMessageMap(0, messages.size());
 
 		if (mConversation instanceof GroupConversation && mConversation.getUnreadCount() > 0 && messages.size() > 0)
 		{
@@ -1824,14 +1845,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			selectedTheme = mConversationDb.getChatThemeForMsisdn(mContactNumber);
 			setChatTheme(selectedTheme);
-		}
-
-		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN))
-		{
-			// In case of Emma HikeBot we show sticker Ftue tip only on
-			// scrolling to
-			// the bottom of the chat thread
-			mConversationsView.setOnScrollListener(getOnScrollListenerForEmmaThread());
 		}
 
 		if (mConversation.getUnreadCount() > 0)
@@ -1920,26 +1933,76 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		/*
-		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
-		 */
-		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
-		{
-			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
-			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
-				{
-					showStickerFtueTip();
-				}
-				else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, false))
-				{
-					showChatBgFtueTip();
-				}
-			}
-		}
-		/*
 		 * Resetting the Orientation Change flag to be used again
 		 */
 		wasOrientationChanged = false;
+	}
+
+	private void addtoMessageMap(int from, int to)
+	{
+		for(int i = to - 1; i >= from; i--)
+		{
+			ConvMessage msg = messages.get(i);
+			addtoMessageMap(msg);
+		}
+	}
+
+	public static void addtoMessageMap(ConvMessage msg)
+	{
+		State msgState = msg.getState();
+
+		if(msg.getMsgID() <= 0)
+		{
+			return;
+		}
+		if(msg.isSent())
+		{
+			if (messageMap == null)
+			{
+				messageMap = new HashMap<Long, ConvMessage>();
+			}
+
+			if(msg.isFileTransferMessage())
+			{
+				if(TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+				{
+					messageMap.put(msg.getMsgID(),msg);
+					return;
+				}
+			}
+			if (msg.isSMS())
+			{
+				if(msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
+			}
+			else
+			{
+				if(msgState != State.SENT_DELIVERED_READ)
+				{
+					messageMap.put(msg.getMsgID(),msg);
+				}
+			}
+		}
+	}
+	
+	private void removeFromMessageMap(ConvMessage msg)
+	{
+		if(messageMap == null)
+			return;
+
+		if(msg.isFileTransferMessage())
+		{
+			if(!TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+			{
+				messageMap.remove(msg.getMsgID());
+			}
+		}
+		else
+		{
+			messageMap.remove(msg.getMsgID());
+		}
 	}
 
 	private void addUnkownContactBlockHeader()
@@ -2075,100 +2138,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}, 1200);
 	}
 
-	/*
-	 * In case of Emma hikebot we show sticker ftue tip only on scrolling to the bottom of the emma chatthread
-	 */
-	private OnScrollListener getOnScrollListenerForEmmaThread()
-	{
-		return new OnScrollListener()
-		{
-			@Override
-			public void onScrollStateChanged(AbsListView arg0, int scrollState)
-			{
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-			{
-				ChatThread.this.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
-				if (view.getChildAt(view.getChildCount() - 1) != null && view.getLastVisiblePosition() == view.getAdapter().getCount() - 1
-						&& view.getChildAt(view.getChildCount() - 1).getBottom() <= view.getHeight())
-				{
-					if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
-					{
-						// variable hideTip is for hiding the sticker tip
-						// for the first auto scroll from bottom to top of emma
-						// thread.
-						// after that if user manually scroll the emma thread
-						// from top
-						// to bottom than we show the tip and keep it showing
-						// than on
-						boolean hideTip = false;
-						if (tipView == null)
-						{
-							hideTip = true;
-						}
-
-						showStickerFtueTip();
-
-						if (hideTip)
-						{
-							tipView.setVisibility(View.GONE);
-						}
-					}
-				}
-			}
-		};
-	}
-
-	private void showChatBgFtueTip()
-	{
-		tipView = findViewById(R.id.chat_bg_ftue_tip);
-		tipView.setOnTouchListener(new OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1)
-			{
-				// disabling on touch gesture for sticker ftue tip
-				// so that we do not send an unnecessary nudge on a
-				// double tap on tipview.
-				return true;
-			}
-		});
-		HikeTip.showTip(this, TipType.CHAT_BG_FTUE, tipView);
-	}
-
-	private void closeChatBgFtueTip()
-	{
-		if (tipView != null)
-		{
-			TipType viewTipType = (TipType) tipView.getTag();
-			if (viewTipType == TipType.CHAT_BG_FTUE)
-			{
-				tipView.clearAnimation();
-				HikeTip.closeTip(TipType.CHAT_BG_FTUE, tipView, prefs);
-				tipView = null;
-			}
-		}
-	}
-
-	private void showStickerFtueTip()
-	{
-		tipView = findViewById(R.id.emoticon_tip);
-		tipView.setOnTouchListener(new OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1)
-			{
-				// disabling on touch gesture for sticker ftue tip
-				// so that we do not send an unnecessary nudge on a
-				// double tap on tipview.
-				return true;
-			}
-		});
-		HikeTip.showTip(this, TipType.EMOTICON, tipView);
-	}
-
 	private void setupActionBar(boolean initialising)
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -2207,7 +2176,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			mLastSeenView.setText(lastSeenString);
-			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
+		//	mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
 		}
 
 		setAvatar();
@@ -2683,7 +2652,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
+					if(msg.isGroupChat())
+					{
+						msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
+					}
+					removeFromMessageMap(msg);
 				}
 			}
 			runOnUiThread(mUpdateAdapter);
@@ -2833,6 +2806,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				try
 				{
 					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+					adapterMessage.setTimestamp(convMessage.getTimestamp());
 				}
 				catch (JSONException e)
 				{
@@ -3043,7 +3017,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					else
 					{
 						mLastSeenView.setText(lastSeenString);
-						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
+						//mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
 					}
 				}
 			});
@@ -3172,25 +3146,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ConvMessage findMessageById(long msgID)
 	{
-		if (mAdapter == null)
-		{
+		if(messageMap == null)
 			return null;
-		}
 
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
-		{
-			ConvMessage msg = mAdapter.getItem(i);
-			if (msg == null)
-			{
-				continue;
-			}
-			if (msg.getMsgID() == msgID)
-			{
-				return msg;
-			}
-		}
-		return null;
+		return messageMap.get(msgID);
 	}
 
 	public String getContactNumber()
@@ -3407,6 +3366,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				messages.remove(messages.size() - 1);
 			}
 			mAdapter.addMessage(convMessage);
+			addtoMessageMap(messages.size() - 1 ,messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -3689,11 +3649,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		attachmentsGridView.setAdapter(gridAdapter);
 
 		int selection = temporaryTheme.ordinal();
-		if (tipView != null)
-		{
-			TipType viewTipType = (TipType) tipView.getTag();
-			selection = viewTipType == TipType.CHAT_BG_FTUE ? 0 : temporaryTheme.ordinal();
-		}
 		attachmentsGridView.setSelection(selection);
 
 		attachmentsGridView.setOnItemClickListener(new OnItemClickListener()
@@ -3941,18 +3896,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.camera), 0, R.drawable.ic_attach_camera));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.photo), 1, R.drawable.ic_attach_pic));
-		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.audio), 3, R.drawable.ic_attach_music));
-		if (canShareLocation)
-		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.location), 4, R.drawable.ic_attach_location));
-		}
+		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
 		if (canShareContacts)
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.contact), 5, R.drawable.ic_attach_contact));
 		}
-		optionsList.add(new OverFlowMenuItem(getString(R.string.file), 6, R.drawable.ic_attach_file));
-
+		if (canShareLocation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.location_option), 4, R.drawable.ic_attach_location));
+		}
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -4369,7 +4323,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					return;
 				}
-				initialiseFileTransfer(selectedFile.getPath(), HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, recordedTime, false);
+				initialiseFileTransfer(selectedFile.getPath(), null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, recordedTime, false);
 			}
 		});
 
@@ -4659,8 +4613,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Logger.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
-
-			initialiseFileTransfer(filePath, hikeFileType, null, false, -1, false);
+			initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false);
 		}
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
 		{
@@ -4954,7 +4907,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		contactDialog.show();
 	}
 
-	private void initialiseFileTransfer(String filePath, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration, boolean isForwardingFile)
+	private void initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration, boolean isForwardingFile)
 	{
 		clearTempData();
 		if (filePath == null)
@@ -4970,7 +4923,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Toast.makeText(getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileType, hikeFileType, isRecording, isForwardingFile, mConversation.isOnhike(),
+		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile, mConversation.isOnhike(),
 				recordingDuration);
 	}
 
@@ -5084,10 +5037,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH, currentFileSelectionPath);
 			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_MIME_TYPE, currentFileSelectionMimeType);
 		}
-		if (mContactNumber.equals(HikeConstants.FTUE_HIKEBOT_MSISDN) && findViewById(R.id.emoticon_tip).getVisibility() == View.VISIBLE)
-		{
-			outState.putBoolean(HikeConstants.Extras.SHOW_STICKER_TIP_FOR_EMMA, true);
-		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
 			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
@@ -5143,16 +5092,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						// view not changed , exit with dismiss dialog
 						dismissPopupWindow();
 						return;
-					}
-					if (tipView != null)
-					{
-						TipType viewTipType = (TipType) tipView.getTag();
-						if (viewTipType == TipType.EMOTICON)
-						{
-							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
-							tipView = null;
-						}
 					}
 					if (emoticonType != EmoticonType.STICKERS)
 					{
@@ -5332,7 +5271,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else if (!prefs.getBoolean(categoryId.downloadPref(), false))
 				{
-					postToHandlerStickerPreviewDialog(category);
+					/*
+					 * Now we don't show sticker preview dialog for hardcoded categories
+					 */
+					prefs.edit().putBoolean(category.categoryId.downloadPref(), true).commit();
+					return;
 				}
 			}
 		}
@@ -5884,6 +5827,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 
 						mAdapter.addMessages(result, startIndex);
+						addtoMessageMap(startIndex, startIndex + result.size());
 						mAdapter.notifyDataSetChanged();
 						mConversationsView.setSelectionFromTop(firstVisibleItem + result.size(), scrollOffset);
 					}
@@ -6404,7 +6348,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
 			TipType tipType = (TipType) tipView.getTag();
-			if (tipType == TipType.CHAT_BG_FTUE || tipType == TipType.LAST_SEEN)
+			if (tipType == TipType.LAST_SEEN)
 			{
 				tipView.setVisibility(View.INVISIBLE);
 			}

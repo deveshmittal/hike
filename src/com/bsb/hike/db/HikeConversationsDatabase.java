@@ -47,6 +47,8 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -865,6 +867,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv.setConversation(conversation);
 			}
 			conv.setMsgID(msgId);
+			ChatThread.addtoMessageMap(conv);
 
 			if (conv.isFileTransferMessage() && conv.getConversation() != null)
 			{
@@ -2353,6 +2356,89 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 
 			return statusMessages;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
+	public Map<String, StatusMessage> getLastStatusMessages(boolean timelineUpdatesOnly, StatusMessage.StatusMessageType[] smTypes, List<ContactInfo> contactList)
+	{
+		String[] columns = new String[] { DBConstants.STATUS_ID, DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN, DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
+				DBConstants.TIMESTAMP, DBConstants.MOOD_ID, DBConstants.TIME_OF_DAY };
+
+		StringBuilder selection = new StringBuilder();
+
+		StringBuilder msisdnSelection = null;
+		if (contactList != null)
+		{
+			msisdnSelection = new StringBuilder("(");
+			for (ContactInfo contactInfo : contactList)
+			{
+				msisdnSelection.append(DatabaseUtils.sqlEscapeString(contactInfo.getMsisdn()) + ",");
+			}
+			msisdnSelection.replace(msisdnSelection.lastIndexOf(","), msisdnSelection.length(), ")");
+		}
+
+		if (!TextUtils.isEmpty(msisdnSelection))
+		{
+			selection.append(DBConstants.MSISDN + " IN " + msisdnSelection.toString() + (timelineUpdatesOnly ? " AND " : ""));
+		}
+		if (timelineUpdatesOnly)
+		{
+			selection.append(DBConstants.SHOW_IN_TIMELINE + " =1 ");
+		}
+
+		StringBuilder smTypeSelection = null;
+		if (smTypes != null)
+		{
+			smTypeSelection = new StringBuilder("(");
+			for (StatusMessage.StatusMessageType smType : smTypes)
+			{
+				smTypeSelection.append(smType.ordinal() + ",");
+			}
+			smTypeSelection.replace(smTypeSelection.lastIndexOf(","), smTypeSelection.length(), ")");
+		}
+		
+		if (!TextUtils.isEmpty(smTypeSelection))
+		{
+			selection.append(" AND "+DBConstants.STATUS_TYPE + " IN " + smTypeSelection.toString());
+		}
+		String orderBy = DBConstants.STATUS_ID + " DESC ";
+		
+		String havingSelection = "MAX(" + DBConstants.STATUS_ID +")="+ DBConstants.STATUS_ID;;
+
+		String groupby = DBConstants.MSISDN;
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.STATUS_TABLE, columns, selection.toString(), null, groupby, havingSelection, orderBy);
+
+			Map<String, StatusMessage> statusMessagesMap = new HashMap<String, StatusMessage>();
+
+			int idIdx = c.getColumnIndex(DBConstants.STATUS_ID);
+			int mappedIdIdx = c.getColumnIndex(DBConstants.STATUS_MAPPED_ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int textIdx = c.getColumnIndex(DBConstants.STATUS_TEXT);
+			int typeIdx = c.getColumnIndex(DBConstants.STATUS_TYPE);
+			int tsIdx = c.getColumnIndex(DBConstants.TIMESTAMP);
+			int moodIdIdx = c.getColumnIndex(DBConstants.MOOD_ID);
+			int timeOfDayIdx = c.getColumnIndex(DBConstants.TIME_OF_DAY);
+
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+
+				StatusMessage statusMessage = new StatusMessage(c.getLong(idIdx), c.getString(mappedIdIdx), msisdn, null, c.getString(textIdx),
+						StatusMessageType.values()[c.getInt(typeIdx)], c.getLong(tsIdx), c.getInt(moodIdIdx), c.getInt(timeOfDayIdx));
+				statusMessagesMap.put(msisdn, statusMessage);
+
+			}
+			return statusMessagesMap;
 		}
 		finally
 		{

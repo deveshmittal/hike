@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
@@ -475,12 +474,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		@Override
 		public void send(CrashReportData crashReportData) throws ReportSenderException
 		{
-			/* only send ACRA reports if we're in release mode */
-			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE))
-			{
-				return;
-			}
-
 			try
 			{
 				final String reportUrl = AccountUtils.base + "/logs/android";
@@ -896,7 +889,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
 		}
 	};
 

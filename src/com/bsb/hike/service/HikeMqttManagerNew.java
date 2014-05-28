@@ -103,6 +103,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private DisconnectRunnable disConnectRunnable;
 
+	private ActivityCheckRunnable activityChkRunnable;
+
 	private HikeMqttPersistence persistence = null;
 
 	private WakeLock wakelock = null;
@@ -139,6 +141,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private static volatile AtomicBoolean ipsChanged = new AtomicBoolean(false);
 
+	private volatile short fastReconnect = 0;
+
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
 	 * then disconnect w/o letting more msgs to come in.
@@ -163,6 +167,26 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	public enum ServerConnectionStatus
 	{
 		ACCEPTED, UNACCEPTABLE_PROTOCOL_VERSION, IDENTIFIER_REJECTED, SERVER_UNAVAILABLE, BAD_USERNAME_OR_PASSWORD, NOT_AUTHORIZED, UNKNOWN
+	}
+
+	private class ActivityCheckRunnable implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			if (mqtt != null)
+			{
+				try
+				{
+					mqtt.checkActivity();
+					scheduleNextActivityCheck();
+				}
+				catch (Exception e)
+				{
+					Logger.e(TAG, "Exception in ActivityCheckRunnable", e);
+				}
+			}
+		}
 	}
 
 	private class IsMqttConnectedCheckRunnable implements Runnable
@@ -302,6 +326,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		isConnRunnable = new IsMqttConnectedCheckRunnable();
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
+		activityChkRunnable = new ActivityCheckRunnable();
 	}
 
 	/*
@@ -480,6 +505,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
+	private void scheduleNextActivityCheck()
+	{
+		try
+		{
+			mqttThreadHandler.removeCallbacks(activityChkRunnable);
+			mqttThreadHandler.postDelayed(activityChkRunnable, 62 * 1000);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	private void scheduleNextConnectionCheck()
 	{
 		scheduleNextConnectionCheck(HikeConstants.MAX_RECONNECT_TIME);
@@ -583,7 +621,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			boolean connectUsingSSL = Utils.switchSSLOn(context);
 
 			setBrokerHostPort(connectUsingSSL);
-			
+
 			if (op == null || ipsChanged.get())
 			{
 				op = new MqttConnectOptions();
@@ -607,7 +645,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
-				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
+				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect + ":" + fastReconnect, null, MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
@@ -620,6 +658,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			{
 				acquireWakeLock(connectionTimeoutSec);
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
+				Logger.d(TAG, "Connect using pushconnect : " + pushConnect + "  fast disconnect : " + fastReconnect);
+				mqtt.setClientId(clientId + ":" + pushConnect + ":" + fastReconnect);
 				mqtt.setServerURI(protocol + brokerHostName + ":" + brokerPortNumber);
 				if (connectUsingSSL)
 					op.setSocketFactory(HikeSSLUtil.getSSLSocketFactory());
@@ -771,6 +811,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			e.printStackTrace();
 		}
+
 		mqtt = null;
 		op = null;
 		mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
@@ -804,13 +845,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						pushConnect = false;
 						retryCount = 0;
+						fastReconnect = 0;
 						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
 						cancelNetworkErrorTimer();
 						HikeMessengerApp.getPubSub().publish(HikePubSub.CONNECTED_TO_MQTT, null);
 						mqttThreadHandler.postAtFrontOfQueue(new RetryFailedMessages());
-						// scheduleNextConnectionCheck(); // after successfull connect, reschedule for next conn check
+						scheduleNextActivityCheck(); // after successfull connect, reschedule for next conn check
 					}
 
 					/*
@@ -929,6 +971,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Logger.w(TAG, "Connection Lost : " + arg0.getMessage());
 					scheduleNetworkErrorTimer();
 					connectOnMqttThread();
+				}
+
+				@Override
+				public void fastReconnect()
+				{
+					// TODO Auto-generated method stub
+					
+					fastReconnect = 1;
 				}
 			};
 		}

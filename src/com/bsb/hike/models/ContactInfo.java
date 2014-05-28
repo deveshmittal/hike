@@ -333,7 +333,9 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return json;
 	}
 
-	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator();
+	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator(true);
+	
+	public static LastSeenComparator lastSeenTimeComparatorWithoutFav = new LastSeenComparator(false);
 
 	@Override
 	public int compareTo(ContactInfo rhs)

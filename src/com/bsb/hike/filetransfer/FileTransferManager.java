@@ -294,7 +294,7 @@ public class FileTransferManager extends BroadcastReceiver
 
 	}
 
-	public void uploadFile(String msisdn, File sourceFile, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
+	public void uploadFile(String msisdn, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
 			long recordingDuration)
 	{
 		if(taskOverflowLimitAchieved())
@@ -303,7 +303,7 @@ public class FileTransferManager extends BroadcastReceiver
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
 				recordingDuration);
 		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);

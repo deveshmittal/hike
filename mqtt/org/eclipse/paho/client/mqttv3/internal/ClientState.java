@@ -113,6 +113,8 @@ public class ClientState
 
 	private boolean quiescing = false;
 
+	private long lastOutBoundQOS1 = 0;
+
 	private long lastOutboundActivity = 0;
 
 	private long lastInboundActivity = 0;
@@ -134,6 +136,8 @@ public class ClientState
 	private MqttPingSender pingSender = null;
 
 	private final static String className = ClientState.class.getName();
+
+	private static final long INACTIVITY_TIMEOUT = 60 * 1000;
 
 	private final String TAG = "clientState";
 
@@ -220,7 +224,7 @@ public class ClientState
 		catch (MqttException ex)
 		{
 			// @TRACE 602=key={0} exception
-			Logger.d(TAG, "exception , cause : " + ex.getCause());
+			Logger.e(TAG, "exception in restore message, cause : ", ex);
 			if (ex.getCause() instanceof EOFException)
 			{
 				// Premature end-of-file means that the message is corrupted
@@ -487,7 +491,7 @@ public class ClientState
 				if (actualInFlight >= this.maxInflight)
 				{
 					// @TRACE 613= sending {0} msgs at max inflight window
-					Logger.d(TAG, "max in flight messages reached ");
+					Logger.e(TAG, "max in flight messages reached ");
 
 					throw new MqttException(MqttException.REASON_CODE_MAX_INFLIGHT);
 				}
@@ -621,7 +625,7 @@ public class ClientState
 					{
 
 						// @TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
-						Logger.d(TAG, "inserting ping in pending flows , lastoutboundactivity time : " + lastInboundActivity + " lastinboundactivitytime : " + lastInboundActivity);
+						Logger.d(TAG, "inserting ping in pending flows , lastoutboundactivity time : " + lastOutboundActivity + " lastinboundactivitytime : " + lastInboundActivity);
 						pingOutstanding = Boolean.TRUE;
 						lastPing = time;
 						token = new MqttToken(clientComms.getClient().getClientId());
@@ -640,16 +644,15 @@ public class ClientState
 						Logger.d(TAG, "ping not outstanding , nextping time : " + nextPingTime);
 					}
 				}
-				else if (!clientComms.receiver.isReceiving() && (time - lastPing >= keepAlive + delta) && (time - lastInboundActivity >= keepAlive + delta)
-						&& (time - lastOutboundActivity >= keepAlive + delta))
+				else if ((time - lastPing >= keepAlive + delta) && (time - lastInboundActivity >= keepAlive + delta) && (time - lastOutboundActivity >= keepAlive + delta))
 				{
 					// any of the conditions is true means the client is active
 					// lastInboundActivity will be updated once receiving is done.
 					// Add a delta, since the timer and System.currentTimeMillis() is not accurate.
 					// A ping is outstanding but no packet has been received in KA so connection is deemed broken
 					// @TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}
-					Logger.d(TAG, "timed out as no activity, already sent the ping but no response recieved,  lastoutboundactivity : " + lastOutboundActivity
-							+ " lastinboundactivity : " + lastInboundActivity);
+					Logger.e(TAG, "timed out as no activity, already sent the ping but no response recieved,  lastoutboundactivity : " + lastOutboundActivity
+							+ " lastOutboundQOS1 : " + lastOutBoundQOS1 + " lastinboundactivity : " + lastInboundActivity);
 
 					// A ping has already been sent. At this point, assume that the
 					// broker has hung and the TCP layer hasn't noticed.
@@ -662,6 +665,18 @@ public class ClientState
 		}
 
 		return token;
+	}
+
+	public void checkActivity() throws MqttException
+	{
+		synchronized (pingOutstanding)
+		{	
+			if ((lastOutBoundQOS1 - lastInboundActivity >= INACTIVITY_TIMEOUT))
+			{
+				Logger.e(TAG, "not recieved ack for 1 min so disconnecting");
+				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			}
+		}
 	}
 
 	/**
@@ -830,6 +845,15 @@ public class ClientState
 				tokenStore.removeToken(message);
 				checkQuiesceLock();
 			}
+			else
+			// this is QOS 1 or 2
+			{
+				lastOutBoundQOS1 = System.currentTimeMillis();
+			}
+		}
+		else if (message instanceof MqttPingReq)
+		{
+			lastOutBoundQOS1 = System.currentTimeMillis();
 		}
 	}
 
@@ -1060,24 +1084,32 @@ public class ClientState
 
 	protected void notifyResult(MqttWireMessage ack, MqttToken token, MqttException ex)
 	{
-		final String methodName = "notifyResult";
-		// unblock any threads waiting on the token
-		token.internalTok.markComplete(ack, ex);
-
-		// Let the user know an async operation has completed and then remove the token
-		if (ack != null && ack instanceof MqttAck && !(ack instanceof MqttPubRec))
+		try
 		{
-			// @TRACE 648=key{0}, msg={1}, excep={2}
 
-			callback.asyncOperationComplete(token);
+			final String methodName = "notifyResult";
+			// unblock any threads waiting on the token
+			token.internalTok.markComplete(ack, ex);
+
+			// Let the user know an async operation has completed and then remove the token
+			if (ack != null && ack instanceof MqttAck && !(ack instanceof MqttPubRec))
+			{
+				// @TRACE 648=key{0}, msg={1}, excep={2}
+
+				callback.asyncOperationComplete(token);
+			}
+			// There are cases where there is no ack as the operation failed before
+			// an ack was received
+			if (ack == null)
+			{
+				// @TRACE 649=key={0},excep={1}
+
+				callback.asyncOperationComplete(token);
+			}
 		}
-		// There are cases where there is no ack as the operation failed before
-		// an ack was received
-		if (ack == null)
+		catch (Exception e)
 		{
-			// @TRACE 649=key={0},excep={1}
-
-			callback.asyncOperationComplete(token);
+			Logger.e(TAG, "Exception occured", e);
 		}
 	}
 

@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
+
 import android.net.Uri;
 import android.os.Environment;
 
@@ -1522,6 +1524,8 @@ public class HikeConstants
 
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
+
+	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE, StatusMessageType.PROFILE_PIC};
 
 	public static enum WelcomeTutorial
 	{
