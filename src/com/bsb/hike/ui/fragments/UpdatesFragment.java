@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
@@ -81,19 +82,19 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 	private void setupListHeader(ListView listView)
 	{
-		View header = LayoutInflater.from(getActivity()).inflate(
-				R.layout.timeline_list_header, null);
-		header.setOnClickListener(new View.OnClickListener()
+		final View header = LayoutInflater.from(getActivity()).inflate(
+				R.layout.status_update_ftue_tip, null);
+		header.setOnClickListener(null);
+		ImageView closeIcon = (ImageView) header.findViewById(R.id.close_tip);
+		closeIcon.setOnClickListener(new View.OnClickListener()
 		{
 			
 			@Override
 			public void onClick(View v)
 			{
-				Intent intent = new Intent(getActivity(), StatusUpdate.class);
-				startActivity(intent);
+				getListView().removeHeaderView(header);
 			}
 		});
-		TextView headerTextView = (TextView) header.findViewById(R.id.header_txt);
 		listView.addHeaderView(header);
 	}
 

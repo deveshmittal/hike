@@ -1531,5 +1531,7 @@
      <string name="add_shortcut">Add Shortcut</string>
      <string name="timeline">Timeline</string>
      <string name="add_favorites_upper_case">ADD FAVORITES</string>
+     <string name="status_update_tip_header">Post your status</string>
+     <string name="status_update_tip_msg">Status updates are visible to favorites only</string>
      
 </resources>
