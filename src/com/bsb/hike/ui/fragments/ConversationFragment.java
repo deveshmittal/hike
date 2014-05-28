@@ -1588,7 +1588,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
-					removeGroupChatTipIfExists();
+					getFirstConversation();
 
 					displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
 
@@ -1632,7 +1632,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 	}
 
-	private Conversation removeGroupChatTipIfExists()
+	private Conversation getFirstConversation()
 	{
 		Conversation conv = null;
 		if (!displayedConversations.isEmpty())
@@ -1879,7 +1879,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		/*
 		 * if group chat tip is showing we should remove this first and than add stealth ftue conversation tip
 		 */
-		Conversation conv = removeGroupChatTipIfExists();
+		Conversation conv = getFirstConversation();
 
 		/*
 		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
