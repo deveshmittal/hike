@@ -1328,7 +1328,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 			final String groupName = db.getGroupName(groupId);
 
-			Conversation conv = mConversationsByMSISDN.get(groupId);
+			final Conversation conv = mConversationsByMSISDN.get(groupId);
 			if (conv == null)
 			{
 				return;
@@ -1339,7 +1339,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
-			getActivity().runOnUiThread(this);
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					updateViewForNameChange(conv);
+				}
+			});
 		}
 		else if (HikePubSub.CONTACT_ADDED.equals(type))
 		{
@@ -1350,7 +1358,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			Conversation conversation = this.mConversationsByMSISDN.get(contactInfo.getMsisdn());
+			final Conversation conversation = this.mConversationsByMSISDN.get(contactInfo.getMsisdn());
 			if (conversation != null)
 			{
 				conversation.setContactName(contactInfo.getName());
@@ -1359,7 +1367,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					return;
 				}
-				getActivity().runOnUiThread(this);
+				getActivity().runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						updateViewForNameChange(conversation);
+					}
+				});
 			}
 		}
 		else if (HikePubSub.TYPING_CONVERSATION.equals(type) || HikePubSub.END_TYPING_CONVERSATION.equals(type))
@@ -1738,6 +1754,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		return getListView().getChildAt(index);
+	}
+
+	private void updateViewForNameChange(Conversation conversation)
+	{
+		View parentView = getParenViewForConversation(conversation);
+
+		if (parentView == null)
+		{
+			return;
+		}
+
+		mAdapter.updateViewsRelatedToName(parentView, conversation);
 	}
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
