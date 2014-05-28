@@ -764,7 +764,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			public void onClick(View v)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(conv.getMsisdn(), conv.getConvId()));
-				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 			}
 		};
