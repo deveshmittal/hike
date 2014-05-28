@@ -1,6 +1,7 @@
 package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -144,7 +145,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 
 			mAdapter.notifyDataSetChanged();
-			mAdapter.setNotifyOnChange(false);
+
 			if (mAdapter.getCount() == 0)
 			{
 				setEmptyState();
@@ -811,12 +812,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			mAdapter.clear();
 		}
 
-		mAdapter = new ConversationsAdapter(getActivity(), R.layout.conversation_item, displayedConversations);
-
-		/*
-		 * because notifyOnChange gets re-enabled whenever we call notifyDataSetChanged it's simpler to assume it's set to false and always notifyOnChange by hand
-		 */
-		mAdapter.setNotifyOnChange(false);
+		mAdapter = new ConversationsAdapter(getActivity(), displayedConversations);
 
 		setListAdapter(mAdapter);
 
@@ -900,9 +896,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			displayedConversations.addAll(stealthConversations);
 		}
 
-		mAdapter.sort(mConversationsComparator);
+		Collections.sort(displayedConversations, mConversationsComparator);
 		mAdapter.notifyDataSetChanged();
-		mAdapter.setNotifyOnChange(false);
 	}
 
 	private void leaveGroup(Conversation conv)
@@ -973,9 +968,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 		mAdapter.notifyDataSetChanged();
-		// notifyDataSetChanged sets notifyonChange to true but we want it to
-		// always be false
-		mAdapter.setNotifyOnChange(false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1104,11 +1096,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					{
 						conversation.setMessages(messageList);
 					}
-					mAdapter.sort(mConversationsComparator);
+					Collections.sort(displayedConversations, mConversationsComparator);
 					mAdapter.notifyDataSetChanged();
-					// notifyDataSetChanged sets notifyonChange to true but we
-					// want it to always be false
-					mAdapter.setNotifyOnChange(false);
 				}
 			});
 		}
@@ -1136,10 +1125,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				public void run()
 				{
-					mAdapter.add(conversation);
+					displayedConversations.add(conversation);
 
 					mAdapter.notifyDataSetChanged();
-					mAdapter.setNotifyOnChange(false);
 				}
 			});
 		}
@@ -1481,9 +1469,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					displayedConversations.addAll(stealthConversations);
 					stealthConversations.clear();
-					mAdapter.sort(mConversationsComparator);
+					Collections.sort(displayedConversations, mConversationsComparator);
 					mAdapter.notifyDataSetChanged();
-					mAdapter.setNotifyOnChange(false);
 				}
 			});
 		}
@@ -1663,11 +1650,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (!mConversationsAdded.contains(conv.getMsisdn()))
 		{
 			mConversationsAdded.add(conv.getMsisdn());
-			mAdapter.add(conv);
+			displayedConversations.add(conv);
 		}
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
-		mAdapter.sort(mConversationsComparator);
+
+		Collections.sort(displayedConversations, mConversationsComparator);
 
 		if (messageRefreshHandler == null)
 		{

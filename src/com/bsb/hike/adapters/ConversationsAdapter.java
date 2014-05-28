@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,12 +41,10 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
-public class ConversationsAdapter extends ArrayAdapter<Conversation>
+public class ConversationsAdapter extends BaseAdapter
 {
 
 	private IconLoader iconLoader;
-
-	private int mResourceId;
 
 	private int mIconImageSize;
 
@@ -57,6 +55,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	private boolean stealthFtueTipAnimated = false;
 	
 	private boolean resetStealthTipAnimated = false;
+
+	private List<Conversation> conversationList;
+
+	private Context context;
 
 	private enum ViewType
 	{
@@ -82,10 +84,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		ImageView avatar;
 	}
 
-	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
+	public ConversationsAdapter(Context context, List<Conversation> objects)
 	{
-		super(context, textViewResourceId, objects);
-		this.mResourceId = textViewResourceId;
+		this.context = context;
+		this.conversationList = objects;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
@@ -93,9 +95,36 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	}
 
 	@Override
+	public int getCount()
+	{
+		return conversationList.size();
+	}
+
+	@Override
+	public Conversation getItem(int position)
+	{
+		return conversationList.get(position);
+	}
+
+	@Override
+	public long getItemId(int position)
+	{
+		return position;
+	}
+	@Override
 	public int getViewTypeCount()
 	{
 		return ViewType.values().length;
+	}
+
+	public void remove(Conversation conversation)
+	{
+		conversationList.remove(conversation);
+	}
+
+	public void clear()
+	{
+		conversationList.clear();
 	}
 
 	@Override
@@ -120,7 +149,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final Conversation conversation = getItem(position);
 
@@ -135,7 +163,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			switch (viewType)
 			{
 			case CONVERSATION:
-				v = inflater.inflate(mResourceId, parent, false);
+				v = inflater.inflate(R.layout.conversation_item, parent, false);
 				viewHolder.headerText = (TextView) v.findViewById(R.id.contact);
 				viewHolder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
 				viewHolder.imageStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
@@ -214,11 +242,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		else if (viewType == ViewType.RESET_STEALTH_TIP)
 		{
 			long remainingTime = HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS
-					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance(getContext()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
+					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
 
 			if (remainingTime <= 0)
 			{
-				viewHolder.headerText.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
+				viewHolder.headerText.setText(Html.fromHtml(context.getResources().getString(R.string.tap_to_reset_stealth_tip)));
 			}
 			else
 			{
@@ -247,7 +275,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					remove(conversation);
 					notifyDataSetChanged();
 
-					Utils.cancelScheduledStealthReset(getContext());
+					Utils.cancelScheduledStealthReset(context);
 					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 				}
 			});
@@ -305,8 +333,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
 	{
-		Context context = getContext();
-
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
 
 		updateViewsRelatedToMessageState(parentView, message, conversation);
@@ -385,7 +411,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 	private CharSequence getConversationText(Conversation conversation, ConvMessage message)
 	{
-		Context context = getContext();
 		MessageMetadata metadata = message.getMetadata();
 		CharSequence markedUp = null;
 
@@ -555,7 +580,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 				return;
 			}
-			textView.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
+			textView.setText(Html.fromHtml(context.getResources().getString(R.string.tap_to_reset_stealth_tip)));
 		}
 
 		@Override
@@ -581,7 +606,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		int minutes = (int) (secondsUntilFinished / 60);
 		int seconds = (int) (secondsUntilFinished % 60);
 		String text = String.format("%1$02d:%2$02d", minutes, seconds);
-		textView.setText(Html.fromHtml(getContext().getString(R.string.reset_stealth_tip, text)));
+		textView.setText(Html.fromHtml(context.getString(R.string.reset_stealth_tip, text)));
 
 	}
 
