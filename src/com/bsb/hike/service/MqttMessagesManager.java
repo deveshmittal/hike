@@ -1697,9 +1697,12 @@ public class MqttMessagesManager
 			}
 
 			clearTypingNotificationHandler.removeCallbacks(clearTypingNotification);
-		}
 
-		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
+			/*
+			 * We only publish this event if we actually removed a typing notification
+			 */
+			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
+		}
 	}
 		
 }
