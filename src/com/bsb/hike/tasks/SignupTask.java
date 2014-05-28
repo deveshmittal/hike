@@ -581,6 +581,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
+		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
 		return Boolean.TRUE;
 	}
 
