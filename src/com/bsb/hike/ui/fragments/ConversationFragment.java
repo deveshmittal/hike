@@ -1128,7 +1128,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.MSG_READ.equals(type))
 		{
 			String msisdn = (String) object;
-			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			final Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null)
 			{
 				/*
@@ -1136,6 +1136,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				 */
 				return;
 			}
+
+			ConvMessage lastConvMessage = null;
+
 			/*
 			 * look for the latest received messages and set them to read. Exit when we've found some read messages
 			 */
@@ -1146,24 +1149,45 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.RECEIVED_READ.ordinal()))
 				{
 					ConvMessage.State currentState = msg.getState();
-					msg.setState(ConvMessage.State.RECEIVED_READ);
 					if (currentState == ConvMessage.State.RECEIVED_READ)
 					{
 						break;
 					}
+
+					/*
+					 * We are only interested with the last convMessage object for updating the UI.
+					 */
+					if (i == messages.size() - 1)
+					{
+						lastConvMessage = msg;
+					}
+					msg.setState(ConvMessage.State.RECEIVED_READ);
 				}
 			}
 
-			if (getActivity() == null)
+			/*
+			 * We should only update the view if the last message's state was changed.
+			 */
+			if (getActivity() == null || lastConvMessage == null)
 			{
 				return;
 			}
-			getActivity().runOnUiThread(this);
+
+			final ConvMessage message = lastConvMessage;
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					updateViewForMessageStateChange(conv, message);
+				}
+			});
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
 			long msgId = ((Long) object).longValue();
-			ConvMessage msg = findMessageById(msgId);
+			final ConvMessage msg = findMessageById(msgId);
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
@@ -1172,14 +1196,29 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					return;
 				}
-				getActivity().runOnUiThread(this);
+				getActivity().runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
+						
+						updateViewForMessageStateChange(conversation, msg);
+					}
+				});
 			}
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
 		{
 			Pair<String, long[]> pair = (Pair<String, long[]>) object;
 
+			final String msisdn = pair.first;
+
 			long[] ids = (long[]) pair.second;
+
+			ConvMessage lastConvMessage = null;
+
 			// TODO we could keep a map of msgId -> conversation objects
 			// somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
@@ -1188,30 +1227,50 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					// If the msisdn don't match we simply return
-					if (!msg.getMsisdn().equals(pair.first))
+					if (!msg.getMsisdn().equals(msisdn))
 					{
 						return;
 					}
+					lastConvMessage = msg;
+
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+
+					/*
+					 * Since we have updated the last message of the conversation, we don't need to iterate through the array anymore.
+					 */
+					break;
 				}
 			}
 
-			if (getActivity() == null)
+			if (getActivity() == null || lastConvMessage == null)
 			{
 				return;
 			}
-			getActivity().runOnUiThread(this);
+
+			final ConvMessage message = lastConvMessage;
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					Conversation conversation = mConversationsByMSISDN.get(msisdn);
+					
+					updateViewForMessageStateChange(conversation, message);
+				}
+			});
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))
 		{
 			Pair<String, Long> pair = (Pair<String, Long>) object;
 
+			final String msisdn = pair.first;
 			long msgId = pair.second;
-			ConvMessage msg = findMessageById(msgId);
+			final ConvMessage msg = findMessageById(msgId);
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 			{
 				// If the msisdn don't match we simply return
-				if (!msg.getMsisdn().equals(pair.first))
+				if (!msg.getMsisdn().equals(msisdn))
 				{
 					return;
 				}
@@ -1221,7 +1280,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					return;
 				}
-				getActivity().runOnUiThread(this);
+				getActivity().runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						Conversation conversation = mConversationsByMSISDN.get(msisdn);
+						
+						updateViewForMessageStateChange(conversation, msg);
+					}
+				});
 			}
 		}
 		else if (HikePubSub.ICON_CHANGED.equals(type))
@@ -1649,6 +1718,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		return getListView().getChildAt(index);
+	}
+
+	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
+	{
+		View parentView = getParenViewForConversation(conversation);
+
+		if (parentView == null)
+		{
+			return;
+		}
+
+		mAdapter.updateViewsRelatedToMessageState(parentView, convMessage, conversation);
 	}
 
 	private void addMessage(Conversation conv, ConvMessage convMessage)
