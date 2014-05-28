@@ -1541,4 +1541,8 @@ public class HikeConstants
 	 * this key to true in preference
 	 */
 	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
+
+	public static final long[] SHORT_VIB_PATTERN = new long[] { 0, 200, 100, 250 };
+
+	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
 }

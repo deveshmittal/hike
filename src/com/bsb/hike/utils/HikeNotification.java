@@ -552,12 +552,12 @@ public class HikeNotification
 					else if (VIB_SHORT.equals(vibrate))
 					{
 						// short vibrate
-						mBuilder.setVibrate(new long[] { 0, 200, 100, 250 });
+						mBuilder.setVibrate(HikeConstants.SHORT_VIB_PATTERN);
 					}
 					else if (VIB_LONG.equals(vibrate))
 					{
 						// long vibrate
-						mBuilder.setVibrate(new long[] { 0, 1000 });
+						mBuilder.setVibrate(HikeConstants.LONG_VIB_PATTERN);
 					}
 				}
 			}
