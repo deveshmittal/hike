@@ -282,78 +282,105 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		{
 			contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
+
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
+			updateViewsRelatedToLastMessage(v, message, conversation);
+		}
 
-			ImageView avatarframe = viewHolder.avatarFrame;
+		updateViewsRelatedToAvater(v, conversation);
 
-			ImageView imgStatus = viewHolder.imageStatus;
+		return v;
+	}
 
-			TextView unreadIndicator = viewHolder.unreadIndicator;
-			unreadIndicator.setVisibility(View.GONE);
-			imgStatus.setVisibility(View.GONE);
-			/*
-			 * If the message is a status message, we only show an indicator if the status of the message is unread.
-			 */
-			if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
+	public void updateViewsRelatedToAvater(View parentView, Conversation conversation)
+	{
+		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		ImageView avatarView = viewHolder.avatar;
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
+	}
+
+	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
+	{
+		Context context = getContext();
+
+		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		updateViewsRelatedToMessageState(parentView, message, conversation);
+
+		TextView messageView = viewHolder.subText;
+
+		CharSequence markedUp = getConversationText(conversation, message);
+		
+		messageView.setVisibility(View.VISIBLE);
+		messageView.setText(markedUp);
+		TextView tsView = viewHolder.timeStamp;
+		tsView.setText(message.getTimestampFormatted(true, context));
+	}
+
+	public void updateViewsRelatedToMessageState(View parentView, ConvMessage message, Conversation conversation)
+	{
+		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		ImageView avatarframe = viewHolder.avatarFrame;
+
+		ImageView imgStatus = viewHolder.imageStatus;
+
+		TextView messageView = viewHolder.subText;
+
+		TextView unreadIndicator = viewHolder.unreadIndicator;
+		unreadIndicator.setVisibility(View.GONE);
+		imgStatus.setVisibility(View.GONE);
+		/*
+		 * If the message is a status message, we only show an indicator if the status of the message is unread.
+		 */
+		if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE || message.getState() == State.RECEIVED_UNREAD)
+		{
+			int resId = message.getImageState();
+			if (resId > 0)
 			{
-				int resId = message.getImageState();
-				if (resId > 0)
-				{
-					avatarframe.setImageDrawable(null);
-					imgStatus.setImageResource(resId);
-					imgStatus.setVisibility(View.VISIBLE);
-				}
-				else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
-				{
-					avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
-					unreadIndicator.setVisibility(View.VISIBLE);
+				avatarframe.setImageDrawable(null);
+				imgStatus.setImageResource(resId);
+				imgStatus.setVisibility(View.VISIBLE);
+			}
+			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
+			{
+				avatarframe.setImageResource(R.drawable.frame_avatar_highlight);
+				unreadIndicator.setVisibility(View.VISIBLE);
 
-					unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
+				unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
 
-					if (conversation.getUnreadCount() == 0)
-					{
-						unreadIndicator.setText("");
-					}
-					else
-					{
-						unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
-					}
+				if (conversation.getUnreadCount() == 0)
+				{
+					unreadIndicator.setText("");
 				}
 				else
 				{
-					avatarframe.setImageDrawable(null);
+					unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
 				}
 			}
 			else
 			{
 				avatarframe.setImageDrawable(null);
 			}
-
-			TextView messageView = viewHolder.subText;
-
-			CharSequence markedUp = getConversationText(conversation, message);
-			
-			messageView.setVisibility(View.VISIBLE);
-			messageView.setText(markedUp);
-			TextView tsView = viewHolder.timeStamp;
-			tsView.setText(message.getTimestampFormatted(true, context));
-			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
-			{
-				/* set unread messages to BLUE */
-				messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
-			}
-			else
-			{
-				messageView.setTextColor(context.getResources().getColor(R.color.list_item_header));
-			}
+		}
+		else
+		{
+			avatarframe.setImageDrawable(null);
 		}
 
-		ImageView avatarView = viewHolder.avatar;
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
-		return v;
+		if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+		{
+			/* set unread messages to BLUE */
+			messageView.setTextColor(context.getResources().getColor(R.color.unread_message));
+		}
+		else
+		{
+			messageView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+		}
 	}
 
 	private CharSequence getConversationText(Conversation conversation, ConvMessage message)
