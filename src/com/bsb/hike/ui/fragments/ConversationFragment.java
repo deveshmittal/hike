@@ -1299,8 +1299,28 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
+
+			final String msisdn = (String) object;
+
 			/* an icon changed, so update the view */
-			getActivity().runOnUiThread(this);
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					Conversation conversation = mConversationsByMSISDN.get(msisdn);
+
+					View parentView = getParenViewForConversation(conversation);
+
+					if (parentView == null)
+					{
+						return;
+					}
+
+					mAdapter.updateViewsRelatedToAvatar(parentView, conversation);
+				}
+			});
 		}
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
