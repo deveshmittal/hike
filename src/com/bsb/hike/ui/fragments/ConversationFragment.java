@@ -934,6 +934,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 		ConvMessage message;
+
+		boolean shouldUpdateUI = false;
+
 		if (isTyping)
 		{
 			message = messageList.get(messageList.size() - 1);
@@ -944,6 +947,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				convMessage.setMessage(HikeConstants.IS_TYPING);
 				convMessage.setState(State.RECEIVED_UNREAD);
 				messageList.add(convMessage);
+
+				shouldUpdateUI = true;
 			}
 		}
 		else
@@ -952,9 +957,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (message.getTypingNotification() != null)
 			{
 				messageList.remove(message);
+				shouldUpdateUI = true;
 			}
 		}
-		run();
+
+		if (shouldUpdateUI)
+		{
+			if (messageList.isEmpty())
+			{
+				return;
+			}
+
+			/*
+			 * Getting the current last message in the conversation
+			 */
+			ConvMessage convMessage = messageList.get(messageList.size() - 1);
+
+			View parentView = getParenViewForConversation(conversation);
+
+			if (parentView == null || convMessage == null)
+			{
+				return;
+			}
+			
+			mAdapter.updateViewsRelatedToLastMessage(parentView, convMessage, conversation);
+		}
 	}
 
 	@Override
