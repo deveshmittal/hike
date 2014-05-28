@@ -22,7 +22,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.util.Pair;
@@ -205,8 +204,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private HashSet<String> mConversationsAdded;
 
 	private Comparator<? super Conversation> mConversationsComparator;
-
-	private Handler messageRefreshHandler;
 
 	private View emptyView;
 
@@ -1049,9 +1046,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					addMessage(conv, finalMessage);
-
-					messageRefreshHandler.removeCallbacks(ConversationFragment.this);
-					messageRefreshHandler.postDelayed(ConversationFragment.this, 100);
 				}
 			});
 
@@ -1655,11 +1649,34 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
+		sortAndUpdateTheView(conv, convMessage);
+	}
+
+	private void sortAndUpdateTheView(Conversation conversation, ConvMessage convMessage)
+	{
+		int prevIndex = displayedConversations.indexOf(conversation);
+
 		Collections.sort(displayedConversations, mConversationsComparator);
 
-		if (messageRefreshHandler == null)
+		int newIndex = displayedConversations.indexOf(conversation);
+
+		/*
+		 * Here we check if the index of the item remained the same after sorting. If it did, we just need to update that item's view. If not, we need to call notifyDataSetChanged.
+		 */
+		if (newIndex != prevIndex)
 		{
-			messageRefreshHandler = new Handler();
+			run();
+		}
+		else
+		{
+			View parentView = getListView().getChildAt(newIndex);
+
+			if (parentView == null)
+			{
+				return;
+			}
+
+			mAdapter.updateViewsRelatedToLastMessage(parentView, convMessage, conversation);
 		}
 	}
 
