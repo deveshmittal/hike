@@ -14,8 +14,10 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -47,6 +49,14 @@ public class FetchBulkLastSeenTask extends AsyncTask<Void, Void, Boolean>
 	@Override
 	protected Boolean doInBackground(Void... params)
 	{
+		/*
+		 * Not working in prod
+		 */
+		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.PRODUCTION, true))
+		{
+			return true;
+		}
+
 		URL url;
 		try
 		{
