@@ -331,6 +331,10 @@ public class HikePubSub implements Runnable
 
 	public static final String CLOSE_CURRENT_STEALTH_CHAT = "closeCurrentStealthChat";
 
+	public static final String REMOVE_STATUS_UPDATE_TIP = "RemoveStatusUpdateTip";
+
+	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

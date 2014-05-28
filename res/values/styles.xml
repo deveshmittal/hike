@@ -300,7 +300,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:cacheColorHint">#00000000</item>
         <item name="android:divider">@drawable/home_list_divider</item>
-        <item name="android:dividerHeight">1dp</item>
+        <item name="android:dividerHeight">0.5dp</item>
         <item name="android:drawSelectorOnTop">false</item>
         <item name="android:listSelector">#00000000</item>
     </style>
