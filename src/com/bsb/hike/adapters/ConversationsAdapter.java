@@ -63,6 +63,25 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		CONVERSATION, GROUP_CHAT_TIP, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP
 	}
 
+	private class ViewHolder
+	{
+		TextView headerText;
+
+		View closeTip;
+
+		TextView subText;
+
+		ImageView avatarFrame;
+
+		ImageView imageStatus;
+
+		TextView unreadIndicator;
+
+		TextView timeStamp;
+
+		ImageView avatar;
+	}
+
 	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
 	{
 		super(context, textViewResourceId, objects);
@@ -108,29 +127,47 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		View v = convertView;
+		ViewHolder viewHolder = null;
+
 		if (v == null)
 		{
+			viewHolder = new ViewHolder();
 			switch (viewType)
 			{
 			case CONVERSATION:
 				v = inflater.inflate(mResourceId, parent, false);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.contact);
+				viewHolder.avatarFrame = (ImageView) v.findViewById(R.id.avatar_frame);
+				viewHolder.imageStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
+				viewHolder.unreadIndicator = (TextView) v.findViewById(R.id.unread_indicator);
+				viewHolder.subText = (TextView) v.findViewById(R.id.last_message);
+				viewHolder.timeStamp = (TextView) v.findViewById(R.id.last_message_timestamp);
+				viewHolder.avatar = (ImageView) v.findViewById(R.id.avatar);
 				break;
 			case GROUP_CHAT_TIP:
 				v = inflater.inflate(R.layout.group_chat_tip, parent, false);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.tip);
+				viewHolder.closeTip = v.findViewById(R.id.close);
 				break;
 			case STEALTH_FTUE_TIP_VIEW:
 			case RESET_STEALTH_TIP:
 				v = inflater.inflate(R.layout.stealth_ftue_conversation_tip, parent, false);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.tip);
+				viewHolder.closeTip = v.findViewById(R.id.close);
 				break;
 			default:
 				break;
 			}
+
+			v.setTag(viewHolder);
+		}
+		else
+		{
+			viewHolder = (ViewHolder) v.getTag();
 		}
 
 		if (viewType == ViewType.GROUP_CHAT_TIP)
 		{
-			TextView tip = (TextView) v.findViewById(R.id.tip);
-
 			String tipString = context.getString(R.string.tap_top_right_group_chat);
 			String tipReplaceString = "*";
 
@@ -138,10 +175,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			ssb.setSpan(new ImageSpan(context, R.drawable.ic_group_tip_menu), tipString.indexOf(tipReplaceString), tipString.indexOf(tipReplaceString) + tipReplaceString.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-			tip.setText(ssb);
+			viewHolder.headerText.setText(ssb);
 
-			View close = v.findViewById(R.id.close);
-			close.setOnClickListener(new OnClickListener()
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
@@ -155,9 +191,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		}
 		else if (viewType == ViewType.STEALTH_FTUE_TIP_VIEW)
 		{
-			View close = v.findViewById(R.id.close);
 			final int pos = position;
-			close.setOnClickListener(new OnClickListener()
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
@@ -178,32 +213,29 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		}
 		else if (viewType == ViewType.RESET_STEALTH_TIP)
 		{
-			View close = v.findViewById(R.id.close);
-			TextView tipText = (TextView) v.findViewById(R.id.tip);
-
 			long remainingTime = HikeConstants.RESET_COMPLETE_STEALTH_TIME_MS
 					- (System.currentTimeMillis() - HikeSharedPreferenceUtil.getInstance(getContext()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l));
 
 			if (remainingTime <= 0)
 			{
-				tipText.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
+				viewHolder.headerText.setText(Html.fromHtml(getContext().getResources().getString(R.string.tap_to_reset_stealth_tip)));
 			}
 			else
 			{
 				if (countDownSetter == null)
 				{
-					countDownSetter = new CountDownSetter(tipText, remainingTime, 1000);
+					countDownSetter = new CountDownSetter(viewHolder.headerText, remainingTime, 1000);
 					countDownSetter.start();
 
-					setTimeRemainingText(tipText, remainingTime);
+					setTimeRemainingText(viewHolder.headerText, remainingTime);
 				}
 				else
 				{
-					countDownSetter.setTextView(tipText);
+					countDownSetter.setTextView(viewHolder.headerText);
 				}
 			}
 
-			close.setOnClickListener(new OnClickListener()
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
@@ -231,8 +263,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			return v;
 		}
 
-		TextView contactView = (TextView) v.findViewById(R.id.contact);
-		if(itemToBeAnimated(conversation))
+		TextView contactView = viewHolder.headerText;
+		if (itemToBeAnimated(conversation))
 		{
 			final Animation animation = AnimationUtils.loadAnimation(context,
 		            R.anim.slide_in_from_left);
@@ -255,11 +287,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
 
-			ImageView avatarframe = (ImageView) v.findViewById(R.id.avatar_frame);
+			ImageView avatarframe = viewHolder.avatarFrame;
 
-			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
+			ImageView imgStatus = viewHolder.imageStatus;
 
-			TextView unreadIndicator = (TextView) v.findViewById(R.id.unread_indicator);
+			TextView unreadIndicator = viewHolder.unreadIndicator;
 			unreadIndicator.setVisibility(View.GONE);
 			imgStatus.setVisibility(View.GONE);
 			/*
@@ -300,13 +332,13 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				avatarframe.setImageDrawable(null);
 			}
 
-			TextView messageView = (TextView) v.findViewById(R.id.last_message);
+			TextView messageView = viewHolder.subText;
 
 			CharSequence markedUp = getConversationText(conversation, message);
 			
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);
-			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
+			TextView tsView = viewHolder.timeStamp;
 			tsView.setText(message.getTimestampFormatted(true, context));
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
 			{
@@ -319,7 +351,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			}
 		}
 
-		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
+		ImageView avatarView = viewHolder.avatar;
 		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
 		return v;
 	}
