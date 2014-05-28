@@ -655,8 +655,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 		int offset = 0;
 		int emoticonsListSize = 0;
-		tabDrawables = new int[] { R.drawable.ic_recents_emo, EmoticonConstants.EMOJI_RES_IDS[0], EmoticonConstants.EMOJI_RES_IDS[109], EmoticonConstants.EMOJI_RES_IDS[162],
-				EmoticonConstants.EMOJI_RES_IDS[294], EmoticonConstants.EMOJI_RES_IDS[392] };
+		tabDrawables = new int[] { R.drawable.emo_recent, R.drawable.emo_tab_5_selector, R.drawable.emo_tab_6_selector, R.drawable.emo_tab_7_selector,
+				R.drawable.emo_tab_8_selector, R.drawable.emo_tab_9_selector };
 		offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 		emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
 
