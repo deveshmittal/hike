@@ -729,6 +729,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 * Setting the last seen preference for the friends comparator.
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		ContactInfo.lastSeenTimeComparatorWithoutFav.lastSeenPref = ContactInfo.lastSeenTimeComparator.lastSeenPref;
+		
 
 		appStateHandler = new Handler();
 
