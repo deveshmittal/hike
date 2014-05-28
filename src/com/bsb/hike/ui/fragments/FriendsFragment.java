@@ -35,6 +35,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Utils;
 
 public class FriendsFragment extends SherlockListFragment implements Listener, OnItemLongClickListener
@@ -46,9 +47,11 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.FRIENDS_TAB_QUERY, HikePubSub.FREE_SMS_TOGGLED,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.INVITE_SENT, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.STEALTH_CONVERSATION_MARKED,
-			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE };
+			HikePubSub.STEALTH_CONVERSATION_UNMARKED, HikePubSub.STEALTH_MODE_RESET_COMPLETE, HikePubSub.APP_FOREGROUNDED };
 
 	private SharedPreferences preferences;
+
+	private LastSeenScheduler lastSeenScheduler;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -74,6 +77,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		preferences = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
+		lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
+		lastSeenScheduler.start();
 	}
 
 	@Override
@@ -88,6 +94,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		{
 			friendsAdapter.destroy();
 		}
+
+		if (lastSeenScheduler != null)
+		{
+			lastSeenScheduler.stop();
+			lastSeenScheduler = null;
+		}
+
 		super.onDestroy();
 	}
 
@@ -339,8 +352,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			List<ContactInfo> friendsList = friendsAdapter.getFriendsList();
 			List<ContactInfo> friendsStealthList = friendsAdapter.getStealthFriendsList();
 
-			updateLastSeenTimeInBulk(friendsList);
-			updateLastSeenTimeInBulk(friendsStealthList);
+			Utils.updateLastSeenTimeInBulk(friendsList);
+			Utils.updateLastSeenTimeInBulk(friendsStealthList);
 
 			if (!isAdded())
 			{
@@ -484,28 +497,30 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				}
 			});
 		}
-	}
-
-	private void updateLastSeenTimeInBulk(List<ContactInfo> contactList)
-	{
-		for (ContactInfo contactInfo : contactList)
+		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
 		{
-			String msisdn = contactInfo.getMsisdn();
-			if (HikeMessengerApp.lastSeenFriendsMap.containsKey(msisdn))
+			if (!isAdded())
 			{
-				Pair<Integer, Long> lastSeenValuePair = HikeMessengerApp.lastSeenFriendsMap.get(msisdn);
-
-				int isOffline = lastSeenValuePair.first;
-
-				long updatedLastSeenValue = lastSeenValuePair.second;
-				long previousLastSeen = contactInfo.getLastSeenTime();
-
-				if (updatedLastSeenValue > previousLastSeen)
-				{
-					contactInfo.setLastSeenTime(updatedLastSeenValue);
-				}
-				contactInfo.setOffline(isOffline);
+				return;
 			}
+
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					if (lastSeenScheduler == null)
+					{
+						lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
+					}
+					else
+					{
+						lastSeenScheduler.stop();
+					}
+					lastSeenScheduler.start();
+				}
+			});
 		}
 	}
 
