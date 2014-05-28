@@ -1639,6 +1639,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		return null;
 	}
 
+	private View getParenViewForConversation(Conversation conversation)
+	{
+		int index = displayedConversations.indexOf(conversation);
+
+		if (index == -1)
+		{
+			return null;
+		}
+
+		return getListView().getChildAt(index);
+	}
+
 	private void addMessage(Conversation conv, ConvMessage convMessage)
 	{
 		if (!mConversationsAdded.contains(conv.getMsisdn()))
