@@ -1428,7 +1428,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.RESET_UNREAD_COUNT.equals(type))
 		{
 			String msisdn = (String) object;
-			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			final Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null)
 			{
 				return;
@@ -1439,7 +1439,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
-			getActivity().runOnUiThread(this);
+			getActivity().runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					List<ConvMessage> messages = conv.getMessages();
+
+					if (messages.isEmpty())
+					{
+						return;
+					}
+
+					ConvMessage lastConvMessage = messages.get(messages.size() - 1);
+					updateViewForMessageStateChange(conv, lastConvMessage);
+				}
+			});
 		}
 		else if (HikePubSub.GROUP_LEFT.equals(type))
 		{
