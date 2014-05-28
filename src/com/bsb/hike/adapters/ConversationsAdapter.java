@@ -67,6 +67,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private class ViewHolder
 	{
+		String msisdn;
+
 		TextView headerText;
 
 		View closeTip;
@@ -291,6 +293,8 @@ public class ConversationsAdapter extends BaseAdapter
 			return v;
 		}
 
+		viewHolder.msisdn = conversation.getMsisdn();
+
 		TextView contactView = viewHolder.headerText;
 		if (itemToBeAnimated(conversation))
 		{
@@ -327,6 +331,15 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
 
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation.
+		 * We don't need to do anything here then.
+		 */
+		if(!conversation.getMsisdn().equals(viewHolder.msisdn))
+		{
+			return;
+		}
+
 		ImageView avatarView = viewHolder.avatar;
 		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
 	}
@@ -334,6 +347,15 @@ public class ConversationsAdapter extends BaseAdapter
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation.
+		 * We don't need to do anything here then.
+		 */
+		if(!conversation.getMsisdn().equals(viewHolder.msisdn))
+		{
+			return;
+		}
 
 		updateViewsRelatedToMessageState(parentView, message, conversation);
 
@@ -350,6 +372,15 @@ public class ConversationsAdapter extends BaseAdapter
 	public void updateViewsRelatedToMessageState(View parentView, ConvMessage message, Conversation conversation)
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation.
+		 * We don't need to do anything here then.
+		 */
+		if(!conversation.getMsisdn().equals(viewHolder.msisdn))
+		{
+			return;
+		}
 
 		ImageView avatarframe = viewHolder.avatarFrame;
 
