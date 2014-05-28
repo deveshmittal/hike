@@ -208,7 +208,8 @@
             android:name="com.bsb.hike.ui.PeopleActivity" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.TimelineActivity" >
+            android:name="com.bsb.hike.ui.TimelineActivity" 
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"

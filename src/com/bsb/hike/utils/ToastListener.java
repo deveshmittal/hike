@@ -190,6 +190,7 @@ public class ToastListener implements Listener
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
 			if (activity instanceof TimelineActivity)
 			{
+				Utils.resetUnseenStatusCount(activity);
 				return;
 			}
 			StatusMessage statusMessage = (StatusMessage) object;
