@@ -312,7 +312,7 @@ public class ConversationsAdapter extends BaseAdapter
 			updateViewsRelatedToLastMessage(v, message, conversation);
 		}
 
-		updateViewsRelatedToAvater(v, conversation);
+		updateViewsRelatedToAvatar(v, conversation);
 
 		return v;
 	}
@@ -344,7 +344,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 	}
 
-	public void updateViewsRelatedToAvater(View parentView, Conversation conversation)
+	public void updateViewsRelatedToAvatar(View parentView, Conversation conversation)
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
 
