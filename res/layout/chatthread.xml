@@ -188,9 +188,9 @@
                     android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="?actionBarItemBackground"
+                    android:background="@null"
                     android:onClick="onSendClick"
-                    android:src="@drawable/ic_walkie_talkie"
+                    android:src="@drawable/walkie_talkie_btn_selector"
                     android:state_enabled="false" />
 
                 <ImageButton
@@ -199,10 +199,10 @@
                     android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="?actionBarItemBackground"
+                    android:background="@null"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
-                    android:src="@drawable/ic_sticker" />
+                    android:src="@drawable/sticker_btn_selector" />
 
                 <LinearLayout
                     android:id="@+id/tb_layout"
