@@ -2,18 +2,13 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -186,10 +181,11 @@ import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.utils.LastSeenScheduler;
+import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
@@ -325,7 +321,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
-			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT };
+			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED };
 
 	private EmoticonType emoticonType;
 
@@ -393,6 +389,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View bottomFastScrollIndicator;
 
 	private View upFastScrollIndicator;
+
+	private LastSeenScheduler lastSeenScheduler;
 
 	int currentFirstVisibleItem = Integer.MAX_VALUE;
 
@@ -569,6 +567,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			attachmentWindow.dismiss();
 			attachmentWindow = null;
 		}
+
+		resetLastSeenScheduler();
+
 		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
 		if(messageMap != null)
 		{
@@ -576,6 +577,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			messageMap = null;
 		}
 
+	}
+
+	private void resetLastSeenScheduler()
+	{
+		if (lastSeenScheduler != null)
+		{
+			lastSeenScheduler.stop();
+			lastSeenScheduler = null;
+		}
 	}
 
 	@Override
@@ -1775,12 +1785,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			if (shouldShowLastSeen())
 			{
+				/*
+				 * Marking the isOnline flag based on the contact's last value.
+				 */
+				if (contactInfo.getOffline() == 0)
+				{
+					isOnline = true;
+				}
+
 				mLastSeenView.setText("");
 				mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+
 				/*
-				 * Fetching last seen value.
+				 * Making sure nothing is already scheduled wrt last seen.
 				 */
-				Utils.executeLongResultTask(new FetchLastSeenTask(mContactNumber, false));
+				resetLastSeenScheduler();
+
+				lastSeenScheduler = new LastSeenScheduler(this, false, contactInfo.getMsisdn(), lastSeenFetchedCallback);
+				lastSeenScheduler.start();
 			}
 		}
 
@@ -2988,39 +3010,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			ContactInfo newContactInfo = (ContactInfo) object;
 
-			if (!mContactNumber.equals(newContactInfo.getMsisdn()) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen())
-			{
-				return;
-			}
-
-			/*
-			 * Updating the class's contactinfo object
-			 */
-			contactInfo.setOffline(newContactInfo.getOffline());
-			contactInfo.setLastSeenTime(newContactInfo.getLastSeenTime());
-
-			final String lastSeenString = Utils.getLastSeenTimeAsString(this, contactInfo.getLastSeenTime(), contactInfo.getOffline(), false, true);
-
-			isOnline = contactInfo.getOffline() == 0;
-
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					if (lastSeenString == null)
-					{
-						mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
-						mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-					}
-					else
-					{
-						mLastSeenView.setText(lastSeenString);
-						//mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_last_seen_clock, 0, 0, 0);
-					}
-				}
-			});
+			updateLastSeen(newContactInfo.getMsisdn(), newContactInfo.getOffline(), newContactInfo.getLastSeenTime());
 		}
 		else if (HikePubSub.SEND_SMS_PREF_TOGGLED.equals(type))
 		{
@@ -3121,6 +3111,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
+				}
+			});
+		}
+		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					if (lastSeenScheduler == null)
+					{
+						lastSeenScheduler = new LastSeenScheduler(ChatThread.this, false, contactInfo.getMsisdn(), lastSeenFetchedCallback);
+					}
+					else
+					{
+						lastSeenScheduler.stop();
+					}
+					lastSeenScheduler.start();
 				}
 			});
 		}
@@ -6002,113 +6013,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
-	private class FetchLastSeenTask extends AsyncTask<Void, Void, Long>
-	{
-
-		boolean retriedOnce;
-
-		String msisdn;
-
-		public FetchLastSeenTask(String msisdn, boolean retriedOnce)
-		{
-			this.msisdn = msisdn;
-			if (contactInfo.getOffline() == 0)
-			{
-				isOnline = true;
-				/*
-				 * We reset this to 1 since the user's online state is stale here.
-				 */
-				contactInfo.setOffline(1);
-			}
-			this.retriedOnce = retriedOnce;
-		}
-
-		@Override
-		protected Long doInBackground(Void... params)
-		{
-			URL url;
-			try
-			{
-				url = new URL(AccountUtils.base + "/user/lastseen/" + mContactNumber);
-
-				Logger.d(getClass().getSimpleName(), "URL:  " + url);
-
-				URLConnection connection = url.openConnection();
-				AccountUtils.addUserAgent(connection);
-				connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
-
-				if (AccountUtils.ssl)
-				{
-					((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-				}
-
-				JSONObject response = AccountUtils.getResponse(connection.getInputStream());
-				Logger.d(getClass().getSimpleName(), "Response: " + response);
-				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
-				{
-					return null;
-				}
-				JSONObject data = response.getJSONObject(HikeConstants.DATA);
-				return data.getLong(HikeConstants.LAST_SEEN);
-
-			}
-			catch (MalformedURLException e)
-			{
-				Logger.w(getClass().getSimpleName(), e);
-				return null;
-			}
-			catch (IOException e)
-			{
-				Logger.w(getClass().getSimpleName(), e);
-				return null;
-			}
-			catch (JSONException e)
-			{
-				Logger.w(getClass().getSimpleName(), e);
-				return null;
-			}
-
-		}
-
-		@Override
-		protected void onPostExecute(Long result)
-		{
-			if (result == null)
-			{
-				if (!retriedOnce)
-				{
-					Utils.executeLongResultTask(new FetchLastSeenTask(msisdn, true));
-					return;
-				}
-			}
-			else
-			{
-				/*
-				 * Update current last seen value.
-				 */
-				long currentLastSeenValue = result;
-				/*
-				 * We only apply the offset if the value is greater than 0 since 0 and -1 are reserved.
-				 */
-				if (currentLastSeenValue > 0)
-				{
-					contactInfo.setOffline(1);
-					contactInfo.setLastSeenTime(Utils.applyServerTimeOffset(ChatThread.this, currentLastSeenValue));
-				}
-				else
-				{
-					contactInfo.setOffline((int) currentLastSeenValue);
-					contactInfo.setLastSeenTime(System.currentTimeMillis() / 1000);
-				}
-
-				HikeUserDatabase.getInstance().updateLastSeenTime(msisdn, contactInfo.getLastSeenTime());
-				HikeUserDatabase.getInstance().updateIsOffline(msisdn, contactInfo.getOffline());
-
-			}
-			HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
-		}
-	}
-
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event)
 	{
@@ -6866,4 +6770,51 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			screenOffEvent = true;
 		}
 	};
+
+	LastSeenFetchedCallback lastSeenFetchedCallback = new LastSeenFetchedCallback()
+	{
+		
+		@Override
+		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
+		{
+			updateLastSeen(msisdn, offline, lastSeenTime);
+		}
+	};
+
+	private void updateLastSeen(String msisdn, int offline, long lastSeenTime)
+	{
+		if (!mContactNumber.equals(msisdn) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen())
+		{
+			return;
+		}
+
+		/*
+		 * Updating the class's contactinfo object
+		 */
+		contactInfo.setOffline(offline);
+		contactInfo.setLastSeenTime(lastSeenTime);
+
+		final String lastSeenString = Utils.getLastSeenTimeAsString(this, lastSeenTime, offline, false, true);
+
+		isOnline = contactInfo.getOffline() == 0;
+
+		runOnUiThread(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				if (lastSeenString == null)
+				{
+					mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
+					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+				}
+				else
+				{
+					mLastSeenView.setText(lastSeenString);
+				}
+
+			}
+		});
+	}
 }

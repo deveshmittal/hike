@@ -841,7 +841,11 @@ public class HikeConstants
 	public static final String FILE_SHARE_PREFIX = "file://";
 
 	public static final String SHARE_CONTACT_CONTENT_TYPE = "text/x-vcard";
-	
+
+	public static final int MAX_LAST_SEEN_RETRY_COUNT = 3;
+
+	public static final int RETRY_WAIT_ADDITION = 2;
+
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 
 	public static final class ResultCodes
@@ -1539,4 +1543,8 @@ public class HikeConstants
 	 * this key to true in preference
 	 */
 	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
+
+	public static final long[] SHORT_VIB_PATTERN = new long[] { 0, 200, 100, 250 };
+
+	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
 }
