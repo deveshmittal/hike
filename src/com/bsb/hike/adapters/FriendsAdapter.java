@@ -957,7 +957,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					if(lastSeenPref && contactInfo.getOffline() == 0)
 					{
 						onlineIndicator.setVisibility(View.VISIBLE);
-						onlineIndicator.setImageResource(R.drawable.ic_online_blue_dot);
+						onlineIndicator.setImageResource(R.drawable.ic_online_green_dot);
 					}
 					else
 					{
