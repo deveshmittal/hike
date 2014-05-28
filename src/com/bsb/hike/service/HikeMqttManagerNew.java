@@ -147,6 +147,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private static final String TAG = "HikeMqttManagerNew";
 
+	private static final int MAX_RETRY_COUNT = 20;
+
+	private volatile int retryCount = 0;
+
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
 	{
@@ -373,13 +377,19 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		this.mqttMessageManager.close();
 	}
 
-	// this function works on exponential retrying
 	private int getConnRetryTime()
 	{
-		if (reconnectTime == 0)
+		return getConnRetryTime(false);
+	}
+
+	// this function works on exponential retrying
+	private int getConnRetryTime(boolean forceExp)
+	{
+		if ((reconnectTime == 0 || retryCount < MAX_RETRY_COUNT) && !forceExp)
 		{
 			Random random = new Random();
 			reconnectTime = random.nextInt(HikeConstants.RECONNECT_TIME) + 1;
+			retryCount++;
 		}
 		else
 		{
@@ -618,10 +628,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
 				mqtt.connect(op, null, getConnectListener());
 			}
-			else
+			else 
 			{
+				// if no network then should rely on network change listener
+				Logger.d(TAG,"No network so not trying to connect.");
 				mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
-				scheduleNextConnectionCheck(getConnRetryTime()); // exponential retry incase of no network
+				//scheduleNextConnectionCheck(getConnRetryTime()); // exponential retry incase of no network
 			}
 		}
 		catch (MqttSecurityException e)
@@ -791,6 +803,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					try
 					{
 						pushConnect = false;
+						retryCount = 0;
 						reconnectTime = 0; // resetting the reconnect timer to 0 as it would have been changed in failure
 						mqttConnStatus = MQTTConnectionStatus.CONNECTED;
 						Logger.d(TAG, "Client Connected ....");
@@ -821,6 +834,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 					try
 					{
+						MqttException exception = (MqttException)value;
+						handleMqttException(exception, true);
 						MqttException ex = arg0.getException();
 						if (ex != null)
 							Logger.e(TAG, "Exception : " + ex.getReasonCode());
@@ -849,8 +864,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						 */
 						if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
 						{
-							int reConnTime = getConnRetryTime();
-							Logger.d(TAG, "Reconnect time (sec): " + reConnTime);
+							int reConnTime = getConnRetryTime(true);
+							Logger.d(TAG, "SERVER UNAVAILABLE Reconnect time (sec): " + reConnTime);
 							scheduleNextConnectionCheck(reConnTime);
 						}
 						else
@@ -1030,7 +1045,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		case MqttException.REASON_CODE_BROKER_UNAVAILABLE:
 			Logger.e(TAG, "Server Unavailable, try reconnecting later");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
-			scheduleNextConnectionCheck(getConnRetryTime());// exponential retry for connection
+			scheduleNextConnectionCheck(getConnRetryTime(true));// exponential retry for connection
 			break;
 		case MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED:
 			Logger.e(TAG, "Client already disconnected.");
@@ -1101,7 +1116,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			clearSettings();
 			break;
 		case MqttException.REASON_CODE_SERVER_CONNECT_ERROR:
-			scheduleNextConnectionCheck(getConnRetryTime());// exponential handling
+			scheduleNextConnectionCheck(getConnRetryTime());
 			break;
 		case MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH:
 			clearSettings();
