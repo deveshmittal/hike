@@ -1085,13 +1085,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						mConversationsByMSISDN.remove(msisdn);
 						mConversationsAdded.remove(msisdn);
 						mAdapter.remove(conversation);
+						mAdapter.notifyDataSetChanged();
 					}
 					else
 					{
 						conversation.setMessages(messageList);
+						sortAndUpdateTheView(conversation, messageList.get(messageList.size() - 1));
 					}
-					Collections.sort(displayedConversations, mConversationsComparator);
-					mAdapter.notifyDataSetChanged();
 				}
 			});
 		}
