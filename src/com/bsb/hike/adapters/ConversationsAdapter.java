@@ -38,6 +38,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -685,5 +686,12 @@ public class ConversationsAdapter extends BaseAdapter
 	public boolean itemToBeAnimated(Conversation conv)
 	{
 		return itemsToAnimat.get(conv.hashCode()) && conv.isStealth();
+	}
+
+	@Override
+	public void notifyDataSetChanged()
+	{
+		Logger.d("TestList", "NotifyDataSetChanged called");
+		super.notifyDataSetChanged();
 	}
 }
