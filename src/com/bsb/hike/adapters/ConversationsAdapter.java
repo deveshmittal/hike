@@ -295,24 +295,14 @@ public class ConversationsAdapter extends BaseAdapter
 
 		viewHolder.msisdn = conversation.getMsisdn();
 
-		TextView contactView = viewHolder.headerText;
+		updateViewsRelatedToName(v, conversation);
+
 		if (itemToBeAnimated(conversation))
 		{
 			final Animation animation = AnimationUtils.loadAnimation(context,
 		            R.anim.slide_in_from_left);
 			v.startAnimation(animation);
 			setItemAnimated(conversation);
-		}
-		String name = conversation.getLabel();
-
-		contactView.setText(name);
-		if (conversation instanceof GroupConversation)
-		{
-			contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
-		}
-		else
-		{
-			contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 		}
 
 		List<ConvMessage> messages = conversation.getMessages();
@@ -325,6 +315,33 @@ public class ConversationsAdapter extends BaseAdapter
 		updateViewsRelatedToAvater(v, conversation);
 
 		return v;
+	}
+
+	public void updateViewsRelatedToName(View parentView, Conversation conversation)
+	{
+		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation.
+		 * We don't need to do anything here then.
+		 */
+		if(!conversation.getMsisdn().equals(viewHolder.msisdn))
+		{
+			return;
+		}
+
+		TextView contactView = viewHolder.headerText;
+		String name = conversation.getLabel();
+
+		contactView.setText(name);
+		if (conversation instanceof GroupConversation)
+		{
+			contactView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group, 0, 0, 0);
+		}
+		else
+		{
+			contactView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+		}
 	}
 
 	public void updateViewsRelatedToAvater(View parentView, Conversation conversation)
