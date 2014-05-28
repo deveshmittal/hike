@@ -10,7 +10,9 @@
         android:background="@color/tip_green_bg"
         android:gravity="center"
         android:minHeight="74dp"
-        android:orientation="vertical"
+        android:paddingTop="10dp"
+    	android:paddingBottom="10dp"
+    	android:orientation="vertical"
         android:paddingLeft="15dp" >
 
         <LinearLayout
@@ -20,6 +22,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:orientation="vertical"
+            android:paddingRight="103dp"
             android:paddingBottom="5dp" >
 
             <com.bsb.hike.view.CustomFontTextView
