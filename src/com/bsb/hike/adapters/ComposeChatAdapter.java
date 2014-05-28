@@ -236,6 +236,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private View inflateView(ViewType viewType)
 	{
 		View convertView = null;
+		ViewHolder holder = null;
 		switch (viewType)
 		{
 		case SECTION:
@@ -244,9 +245,21 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
 			break;
+		case FRIEND:
+		case FRIEND_REQUEST:
+			convertView = LayoutInflater.from(context).inflate(R.layout.friends_child_view, null);
+			holder = new ViewHolder();
+			holder.userImage = (ImageView) convertView.findViewById(R.id.avatar);
+			holder.name = (TextView) convertView.findViewById(R.id.contact);
+			holder.status = (TextView) convertView.findViewById(R.id.last_seen);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
+			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
+			convertView.setTag(holder);
+			break;	
 		default:
 			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, null);
-			ViewHolder holder = new ViewHolder();
+			holder = new ViewHolder();
 			holder.userImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.status = (TextView) convertView.findViewById(R.id.number);
