@@ -66,6 +66,6 @@ public class LastSeenComparator implements Comparator<ContactInfo>
 
 	private boolean hasLastSeenValue(ContactInfo lhs)
 	{
-		return (lhs.getFavoriteType() == FavoriteType.FRIEND || lhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) && (lhs.getOffline() == 0);
+		return (lhs.getFavoriteType() == FavoriteType.FRIEND || lhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED || lhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) && (lhs.getOffline() == 0);
 	}
 }

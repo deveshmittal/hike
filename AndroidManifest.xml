@@ -90,7 +90,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_label"
             android:theme="@style/AppTheme.Home"
-            android:windowSoftInputMode="stateVisible" >
+            android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 

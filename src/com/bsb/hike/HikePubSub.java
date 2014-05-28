@@ -333,6 +333,10 @@ public class HikePubSub implements Runnable
 
 	public static final String APP_FOREGROUNDED = "appForegrounded";
 
+	public static final String REMOVE_STATUS_UPDATE_TIP = "RemoveStatusUpdateTip";
+
+	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

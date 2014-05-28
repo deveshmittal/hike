@@ -115,7 +115,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			TextView count = (TextView) convertView.findViewById(R.id.count);
 			count.setText(contactInfo.getMsisdn());
 			// set section heading
-			if(contactInfo.getPhoneNum().equals(FRIEND_PHONE_NUM))
+			if(contactInfo.getPhoneNum()!=null && contactInfo.getPhoneNum().equals(FRIEND_PHONE_NUM))
 			{
 				tv.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_favorites_star), null, null, null);
 				tv.setCompoundDrawablePadding((int) context.getResources().getDimension(R.dimen.favorites_star_icon_drawable_padding));
@@ -183,10 +183,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 					holder.status.setText(contactInfo.getMsisdn());
 					holder.statusMood.setVisibility(View.GONE);
 				}
-				if(lastSeenPref && contactInfo.getOffline() == 0)
+				if(lastSeenPref && contactInfo.getOffline() == 0 && !showCheckbox)
 				{
 					holder.onlineIndicator.setVisibility(View.VISIBLE);
-					holder.onlineIndicator.setImageResource(R.drawable.ic_online_blue_dot);
+					holder.onlineIndicator.setImageResource(R.drawable.ic_online_green_dot);
 				}
 				else
 				{
@@ -209,6 +209,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 			else
 			{
+				holder.userImage.setScaleType(ScaleType.FIT_CENTER);
 				String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
 				iconloader.loadImage(id, true, holder.userImage, true);
 			}
@@ -236,6 +237,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private View inflateView(ViewType viewType)
 	{
 		View convertView = null;
+		ViewHolder holder = null;
 		switch (viewType)
 		{
 		case SECTION:
@@ -244,9 +246,21 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
 			break;
+		case FRIEND:
+		case FRIEND_REQUEST:
+			convertView = LayoutInflater.from(context).inflate(R.layout.friends_child_view, null);
+			holder = new ViewHolder();
+			holder.userImage = (ImageView) convertView.findViewById(R.id.avatar);
+			holder.name = (TextView) convertView.findViewById(R.id.contact);
+			holder.status = (TextView) convertView.findViewById(R.id.last_seen);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
+			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
+			convertView.setTag(holder);
+			break;	
 		default:
 			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, null);
-			ViewHolder holder = new ViewHolder();
+			holder = new ViewHolder();
 			holder.userImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.status = (TextView) convertView.findViewById(R.id.number);

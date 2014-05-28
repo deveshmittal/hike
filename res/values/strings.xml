@@ -1536,5 +1536,10 @@
      <string name="add_shortcut">Add Shortcut</string>
      <string name="timeline">Timeline</string>
      <string name="add_favorites_upper_case">ADD FAVORITES</string>
+     <string name="status_update_tip_header">Post your status</string>
+     <string name="status_update_tip_msg">Status updates are visible to favorites only</string>
+     <string name="new_chat_compose_hint">Search by name or number</string>
+     <string name="new_ui_welcome_tip_header">hike just got much better!</string>
+     <string name="new_ui_welcome_tip_msg">Easier to use and faster than ever</string>
      
 </resources>

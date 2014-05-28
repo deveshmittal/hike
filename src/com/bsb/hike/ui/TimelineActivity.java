@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -75,7 +76,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
         mainFragment = new UpdatesFragment();
         
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_frame, mainFragment).commit();
+                .add(R.id.parent_layout, mainFragment).commit();
 		
 	}
 	
@@ -105,7 +106,11 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 				break;	
 			case R.id.new_update:
 				intent = new Intent(this, StatusUpdate.class);
-
+				
+				if(!HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, false))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STATUS_UPDATE_TIP, null);
+				}
 				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 				break;
 		}
@@ -124,9 +129,13 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	@Override
 	public void onBackPressed()
 	{
-		Intent intent = new Intent(TimelineActivity.this, HomeActivity.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		if (!(fragment != null && fragment.isVisible()))
+		{
+			Intent intent = new Intent(TimelineActivity.this, HomeActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
 
 		super.onBackPressed();
 	}

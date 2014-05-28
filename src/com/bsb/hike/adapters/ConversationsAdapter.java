@@ -60,7 +60,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP
 	}
 
 	private class ViewHolder
@@ -137,6 +137,8 @@ public class ConversationsAdapter extends BaseAdapter
 				return ViewType.STEALTH_FTUE_TIP_VIEW.ordinal();
 			case ConversationTip.RESET_STEALTH_TIP:
 				return ViewType.RESET_STEALTH_TIP.ordinal();
+			case ConversationTip.WELCOME_HIKE_TIP:
+				return ViewType.WELCOME_HIKE_TIP.ordinal();
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
@@ -173,6 +175,9 @@ public class ConversationsAdapter extends BaseAdapter
 				viewHolder.headerText = (TextView) v.findViewById(R.id.tip);
 				viewHolder.closeTip = v.findViewById(R.id.close);
 				break;
+			case WELCOME_HIKE_TIP:
+				v = inflater.inflate(R.layout.welcome_hike_tip, parent, false);
+				break;	
 			default:
 				break;
 			}
@@ -255,6 +260,22 @@ public class ConversationsAdapter extends BaseAdapter
 				parent.startAnimation(animation);
 			}
 			
+			return v;
+		}
+		else if (viewType == ViewType.WELCOME_HIKE_TIP)
+		{
+			View close = v.findViewById(R.id.close_tip);
+			((TextView)v.findViewById(R.id.tip_header)).setText(R.string.new_ui_welcome_tip_header);
+			((TextView)v.findViewById(R.id.tip_msg)).setText(R.string.new_ui_welcome_tip_msg);
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
+				}
+			});
 			return v;
 		}
 

@@ -846,6 +846,8 @@ public class HikeConstants
 
 	public static final int RETRY_WAIT_ADDITION = 2;
 
+	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;

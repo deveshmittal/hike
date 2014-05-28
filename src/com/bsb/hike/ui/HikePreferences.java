@@ -687,6 +687,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 
 				ContactInfo.lastSeenTimeComparator.lastSeenPref = isChecked;
+				ContactInfo.lastSeenTimeComparatorWithoutFav.lastSeenPref = isChecked;
 			}
 			catch (JSONException e)
 			{
