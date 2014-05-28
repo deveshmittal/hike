@@ -8,6 +8,8 @@ public class ConversationTip extends Conversation
 
 	public static final int RESET_STEALTH_TIP = 3;
 
+	public static final int WELCOME_HIKE_TIP = 4;
+
 	private int tipType;
 	public ConversationTip(int tipType)
 	{
@@ -38,5 +40,10 @@ public class ConversationTip extends Conversation
 	public boolean isResetStealthTip()
 	{
 		return tipType == RESET_STEALTH_TIP;
+	}
+	
+	public boolean isWelcomeHikeTip()
+	{
+		return tipType == WELCOME_HIKE_TIP;
 	}
 }
