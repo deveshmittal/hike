@@ -1679,7 +1679,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (conversation instanceof ConversationTip && ((ConversationTip) conversation).isWelcomeHikeTip())
 		{
 			mAdapter.remove(conversation);
-			ConversationFragment.this.run();
+			notifyDataSetChanged();
 		}
 		HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
 	}
