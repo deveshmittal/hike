@@ -1533,5 +1533,6 @@
      <string name="add_favorites_upper_case">ADD FAVORITES</string>
      <string name="status_update_tip_header">Post your status</string>
      <string name="status_update_tip_msg">Status updates are visible to favorites only</string>
+     <string name="new_chat_compose_hint">Search by name or number</string>
      
 </resources>
