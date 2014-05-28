@@ -1735,7 +1735,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		/*
 		 * Adding a blank message
 		 */
-		ConvMessage newMessage = new ConvMessage("", msisdn, convMessage != null ? convMessage.getTimestamp() : 0, State.RECEIVED_READ);
+		final ConvMessage newMessage = new ConvMessage("", msisdn, convMessage != null ? convMessage.getTimestamp() : 0, State.RECEIVED_READ);
 		messages.add(newMessage);
 
 		if (getActivity() == null)
@@ -1743,7 +1743,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 
-		getActivity().runOnUiThread(this);
+		getActivity().runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				View parentView = getParenViewForConversation(conversation);
+
+				if (parentView == null)
+				{
+					return;
+				}
+				
+				mAdapter.updateViewsRelatedToLastMessage(parentView, newMessage, conversation);
+			}
+		});
 	}
 
 	private ConvMessage findMessageById(long msgId)
