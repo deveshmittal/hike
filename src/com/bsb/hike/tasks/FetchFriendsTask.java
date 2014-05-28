@@ -165,6 +165,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			}
 
 			FavoriteType favoriteType = favTypeMap.get(msisdn);
+			contactInfo.setFavoriteType(favoriteType);
 
 			if (shouldAddToFavorites(favoriteType))
 			{
