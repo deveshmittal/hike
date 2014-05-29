@@ -523,7 +523,7 @@ public class UploadFileTask extends FileTransferBase
 		{
 			error();
 			Logger.e(getClass().getSimpleName(), "Exception", e);
-			return FTResult.UPLOAD_FAILED;
+			return FTResult.READ_FAIL;
 		}
 		catch (ClientProtocolException e)
 		{
