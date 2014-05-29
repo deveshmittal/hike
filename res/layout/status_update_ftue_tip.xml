@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/tip_green_bg"
+        android:gravity="center"
+        android:minHeight="74dp"
+        android:paddingTop="10dp"
+    	android:paddingBottom="10dp"
+    	android:orientation="vertical"
+        android:paddingLeft="15dp" >
+
+        <LinearLayout
+            android:id="@+id/tip_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical"
+            android:paddingRight="103dp"
+            android:paddingBottom="5dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="2dp"
+                android:text="@string/status_update_tip_header"
+                android:textColor="#ffffff"
+                android:textSize="24sp"
+                android:textStyle="italic" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/status_update_tip_msg"
+                android:textColor="#ffffff"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/tip_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/tip_content" >
+
+            <ImageView
+                android:id="@+id/arrow_pointer"
+                android:layout_width="43dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:scaleType="fitStart"
+                android:src="@drawable/ftue_up_arrow" />
+
+            <View
+                android:id="@+id/close_divider"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@id/arrow_pointer"
+                android:background="@color/tip_green_divider_color" />
+
+            <ImageView
+                android:id="@+id/close_tip"
+                android:layout_width="56dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/popup_button_bg_selector"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_tip_cross" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/dark_grey_drop_shadow" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/light_grey_drop_shadow" />
+
+</LinearLayout>

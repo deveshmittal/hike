@@ -1144,44 +1144,7 @@ public class MqttMessagesManager
 		}
 		else if (HikeConstants.MqttMessageTypes.BULK_LAST_SEEN.equals(type))
 		{
-			/*
-			 * {"t": "bls", "ts":<server timestamp>, "d": {"lastseens":{"+919818149394":<last_seen_time_in_epoch> ,"+919810335374":<last_seen_time_in_epoch>}}}
-			 */
-			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			JSONObject lastSeens = null;
-			if (data != null)
-				lastSeens = data.getJSONObject(HikeConstants.BULK_LAST_SEEN_KEY);
-			// Iterator<String> iterator = lastSeens.keys();
-
-			if (lastSeens != null)
-			{
-				for (Iterator<String> iterator = lastSeens.keys(); iterator.hasNext();)
-				{
-					String msisdn = iterator.next();
-					int isOffline;
-					long lastSeenTime = lastSeens.getLong(msisdn);
-					if (lastSeenTime > 0)
-					{
-						isOffline = 1;
-						lastSeenTime = Utils.applyServerTimeOffset(context, lastSeenTime);
-					}
-					else
-					{
-						/*
-						 * Otherwise the last seen time notifies that the user is either online or has turned the setting off.
-						 */
-						isOffline = (int) lastSeenTime;
-						lastSeenTime = System.currentTimeMillis() / 1000;
-					}
-					userDb.updateLastSeenTime(msisdn, lastSeenTime);
-					userDb.updateIsOffline(msisdn, (int) isOffline);
-
-					HikeMessengerApp.lastSeenFriendsMap.put(msisdn, new Pair<Integer, Long>(isOffline, lastSeenTime));
-
-				}
-				pubSub.publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
-			}
-
+			Utils.handleBulkLastSeenPacket(context, jsonObj);
 		}
 		else if (HikeConstants.MqttMessageTypes.LAST_SEEN.equals(type))
 		{
@@ -1697,9 +1660,12 @@ public class MqttMessagesManager
 			}
 
 			clearTypingNotificationHandler.removeCallbacks(clearTypingNotification);
-		}
 
-		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
+			/*
+			 * We only publish this event if we actually removed a typing notification
+			 */
+			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
+		}
 	}
 		
 }

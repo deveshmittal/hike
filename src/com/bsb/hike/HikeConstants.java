@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
+
 import android.net.Uri;
 import android.os.Environment;
 
@@ -842,7 +844,13 @@ public class HikeConstants
 	public static final String FILE_SHARE_PREFIX = "file://";
 
 	public static final String SHARE_CONTACT_CONTENT_TYPE = "text/x-vcard";
-	
+
+	public static final int MAX_LAST_SEEN_RETRY_COUNT = 3;
+
+	public static final int RETRY_WAIT_ADDITION = 2;
+
+	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1526,6 +1534,8 @@ public class HikeConstants
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 
+	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE, StatusMessageType.PROFILE_PIC};
+
 	public static enum WelcomeTutorial
 	{
 		INTRO_VIEWED, STICKER_VIEWED, CHAT_BG_VIEWED
@@ -1536,4 +1546,8 @@ public class HikeConstants
 	 * this key to true in preference
 	 */
 	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
+
+	public static final long[] SHORT_VIB_PATTERN = new long[] { 0, 200, 100, 250 };
+
+	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
 }

@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
@@ -33,6 +35,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -55,7 +58,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private boolean loadingMoreMessages;
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.PROTIP_ADDED, HikePubSub.ICON_CHANGED };
+			HikePubSub.PROTIP_ADDED, HikePubSub.ICON_CHANGED, HikePubSub.REMOVE_STATUS_UPDATE_TIP };
 
 	private String[] friendMsisdns;
 
@@ -64,6 +67,8 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private long previousEventTime;
 
 	private int velocity;
+	
+	private View statusTipheader;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -72,8 +77,40 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 		ListView updatesList = (ListView) parent.findViewById(android.R.id.list);
 		updatesList.setEmptyView(parent.findViewById(android.R.id.empty));
+		if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, false))
+		{
+			setupListHeader(updatesList);
+		}
 
 		return parent;
+	}
+
+	private void setupListHeader(ListView listView)
+	{
+		statusTipheader = LayoutInflater.from(getActivity()).inflate(
+				R.layout.status_update_ftue_tip, null);
+		statusTipheader.setOnClickListener(null);
+		ImageView closeIcon = (ImageView) statusTipheader.findViewById(R.id.close_tip);
+		closeIcon.setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				removeStatusUpdateTip(true);
+			}
+			
+		});
+		listView.addHeaderView(statusTipheader);
+	}
+	
+	private void removeStatusUpdateTip(boolean removeHeader)
+	{
+		HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, true);
+		if(statusTipheader != null && removeHeader)
+		{
+			getListView().removeHeaderView(statusTipheader);
+		}
 	}
 
 	@Override
@@ -130,6 +167,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onDestroy()
 	{
+		removeStatusUpdateTip(false);
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
 	}
@@ -137,7 +175,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
-		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
+		StatusMessage statusMessage = centralTimelineAdapter.getItem(position - getListView().getHeaderViewsCount());
 		if (statusMessage.getId() == CentralTimelineAdapter.FTUE_ITEM_ID || (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) || (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP))
 		{
@@ -262,7 +300,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		{
 			final StatusMessage statusMessage = (StatusMessage) object;
 			final int startIndex = getStartIndex();
-			Utils.resetUnseenStatusCount(prefs);
 
 			if (!isAdded())
 			{
@@ -353,6 +390,21 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				public void run()
 				{
 					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+		else if (HikePubSub.REMOVE_STATUS_UPDATE_TIP.equals(type))
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					removeStatusUpdateTip(true);
 				}
 			});
 		}

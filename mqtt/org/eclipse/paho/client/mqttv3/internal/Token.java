@@ -127,7 +127,7 @@ public class Token
 		if (resp == null && !completed)
 		{
 			// @TRACE 406=key={0} timed out token={1}
-			Logger.d(TAG, "timed out wating for response , timeout time : " + timeout);
+			Logger.e(TAG, "timed out wating for response , timeout time : " + timeout);
 			exception = new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
 			throw exception;
 		}
@@ -177,7 +177,7 @@ public class Token
 					if (this.exception != null)
 					{
 						// @TRACE 401=failed with exception
-						Logger.d(TAG, "exception occured , cause : " + exception.getCause());
+						Logger.e(TAG, "exception occured , cause : " + exception);
 						throw exception;
 					}
 

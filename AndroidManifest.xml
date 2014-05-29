@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="450"
-    android:versionName="2.9.6.50" >
+    android:versionCode="452"
+    android:versionName="2.9.6.52" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -90,7 +90,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_label"
             android:theme="@style/AppTheme.Home"
-            android:windowSoftInputMode="stateVisible" >
+            android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -203,6 +203,13 @@
         <activity
             android:name="com.bsb.hike.ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.PeopleActivity" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.TimelineActivity" 
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
