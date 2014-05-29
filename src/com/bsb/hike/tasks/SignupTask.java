@@ -582,6 +582,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		isAlreadyFetchingNumber = false;
 
 		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
+		settings.edit().putBoolean(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, true).commit();
 		return Boolean.TRUE;
 	}
 
