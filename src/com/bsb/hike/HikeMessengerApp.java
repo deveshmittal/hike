@@ -725,7 +725,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		ContactInfo.lastSeenTimeComparatorWithoutFav.lastSeenPref = ContactInfo.lastSeenTimeComparator.lastSeenPref;
-		
+
+		/*
+		 * Fetching all stealth contacts on app creation so that the conversation cannot be opened through the shortcut or share screen.
+		 */
+		HikeConversationsDatabase.getInstance().addStealthMsisdnToMap();
 
 		appStateHandler = new Handler();
 

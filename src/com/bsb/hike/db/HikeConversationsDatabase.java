@@ -3162,4 +3162,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
+
+	public void addStealthMsisdnToMap()
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN }, DBConstants.IS_STEALTH + "=1", null, null, null, null);
+
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+
+			while (c.moveToNext())
+			{
+				HikeMessengerApp.addStealthMsisdnToMap(c.getString(msisdnIdx));
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
 }
