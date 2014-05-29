@@ -302,6 +302,7 @@ public class UploadFileTask extends FileTransferBase
 				else if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = mFile;
+					hikeFile.setFile(selectedFile);
 				}
 				else
 				{
