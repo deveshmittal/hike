@@ -3154,6 +3154,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						return;
 					}
 
+					if (!shouldShowLastSeen())
+					{
+						return;
+					}
+
 					if (lastSeenScheduler == null)
 					{
 						lastSeenScheduler = new LastSeenScheduler(ChatThread.this, false, contactInfo.getMsisdn(), lastSeenFetchedCallback);

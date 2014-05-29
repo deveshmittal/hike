@@ -16,6 +16,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -149,8 +150,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		init();
 
-		lastSeenScheduler = new LastSeenScheduler(this, true);
-		lastSeenScheduler.start();
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+		{
+			lastSeenScheduler = new LastSeenScheduler(this, true);
+			lastSeenScheduler.start();
+		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 	}
@@ -798,6 +802,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
 		{
+
+			if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+			{
+				return;
+			}
 
 			runOnUiThread(new Runnable()
 			{
