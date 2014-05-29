@@ -46,6 +46,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -95,7 +96,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private LastSeenScheduler lastSeenScheduler;
 
-	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED };
+	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -832,6 +833,26 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			});
 
+		}
+		else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type))
+		{
+			final ContactInfo contactInfo = (ContactInfo) object;
+
+			if (contactInfo.getFavoriteType() != FavoriteType.FRIEND)
+			{
+				return;
+			}
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					adapter.addToGroup(contactInfo, FriendsAdapter.FRIEND_INDEX);
+				}
+
+			});
 		}
 	}
 
