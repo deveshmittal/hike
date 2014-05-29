@@ -1138,6 +1138,8 @@ public class HikeConstants
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
 
 		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
+
+		public static final String FROM_NOTIFICATION = "fromNotification";
 	}
 
 	public static final class LogEvent
