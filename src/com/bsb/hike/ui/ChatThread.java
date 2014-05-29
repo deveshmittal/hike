@@ -1736,7 +1736,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 		}
 
-		setupActionBar(true);
+		mHandler.post(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				setupActionBar(true);
+			}
+		});
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 		boolean addBlockHeader = false;
@@ -1793,8 +1801,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isOnline = true;
 				}
 
-				mLastSeenView.setText("");
-				mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+				setLastSeenText("");
 
 				/*
 				 * Making sure nothing is already scheduled wrt last seen.
@@ -2170,10 +2177,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		View backContainer = actionBarView.findViewById(R.id.back);
 		View contactInfoContainer = actionBarView.findViewById(R.id.contact_info);
 
-		CharSequence lastSeenString = null;
+		String lastSeenString = null;
 		if (!initialising)
 		{
-			lastSeenString = mLastSeenView.getText();
+			lastSeenString = mLastSeenView.getText().toString();
 		}
 
 		avatar = (ImageView) actionBarView.findViewById(R.id.avatar);
@@ -2191,20 +2198,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
-				mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+				setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
 			}
 		}
 		else
 		{
-			mLastSeenView.setText(lastSeenString);
-		//	mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(shouldShowLastSeen() ? R.drawable.ic_last_seen_clock : 0, 0, 0, 0);
+			setLastSeenText(lastSeenString);
 		}
 
 		setAvatar();
 		// avatar.setImageDrawable(IconCacheManager.getInstance()
 		// .getIconForMSISDN(mContactNumber, true));
-		mLabelView.setText(mLabel);
+		setLabel(mLabel);
 
 		backContainer.setOnClickListener(new OnClickListener()
 		{
@@ -2239,6 +2244,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setAvatar()
 	{
+		if (avatar == null)
+		{
+			return;
+		}
+
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
 		if (drawable != null)
 		{
@@ -2254,6 +2264,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	private void setLabel(String label)
+	{
+		if (mLabelView == null)
+		{
+			return;
+		}
+		mLabelView.setText(label);
+	}
+
+	private void setLastSeenText(String text)
+	{
+		if (mLastSeenView == null)
+		{
+			return;
+		}
+		mLastSeenView.setText(text);
+	}
+
 	private void updateActivePeopleNumberView(int addPeopleCount)
 	{
 		int numActivePeople = ((GroupConversation) mConversation).getGroupMemberAliveCount() + addPeopleCount;
@@ -2264,8 +2292,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * Adding 1 to count the user.
 			 */
-			mLastSeenView.setText(getString(R.string.num_people, (numActivePeople + 1)));
-			mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			setLastSeenText(getString(R.string.num_people, (numActivePeople + 1)));
 		}
 	}
 
@@ -2565,7 +2592,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						if (label != null)
 						{
-							mLabelView.setText(label);
+							setLabel(label);
 						}
 
 						addMessage(message);
@@ -2740,8 +2767,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				public void run()
 				{
-					mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
-					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+					setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
 
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
@@ -2761,7 +2787,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					public void run()
 					{
-						mLabelView.setText(groupName);
+						setLabel(groupName);
 					}
 				});
 			}
@@ -2799,7 +2825,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					@Override
 					public void run()
 					{
-						mLabelView.setText(mLabel);
+						setLabel(mLabel);
 
 						// remove block header if present
 						if (messages != null && messages.size() > 0)
@@ -6811,12 +6837,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if (lastSeenString == null)
 				{
-					mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms);
-					mLastSeenView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+					setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
 				}
 				else
 				{
-					mLastSeenView.setText(lastSeenString);
+					setLastSeenText(lastSeenString);
 				}
 
 			}
