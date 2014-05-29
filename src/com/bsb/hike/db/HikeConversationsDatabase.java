@@ -402,6 +402,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
+
+		// we are saving recent sticker file only in internal memory
+		if (oldVersion < 25)
+		{
+			StickerManager st = StickerManager.getInstance();
+			st.setContext(mContext);
+			st.moveRecentStickerFileToInternal();
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)

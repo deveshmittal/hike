@@ -1084,6 +1084,11 @@ public class StickerManager
 		}
 	}
 
+	public void setContext(Context context)
+	{
+		this.context = context;
+	}
+
 	public void moveRecentStickerFileToInternal()
 	{
 		Set<Sticker> stickerOnOuterMem = getSortedListForCategory(StickerCategoryId.recent, getExternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
