@@ -94,6 +94,8 @@ public class AccountUtils
 
 	public static String base = HTTP_STRING + host + "/v1";
 
+	public static String baseV2 = HTTP_STRING + host + "/v2";
+
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
