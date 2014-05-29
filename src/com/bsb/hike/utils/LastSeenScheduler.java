@@ -2,6 +2,7 @@ package com.bsb.hike.utils;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -46,7 +47,7 @@ public class LastSeenScheduler
 		this.shouldFetchBulkLastSeen = shouldFetchBulkLastSeen;
 		this.msisdn = msisdn;
 		this.lastSeenFetchedCallback = lastSeenFetchedCallback;
-		this.mHandler = new Handler();
+		this.mHandler = new Handler(Looper.getMainLooper());
 	}
 
 	public void start()
