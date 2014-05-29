@@ -156,7 +156,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 					switch (lastStatusMessage.getStatusMessageType())
 					{
 					case TEXT:
-						holder.status.setText("\""+lastStatusMessage.getText()+"\"");
+						holder.status.setText(lastStatusMessage.getText());
 						if (lastStatusMessage.hasMood())
 						{
 							holder.statusMood.setVisibility(View.VISIBLE);

@@ -927,7 +927,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 						switch (lastStatusMessage.getStatusMessageType())
 						{
 						case TEXT:
-							lastSeen.setText("\""+lastStatusMessage.getText()+"\"");
+							lastSeen.setText(lastStatusMessage.getText());
 							if (lastStatusMessage.hasMood())
 							{
 								statusMood.setVisibility(View.VISIBLE);
