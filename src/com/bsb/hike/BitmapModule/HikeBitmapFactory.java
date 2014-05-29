@@ -6,15 +6,14 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Bitmap.Config;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -32,37 +31,6 @@ import com.bsb.hike.utils.Utils;
 public class HikeBitmapFactory
 {
 	private static final String TAG = "HikeBitmapFactory";
-
-	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
-	{
-		if (bitmap == null)
-		{
-			return null;
-		}
-
-		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-
-		if (output == null)
-		{
-			return null;
-		}
-
-		Canvas canvas = new Canvas(output);
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-		final RectF rectF = new RectF(rect);
-		final float roundPx = 4;
-
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-		return output;
-	}
 
 	public static Bitmap getCircularBitmap(Bitmap bitmap)
 	{
@@ -126,86 +94,6 @@ public class HikeBitmapFactory
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
 		return getBitmapDrawable(decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-
-		thumbnail = decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail);
-		}
-
-		return thumbnail;
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-		if (applyBitmapConfig)
-		{
-			options.inPreferredConfig = Config.RGB_565;
-		}
-
-		thumbnail = decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail);
-		}
-
-		return thumbnail;
 	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail)
