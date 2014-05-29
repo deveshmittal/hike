@@ -3905,7 +3905,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		final ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.camera), 0, R.drawable.ic_attach_camera));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.camera_upper_case), 0, R.drawable.ic_attach_camera));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.photo), 1, R.drawable.ic_attach_pic));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.audio), 3, R.drawable.ic_attach_music));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
