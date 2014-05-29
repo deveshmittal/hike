@@ -736,7 +736,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				try
 				{
 					Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
-					if (vibrator.hasVibrator())
+					if (vibrator != null)
 					{
 						if (getString(R.string.vib_long).equals(newValue.toString()))
 						{
