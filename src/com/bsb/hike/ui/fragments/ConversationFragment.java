@@ -715,7 +715,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						HikeAnalyticsEvent.sendStealthMsisdns(enabledConvs, new HashSet<String>());
 
 						stealthConversations.add(conv);
-						HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
+						HikeMessengerApp.addNewStealthMsisdn(conv.getMsisdn());
 					}
 					else
 					{
@@ -847,7 +847,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (conv.isStealth())
 			{
 				stealthConversations.add(conv);
-				HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
+				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
 
 			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))

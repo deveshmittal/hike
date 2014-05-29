@@ -839,9 +839,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		return typingNotificationMap;
 	}
 
-	public static void addStealthMsisdn(String msisdn)
+	public static void addStealthMsisdnToMap(String msisdn)
 	{
 		stealthMsisdn.add(msisdn);
+	}
+
+	public static void addNewStealthMsisdn(String msisdn)
+	{
+		addStealthMsisdnToMap(msisdn);
 		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_MARKED, msisdn);
 	}
 
