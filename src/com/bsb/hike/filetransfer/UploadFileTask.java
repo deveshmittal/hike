@@ -294,7 +294,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
 				// do not copy the file if it is video or audio
-				if (hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
+				if (!mFile.exists() || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
 				{
 					selectedFile = mFile;
 					hikeFile.setFile(selectedFile);
