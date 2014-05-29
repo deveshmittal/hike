@@ -373,7 +373,7 @@ public class UploadFileTask extends FileTransferBase
 			if (thumbnail != null)
 			{
 				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-			    thumbnail.recycle();
+			    //thumbnail.recycle();
 			}
 			else
 			{
