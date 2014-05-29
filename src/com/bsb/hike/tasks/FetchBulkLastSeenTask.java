@@ -50,7 +50,7 @@ public class FetchBulkLastSeenTask extends AsyncTask<Void, Void, Boolean>
 		URL url;
 		try
 		{
-			url = new URL("http://54.251.147.222:8181/v2/user/bls");
+			url = new URL(AccountUtils.baseV2 + "/user/bls");
 
 			Logger.d(getClass().getSimpleName(), "URL:  " + url);
 

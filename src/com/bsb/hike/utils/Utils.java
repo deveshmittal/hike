@@ -1463,10 +1463,12 @@ public class Utils
 		if (isProductionServer)
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
+			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
+			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
