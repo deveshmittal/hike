@@ -204,7 +204,7 @@ public class UploadFileTask extends FileTransferBase
 				if (thumbnail != null)
 				{
 					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-				    thumbnail.recycle();
+				    //thumbnail.recycle();
 				}
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length());
 			}
@@ -294,7 +294,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
 				// do not copy the file if it is video or audio
-				if (hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
+				if (!mFile.exists() || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
 				{
 					selectedFile = mFile;
 					hikeFile.setFile(selectedFile);
@@ -302,6 +302,7 @@ public class UploadFileTask extends FileTransferBase
 				else if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = mFile;
+					hikeFile.setFile(selectedFile);
 				}
 				else
 				{
@@ -524,7 +525,7 @@ public class UploadFileTask extends FileTransferBase
 		{
 			error();
 			Logger.e(getClass().getSimpleName(), "Exception", e);
-			return FTResult.UPLOAD_FAILED;
+			return FTResult.READ_FAIL;
 		}
 		catch (ClientProtocolException e)
 		{
