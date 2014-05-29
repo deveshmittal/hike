@@ -152,7 +152,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				StatusMessage lastStatusMessage = getLastStatusMessagesMap().get(contactInfo.getMsisdn());
 				if(lastStatusMessage != null)
 				{
-					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_blue_subtext));
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 					switch (lastStatusMessage.getStatusMessageType())
 					{
 					case TEXT:

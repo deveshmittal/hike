@@ -923,7 +923,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					StatusMessage lastStatusMessage = lastStatusMessagesMap.get(contactInfo.getMsisdn());
 					if(lastStatusMessage != null)
 					{
-						lastSeen.setTextColor(context.getResources().getColor(R.color.list_item_blue_subtext));
+						lastSeen.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 						switch (lastStatusMessage.getStatusMessageType())
 						{
 						case TEXT:
