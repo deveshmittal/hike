@@ -1886,8 +1886,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
 	{
-		// long time = System.currentTimeMillis();
-		// Logger.i("getGroup", "start");
 		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? " AND " + DBConstants.HAS_LEFT + "=0" : "")
 				+ (notShownStatusMsgOnly ? " AND " + DBConstants.SHOWN_STATUS + "=0" : "");
 		Cursor c = null;
@@ -1912,11 +1910,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			// at least one msisdn is required to run this in query
 			if (fetchParticipants && !"(".equals(msisdns))
 			{
-				// Logger.i("getGroup", "executing query for contact info");
-				// long st = System.currentTimeMillis();
 				msisdns = msisdns.substring(0, msisdns.length() - 1) + ")";
 				List<ContactInfo> list = huDB.getContactNamesFromMsisdnList(msisdns);
-				// Logger.i("getGroup", "contact info time " + (System.currentTimeMillis() - st));
 				for (ContactInfo contactInfo : list)
 				{
 					participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
@@ -1931,7 +1926,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				c.close();
 			}
-//			Logger.i("getGroup", "get group end , time " + (System.currentTimeMillis() - time));
 		}
 	}
 
