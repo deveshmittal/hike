@@ -25,7 +25,6 @@ public class HikeAppStateUtils
 
 	public static void onResume(Activity activity)
 	{
-		com.facebook.Settings.publishInstallAsync(activity, HikeConstants.APP_FACEBOOK_ID);
 		Logger.d(TAG + activity.getClass().getSimpleName(), "onResume called");
 		if (!Utils.isHoneycombOrHigher())
 		{
