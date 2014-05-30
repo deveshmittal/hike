@@ -81,6 +81,8 @@ public class LastSeenScheduler
 	{
 		resetLastSeenRetryParams(retrySingle);
 
+		this.msisdn = msisdn;
+		this.lastSeenFetchedCallback = lastSeenFetchedCallback;
 		fetchLastSeenRunnable.run();
 	}
 
