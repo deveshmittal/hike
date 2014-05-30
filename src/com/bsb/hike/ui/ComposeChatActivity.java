@@ -152,8 +152,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
 		{
-			lastSeenScheduler = new LastSeenScheduler(this, true);
-			lastSeenScheduler.start();
+			lastSeenScheduler = LastSeenScheduler.getInstance(this);
+			lastSeenScheduler.start(true);
 		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -816,13 +816,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				{
 					if (lastSeenScheduler == null)
 					{
-						lastSeenScheduler = new LastSeenScheduler(ComposeChatActivity.this, true);
+						lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
 					}
 					else
 					{
 						lastSeenScheduler.stop();
 					}
-					lastSeenScheduler.start();
+					lastSeenScheduler.start(true);
 				}
 			});
 		}

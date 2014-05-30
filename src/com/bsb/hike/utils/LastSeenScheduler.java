@@ -19,6 +19,8 @@ public class LastSeenScheduler
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime);
 	}
 
+	private static LastSeenScheduler lastSeenScheduler;
+
 	private boolean shouldFetchBulkLastSeen;
 
 	private Context context;
@@ -37,30 +39,29 @@ public class LastSeenScheduler
 
 	private int retryWaitTime = 0;
 
-	public LastSeenScheduler(Context context, boolean fetchBulkLastSeen)
+	private LastSeenScheduler(Context context)
 	{
-		this(context, fetchBulkLastSeen, null, null);
-	}
-
-	public LastSeenScheduler(Context context, boolean shouldFetchBulkLastSeen, String msisdn, LastSeenFetchedCallback lastSeenFetchedCallback)
-	{
-		this.context = context.getApplicationContext();
-		this.shouldFetchBulkLastSeen = shouldFetchBulkLastSeen;
-		this.msisdn = msisdn;
-		this.lastSeenFetchedCallback = lastSeenFetchedCallback;
+		this.context = context;
 		this.mHandler = new Handler(Looper.getMainLooper());
 	}
 
-	public void start()
+	public static LastSeenScheduler getInstance(Context context)
 	{
-		if (shouldFetchBulkLastSeen)
+		if (lastSeenScheduler == null)
 		{
-			fetchBulkLastSeenRunnable.run();
+			lastSeenScheduler = new LastSeenScheduler(context.getApplicationContext());
 		}
-		else
-		{
-			fetchLastSeenRunnable.run();
-		}
+		return lastSeenScheduler;
+	}
+
+	public void start(boolean fetchBulkLastSeen)
+	{
+		fetchBulkLastSeenRunnable.run();
+	}
+
+	public void start(String msisdn, LastSeenFetchedCallback lastSeenFetchedCallback)
+	{
+		fetchLastSeenRunnable.run();
 	}
 
 	public void stop()
