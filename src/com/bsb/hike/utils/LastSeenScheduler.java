@@ -3,13 +3,13 @@ package com.bsb.hike.utils;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask;
-import com.bsb.hike.tasks.FetchLastSeenTask;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask.FetchBulkLastSeenCallback;
+import com.bsb.hike.tasks.FetchLastSeenTask;
 import com.bsb.hike.tasks.FetchLastSeenTask.FetchLastSeenCallback;
+import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 
 public class LastSeenScheduler
 {
@@ -17,6 +17,14 @@ public class LastSeenScheduler
 	{
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime);
 	}
+
+	private class Retry
+	{
+		int retryCount;
+		int retryWaitTime;
+	}
+
+	private static LastSeenScheduler lastSeenScheduler;
 
 	private boolean shouldFetchBulkLastSeen;
 
@@ -32,47 +40,66 @@ public class LastSeenScheduler
 
 	private Handler mHandler;
 
-	private int retryCount = 0;
+	private Retry retryBulk;
 
-	private int retryWaitTime = 0;
+	private Retry retrySingle;
 
-	public LastSeenScheduler(Context context, boolean fetchBulkLastSeen)
+	private boolean fetchBulkLastSeenCancelled = false;
+
+	private LastSeenScheduler(Context context)
 	{
-		this(context, fetchBulkLastSeen, null, null);
-	}
-
-	public LastSeenScheduler(Context context, boolean shouldFetchBulkLastSeen, String msisdn, LastSeenFetchedCallback lastSeenFetchedCallback)
-	{
-		this.context = context.getApplicationContext();
-		this.shouldFetchBulkLastSeen = shouldFetchBulkLastSeen;
-		this.msisdn = msisdn;
-		this.lastSeenFetchedCallback = lastSeenFetchedCallback;
+		this.context = context;
 		this.mHandler = new Handler(Looper.getMainLooper());
+		this.retryBulk = new Retry();
+		this.retrySingle = new Retry();
 	}
 
-	public void start()
+	public static LastSeenScheduler getInstance(Context context)
 	{
-		if (shouldFetchBulkLastSeen)
+		if (lastSeenScheduler == null)
 		{
-			fetchBulkLastSeenRunnable.run();
+			lastSeenScheduler = new LastSeenScheduler(context.getApplicationContext());
 		}
-		else
+		return lastSeenScheduler;
+	}
+
+	public void start(boolean fetchBulkLastSeen)
+	{
+		resetLastSeenRetryParams(retryBulk);
+		/*
+		 * We reset this flag so that the retry logic works now.
+		 */
+		fetchBulkLastSeenCancelled = false;
+		if(fetchBulkLastSeenTask == null)
 		{
-			fetchLastSeenRunnable.run();
+			fetchBulkLastSeenTask = new FetchBulkLastSeenTask(context, bulkLastSeenCallback);
+			fetchBulkLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
+	}
+
+	public void start(String msisdn, LastSeenFetchedCallback lastSeenFetchedCallback)
+	{
+		resetLastSeenRetryParams(retrySingle);
+
+		fetchLastSeenRunnable.run();
 	}
 
 	public void stop()
 	{
-		resetLastSeenRetryParams();
 
 		if (fetchLastSeenTask != null)
 		{
+			resetLastSeenRetryParams(retrySingle);
 			fetchLastSeenTask.cancel(true);
 		}
 		if (fetchBulkLastSeenTask != null)
 		{
-			fetchBulkLastSeenTask.cancel(true);
+			resetLastSeenRetryParams(retryBulk);
+
+			/*
+			 * We set this task to ensure another bulk last seen task is not scheduled by the retry logic again.
+			 */
+			fetchBulkLastSeenCancelled = true;
 		}
 		mHandler.removeCallbacks(fetchLastSeenRunnable);
 		mHandler.removeCallbacks(fetchBulkLastSeenRunnable);
@@ -84,14 +111,13 @@ public class LastSeenScheduler
 		@Override
 		public void lastSeenNotFetched()
 		{
-			scheduleRetry();
+			scheduleRetry(retrySingle);
 		}
 
 		@Override
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 		{
-			Log.d("TestLastSeen", "Last seen fetched!");
-			resetLastSeenRetryParams();
+			resetLastSeenRetryParams(retrySingle);
 			lastSeenFetchedCallback.lastSeenFetched(msisdn, offline, lastSeenTime);
 		}
 	};
@@ -101,38 +127,44 @@ public class LastSeenScheduler
 		@Override
 		public void bulkLastSeenNotFetched()
 		{
-			Log.d("TestLastSeen", "unable to fetch bulk last seen");
-			scheduleRetry();
+			fetchBulkLastSeenTask = null;
+
+			if (fetchBulkLastSeenCancelled)
+			{
+				resetLastSeenRetryParams(retryBulk);
+			}
+			else
+			{
+				scheduleRetry(retryBulk);
+			}
 		}
 
 		@Override
 		public void bulkLastSeenFetched()
 		{
-			Log.d("TestLastSeen", "fetched bulk last seen");
-			resetLastSeenRetryParams();
+			fetchBulkLastSeenTask = null;
+
+			resetLastSeenRetryParams(retryBulk);
 		}
 	};
 
-	private void scheduleRetry()
+	private void scheduleRetry(Retry retry)
 	{
-		if (retryCount >= HikeConstants.MAX_LAST_SEEN_RETRY_COUNT - 1)
+		if (retry.retryCount >= HikeConstants.MAX_LAST_SEEN_RETRY_COUNT - 1)
 		{
-			Log.d("TestLastSeen", "Last seen not fetched. Crossed max retries");
 			return;
 		}
 
-		retryCount++;
-		retryWaitTime += HikeConstants.RETRY_WAIT_ADDITION;
+		retry.retryCount++;
+		retry.retryWaitTime += HikeConstants.RETRY_WAIT_ADDITION;
 
-		Log.d("TestLastSeen", "Last seen not fetched. Retrying in " + retryWaitTime);
-
-		mHandler.postDelayed(shouldFetchBulkLastSeen ? fetchBulkLastSeenRunnable : fetchLastSeenRunnable, retryWaitTime * 1000);
+		mHandler.postDelayed(shouldFetchBulkLastSeen ? fetchBulkLastSeenRunnable : fetchLastSeenRunnable, retry.retryWaitTime * 1000);
 	}
 
-	private void resetLastSeenRetryParams()
+	private void resetLastSeenRetryParams(Retry retry)
 	{
-		retryCount = 0;
-		retryWaitTime = 0;
+		retry.retryCount = 0;
+		retry.retryWaitTime = 0;
 	}
 
 	private Runnable fetchLastSeenRunnable = new Runnable()
@@ -140,9 +172,8 @@ public class LastSeenScheduler
 		@Override
 		public void run()
 		{
-			Log.d("TestLastSeen", "Retrying Last seen");
 			fetchLastSeenTask = new FetchLastSeenTask(context, msisdn, lastSeenCallback);
-			Utils.executeLongResultTask(fetchLastSeenTask);
+			fetchLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	};
 
@@ -151,9 +182,8 @@ public class LastSeenScheduler
 		@Override
 		public void run()
 		{
-			Log.d("TestLastSeen", "Retrying bulk Last seen");
 			fetchBulkLastSeenTask = new FetchBulkLastSeenTask(context, bulkLastSeenCallback);
-			Utils.executeBoolResultAsyncTask(fetchBulkLastSeenTask);
+			fetchBulkLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	};
 }

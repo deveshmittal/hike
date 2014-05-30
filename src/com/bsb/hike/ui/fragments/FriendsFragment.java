@@ -80,8 +80,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
 		{
-			lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
-			lastSeenScheduler.start();
+			lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
+			lastSeenScheduler.start(true);
 		}
 	}
 
@@ -520,13 +520,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				{
 					if (lastSeenScheduler == null)
 					{
-						lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
+						lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
 					}
 					else
 					{
 						lastSeenScheduler.stop();
 					}
-					lastSeenScheduler.start();
+					lastSeenScheduler.start(true);
 				}
 			});
 		}

@@ -1808,8 +1808,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				 */
 				resetLastSeenScheduler();
 
-				lastSeenScheduler = new LastSeenScheduler(this, false, contactInfo.getMsisdn(), lastSeenFetchedCallback);
-				lastSeenScheduler.start();
+				lastSeenScheduler = LastSeenScheduler.getInstance(this);
+				lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 			}
 		}
 
@@ -3161,13 +3161,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 					if (lastSeenScheduler == null)
 					{
-						lastSeenScheduler = new LastSeenScheduler(ChatThread.this, false, contactInfo.getMsisdn(), lastSeenFetchedCallback);
+						lastSeenScheduler = LastSeenScheduler.getInstance(ChatThread.this);
 					}
 					else
 					{
 						lastSeenScheduler.stop();
 					}
-					lastSeenScheduler.start();
+					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 				}
 			});
 		}
