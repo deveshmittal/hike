@@ -213,7 +213,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						if (!(dialog != null && dialog.isShowing()))
+						if (!(dialog != null && dialog.isShowing()) && mainFragment != null)
 						{
 							if (!mainFragment.hasNoConversation())
 							{
