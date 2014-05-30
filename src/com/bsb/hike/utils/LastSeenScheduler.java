@@ -79,6 +79,8 @@ public class LastSeenScheduler
 
 	public void start(String msisdn, LastSeenFetchedCallback lastSeenFetchedCallback)
 	{
+		resetLastSeenRetryParams(retrySingle);
+
 		fetchLastSeenRunnable.run();
 	}
 
