@@ -2519,6 +2519,10 @@ public class Utils
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 			}
+			else
+			{
+				return;
+			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
 		}
 		catch (JSONException e)
