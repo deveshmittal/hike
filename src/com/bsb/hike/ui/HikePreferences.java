@@ -777,6 +777,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				return true;
 			}
 		});
+		soundPref.setTitle(getString(R.string.notificationSoundTitle) + " - " + (soundPref.getValue()));
 	}
 
 	@Override
