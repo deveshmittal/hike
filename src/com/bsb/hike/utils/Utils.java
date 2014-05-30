@@ -2510,7 +2510,7 @@ public class Utils
 				/*
 				 * We don't need to request for the bulk last seen from here anymore. We have the HTTP call for this.
 				 */
-				data.put(HikeConstants.BULK_LAST_SEEN, HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.PRODUCTION, true));
+				data.put(HikeConstants.BULK_LAST_SEEN, false);
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
