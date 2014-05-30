@@ -173,8 +173,8 @@ public class AccountUtils
 		/*
 		 * set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds
 		 */
-		HttpConnectionParams.setConnectionTimeout(params, 6000);
-		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
+		HttpConnectionParams.setConnectionTimeout(params, HikeConstants.CONNECT_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 
