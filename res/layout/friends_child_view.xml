@@ -23,8 +23,13 @@
                 style="@style/AvatarStyle.Padding" />
 
             <ImageView
-                android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle" />
+        		android:id="@+id/online_indicator"
+        		android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:layout_gravity="bottom|right"
+        		android:scaleType="centerInside"
+        		android:layout_marginBottom="7dp" />
+            
         </FrameLayout>
 
         <com.bsb.hike.view.CustomFontTextView
@@ -69,19 +74,34 @@
                 android:textSize="16sp"
                 android:textStyle="bold|italic" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/last_seen"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
-                android:textColor="@color/list_item_subtext"
-                android:textSize="13sp"
-                android:textStyle="italic"
-                android:visibility="visible" />
+            <LinearLayout
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:orientation="horizontal" >
+            	
+            	<ImageView
+            	    android:id="@+id/status_mood"
+            	    android:layout_width="17dp"
+            	    android:layout_height="17dp"
+            	    android:layout_marginTop="2dp"
+            	    android:layout_marginRight="5dp"
+            	    android:visibility="gone" />
+            	
+            	<com.bsb.hike.view.CustomFontTextView
+                	android:id="@+id/last_seen"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_alignParentLeft="true"
+	                android:layout_centerVertical="true"
+	                android:ellipsize="end"
+	                android:singleLine="true"
+	                android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+	                android:textColor="@color/list_item_subtext"
+	                android:textSize="15dp"
+	                android:textStyle="italic"
+	                android:visibility="visible" />
+        </LinearLayout>
+            	
         </LinearLayout>
     </RelativeLayout>
 

@@ -636,7 +636,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						String filePath;
 						if (fileUriString.startsWith(fileUriStart))
 						{
-							File selectedFile = new File(URI.create(fileUriString));
+							File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 							/*
 							 * Done to fix the issue in a few Sony devices.
 							 */
@@ -688,6 +688,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
+			if(type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
+			{
+				//TODO need to handle this case of contact sharing
+				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
 			fileUri = Utils.makePicasaUri(fileUri);
@@ -700,7 +706,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			else if (fileUriString.startsWith(fileUriStart))
 			{
-				File selectedFile = new File(URI.create(fileUriString));
+				File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 				/*
 				 * Done to fix the issue in a few Sony devices.
 				 */

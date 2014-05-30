@@ -928,10 +928,10 @@
     <string name="mark_stealth">Marquer tchat comme caché</string>
     <string name="unmark_stealth">Marquer tchat comme visible</string>
     <string name="edit">Edit</string>
-    <string name="vib_off">Non</string>
-    <string name="vib_default">Par défaut</string>
-    <string name="vib_short">Court</string>
-    <string name="vib_long">Long</string>
+    <string name="vib_off_key">Non</string>
+    <string name="vib_default_key">Par défaut</string>
+    <string name="vib_short_key">Court</string>
+    <string name="vib_long_key">Long</string>
     <string name="chat_unmarked_stealth_first">Tu as marqué un tchat comme visible. Quiconque lancera hike pourra le voir.</string>
     <string name="delete_account_heading">EN SUPPRIMANT TON COMPTE, TU VAS</string>
     <string name="delete_account_description">supprimer tous tes messages, tes SMS gratuits et tes récompenses hike</string>

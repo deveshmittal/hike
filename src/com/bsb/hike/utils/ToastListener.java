@@ -20,6 +20,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.adapters.CentralTimelineAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -35,6 +36,8 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
@@ -169,6 +172,10 @@ public class ToastListener implements Listener
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+			if (activity instanceof PeopleActivity) 
+			{
+				return;
+			}
 			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
 				this.toaster.notifyStealthMessage();
@@ -180,7 +187,8 @@ public class ToastListener implements Listener
 		}
 		else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type))
 		{
-			if (currentActivity != null && currentActivity.get() != null)
+			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+			if (activity instanceof TimelineActivity)
 			{
 				return;
 			}

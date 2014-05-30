@@ -47,8 +47,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -103,7 +101,6 @@ import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Pair;
-import android.util.Patterns;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -156,7 +153,9 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.google.android.maps.GeoPoint;
@@ -1028,10 +1027,10 @@ public class Utils
 		context.startActivity(s);
 	}
 
-	public static void startShareImageIntent(Context context, String imagePath)
+	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
 	{
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
-		s.setType("image/*");
+		s.setType(mimeType);
 		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
 		context.startActivity(s);
 	}
@@ -1187,6 +1186,11 @@ public class Utils
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
 	{
+		if (bitmap  == null)
+		{
+			return null;
+		}
+
 		Bitmap rotatedBitmap = null;
 		Matrix m = new Matrix();
 		ExifInterface exif = null;
@@ -2083,7 +2087,7 @@ public class Utils
 	public static void vibrateNudgeReceived(Context context)
 	{
 		String VIB_OFF = context.getResources().getString(R.string.vib_off);
-		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, VIB_OFF)))
+		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, getOldVibratePref(context))))
 		{
 			return;
 		}
@@ -2435,10 +2439,10 @@ public class Utils
 
 	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
 	{
-		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true);
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
 	}
 
-	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen)
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		if (!isUserAuthenticated(context))
 		{
@@ -2466,7 +2470,7 @@ public class Utils
 			}
 		}
 
-		sendAppState(context, requestBulkLastSeen);
+		sendAppState(context, requestBulkLastSeen, dueToConnect);
 
 		if (resetStealth)
 		{
@@ -2486,7 +2490,7 @@ public class Utils
 		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 	}
 
-	private static void sendAppState(Context context, boolean requestBulkLastSeen)
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		JSONObject object = new JSONObject();
 
@@ -2505,7 +2509,7 @@ public class Utils
 				data.put(HikeConstants.BULK_LAST_SEEN, requestBulkLastSeen && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true));
 				object.put(HikeConstants.DATA, data);
 			}
-			else
+			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 			}
@@ -3067,12 +3071,11 @@ public class Utils
 		}
 	}
 
-	public static void resetUnseenStatusCount(SharedPreferences prefs)
+	public static void resetUnseenStatusCount(Context context)
 	{
-		Editor editor = prefs.edit();
-		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		editor.commit();
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
@@ -3226,7 +3229,7 @@ public class Utils
 			Logger.w("LE", "Invalid json");
 		}
 	}
-
+	
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3240,7 +3243,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-
+			
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
@@ -3306,10 +3309,25 @@ public class Utils
 		return returnVal;
 	}
 
-	public static Intent getHomeActivityIntent(Context context, final int tabIndex)
+	public static Intent getHomeActivityIntent(Context context)
 	{
 		final Intent intent = new Intent(context, HomeActivity.class);
-		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getPeopleActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, PeopleActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getTimelineActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, TimelineActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		return intent;
@@ -3538,22 +3556,6 @@ public class Utils
 		return false;
 	}
 
-	public static String getEmail(Context context)
-	{
-		String email = null;
-		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-		Account[] accounts = AccountManager.get(context).getAccounts();
-		for (Account account : accounts)
-		{
-			if (emailPattern.matcher(account.name).matches())
-			{
-				email = account.name;
-				break;
-			}
-		}
-		return email;
-	}
-
 	public static void startChatThread(Context context, ContactInfo contactInfo)
 	{
 		Intent intent = new Intent(context, ChatThread.class);
@@ -3683,7 +3685,10 @@ public class Utils
 
 	public static boolean isPlayTickSound(Context context)
 	{
-		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
+		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
+				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
 	}
 
 	/**
@@ -3765,5 +3770,66 @@ public class Utils
 			}
 		}
 		return false;
+	}
+
+	public static String replaceUrlSpaces(String fileUriString)
+	{
+		/*
+		 * In some phones URI is received with spaces in file path
+		 * we should first replace all these spaces with %20 than
+		 * pass it on to URI.create() method. URI.create() method
+		 * treats space as an invalid charactor in URI. 
+		 */
+		return fileUriString.replace(" ", "%20");
+	}
+
+	/*
+	 * This function is to respect old vibrate preference before vib list pref , if previous was on send, VIB Default else return VIB_OFF
+	 */
+	public static String getOldVibratePref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String vibOff = res.getString(R.string.vib_off);
+		String vibDef = res.getString(R.string.vib_default);
+
+		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true))
+		{
+			return vibDef;
+		}
+		else
+		{
+			return vibOff;
+		}
+	}
+
+	/*
+	 * This function is to respect old sound preference before sound list pref , if previous was on then check for hike jingle, else return SOUND_OFF
+	 */
+	public static String getOldSoundPref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String notifSoundOff = res.getString(R.string.notif_sound_off);
+		String notifSoundDefault = res.getString(R.string.notif_sound_default);
+		String notifSoundHike = res.getString(R.string.notif_sound_Hike);
+
+		if (preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true))
+		{
+			if (preferenceManager.getBoolean(HikeConstants.HIKE_JINGLE_PREF, true))
+			{
+				return notifSoundHike;
+			}
+			return notifSoundDefault;
+		}
+		else
+		{
+			return notifSoundOff;
+		}
+	}
+
+	public static int getFreeSMSCount(Context context)
+	{
+		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, context.MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
 	}
 }

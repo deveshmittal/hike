@@ -97,7 +97,7 @@ public class HikeNotification
 		/*
 		 * invoke the chat thread here. The free SMS invite switch popup should already be showing here ideally by now.
 		 */
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + FREE_SMS_POPUP_NOTIFICATION_ID)));
@@ -116,7 +116,7 @@ public class HikeNotification
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
 		// we've got to invoke the timeline here
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + PROTIP_NOTIFICATION_ID)));
@@ -278,7 +278,7 @@ public class HikeNotification
 		String text = message;
 
 		// we've got to invoke the timeline here
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
@@ -304,7 +304,7 @@ public class HikeNotification
 
 		final long timeStamp = System.currentTimeMillis() / 1000;
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.FRIENDS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getPeopleActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -332,7 +332,7 @@ public class HikeNotification
 
 		final long timeStamp = statusMessage.getTimeStamp();
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -391,7 +391,7 @@ public class HikeNotification
 
 		final int icon = returnSmallIcon();
 		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
@@ -404,7 +404,7 @@ public class HikeNotification
 
 		final int notificationId = (int) timeStamp;
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -516,21 +516,23 @@ public class HikeNotification
 
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
-		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, getOldVibratePref(preferenceManager));
+		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
 		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
-		
+
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, getOldSoundPref(preferenceManager));
+			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 			if (!shouldNotPlayNotification)
 			{
-				if(!NOTIF_SOUND_OFF.equals(notifSond)){
+				Logger.i("notif", "sound " + notifSond);
+				if (!NOTIF_SOUND_OFF.equals(notifSond))
+				{
 					if (NOTIF_SOUND_HIKE.equals(notifSond))
 					{
 						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
@@ -540,12 +542,12 @@ public class HikeNotification
 						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
 					}
 				}
-				
+
 				if (!VIB_OFF.equals(vibrate))
 				{
 					if (VIB_DEF.equals(vibrate))
 					{
-						mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_VIBRATE);
 					}
 					else if (VIB_SHORT.equals(vibrate))
 					{
@@ -565,40 +567,6 @@ public class HikeNotification
 			}
 		}
 		return mBuilder;
-	}
-
-	/*
-	 * This function is to respect old vibrate preference before vib list pref , if previous was on send, VIB Default else return VIB_OFF
-	 */
-	private String getOldVibratePref(SharedPreferences preferenceManager)
-	{
-		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true))
-		{
-			return VIB_DEF;
-		}
-		else
-		{
-			return VIB_OFF;
-		}
-	}
-
-	/*
-	 * This function is to respect old sound preference before sound list pref , if previous was on then check for hike jingle, else return SOUND_OFF
-	 */
-	private String getOldSoundPref(SharedPreferences preferenceManager)
-	{
-		if (preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true))
-		{
-			if (preferenceManager.getBoolean(HikeConstants.HIKE_JINGLE_PREF, true))
-			{
-				return NOTIF_SOUND_HIKE;
-			}
-			return NOTIF_SOUND_DEFAULT;
-		}
-		else
-		{
-			return NOTIF_SOUND_OFF;
-		}
 	}
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)

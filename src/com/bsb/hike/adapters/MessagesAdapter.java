@@ -702,6 +702,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		long startTime = System.currentTimeMillis();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
@@ -1281,9 +1282,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
 					else if (fileThumbParams.width == maxWidth)
-	                {
-	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
-	                }
+					{
+						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
 				}
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				videoHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -1426,9 +1427,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
 					}
 					else if (fileThumbParams.width == maxWidth)
-	                {
-	                    fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
-	                }
+					{
+						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
 				}
 				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
@@ -3312,6 +3313,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			dayHolder.dayStubInflated.setVisibility(View.GONE);
 		}
+		Logger.i("chatthread", "position " + position + " time taken : " + (System.currentTimeMillis() - startTime));
 		return v;
 	}
 
@@ -3713,8 +3715,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
 		fileThumb.getLayoutParams().height = pixels;
 		fileThumb.getLayoutParams().width = pixels;
-		//fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
-		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);;
+		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
+		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
+		;
 		fileThumb.setImageResource(0);
 	}
 
@@ -3828,7 +3831,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	Handler handler = new Handler();
 
-	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, ConvMessage message)
+	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, ConvMessage message, View inflated)
 	{
 		if (showUndeliveredMessage != null)
 		{
@@ -3839,12 +3842,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
 		{
-			showUndeliveredMessage = new ShowUndeliveredMessage(message, tv, container, iv);
+			showUndeliveredMessage = new ShowUndeliveredMessage(message, tv, container, iv, inflated);
 			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		}
 		else
 		{
-			showUndeliveredTextAndSetClick(message, tv, container, iv, true);
+			showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
 		}
 	}
 
@@ -3874,79 +3877,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		previousMessageCalendar.setTimeInMillis(previous.getTimestamp() * 1000);
 
 		return (previousMessageCalendar.get(Calendar.DAY_OF_YEAR) != currentMessageCalendar.get(Calendar.DAY_OF_YEAR));
-	}
-
-	private void setSDRAndTimestamp(int position, TextView tv, ImageView iv, View container)
-	{
-		/*
-		 * We show the time stamp in the status message separately so no need to show this time stamp.
-		 */
-		if (ViewType.values()[getItemViewType(position)] == ViewType.STATUS_MESSAGE)
-		{
-			return;
-		}
-		tv.setVisibility(View.VISIBLE);
-		if (iv != null)
-		{
-			iv.setVisibility(View.GONE);
-		}
-
-		tv.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
-
-		ConvMessage current = getItem(position);
-		if (current.isSent() && (position == lastSentMessagePosition))
-		{
-			switch (current.getState())
-			{
-			case SENT_UNCONFIRMED:
-				tv.setVisibility(View.GONE);
-				iv.setVisibility(View.VISIBLE);
-
-				AnimationDrawable ad = (AnimationDrawable) context.getResources().getDrawable(isDefaultTheme ? R.drawable.sending : R.drawable.sending_custom);
-				iv.setImageDrawable(ad);
-				ad.setCallback(iv);
-				ad.setVisible(true, true);
-				ad.start();
-
-				if (!current.isSMS())
-				{
-					scheduleUndeliveredText(tv, container, iv, current);
-				}
-				break;
-			case SENT_CONFIRMED:
-				tv.setText(context.getString(!current.isSMS() ? R.string.sent : R.string.sent_via_sms, current.getTimestampFormatted(false, context)));
-				if (!current.isSMS())
-				{
-					scheduleUndeliveredText(tv, container, iv, current);
-				}
-				break;
-			case SENT_DELIVERED:
-				tv.setText(R.string.delivered);
-				break;
-			case SENT_DELIVERED_READ:
-				if (!isGroupChat)
-				{
-					tv.setText(R.string.read);
-				}
-				else
-				{
-					setReadByForGroup(current, tv);
-				}
-				break;
-			}
-		}
-		else
-		{
-
-			ConvMessage next = position == getCount() - 1 ? null : getItem(position + 1);
-
-			if (next == null || (next.isSent() != current.isSent()) || (next.getTimestamp() - current.getTimestamp() > 2 * 60))
-			{
-				tv.setText(current.getTimestampFormatted(false, context));
-				return;
-			}
-			tv.setVisibility(View.GONE);
-		}
 	}
 
 	private void setTimeNStatus(int position, DetailViewHolder detailHolder, boolean ext, View clickableItem)
@@ -4064,8 +3994,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		messageInfo.setVisibility(View.GONE);
 		sending.setVisibility(View.GONE);
+		inflated.setVisibility(View.GONE);
 		if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
 		{
+			inflated.setVisibility(View.VISIBLE);
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
@@ -4075,102 +4007,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if (!message.isSMS())
 			{
-				scheduleUndeliveredText(messageInfo, clickableItem, sending, message);
+				scheduleUndeliveredText(messageInfo, clickableItem, sending, message, inflated);
 			}
 		}
 	}
 
 	private void updateViewWindowForReadBy(ConvMessage message)
 	{
-		ConvMessage lastMessage = getItem(getCount()-1);
-		if(lastMessage.getMsgID() == message.getMsgID())
+		ConvMessage lastMessage = getItem(getCount() - 1);
+		if (lastMessage.getMsgID() == message.getMsgID())
 		{
 			chatThread.updateViewWindowForReadBy();
-		}
-	}
-	private void setNewSDR(int position, TextView time, ImageView status, boolean ext, View messageTimeStatus, TextView messageInfo, View container, ImageView sending)
-	{
-		ConvMessage message = getItem(position);
-
-		time.setText(message.getTimestampFormatted(false, context));
-		time.setVisibility(View.VISIBLE);
-		if (message.isSent())
-		{
-			if (message.isFileTransferMessage() && (TextUtils.isEmpty(message.getMetadata().getHikeFiles().get(0).getFileKey())))
-			{
-				if (ext)
-				{
-					status.setImageResource(R.drawable.ic_clock_white);
-				}
-				else
-				{
-					status.setImageResource(R.drawable.ic_clock);
-				}
-			}
-			else if (ext)
-			{
-				switch (message.getState())
-				{
-				case SENT_UNCONFIRMED:
-					status.setImageResource(R.drawable.ic_clock_white);
-					break;
-				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick_white);
-					break;
-				case SENT_DELIVERED:
-					status.setImageResource(R.drawable.ic_double_tick_white);
-					break;
-				case SENT_DELIVERED_READ:
-					status.setImageResource(R.drawable.ic_double_tick_r_white);
-					break;
-				default:
-					break;
-				}
-			}
-			else
-			{
-				switch (message.getState())
-				{
-				case SENT_UNCONFIRMED:
-					status.setImageResource(R.drawable.ic_clock);
-					break;
-				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick);
-					break;
-				case SENT_DELIVERED:
-					status.setImageResource(R.drawable.ic_double_tick);
-					break;
-				case SENT_DELIVERED_READ:
-					status.setImageResource(R.drawable.ic_double_tick_r);
-					break;
-				default:
-					break;
-				}
-			}
-			status.setScaleType(ScaleType.CENTER);
-			status.setVisibility(View.VISIBLE);
-		}
-
-		if (messageTimeStatus != null)
-			messageTimeStatus.setVisibility(View.VISIBLE);
-
-		if ((message.getState() != null) && (position == lastSentMessagePosition))
-		{
-			messageInfo.setText("");
-			messageInfo.setVisibility(View.VISIBLE);
-			if (message.getState() == State.SENT_DELIVERED_READ && isGroupChat)
-			{
-				// messageInfo.setVisibility(View.VISIBLE);
-				messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
-				setReadByForGroup(message, messageInfo);
-			}
-			else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
-			{
-				if (!message.isSMS())
-				{
-					scheduleUndeliveredText(messageInfo, container, sending, message);
-				}
-			}
 		}
 	}
 
@@ -4197,10 +4044,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else if (lastIndex == 1)
 			{
 				/*
-				 * We increment the last index if its one since we can
-				 * accommodate another name in this case. 
+				 * We increment the last index if its one since we can accommodate another name in this case.
 				 */
-				lastIndex ++;
+				lastIndex++;
 				moreNamesThanMaxCount = true;
 			}
 			else if (lastIndex > 0)
@@ -4578,12 +4424,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		View container;
 
-		public ShowUndeliveredMessage(ConvMessage message, TextView tv, View container, ImageView iv)
+		View inflated;
+
+		public ShowUndeliveredMessage(ConvMessage message, TextView tv, View container, ImageView iv, View inflated)
 		{
 			this.message = message;
 			this.tv = tv;
 			this.container = container;
 			this.iv = iv;
+			this.inflated = inflated;
 		}
 
 		@Override
@@ -4596,17 +4445,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
 			if (isMessageUndelivered(lastSentMessage))
 			{
-				showUndeliveredTextAndSetClick(message, tv, container, iv, true);
+				showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
 			}
 		}
 	}
 
-	private void showUndeliveredTextAndSetClick(ConvMessage message, TextView tv, View container, ImageView iv, boolean fromHandler)
+	private void showUndeliveredTextAndSetClick(ConvMessage message, TextView tv, View container, ImageView iv, boolean fromHandler, View inflated)
 	{
 		String undeliveredText = getUndeliveredTextRes();
 		if (!TextUtils.isEmpty(undeliveredText))
 		{
 			iv.setVisibility(View.GONE);
+			inflated.setVisibility(View.VISIBLE);
 			tv.setVisibility(View.VISIBLE);
 			tv.setText(undeliveredText);
 		}
@@ -5172,30 +5022,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		HashMap<Long, ConvMessage> selectedMsgs = new HashMap<Long, ConvMessage>();
 		for (ConvMessage convMessage : convMessages)
 		{
-			if(mSelectedItemsIds.contains(convMessage.getMsgID()))
+			if (mSelectedItemsIds.contains(convMessage.getMsgID()))
 			{
 				selectedMsgs.put(convMessage.getMsgID(), convMessage);
 			}
 		}
 		return selectedMsgs;
 	}
-	
+
 	public long[] getSelectedMsgIdsLongArray()
 	{
 		long[] result = new long[mSelectedItemsIds.size()];
-		int i=0;
+		int i = 0;
 		for (Long msgId : mSelectedItemsIds)
 		{
 			result[i++] = msgId;
 		}
 		return result;
 	}
-	
+
 	public Set<Long> getSelectedMessageIds()
 	{
 		return mSelectedItemsIds;
 	}
-	
+
 	public boolean isSelected(ConvMessage convMsg)
 	{
 		return mSelectedItemsIds.contains(convMsg.getMsgID());

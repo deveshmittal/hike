@@ -141,7 +141,10 @@ public abstract class ImageWorker
 			if (b != null && mImageCache != null)
 			{
 				BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(mResources, b);
-				mImageCache.putInCache(data, bd);
+				if (bd != null)
+				{
+					mImageCache.putInCache(data, bd);
+				}
 				imageView.setImageDrawable(bd);
 			}
 			else if (b == null && setDefaultAvatarIfNoCustomIcon)

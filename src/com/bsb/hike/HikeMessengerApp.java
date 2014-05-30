@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
@@ -304,9 +303,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
 
-	public static final String GREENBLUE_DETAILS_SENT = "whatsappDetailsSent";
+	public static final String GREENBLUE_DETAILS_SENT = "gbDetailsSent";
 
-	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeWhatsapp";
+	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeGb";
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
@@ -315,8 +314,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
 
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
-
-	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
 
 	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
 
@@ -477,12 +474,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		@Override
 		public void send(CrashReportData crashReportData) throws ReportSenderException
 		{
-			/* only send ACRA reports if we're in release mode */
-			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE))
-			{
-				return;
-			}
-
 			try
 			{
 				final String reportUrl = AccountUtils.base + "/logs/android";
@@ -576,7 +567,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 * Resetting the stealth mode when the app starts. 
 		 */
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-
+		performPreferenceTransition();
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
 		try
@@ -708,12 +699,21 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			editor.commit();
 		}
 
+		/*
+		 * Replacing GB keys' strings.
+		 */
+		if (!settings.contains(GREENBLUE_DETAILS_SENT))
+		{
+			replaceGBKeys();
+		}
+
 		makeNoMediaFiles();
 
 		hikeBotNamesMap = new HashMap<String, String>();
 		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		initHikeLruCache(getApplicationContext());
 
 		/*
@@ -724,6 +724,17 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+	}
+
+	private void replaceGBKeys()
+	{
+		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance(this);
+
+		boolean gbDetailsSent = preferenceUtil.getData("whatsappDetailsSent", false);
+		int lastGBBackoffTime = preferenceUtil.getData("lastBackOffTimeWhatsapp", 0);
+
+		preferenceUtil.saveData(GREENBLUE_DETAILS_SENT, gbDetailsSent);
+		preferenceUtil.saveData(LAST_BACK_OFF_TIME_GREENBLUE, lastGBBackoffTime);
 	}
 
 	private static HikeLruCache cache;
@@ -878,7 +889,20 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
 		}
 	};
+
+	private void performPreferenceTransition()
+	{
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!pref.getBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, false))
+		{
+			Editor edit = pref.edit();
+			edit.putString(HikeConstants.NOTIF_SOUND_PREF, Utils.getOldSoundPref(this));
+			edit.putString(HikeConstants.VIBRATE_PREF_LIST, Utils.getOldVibratePref(this));
+			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
+			edit.commit();
+		}
+	}
 }

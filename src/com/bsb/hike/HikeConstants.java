@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
+
 import android.net.Uri;
 import android.os.Environment;
 
@@ -425,6 +427,8 @@ public class HikeConstants
 
 	public static final String FTUE_GAMING_MSISDN = "+hike2+";
 
+	public static final String FTUE_HIKE_DAILY = "+hike3+";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
@@ -600,9 +604,9 @@ public class HikeConstants
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
-	public static final int LOCAL_CLEAR_TYPING_TIME = 5 * 1000;
+	public static final int LOCAL_CLEAR_TYPING_TIME = 6 * 1000;
 
-	public static final int RESEND_TYPING_TIME = 3 * 1000;
+	public static final int RESEND_TYPING_TIME = 4 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
@@ -833,6 +837,10 @@ public class HikeConstants
 	public static final String RESET = "reset";
 	
 	public static final String STEALTH = "stlth";
+
+	public static final String FILE_SHARE_PREFIX = "file://";
+
+	public static final String SHARE_CONTACT_CONTENT_TYPE = "text/x-vcard";
 	
 	public static final class ResultCodes
 	{
@@ -1126,6 +1134,8 @@ public class HikeConstants
 		public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
+
+		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
 	}
 
 	public static final class LogEvent
@@ -1515,9 +1525,16 @@ public class HikeConstants
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 
+	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE, StatusMessageType.PROFILE_PIC};
+
 	public static enum WelcomeTutorial
 	{
 		INTRO_VIEWED, STICKER_VIEWED, CHAT_BG_VIEWED
 	}
 
+	/**
+	 * while updating from sound/vibrate single pref to list pref (from app 2.9.0 to ) , we need to respect old setting set by user, so if are done this transition , we will set
+	 * this key to true in preference
+	 */
+	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
 }
