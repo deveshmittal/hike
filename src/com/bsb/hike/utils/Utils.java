@@ -3325,6 +3325,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, PeopleActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}
@@ -3333,6 +3334,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, TimelineActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}

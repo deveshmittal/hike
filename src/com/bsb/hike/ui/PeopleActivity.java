@@ -11,6 +11,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -131,7 +132,7 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		{
 		case R.id.show_timeline:
 			intent = new Intent(this, TimelineActivity.class);
-			
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			break;	
 		}
 
@@ -166,9 +167,12 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	@Override
 	public void onBackPressed()
 	{
-		Intent intent = new Intent(PeopleActivity.this, HomeActivity.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
+		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_NOTIFICATION, false))
+		{
+			Intent intent = new Intent(PeopleActivity.this, HomeActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
 
 		super.onBackPressed();
 	}

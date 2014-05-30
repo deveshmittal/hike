@@ -103,9 +103,11 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			case R.id.show_people:
 				intent = new Intent(this, PeopleActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				break;	
 			case R.id.new_update:
 				intent = new Intent(this, StatusUpdate.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				
 				if(!HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, false))
 				{
@@ -130,7 +132,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	public void onBackPressed()
 	{
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (!(fragment != null && fragment.isVisible()))
+		if (!(fragment != null && fragment.isVisible()) && getIntent().getBooleanExtra(HikeConstants.Extras.FROM_NOTIFICATION, false))
 		{
 			Intent intent = new Intent(TimelineActivity.this, HomeActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

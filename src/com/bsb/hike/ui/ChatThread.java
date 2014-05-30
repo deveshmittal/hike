@@ -6533,7 +6533,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		try
 		{
-			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), 0, -(int) (0.5 * Utils.densityMultiplier));
+			int rightMargin = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width) + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -rightMargin, -(int) (0.5 * Utils.densityMultiplier));
+			
 		}
 		catch (BadTokenException e)
 		{
