@@ -1251,7 +1251,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				/*
 				 * This message is not downloaded or uplpaded yet. this can't be forwarded
 				 */
-				selectedNonForwadableMsg(isMsgSelected);
+				if(message.isSent())
+				{
+					selectedNonForwadableMsg(isMsgSelected);
+				}
 				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING))
 				{
 					/*
@@ -3941,7 +3944,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		final ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.camera), 0, R.drawable.ic_attach_camera));
+		optionsList.add(new OverFlowMenuItem(getString(R.string.camera_upper_case), 0, R.drawable.ic_attach_camera));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.photo), 1, R.drawable.ic_attach_pic));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.audio), 3, R.drawable.ic_attach_music));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.video), 2, R.drawable.ic_attach_video));
@@ -6564,7 +6567,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		try
 		{
-			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), 0, -(int) (0.5 * Utils.densityMultiplier));
+			int rightMargin = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width) + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
+			attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -rightMargin, -(int) (0.5 * Utils.densityMultiplier));
+			
 		}
 		catch (BadTokenException e)
 		{

@@ -18,6 +18,7 @@ import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -204,7 +205,7 @@ public class UploadFileTask extends FileTransferBase
 				if (thumbnail != null)
 				{
 					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-				    thumbnail.recycle();
+				    //thumbnail.recycle();
 				}
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length());
 			}
@@ -294,7 +295,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
 				// do not copy the file if it is video or audio
-				if (hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
+				if (!mFile.exists() || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
 				{
 					selectedFile = mFile;
 					hikeFile.setFile(selectedFile);
@@ -302,6 +303,7 @@ public class UploadFileTask extends FileTransferBase
 				else if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = mFile;
+					hikeFile.setFile(selectedFile);
 				}
 				else
 				{
@@ -372,7 +374,7 @@ public class UploadFileTask extends FileTransferBase
 			if (thumbnail != null)
 			{
 				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-			    thumbnail.recycle();
+			    //thumbnail.recycle();
 			}
 			else
 			{
@@ -524,7 +526,7 @@ public class UploadFileTask extends FileTransferBase
 		{
 			error();
 			Logger.e(getClass().getSimpleName(), "Exception", e);
-			return FTResult.UPLOAD_FAILED;
+			return FTResult.READ_FAIL;
 		}
 		catch (ClientProtocolException e)
 		{
@@ -1038,6 +1040,7 @@ public class UploadFileTask extends FileTransferBase
 		Long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
+		int resCode = 0;
 		try
 		{
 			post.addHeader("Connection", "Keep-Alive");
@@ -1063,13 +1066,19 @@ public class UploadFileTask extends FileTransferBase
 			// total.append(line);
 			// }
 			// res = total.toString();
+			resCode = response.getStatusLine().getStatusCode();
 			res = EntityUtils.toString(response.getEntity());
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if (retryAttempts >= MAX_RETRY_ATTEMPTS || e.getMessage() == null)
+			if(e instanceof HttpException)
+			{
+				res = ((HttpException) e).toString();
+				Logger.d(getClass().getSimpleName(),"response: " + res);
+			}
+			if (e.getMessage() == null)
 			{
 				error();
 				res = null;
@@ -1089,8 +1098,14 @@ public class UploadFileTask extends FileTransferBase
 //				retry = false;
 //			}
 		}
+		if (retryAttempts >= MAX_RETRY_ATTEMPTS || resCode == 400 || resCode == 404)
+		{
+			error();
+			res = null;
+			retry = false;
+		}
 		time = System.currentTimeMillis() - time;
-		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s");
+		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s.  Response: " + resCode);
 		return res;
 	}
 

@@ -2014,7 +2014,7 @@ public class Utils
 	public static boolean isPicasaUri(String picasaUriString)
 	{
 		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START)
-				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX));
+				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX) || picasaUriString.toString().startsWith(HikeConstants.GOOGLE_PLUS_PREFIX));
 	}
 
 	public static Uri makePicasaUri(Uri uri)
@@ -2101,7 +2101,8 @@ public class Utils
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
 		{
 			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			vibrator.vibrate(100);
+			if (vibrator != null)
+				vibrator.vibrate(100);
 		}
 	}
 
@@ -3331,6 +3332,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, PeopleActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}
@@ -3339,6 +3341,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, TimelineActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}

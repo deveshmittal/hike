@@ -669,6 +669,9 @@ public class HikeConstants
 	// Gmail URI prefix for all devices
 	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
+	// Google Plus URI prefix for all devices
+	public static final String GOOGLE_PLUS_PREFIX = "content://com.google.android.apps.photos.content";
+
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
@@ -1142,6 +1145,8 @@ public class HikeConstants
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
 
 		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
+
+		public static final String FROM_NOTIFICATION = "fromNotification";
 	}
 
 	public static final class LogEvent
@@ -1531,7 +1536,7 @@ public class HikeConstants
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 
-	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE, StatusMessageType.PROFILE_PIC};
+	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE};
 
 	public static enum WelcomeTutorial
 	{

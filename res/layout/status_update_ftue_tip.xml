@@ -10,8 +10,6 @@
         android:background="@color/tip_green_bg"
         android:gravity="center"
         android:minHeight="74dp"
-        android:paddingTop="10dp"
-    	android:paddingBottom="10dp"
     	android:orientation="vertical"
         android:paddingLeft="15dp" >
 
@@ -21,9 +19,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
+            android:paddingTop="10dp"
+    		android:paddingBottom="15dp"
             android:orientation="vertical"
-            android:paddingRight="103dp"
-            android:paddingBottom="5dp" >
+            android:paddingRight="103dp" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:layout_width="wrap_content"
@@ -46,22 +45,24 @@
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="wrap_content"
+            android:layout_alignTop="@id/tip_content"
             android:layout_alignBottom="@id/tip_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@id/tip_content" >
+            android:layout_alignParentRight="true" >
 
             <ImageView
                 android:id="@+id/arrow_pointer"
                 android:layout_width="43dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
+                android:paddingTop="10dp"
+    			android:layout_alignParentLeft="true"
                 android:scaleType="fitStart"
                 android:src="@drawable/ftue_up_arrow" />
 
             <View
                 android:id="@+id/close_divider"
                 android:layout_width="1dp"
-                android:layout_height="match_parent"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/arrow_pointer"
                 android:background="@color/tip_green_divider_color" />
 
