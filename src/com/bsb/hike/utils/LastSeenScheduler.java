@@ -45,6 +45,7 @@ public class LastSeenScheduler
 
 	private Retry retrySingle;
 
+	private boolean fetchBulkLastSeenCancelled = false;
 
 	private LastSeenScheduler(Context context)
 	{
@@ -65,7 +66,16 @@ public class LastSeenScheduler
 
 	public void start(boolean fetchBulkLastSeen)
 	{
-		fetchBulkLastSeenRunnable.run();
+		resetLastSeenRetryParams(retryBulk);
+		/*
+		 * We reset this flag so that the retry logic works now.
+		 */
+		fetchBulkLastSeenCancelled = false;
+		if(fetchBulkLastSeenTask == null)
+		{
+			fetchBulkLastSeenTask = new FetchBulkLastSeenTask(context, bulkLastSeenCallback);
+			fetchBulkLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
+		}
 	}
 
 	public void start(String msisdn, LastSeenFetchedCallback lastSeenFetchedCallback)
@@ -83,8 +93,12 @@ public class LastSeenScheduler
 		}
 		if (fetchBulkLastSeenTask != null)
 		{
-			fetchBulkLastSeenTask.cancel(true);
 			resetLastSeenRetryParams(retryBulk);
+
+			/*
+			 * We set this task to ensure another bulk last seen task is not scheduled by the retry logic again.
+			 */
+			fetchBulkLastSeenCancelled = true;
 		}
 		mHandler.removeCallbacks(fetchLastSeenRunnable);
 		mHandler.removeCallbacks(fetchBulkLastSeenRunnable);
@@ -112,12 +126,23 @@ public class LastSeenScheduler
 		@Override
 		public void bulkLastSeenNotFetched()
 		{
-			scheduleRetry(retryBulk);
+			fetchBulkLastSeenTask = null;
+
+			if (fetchBulkLastSeenCancelled)
+			{
+				resetLastSeenRetryParams(retryBulk);
+			}
+			else
+			{
+				scheduleRetry(retryBulk);
+			}
 		}
 
 		@Override
 		public void bulkLastSeenFetched()
 		{
+			fetchBulkLastSeenTask = null;
+
 			resetLastSeenRetryParams(retryBulk);
 		}
 	};
