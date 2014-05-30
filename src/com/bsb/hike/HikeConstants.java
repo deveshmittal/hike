@@ -492,6 +492,10 @@ public class HikeConstants
 	/* Constant used to name the preference file which saves the drafts */
 	public static final String DRAFT_SETTING = "draftSetting";
 
+	public static final int CONNECT_TIMEOUT = 6 * 1000;
+
+	public static final int SOCKET_TIMEOUT = 30 * 100;
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5 * 1000;
 

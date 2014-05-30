@@ -10,6 +10,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -26,6 +27,8 @@ public abstract class FetchLastSeenBase extends MyAsyncTask<Void, Void, Boolean>
 		Logger.d(getClass().getSimpleName(), "URL:  " + url);
 
 		URLConnection connection = url.openConnection();
+		connection.setConnectTimeout(HikeConstants.CONNECT_TIMEOUT);
+		connection.setReadTimeout(HikeConstants.SOCKET_TIMEOUT);
 
 		Logger.d(getClass().getSimpleName(), "opened connection " + url);
 		AccountUtils.addUserAgent(connection);
