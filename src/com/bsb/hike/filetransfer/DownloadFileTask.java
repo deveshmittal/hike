@@ -126,7 +126,7 @@ public class DownloadFileTask extends FileTransferBase
 		URLConnection conn = null;
 		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
 		chunkSize = networkType.getMinChunkSize();
-		while (shouldRetry() && _state == FTState.IN_PROGRESS)
+		while (shouldRetry())
 		{
 			try
 			{
@@ -145,7 +145,13 @@ public class DownloadFileTask extends FileTransferBase
 				conn.connect();
 				int resCode = ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
 				// Make sure the response code is in the 200 range.
-				if (resCode / 100 != 2)
+				if (resCode == 400 || resCode == 404)
+				{
+					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
+					error();
+					return FTResult.FILE_EXPIRED;
+				}
+				else if (resCode / 100 != 2)
 				{
 					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();

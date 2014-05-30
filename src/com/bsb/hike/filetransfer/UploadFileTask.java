@@ -18,6 +18,7 @@ import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -1039,6 +1040,7 @@ public class UploadFileTask extends FileTransferBase
 		Long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
+		int resCode = 0;
 		try
 		{
 			post.addHeader("Connection", "Keep-Alive");
@@ -1064,13 +1066,19 @@ public class UploadFileTask extends FileTransferBase
 			// total.append(line);
 			// }
 			// res = total.toString();
+			resCode = response.getStatusLine().getStatusCode();
 			res = EntityUtils.toString(response.getEntity());
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if (retryAttempts >= MAX_RETRY_ATTEMPTS || e.getMessage() == null)
+			if(e instanceof HttpException)
+			{
+				res = ((HttpException) e).toString();
+				Logger.d(getClass().getSimpleName(),"response: " + res);
+			}
+			if (e.getMessage() == null)
 			{
 				error();
 				res = null;
@@ -1090,8 +1098,14 @@ public class UploadFileTask extends FileTransferBase
 //				retry = false;
 //			}
 		}
+		if (retryAttempts >= MAX_RETRY_ATTEMPTS || resCode == 400 || resCode == 404)
+		{
+			error();
+			res = null;
+			retry = false;
+		}
 		time = System.currentTimeMillis() - time;
-		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s");
+		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s.  Response: " + resCode);
 		return res;
 	}
 
