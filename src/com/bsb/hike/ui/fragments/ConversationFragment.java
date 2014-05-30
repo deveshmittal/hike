@@ -989,6 +989,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			if (parentView == null || convMessage == null)
 			{
+				if(parentView == null)
+				{
+					notifyDataSetChanged();
+				}
 				return;
 			}
 			
@@ -1353,6 +1357,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 					if (parentView == null)
 					{
+						notifyDataSetChanged();
 						return;
 					}
 
@@ -1763,6 +1768,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				if (parentView == null)
 				{
+					notifyDataSetChanged();
 					return;
 				}
 				
@@ -1814,6 +1820,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (parentView == null)
 		{
+			notifyDataSetChanged();
 			return;
 		}
 
@@ -1826,6 +1833,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (parentView == null)
 		{
+			notifyDataSetChanged();
 			return;
 		}
 
@@ -1871,6 +1879,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			if (parentView == null)
 			{
+				notifyDataSetChanged();
 				return;
 			}
 
