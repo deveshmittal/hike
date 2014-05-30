@@ -1875,6 +1875,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
+		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
+	}
+
+	/**
+	 * Returns a list of participants to a group
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	{
 		// long time = System.currentTimeMillis();
 		// Logger.i("getGroup", "start");
 		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? " AND " + DBConstants.HAS_LEFT + "=0" : "")
@@ -1899,7 +1910,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			String msisdns = allMsisdns.toString();
 			// at least one msisdn is required to run this in query
-			if (!"(".equals(msisdns))
+			if (fetchParticipants && !"(".equals(msisdns))
 			{
 				// Logger.i("getGroup", "executing query for contact info");
 				// long st = System.currentTimeMillis();
@@ -2180,7 +2191,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String groupId = groupCursor.getString(groupIdIdx);
 				String groupName = groupCursor.getString(groupNameIdx);
 
-				Map<String, GroupParticipant> groupParticipantMap = getGroupParticipants(groupId, true, false);
+				Map<String, GroupParticipant> groupParticipantMap = getGroupParticipants(groupId, true, false, false);
 				groupName = TextUtils.isEmpty(groupName) ? Utils.defaultGroupName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 
