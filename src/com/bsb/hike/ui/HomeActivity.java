@@ -139,6 +139,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private FetchContactsTask fetchContactsTask;
 	
 	private ConversationFragment mainFragment;
+	
+	private Handler mHandler = new Handler();
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -853,7 +855,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), false);
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), true);
 				}
 			});
 		}
@@ -1525,11 +1527,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		
 		if(showAnimation)
 		{
-			/*
-			 * TODO if we animate it for every new notification than
-			 * we should not initialize this handler every time 
-			 */
-			(new Handler()).post(new Runnable()
+			mHandler.post(new Runnable()
 			{
 
 				@Override
