@@ -1128,7 +1128,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					else
 					{
 						conversation.setMessages(messageList);
-						sortAndUpdateTheView(conversation, messageList.get(messageList.size() - 1));
+						sortAndUpdateTheView(conversation, messageList.get(messageList.size() - 1), false);
 					}
 				}
 			});
@@ -1834,18 +1834,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void addMessage(Conversation conv, ConvMessage convMessage)
 	{
+		boolean newConversationAdded = false;
+
 		if (!mConversationsAdded.contains(conv.getMsisdn()))
 		{
 			mConversationsAdded.add(conv.getMsisdn());
 			displayedConversations.add(conv);
+
+			newConversationAdded = true;
 		}
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
-		sortAndUpdateTheView(conv, convMessage);
+		sortAndUpdateTheView(conv, convMessage, newConversationAdded);
 	}
 
-	private void sortAndUpdateTheView(Conversation conversation, ConvMessage convMessage)
+	private void sortAndUpdateTheView(Conversation conversation, ConvMessage convMessage, boolean newConversationAdded)
 	{
 		int prevIndex = displayedConversations.indexOf(conversation);
 
@@ -1855,8 +1859,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		/*
 		 * Here we check if the index of the item remained the same after sorting. If it did, we just need to update that item's view. If not, we need to call notifyDataSetChanged.
+		 * OR if a new conversation was added, in that case we simply call notify.
 		 */
-		if (newIndex != prevIndex)
+		if (newConversationAdded || newIndex != prevIndex)
 		{
 			notifyDataSetChanged();
 		}
