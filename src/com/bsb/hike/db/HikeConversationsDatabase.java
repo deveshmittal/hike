@@ -1875,6 +1875,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
+		// long time = System.currentTimeMillis();
+		// Logger.i("getGroup", "start");
 		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? " AND " + DBConstants.HAS_LEFT + "=0" : "")
 				+ (notShownStatusMsgOnly ? " AND " + DBConstants.SHOWN_STATUS + "=0" : "");
 		Cursor c = null;
@@ -1886,20 +1888,30 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
 			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
+			StringBuilder allMsisdns = new StringBuilder("(");
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
-				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn, false);
-				if (TextUtils.isEmpty(contactInfo.getName()))
-				{
-					contactInfo.setName(c.getString(c.getColumnIndex(DBConstants.NAME)));
-				}
-				contactInfo.setOnhike(c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) == 1 ? true : false);
-
-				GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c
-						.getColumnIndex(DBConstants.ON_DND)) != 0);
+				allMsisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(c.getColumnIndex(DBConstants.NAME)), msisdn), c.getInt(c
+						.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 				participantList.put(msisdn, groupParticipant);
 			}
+			String msisdns = allMsisdns.toString();
+			// at least one msisdn is required to run this in query
+			if (!"(".equals(msisdns))
+			{
+				// Logger.i("getGroup", "executing query for contact info");
+				// long st = System.currentTimeMillis();
+				msisdns = msisdns.substring(0, msisdns.length() - 1) + ")";
+				List<ContactInfo> list = huDB.getContactNamesFromMsisdnList(msisdns);
+				// Logger.i("getGroup", "contact info time " + (System.currentTimeMillis() - st));
+				for (ContactInfo contactInfo : list)
+				{
+					participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+				}
+			}
+
 			return participantList;
 		}
 		finally
@@ -1908,6 +1920,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				c.close();
 			}
+//			Logger.i("getGroup", "get group end , time " + (System.currentTimeMillis() - time));
 		}
 	}
 
