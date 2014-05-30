@@ -3,12 +3,11 @@ package com.bsb.hike.utils;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask;
-import com.bsb.hike.tasks.FetchLastSeenTask;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask.FetchBulkLastSeenCallback;
+import com.bsb.hike.tasks.FetchLastSeenTask;
 import com.bsb.hike.tasks.FetchLastSeenTask.FetchLastSeenCallback;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 
@@ -151,7 +150,6 @@ public class LastSeenScheduler
 	{
 		if (retry.retryCount >= HikeConstants.MAX_LAST_SEEN_RETRY_COUNT - 1)
 		{
-			Log.d("TestLastSeen", "Last seen not fetched. Crossed max retries");
 			return;
 		}
 
@@ -172,7 +170,6 @@ public class LastSeenScheduler
 		@Override
 		public void run()
 		{
-			Log.d("TestLastSeen", "Retrying Last seen");
 			fetchLastSeenTask = new FetchLastSeenTask(context, msisdn, lastSeenCallback);
 			fetchLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
@@ -183,7 +180,6 @@ public class LastSeenScheduler
 		@Override
 		public void run()
 		{
-			Log.d("TestLastSeen", "Retrying bulk Last seen");
 			fetchBulkLastSeenTask = new FetchBulkLastSeenTask(context, bulkLastSeenCallback);
 			fetchBulkLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
