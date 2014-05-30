@@ -127,7 +127,6 @@
             android:name="com.bsb.hike.ui.ChatThread"
             android:label="@string/app_label"
             android:launchMode="singleTop"
-            android:theme="@style/ChatThreadTheme"
             android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
