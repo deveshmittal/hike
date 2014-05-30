@@ -669,6 +669,9 @@ public class HikeConstants
 	// Gmail URI prefix for all devices
 	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
+	// Google Plus URI prefix for all devices
+	public static final String GOOGLE_PLUS_PREFIX = "content://com.google.android.apps.photos.content";
+
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;

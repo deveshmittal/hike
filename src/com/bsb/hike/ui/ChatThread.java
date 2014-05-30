@@ -1251,7 +1251,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				/*
 				 * This message is not downloaded or uplpaded yet. this can't be forwarded
 				 */
-				selectedNonForwadableMsg(isMsgSelected);
+				if(message.isSent())
+				{
+					selectedNonForwadableMsg(isMsgSelected);
+				}
 				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING))
 				{
 					/*
