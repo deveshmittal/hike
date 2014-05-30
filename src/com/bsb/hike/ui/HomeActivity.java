@@ -1516,22 +1516,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			timelineTopBarIndicator.setVisibility(View.VISIBLE);
 			timelineTopBarIndicator.setText(String.valueOf(count));
-			if(showAnimation)
-			{
-				(new Handler()).post(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
-					}
-				});
-			}
 		}
 		else
 		{
+			showAnimation = false;
 			timelineTopBarIndicator.setVisibility(View.GONE);
+		}
+		
+		if(showAnimation)
+		{
+			/*
+			 * TODO if we animate it for every new notification than
+			 * we should not initialize this handler every time 
+			 */
+			(new Handler()).post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+				}
+			});
 		}
 	}
 	
