@@ -10,6 +10,7 @@ import com.bsb.hike.tasks.FetchBulkLastSeenTask;
 import com.bsb.hike.tasks.FetchLastSeenTask;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask.FetchBulkLastSeenCallback;
 import com.bsb.hike.tasks.FetchLastSeenTask.FetchLastSeenCallback;
+import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 
 public class LastSeenScheduler
 {
@@ -142,7 +143,7 @@ public class LastSeenScheduler
 		{
 			Log.d("TestLastSeen", "Retrying Last seen");
 			fetchLastSeenTask = new FetchLastSeenTask(context, msisdn, lastSeenCallback);
-			Utils.executeLongResultTask(fetchLastSeenTask);
+			fetchLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	};
 
@@ -153,7 +154,7 @@ public class LastSeenScheduler
 		{
 			Log.d("TestLastSeen", "Retrying bulk Last seen");
 			fetchBulkLastSeenTask = new FetchBulkLastSeenTask(context, bulkLastSeenCallback);
-			Utils.executeBoolResultAsyncTask(fetchBulkLastSeenTask);
+			fetchBulkLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	};
 }

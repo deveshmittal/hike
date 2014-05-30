@@ -1,26 +1,19 @@
 package com.bsb.hike.tasks;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class FetchLastSeenTask extends AsyncTask<Void, Void, Long>
+public class FetchLastSeenTask extends FetchLastSeenBase
 {
 	public static interface FetchLastSeenCallback
 	{
@@ -35,6 +28,10 @@ public class FetchLastSeenTask extends AsyncTask<Void, Void, Long>
 
 	FetchLastSeenCallback fetchLastSeenCallback;
 
+	long lastSeenValue;
+
+	int offline;
+
 	public FetchLastSeenTask(Context context, String msisdn, FetchLastSeenCallback fetchLastSeenCallback)
 	{
 		/*
@@ -48,86 +45,71 @@ public class FetchLastSeenTask extends AsyncTask<Void, Void, Long>
 	}
 
 	@Override
-	protected Long doInBackground(Void... params)
+	protected Boolean doInBackground(Void... params)
 	{
-		URL url;
 		try
 		{
-			url = new URL(AccountUtils.base + "/user/lastseen/" + msisdn);
-
-			Logger.d(getClass().getSimpleName(), "URL:  " + url);
-
-			URLConnection connection = url.openConnection();
-			AccountUtils.addUserAgent(connection);
-			connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
-
-			if (AccountUtils.ssl)
-			{
-				((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-			}
-
-			JSONObject response = AccountUtils.getResponse(connection.getInputStream());
-			Logger.d(getClass().getSimpleName(), "Response: " + response);
-			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
-			{
-				return null;
-			}
-			JSONObject data = response.getJSONObject(HikeConstants.DATA);
-			return data.getLong(HikeConstants.LAST_SEEN);
-
-		}
-		catch (MalformedURLException e)
-		{
-			Logger.w(getClass().getSimpleName(), e);
-			return null;
+			JSONObject response = sendRequest(AccountUtils.base + "/user/lastseen/" + msisdn);
+			return saveResult(response);
 		}
 		catch (IOException e)
 		{
 			Logger.w(getClass().getSimpleName(), e);
-			return null;
+			return false;
 		}
 		catch (JSONException e)
 		{
 			Logger.w(getClass().getSimpleName(), e);
-			return null;
+			return false;
 		}
 
 	}
 
 	@Override
-	protected void onPostExecute(Long result)
+	public boolean saveResult(JSONObject response) throws JSONException
 	{
-		if (result == null)
+		if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
+		{
+			return false;
+		}
+		JSONObject data = response.getJSONObject(HikeConstants.DATA);
+		long result = data.getLong(HikeConstants.LAST_SEEN);
+
+		/*
+		 * Update current last seen value.
+		 */
+		long currentLastSeenValue = result;
+		/*
+		 * We only apply the offset if the value is greater than 0 since 0 and -1 are reserved.
+		 */
+		if (currentLastSeenValue > 0)
+		{
+			offline = 1;
+			lastSeenValue = Utils.applyServerTimeOffset(context, currentLastSeenValue);
+		}
+		else
+		{
+			offline = (int) currentLastSeenValue;
+			lastSeenValue = System.currentTimeMillis() / 1000;
+		}
+
+		HikeUserDatabase.getInstance().updateLastSeenTime(msisdn, lastSeenValue);
+		HikeUserDatabase.getInstance().updateIsOffline(msisdn, offline);
+
+		return true;
+	}
+
+	@Override
+	protected void onPostExecute(Boolean result)
+	{
+		if (!result)
 		{
 			fetchLastSeenCallback.lastSeenNotFetched();
 		}
 		else
 		{
-			int offline;
-			long lastSeenValue;
-
-			/*
-			 * Update current last seen value.
-			 */
-			long currentLastSeenValue = result;
-			/*
-			 * We only apply the offset if the value is greater than 0 since 0 and -1 are reserved.
-			 */
-			if (currentLastSeenValue > 0)
-			{
-				offline = 1;
-				lastSeenValue = Utils.applyServerTimeOffset(context, currentLastSeenValue);
-			}
-			else
-			{
-				offline = (int) currentLastSeenValue;
-				lastSeenValue = System.currentTimeMillis() / 1000;
-			}
-
-			HikeUserDatabase.getInstance().updateLastSeenTime(msisdn, lastSeenValue);
-			HikeUserDatabase.getInstance().updateIsOffline(msisdn, offline);
-
 			fetchLastSeenCallback.lastSeenFetched(msisdn, offline, lastSeenValue);
 		}
 	}
+
 }
