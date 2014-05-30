@@ -79,13 +79,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 
 		Context context;
+		boolean publishStealthEvent;
 
 		public DeleteConversationsAsyncTask(Context context)
+		{
+			this(context, true);
+		}
+
+		public DeleteConversationsAsyncTask(Context context, boolean publishStealthEvent)
 		{
 			/*
 			 * Using application context since that will never be null while the task is running.
 			 */
 			this.context = context.getApplicationContext();
+			this.publishStealthEvent = publishStealthEvent;
 		}
 
 		@Override
@@ -138,8 +145,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
 
-				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn());
-				;
+				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn(), publishStealthEvent);
 				stealthConversations.remove(conversation);
 			}
 
@@ -455,7 +461,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		resetStealthPreferences();
-		HikeMessengerApp.clearStealthMsisdn();
 		stealthConversations.clear();
 
 		/*
@@ -470,8 +475,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 * Calling the delete conversation task in the end to ensure that we first publish the reset event. If the delete task was published at first, it was causing a threading
 		 * issue where the contacts in the friends fragment were getting removed and not added again.
 		 */
-		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity(), false);
 		task.execute(stealthConversations.toArray(new Conversation[0]));
+
+		HikeMessengerApp.clearStealthMsisdn();
 	}
 
 	private void resetStealthPreferences()

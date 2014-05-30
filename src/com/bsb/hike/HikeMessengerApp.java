@@ -848,8 +848,16 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static void removeStealthMsisdn(String msisdn)
 	{
+		removeStealthMsisdn(msisdn, true);
+	}
+
+	public static void removeStealthMsisdn(String msisdn, boolean publishEvent)
+	{
 		stealthMsisdn.remove(msisdn);
-		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		if(publishEvent)
+		{
+			getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		}
 	}
 
 	public static void clearStealthMsisdn()
