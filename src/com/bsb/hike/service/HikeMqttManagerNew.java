@@ -177,7 +177,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		@Override
 		public void run()
 		{
-			if (mqtt != null)
+			if (isConnected())
 			{
 				try
 				{
