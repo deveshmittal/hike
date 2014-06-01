@@ -899,50 +899,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						MqttException exception = (MqttException)value;
 						handleMqttException(exception, true);
-						MqttException ex = arg0.getException();
-						if (ex != null)
-							Logger.e(TAG, "Exception : " + ex.getReasonCode());
-						ServerConnectionStatus connectionStatus = ServerConnectionStatus.UNKNOWN;
-						scheduleNetworkErrorTimer();
-						if (value != null)
-						{
-							Logger.e(TAG, "Connection failed : " + value.getMessage());
-							String msg = value.getMessage();
-							Logger.e("(TAG", "Hike Unable to connect", value);
-							connectionStatus = getServerStatusCode(msg);
-
-							if (connectionStatus == ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD || connectionStatus == ServerConnectionStatus.IDENTIFIER_REJECTED
-									|| connectionStatus == ServerConnectionStatus.NOT_AUTHORIZED)
-							{
-								clearSettings();
-							}
-
-						}
-						mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED_UNKNOWN_REASON;
-
-						/*
-						 * if something has failed, we wait for one keep-alive period before trying again in a real implementation, you would probably want to keep count of how
-						 * many times you attempt this, and stop trying after a certain number, or length of time - rather than keep trying forever. a failure is often an
-						 * intermittent network issue, however, so some limited retry is a good idea
-						 */
-						if(ex.getCause() != null && ex.getCause().toString().contains("UnknownHostException"))
-						{
-							Logger.e(TAG, "DNS Failure , Connect using ips");
-							serverUriIndex = (serverUriIndex + 1) % (serverURIs.length);
-							scheduleNextConnectionCheck(0);
-						}
-						else if (connectionStatus != ServerConnectionStatus.SERVER_UNAVAILABLE)
-						{
-							int reConnTime = getConnRetryTime(true);
-							Logger.d(TAG, "SERVER UNAVAILABLE Reconnect time (sec): " + reConnTime);
-							scheduleNextConnectionCheck(reConnTime);
-						}
-						else
-						{
-							Random random = new Random();
-							int reconnectIn = random.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
-							scheduleNextConnectionCheck(reconnectIn * 60); // Converting minutes to seconds
-						}
 					}
 					catch (Exception e)
 					{
@@ -1147,8 +1103,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			break;
 		case MqttException.REASON_CODE_CLIENT_EXCEPTION:
 			Logger.e(TAG, "Exception : " + e.getCause().getMessage());
+			if(e.getCause() != null && e.getCause().toString().contains("UnknownHostException"))
+			{
+				Logger.e(TAG, "DNS Failure , Connect using ips");
+				serverUriIndex = (serverUriIndex + 1) % (serverURIs.length);
+				scheduleNextConnectionCheck(getConnRetryTime());
+			}
 			// Till this point disconnect has already happened due to exception (This is as per lib)
-			if (reConnect)
+			else if (reConnect)
 				connectOnMqttThread(20);
 			break;
 		case MqttException.REASON_CODE_CLIENT_NOT_CONNECTED:
