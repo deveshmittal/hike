@@ -202,6 +202,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		intent.setClass(getActivity(), ChatThread.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
+		getActivity().finish();
 	}
 
 	@Override

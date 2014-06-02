@@ -141,6 +141,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		else
 		{
 			Utils.startChatThread(getActivity(), contactInfo);
+			getActivity().finish();
 		}
 	}
 
