@@ -139,6 +139,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private FetchContactsTask fetchContactsTask;
 	
 	private ConversationFragment mainFragment;
+	
+	private Handler mHandler = new Handler();
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -213,7 +215,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					}
 					else
 					{
-						if (!(dialog != null && dialog.isShowing()))
+						if (!(dialog != null && dialog.isShowing()) && mainFragment != null)
 						{
 							if (!mainFragment.hasNoConversation())
 							{
@@ -413,7 +415,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		
 		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
 		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
-		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), true);
+		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 1000);
 		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -853,7 +855,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), false);
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
 				}
 			});
 		}
@@ -1344,7 +1346,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		try
 		{
-			overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
+			int rightMargin = getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
+			overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor), -rightMargin, 0);
 		}
 		catch (BadTokenException e)
 		{
@@ -1504,71 +1507,79 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	}
 	
 
-	public void updateTimelineNotificationCount(int count, boolean showAnimation)
+	public void updateTimelineNotificationCount(final int count, int delayTime)
 	{
-		if(count > 9)
-		{
-			timelineTopBarIndicator.setVisibility(View.VISIBLE);
-			timelineTopBarIndicator.setText("9+");
-		}
-		else if(count > 0)
-		{
-			timelineTopBarIndicator.setVisibility(View.VISIBLE);
-			timelineTopBarIndicator.setText(String.valueOf(count));
-			if(showAnimation)
-			{
-				(new Handler()).post(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
-					}
-				});
-			}
-		}
-		else
+		
+		if (count < 1)
 		{
 			timelineTopBarIndicator.setVisibility(View.GONE);
+		}
+		else 
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if(timelineTopBarIndicator != null)
+					{
+						if(count > 9)
+						{
+							timelineTopBarIndicator.setVisibility(View.VISIBLE);
+							timelineTopBarIndicator.setText("9+");
+						}
+						else if(count > 0)
+						{
+							timelineTopBarIndicator.setVisibility(View.VISIBLE);
+							timelineTopBarIndicator.setText(String.valueOf(count));
+						}
+						timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+					}
+				}
+			}, delayTime);
 		}
 	}
 	
 	private Animation getNotificationIndicatorAnim()
 	{
 		AnimationSet animSet = new AnimationSet(true);
-		float a = 0.6f;
+		float a = 0.5f;
 		float b = 1.15f;
 		float c = 0.8f;
 		float d = 1.07f;
 		float e = 1f;
-		Animation anim0 = new ScaleAnimation(1, a, 1, a, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		int initialOffset = 0;
+		float pivotX = 0.5f;
+		float pivotY = 0.5f;
+		Animation anim0 = new ScaleAnimation(1, a, 1, a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim0.setInterpolator(new AccelerateInterpolator(2f));
+		anim0.setStartOffset(initialOffset);
 		anim0.setDuration(150);
 		animSet.addAnimation(anim0);
 
-		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim1.setInterpolator(new AccelerateInterpolator(2f));
 		anim1.setDuration(200);
-		anim1.setStartOffset(anim0.getDuration());
+		anim1.setStartOffset(initialOffset+ anim0.getDuration());
 		animSet.addAnimation(anim1);
 
-		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim2.setInterpolator(new AccelerateInterpolator(-1f));
 		anim2.setDuration(150);
-		anim2.setStartOffset(anim0.getDuration() + anim1.getDuration());
+		anim2.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration());
 		animSet.addAnimation(anim2);
 
-		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim2.setInterpolator(new AccelerateInterpolator(1f));
 		anim3.setDuration(150);
-		anim3.setStartOffset(anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
+		anim3.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
 		animSet.addAnimation(anim3);
 
-		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
+		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim4.setInterpolator(new AccelerateInterpolator(1f));
 		anim4.setDuration(150);
-		anim4.setStartOffset(anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
+		anim4.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
 		animSet.addAnimation(anim4);
 
 		return animSet;

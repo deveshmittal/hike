@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="452"
-    android:versionName="2.9.6.52" >
+    android:versionCode="453"
+    android:versionName="2.9.6.53" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -127,7 +127,6 @@
             android:name="com.bsb.hike.ui.ChatThread"
             android:label="@string/app_label"
             android:launchMode="singleTop"
-            android:theme="@style/ChatThreadTheme"
             android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />

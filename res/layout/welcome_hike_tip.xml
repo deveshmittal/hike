@@ -6,19 +6,18 @@
     android:gravity="center"
     android:minHeight="74dp"
     android:orientation="vertical"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
     android:paddingLeft="15dp" >
 
     <LinearLayout
         android:id="@+id/tip_content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
         android:paddingRight="62dp"
-        android:paddingBottom="5dp" >
+        android:paddingTop="10dp"
+    	android:paddingBottom="15dp" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tip_header"
@@ -50,7 +49,8 @@
         <View
             android:id="@+id/close_divider"
             android:layout_width="1dp"
-            android:layout_height="match_parent"
+            android:layout_height="32dp"
+            android:layout_gravity="center_vertical"
             android:background="@color/tip_green_divider_color" />
 
         <ImageView

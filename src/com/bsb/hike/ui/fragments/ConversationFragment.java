@@ -79,13 +79,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 
 		Context context;
+		boolean publishStealthEvent;
 
 		public DeleteConversationsAsyncTask(Context context)
+		{
+			this(context, true);
+		}
+
+		public DeleteConversationsAsyncTask(Context context, boolean publishStealthEvent)
 		{
 			/*
 			 * Using application context since that will never be null while the task is running.
 			 */
 			this.context = context.getApplicationContext();
+			this.publishStealthEvent = publishStealthEvent;
 		}
 
 		@Override
@@ -138,8 +145,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
 
-				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn());
-				;
+				HikeMessengerApp.removeStealthMsisdn(conversation.getMsisdn(), publishStealthEvent);
 				stealthConversations.remove(conversation);
 			}
 
@@ -457,7 +463,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		resetStealthPreferences();
-		HikeMessengerApp.clearStealthMsisdn();
 		stealthConversations.clear();
 
 		/*
@@ -472,8 +477,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 * Calling the delete conversation task in the end to ensure that we first publish the reset event. If the delete task was published at first, it was causing a threading
 		 * issue where the contacts in the friends fragment were getting removed and not added again.
 		 */
-		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity(), false);
 		task.execute(stealthConversations.toArray(new Conversation[0]));
+
+		HikeMessengerApp.clearStealthMsisdn();
 	}
 
 	private void resetStealthPreferences()
@@ -715,7 +722,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						HikeAnalyticsEvent.sendStealthMsisdns(enabledConvs, new HashSet<String>());
 
 						stealthConversations.add(conv);
-						HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
+						HikeMessengerApp.addNewStealthMsisdn(conv.getMsisdn());
 					}
 					else
 					{
@@ -847,7 +854,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (conv.isStealth())
 			{
 				stealthConversations.add(conv);
-				HikeMessengerApp.addStealthMsisdn(conv.getMsisdn());
+				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
 
 			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
@@ -982,6 +989,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			if (parentView == null || convMessage == null)
 			{
+				if(parentView == null)
+				{
+					notifyDataSetChanged();
+				}
 				return;
 			}
 			
@@ -1121,7 +1132,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					else
 					{
 						conversation.setMessages(messageList);
-						sortAndUpdateTheView(conversation, messageList.get(messageList.size() - 1));
+						sortAndUpdateTheView(conversation, messageList.get(messageList.size() - 1), false);
 					}
 				}
 			});
@@ -1346,6 +1357,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 					if (parentView == null)
 					{
+						notifyDataSetChanged();
 						return;
 					}
 
@@ -1756,6 +1768,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 				if (parentView == null)
 				{
+					notifyDataSetChanged();
 					return;
 				}
 				
@@ -1807,6 +1820,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (parentView == null)
 		{
+			notifyDataSetChanged();
 			return;
 		}
 
@@ -1819,6 +1833,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (parentView == null)
 		{
+			notifyDataSetChanged();
 			return;
 		}
 
@@ -1827,18 +1842,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void addMessage(Conversation conv, ConvMessage convMessage)
 	{
+		boolean newConversationAdded = false;
+
 		if (!mConversationsAdded.contains(conv.getMsisdn()))
 		{
 			mConversationsAdded.add(conv.getMsisdn());
 			displayedConversations.add(conv);
+
+			newConversationAdded = true;
 		}
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
-		sortAndUpdateTheView(conv, convMessage);
+		sortAndUpdateTheView(conv, convMessage, newConversationAdded);
 	}
 
-	private void sortAndUpdateTheView(Conversation conversation, ConvMessage convMessage)
+	private void sortAndUpdateTheView(Conversation conversation, ConvMessage convMessage, boolean newConversationAdded)
 	{
 		int prevIndex = displayedConversations.indexOf(conversation);
 
@@ -1848,8 +1867,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		/*
 		 * Here we check if the index of the item remained the same after sorting. If it did, we just need to update that item's view. If not, we need to call notifyDataSetChanged.
+		 * OR if a new conversation was added, in that case we simply call notify.
 		 */
-		if (newIndex != prevIndex)
+		if (newConversationAdded || newIndex != prevIndex)
 		{
 			notifyDataSetChanged();
 		}
@@ -1859,6 +1879,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			if (parentView == null)
 			{
+				notifyDataSetChanged();
 				return;
 			}
 

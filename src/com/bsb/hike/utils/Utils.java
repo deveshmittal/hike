@@ -1467,10 +1467,12 @@ public class Utils
 		if (isProductionServer)
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
+			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
+			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -2099,7 +2101,8 @@ public class Utils
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
 		{
 			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			vibrator.vibrate(100);
+			if (vibrator != null)
+				vibrator.vibrate(100);
 		}
 	}
 
@@ -2508,7 +2511,7 @@ public class Utils
 				/*
 				 * We don't need to request for the bulk last seen from here anymore. We have the HTTP call for this.
 				 */
-				data.put(HikeConstants.BULK_LAST_SEEN, HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.PRODUCTION, true));
+				data.put(HikeConstants.BULK_LAST_SEEN, false);
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
@@ -2516,6 +2519,10 @@ public class Utils
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
+			}
+			else
+			{
+				return;
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
 		}
@@ -3325,6 +3332,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, PeopleActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}
@@ -3333,6 +3341,7 @@ public class Utils
 	{
 		final Intent intent = new Intent(context, TimelineActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}

@@ -1,27 +1,17 @@
 package com.bsb.hike.tasks;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class FetchBulkLastSeenTask extends AsyncTask<Void, Void, Boolean>
+public class FetchBulkLastSeenTask extends FetchLastSeenBase
 {
 	public static interface FetchBulkLastSeenCallback
 	{
@@ -49,50 +39,10 @@ public class FetchBulkLastSeenTask extends AsyncTask<Void, Void, Boolean>
 	@Override
 	protected Boolean doInBackground(Void... params)
 	{
-		/*
-		 * Not working in prod
-		 */
-		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.PRODUCTION, true))
-		{
-			return true;
-		}
-
-		URL url;
 		try
 		{
-			url = new URL("http://54.251.147.222:8181/v2/user/bls");
-
-			Logger.d(getClass().getSimpleName(), "URL:  " + url);
-
-			URLConnection connection = url.openConnection();
-
-			Logger.d(getClass().getSimpleName(), "opened connection " + url);
-			AccountUtils.addUserAgent(connection);
-			connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
-
-			if (AccountUtils.ssl)
-			{
-				((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-			}
-
-			Logger.d(getClass().getSimpleName(), "gettting is");
-			InputStream is = connection.getInputStream();
-			Logger.d(getClass().getSimpleName(), "got is");
-			JSONObject response = AccountUtils.getResponse(is);
-			Logger.d(getClass().getSimpleName(), "Response: " + response);
-			if (response == null)
-			{
-				return false;
-			}
-			Utils.handleBulkLastSeenPacket(context, response);
-
-			return true;
-
-		}
-		catch (MalformedURLException e)
-		{
-			Logger.w(getClass().getSimpleName(), e);
-			return false;
+			JSONObject response = sendRequest(AccountUtils.baseV2 + "/user/bls");
+			return saveResult(response);
 		}
 		catch (IOException e)
 		{
@@ -104,7 +54,17 @@ public class FetchBulkLastSeenTask extends AsyncTask<Void, Void, Boolean>
 			Logger.w(getClass().getSimpleName(), e);
 			return false;
 		}
+	}
 
+	@Override
+	public boolean saveResult(JSONObject response) throws JSONException
+	{
+		if (response == null)
+		{
+			return false;
+		}
+		Utils.handleBulkLastSeenPacket(context, response);
+		return true;
 	}
 
 	@Override

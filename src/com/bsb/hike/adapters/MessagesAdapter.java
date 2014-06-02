@@ -4373,11 +4373,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		chatThread.showContactDetails(items, name, null, true);
 	}
 
+	/*
+	 * We need to setup this onLongClickListener for all
+	 * such message item which are clickable because otherwise
+	 * these items will consume this event on its on.
+	 */
 	@Override
 	public boolean onLongClick(View view)
 	{
-		chatThread.showMessageContextMenu((ConvMessage) view.getTag());
-		return true;
+		/*
+		 * here returning false will pass this event to
+		 * onItemLongClick method of listview.
+		 */
+		return false;
 	}
 
 	@Override

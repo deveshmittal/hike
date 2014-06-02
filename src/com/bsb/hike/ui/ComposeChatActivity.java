@@ -16,6 +16,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -95,7 +97,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private LastSeenScheduler lastSeenScheduler;
 
-	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED };
+	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -148,8 +150,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		init();
 
-		lastSeenScheduler = new LastSeenScheduler(this, true);
-		lastSeenScheduler.start();
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+		{
+			lastSeenScheduler = LastSeenScheduler.getInstance(this);
+			lastSeenScheduler.start(true);
+		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 	}
@@ -798,6 +803,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
 		{
 
+			if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+			{
+				return;
+			}
+
 			runOnUiThread(new Runnable()
 			{
 				
@@ -806,13 +816,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				{
 					if (lastSeenScheduler == null)
 					{
-						lastSeenScheduler = new LastSeenScheduler(ComposeChatActivity.this, true);
+						lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
 					}
 					else
 					{
 						lastSeenScheduler.stop();
 					}
-					lastSeenScheduler.start();
+					lastSeenScheduler.start(true);
 				}
 			});
 		}
@@ -832,6 +842,26 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			});
 
+		}
+		else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type))
+		{
+			final ContactInfo contactInfo = (ContactInfo) object;
+
+			if (contactInfo.getFavoriteType() != FavoriteType.FRIEND)
+			{
+				return;
+			}
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					adapter.addToGroup(contactInfo, FriendsAdapter.FRIEND_INDEX);
+				}
+
+			});
 		}
 	}
 

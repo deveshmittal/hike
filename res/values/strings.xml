@@ -316,7 +316,6 @@
     <string name="faq">FAQs</string>
     <string name="feeling_lazy">Feeling lazy? We\'ll do it for you</string>
     <string name="connect_fb">Connect with Facebook</string>
-    <string name="camera">CAMERA</string>
     <string name="gallery">Gallery</string>
     <string name="fb_app_id">425850510764995</string>
     <string name="choose_picture">Choose a picture</string>
@@ -1537,9 +1536,11 @@
      <string name="timeline">Timeline</string>
      <string name="add_favorites_upper_case">ADD FAVORITES</string>
      <string name="status_update_tip_header">Post your status</string>
-     <string name="status_update_tip_msg">Status updates are visible to favorites only</string>
+     <string name="status_update_tip_msg">Status is visible to favorites only</string>
      <string name="new_chat_compose_hint">Search by name or number</string>
-     <string name="new_ui_welcome_tip_header">hike just got much better!</string>
+     <string name="new_ui_welcome_tip_header">Welcome to new hike</string>
      <string name="new_ui_welcome_tip_msg">Easier to use and faster than ever</string>
-     
+     <string name="camera">Camera</string>
+     <string name="camera_upper_case">CAMERA</string>
+    
 </resources>

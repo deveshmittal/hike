@@ -492,6 +492,10 @@ public class HikeConstants
 	/* Constant used to name the preference file which saves the drafts */
 	public static final String DRAFT_SETTING = "draftSetting";
 
+	public static final int CONNECT_TIMEOUT = 6 * 1000;
+
+	public static final int SOCKET_TIMEOUT = 30 * 100;
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5 * 1000;
 
@@ -1145,6 +1149,8 @@ public class HikeConstants
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
 
 		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
+
+		public static final String FROM_NOTIFICATION = "fromNotification";
 	}
 
 	public static final class LogEvent
@@ -1534,7 +1540,7 @@ public class HikeConstants
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
 
-	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE, StatusMessageType.PROFILE_PIC};
+	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE};
 
 	public static enum WelcomeTutorial
 	{

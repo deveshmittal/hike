@@ -78,8 +78,11 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		preferences = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
-		lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
-		lastSeenScheduler.start();
+		if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+		{
+			lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
+			lastSeenScheduler.start(true);
+		}
 	}
 
 	@Override
@@ -504,6 +507,11 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				return;
 			}
 
+			if (!PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+			{
+				return;
+			}
+
 			getActivity().runOnUiThread(new Runnable()
 			{
 				
@@ -512,13 +520,13 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				{
 					if (lastSeenScheduler == null)
 					{
-						lastSeenScheduler = new LastSeenScheduler(getActivity(), true);
+						lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
 					}
 					else
 					{
 						lastSeenScheduler.stop();
 					}
-					lastSeenScheduler.start();
+					lastSeenScheduler.start(true);
 				}
 			});
 		}

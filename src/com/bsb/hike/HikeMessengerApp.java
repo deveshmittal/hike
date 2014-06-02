@@ -725,7 +725,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 */
 		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		ContactInfo.lastSeenTimeComparatorWithoutFav.lastSeenPref = ContactInfo.lastSeenTimeComparator.lastSeenPref;
-		
+
+		/*
+		 * Fetching all stealth contacts on app creation so that the conversation cannot be opened through the shortcut or share screen.
+		 */
+		HikeConversationsDatabase.getInstance().addStealthMsisdnToMap();
 
 		appStateHandler = new Handler();
 
@@ -839,16 +843,29 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		return typingNotificationMap;
 	}
 
-	public static void addStealthMsisdn(String msisdn)
+	public static void addStealthMsisdnToMap(String msisdn)
 	{
 		stealthMsisdn.add(msisdn);
+	}
+
+	public static void addNewStealthMsisdn(String msisdn)
+	{
+		addStealthMsisdnToMap(msisdn);
 		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_MARKED, msisdn);
 	}
 
 	public static void removeStealthMsisdn(String msisdn)
 	{
+		removeStealthMsisdn(msisdn, true);
+	}
+
+	public static void removeStealthMsisdn(String msisdn, boolean publishEvent)
+	{
 		stealthMsisdn.remove(msisdn);
-		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		if(publishEvent)
+		{
+			getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		}
 	}
 
 	public static void clearStealthMsisdn()
