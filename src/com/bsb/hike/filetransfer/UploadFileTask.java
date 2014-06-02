@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Handler;
@@ -189,7 +190,9 @@ public class UploadFileTask extends FileTransferBase
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
-						thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
+						BitmapDrawable bd = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey);
+						if(bd != null)
+							thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
 					}
 					// Logger.d("UploadFileTask",
 					// "thumbnail size : " + BitmapUtils.getBitmapSize(thumbnail) + "  height : " + thumbnail.getHeight() + "   width : " + thumbnail.getWidth());
@@ -199,7 +202,9 @@ public class UploadFileTask extends FileTransferBase
 					thumbnail = ThumbnailUtils.createVideoThumbnail(destinationFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
 					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
-						thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
+						BitmapDrawable bd = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey);
+						if(bd != null)
+							thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
 					}
 				}
 				if (thumbnail != null)
