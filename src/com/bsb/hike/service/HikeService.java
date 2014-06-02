@@ -263,7 +263,15 @@ public class HikeService extends Service
 	{
 		sm = StickerManager.getInstance();
 		sm.init(getApplicationContext());
+		// move stickers from external to internal if not done
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, false))
+		{
+			sm.moveRecentStickerFileToInternal();
+			Editor edit = settings.edit();
+			edit.putBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, true);
+			edit.commit();
+		}
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 		/*
 		 * If we had earlier removed bollywood stickers we need to display them again.

@@ -35,6 +35,8 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
 {
+	public static final String STICKERS_MOVED_EXTERNAL_TO_INTERNAL = "movedStickersExtToInt";
+
 	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
 
 	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
@@ -1092,8 +1094,13 @@ public class StickerManager
 	public void moveRecentStickerFileToInternal()
 	{
 		Set<Sticker> stickerOnOuterMem = getSortedListForCategory(StickerCategoryId.recent, getExternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
-		Set<Sticker> stickerOnInnerMem = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
-		stickerOnInnerMem.addAll(stickerOnOuterMem);
-		saveSortedListForCategory(StickerCategoryId.recent, stickerOnInnerMem);
+		if (stickerOnOuterMem.size() == 0)
+		{
+			Set<Sticker> stickerOnInnerMem = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
+			if (stickerOnInnerMem.size() > 0)
+				saveSortedListForCategory(StickerCategoryId.recent, stickerOnInnerMem);
+			return;
+		}
+		saveSortedListForCategory(StickerCategoryId.recent, stickerOnOuterMem);
 	}
 }
