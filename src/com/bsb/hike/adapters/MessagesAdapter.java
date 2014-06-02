@@ -1272,11 +1272,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					/*
 					 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
 					 */
+
+					// Set Thumbnail Width
 					int maxWidth = (int) (250 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
 					int minWidth = (int) (119 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
-
 					if (fileThumbParams.width == minWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
@@ -1284,6 +1285,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					else if (fileThumbParams.width == maxWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
+
+					// Set Thumbnail Height
+					int minHeight = (int) (70 * Utils.densityMultiplier);
+					fileThumbParams.height = Math.max(fileThumbParams.height, minHeight);
+					if (fileThumbParams.height == minHeight)
+					{
+						int width = ((thumbnail.getIntrinsicWidth() * minHeight) / thumbnail.getIntrinsicHeight());
+						if(width >= minWidth && width<=maxWidth)
+							fileThumbParams.width = width;
 					}
 				}
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
@@ -1417,11 +1428,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					/*
 					 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
 					 */
+
+					// Set Thumbnail Width
 					int maxWidth = (int) (250 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
 					int minWidth = (int) (119 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
-
 					if (fileThumbParams.width == minWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
@@ -1429,6 +1441,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					else if (fileThumbParams.width == maxWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
+
+					// Set Thumbnail Height
+					int minHeight = (int) (70 * Utils.densityMultiplier);
+					fileThumbParams.height = Math.max(fileThumbParams.height, minHeight);
+					if (fileThumbParams.height == minHeight)
+					{
+						int width = ((thumbnail.getIntrinsicWidth() * minHeight) / thumbnail.getIntrinsicHeight());
+						if(width >= minWidth && width<=maxWidth)
+							fileThumbParams.width = width;
 					}
 				}
 				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
