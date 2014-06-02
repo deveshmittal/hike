@@ -403,13 +403,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db.execSQL(alter);
 		}
 
-		// we are saving recent sticker file only in internal memory
-		if (oldVersion < 25)
-		{
-			StickerManager st = StickerManager.getInstance();
-			st.setContext(mContext);
-			st.moveRecentStickerFileToInternal();
-		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
