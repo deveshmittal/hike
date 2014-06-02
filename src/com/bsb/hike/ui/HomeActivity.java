@@ -1507,7 +1507,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	}
 	
 
-	public void updateTimelineNotificationCount(final int count, int delayTime)
+	public void updateTimelineNotificationCount(int count, int delayTime)
 	{
 		
 		if (count < 1)
@@ -1524,17 +1524,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					if(timelineTopBarIndicator != null)
 					{
+						int count = Utils.getNotificationCount(accountPrefs, false);
 						if(count > 9)
 						{
 							timelineTopBarIndicator.setVisibility(View.VISIBLE);
 							timelineTopBarIndicator.setText("9+");
+							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
 						}
 						else if(count > 0)
 						{
 							timelineTopBarIndicator.setVisibility(View.VISIBLE);
 							timelineTopBarIndicator.setText(String.valueOf(count));
+							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
 						}
-						timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
 					}
 				}
 			}, delayTime);
