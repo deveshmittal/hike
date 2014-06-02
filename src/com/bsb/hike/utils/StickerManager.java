@@ -1094,8 +1094,13 @@ public class StickerManager
 	public void moveRecentStickerFileToInternal()
 	{
 		Set<Sticker> stickerOnOuterMem = getSortedListForCategory(StickerCategoryId.recent, getExternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
-		Set<Sticker> stickerOnInnerMem = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
-		stickerOnInnerMem.addAll(stickerOnOuterMem);
-		saveSortedListForCategory(StickerCategoryId.recent, stickerOnInnerMem);
+		if (stickerOnOuterMem.size() == 0)
+		{
+			Set<Sticker> stickerOnInnerMem = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
+			if (stickerOnInnerMem.size() > 0)
+				saveSortedListForCategory(StickerCategoryId.recent, stickerOnInnerMem);
+			return;
+		}
+		saveSortedListForCategory(StickerCategoryId.recent, stickerOnOuterMem);
 	}
 }
