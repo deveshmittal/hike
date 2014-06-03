@@ -1255,7 +1255,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				else if (!shouldConnectUsingSSL && isSSLConnected)
 					disconnectOnMqttThread(true);
 				else
+				{
+					ipConnectCount = 0;
+					connectUsingIp = false;
 					connectOnMqttThread();
+				}
 			}
 			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
 		}
