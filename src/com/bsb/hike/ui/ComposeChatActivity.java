@@ -254,7 +254,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		if (lastSeenScheduler != null)
 		{
-			lastSeenScheduler.stop();
+			lastSeenScheduler.stop(true);
 			lastSeenScheduler = null;
 		}
 
@@ -815,7 +815,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					}
 					else
 					{
-						lastSeenScheduler.stop();
+						lastSeenScheduler.stop(true);
 					}
 					lastSeenScheduler.start(true);
 				}

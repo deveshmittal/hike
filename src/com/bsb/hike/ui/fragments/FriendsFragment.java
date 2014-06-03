@@ -95,7 +95,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		if (lastSeenScheduler != null)
 		{
-			lastSeenScheduler.stop();
+			lastSeenScheduler.stop(true);
 			lastSeenScheduler = null;
 		}
 
@@ -520,7 +520,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 					}
 					else
 					{
-						lastSeenScheduler.stop();
+						lastSeenScheduler.stop(true);
 					}
 					lastSeenScheduler.start(true);
 				}

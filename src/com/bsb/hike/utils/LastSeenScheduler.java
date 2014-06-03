@@ -86,25 +86,31 @@ public class LastSeenScheduler
 		fetchLastSeenRunnable.run();
 	}
 
-	public void stop()
+	public void stop(boolean stopBulkFetch)
 	{
-
-		if (fetchLastSeenTask != null)
+		if (!stopBulkFetch)
 		{
+			lastSeenFetchedCallback = null;
+
 			resetLastSeenRetryParams(retrySingle);
 			fetchLastSeenTask.cancel(true);
-		}
-		if (fetchBulkLastSeenTask != null)
-		{
-			resetLastSeenRetryParams(retryBulk);
 
-			/*
-			 * We set this task to ensure another bulk last seen task is not scheduled by the retry logic again.
-			 */
-			fetchBulkLastSeenCancelled = true;
+			mHandler.removeCallbacks(fetchLastSeenRunnable);
 		}
-		mHandler.removeCallbacks(fetchLastSeenRunnable);
-		mHandler.removeCallbacks(fetchBulkLastSeenRunnable);
+		else
+		{
+			if (fetchBulkLastSeenTask != null)
+			{
+				resetLastSeenRetryParams(retryBulk);
+
+				/*
+				 * We set this task to ensure another bulk last seen task is not scheduled by the retry logic again.
+				 */
+				fetchBulkLastSeenCancelled = true;
+			}
+			mHandler.removeCallbacks(fetchBulkLastSeenRunnable);
+		}
+
 	}
 
 	private FetchLastSeenCallback lastSeenCallback = new FetchLastSeenCallback()
