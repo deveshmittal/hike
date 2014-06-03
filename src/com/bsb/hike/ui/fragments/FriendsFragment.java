@@ -61,7 +61,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		ListView friendsList = (ListView) parent.findViewById(android.R.id.list);
 
-		friendsAdapter = new FriendsAdapter(getActivity(), friendsList, friendsListFetchedCallback);
+		friendsAdapter = new FriendsAdapter(getActivity(), friendsList, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparator);
 		friendsAdapter.setLoadingView(parent.findViewById(R.id.spinner));
 		friendsAdapter.setEmptyView(parent.findViewById(R.id.noResultView));
 

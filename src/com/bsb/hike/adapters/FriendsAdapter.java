@@ -36,6 +36,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.LastSeenComparator;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -140,7 +141,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	protected FriendsListFetchedCallback friendsListFetchedCallback;
 
-	public FriendsAdapter(Context context, ListView listView, FriendsListFetchedCallback friendsListFetchedCallback)
+	protected LastSeenComparator lastSeenComparator;
+
+	public FriendsAdapter(Context context, ListView listView, FriendsListFetchedCallback friendsListFetchedCallback, LastSeenComparator lastSeenComparator)
 	{
 		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -152,6 +155,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		this.showSMSContacts = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.FREE_SMS_PREF, true) || Utils.getSendSmsPref(context);
 		this.friendsListFetchedCallback = friendsListFetchedCallback;
+		this.lastSeenComparator = lastSeenComparator;
 
 		completeList = new ArrayList<ContactInfo>();
 
@@ -570,7 +574,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void addStealthContacts()
 	{
 		friendsList.addAll(friendsStealthList);
-		Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+		Collections.sort(friendsList, lastSeenComparator);
 
 		hikeContactsList.addAll(hikeStealthContactsList);
 		Collections.sort(hikeContactsList);
@@ -677,7 +681,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 		case FRIEND_INDEX:
 			friendsList.add(contactInfo);
-			Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+			Collections.sort(friendsList, lastSeenComparator);
 			break;
 		case HIKE_INDEX:
 			hikeContactsList.add(contactInfo);

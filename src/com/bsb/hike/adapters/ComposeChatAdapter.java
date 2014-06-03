@@ -50,7 +50,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
-		super(context, listView, friendsListFetchedCallback);
+		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
 		existingParticipants = new HashMap<String, ContactInfo>();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
