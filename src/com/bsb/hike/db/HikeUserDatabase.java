@@ -2228,7 +2228,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN },
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO },
 					DBConstants.MSISDN + " != ?", new String[] { myMsisdn }, null, null, DBConstants.NAME + " COLLATE NOCASE");
 
 			contactInfos = extractContactInfo(c, true);
