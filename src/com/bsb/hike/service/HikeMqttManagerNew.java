@@ -1,5 +1,6 @@
 package com.bsb.hike.service;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -1116,7 +1117,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (e != null && e.getCause() != null)
 			{
 				Logger.e(TAG, "Exception : " + e.getCause().getMessage());
-				if (e.getCause() != null && e.getCause().toString().contains("UnknownHostException"))
+				if (e.getCause() instanceof UnknownHostException)
 				{
 					Logger.e(TAG, "DNS Failure , Connect using ips");
 					connectUsingIp = true;
