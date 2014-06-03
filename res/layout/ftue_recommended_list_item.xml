@@ -10,8 +10,7 @@
         android:layout_height="60dp"
         android:background="@drawable/list_item"
         android:orientation="horizontal"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp" >
+        android:paddingLeft="12dp" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
@@ -31,8 +30,9 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:paddingLeft="15dp"
-            android:paddingRight="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background ="@drawable/list_item"
             android:src="@drawable/ic_add_friend"
             android:visibility="gone" />
 
