@@ -227,7 +227,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		friendsAdapter.setListFetchedOnce(true);
 
-		friendsAdapter.makeCompleteList(true);
+		friendsAdapter.makeCompleteList(true, true);
 	}
 
 	private void clearAllLists()
