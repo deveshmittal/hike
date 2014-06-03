@@ -1542,5 +1542,7 @@
      <string name="new_ui_welcome_tip_msg">Easier to use and faster than ever</string>
      <string name="camera">Camera</string>
      <string name="camera_upper_case">CAMERA</string>
+     <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike, start chatting.</string>
+     <string name="see_all_upper_caps">SEE ALL</string>
     
 </resources>

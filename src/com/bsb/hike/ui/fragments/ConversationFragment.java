@@ -30,11 +30,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -48,6 +45,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
+import com.bsb.hike.adapters.EmptyConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -56,16 +54,14 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConversationTip;
+import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -158,44 +154,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 	}
 
-	private class FTUEGridAdapter extends ArrayAdapter<ContactInfo>
-	{
-
-		private IconLoader iconLoader;
-
-		public FTUEGridAdapter(Context context, int textViewResourceId, List<ContactInfo> objects)
-		{
-			super(context, textViewResourceId, objects);
-			iconLoader = new IconLoader(context, 180);
-			iconLoader.setDefaultAvatarIfNoCustomIcon(true);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent)
-		{
-			ContactInfo contactInfo = getItem(position);
-
-			if (convertView == null)
-			{
-				convertView = getLayoutInflater(null).inflate(R.layout.ftue_grid_item, parent, false);
-			}
-
-			ImageView avatarImage = (ImageView) convertView.findViewById(R.id.avatar);
-			ImageView avatarFrame = (ImageView) convertView.findViewById(R.id.avatar_frame);
-			TextView contactName = (TextView) convertView.findViewById(R.id.name);
-
-			avatarFrame.setImageResource(contactInfo.isOnhike() ? R.drawable.frame_avatar_highlight : R.drawable.frame_avatar_highlight_green);
-			iconLoader.loadImage(contactInfo.getMsisdn(), true, avatarImage, true);
-			// avatarImage.setImageDrawable(IconCacheManager.getInstance()
-			// .getIconForMSISDN(contactInfo.getMsisdn(), true));
-			contactName.setText(contactInfo.getFirstName());
-
-			convertView.setTag(contactInfo);
-
-			return convertView;
-		}
-	}
-
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
@@ -265,61 +223,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			ftueNotEmptyView.setVisibility(View.VISIBLE);
 
-			Button invite = (Button) emptyView.findViewById(R.id.invite);
-			Button newChat = (Button) emptyView.findViewById(R.id.new_chat);
-
-			invite.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					startActivity(new Intent(getActivity(), TellAFriend.class));
-
-					Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_FROM_GRID);
-				}
-			});
-
-			newChat.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					startActivity(new Intent(getActivity(), ComposeChatActivity.class));
-
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_GRID);
-				}
-			});
-
-			GridView ftueGrid = (GridView) emptyView.findViewById(R.id.ftue_grid);
-			ftueGrid.setAdapter(new FTUEGridAdapter(getActivity(), -1, HomeActivity.ftueList));
-			ftueGrid.setOnItemClickListener(new OnItemClickListener()
-			{
-
-				@Override
-				public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
-				{
-					
-					ContactInfo contactInfo = (ContactInfo) view.getTag();
-
-					if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
-					{
-						int stealthMode = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-						if (stealthMode != HikeConstants.STEALTH_ON)
-						{
-							return;
-						}
-					}
-
-					Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
-					intent.setClass(getActivity(), ChatThread.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-
-					Utils.sendUILogEvent(HikeConstants.LogEvent.GRID_6, contactInfo.getMsisdn());
-				}
-			});
+			ListView ftueListView = (ListView) emptyView.findViewById(R.id.ftue_list);
+			List<EmptyConversationItem> ftueListItems= new ArrayList<EmptyConversationItem>();
+			
+			int hikeContactCount = -1; // TODO need to fetch actual hike contacts count here
+			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueList, getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
+			ftueListItems.add(hikeContactsItem);
+			ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 		}
 	}
 
