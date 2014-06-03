@@ -28,6 +28,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.FriendsAdapter;
+import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -60,7 +61,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		ListView friendsList = (ListView) parent.findViewById(android.R.id.list);
 
-		friendsAdapter = new FriendsAdapter(getActivity(), friendsList);
+		friendsAdapter = new FriendsAdapter(getActivity(), friendsList, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparator);
 		friendsAdapter.setLoadingView(parent.findViewById(R.id.spinner));
 		friendsAdapter.setEmptyView(parent.findViewById(R.id.noResultView));
 
@@ -77,12 +78,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 		preferences = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
-
-		if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
-		{
-			lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
-			lastSeenScheduler.start(true);
-		}
 	}
 
 	@Override
@@ -581,4 +576,22 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		alertDialog.getListView().setDivider(getResources().getDrawable(R.drawable.ic_thread_divider_profile));
 		return true;
 	}
+
+	FriendsListFetchedCallback friendsListFetchedCallback = new FriendsListFetchedCallback()
+	{
+
+		@Override
+		public void listFetched()
+		{
+			if (!isAdded())
+			{
+				return;
+			}
+			if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+			{
+				lastSeenScheduler = LastSeenScheduler.getInstance(getActivity());
+				lastSeenScheduler.start(true);
+			}
+		}
+	};
 }

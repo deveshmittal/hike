@@ -40,6 +40,7 @@ import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.LastSeenComparator;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -47,6 +48,11 @@ import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class FriendsAdapter extends BaseAdapter implements OnClickListener, PinnedSectionListAdapter
 {
+
+	public static interface FriendsListFetchedCallback
+	{
+		public void listFetched();
+	}
 
 	private static final String TAG = "FreindsAdapter";
 
@@ -139,7 +145,11 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	
 	private Map<String, StatusMessage> lastStatusMessagesMap;
 
-	public FriendsAdapter(Context context, ListView listView)
+	protected FriendsListFetchedCallback friendsListFetchedCallback;
+
+	protected LastSeenComparator lastSeenComparator;
+
+	public FriendsAdapter(Context context, ListView listView, FriendsListFetchedCallback friendsListFetchedCallback, LastSeenComparator lastSeenComparator)
 	{
 		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -154,6 +164,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		 */
 		//this.showSMSContacts = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.FREE_SMS_PREF, true) || Utils.getSendSmsPref(context);
 		this.showSMSContacts = false;
+		this.friendsListFetchedCallback = friendsListFetchedCallback;
+		this.lastSeenComparator = lastSeenComparator;
 
 		completeList = new ArrayList<ContactInfo>();
 
@@ -334,6 +346,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public void makeCompleteList(boolean filtered)
 	{
+		makeCompleteList(filtered, false);
+	}
+
+	public void makeCompleteList(boolean filtered, boolean firstFetch)
+	{
+		if (firstFetch)
+		{
+			friendsListFetchedCallback.listFetched();
+		}
 
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
@@ -567,7 +588,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void addStealthContacts()
 	{
 		friendsList.addAll(friendsStealthList);
-		Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+		Collections.sort(friendsList, lastSeenComparator);
 
 		hikeContactsList.addAll(hikeStealthContactsList);
 		Collections.sort(hikeContactsList);
@@ -674,7 +695,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 		case FRIEND_INDEX:
 			friendsList.add(contactInfo);
-			Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+			Collections.sort(friendsList, lastSeenComparator);
 			break;
 		case HIKE_INDEX:
 			hikeContactsList.add(contactInfo);
