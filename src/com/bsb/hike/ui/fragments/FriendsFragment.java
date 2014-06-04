@@ -363,7 +363,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				@Override
 				public void run()
 				{
-					Collections.sort(friendsAdapter.getFriendsList(), ContactInfo.lastSeenTimeComparator);
 					friendsAdapter.makeCompleteList(false);
 				}
 			});
