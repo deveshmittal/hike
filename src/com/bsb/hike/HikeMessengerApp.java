@@ -347,6 +347,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
 
+	public static final String SHOW_START_NEW_CHAT_TIP = "showStartNewChatTip";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

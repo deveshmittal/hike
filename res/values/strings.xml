@@ -1542,5 +1542,7 @@
      <string name="new_ui_welcome_tip_msg">Easier to use and faster than ever</string>
      <string name="camera">Camera</string>
      <string name="camera_upper_case">CAMERA</string>
+     <string name="new_chat_tip_header">Start a new chat</string>
+     <string name="new_chat_tip_msg">tap on compose to see contacts</string>
     
 </resources>

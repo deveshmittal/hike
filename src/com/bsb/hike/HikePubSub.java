@@ -339,6 +339,8 @@ public class HikePubSub implements Runnable
 
 	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
 
+	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
