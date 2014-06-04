@@ -583,7 +583,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (lastSeenScheduler != null)
 		{
-			lastSeenScheduler.stop();
+			lastSeenScheduler.stop(false);
 			lastSeenScheduler = null;
 		}
 	}
@@ -3168,7 +3168,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					else
 					{
-						lastSeenScheduler.stop();
+						lastSeenScheduler.stop(false);
 					}
 					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 				}
