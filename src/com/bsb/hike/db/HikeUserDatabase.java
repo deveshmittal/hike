@@ -2127,7 +2127,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		if(limit > 0)
 		{
-			List<ContactInfo> nonHikeContacts = getNonHikeMostContactedContacts(limit);
+			List<ContactInfo> nonHikeContacts = getNonHikeMostContactedContacts(limit*4);
 			ftueContactsData.setTotalSmsContactsCount(getNonHikeContactsCount());
 
 			if (nonHikeContacts.size() >= limit)
