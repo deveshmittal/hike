@@ -1808,7 +1808,19 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					setProfileImage();
 
 					enterEditText.setText(mActivityState.userName);
-					enterEditText.setSelection(mActivityState.userName.length());
+
+					/*
+					 * Saw a few crashes here. Catching the exception since we don't seem to be doing anything wrong here.
+					 */
+					try
+					{
+						enterEditText.setSelection(mActivityState.userName.length());
+					}
+					catch (IndexOutOfBoundsException e)
+					{
+						Logger.w(getClass().getSimpleName(), "IOOB thrown while setting the name's textbox selection");
+					}
+
 					Button fbBtn = (Button) findViewById(R.id.connect_fb);
 					if (fbBtn != null)
 					{
