@@ -226,9 +226,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ListView ftueListView = (ListView) emptyView.findViewById(R.id.ftue_list);
 			List<EmptyConversationItem> ftueListItems= new ArrayList<EmptyConversationItem>();
 			
-			int hikeContactCount = -1; // TODO need to fetch actual hike contacts count here
-			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getCompleteList(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
-			ftueListItems.add(hikeContactsItem);
+			if(!HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
+			{
+				int hikeContactCount = HomeActivity.ftueContactsData.getTotalHikeContactsCount();
+				EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
+				ftueListItems.add(hikeContactsItem);
+			}
+			/*
+			 * We only add this item if hike contacts are less than 
+			 * certain threashold
+			 */
+			if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
+					&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
+			{
+				int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
+				EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
+				ftueListItems.add(hikeContactsItem);
+			}
 			ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 		}
 	}

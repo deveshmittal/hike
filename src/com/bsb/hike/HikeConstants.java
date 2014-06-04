@@ -1556,4 +1556,6 @@ public class HikeConstants
 	public static final long[] SHORT_VIB_PATTERN = new long[] { 0, 200, 100, 250 };
 
 	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
+
+	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
 }

@@ -1545,5 +1545,6 @@
      <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike, start chatting.</string>
      <string name="see_all_upper_caps">SEE ALL</string>
      <string name="recommend_more_upper_caps">RECOMMEND MORE</string>
+     <string name="ftue_sms_contact_card_header">placeholder %1$d sms contacts.</string>
     
 </resources>
