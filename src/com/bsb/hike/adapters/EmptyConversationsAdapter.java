@@ -20,6 +20,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
 
 public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationItem>
@@ -94,10 +95,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			viewHolder = (ViewHolder) v.getTag();
 		}
 
-		switch (item.getType())
+		if (item.getType() == EmptyConversationItem.HIKE_CONTACTS || item.getType() == EmptyConversationItem.SMS_CONTACTS)
 		{
-		case EmptyConversationItem.HIKE_CONTACTS:
-		case EmptyConversationItem.SMS_CONTACTS:
 			viewHolder.name.setText(item.getHeader());
 			viewHolder.mainInfo.setVisibility(View.GONE);
 
@@ -132,13 +131,42 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			{
 				parentView.findViewById(R.id.divider).setVisibility(View.GONE);
 			}
-			viewHolder.seeAll.setText(R.string.see_all_upper_caps);
-			viewHolder.seeAll.setOnClickListener(seeAllBtnClickListener);
 
+			switch (item.getType())
+			{
+			case EmptyConversationItem.HIKE_CONTACTS:
+				if (HomeActivity.ftueContactsData.getTotalHikeContactsCount() > HikeConstants.FTUE_LIMIT)
+				{
+					setUpSeeAllButton(viewHolder.seeAll);
+				}
+				else
+				{
+					viewHolder.seeAll.setVisibility(View.GONE);
+				}
+				break;
+			case EmptyConversationItem.SMS_CONTACTS:
+				if (HomeActivity.ftueContactsData.getTotalSmsContactsCount() > HomeActivity.ftueContactsData.getSmsContacts().size())
+				{
+					setUpSeeAllButton(viewHolder.seeAll);
+				}
+				else
+				{
+					viewHolder.seeAll.setVisibility(View.GONE);
+				}
+				break;
+
+			}
 		}
 		return v;
 	}
-	
+
+	private void setUpSeeAllButton(TextView seeAllView)
+	{
+		seeAllView.setVisibility(View.VISIBLE);
+		seeAllView.setText(R.string.see_all_upper_caps);
+		seeAllView.setOnClickListener(seeAllBtnClickListener);
+	}
+
 	@Override
 	public boolean isEnabled(int position)
 	{
