@@ -103,6 +103,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 			viewHolder.contactsContainer.removeAllViews();
 
+			int limit = HikeConstants.FTUE_LIMIT;
 			View parentView = null;
 			for (ContactInfo contactInfo : item.getContactList())
 			{
@@ -121,6 +122,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				parentView.setOnClickListener(ftueListItemClickListener);
 
 				viewHolder.contactsContainer.addView(parentView);
+
+				if (--limit == 0)
+				{
+					break;
+				}
 			}
 			if (parentView != null)
 			{
