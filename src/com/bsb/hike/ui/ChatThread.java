@@ -396,6 +396,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private HashMap<Integer, Boolean> mOptionsList = new HashMap<Integer, Boolean>();
 
+	private MessageReceiver mMessageReceiver;
+
+	private ChatThreadReceiver chatThreadReceiver;
+
+	private ScreenOffReceiver screenOffBR;
+
 	@Override
 	protected void onPause()
 	{
@@ -509,11 +515,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	private void unregisterReceivers()
+	{
+		if (mMessageReceiver != null)
+		{
+			LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+		}
+		if (chatThreadReceiver != null)
+		{
+			LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
+		}
+		if (screenOffBR != null)
+		{
+			unregisterReceiver(screenOffBR);
+		}
+	}
+
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		unregisterReceiver(screenOffBR);
+
+		unregisterReceivers();
+
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
 		{
 			Editor editor = prefs.edit();
@@ -521,8 +545,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			editor.commit();
 		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(chatThreadReceiver);
 		if (stickerAdapter != null)
 		{
 			stickerAdapter.unregisterListeners();
@@ -741,10 +763,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		/* registering localbroadcast manager */
+		mMessageReceiver = new MessageReceiver();
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
-		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
+
+		chatThreadReceiver = new ChatThreadReceiver();
 		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
+
+		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
 		Logger.i("chatthread", "on create end");
 	}
 
@@ -6078,7 +6105,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return mConversation != null && mConversation.isOnhike();
 	}
 
-	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver()
+	private class MessageReceiver extends BroadcastReceiver
 	{
 		@Override
 		public void onReceive(Context context, Intent intent)
@@ -6119,9 +6146,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// }
 			// }
 		}
-	};
+	}
 
-	private BroadcastReceiver chatThreadReceiver = new BroadcastReceiver()
+	private class ChatThreadReceiver extends BroadcastReceiver
 	{
 		@Override
 		public void onReceive(Context context, Intent intent)
@@ -6140,7 +6167,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
-	};
+	}
 
 	private void setActionModeOn(boolean isOn)
 	{
@@ -6801,16 +6828,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		fillerView.setVisibility(View.VISIBLE);
 	}
 
-	private BroadcastReceiver screenOffBR = new BroadcastReceiver()
+	private class ScreenOffReceiver extends BroadcastReceiver
 	{
-
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
 			Logger.d("chatthread", "on receive called screenoff");
 			screenOffEvent = true;
 		}
-	};
+	}
 
 	LastSeenFetchedCallback lastSeenFetchedCallback = new LastSeenFetchedCallback()
 	{
