@@ -132,6 +132,22 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		}
 		return v;
 	}
+	
+	@Override
+	public boolean isEnabled(int position)
+	{
+		EmptyConversationItem item = (EmptyConversationItem) getItem(position);
+		switch (item.getType())
+		{
+		case EmptyConversationItem.HIKE_CONTACTS:
+		case EmptyConversationItem.SMS_CONTACTS:
+			return false;
+
+		default:
+			break;
+		}
+		return super.isEnabled(position);
+	}
 
 	private OnClickListener ftueListItemClickListener = new OnClickListener()
 	{
