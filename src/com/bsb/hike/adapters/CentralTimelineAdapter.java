@@ -436,7 +436,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			int limit = HikeConstants.FTUE_LIMIT;
 
 			View parentView = null;
-			for (ContactInfo contactInfo : HomeActivity.ftueList)
+			for (ContactInfo contactInfo : HomeActivity.ftueContactsData.getCompleteList())
 			{
 				FavoriteType favoriteType = contactInfo.getFavoriteType();
 				if (favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_SENT || favoriteType == FavoriteType.REQUEST_SENT_REJECTED

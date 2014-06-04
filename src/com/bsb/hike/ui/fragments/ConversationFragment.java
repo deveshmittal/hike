@@ -215,7 +215,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		View ftueNotEmptyView = emptyView.findViewById(R.id.ftue_not_empty);
 
-		if (HomeActivity.ftueList.isEmpty())
+		if (HomeActivity.ftueContactsData.isEmpty())
 		{
 			ftueNotEmptyView.setVisibility(View.GONE);
 		}
@@ -227,7 +227,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			List<EmptyConversationItem> ftueListItems= new ArrayList<EmptyConversationItem>();
 			
 			int hikeContactCount = -1; // TODO need to fetch actual hike contacts count here
-			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueList, getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
+			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getCompleteList(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 			ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 		}

@@ -65,6 +65,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
@@ -84,7 +85,7 @@ import com.bsb.hike.utils.Utils;
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
 
-	public static List<ContactInfo> ftueList = new ArrayList<ContactInfo>(0);
+	public static FtueContactsData ftueContactsData = new FtueContactsData();
 
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
@@ -905,14 +906,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
-			if (ftueList.isEmpty())
+			if (ftueContactsData.isEmpty())
 			{
 				return;
 			}
 			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			ContactInfo favoriteToggleContact = favoriteToggle.first;
 
-			for (ContactInfo contactInfo : ftueList)
+			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(favoriteToggleContact.getMsisdn()))
 				{
@@ -925,12 +926,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.USER_JOINED.equals(type) || HikePubSub.USER_LEFT.equals(type))
 		{
-			if (ftueList.isEmpty())
+			if (ftueContactsData.isEmpty())
 			{
 				return;
 			}
 			String msisdn = (String) object;
-			for (ContactInfo contactInfo : ftueList)
+			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(msisdn))
 				{
@@ -1069,27 +1070,30 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
-	private class GetFTUEContactsTask extends AsyncTask<Void, Void, List<ContactInfo>>
+	private class GetFTUEContactsTask extends AsyncTask<Void, Void, FtueContactsData>
 	{
 
 		@Override
-		protected List<ContactInfo> doInBackground(Void... params)
+		protected FtueContactsData doInBackground(Void... params)
 		{
-			List<ContactInfo> contactList = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+			FtueContactsData ftueContactsDataResult = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
 			/*
 			 * This msisdn type will be the identifier for ftue contacts in the friends tab.
 			 */
-			for (ContactInfo contactInfo : contactList)
+			ftueContactsDataResult.setCompleteList();
+			for (ContactInfo contactInfo : ftueContactsDataResult.getCompleteList())
 			{
 				contactInfo.setMsisdnType(HikeConstants.FTUE_MSISDN_TYPE);
 			}
-			return contactList;
+
+			return ftueContactsDataResult;
 		}
 
 		@Override
-		protected void onPostExecute(List<ContactInfo> result)
+		protected void onPostExecute(FtueContactsData result)
 		{
-			ftueList = result;
+			ftueContactsData = result;
+			Logger.d("GetFTUEContactsTask","ftueContactsData = "+ ftueContactsData.toString());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
 		}
 	}
