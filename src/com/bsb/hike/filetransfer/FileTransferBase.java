@@ -41,6 +41,18 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
 	
+	protected static int RESPONSE_OK = 200;
+	
+	protected static int RESPONSE_ACCEPTED = 201;
+	
+	protected static int RESPONSE_BAD_REQUEST = 400;
+	
+	protected static int RESPONSE_NOT_FOUND = 404;
+	
+	protected String token;
+
+	protected String uId;
+
 	protected static String ETAG = "Etag";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
@@ -96,6 +108,18 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		this.hikeFileType = hikeFileType;
 		context = ctx;
 		this.fileTaskMap = fileTaskMap;
+	}
+	
+	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType, String token, String uId)
+	{
+		this.handler = handler;
+		this.mFile = destinationFile;
+		this.msgId = msgId;
+		this.hikeFileType = hikeFileType;
+		context = ctx;
+		this.fileTaskMap = fileTaskMap;
+		this.token = token;
+		this.uId = uId;
 	}
 
 	protected void setFileTotalSize(int ts)
