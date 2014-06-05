@@ -138,13 +138,13 @@ public class FileTransferManager extends BroadcastReceiver
 			@Override
 			public int getMaxChunkSize()
 			{
-				return 16 * 1024;
+				return 32 * 1024;
 			}
 
 			@Override
 			public int getMinChunkSize()
 			{
-				return 4 * 1024;
+				return 16 * 1024;
 			}
 		},
 		NO_NETWORK
