@@ -832,7 +832,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				@Override
 				public void run()
 				{
-					Collections.sort(adapter.getFriendsList(), ContactInfo.lastSeenTimeComparatorWithoutFav);
 					adapter.makeCompleteList(false);
 				}
 			});
