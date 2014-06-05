@@ -1187,7 +1187,7 @@ public class UploadFileTask extends FileTransferBase
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
 
-		else if (result != FTResult.PAUSED)
+		if (result != FTResult.PAUSED && result != FTResult.SUCCESS)
 		{
 			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled
 					: result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed : result == FTResult.CARD_UNMOUNT ? R.string.card_unmount
