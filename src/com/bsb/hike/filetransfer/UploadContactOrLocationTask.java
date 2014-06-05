@@ -70,9 +70,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private FutureTask<FTResult> futureTask;
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String msisdn, double latitude,
-			double longitude, int zoomLevel, boolean isRecipientOnhike)
+			double longitude, int zoomLevel, boolean isRecipientOnhike, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
@@ -84,9 +84,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	}
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String msisdn, JSONObject contactJson,
-			boolean isRecipientOnhike)
+			boolean isRecipientOnhike, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.msisdn = msisdn;
 		this.contactJson = contactJson;
 		this.uploadingContact = true;
@@ -96,9 +96,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	}
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, Object convMessage, boolean uploadingContact,
-			boolean isRecipientOnhike)
+			boolean isRecipientOnhike, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.userContext = convMessage;
 		this.uploadingContact = uploadingContact;
 		this.isRecipientOnhike = isRecipientOnhike;
