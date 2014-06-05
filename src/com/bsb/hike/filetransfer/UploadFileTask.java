@@ -70,10 +70,6 @@ public class UploadFileTask extends FileTransferBase
 
 	private String fileType;
 
-	private String token;
-
-	private String uId;
-
 	private String msisdn;
 
 	private boolean isRecipientOnhike;
@@ -101,9 +97,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
-		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
 		this.msisdn = msisdn;
 		this.fileType = fileType;
 		this.isRecipientOnhike = isRecipientOnHike;
@@ -119,9 +113,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Object convMessage,
 			boolean isRecipientOnHike)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.isRecipientOnhike = isRecipientOnHike;
 		userContext = convMessage;
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
@@ -136,9 +128,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri, Object convMessage,
 			boolean isRecipientOnHike)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.picasaUri = picasaUri;
 		this.isRecipientOnhike = isRecipientOnHike;
 		userContext = convMessage;
@@ -149,9 +139,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri,
 			HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.picasaUri = picasaUri;
 		this.hikeFileType = hikeFileType;
 		this.msisdn = msisdn;

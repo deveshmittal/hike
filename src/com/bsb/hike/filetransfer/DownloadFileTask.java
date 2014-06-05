@@ -42,9 +42,9 @@ public class DownloadFileTask extends FileTransferBase
 	private int num = 0;
 
 	protected DownloadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, String fileKey, long msgId,
-			HikeFileType hikeFileType, Object userContext, boolean showToast)
+			HikeFileType hikeFileType, Object userContext, boolean showToast, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType);
+		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType, token, uId);
 		this.fileKey = fileKey;
 		this.showToast = showToast;
 		this.userContext = userContext;
@@ -135,6 +135,7 @@ public class DownloadFileTask extends FileTransferBase
 				String byteRange = mStart + "-";
 				try
 				{
+					conn.setRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
 					conn.setRequestProperty("Range", "bytes=" + byteRange);
 					conn.setConnectTimeout(10000);
 				}
