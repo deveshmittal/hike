@@ -332,7 +332,6 @@
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
     </style>
-    
     <style name="ActivityAnimation">
         <item name="android:windowExitAnimation">@anim/fade_out_animation</item>
     	<item name="android:windowEnterAnimation">@anim/fade_in_animation</item>

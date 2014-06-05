@@ -740,6 +740,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 		}
 
+		mHandler.post(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				android.view.Window window = getWindow();
+				if (window != null)
+				{
+					window.setBackgroundDrawableResource(R.color.black);
+				}
+
+			}
+		});
 		/* registering localbroadcast manager */
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
