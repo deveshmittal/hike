@@ -20,6 +20,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -42,6 +45,7 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
@@ -243,8 +247,39 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
 				ftueListItems.add(hikeContactsItem);
 			}
+			if(ftueListView.getHeaderViewsCount()==0)
+			{
+				setupEmptyListViewHeader(ftueListView);
+			}
 			ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 		}
+	}
+
+	private void setupEmptyListViewHeader(ListView ftueListView)
+	{
+		View headerView = LayoutInflater.from(getActivity()).inflate(
+				R.layout.ftue_welcome_card_content, null);
+		headerView.setOnClickListener(null);
+		TextView startExploringBtn = (TextView) headerView.findViewById(R.id.card_btn);
+		ImageView cardHeaderImage = (ImageView)headerView.findViewById(R.id.card_header_img_bg);
+		
+		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), R.drawable.bg_ct_love_tile, 1);
+		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
+		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		cardHeaderImage.setImageDrawable(bd);
+		
+		startExploringBtn.setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				
+			}
+			
+		});
+		ftueListView.addHeaderView(headerView);
+		
 	}
 
 	@Override
