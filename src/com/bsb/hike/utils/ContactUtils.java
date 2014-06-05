@@ -542,6 +542,14 @@ public class ContactUtils
 			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE + "= 'com.whatsapp'";
 			greenblueContactsCursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, null, null);
 
+			/*
+			 * We were getting this cursor as null for some reason (saw crashes on the dev console).
+			 */
+			if (greenblueContactsCursor == null)
+			{
+				return;
+			}
+
 			int id = greenblueContactsCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
 
 			StringBuilder greenblueContactIds = null;
