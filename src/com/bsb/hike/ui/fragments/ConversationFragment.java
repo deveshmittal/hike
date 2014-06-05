@@ -1431,6 +1431,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			final boolean isTyping = HikePubSub.TYPING_CONVERSATION.equals(type);
 			final TypingNotification typingNotification = (TypingNotification) object;
 
+			if (getActivity() == null)
+			{
+				return;
+			}
 			getActivity().runOnUiThread(new Runnable()
 			{
 
@@ -1576,6 +1580,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
+			if (getActivity() == null)
+			{
+				return;
+			}
+
 			getActivity().runOnUiThread(new Runnable()
 			{
 				@Override
@@ -1587,6 +1596,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.CLEAR_FTUE_STEALTH_CONV.equals(type))
 		{
+			if (getActivity() == null)
+			{
+				return;
+			}
+
 			getActivity().runOnUiThread(new Runnable()
 			{
 				@Override
