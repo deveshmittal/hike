@@ -41,6 +41,13 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
 	
+	protected static int RESPONSE_OK = 200;
+	
+	protected static int RESPONSE_ACCEPTED = 201;
+	
+	protected static int RESPONSE_BAD_REQUEST = 400;
+	
+	protected static int RESPONSE_NOT_FOUND = 404;
 	protected static String ETAG = "Etag";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry

@@ -145,7 +145,7 @@ public class DownloadFileTask extends FileTransferBase
 				conn.connect();
 				int resCode = ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
 				// Make sure the response code is in the 200 range.
-				if (resCode == 400 || resCode == 404)
+				if (resCode == RESPONSE_BAD_REQUEST || resCode == RESPONSE_NOT_FOUND)
 				{
 					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();

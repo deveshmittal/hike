@@ -1077,36 +1077,27 @@ public class UploadFileTask extends FileTransferBase
 		{
 			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if(e instanceof HttpException)
-			{
-				res = ((HttpException) e).toString();
-				Logger.d(getClass().getSimpleName(),"response: " + res);
-			}
 			if (e.getMessage() == null)
 			{
 				error();
 				res = null;
 				retry = false;
 			}
-			
-//			Logger.d(getClass().getSimpleName(), "Caught Exception: " + e.getMessage());
-//			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2) || e.getMessage().contains(NETWORK_ERROR_3)))
-//			{
-//				Logger.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
-//				// we should retry if failed due to network
-//			}
-//			else
-//			{
-//				error();
-//				res = null;
-//				retry = false;
-//			}
+			return null;
 		}
-		if (retryAttempts >= MAX_RETRY_ATTEMPTS || resCode == 400 || resCode == 404)
+		if (resCode != 0 && resCode != RESPONSE_OK && resCode != RESPONSE_ACCEPTED)
 		{
 			error();
 			res = null;
-			retry = false;
+			if (retryAttempts >= MAX_RETRY_ATTEMPTS || resCode == RESPONSE_BAD_REQUEST || resCode == RESPONSE_NOT_FOUND)
+			{
+				retry = false;
+			}
+			else if (resCode /100 == 5)
+			{
+				deleteStateFile();
+				retry = false;
+			}
 		}
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s.  Response: " + resCode);
