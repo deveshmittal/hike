@@ -18,8 +18,18 @@ public class ContactManager implements ITransientCache
 	private ContactManager()
 	{
 		cache = new ContactsCache();
+		loadPersistenceCache();
 	}
 	
+	/**
+	 * 
+	 */
+	private void loadPersistenceCache()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 	public static ContactManager getInstance()
 	{
 		return _instance;
@@ -43,6 +53,11 @@ public class ContactManager implements ITransientCache
 		cache.clearTransientMemory();
 	}
 	
+	/**
+	 * This function will return name or null for a particular msisdn
+	 * @param msisdn
+	 * @return
+	 */
 	public ContactInfo getContact(String msisdn)
 	{
 		ContactInfo c = null;

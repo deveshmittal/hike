@@ -9,9 +9,9 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
 /**
- * @author Gautam This class is used as a cache to store the contacts. This hides the mechanism of storing the contacts object from the clients and the manager. This class should
- *         be enhanced properly when logic of caching is changed. All the threading stuff should be handled by this class only. Most of the operation will be read so synchronizing
- *         with mutex is not good. Taking explicit read write locks will enhance performance.
+ * @author Gautam This class is used as a cache to store the contacts. This hides the mechanism of storing the contacts object from the clients and the manager. 
+ * This class should be enhanced properly when logic of caching is changed. All the threading stuff should be handled by this class only. Most of the operation will be read so synchronizing
+ * with mutex is not good. Taking explicit read write locks will enhance performance.
  */
 class ContactsCache
 {

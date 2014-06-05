@@ -602,7 +602,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				}
 				catch (Exception e)
 				{
-					Logger.e(getClass().getSimpleName(), "Exception while getting contact",e);
+					Logger.e(getClass().getSimpleName(), "Exception while getting contact", e);
 				}
 			}
 			return transientContactMap;
@@ -1810,14 +1810,29 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return getNonHikeMostContactedContactsFromListOfNumbers(data.first, data.second, limit);
 	}
 
+	private Cursor getContactsCursorForMsisdnList(String msisdns)
+	{
+		Cursor c = null;
+		c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.MSISDN + ", "
+				+ DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + " from " + DBConstants.USERS_TABLE
+				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
+		return c;
+	}
+
+	private Cursor getContactsForMsisdnList(String msisdns)
+	{
+		Cursor c = null;
+		c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.ONHIKE + ", "
+				+ DBConstants.HAS_CUSTOM_PHOTO + " from " + DBConstants.USERS_TABLE + " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
+		return c;
+	}
+
 	public List<ContactInfo> getContactNamesFromMsisdnList(String msisdns)
 	{
 		Cursor c = null;
 		try
 		{
-			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.ONHIKE + ", "
-					+ DBConstants.HAS_CUSTOM_PHOTO + " from " + DBConstants.USERS_TABLE + " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN,
-					null);
+			c = getContactsForMsisdnList(msisdns);
 
 			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
 
@@ -1838,6 +1853,32 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				contactList.add(contactInfo);
 			}
 			return contactList;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	public Map<String,ContactInfo> getContactsMapFromMsisdnList(String msisdns)
+	{
+		Cursor c = null;
+		Map<String,ContactInfo> map = new HashMap<String, ContactInfo>();
+		try
+		{
+			c = getContactsCursorForMsisdnList(msisdns);
+			if(c != null)
+			{
+				while(c.moveToNext())
+				{
+					ContactInfo cInfo = processContact(c);
+					map.put(cInfo.getMsisdn(), cInfo);
+				}
+			}
+			return map;
 		}
 		finally
 		{
