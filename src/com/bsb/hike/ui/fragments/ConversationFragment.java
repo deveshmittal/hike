@@ -1078,7 +1078,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					return;
 				}
 			}
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1113,7 +1113,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				messageList.add(message);
 			}
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1153,7 +1153,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			mConversationsAdded.add(conversation.getMsisdn());
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1210,7 +1210,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			/*
 			 * We should only update the view if the last message's state was changed.
 			 */
-			if (getActivity() == null || lastConvMessage == null)
+			if (!isAdded() || lastConvMessage == null)
 			{
 				return;
 			}
@@ -1234,7 +1234,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 
-				if (getActivity() == null)
+				if (!isAdded())
 				{
 					return;
 				}
@@ -1284,7 +1284,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			}
 
-			if (getActivity() == null || lastConvMessage == null)
+			if (!isAdded() || lastConvMessage == null)
 			{
 				return;
 			}
@@ -1318,7 +1318,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
 
-				if (getActivity() == null)
+				if (!isAdded())
 				{
 					return;
 				}
@@ -1337,7 +1337,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1378,7 +1378,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			conv.setContactName(groupName);
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1406,7 +1406,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				conversation.setContactName(contactInfo.getName());
 
-				if (getActivity() == null)
+				if (!isAdded())
 				{
 					return;
 				}
@@ -1431,7 +1431,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			final boolean isTyping = HikePubSub.TYPING_CONVERSATION.equals(type);
 			final TypingNotification typingNotification = (TypingNotification) object;
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1455,7 +1455,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			conv.setUnreadCount(0);
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1486,7 +1486,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1501,7 +1501,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type))
 		{
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1540,7 +1540,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1556,7 +1556,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP.equals(type))
 		{
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1580,7 +1580,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1596,7 +1596,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.CLEAR_FTUE_STEALTH_CONV.equals(type))
 		{
-			if (getActivity() == null)
+			if (!isAdded())
 			{
 				return;
 			}
@@ -1767,7 +1767,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		final ConvMessage newMessage = new ConvMessage("", msisdn, convMessage != null ? convMessage.getTimestamp() : 0, State.RECEIVED_READ);
 		messages.add(newMessage);
 
-		if (getActivity() == null)
+		if (!isAdded())
 		{
 			return;
 		}
