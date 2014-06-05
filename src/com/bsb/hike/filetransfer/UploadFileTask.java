@@ -18,10 +18,11 @@ import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.http.HttpException;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -971,33 +972,38 @@ public class UploadFileTask extends FileTransferBase
 		if(TextUtils.isEmpty(fileKey))
 			return false;
 		
+		// If we are not able to verify the filekey validity from the server, fall back to uploading the file
 		try
 		{
 			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
-			URLConnection conn = initConn();
-			long start = 0;
-			String byteRange = start + "-";
-			try
-			{
-				conn.setRequestProperty("Range", "bytes=" + byteRange);
-				conn.setConnectTimeout(10000);
-			}
-			catch (Exception e)
-			{
+			HttpClient client = new DefaultHttpClient();
+			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+			HttpHead head = new HttpHead(mUrl.toString());
+			head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 
-			}
-			conn.connect();
-			int resCode = AccountUtils.ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
-			// Make sure the response code is in the 200 range.
-			if (resCode / 100 != 2)
+			HttpResponse resp = client.execute(head);
+			int resCode = resp.getStatusLine().getStatusCode();
+			// Make sure the response code is 200.
+			if (resCode == RESPONSE_OK)
 			{
-				fileKey = null;
-				return false;
+				// This is to get the file size from server
+				// continue anyway if not able to obtain the size
+				try
+				{
+					String range = resp.getFirstHeader("Content-Range").getValue();
+					fileSize = Integer.valueOf(range.substring(range.lastIndexOf("/") + 1, range.length()));
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					fileSize = 0;
+				}
+				return true;
 			}
 			else
 			{
-				fileSize = conn.getContentLength();
-				return true;
+				fileKey = null;
+				return false;
 			}
 		}
 		catch (Exception e)
