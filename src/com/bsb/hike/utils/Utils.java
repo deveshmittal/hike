@@ -90,6 +90,7 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -1276,15 +1277,24 @@ public class Utils
 
 	public static String getRealPathFromUri(Uri contentUri, Activity activity)
 	{
+		String filePath = null;
 		String[] proj = { MediaStore.Images.Media.DATA };
 		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
 		if (cursor == null || cursor.getCount() == 0)
 		{
-			return null;
+			//return null;
 		}
-		int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		cursor.moveToFirst();
-		return cursor.getString(column_index);
+		else
+		{
+			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			filePath = cursor.getString(column_index);
+		}
+		if(filePath == null)
+		{
+			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
+		}
+		return filePath;
 	}
 
 	public static enum ExternalStorageState
@@ -2917,6 +2927,11 @@ public class Utils
 	public static boolean isHoneycombOrHigher()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+
+	public static boolean isKitkatOrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 	}
 
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
