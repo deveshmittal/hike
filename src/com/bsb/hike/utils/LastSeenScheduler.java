@@ -126,7 +126,10 @@ public class LastSeenScheduler
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 		{
 			resetLastSeenRetryParams(retrySingle);
-			lastSeenFetchedCallback.lastSeenFetched(msisdn, offline, lastSeenTime);
+			if (lastSeenFetchedCallback != null)
+			{
+				lastSeenFetchedCallback.lastSeenFetched(msisdn, offline, lastSeenTime);
+			}
 		}
 	};
 

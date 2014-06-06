@@ -463,7 +463,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		int prevStealthValue = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		resetStealthPreferences();
-		stealthConversations.clear();
 
 		/*
 		 * If previously the stealth mode was off, we should publish an event telling the friends fragment to refresh its list.
