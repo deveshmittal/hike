@@ -349,6 +349,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOW_START_NEW_CHAT_TIP = "showStartNewChatTip";
 
+	public static final String SHOW_STEALTH_UNREAD_TIP = "showStelathUnreadTip";
+
+	public static final String STEALTH_UNREAD_TIP_MESSAGE = "stealthUnreadTipMessage";
+
+	public static final String STEALTH_UNREAD_TIP_HEADER = "stealthUnreadTipHeader";
+	
+	public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
