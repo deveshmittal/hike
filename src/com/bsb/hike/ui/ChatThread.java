@@ -2065,6 +2065,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(messageMap == null)
 			return;
 
+		if (msg.isGroupChat())
+		{
+			return;
+		}
+
 		if(msg.isFileTransferMessage())
 		{
 			if(!TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
