@@ -1546,8 +1546,11 @@
      <string name="see_all_upper_caps">SEE ALL</string>
      <string name="recommend_more_upper_caps">RECOMMEND MORE</string>
      <string name="ftue_sms_contact_card_header">placeholder %1$d sms contacts.</string>
+     <string name="skip_upper_caps">SKIP</string>
      <string name="welcome_to_hike">Welcome to hike</string>
      <string name="ftue_welcome_card_msg">Hike is full of awesome things. We\’d love to show them to you</string>
      <string name="start_exploring">START EXPLORING</string>
+     <string name="hidden_mode">Hidden mode</string>
+     <string name="ftue_hidden_mode_card_msg">Mark your private chats as hidden and access them with passcode.</string>
     
 </resources>

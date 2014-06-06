@@ -210,6 +210,13 @@
             android:name="com.bsb.hike.ui.TimelineActivity" 
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
+         <activity
+            android:name="com.bsb.hike.ui.FtueCardsActivity"
+            android:label="@string/app_label"
+            android:launchMode="singleTop"
+            android:theme="@style/NoTitleBar" >
+        </activity>
+        
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"

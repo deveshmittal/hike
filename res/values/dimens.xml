@@ -138,4 +138,12 @@
 	<dimen name="favorites_star_icon_drawable_padding">7dp</dimen>
 	<dimen name="medium_avatar_2">52dp</dimen>
 	<dimen name="overflow_menu_right_margin">8dp</dimen>
+	<dimen name="ftue_card_text_header_font">32dp</dimen>
+	<dimen name="ftue_card_text_msg_font">16dp</dimen>
+	<dimen name="ftue_card_page_indicator_height">22dp</dimen>
+	<dimen name="card_header_img_content_padding_top">8dp</dimen>
+	<dimen name="card_header_img_content_padding_bottom">50dp</dimen>
+	<dimen name="card_header_text_padding_left">10dp</dimen>
+	<dimen name="card_header_text_padding_right">10dp</dimen>
+	
 </resources>
