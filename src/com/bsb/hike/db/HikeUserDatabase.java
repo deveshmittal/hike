@@ -1813,9 +1813,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	private Cursor getContactsCursorForMsisdnList(String msisdns)
 	{
 		Cursor c = null;
-		c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.MSISDN + ", "
-				+ DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + " from " + DBConstants.USERS_TABLE
-				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
+		c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", "
+				+ DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME
+				+ ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE + " WHERE "
+				+ DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
 		return c;
 	}
 
@@ -1827,6 +1828,31 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return c;
 	}
 
+	public void getConversationContacts(Map<String, ContactInfo> map)
+	{
+		String msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		Cursor c = null;
+		try
+		{
+			c = getContactsCursorForMsisdnList(msisdns);
+			if (c != null)
+			{
+				while (c.moveToNext())
+				{
+					ContactInfo cInfo = processContact(c);
+					map.put(cInfo.getMsisdn(), cInfo);
+				}
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
 	public List<ContactInfo> getContactNamesFromMsisdnList(String msisdns)
 	{
 		Cursor c = null;

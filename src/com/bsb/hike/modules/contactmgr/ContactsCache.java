@@ -159,9 +159,9 @@ class ContactsCache
 	 */
 	void loadPersistenceMemory()
 	{
-		
+		HikeUserDatabase.getInstance().getConversationContacts(persistenceMap);
 	}
-	
+
 	public void clearTransientMemory()
 	{
 		writeLockTrans.lock();

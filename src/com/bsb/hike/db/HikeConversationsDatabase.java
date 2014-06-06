@@ -1215,6 +1215,55 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public String getConversationMsisdns()
+	{
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA }, null, null, null,
+				null, null);
+
+		final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
+		final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+
+		try
+		{
+			StringBuilder msisdns = new StringBuilder("(");
+
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnColumn);
+				String groupParticipant = c.getString(groupParticipantColumn);
+				String metadata = c.getString(metadataColumn);
+
+				if (Utils.isGroupConversation(msisdn))
+				{
+					// TODO get last message in group MSISDN from metadata 
+				}
+				else
+				{
+					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				}
+			}
+
+			int idx = msisdns.lastIndexOf(",");
+			if (idx < 0)
+			{
+				return null;
+			}
+
+			msisdns.replace(idx, msisdns.length(), ")");
+
+			return msisdns.toString();
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
+	}
+
 	public List<Conversation> getConversations()
 	{
 		long startTime = System.currentTimeMillis();
