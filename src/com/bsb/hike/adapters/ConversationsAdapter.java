@@ -60,7 +60,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP
 	}
 
 	private class ViewHolder
@@ -140,7 +140,9 @@ public class ConversationsAdapter extends BaseAdapter
 			case ConversationTip.WELCOME_HIKE_TIP:
 				return ViewType.WELCOME_HIKE_TIP.ordinal();
 			case ConversationTip.START_NEW_CHAT_TIP:
-				return ViewType.START_NEW_CHAT_TIP.ordinal();	
+				return ViewType.START_NEW_CHAT_TIP.ordinal();
+			case ConversationTip.STEALTH_UNREAD_TIP:
+				return ViewType.STEALTH_UNREAD_TIP.ordinal();	
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
@@ -182,7 +184,10 @@ public class ConversationsAdapter extends BaseAdapter
 				break;	
 			case START_NEW_CHAT_TIP:
 				v = inflater.inflate(R.layout.start_new_chat_tip, parent, false);
-				break;		
+				break;
+			case STEALTH_UNREAD_TIP:
+				v = inflater.inflate(R.layout.stealth_unread_tip, parent, false);
+				break;	
 			default:
 				break;
 			}
@@ -295,6 +300,34 @@ public class ConversationsAdapter extends BaseAdapter
 				public void onClick(View view)
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_START_NEW_CHAT_TIP, null);
+				}
+			});
+			return v;
+		}
+		else if (viewType == ViewType.STEALTH_UNREAD_TIP)
+		{
+			View close = v.findViewById(R.id.close_tip);
+			String headerTxt = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_UNREAD_TIP_HEADER, "");
+			String msgTxt = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, "");
+			((TextView)v.findViewById(R.id.tip_header)).setText(headerTxt);
+			((TextView)v.findViewById(R.id.tip_msg)).setText(msgTxt);
+			v.findViewById(R.id.all_content).setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
+				}
+			});
+			
+			close.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
 				}
 			});
 			return v;
