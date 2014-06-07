@@ -93,7 +93,7 @@ public class HikeBitmapFactory
 			return null;
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
-		return getBitmapDrawable(decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+		return getBitmapDrawable(decodeBitmapFromByteArray(thumbnailBytes, Config.RGB_565));
 	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail)
