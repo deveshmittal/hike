@@ -460,7 +460,6 @@
     <string name="gc_fallback_offline">You need to be online to send this message</string>
     <string name="stickers">Stickers</string>
     <string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
-    <string name="new_stickers_available">New stickers available!</string>
     <string name="updating_set">Updating the set</string>
     <string name="downloading_category">Downloading new stickers</string>
     <string name="download">Download</string>
@@ -1012,7 +1011,6 @@
     <string name="gc_fallback_offline">You need to be online to send this message</string>
     <string name="stickers">Stickers</string>
     <string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
-    <string name="new_stickers_available">New stickers available!</string>
     <string name="updating_set">Updating the set</string>
     <string name="downloading_category">Downloading new stickers</string>
     <string name="download">Download</string>
@@ -1529,5 +1527,6 @@
      <string name="email_chat">Email Chat</string>
      <string name="clear_chat">Clear Chat</string>
      <string name="add_shortcut">Add Shortcut</string>
+     <string name="new_stickers_available">Tap to download new stickers</string>
      
 </resources>
