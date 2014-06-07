@@ -413,6 +413,38 @@ public class HikeBitmapFactory
 		return result;
 	}
 
+	/**
+	 * This method decodes a bitmap from byte array with particular configuration config passed as a parameter. Bitmap will not be sampled , only configuration will be config. To
+	 * sample down bitmap use decodeSampledBitmapFromByteArray
+	 * 
+	 * @param bytearray
+	 * @param con
+	 * @return
+	 */
+	public static Bitmap decodeBitmapFromByteArray(byte[] bytearray, Config config)
+	{
+		if (bytearray == null)
+			return null;
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = config;
+
+		Bitmap result = null;
+		try
+		{
+			result = decodeByteArray(bytearray, 0, bytearray.length, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = decodeByteArray(bytearray, 0, bytearray.length);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
+		}
+		return result;
+	}
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private static void addInBitmapOptions(BitmapFactory.Options options)
 	{
