@@ -1544,5 +1544,6 @@
      <string name="camera_upper_case">CAMERA</string>
      <string name="new_chat_tip_header">Start a new chat</string>
      <string name="new_chat_tip_msg">tap on compose to see contacts</string>
+     <string name="sticker_tip_msg">tap sticker icon to open sticker panel!</string>
     
 </resources>
