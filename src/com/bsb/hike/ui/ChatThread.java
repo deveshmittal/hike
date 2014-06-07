@@ -1701,6 +1701,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mLabel = mConversation.getLabel();
+		if (!(mConversation instanceof GroupConversation))
+		{
+			 	  mLabel = Utils.getFirstName(mLabel);
+	    }
 
 		if (showKeyboard && !wasOrientationChanged)
 		{
@@ -2799,6 +2803,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
 				this.mLabel = contactInfo.getName();
+				if (!(mConversation instanceof GroupConversation))
+      			{
+	                 this.mLabel = Utils.getFirstName(mLabel);
+				}
 				runOnUiThread(new Runnable()
 				{
 					@Override
