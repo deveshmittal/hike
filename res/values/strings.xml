@@ -1552,5 +1552,14 @@
      <string name="start_exploring">START EXPLORING</string>
      <string name="hidden_mode">Hidden mode</string>
      <string name="ftue_hidden_mode_card_msg">Mark your private chats as hidden and access them with passcode.</string>
+     <string name="hike_offline">Hike offline</string>
+     <string name="attachments">Attachments</string>
+     <string name="ftue_sticker_card_msg">When words can\’t express, say it with a sticker. You\’ll love them!</string>
+     <string name="ftue_attachment_card_msg">Send photos, video, pdfs, docs and a lot more up to 100MB each.</string>
+     <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline</string>
+     <string name="ftue_favorites_card_msg">Only favorites can see your last seen and status updates</string>
+     <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
+     <string name="themes">Themes</string>
+     
     
 </resources>
