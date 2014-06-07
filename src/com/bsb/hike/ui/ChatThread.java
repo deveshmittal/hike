@@ -5608,21 +5608,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			dividerBg = getResources().getColor(R.color.love_div);
 			break;
-		case angry:
-			resParentBg = getResources().getColor(R.color.angry_bg);
-
-			stickerBtnBg = R.drawable.angry_btn;
-			stickerBtnText = R.string.download;
-			stickerBtnTextColor = getResources().getColor(R.color.angry_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.angry_btn_text_shadow);
-
-			categoryText = "Hot Heads";
-			categoryTextColor = getResources().getColor(R.color.angry_text);
-			categoryTextShadowColor = getResources().getColor(R.color.angry_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.angry_div);
-			break;
-		case sports:
+        case sports:
 			resParentBg = getResources().getColor(R.color.sports_bg);
 
 			stickerBtnBg = R.drawable.sports_btn;

@@ -228,14 +228,8 @@
     <color name="love_text_shadow">#c44d71</color>
     <color name="love_btn_text_shadow">#c44d71</color>
     <color name="love_div">#c44d71</color>
-    <color name="angry_bg">#be251e</color>
     <color name="angry_btn_normal">#c54943</color>
     <color name="angry_btn_pressed">#ad3e39</color>
-    <color name="angry_text">#ffffff</color>
-    <color name="angry_btn_text">#ffffff</color>
-    <color name="angry_text_shadow">#a51d17</color>
-    <color name="angry_btn_text_shadow">#a51d17</color>
-    <color name="angry_div">#a51d17</color>
     <color name="valentine_nudge_white">#ffffef</color>
     <color name="valenting_nudge_button_pressed">#26000000</color>
     <color name="selected_msg_item_bg">#1A0f8fe1</color>
