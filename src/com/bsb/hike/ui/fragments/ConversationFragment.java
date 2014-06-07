@@ -218,42 +218,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 
-		View ftueNotEmptyView = emptyView.findViewById(R.id.ftue_not_empty);
+		ListView ftueListView = (ListView) emptyView.findViewById(R.id.ftue_list);
+		List<EmptyConversationItem> ftueListItems= new ArrayList<EmptyConversationItem>();
 
-		if (HomeActivity.ftueContactsData.isEmpty())
+		if(!HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
 		{
-			ftueNotEmptyView.setVisibility(View.GONE);
+			int hikeContactCount = HomeActivity.ftueContactsData.getTotalHikeContactsCount();
+			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
+			ftueListItems.add(hikeContactsItem);
 		}
-		else
+		/*
+		 * We only add this item if hike contacts are less than 
+		 * certain threashold
+		 */
+		if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
+				&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
 		{
-			ftueNotEmptyView.setVisibility(View.VISIBLE);
-
-			ListView ftueListView = (ListView) emptyView.findViewById(R.id.ftue_list);
-			List<EmptyConversationItem> ftueListItems= new ArrayList<EmptyConversationItem>();
-			
-			if(!HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
-			{
-				int hikeContactCount = HomeActivity.ftueContactsData.getTotalHikeContactsCount();
-				EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
-				ftueListItems.add(hikeContactsItem);
-			}
-			/*
-			 * We only add this item if hike contacts are less than 
-			 * certain threashold
-			 */
-			if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
-					&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
-			{
-				int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
-				EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
-				ftueListItems.add(hikeContactsItem);
-			}
-			if(ftueListView.getHeaderViewsCount()==0)
-			{
-				setupEmptyListViewHeader(ftueListView);
-			}
-			ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
+			int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
+			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
+			ftueListItems.add(hikeContactsItem);
 		}
+		if(ftueListView.getHeaderViewsCount()==0)
+		{
+			setupEmptyListViewHeader(ftueListView);
+		}
+		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
 	private void setupEmptyListViewHeader(ListView ftueListView)

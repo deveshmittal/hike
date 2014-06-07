@@ -6,17 +6,10 @@
     android:background="#ececec"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/ftue_not_empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
-
-        <ListView
-            android:id="@+id/ftue_list"
-            style="@style/HomeList"
-            android:dividerHeight="0.5dp"
-            android:divider="@drawable/home_list_divider" />
-    </LinearLayout>
+    <ListView
+        android:id="@+id/ftue_list"
+        style="@style/HomeList"
+        android:divider="@drawable/home_list_divider"
+        android:dividerHeight="0.5dp" />
 
 </RelativeLayout>
