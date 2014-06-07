@@ -82,6 +82,19 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.parent = v.findViewById(R.id.main_content);
 
 				viewHolder.seeAll = (TextView) v.findViewById(R.id.see_all);
+				
+				viewHolder.contactsContainer.removeAllViews();
+				int limit = HikeConstants.FTUE_LIMIT;
+				for (int i=0; i< item.getContactList().size(); i++)
+				{
+					View parentView = inflater.inflate(R.layout.ftue_recommended_list_item, parent, false);
+					viewHolder.contactsContainer.addView(parentView);
+					
+					if (--limit == 0)
+					{
+						break;
+					}
+				}
 
 				break;
 
@@ -100,13 +113,12 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			viewHolder.name.setText(item.getHeader());
 			viewHolder.mainInfo.setVisibility(View.GONE);
 
-			viewHolder.contactsContainer.removeAllViews();
-
 			int limit = HikeConstants.FTUE_LIMIT;
 			View parentView = null;
-			for (ContactInfo contactInfo : item.getContactList())
+			for (int i=0; i< item.getContactList().size(); i++)
 			{
-				parentView = inflater.inflate(R.layout.ftue_recommended_list_item, parent, false);
+				ContactInfo contactInfo = item.getContactList().get(i);
+				parentView = viewHolder.contactsContainer.getChildAt(i);
 
 				ImageView avatar = (ImageView) parentView.findViewById(R.id.avatar);
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
@@ -119,8 +131,6 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 				parentView.setTag(contactInfo);
 				parentView.setOnClickListener(ftueListItemClickListener);
-
-				viewHolder.contactsContainer.addView(parentView);
 
 				if (--limit == 0)
 				{
