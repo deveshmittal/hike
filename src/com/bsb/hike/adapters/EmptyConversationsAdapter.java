@@ -137,10 +137,6 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 					break;
 				}
 			}
-			if (parentView != null)
-			{
-				parentView.findViewById(R.id.divider).setVisibility(View.GONE);
-			}
 
 			switch (item.getType())
 			{

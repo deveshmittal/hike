@@ -74,13 +74,8 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/card_btn"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/card_button_selector"
-            android:gravity="center"
             android:text="@string/start_exploring"
-            android:textColor="@color/blue_hike"
-            android:textSize="15sp" />
+            style="@style/FtueCardActionButton" />
     </LinearLayout>
 
 </LinearLayout>

@@ -5,10 +5,10 @@
     android:layout_height="wrap_content" >
 
     <RelativeLayout
-        style="@style/UpdatesContainer"
+        style="@style/CardContainerWithdoutPadding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp" >
+        android:paddingTop="23dp" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/name"
@@ -19,7 +19,8 @@
             android:textColor="@color/ftue_card_header"
             android:textSize="24sp"
             android:textStyle="italic"
-            android:paddingLeft="12dp" />
+            android:paddingRight="10dp"
+            android:paddingLeft="22dp" />
 
         <LinearLayout
             android:id="@+id/details_content"
@@ -27,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/name"
             android:layout_marginRight="5dp"
-            android:paddingLeft="12dp"
+            android:paddingLeft="22dp"
+            android:paddingRight="10dp"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.LinkedTextView
@@ -47,21 +49,15 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/details_content"
             android:layout_marginTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:orientation="vertical" />
         
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/see_all"
-            android:layout_width="wrap_content"
-	        android:layout_height="50dp"
-	        android:background="@drawable/list_item"
-	        android:orientation="horizontal"
-	        android:textSize="14sp"
-	        android:textColor="#0f8fe1"
-	        android:gravity="center_vertical"
-	        android:paddingLeft="17dp"
-	        android:paddingRight="12dp"
-	        android:layout_below="@id/contacts_container"
-	        android:text="see all aj;f;a fad;f" />
+            android:text="@string/see_all_upper_caps"
+            style="@style/FtueCardActionButton"
+            android:layout_below="@id/contacts_container" />
         
     </RelativeLayout>
 

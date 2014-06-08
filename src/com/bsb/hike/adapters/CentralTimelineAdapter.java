@@ -469,10 +469,6 @@ public class CentralTimelineAdapter extends BaseAdapter
 					break;
 				}
 			}
-			if (parentView != null)
-			{
-				parentView.findViewById(R.id.divider).setVisibility(View.GONE);
-			}
 			viewHolder.seeAll.setText(R.string.recommend_more_upper_caps);
 			viewHolder.seeAll.setOnClickListener(seeAllBtnClickListener);
 			break;
