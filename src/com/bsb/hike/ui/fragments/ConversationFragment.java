@@ -241,6 +241,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if(ftueListView.getHeaderViewsCount()==0)
 		{
 			setupEmptyListViewHeader(ftueListView);
+			addBottomPadding(ftueListView);
 		}
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
@@ -272,6 +273,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		});
 		ftueListView.addHeaderView(headerView);
 		
+	}
+	
+	/*
+	 * We are adding this footer in empty state list view
+	 * to give proper padding at the bottom of the list.
+	 */
+	private void addBottomPadding(ListView ftueListView)
+	{
+		View paddingView = LayoutInflater.from(getActivity()).inflate(
+				R.layout.ftue_list_padding_footer_view, null);
+		ftueListView.addFooterView(paddingView);
 	}
 
 	@Override
