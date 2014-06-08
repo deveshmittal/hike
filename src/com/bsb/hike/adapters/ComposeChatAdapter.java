@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +20,11 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
@@ -47,10 +51,12 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private List<ContactInfo> newContactsList;
 
 	private boolean isCreatingOrEditingGroup;
+	
+	private boolean lastSeenPref;
 
-	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId)
+	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
-		super(context, listView);
+		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
 		existingParticipants = new HashMap<String, ContactInfo>();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -62,6 +68,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		groupsList = new ArrayList<ContactInfo>(0);
 		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		/*
+		 * We should show sms contacts section in new compose
+		 */
+		showSMSContacts = true;
 	}
 
 	public void setIsCreatingOrEditingGroup(boolean b)
@@ -75,7 +86,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
 				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList,
-				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup);
+				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -104,6 +115,16 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			TextView count = (TextView) convertView.findViewById(R.id.count);
 			count.setText(contactInfo.getMsisdn());
 			// set section heading
+			if(contactInfo.getPhoneNum()!=null && contactInfo.getPhoneNum().equals(FRIEND_PHONE_NUM))
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_favorites_star), null, null, null);
+				tv.setCompoundDrawablePadding((int) context.getResources().getDimension(R.dimen.favorites_star_icon_drawable_padding));
+			}
+			else
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			}
+
 		}
 		else if (viewType == ViewType.EXTRA)
 		{
@@ -120,11 +141,64 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 			if (viewType == ViewType.NEW_CONTACT)
 			{
+				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(statusForEmptyContactInfo);
+				holder.statusMood.setVisibility(View.GONE);
+				holder.onlineIndicator.setVisibility(View.GONE);
+			}
+			else if(contactInfo.getFavoriteType() == FavoriteType.FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+			{
+				holder.status.setText("is friend");
+				StatusMessage lastStatusMessage = getLastStatusMessagesMap().get(contactInfo.getMsisdn());
+				if(lastStatusMessage != null)
+				{
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+					switch (lastStatusMessage.getStatusMessageType())
+					{
+					case TEXT:
+						holder.status.setText(lastStatusMessage.getText());
+						if (lastStatusMessage.hasMood())
+						{
+							holder.statusMood.setVisibility(View.VISIBLE);
+							holder.statusMood.setImageResource(EmoticonConstants.moodMapping.get(lastStatusMessage.getMoodId()));
+						}
+						else
+						{
+							holder.statusMood.setVisibility(View.GONE);
+						}
+						break;
+
+					case PROFILE_PIC:
+						holder.status.setText(R.string.changed_profile);
+						holder.statusMood.setVisibility(View.GONE);
+						break;
+
+					default:
+						break;
+					}
+				}
+				else
+				{
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+					holder.status.setText(contactInfo.getMsisdn());
+					holder.statusMood.setVisibility(View.GONE);
+				}
+				if(lastSeenPref && contactInfo.getOffline() == 0 && !showCheckbox)
+				{
+					holder.onlineIndicator.setVisibility(View.VISIBLE);
+					holder.onlineIndicator.setImageResource(R.drawable.ic_online_green_dot);
+				}
+				else
+				{
+					holder.onlineIndicator.setVisibility(View.GONE);
+				}
 			}
 			else
 			{
+				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(contactInfo.getMsisdn());
+				holder.statusMood.setVisibility(View.GONE);
+				holder.onlineIndicator.setVisibility(View.GONE);
 			}
 
 			if (contactInfo.isUnknownContact())
@@ -135,6 +209,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 			else
 			{
+				holder.userImage.setScaleType(ScaleType.FIT_CENTER);
 				String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
 				iconloader.loadImage(id, true, holder.userImage, true);
 			}
@@ -162,6 +237,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private View inflateView(ViewType viewType)
 	{
 		View convertView = null;
+		ViewHolder holder = null;
 		switch (viewType)
 		{
 		case SECTION:
@@ -170,13 +246,27 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
 			break;
+		case FRIEND:
+		case FRIEND_REQUEST:
+			convertView = LayoutInflater.from(context).inflate(R.layout.friends_child_view, null);
+			holder = new ViewHolder();
+			holder.userImage = (ImageView) convertView.findViewById(R.id.avatar);
+			holder.name = (TextView) convertView.findViewById(R.id.contact);
+			holder.status = (TextView) convertView.findViewById(R.id.last_seen);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
+			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
+			convertView.setTag(holder);
+			break;	
 		default:
 			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, null);
-			ViewHolder holder = new ViewHolder();
+			holder = new ViewHolder();
 			holder.userImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.status = (TextView) convertView.findViewById(R.id.number);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
 			convertView.setTag(holder);
 			break;
 		}
@@ -192,11 +282,25 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		TextView status;
 
 		CheckBox checkbox;
+		
+		ImageView statusMood;
+		
+		ImageView onlineIndicator;
 	}
 
 	@Override
 	public void makeCompleteList(boolean filtered)
 	{
+		makeCompleteList(filtered, false);
+	}
+
+	@Override
+	public void makeCompleteList(boolean filtered, boolean firstFetch)
+	{
+		if (firstFetch)
+		{
+			friendsListFetchedCallback.listFetched();
+		}
 
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
@@ -210,7 +314,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		if (fetchGroups && !groupsList.isEmpty())
 		{
 			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats_upper_case),
-					FRIEND_PHONE_NUM);
+					GROUP_MSISDN);
 			if (filteredGroupsList.size() > 0)
 			{
 				completeList.add(groupSection);

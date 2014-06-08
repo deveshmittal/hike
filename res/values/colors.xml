@@ -161,7 +161,7 @@
     <color name="conversation_timestamp">#bfbcb6</color>
     <color name="unread_message">#0090ec</color>
     <color name="conversation_pressed">#f1efe8</color>
-    <color name="list_divider">#1f73716d</color>
+    <color name="list_divider">#e6e6e6</color>
     <color name="home_bg">#fffffc</color>
     <color name="update_no_btn">#73716d</color>
     <color name="chat_thread_default_bg">#e8e3d8</color>
@@ -298,5 +298,9 @@
     <color name="unsaved_contact_name">#66000000</color>
     <color name="white_alpha_10">#1Affffff</color>
     <color name="block_add_unknown">#FFFFFF</color>
+    <color name="tip_green_bg">#26bd86</color>
+    <color name="tip_green_divider_color">#49c899</color>
+    <color name="dark_grey_drop_shadow">#bdbdbd</color>
+    <color name="light_grey_drop_shadow">#c9c9c9</color>
 </resources>
 	

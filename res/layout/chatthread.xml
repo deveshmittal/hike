@@ -101,17 +101,6 @@
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/chat_bg_ftue_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="100dp"
-                android:visibility="gone" >
-
-                <include layout="@layout/chat_bg_tool_tip" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/last_seen_tip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -119,17 +108,6 @@
                 android:visibility="gone" >
 
                 <include layout="@layout/tool_tip" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/emoticon_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_marginLeft="7dp"
-                android:visibility="gone" >
-
-                <include layout="@layout/sticker_tool_tip" />
             </LinearLayout>
 
             <LinearLayout
@@ -210,9 +188,9 @@
                     android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
-                    android:background="?actionBarItemBackground"
+                    android:background="@null"
                     android:onClick="onSendClick"
-                    android:src="@drawable/ic_walkie_talkie"
+                    android:src="@drawable/walkie_talkie_btn_selector"
                     android:state_enabled="false" />
 
                 <ImageButton
@@ -221,10 +199,10 @@
                     android:layout_height="49dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="?actionBarItemBackground"
+                    android:background="@null"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
-                    android:src="@drawable/ic_sticker" />
+                    android:src="@drawable/sticker_btn_selector" />
 
                 <LinearLayout
                     android:id="@+id/tb_layout"

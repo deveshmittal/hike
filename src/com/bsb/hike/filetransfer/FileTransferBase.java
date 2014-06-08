@@ -4,10 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONObject;
 
@@ -17,6 +22,8 @@ import android.os.Handler;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -34,6 +41,18 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
 	
+	protected static int RESPONSE_OK = 200;
+	
+	protected static int RESPONSE_ACCEPTED = 201;
+	
+	protected static int RESPONSE_BAD_REQUEST = 400;
+	
+	protected static int RESPONSE_NOT_FOUND = 404;
+	
+	protected String token;
+
+	protected String uId;
+
 	protected static String ETAG = "Etag";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
@@ -61,6 +80,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	
 	protected int fileSize;
 
+	protected URL mUrl;
+
 	protected File stateFile; // this represents state file in which file state will be saved
 
 	protected volatile FTState _state;
@@ -87,6 +108,18 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		this.hikeFileType = hikeFileType;
 		context = ctx;
 		this.fileTaskMap = fileTaskMap;
+	}
+	
+	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType, String token, String uId)
+	{
+		this.handler = handler;
+		this.mFile = destinationFile;
+		this.msgId = msgId;
+		this.hikeFileType = hikeFileType;
+		context = ctx;
+		this.fileTaskMap = fileTaskMap;
+		this.token = token;
+		this.uId = uId;
 	}
 
 	protected void setFileTotalSize(int ts)
@@ -238,5 +271,16 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		}
 	}
 	
+	protected URLConnection initConn() throws IOException
+	{
+		URLConnection conn = (HttpURLConnection) mUrl.openConnection();
+		if (AccountUtils.ssl)
+		{
+			((HttpsURLConnection) conn).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+		}
+		AccountUtils.addUserAgent(conn);
+		AccountUtils.setNoTransform(conn);;
+		return conn;
+	}
 	
 }

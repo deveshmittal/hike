@@ -84,11 +84,11 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 		}
 		if (!canSend)
 		{
-			mButton.setImageResource(R.drawable.ic_walkie_talkie);
+			mButton.setImageResource(R.drawable.walkie_talkie_btn_selector);
 		}
 		else
 		{
-			mButton.setImageResource(R.drawable.ic_send);
+			mButton.setImageResource(R.drawable.send_btn_selector);
 		}
 		if (mConversation instanceof GroupConversation)
 		{

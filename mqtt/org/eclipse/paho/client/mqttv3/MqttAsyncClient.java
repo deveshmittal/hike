@@ -565,7 +565,7 @@ public class MqttAsyncClient implements IMqttAsyncClient
 		catch (MqttException ex)
 		{
 			// @TRACE 105=< exception
-			Logger.d(TAG, "Exception in disconnect : " + ex.getCause());
+			Logger.e(TAG, "Exception in disconnect : " + ex);
 			throw ex;
 		}
 		// @TRACE 108=<
@@ -621,6 +621,11 @@ public class MqttAsyncClient implements IMqttAsyncClient
 	public String getClientId()
 	{
 		return clientId;
+	}
+	
+	public void setClientId(String clientId)
+	{
+		this.clientId = clientId;
 	}
 
 	/*
@@ -729,6 +734,11 @@ public class MqttAsyncClient implements IMqttAsyncClient
 		return token;
 	}
 
+	public void checkActivity()
+	{
+		comms.checkActivity();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

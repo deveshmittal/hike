@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
@@ -344,6 +343,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_FIRST_UNMARK_STEALTH_TOAST = "shownFirstUnmarkStealthToast";
 
+	public static final String SHOWN_STATUS_UPDATE_TIP = "shownStatusUpdateTip";
+
+	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -475,12 +478,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		@Override
 		public void send(CrashReportData crashReportData) throws ReportSenderException
 		{
-			/* only send ACRA reports if we're in release mode */
-			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE))
-			{
-				return;
-			}
-
 			try
 			{
 				final String reportUrl = AccountUtils.base + "/logs/android";
@@ -724,9 +721,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		initHikeLruCache(getApplicationContext());
 
 		/*
-		 * Setting the last seen preference for the friends comparator.
+		 * Fetching all stealth contacts on app creation so that the conversation cannot be opened through the shortcut or share screen.
 		 */
-		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		HikeConversationsDatabase.getInstance().addStealthMsisdnToMap();
 
 		appStateHandler = new Handler();
 
@@ -840,16 +837,29 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		return typingNotificationMap;
 	}
 
-	public static void addStealthMsisdn(String msisdn)
+	public static void addStealthMsisdnToMap(String msisdn)
 	{
 		stealthMsisdn.add(msisdn);
+	}
+
+	public static void addNewStealthMsisdn(String msisdn)
+	{
+		addStealthMsisdnToMap(msisdn);
 		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_MARKED, msisdn);
 	}
 
 	public static void removeStealthMsisdn(String msisdn)
 	{
+		removeStealthMsisdn(msisdn, true);
+	}
+
+	public static void removeStealthMsisdn(String msisdn, boolean publishEvent)
+	{
 		stealthMsisdn.remove(msisdn);
-		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		if(publishEvent)
+		{
+			getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		}
 	}
 
 	public static void clearStealthMsisdn()
@@ -896,7 +906,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			/*
 			 * Send a fg/bg packet on reconnecting.
 			 */
-			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false);
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
 		}
 	};
 
