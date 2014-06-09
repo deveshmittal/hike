@@ -91,6 +91,8 @@ public class UploadFileTask extends FileTransferBase
 
 	private int bufferSize = 1;
 
+	private boolean freshStart;
+
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
 			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
@@ -451,7 +453,13 @@ public class UploadFileTask extends FileTransferBase
 			{
 				fileWasAlreadyUploaded = false;
 
-				JSONObject response = uploadFile(selectedFile); // <<----- this is the main upload function where upload to server is done
+				JSONObject response = null;
+				freshStart = true;
+				while(freshStart)
+				{
+					freshStart = false;
+					response = uploadFile(selectedFile); // <<----- this is the main upload function where upload to server is done
+				}
 
 				if (_state == FTState.CANCELLED)
 					return FTResult.CANCELLED;
@@ -649,6 +657,11 @@ public class UploadFileTask extends FileTransferBase
 				{
 					if (shouldRetry())
 					{
+						if (freshStart)
+						{
+							raf.close();
+							return null;
+						}
 						raf.seek(start);
 						setChunkSize();
 						if (chunkSize > length)
@@ -888,10 +901,16 @@ public class UploadFileTask extends FileTransferBase
 			{
 				retry = false;
 			}
-			else if (resCode / 100 == 5)
+			else if (resCode == INTERNAL_SERVER_ERROR)
 			{
 				deleteStateFile();
-				retry = false;
+				_state = FTState.IN_PROGRESS;
+				freshStart = true;
+			}
+			else if (resCode >= 400)
+			{
+				_state = FTState.IN_PROGRESS;
+				freshStart = true;
 			}
 		}
 		time = System.currentTimeMillis() - time;
