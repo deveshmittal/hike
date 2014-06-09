@@ -473,6 +473,35 @@ public class HikeBitmapFactory
 		return result;
 	}
 
+	/**
+	 * This method uses the configuration given by config to decode a bitmap from resource.
+	 * 
+	 * @param filename
+	 * @param con
+	 * @return
+	 */
+	public static Bitmap decodeBitmapFromResource(Resources res, int resId, Bitmap.Config config)
+	{
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = config;
+
+		Bitmap result = null;
+		try
+		{
+			result = decodeResource(res, resId, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = decodeResource(res, resId);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from file: ", e);
+		}
+		return result;
+	}
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private static void addInBitmapOptions(BitmapFactory.Options options)
 	{

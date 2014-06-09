@@ -224,7 +224,7 @@ public abstract class ImageWorker
 	 */
 	public void setLoadingImage(int resId)
 	{
-		mLoadingBitmap = HikeBitmapFactory.decodeResource(mResources, resId);
+		mLoadingBitmap = HikeBitmapFactory.decodeBitmapFromResource(mResources, resId, Bitmap.Config.RGB_565);
 	}
 
 	/**
