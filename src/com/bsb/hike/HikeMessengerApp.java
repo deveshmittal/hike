@@ -46,6 +46,7 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -722,7 +723,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		initHikeLruCache(getApplicationContext());
-
+		initContactManager();
 		/*
 		 * Setting the last seen preference for the friends comparator.
 		 */
@@ -756,6 +757,18 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HikeLruCache getLruCache()
 	{
 		return cache;
+	}
+
+	private static ContactManager conMgr;
+
+	private void initContactManager()
+	{
+		conMgr = ContactManager.getInstance();
+	}
+
+	public static ContactManager getContactManager()
+	{
+		return conMgr;
 	}
 
 	private void makeNoMediaFiles()

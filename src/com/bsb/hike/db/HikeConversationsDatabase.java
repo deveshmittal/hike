@@ -1372,7 +1372,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		HikeUserDatabase huDb = null;
 
-		StringBuilder msisdns = null;
+		List<String> msisdns = new ArrayList<String>();
 		try
 		{
 			huDb = HikeUserDatabase.getInstance();
@@ -1387,11 +1387,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (!Utils.isGroupConversation(msisdn))
 				{
-					if (msisdns == null)
-					{
-						msisdns = new StringBuilder("(");
-					}
-					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+					msisdns.add(msisdn);
 				}
 				conv = new Conversation(msisdn, convid);
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
@@ -1412,6 +1408,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					try
 					{
 						message.setMetadata(metadata);
+
+						List<String> groupLastMsisdns = getGroupLastMsgMsisdn(metadata);
+
+						if (null != groupLastMsisdns)
+						{
+							msisdns.addAll(groupLastMsisdns);
+						}
+						else
+						{
+							msisdns.add(c.getString(groupParticipantColumn));
+						}
 					}
 					catch (JSONException e)
 					{
@@ -1424,16 +1431,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				conversationMap.put(msisdn, conv);
 			}
-			if (msisdns != null)
-			{
-				msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
-			}
-			else
-			{
-				msisdns = new StringBuilder("()");
-			}
 
-			List<ContactInfo> contactList = huDb.getContactNamesFromMsisdnList(msisdns.toString());
+			List<ContactInfo> contactList = getContactForMsisdnList(msisdns);
 
 			for (ContactInfo contactInfo : contactList)
 			{
@@ -1501,6 +1500,42 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Logger.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
+	}
+
+	private List<ContactInfo> getContactForMsisdnList(List<String> msisdns)
+	{
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+
+		ContactManager conMgr = HikeMessengerApp.getContactManager();
+
+		StringBuilder msisdnsDB = null;
+
+		for (String msisdn : msisdns)
+		{
+			ContactInfo c = conMgr.getContact(msisdn);
+			if (null != c)
+			{
+				contacts.add(c);
+			}
+			else
+			{
+				if (null == msisdnsDB)
+				{
+					msisdnsDB = new StringBuilder("(");
+				}
+				msisdnsDB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+			}
+		}
+		if (null != msisdnsDB)
+		{
+			msisdnsDB.replace(msisdnsDB.lastIndexOf(","), msisdnsDB.length(), ")");
+
+			// if not found in persistence memory get contacts from Db. This will happen very rarely as we have already loaded all the persistence contacts initially
+
+			List<ContactInfo> contactsDB = conMgr.loadPersistenceCache(msisdnsDB.toString());
+			contacts.addAll(contactsDB);
+		}
+		return contacts;
 	}
 
 	private ConvMessage getLastMessageForConversation(String msisdn)
