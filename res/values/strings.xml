@@ -1560,6 +1560,7 @@
      <string name="ftue_favorites_card_msg">Only favorites can see your last seen and status updates. Choose them wisely.</string>
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes. They\'re awesome.</string>
      <string name="themes">Themes</string>
+     <string name="ftue_updates_are_fun_with_favorites">We\'ve got you some recommendations. Add them as favorite to share your status updates and last seen.</string>
      
     
 </resources>

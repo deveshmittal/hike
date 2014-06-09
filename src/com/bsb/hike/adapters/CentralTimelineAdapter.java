@@ -430,7 +430,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 		case FTUE_ITEM:
 			viewHolder.name.setText(R.string.favorites_ftue_item_label);
-			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_favorites);
+			viewHolder.mainInfo.setText(R.string.ftue_updates_are_fun_with_favorites);
 
 			viewHolder.contactsContainer.removeAllViews();
 
