@@ -984,6 +984,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			 */
 			ConvMessage convMessage = messageList.get(messageList.size() - 1);
 
+			if (!wasViewSetup())
+			{
+				return;
+			}
+
 			View parentView = getParenViewForConversation(conversation);
 
 			if (parentView == null || convMessage == null)
@@ -1351,6 +1356,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					Conversation conversation = mConversationsByMSISDN.get(msisdn);
+
+					if (!wasViewSetup())
+					{
+						return;
+					}
 
 					View parentView = getParenViewForConversation(conversation);
 
@@ -1777,6 +1787,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			@Override
 			public void run()
 			{
+				if (!wasViewSetup())
+				{
+					return;
+				}
+
 				View parentView = getParenViewForConversation(conversation);
 
 				if (parentView == null)
@@ -1829,6 +1844,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void updateViewForNameChange(Conversation conversation)
 	{
+		if (!wasViewSetup())
+		{
+			return;
+		}
+
 		View parentView = getParenViewForConversation(conversation);
 
 		if (parentView == null)
@@ -1842,6 +1862,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
 	{
+		if (!wasViewSetup())
+		{
+			return;
+		}
+
 		View parentView = getParenViewForConversation(conversation);
 
 		if (parentView == null)
@@ -1888,6 +1913,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else
 		{
+			if (!wasViewSetup())
+			{
+				return;
+			}
+
 			View parentView = getListView().getChildAt(newIndex);
 
 			if (parentView == null)
@@ -1898,6 +1928,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			mAdapter.updateViewsRelatedToLastMessage(parentView, convMessage, conversation);
 		}
+	}
+
+	/**
+	 * Returns whether the view is setup. We should call this before trying to get the ListView.
+	 * @return
+	 */
+	private boolean wasViewSetup()
+	{
+		return getView() != null;
 	}
 
 	public void DeleteAllConversations()
