@@ -49,6 +49,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	
 	protected static int RESPONSE_NOT_FOUND = 404;
 	
+	protected static int INTERNAL_SERVER_ERROR = 500;
+
 	protected String token;
 
 	protected String uId;
@@ -283,4 +285,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		return conn;
 	}
 	
+	public Object getUserContext()
+	{
+		return userContext;
+	}
+
 }

@@ -2017,9 +2017,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		for(int i = to - 1; i >= from; i--)
 		{
-			ConvMessage msg = messages.get(i);
-			addtoMessageMap(msg);
+			ConvMessage message = messages.get(i);
+			ConvMessage msg = checkNUpdateFTMsg(message);
+			if (msg != null)
+			{
+				message = msg;
+				messages.set(i, message);
+			}
+			addtoMessageMap(message);
 		}
+	}
+
+	private ConvMessage checkNUpdateFTMsg(ConvMessage message)
+	{
+		if (message.isSent() && message.isFileTransferMessage())
+		{
+			ConvMessage msg  = FileTransferManager.getInstance(getApplicationContext()).getMessage(message.getMsgID());
+			return msg;
+		}
+		return null;
 	}
 
 	public static void addtoMessageMap(ConvMessage msg)
@@ -2584,8 +2600,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(HikeConstants.SMSNative.READ, 1);
-
-				getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?", new String[] { mContactNumber });
+				try
+				{
+					int smsUptaed = getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?",
+							new String[] { mContactNumber });
+				}
+				catch (Exception iae)
+				{
+					// this case should not happen usually , but id no message database resolver is present , say rooted phones , app will crash
+					iae.printStackTrace();
+				}
 			}
 		}).start();
 	}
@@ -2957,24 +2981,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.UPLOAD_FINISHED.equals(type))
 		{
-			ConvMessage convMessage = (ConvMessage) object;
-			if (!convMessage.getMsisdn().equals(this.mContactNumber))
-			{
-				return;
-			}
-			ConvMessage adapterMessage = findMessageById(convMessage.getMsgID());
-			if (adapterMessage != null)
-			{
-				try
-				{
-					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
-					adapterMessage.setTimestamp(convMessage.getTimestamp());
-				}
-				catch (JSONException e)
-				{
-					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-				}
-			}
 			runOnUiThread(mUpdateAdapter);
 		}
 		else if (HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED.equals(type))

@@ -331,6 +331,10 @@
         <item name="actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
+        
+    </style>
+    <style name="AppTheme.Home.HomeA">
+        <item name="homeAsUpIndicator">@drawable/home_screen_top_bar_up</item>
     </style>
     <style name="ActivityAnimation">
         <item name="android:windowExitAnimation">@anim/fade_out_animation</item>
