@@ -285,4 +285,9 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		return conn;
 	}
 	
+	public Object getUserContext()
+	{
+		return userContext;
+	}
+
 }
