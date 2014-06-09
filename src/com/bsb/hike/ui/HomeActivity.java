@@ -1101,13 +1101,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					if (topBarIndicator != null)
 					{
-						if (count > 9)
+						/*
+						 * Fetching the count again since it could have changed after the delay. 
+						 */
+						int newCount = Utils.updateHomeOverflowToggleCount(accountPrefs);
+						if (newCount < 1)
+						{
+							topBarIndicator.setVisibility(View.GONE);
+						}
+						else if (newCount > 9)
 						{
 							topBarIndicator.setVisibility(View.VISIBLE);
 							topBarIndicator.setText("9+");
 							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
 						}
-						else if (count > 0)
+						else if (newCount > 0)
 						{
 							topBarIndicator.setVisibility(View.VISIBLE);
 							topBarIndicator.setText(String.valueOf(count));
