@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import com.viewpagerindicator.IconPagerAdapter;
 public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 {
 	private ViewPager mPager;
+	TextView skipButton;
 
 	private enum FtueCards
 	{
@@ -40,17 +42,65 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 	private void initialiseScreen(Bundle savedInstanceState)
 	{
 		setContentView(R.layout.ftue_cards);
+		skipButton = (TextView) findViewById(R.id.skip);
 
 		mPager = (ViewPager) findViewById(R.id.tutorial_pager);
 		mPager.setAdapter(new TutorialPagerAdapter());
 
 		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
+		mIndicator.setOnPageChangeListener(onPageChangeListener);
 		mIndicator.setViewPager(mPager);
 		AlphaAnimation anim = new AlphaAnimation(0.5f, 0.5f);
 		anim.setDuration(0);
 		anim.setFillAfter(true);
-		findViewById(R.id.skip).startAnimation(anim);
+		skipButton.startAnimation(anim);
+		skipButton.setText(R.string.next_signup);
+		findViewById(R.id.skip).setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				if(mPager.getCurrentItem() < FtueCards.values().length -1)
+				{
+					mPager.setCurrentItem(mPager.getCurrentItem()+1, true);
+				}
+				else
+				{
+					finish();
+				}
+			}
+		});
 	}
+	
+	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
+	{
+		
+		@Override
+		public void onPageSelected(int arg0)
+		{
+			if(arg0 < FtueCards.values().length - 1)
+			{
+				skipButton.setText(R.string.next_signup);
+			}
+			else
+			{
+				skipButton.setText(R.string.done);
+			}
+		}
+		
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2)
+		{
+			
+		}
+		
+		@Override
+		public void onPageScrollStateChanged(int arg0)
+		{
+			
+		}
+	};
 
 	private class TutorialPagerAdapter extends PagerAdapter implements IconPagerAdapter
 	{

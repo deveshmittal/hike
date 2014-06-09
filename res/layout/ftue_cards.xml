@@ -29,16 +29,16 @@
         android:orientation="horizontal" >
 
         <LinearLayout
-            android:id="@+id/skip"
+            android:id="@+id/skip_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="@drawable/bg_overflow_menu_selector"
             android:gravity="right|top"
             android:minWidth="70dp"
             android:orientation="horizontal" >
 
             <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/skip"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="bottom"
@@ -46,6 +46,7 @@
                 android:paddingLeft="11dp"
                 android:paddingRight="11dp"
                 android:text="@string/skip_upper_caps"
+                android:background="@drawable/bg_overflow_menu_selector"
                 android:textColor="#ffffff"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -57,7 +58,7 @@
             android:layout_gravity="bottom"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
-            android:layout_toLeftOf="@id/skip"
+            android:layout_toLeftOf="@id/skip_container"
             android:background="#7fffffff" />
     </RelativeLayout>
 
