@@ -9,7 +9,8 @@
     <ListView
         android:id="@+id/ftue_list"
         style="@style/HomeList"
-        android:divider="@drawable/home_list_divider"
-        android:dividerHeight="0.5dp" />
+        android:divider="@null"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false" />
 
 </RelativeLayout>
