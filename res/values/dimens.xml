@@ -145,5 +145,6 @@
 	<dimen name="card_header_img_content_padding_bottom">50dp</dimen>
 	<dimen name="card_header_text_padding_left">10dp</dimen>
 	<dimen name="card_header_text_padding_right">10dp</dimen>
+	<dimen name="updates_margin_top">8.5dp</dimen>
 	
 </resources>
