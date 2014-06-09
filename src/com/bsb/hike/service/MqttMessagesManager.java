@@ -845,6 +845,15 @@ public class MqttMessagesManager
 			FavoriteType currentType = contactInfo.getFavoriteType();
 			FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND || currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 					: FavoriteType.FRIEND;
+			if(favoriteType == FavoriteType.REQUEST_RECEIVED)
+			{
+				int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+				if(count >= 0)
+				{	
+					Utils.incrementOrDecrementHomeOverflowCount(settings, 1);
+				}
+			}
+
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 			this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 			if (favoriteType == FavoriteType.FRIEND)
