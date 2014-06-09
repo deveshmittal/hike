@@ -302,5 +302,6 @@
     <color name="tip_green_divider_color">#49c899</color>
     <color name="dark_grey_drop_shadow">#bdbdbd</color>
     <color name="light_grey_drop_shadow">#c9c9c9</color>
+    <color name="gray_pressed_state">#252c2c</color>
 </resources>
 	
