@@ -297,5 +297,7 @@
     <color name="dark_grey_drop_shadow">#bdbdbd</color>
     <color name="light_grey_drop_shadow">#c9c9c9</color>
     <color name="gray_pressed_state">#252c2c</color>
+    <color name="stealth_tip_bg">#ef554e</color>
+    <color name="stealth_tip_divider">#f2706a</color>
 </resources>
 	
