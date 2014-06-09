@@ -1417,7 +1417,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						}
 						else
 						{
-							msisdns.add(c.getString(groupParticipantColumn));
+							String groupParticipant = c.getString(groupParticipantColumn);
+							if (null != groupParticipant && !groupParticipant.equals(""))
+							{
+								msisdns.add(c.getString(groupParticipantColumn));
+							}
 						}
 					}
 					catch (JSONException e)
@@ -1437,8 +1441,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			for (ContactInfo contactInfo : contactList)
 			{
 				Conversation conversation = conversationMap.get(contactInfo.getMsisdn());
-				conversation.setContactName(contactInfo.getName());
-				conversation.setOnhike(contactInfo.isOnhike());
+				if (null != conversation)
+				{
+					conversation.setContactName(contactInfo.getName());
+					conversation.setOnhike(contactInfo.isOnhike());
+				}
 			}
 
 			/*
@@ -1533,7 +1540,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			// if not found in persistence memory get contacts from Db. This will happen very rarely as we have already loaded all the persistence contacts initially
 
 			List<ContactInfo> contactsDB = conMgr.loadPersistenceCache(msisdnsDB.toString());
-			contacts.addAll(contactsDB);
+			if (null != contactsDB)
+			{
+				contacts.addAll(contactsDB);
+			}
 		}
 		return contacts;
 	}

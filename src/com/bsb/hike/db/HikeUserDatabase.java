@@ -1836,6 +1836,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public List<ContactInfo> getConversationContacts(Map<String, ContactInfo> map, String msisdnsDB)
 	{
+		if (null == msisdnsDB)
+		{
+			return null;
+		}
 		Cursor c = null;
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 		try
