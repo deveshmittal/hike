@@ -332,7 +332,6 @@
         <item name="android:actionBarSize">@dimen/st__action_bar_default_height</item>
         <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
     </style>
-    
     <style name="ActivityAnimation">
         <item name="android:windowExitAnimation">@anim/fade_out_animation</item>
     	<item name="android:windowEnterAnimation">@anim/fade_in_animation</item>
@@ -634,5 +633,21 @@
 	<style name="SmallListContactItemSubText" parent="SmallListContactItemHeader">
 	    <item name="android:textSize">12sp</item>
 	    <item name="android:textStyle">italic</item>
+	</style>
+	
+	<style name="TipHeader">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textSize">24sp</item>
+	    <item name="android:textStyle">italic</item>
+	    <item name="android:textColor">#ffffff</item>
+	</style>
+
+	<style name="TipBody">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textSize">12sp</item>
+	    <item name="android:textStyle">italic</item>
+	    <item name="android:textColor">#ffffff</item>
 	</style>
 </resources>

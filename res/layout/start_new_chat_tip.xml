@@ -10,38 +10,48 @@
 
     <LinearLayout
         android:id="@+id/tip_content"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
-        android:paddingRight="62dp"
-        android:paddingTop="10dp"
-    	android:paddingBottom="15dp" >
+        android:paddingBottom="15dp"
+        android:paddingRight="159dp"
+        android:paddingTop="10dp" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tip_header"
             style="@style/TipHeader"
-            android:text="@string/status_update_tip_header" />
+            android:text="@string/new_chat_tip_header" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tip_msg"
             style="@style/TipBody"
-            android:text="@string/status_update_tip_msg" />
+            android:text="@string/new_chat_tip_msg" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="57dp"
+    <RelativeLayout
+        android:layout_width="159dp"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/tip_content"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@id/tip_content" >
 
+        <ImageView
+            android:id="@+id/arrow_pointer"
+            android:layout_width="102dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:paddingTop="10dp"
+            android:scaleType="fitStart"
+            android:src="@drawable/ftue_up_arrow" />
+
         <View
             android:id="@+id/close_divider"
             android:layout_width="1dp"
             android:layout_height="32dp"
-            android:layout_gravity="center_vertical"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/arrow_pointer"
             android:background="@color/tip_green_divider_color" />
 
         <ImageView
@@ -52,6 +62,6 @@
             android:background="@drawable/popup_button_bg_selector"
             android:scaleType="centerInside"
             android:src="@drawable/ic_tip_cross" />
-    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

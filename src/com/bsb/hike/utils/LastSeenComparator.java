@@ -34,13 +34,9 @@ public class LastSeenComparator implements Comparator<ContactInfo>
 
 			else if (rhsFavoriteType == FavoriteType.REQUEST_RECEIVED)
 				return 1;
-
-			else if (lastSeenPref)
-			{
-				return compareLastSeen(lhs, rhs);
-			}
 		}
-		else if (lastSeenPref)
+
+		if (lastSeenPref)
 		{
 			return compareLastSeen(lhs, rhs);
 		}

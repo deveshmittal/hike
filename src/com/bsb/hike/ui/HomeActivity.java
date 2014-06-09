@@ -146,7 +146,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -198,59 +198,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
-				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
-				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
-				}
-				if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
-				{
-					return;
-				}
-				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
-				{
-					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
-					{
-						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
-						tipTypeShowing = null;
-						LockPattern.createNewPattern(HomeActivity.this);
-					}
-					else
-					{
-						if (!(dialog != null && dialog.isShowing()) && mainFragment != null)
-						{
-							if (!mainFragment.hasNoConversation())
-							{
-
-								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
-							}
-							else
-							{
-								dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
-								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
-							}
-						}
-					}
-				}
-				else
-				{
-					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
-					{
-						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
-						tipTypeShowing = null;
-					}
-					final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-					if (stealthType == HikeConstants.STEALTH_OFF)
-					{
-						LockPattern.confirmPattern(HomeActivity.this);
-					}
-					else
-					{
-						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
-						Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
-					}
-				}
+				hikeLogoClicked();
 			}
 		});
 
@@ -441,6 +389,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false))
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_START_NEW_CHAT_TIP, null);
+			}
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
 		}
@@ -1068,6 +1020,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
+		else if (HikePubSub.STEALTH_UNREAD_TIP_CLICKED.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					hikeLogoClicked();
+				}
+			});
+		}
 	}
 
 	private class GetFTUEContactsTask extends AsyncTask<Void, Void, FtueContactsData>
@@ -1590,5 +1554,69 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		return animSet;
 	}
+	
+
+	private void hikeLogoClicked()
+	{
+		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
+		}
+		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
+		}
+		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+		{
+			return;
+		}
+		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+		{
+			if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
+			{
+				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+				tipTypeShowing = null;
+				LockPattern.createNewPattern(HomeActivity.this);
+			}
+			else
+			{
+				if (!(dialog != null && dialog.isShowing()) && mainFragment != null)
+				{
+					if (!mainFragment.hasNoConversation())
+					{
+
+						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+					}
+					else
+					{
+						dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+					}
+				}
+			}
+		}
+		else
+		{
+			if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
+			{
+				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+				tipTypeShowing = null;
+			}
+			final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			if (stealthType == HikeConstants.STEALTH_OFF)
+			{
+				LockPattern.confirmPattern(HomeActivity.this);
+			}
+			else
+			{
+				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+			}
+		}
+	}
+
 	
 }

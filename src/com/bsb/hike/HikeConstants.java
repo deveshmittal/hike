@@ -400,6 +400,10 @@ public class HikeConstants
 	public static final String REQUEST_DP = "rdp";
 
 	public static final String C_TIME_STAMP = "cts";
+	
+	public static final String HEADER = "h";
+	
+	public static final String BODY = "b";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -494,7 +498,7 @@ public class HikeConstants
 
 	public static final int CONNECT_TIMEOUT = 6 * 1000;
 
-	public static final int SOCKET_TIMEOUT = 30 * 100;
+	public static final int SOCKET_TIMEOUT = 30 * 1000;
 
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5 * 1000;
@@ -854,6 +858,8 @@ public class HikeConstants
 	public static final int RETRY_WAIT_ADDITION = 2;
 
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
+	
+	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
 
 	public static final class ResultCodes
 	{
@@ -1151,6 +1157,13 @@ public class HikeConstants
 		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
 
 		public static final String FROM_NOTIFICATION = "fromNotification";
+		
+		public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
+		
+		public static final String STEALTH_PUSH_HEADER = "stealthPushHeader";
+		
+		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
+		
 	}
 
 	public static final class LogEvent
@@ -1479,6 +1492,8 @@ public class HikeConstants
 		public static final String STEALTH = "stlth";
 
 		public static final String TOGGLE_STEALTH = "ts";
+		
+		public static final String POPUP = "popup"; //this is a generic popup type
 
 	}
 

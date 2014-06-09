@@ -583,7 +583,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (lastSeenScheduler != null)
 		{
-			lastSeenScheduler.stop();
+			lastSeenScheduler.stop(false);
 			lastSeenScheduler = null;
 		}
 	}
@@ -740,6 +740,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 		}
 
+		mHandler.post(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				android.view.Window window = getWindow();
+				if (window != null)
+				{
+					window.setBackgroundDrawableResource(R.color.black);
+				}
+
+			}
+		});
 		/* registering localbroadcast manager */
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		// LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(HikePubSub.RESUME_BUTTON_UPDATED));
@@ -1851,6 +1865,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		
+		/*
+		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
+		 */
+		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		{
+			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
+			{
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
+				{
+					showStickerFtueTip();
+				}
+			}
+		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		// add block view
@@ -1970,6 +1998,35 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		wasOrientationChanged = false;
 	}
 
+	private void showStickerFtueTip()
+	{
+		tipView = findViewById(R.id.emoticon_tip);
+		tipView.setVisibility(View.VISIBLE);
+		tipView.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1)
+			{
+				// disabling on touch gesture for sticker ftue tip
+				// so that we do not send an unnecessary nudge on a
+				// double tap on tipview.
+				return true;
+			}
+		});
+		tipView.setTag(TipType.EMOTICON);
+		
+		ImageView closeIcon = (ImageView) tipView.findViewById(R.id.close_tip);
+		closeIcon.setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+			}
+		});
+	}
+	
 	private void addtoMessageMap(int from, int to)
 	{
 		for(int i = to - 1; i >= from; i--)
@@ -3168,7 +3225,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					else
 					{
-						lastSeenScheduler.stop();
+						lastSeenScheduler.stop(false);
 					}
 					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 				}
@@ -5142,6 +5199,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						// view not changed , exit with dismiss dialog
 						dismissPopupWindow();
 						return;
+					}
+					if (tipView != null)
+					{
+						TipType viewTipType = (TipType) tipView.getTag();
+						if (viewTipType == TipType.EMOTICON)
+						{
+							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+							tipView = null;
+						}
 					}
 					if (emoticonType != EmoticonType.STICKERS)
 					{
