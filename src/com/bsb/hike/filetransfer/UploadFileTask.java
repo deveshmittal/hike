@@ -18,10 +18,11 @@ import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.http.HttpException;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -70,10 +71,6 @@ public class UploadFileTask extends FileTransferBase
 
 	private String fileType;
 
-	private String token;
-
-	private String uId;
-
 	private String msisdn;
 
 	private boolean isRecipientOnhike;
@@ -101,9 +98,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
-		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
 		this.msisdn = msisdn;
 		this.fileType = fileType;
 		this.isRecipientOnhike = isRecipientOnHike;
@@ -119,9 +114,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Object convMessage,
 			boolean isRecipientOnHike)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.isRecipientOnhike = isRecipientOnHike;
 		userContext = convMessage;
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
@@ -136,9 +129,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri, Object convMessage,
 			boolean isRecipientOnHike)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.picasaUri = picasaUri;
 		this.isRecipientOnhike = isRecipientOnHike;
 		userContext = convMessage;
@@ -149,9 +140,7 @@ public class UploadFileTask extends FileTransferBase
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri,
 			HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
-		this.token = token;
-		this.uId = uId;
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.picasaUri = picasaUri;
 		this.hikeFileType = hikeFileType;
 		this.msisdn = msisdn;
@@ -984,33 +973,38 @@ public class UploadFileTask extends FileTransferBase
 		if(TextUtils.isEmpty(fileKey))
 			return false;
 		
+		// If we are not able to verify the filekey validity from the server, fall back to uploading the file
 		try
 		{
 			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
-			URLConnection conn = initConn();
-			long start = 0;
-			String byteRange = start + "-";
-			try
-			{
-				conn.setRequestProperty("Range", "bytes=" + byteRange);
-				conn.setConnectTimeout(10000);
-			}
-			catch (Exception e)
-			{
+			HttpClient client = new DefaultHttpClient();
+			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+			HttpHead head = new HttpHead(mUrl.toString());
+			head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 
-			}
-			conn.connect();
-			int resCode = AccountUtils.ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
-			// Make sure the response code is in the 200 range.
-			if (resCode / 100 != 2)
+			HttpResponse resp = client.execute(head);
+			int resCode = resp.getStatusLine().getStatusCode();
+			// Make sure the response code is 200.
+			if (resCode == RESPONSE_OK)
 			{
-				fileKey = null;
-				return false;
+				// This is to get the file size from server
+				// continue anyway if not able to obtain the size
+				try
+				{
+					String range = resp.getFirstHeader("Content-Range").getValue();
+					fileSize = Integer.valueOf(range.substring(range.lastIndexOf("/") + 1, range.length()));
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					fileSize = 0;
+				}
+				return true;
 			}
 			else
 			{
-				fileSize = conn.getContentLength();
-				return true;
+				fileKey = null;
+				return false;
 			}
 		}
 		catch (Exception e)
@@ -1042,7 +1036,7 @@ public class UploadFileTask extends FileTransferBase
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
 		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
 		//client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
-		Long time = System.currentTimeMillis();
+		long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
 		int resCode = 0;
@@ -1078,36 +1072,27 @@ public class UploadFileTask extends FileTransferBase
 		{
 			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if(e instanceof HttpException)
-			{
-				res = ((HttpException) e).toString();
-				Logger.d(getClass().getSimpleName(),"response: " + res);
-			}
 			if (e.getMessage() == null)
 			{
 				error();
 				res = null;
 				retry = false;
 			}
-			
-//			Logger.d(getClass().getSimpleName(), "Caught Exception: " + e.getMessage());
-//			if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2) || e.getMessage().contains(NETWORK_ERROR_3)))
-//			{
-//				Logger.e(getClass().getSimpleName(), "Exception while uploading : " + e.getMessage());
-//				// we should retry if failed due to network
-//			}
-//			else
-//			{
-//				error();
-//				res = null;
-//				retry = false;
-//			}
+			return null;
 		}
-		if (retryAttempts >= MAX_RETRY_ATTEMPTS || resCode == 400 || resCode == 404)
+		if (resCode != 0 && resCode != RESPONSE_OK && resCode != RESPONSE_ACCEPTED)
 		{
 			error();
 			res = null;
-			retry = false;
+			if (retryAttempts >= MAX_RETRY_ATTEMPTS || resCode == RESPONSE_BAD_REQUEST || resCode == RESPONSE_NOT_FOUND)
+			{
+				retry = false;
+			}
+			else if (resCode /100 == 5)
+			{
+				deleteStateFile();
+				retry = false;
+			}
 		}
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s.  Response: " + resCode);
@@ -1202,7 +1187,7 @@ public class UploadFileTask extends FileTransferBase
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
 
-		else if (result != FTResult.PAUSED)
+		if (result != FTResult.PAUSED && result != FTResult.SUCCESS)
 		{
 			final int errorStringId = result == FTResult.READ_FAIL ? R.string.unable_to_read : result == FTResult.CANCELLED ? R.string.upload_cancelled
 					: result == FTResult.FAILED_UNRECOVERABLE ? R.string.upload_failed : result == FTResult.CARD_UNMOUNT ? R.string.card_unmount

@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@id/file_thumb"
                 android:layout_alignTop="@id/file_thumb"
-                android:layout_marginTop="17dp"
+                android:layout_marginTop="15dp"
                 android:gravity="center"
                 android:singleLine="true"
                 android:text=".pdf"
