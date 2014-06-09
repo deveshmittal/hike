@@ -357,6 +357,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	
 	public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
 
+	public static final String SHOWN_WELCOME_TO_HIKE_CARD = "shownWelcomeToHikeCard";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
