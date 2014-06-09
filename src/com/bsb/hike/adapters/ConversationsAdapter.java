@@ -19,6 +19,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -58,6 +59,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private Context context;
 
+	private ListView listView;
+
 	private enum ViewType
 	{
 		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP
@@ -82,12 +85,14 @@ public class ConversationsAdapter extends BaseAdapter
 		ImageView avatar;
 	}
 
-	public ConversationsAdapter(Context context, List<Conversation> objects)
+	public ConversationsAdapter(Context context, List<Conversation> objects, ListView listView)
 	{
 		this.context = context;
 		this.conversationList = objects;
+		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
+		iconLoader.setImageFadeIn(false);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		itemsToAnimat = new SparseBooleanArray();
 	}
@@ -344,7 +349,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		ImageView avatarView = viewHolder.avatar;
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, false, isListFlinging, true);
 	}
 
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
@@ -669,5 +674,39 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		Logger.d("TestList", "NotifyDataSetChanged called");
 		super.notifyDataSetChanged();
+	}
+
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		iconLoader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			/*
+			 * We don't want to call notifyDataSetChanged here since that causes the UI to freeze for a bit. Instead we pick out the views and update the avatars there.
+			 */
+			int count = listView.getChildCount();
+			for (int i = 0; i < count; i++)
+			{
+				View view = listView.getChildAt(i);
+				int indexOfData = listView.getFirstVisiblePosition() + i;
+
+				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
+				/*
+				 * Since tips cannot have custom avatars, we simply skip these cases.
+				 */
+				if (viewType != ViewType.CONVERSATION)
+				{
+					continue;
+				}
+
+				updateViewsRelatedToAvatar(view, getItem(indexOfData));
+			}
+		}
 	}
 }

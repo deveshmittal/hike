@@ -155,6 +155,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		this.iconloader = new IconLoader(context, mIconImageSize);
 		this.iconloader.setDefaultAvatarIfNoCustomIcon(true);
+		this.iconloader.setImageFadeIn(false);
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.contactFilter = new ContactFilter();
@@ -881,6 +882,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		ImageView acceptBtn;
 		ImageView rejectBtn;
 		TextView addBtn;
+
+		String msisdn;
 	}
 
 	@Override
@@ -978,11 +981,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		case NOT_FRIEND_SMS:
 		case FTUE_CONTACT:
 
-			ImageView avatar = viewHolder.avatar;
+			viewHolder.msisdn = contactInfo.getMsisdn();
+
 			TextView name = viewHolder.name;
 			ImageView onlineIndicator = viewHolder.onlineIndicator;
 
-			iconloader.loadImage(contactInfo.getMsisdn(), true, avatar, false, isListFlinging, true);
+			updateViewsRelatedToAvatar(convertView, contactInfo);
 
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName());
 
@@ -1192,6 +1196,22 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 
 		return convertView;
+	}
+
+	private void updateViewsRelatedToAvatar(View parentView, ContactInfo contactInfo)
+	{
+		ViewHolder holder = (ViewHolder) parentView.getTag();
+
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation. We don't need
+		 * to do anything here then.
+		 */
+		if (!contactInfo.getMsisdn().equals(holder.msisdn))
+		{
+			return;
+		}
+
+		iconloader.loadImage(contactInfo.getMsisdn(), true, holder.avatar, false, isListFlinging, true);
 	}
 
 	private void setInviteButton(ContactInfo contactInfo, TextView inviteBtn, ImageView inviteIcon)
@@ -1444,5 +1464,41 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public Map<String, StatusMessage> getLastStatusMessagesMap()
 	{
 		return lastStatusMessagesMap;
+	}
+
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		iconloader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			/*
+			 * We don't want to call notifyDataSetChanged here since that causes the UI to freeze for a bit. Instead we pick out the views and update the avatars there.
+			 */
+			int count = listView.getChildCount();
+			for (int i = 0; i < count; i++)
+			{
+				View view = listView.getChildAt(i);
+				int indexOfData = listView.getFirstVisiblePosition() + i;
+
+				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
+				ContactInfo contactInfo = getItem(indexOfData);
+
+				/*
+				 * Since sms contacts and dividers cannot have custom avatars, we simply skip these cases.
+				 */
+				if (viewType == ViewType.SECTION || viewType == ViewType.EXTRA || viewType == ViewType.EMPTY || !contactInfo.isOnhike())
+				{
+					continue;
+				}
+
+				updateViewsRelatedToAvatar(view, getItem(indexOfData));
+			}
+		}
 	}
 }

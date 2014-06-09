@@ -817,6 +817,8 @@ public class HikeConstants
 
 	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
+	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES_SMALL = 25;
+
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;

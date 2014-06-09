@@ -30,8 +30,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
@@ -72,7 +74,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener
+public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener
 {
 
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
@@ -220,6 +222,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private boolean showingStealthFtueConvTip = false;
 	
 	private boolean showingWelcomeHikeConvTip = false;
+
+	private int previousFirstVisibleItem;
+
+	private long previousEventTime;
+
+	private int velocity;
 
 	private enum hikeBotConvStat
 	{
@@ -806,11 +814,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			mAdapter.clear();
 		}
 
-		mAdapter = new ConversationsAdapter(getActivity(), displayedConversations);
+		mAdapter = new ConversationsAdapter(getActivity(), displayedConversations, getListView());
 
 		setListAdapter(mAdapter);
 
 		getListView().setOnItemLongClickListener(this);
+		getListView().setOnScrollListener(this);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 		if (displayedConversations.isEmpty())
@@ -2035,4 +2044,29 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		startActivity(i);
 	}
 
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	{
+		if (previousFirstVisibleItem != firstVisibleItem)
+		{
+			long currTime = System.currentTimeMillis();
+			long timeToScrollOneElement = currTime - previousEventTime;
+			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+			previousFirstVisibleItem = firstVisibleItem;
+			previousEventTime = currTime;
+		}
+
+		if (mAdapter == null)
+		{
+			return;
+		}
+
+		mAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES_SMALL);
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState)
+	{
+	}
 }
