@@ -145,8 +145,8 @@ public class MqttMessagesManager
 			 */
 			if (!HikeConstants.SIGNUP_IC.equals(jsonObj.optString(HikeConstants.SUB_TYPE)))
 			{
-				ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(msisdn);
-				if(contactInfo.getFavoriteType()==FavoriteType.FRIEND)
+				FavoriteType favType = HikeUserDatabase.getInstance().getFriendshipStatus(msisdn);
+				if(favType==FavoriteType.FRIEND||favType==FavoriteType.REQUEST_SENT||favType==FavoriteType.REQUEST_SENT_REJECTED)
 				{
 				    autoDownloadGroupImage(msisdn);
 				}
