@@ -1845,8 +1845,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isOnline = true;
 				}
 
-				setLastSeenText("");
-
 				/*
 				 * Making sure nothing is already scheduled wrt last seen.
 				 */
@@ -2236,7 +2234,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabelView = (TextView) actionBarView.findViewById(R.id.contact_name);
 		mLastSeenView = (TextView) actionBarView.findViewById(R.id.contact_status);
 
-		mLastSeenView.setVisibility(View.VISIBLE);
+		mLastSeenView.setVisibility(View.GONE);
 		mLastSeenView.setSelected(true);
 
 		if (initialising)
@@ -2247,7 +2245,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
+				setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 			}
 		}
 		else
@@ -2329,6 +2327,65 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		mLastSeenView.setText(text);
+		if (mLastSeenView.getVisibility() == View.GONE)
+		{
+			if (mLabelView == null)
+			{
+				mLastSeenView.setVisibility(View.VISIBLE);
+				return;
+			}
+			
+			if (mConversation.isOnhike() && !(mConversation instanceof GroupConversation))
+			{
+				mLastSeenView.setVisibility(View.INVISIBLE);
+				Animation animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_last_seen);
+				mLabelView.startAnimation(animation);
+
+				animation.setAnimationListener(new AnimationListener()
+				{
+					@Override
+					public void onAnimationStart(Animation animation)
+					{
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation)
+					{
+					}
+
+					@Override
+					public void onAnimationEnd(Animation animation)
+					{
+						mLastSeenView.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+			else
+			{
+				mLastSeenView.setVisibility(View.VISIBLE);
+			}
+		}
+	}
+
+	private void hideLastSeenText()
+	{
+		if (mLastSeenView == null)
+		{
+			return;
+		}
+		mLastSeenView.setVisibility(View.GONE);
+	}
+
+	private void setLastSeenTextBasedOnHikeValue(boolean onHike)
+	{
+		if (onHike)
+		{
+			hideLastSeenText();
+		}
+		else
+		{
+			setLastSeenText(getString(R.string.on_sms));
+		}
 	}
 
 	private void updateActivePeopleNumberView(int addPeopleCount)
@@ -2816,7 +2873,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				public void run()
 				{
-					setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
+					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
@@ -6892,7 +6949,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if (lastSeenString == null)
 				{
-					setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
+					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 				}
 				else
 				{
