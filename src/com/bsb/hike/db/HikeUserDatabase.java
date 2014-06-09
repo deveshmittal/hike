@@ -1136,6 +1136,30 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public FavoriteType getFriendshipStatus(String number)
+	{
+		Cursor favoriteCursor = null;
+		try
+		{
+			favoriteCursor = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.FAVORITE_TYPE }, DBConstants.MSISDN + " =? ", new String[] { number },
+					null, null, null);
+			
+            FavoriteType favoriteType = FavoriteType.NOT_FRIEND;
+			if (favoriteCursor.moveToFirst())
+			{
+				favoriteType = FavoriteType.values()[favoriteCursor.getInt(favoriteCursor.getColumnIndex(DBConstants.FAVORITE_TYPE))];
+			}
+			return favoriteType;
+		}
+		finally
+		{
+			if (favoriteCursor != null)
+			{
+				favoriteCursor.close();
+			}
+		}
+	}
 
 	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{

@@ -459,7 +459,6 @@
     <string name="gc_fallback_offline">You need to be online to send this message</string>
     <string name="stickers">Stickers</string>
     <string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
-    <string name="new_stickers_available">New stickers available!</string>
     <string name="updating_set">Updating the set</string>
     <string name="downloading_category">Downloading new stickers</string>
     <string name="download">Download</string>
@@ -1011,7 +1010,6 @@
     <string name="gc_fallback_offline">You need to be online to send this message</string>
     <string name="stickers">Stickers</string>
     <string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
-    <string name="new_stickers_available">New stickers available!</string>
     <string name="updating_set">Updating the set</string>
     <string name="downloading_category">Downloading new stickers</string>
     <string name="download">Download</string>
@@ -1542,5 +1540,5 @@
      <string name="new_ui_welcome_tip_msg">Easier to use and faster than ever</string>
      <string name="camera">Camera</string>
      <string name="camera_upper_case">CAMERA</string>
-    
+     <string name="new_stickers_available">Tap to download new stickers</string>
 </resources>
