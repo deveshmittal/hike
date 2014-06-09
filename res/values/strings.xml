@@ -1565,5 +1565,8 @@
      <string name="new_chat_tip_header">Start a new chat</string>
      <string name="new_chat_tip_msg">tap on compose to see contacts</string>
      <string name="sticker_tip_msg">tap sticker icon to open sticker panel!</string>
+     <string name="ftue_welcome_card_header_second">Explore hike</string>
+     <string name="ftue_welcome_card_msg_second">Hike is full of awesome things! Tap on explore to check then out.</string>
+     <string name="explore_upper_case">EXPLORE</string>
     
 </resources>

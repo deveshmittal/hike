@@ -240,20 +240,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 		}
-		if(ftueListView.getHeaderViewsCount()==0)
+		if(ftueListView.getHeaderViewsCount()==0 && ftueListView.getFooterViewsCount() == 0)
 		{
-			setupEmptyListViewHeader(ftueListView);
+			setupWelcomeToHikeCard(ftueListView, !HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false));
 			addBottomPadding(ftueListView);
 		}
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
-	private void setupEmptyListViewHeader(ListView ftueListView)
+	private void setupWelcomeToHikeCard(ListView ftueListView, boolean asHeader)
 	{
-		View headerView = LayoutInflater.from(getActivity()).inflate(
+		View welcomeCardView = LayoutInflater.from(getActivity()).inflate(
 				R.layout.ftue_welcome_card_content, null);
-		TextView startExploringBtn = (TextView) headerView.findViewById(R.id.card_btn);
-		ImageView cardHeaderImage = (ImageView)headerView.findViewById(R.id.card_header_img_bg);
+		TextView startExploringBtn = (TextView) welcomeCardView.findViewById(R.id.card_btn);
+		TextView cardTextHeader = (TextView) welcomeCardView.findViewById(R.id.card_txt_header);
+		TextView cardTextMsg = (TextView) welcomeCardView.findViewById(R.id.card_txt_msg);
+		ImageView cardHeaderImage = (ImageView) welcomeCardView.findViewById(R.id.card_header_img_bg);
 		
 		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), R.drawable.bg_ct_love_tile, 1);
 		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
@@ -272,9 +274,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			
 		};
-		headerView.setOnClickListener(onClickListner);
+		welcomeCardView.setOnClickListener(onClickListner);
 		startExploringBtn.setOnClickListener(onClickListner);
-		ftueListView.addHeaderView(headerView);
+		
+		if(asHeader)
+		{
+			cardTextHeader.setText(R.string.welcome_to_hike);
+			cardTextMsg.setText(R.string.ftue_welcome_card_msg);
+			startExploringBtn.setText(R.string.start_exploring);
+			ftueListView.addHeaderView(welcomeCardView);
+		}
+		else
+		{
+			cardTextHeader.setText(R.string.ftue_welcome_card_header_second);
+			cardTextMsg.setText(R.string.ftue_welcome_card_msg_second);
+			startExploringBtn.setText(R.string.explore_upper_case);
+			ftueListView.addFooterView(welcomeCardView);
+		}
 		
 	}
 	
@@ -1847,7 +1863,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
 		}
-		
+		if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, true);
+		}
 	}
 
 	private void sortAndUpdateTheView(Conversation conversation, ConvMessage convMessage, boolean newConversationAdded)
