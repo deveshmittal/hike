@@ -339,7 +339,7 @@ public class ToastListener implements Listener
 				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
 				{
 					final String filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
+					bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(filePath, Bitmap.Config.RGB_565);
 				}
 			}
 
@@ -368,7 +368,7 @@ public class ToastListener implements Listener
 				if (resourceId > 0)
 				{
 					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr);
+					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr, Bitmap.Config.ARGB_8888);
 				}
 
 			}
