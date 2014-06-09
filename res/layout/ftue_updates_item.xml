@@ -8,7 +8,7 @@
         style="@style/CardContainerWithdoutPadding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="23dp" >
+        android:paddingTop="20dp" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/name"
@@ -16,10 +16,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:text="Pankaj Verma"
-            android:textColor="@color/ftue_card_header"
+            android:textColor="@color/standerd_black"
             android:textSize="24sp"
             android:textStyle="italic"
-            android:paddingRight="10dp"
+            android:paddingRight="17dp"
             android:paddingLeft="22dp" />
 
         <LinearLayout
@@ -36,10 +36,10 @@
                 android:id="@+id/main_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="5dp"
                 android:text="Added you as a friend"
-                android:textColor="@color/ftue_card_header"
-                android:textSize="16sp"
+                android:textColor="@color/standerd_black"
+                android:textSize="15sp"
                 android:textStyle="italic" />
         </LinearLayout>
 
@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/details_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="16dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:orientation="vertical" />
