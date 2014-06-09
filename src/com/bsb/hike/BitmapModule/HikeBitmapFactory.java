@@ -122,7 +122,7 @@ public class HikeBitmapFactory
 		return decodeByteArray(encodeByte, 0, encodeByte.length);
 	}
 
-	public static Bitmap drawableToBitmap(Drawable drawable)
+	public static Bitmap drawableToBitmap(Drawable drawable, Bitmap.Config config)
 	{
 		if (drawable == null)
 		{
@@ -136,7 +136,7 @@ public class HikeBitmapFactory
 		/*
 		 * http://developer.android.com/reference/android/graphics/Bitmap.Config. html
 		 */
-		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), Config.ARGB_8888);
+		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), config);
 
 		if (bitmap == null)
 		{

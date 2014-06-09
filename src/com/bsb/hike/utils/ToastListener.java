@@ -359,7 +359,7 @@ public class ToastListener implements Listener
 				if (resourceId > 0)
 				{
 					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr);
+					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr, Bitmap.Config.ARGB_8888);
 				}
 
 			}

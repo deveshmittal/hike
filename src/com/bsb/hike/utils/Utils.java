@@ -3103,7 +3103,7 @@ public class Utils
 
 		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
 
-		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable);
+		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
