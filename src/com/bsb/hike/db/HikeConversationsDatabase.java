@@ -21,12 +21,9 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -47,6 +44,7 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -1236,7 +1234,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					// TODO get last message in group MSISDN from metadata 
+					List<String> grpMsisdns = getGroupLastMsgMsisdn(metadata);
+
+					if (null != grpMsisdns)
+					{
+						for (String m : grpMsisdns)
+						{
+							msisdns.append(DatabaseUtils.sqlEscapeString(m) + ",");
+						}
+					}
+					else
+					{
+						msisdns.append(DatabaseUtils.sqlEscapeString(groupParticipant) + ",");
+					}
+
 				}
 				else
 				{
@@ -1262,6 +1273,75 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 
+	}
+
+	private List<String> getGroupLastMsgMsisdn(String metadataString)
+	{
+		List<String> grpLastMsisdns = new ArrayList<String>();
+		JSONObject metadata;
+		try
+		{
+			metadata = new JSONObject(metadataString);
+			ParticipantInfoState participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER
+					: ParticipantInfoState.fromJSON(metadata);
+			switch (participantInfoState)
+			{
+			case BLOCK_INTERNATIONAL_SMS:
+			case GROUP_END:
+			case INTRO_MESSAGE:
+			case NO_INFO:
+				return null;
+			case CHANGED_GROUP_NAME:
+				grpLastMsisdns.add(metadata.getString(HikeConstants.FROM));
+				break;
+
+			case DND_USER:
+				JSONArray dndNumbers = metadata.has(HikeConstants.DND_USERS) ? metadata.getJSONArray(HikeConstants.DND_USERS) : metadata.getJSONArray(HikeConstants.DND_NUMBERS);
+				if (dndNumbers != null && dndNumbers.length() > 0)
+				{
+					for (int i = 0; i < dndNumbers.length(); i++)
+					{
+						String dndName = dndNumbers.optString(i);
+						grpLastMsisdns.add(dndName);
+					}
+				}
+				break;
+
+			case PARTICIPANT_JOINED:
+				JSONArray participantInfoArray = metadata.getJSONArray(HikeConstants.DATA);
+
+				JSONObject participant = (JSONObject) participantInfoArray.opt(0);
+				grpLastMsisdns.add(participant.optString(HikeConstants.MSISDN));
+
+				if (participantInfoArray.length() == 2)
+				{
+					JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
+					grpLastMsisdns.add(participant2.optString(HikeConstants.MSISDN));
+				}
+				break;
+
+			case PARTICIPANT_LEFT:
+				grpLastMsisdns.add(metadata.getString(HikeConstants.DATA));
+				break;
+
+			case USER_JOIN:
+			case USER_OPT_IN:
+				grpLastMsisdns.add(metadata.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN));
+				break;
+
+			case CHANGED_GROUP_IMAGE:
+				grpLastMsisdns.add(metadata.getString(HikeConstants.FROM));
+				break;
+			case STATUS_MESSAGE:
+			case CHAT_BACKGROUND:
+				grpLastMsisdns.add(metadata.getString(HikeConstants.FROM));
+			}
+		}
+		catch (JSONException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception while getting last message in group msisdn from metadata " + e);
+		}
+		return grpLastMsisdns;
 	}
 
 	public List<Conversation> getConversations()
