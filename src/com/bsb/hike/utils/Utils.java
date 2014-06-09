@@ -3091,7 +3091,10 @@ public class Utils
 	
 	public static void resetOverflowCountHomeScreen(Context context)
 	{
-		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
 	}
 
