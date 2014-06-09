@@ -1536,10 +1536,10 @@
      <string name="timeline">Timeline</string>
      <string name="add_favorites_upper_case">ADD FAVORITES</string>
      <string name="status_update_tip_header">Post your status</string>
-     <string name="status_update_tip_msg">Status is visible to favorites only</string>
+     <string name="status_update_tip_msg">status is visible to favorites only</string>
      <string name="new_chat_compose_hint">Search by name or number</string>
      <string name="new_ui_welcome_tip_header">Welcome to new hike</string>
-     <string name="new_ui_welcome_tip_msg">Easier to use and faster than ever</string>
+     <string name="new_ui_welcome_tip_msg">easier to use and faster than ever</string>
      <string name="camera">Camera</string>
      <string name="camera_upper_case">CAMERA</string>
      <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike, start chatting.</string>
@@ -1548,17 +1548,17 @@
      <string name="ftue_sms_contact_card_header">placeholder %1$d sms contacts.</string>
      <string name="skip_upper_caps">SKIP</string>
      <string name="welcome_to_hike">Welcome to hike</string>
-     <string name="ftue_welcome_card_msg">Hike is full of awesome things. We\’d love to show them to you</string>
+     <string name="ftue_welcome_card_msg">Hike is full of awesome things. We\'d love to show them to you</string>
      <string name="start_exploring">START EXPLORING</string>
      <string name="hidden_mode">Hidden mode</string>
-     <string name="ftue_hidden_mode_card_msg">Mark your private chats as hidden and access them with passcode.</string>
+     <string name="ftue_hidden_mode_card_msg">Mark your private chats as hidden and access them with passcode. Tap on \'hi\' to activate hidden mode.</string>
      <string name="hike_offline">Hike offline</string>
      <string name="attachments">Attachments</string>
-     <string name="ftue_sticker_card_msg">When words can\’t express, say it with a sticker. You\’ll love them!</string>
-     <string name="ftue_attachment_card_msg">Send photos, video, pdfs, docs and a lot more up to 100MB each.</string>
-     <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline</string>
-     <string name="ftue_favorites_card_msg">Only favorites can see your last seen and status updates</string>
-     <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
+     <string name="ftue_sticker_card_msg">When words can\'t express, say it with a sticker. Send one to a friend. You\'ll love them!</string>
+     <string name="ftue_attachment_card_msg"> Send photos, video, pdfs, docs and a lot more up to 100MB each. That\'s big :)</string>
+     <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline. Always stay connected.</string>
+     <string name="ftue_favorites_card_msg">Only favorites can see your last seen and status updates. Choose them wisely.</string>
+     <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes. They\'re awesome.</string>
      <string name="themes">Themes</string>
      
     
