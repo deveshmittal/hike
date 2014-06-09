@@ -390,7 +390,7 @@ public class HikeNotification
 		final String text = key + " " + message;
 
 		final int icon = returnSmallIcon();
-		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
+		final Bitmap bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(imagePath, Bitmap.Config.RGB_565);
 		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());

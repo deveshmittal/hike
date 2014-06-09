@@ -330,7 +330,7 @@ public class ToastListener implements Listener
 				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
 				{
 					final String filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
+					bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(filePath, Bitmap.Config.RGB_565);
 				}
 			}
 
