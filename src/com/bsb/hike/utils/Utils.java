@@ -3088,6 +3088,12 @@ public class Utils
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
+	
+	public static void resetOverflowCountHomeScreen(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
+	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
 	{
@@ -3924,5 +3930,44 @@ public class Utils
 				contactInfo.setOffline(isOffline);
 			}
 		}
+	}
+	/**
+	 * Adding this method to compute the overall count for showing in overflow menu on home screen
+	 * @param accountPref
+	 * @param count
+	 * @return
+	 */
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	{
+		int overallCount = 0;
+		if(!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		{
+			overallCount++;
+		}
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		{
+			overallCount++;
+		}
+		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		if(frCount>0)
+		{
+			overallCount += frCount;
+		}
+
+		return overallCount;
+	}
+	
+	public static void incrementOrDecrementHomeOverflowCount(SharedPreferences accountPref, int count)
+	{
+		int currentCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+
+		currentCount += count;
+		if (currentCount >=0)
+		{
+			Editor editor = accountPref.edit();
+			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.commit();
+		}
+
 	}
 }
