@@ -1344,6 +1344,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		contactInfo.setFavoriteType(favoriteType);
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(accepted ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.REJECT_FRIEND_REQUEST, favoriteToggle);
+		int count = preferences.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		if(count > 0)
+		{
+			Utils.incrementOrDecrementHomeOverflowCount(preferences, -1);
+		}
 	}
 
 	public void onTextButtonClick(View v)

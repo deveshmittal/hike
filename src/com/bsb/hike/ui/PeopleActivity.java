@@ -18,6 +18,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.FriendsFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
@@ -180,6 +181,7 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	@Override
 	protected void onResume()
 	{
+		Utils.resetOverflowCountHomeScreen(this);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 		super.onResume();
 	}

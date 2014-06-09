@@ -62,6 +62,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconloader = new IconLoader(context, mIconImageSize);
 		iconloader.setDefaultAvatarIfNoCustomIcon(true);
+		iconloader.setImageFadeIn(false);
 
 		this.existingGroupId = existingGroupId;
 		this.fetchGroups = fetchGroups;
@@ -134,6 +135,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		else
 		{
 			holder = (ViewHolder) convertView.getTag();
+			holder.msisdn = contactInfo.getMsisdn();
+
 			holder.status.setText(contactInfo.getMsisdn());
 
 			String name = contactInfo.getName();
@@ -201,18 +204,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.onlineIndicator.setVisibility(View.GONE);
 			}
 
-			if (contactInfo.isUnknownContact())
-			{
-				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
-				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
-			}
-			else
-			{
-				holder.userImage.setScaleType(ScaleType.FIT_CENTER);
-				String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
-				iconloader.loadImage(id, true, holder.userImage, true);
-			}
+			updateViewsRelatedToAvatar(convertView, contactInfo);
+
 			if (showCheckbox)
 			{
 				holder.checkbox.setVisibility(View.VISIBLE);
@@ -232,6 +225,33 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 		return convertView;
+	}
+
+	private void updateViewsRelatedToAvatar(View parentView, ContactInfo contactInfo)
+	{
+		ViewHolder holder = (ViewHolder) parentView.getTag();
+
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation. We don't need
+		 * to do anything here then.
+		 */
+		if (!contactInfo.getMsisdn().equals(holder.msisdn))
+		{
+			return;
+		}
+
+		if (contactInfo.isUnknownContact())
+		{
+			holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+			holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
+			holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+		}
+		else
+		{
+			holder.userImage.setScaleType(ScaleType.FIT_CENTER);
+			String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
+			iconloader.loadImage(id, true, holder.userImage, false, isListFlinging, true);
+		}
 	}
 
 	private View inflateView(ViewType viewType)
@@ -286,6 +306,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		ImageView statusMood;
 		
 		ImageView onlineIndicator;
+
+		String msisdn;
 	}
 
 	@Override
@@ -469,4 +491,39 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return super.getItemViewType(position);
 	}
 
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		iconloader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			/*
+			 * We don't want to call notifyDataSetChanged here since that causes the UI to freeze for a bit. Instead we pick out the views and update the avatars there.
+			 */
+			int count = listView.getChildCount();
+			for (int i = 0; i < count; i++)
+			{
+				View view = listView.getChildAt(i);
+				int indexOfData = listView.getFirstVisiblePosition() + i;
+
+				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
+				ContactInfo contactInfo = getItem(indexOfData);
+
+				/*
+				 * Since sms contacts and dividers cannot have custom avatars, we simply skip these cases.
+				 */
+				if (viewType == ViewType.SECTION || viewType == ViewType.EXTRA || !contactInfo.isOnhike())
+				{
+					continue;
+				}
+
+				updateViewsRelatedToAvatar(view, getItem(indexOfData));
+			}
+		}
+	}
 }

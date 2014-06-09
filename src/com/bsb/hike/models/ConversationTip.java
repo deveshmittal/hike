@@ -9,6 +9,10 @@ public class ConversationTip extends Conversation
 	public static final int RESET_STEALTH_TIP = 3;
 
 	public static final int WELCOME_HIKE_TIP = 4;
+	
+	public static final int START_NEW_CHAT_TIP = 5;
+	
+	public static final int STEALTH_UNREAD_TIP = 6;
 
 	private int tipType;
 	public ConversationTip(int tipType)
@@ -45,5 +49,15 @@ public class ConversationTip extends Conversation
 	public boolean isWelcomeHikeTip()
 	{
 		return tipType == WELCOME_HIKE_TIP;
+	}
+	
+	public boolean isStartNewChatTip()
+	{
+		return tipType == START_NEW_CHAT_TIP;
+	}
+	
+	public boolean isStealthUnreadTip()
+	{
+		return tipType == STEALTH_UNREAD_TIP;
 	}
 }

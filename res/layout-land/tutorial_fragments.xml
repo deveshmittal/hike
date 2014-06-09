@@ -9,7 +9,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="560"
-        android:gravity="right|bottom"
+        android:gravity="center"
         android:orientation="vertical"
         android:paddingLeft="20dp" >
 
@@ -17,7 +17,6 @@
             android:id="@+id/tutorial_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
             android:src="@drawable/tutorial1_img" />
     </LinearLayout>
 

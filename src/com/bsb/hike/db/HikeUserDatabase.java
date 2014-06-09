@@ -39,6 +39,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -1136,6 +1137,30 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public FavoriteType getFriendshipStatus(String number)
+	{
+		Cursor favoriteCursor = null;
+		try
+		{
+			favoriteCursor = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.FAVORITE_TYPE }, DBConstants.MSISDN + " =? ", new String[] { number },
+					null, null, null);
+			
+            FavoriteType favoriteType = FavoriteType.NOT_FRIEND;
+			if (favoriteCursor.moveToFirst())
+			{
+				favoriteType = FavoriteType.values()[favoriteCursor.getInt(favoriteCursor.getColumnIndex(DBConstants.FAVORITE_TYPE))];
+			}
+			return favoriteType;
+		}
+		finally
+		{
+			if (favoriteCursor != null)
+			{
+				favoriteCursor.close();
+			}
+		}
+	}
 
 	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
@@ -1914,7 +1939,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN }, selection, null, null, null, null);
+			c = mReadDb.query(true, DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN }, selection, null, null, null, null, null);
 
 			return c.getCount();
 		}
@@ -1926,6 +1951,27 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public int getNonHikeContactsCount()
+	{
+		String selection = DBConstants.ONHIKE + " = 0";
+		Cursor c = null;
+		try
+		{
+			c = mReadDb.query(true, DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN }, selection, null, null, null, null, null);
+
+			return c.getCount();
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
+	
 
 	public void setHikeJoinTime(String msisdn, long hikeJoinTime)
 	{
@@ -2021,79 +2067,104 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return sb.toString();
 	}
 
-	public List<ContactInfo> getFTUEContacts(SharedPreferences preferences)
+	public FtueContactsData getFTUEContacts(SharedPreferences preferences)
 	{
-
+		FtueContactsData ftueContactsData = new FtueContactsData();
+		
 		int limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT;
 
-		List<ContactInfo> contactInfoList = new ArrayList<ContactInfo>(HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT);
-
 		String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
-
-		List<ContactInfo> friendList = getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.ON_HIKE_VALUE, myMsisdn);
-
-		if (friendList.size() >= HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT)
+		
+		ftueContactsData.setTotalHikeContactsCount(getHikeContactCount());
+		
+		/*
+		 * adding server recommended contacts to ftue contacts list;
+		 */
+		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
+		Logger.d("getFTUEContacts","recommendedContactsSelection = "+recommendedContactsSelection);
+		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
-			contactInfoList.addAll(friendList.subList(0, HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT));
-
-			return contactInfoList;
+			List<ContactInfo> recommendedContacts = getHikeContacts(limit*2, recommendedContactsSelection, null, myMsisdn);
+			ftueContactsData.getHikeContacts().addAll(recommendedContacts);
+			
+		}
+		
+		limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT - ftueContactsData.getHikeContacts().size();
+		// added server recommended contacts
+		
+		/*
+		 * adding favorites if required;
+		 */
+		if(limit > 0)
+		{
+			List<ContactInfo> friendList = getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.ON_HIKE_VALUE, myMsisdn);
+			for (ContactInfo contactInfo : friendList)
+			{
+				if(!Utils.isListContainsMsisdn(ftueContactsData.getHikeContacts(), contactInfo.getMsisdn()))
+				{
+					ftueContactsData.getHikeContacts().add(contactInfo);
+					limit--;
+					
+					if(limit < 1)
+					{
+						return ftueContactsData;
+					}
+				}
+			}
+			
 		}
 		else
 		{
-			contactInfoList.addAll(friendList);
-			limit = limit - friendList.size();
+			return ftueContactsData;
 		}
-
-		String currentSelection = getQueryableNumbersString(contactInfoList);
-
-		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
-		if (!TextUtils.isEmpty(recommendedContactsSelection))
+		
+		// added favorites contacts
+		
+		/*
+		 * adding random hike contacts if required;
+		 */
+		if(limit > 0)
 		{
-			List<ContactInfo> recommendedContacts = getHikeContacts(limit, recommendedContactsSelection, currentSelection, myMsisdn);
-			contactInfoList.addAll(recommendedContacts);
-
-			if (recommendedContacts.size() == limit)
+			String currentSelection = getQueryableNumbersString(ftueContactsData.getHikeContacts());
+			List<ContactInfo> hikeContacts = getHikeContacts(limit * 2, null, currentSelection, myMsisdn);
+			if (hikeContacts.size() >= limit)
 			{
-				return contactInfoList;
+				ftueContactsData.getHikeContacts().addAll(hikeContacts.subList(0, limit));
+				return ftueContactsData;
 			}
 			else
 			{
-				limit = limit - recommendedContacts.size();
+				ftueContactsData.getHikeContacts().addAll(hikeContacts);
+			}
+
+		}
+		else
+		{
+			return ftueContactsData;
+		}
+		limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT - ftueContactsData.getHikeContacts().size();
+		
+		// added random hike contacts
+		
+		/*
+		 * adding most contacted sms contacts if required;
+		 */
+		if(limit > 0)
+		{
+			List<ContactInfo> nonHikeContacts = getNonHikeMostContactedContacts(limit*4);
+			ftueContactsData.setTotalSmsContactsCount(getNonHikeContactsCount());
+
+			if (nonHikeContacts.size() >= limit)
+			{
+				ftueContactsData.getSmsContacts().addAll(nonHikeContacts.subList(0, limit));
+			}
+			else
+			{
+				ftueContactsData.getSmsContacts().addAll(nonHikeContacts);
 			}
 		}
 
-		currentSelection = getQueryableNumbersString(contactInfoList);
-
-		List<ContactInfo> hikeContacts = getHikeContacts(limit * 2, null, currentSelection, myMsisdn);
-		if (hikeContacts.size() >= limit)
-		{
-			contactInfoList.addAll(hikeContacts.subList(0, limit));
-		}
-		else
-		{
-			contactInfoList.addAll(hikeContacts);
-		}
-
-		if (hikeContacts.size() >= limit)
-		{
-			return contactInfoList;
-		}
-		else
-		{
-			limit = limit - hikeContacts.size();
-		}
-
-		List<ContactInfo> nonHikeContacts = getNonHikeMostContactedContacts(limit);
-		if (nonHikeContacts.size() >= limit)
-		{
-			contactInfoList.addAll(nonHikeContacts.subList(0, limit));
-		}
-		else
-		{
-			contactInfoList.addAll(nonHikeContacts);
-		}
-
-		return contactInfoList;
+		return ftueContactsData;
 	}
 
 	public void updateInvitedTimestamp(String msisdn, long timestamp)

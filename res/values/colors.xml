@@ -160,7 +160,7 @@
     <color name="list_item_subtext">#73716d</color>
     <color name="conversation_timestamp">#bfbcb6</color>
     <color name="unread_message">#0090ec</color>
-    <color name="conversation_pressed">#f1efe8</color>
+    <color name="conversation_pressed">#7fececec</color>
     <color name="list_divider">#e6e6e6</color>
     <color name="home_bg">#fffffc</color>
     <color name="update_no_btn">#73716d</color>
@@ -228,14 +228,8 @@
     <color name="love_text_shadow">#c44d71</color>
     <color name="love_btn_text_shadow">#c44d71</color>
     <color name="love_div">#c44d71</color>
-    <color name="angry_bg">#be251e</color>
     <color name="angry_btn_normal">#c54943</color>
     <color name="angry_btn_pressed">#ad3e39</color>
-    <color name="angry_text">#ffffff</color>
-    <color name="angry_btn_text">#ffffff</color>
-    <color name="angry_text_shadow">#a51d17</color>
-    <color name="angry_btn_text_shadow">#a51d17</color>
-    <color name="angry_div">#a51d17</color>
     <color name="valentine_nudge_white">#ffffef</color>
     <color name="valenting_nudge_button_pressed">#26000000</color>
     <color name="selected_msg_item_bg">#1A0f8fe1</color>
@@ -303,5 +297,16 @@
     <color name="dark_grey_drop_shadow">#bdbdbd</color>
     <color name="light_grey_drop_shadow">#c9c9c9</color>
     <color name="gray_pressed_state">#252c2c</color>
+    <color name="stealth_tip_bg">#ef554e</color>
+    <color name="stealth_tip_divider">#f2706a</color>
+    <color name="ftue_card_header">#9f9f9f</color>
+    <color name="black_alpha_3">#08000000</color>
+    <color name="standerd_black">#333333</color>
+    <color name="standerd_grey">#666666</color>
+    <color name="standerd_light_grey">#999999</color>
+    <color name="standerd_background">#ececec</color>
+    <color name="white_50">#7fffffff</color>
+    <color name="stealth_tip_bg">#ef554e</color>
+    <color name="stealth_tip_divider">#f2706a</color>
 </resources>
 	
