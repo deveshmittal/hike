@@ -423,7 +423,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 	private boolean shouldAddFTUEItem()
 	{
-		if (HomeActivity.ftueList.isEmpty() || statusMessages.size() > HikeConstants.MIN_STATUS_COUNT || prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false))
+		if (HomeActivity.ftueContactsData.isEmpty() || statusMessages.size() > HikeConstants.MIN_STATUS_COUNT || prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false))
 		{
 			return false;
 		}
@@ -432,7 +432,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		 * To add an ftue item, we need to make sure the user does not have 5 friends.
 		 */
 		int friendCounter = 0;
-		for (ContactInfo contactInfo : HomeActivity.ftueList)
+		for (ContactInfo contactInfo : HomeActivity.ftueContactsData.getCompleteList())
 		{
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			if (favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_SENT

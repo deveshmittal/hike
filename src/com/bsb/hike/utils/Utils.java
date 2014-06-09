@@ -143,6 +143,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
@@ -3030,7 +3031,7 @@ public class Utils
 		}
 	}
 
-	public static void executeContactInfoListResultTask(AsyncTask<Void, Void, List<ContactInfo>> asyncTask)
+	public static void executeContactInfoListResultTask(AsyncTask<Void, Void, FtueContactsData> asyncTask)
 	{
 		if (isHoneycombOrHigher())
 		{
@@ -3939,5 +3940,18 @@ public class Utils
 				contactInfo.setOffline(isOffline);
 			}
 		}
+	}
+
+	public static boolean isListContainsMsisdn(List<ContactInfo> contacts, String msisdn)
+	{
+		for(ContactInfo contactInfo : contacts)
+		{
+			if(contactInfo.getMsisdn().equals(msisdn))
+			{
+				Logger.d("tesst", "matched");
+				return true;
+			}
+		}
+		return false;
 	}
 }

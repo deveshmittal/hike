@@ -435,7 +435,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			if (!filteredFriendsList.isEmpty() || !isFiltered)
 				completeList.add(section);
 		}
-		if (addFTUE && !HomeActivity.ftueList.isEmpty() && TextUtils.isEmpty(queryText) && friendsList.size() < HikeConstants.FTUE_LIMIT)
+		if (addFTUE && !HomeActivity.ftueContactsData.isEmpty() && TextUtils.isEmpty(queryText) && friendsList.size() < HikeConstants.FTUE_LIMIT)
 		{
 			SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
@@ -455,7 +455,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				int limit = HikeConstants.FTUE_LIMIT - friendsList.size();
 
 				int counter = 0;
-				for (ContactInfo contactInfo : HomeActivity.ftueList)
+				for (ContactInfo contactInfo : HomeActivity.ftueContactsData.getCompleteList())
 				{
 					FavoriteType favoriteType = contactInfo.getFavoriteType();
 					if (favoriteType == FavoriteType.NOT_FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED || favoriteType == null)
