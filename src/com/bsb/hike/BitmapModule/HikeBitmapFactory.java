@@ -181,7 +181,7 @@ public class HikeBitmapFactory
 		{
 			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
 			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false, true, true);
+			src = createScaledBitmap(src, width, height, Bitmap.Config.RGB_565, false, true, true);
 			return src;
 		}
 		else
