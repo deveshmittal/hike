@@ -308,6 +308,7 @@
     <color name="standerd_grey">#666666</color>
     <color name="standerd_light_grey">#999999</color>
     <color name="standerd_background">#ececec</color>
+    <color name="white_50">#7fffffff</color>
     
 </resources>
 	

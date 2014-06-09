@@ -10,7 +10,6 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -50,11 +49,9 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
 		mIndicator.setOnPageChangeListener(onPageChangeListener);
 		mIndicator.setViewPager(mPager);
-		AlphaAnimation anim = new AlphaAnimation(0.5f, 0.5f);
-		anim.setDuration(0);
-		anim.setFillAfter(true);
-		skipButton.startAnimation(anim);
 		skipButton.setText(R.string.next_signup);
+		skipButton.setTextColor(getResources().getColor(R.color.white_50));
+		
 		findViewById(R.id.skip).setOnClickListener(new View.OnClickListener()
 		{
 			
