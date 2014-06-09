@@ -2523,8 +2523,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(HikeConstants.SMSNative.READ, 1);
-
-				getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?", new String[] { mContactNumber });
+				try
+				{
+					int smsUptaed = getContentResolver().update(HikeConstants.SMSNative.INBOX_CONTENT_URI, contentValues, HikeConstants.SMSNative.NUMBER + "=?",
+							new String[] { mContactNumber });
+				}
+				catch (Exception iae)
+				{
+					// this case should not happen usually , but id no message database resolver is present , say rooted phones , app will crash
+					iae.printStackTrace();
+				}
 			}
 		}).start();
 	}
