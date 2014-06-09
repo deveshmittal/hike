@@ -250,7 +250,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		View headerView = LayoutInflater.from(getActivity()).inflate(
 				R.layout.ftue_welcome_card_content, null);
-		headerView.setOnClickListener(null);
 		TextView startExploringBtn = (TextView) headerView.findViewById(R.id.card_btn);
 		ImageView cardHeaderImage = (ImageView)headerView.findViewById(R.id.card_header_img_bg);
 		
@@ -259,7 +258,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 		cardHeaderImage.setImageDrawable(bd);
 		
-		startExploringBtn.setOnClickListener(new View.OnClickListener()
+		View.OnClickListener onClickListner = new View.OnClickListener()
 		{
 			
 			@Override
@@ -270,7 +269,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				startActivity(intent);
 			}
 			
-		});
+		};
+		headerView.setOnClickListener(onClickListner);
+		startExploringBtn.setOnClickListener(onClickListner);
 		ftueListView.addHeaderView(headerView);
 		
 	}
