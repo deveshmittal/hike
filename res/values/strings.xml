@@ -1545,7 +1545,7 @@
      <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike, start chatting.</string>
      <string name="see_all_upper_caps">SEE ALL</string>
      <string name="recommend_more_upper_caps">RECOMMEND MORE</string>
-     <string name="ftue_sms_contact_card_header">placeholder %1$d sms contacts.</string>
+     <string name="ftue_sms_contact_card_header">Hey, you have %1$d contacts.</string>
      <string name="skip_upper_caps">SKIP</string>
      <string name="welcome_to_hike">Welcome to hike</string>
      <string name="ftue_welcome_card_msg">Hike is full of awesome things. We\'d love to show them to you</string>
@@ -1561,6 +1561,7 @@
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes. They\'re awesome.</string>
      <string name="themes">Themes</string>
      <string name="ftue_updates_are_fun_with_favorites">We\'ve got you some recommendations. Add them as favorite to share your status updates and last seen.</string>
+     <string name="ftue_sms_contact_card_subtext">Would you like to send free sms.</string>
      
     
 </resources>

@@ -111,7 +111,6 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		if (item.getType() == EmptyConversationItem.HIKE_CONTACTS || item.getType() == EmptyConversationItem.SMS_CONTACTS)
 		{
 			viewHolder.name.setText(item.getHeader());
-			viewHolder.mainInfo.setVisibility(View.GONE);
 
 			int limit = HikeConstants.FTUE_LIMIT;
 			View parentView = null;
@@ -141,6 +140,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			switch (item.getType())
 			{
 			case EmptyConversationItem.HIKE_CONTACTS:
+				viewHolder.mainInfo.setVisibility(View.GONE);
 				if (HomeActivity.ftueContactsData.getTotalHikeContactsCount() > HikeConstants.FTUE_LIMIT)
 				{
 					setUpSeeAllButton(viewHolder.seeAll);
@@ -151,6 +151,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				}
 				break;
 			case EmptyConversationItem.SMS_CONTACTS:
+				viewHolder.mainInfo.setVisibility(View.VISIBLE);
+				viewHolder.mainInfo.setText(R.string.ftue_sms_contact_card_subtext);
 				if (HomeActivity.ftueContactsData.getTotalSmsContactsCount() > HomeActivity.ftueContactsData.getSmsContacts().size())
 				{
 					setUpSeeAllButton(viewHolder.seeAll);
