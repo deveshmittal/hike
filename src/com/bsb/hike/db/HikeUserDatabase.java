@@ -1831,18 +1831,26 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public void getConversationContacts(Map<String, ContactInfo> map)
 	{
 		String msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		getConversationContacts(map, msisdns);
+	}
+
+	public List<ContactInfo> getConversationContacts(Map<String, ContactInfo> map, String msisdnsDB)
+	{
 		Cursor c = null;
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 		try
 		{
-			c = getContactsCursorForMsisdnList(msisdns);
+			c = getContactsCursorForMsisdnList(msisdnsDB);
 			if (c != null)
 			{
 				while (c.moveToNext())
 				{
 					ContactInfo cInfo = processContact(c);
 					map.put(cInfo.getMsisdn(), cInfo);
+					contacts.add(cInfo);
 				}
 			}
+			return contacts;
 		}
 		finally
 		{

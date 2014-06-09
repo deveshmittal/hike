@@ -3,6 +3,8 @@
  */
 package com.bsb.hike.modules.contactmgr;
 
+import java.util.List;
+
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.iface.ITransientCache;
 
@@ -31,6 +33,15 @@ public class ContactManager implements ITransientCache
 		cache.loadPersistenceMemory();
 	}
 
+	/**
+	 * This method puts the contactInfo object list in persistence memory
+	 * @param contacts
+	 */
+	public List<ContactInfo> loadPersistenceCache(String msisdnsDB)
+	{
+		return cache.loadPersistenceMemory(msisdnsDB);
+	}
+	
 	public static ContactManager getInstance()
 	{
 		return _instance;
