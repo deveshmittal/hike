@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -58,7 +59,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 	private List<StatusMessage> statusMessages;
 
-	private Context context;
+	private Activity context;
 
 	private String userMsisdn;
 
@@ -84,7 +85,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
 	}
 
-	public CentralTimelineAdapter(Context context, List<StatusMessage> statusMessages, String userMsisdn)
+	public CentralTimelineAdapter(Activity context, List<StatusMessage> statusMessages, String userMsisdn)
 	{
 		this.context = context;
 		mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
@@ -463,6 +464,9 @@ public class CentralTimelineAdapter extends BaseAdapter
 				addFriendBtn.setOnClickListener(addOnClickListener);
 
 				viewHolder.contactsContainer.addView(parentView);
+				
+				parentView.setTag(contactInfo);
+				parentView.setOnClickListener(ftueListItemClickListener);
 
 				if (--limit == 0)
 				{
@@ -689,6 +693,20 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			Intent intent = new Intent(context, PeopleActivity.class);
 			context.startActivity(intent);
+		}
+	};
+	
+	private OnClickListener ftueListItemClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+
+			Utils.startChatThread(context, contactInfo);
+
+			context.finish();
 		}
 	};
 
