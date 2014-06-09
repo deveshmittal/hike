@@ -88,11 +88,11 @@ public class UploadFileTask extends FileTransferBase
 	private int num = 0;
 
 	private static String BOUNDARY = "----------V2ymHFg03ehbqgZCaKO6jy";
-	
+
 	private int bufferSize = 1;
 
-	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile, String fileKey,
-			String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
+	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
+			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
 		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
 		this.msisdn = msisdn;
@@ -173,27 +173,27 @@ public class UploadFileTask extends FileTransferBase
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
 							Bitmap.Config.RGB_565, true, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
-					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
+					if (thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
 						BitmapDrawable bd = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey);
-						if(bd != null)
+						if (bd != null)
 							thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
 					}
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
 					thumbnail = ThumbnailUtils.createVideoThumbnail(destinationFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-					if(thumbnail == null && !TextUtils.isEmpty(fileKey))
+					if (thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
 						BitmapDrawable bd = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey);
-						if(bd != null)
+						if (bd != null)
 							thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
 					}
 				}
 				if (thumbnail != null)
 				{
 					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-				    //thumbnail.recycle();
+					// thumbnail.recycle();
 				}
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length());
 			}
@@ -283,7 +283,8 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
 				// do not copy the file if it is video or audio
-				if (!mFile.exists() || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING || hikeFileType == HikeFileType.OTHER)
+				if (!mFile.exists() || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING
+						|| hikeFileType == HikeFileType.OTHER)
 				{
 					selectedFile = mFile;
 					hikeFile.setFile(selectedFile);
@@ -362,7 +363,7 @@ public class UploadFileTask extends FileTransferBase
 			if (thumbnail != null)
 			{
 				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
-			    //thumbnail.recycle();
+				// thumbnail.recycle();
 			}
 			else
 			{
@@ -406,7 +407,7 @@ public class UploadFileTask extends FileTransferBase
 				}
 				catch (Exception e)
 				{
-					
+
 				}
 			}
 			else
@@ -615,7 +616,7 @@ public class UploadFileTask extends FileTransferBase
 			end = start + chunkSize;
 		end--;
 
-		byte[] fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
+		byte[] fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
 
 		while (end < length && responseJson == null)
 		{
@@ -652,10 +653,10 @@ public class UploadFileTask extends FileTransferBase
 						setChunkSize();
 						if (chunkSize > length)
 							chunkSize = (int) length;
-						if(end != (start + chunkSize - 1))
+						if (end != (start + chunkSize - 1))
 						{
 							end = (start + chunkSize - 1);
-							fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
+							fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
 						}
 						setBufferSize();
 					}
@@ -683,7 +684,7 @@ public class UploadFileTask extends FileTransferBase
 					{
 						end--;
 						chunkSize = end - start + 1;
-						fileBytes = setupFileBytes(boundaryMesssage,boundary,chunkSize);
+						fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
 					}
 				}
 			}
@@ -738,11 +739,11 @@ public class UploadFileTask extends FileTransferBase
 		}
 		return responseJson;
 	}
-	
+
 	private void setBufferSize()
 	{
 		bufferSize = 1;
-		while((bufferSize * 2) < chunkSize)
+		while ((bufferSize * 2) < chunkSize)
 			bufferSize *= 2;
 	}
 
@@ -778,12 +779,12 @@ public class UploadFileTask extends FileTransferBase
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
 	}
-	
+
 	private boolean isFileKeyValid()
 	{
-		if(TextUtils.isEmpty(fileKey))
+		if (TextUtils.isEmpty(fileKey))
 			return false;
-		
+
 		// If we are not able to verify the filekey validity from the server, fall back to uploading the file
 		try
 		{
@@ -846,7 +847,7 @@ public class UploadFileTask extends FileTransferBase
 		HttpClient client = new DefaultHttpClient();
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
 		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
-		//client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+		// client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 		long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
@@ -859,7 +860,7 @@ public class UploadFileTask extends FileTransferBase
 			post.addHeader("X-SESSION-ID", X_SESSION_ID);
 			post.addHeader("X-CONTENT-RANGE", contentRange);
 			post.addHeader("Cookie", "user=" + token + ";uid=" + uId);
-			Logger.d(getClass().getSimpleName(),"user=" + token + ";uid=" + uId);
+			Logger.d(getClass().getSimpleName(), "user=" + token + ";uid=" + uId);
 			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
 			post.setEntity(new ByteArrayEntity(fileBytes));
@@ -887,14 +888,14 @@ public class UploadFileTask extends FileTransferBase
 			{
 				retry = false;
 			}
-			else if (resCode /100 == 5)
+			else if (resCode / 100 == 5)
 			{
 				deleteStateFile();
 				retry = false;
 			}
 		}
 		time = System.currentTimeMillis() - time;
-		Logger.d(getClass().getSimpleName(),"Upload time: " + time/1000 + "." + time%1000 + "s.  Response: " + resCode);
+		Logger.d(getClass().getSimpleName(), "Upload time: " + time / 1000 + "." + time % 1000 + "s.  Response: " + resCode);
 		return res;
 	}
 
