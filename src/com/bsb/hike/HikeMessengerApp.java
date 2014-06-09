@@ -359,6 +359,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WELCOME_TO_HIKE_CARD = "shownWelcomeToHikeCard";
 
+	public static final String FRIEND_REQ_COUNT = "frReqCount";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

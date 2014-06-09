@@ -23,7 +23,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -34,7 +33,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowManager.BadTokenException;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -146,7 +144,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FRIEND_REQ_COUNT_RESET, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -849,11 +847,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
+			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+			if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)|| (HikePubSub.FAVORITE_TOGGLED.equals(type) && (favoriteToggle.second.equals(FavoriteType.REQUEST_RECEIVED) || favoriteToggle.second.equals(FavoriteType.FRIEND))))
+			{
+				updateOverFlowMenuNotification();
+			}
+
 			if (ftueContactsData.isEmpty())
 			{
 				return;
 			}
-			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			ContactInfo favoriteToggleContact = favoriteToggle.first;
 
 			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
@@ -865,7 +868,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				}
 			}
-
 		}
 		else if (HikePubSub.USER_JOINED.equals(type) || HikePubSub.USER_LEFT.equals(type))
 		{
@@ -1013,9 +1015,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.STEALTH_UNREAD_TIP_CLICKED.equals(type))
 		{
-			runOnUiThread(new Runnable()
-			{
-
+			runOnUiThread(new Runnable() {
 				@Override
 				public void run()
 				{
@@ -1023,6 +1023,63 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
+		else if(HikePubSub.FRIEND_REQ_COUNT_RESET.equals(type))
+		{
+			runOnUiThread( new Runnable() {
+			@Override
+			public void run()
+			{
+
+				
+					topBarIndicator.setVisibility(View.INVISIBLE);
+
+				}
+			});
+		}
+	}
+
+	private void updateHomeOverflowToggleCount(final int count, int delayTime)
+	{
+
+		if (count < 1)
+		{
+			topBarIndicator.setVisibility(View.GONE);
+		}
+		else
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (topBarIndicator != null)
+					{
+						/*
+						 * Fetching the count again since it could have changed after the delay. 
+						 */
+						int newCount = Utils.updateHomeOverflowToggleCount(accountPrefs);
+						if (newCount < 1)
+						{
+							topBarIndicator.setVisibility(View.GONE);
+						}
+						else if (newCount > 9)
+						{
+							topBarIndicator.setVisibility(View.VISIBLE);
+							topBarIndicator.setText("9+");
+							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
+						}
+						else if (newCount > 0)
+						{
+							topBarIndicator.setVisibility(View.VISIBLE);
+							topBarIndicator.setText(String.valueOf(count));
+							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
+						}
+					}
+				}
+			}, delayTime);
+		}
+
 	}
 
 	private class GetFTUEContactsTask extends AsyncTask<Void, Void, FtueContactsData>
@@ -1204,6 +1261,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 				else
 				{
+					
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
 				}
 
@@ -1219,9 +1277,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					freeSmsCount.setVisibility(View.GONE);
 				}
+				
+				TextView friendRequestCount = (TextView) convertView.findViewById(R.id.friend_req_count);
+				int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+				if(frCount>0 && item.getKey() == 10)
+				{
+					friendRequestCount.setText(Integer.toString(frCount));
+					friendRequestCount.setVisibility(View.VISIBLE);
+
+				}
+				else
+					friendRequestCount.setVisibility(View.GONE);
 
 				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
+								
 				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 				if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked))
@@ -1230,6 +1300,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 				else
 					newGamesIndicator.setVisibility(View.GONE);
+				
+				
 				return convertView;
 			}
 		});
@@ -1349,13 +1421,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public void updateOverFlowMenuNotification()
 	{
-		if (accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true) && topBarIndicator != null)
+		final int count = Utils.updateHomeOverflowToggleCount(accountPrefs);
+		if (topBarIndicator != null)
 		{
-			topBarIndicator.setVisibility(View.INVISIBLE);
-		}
-		else
-		{
-			topBarIndicator.setVisibility(View.VISIBLE);
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					updateHomeOverflowToggleCount(count, 1000);
+				}
+			});
+
 		}
 	}
 
@@ -1468,12 +1546,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public void updateTimelineNotificationCount(int count, int delayTime)
 	{
-		
 		if (count < 1)
 		{
 			timelineTopBarIndicator.setVisibility(View.GONE);
 		}
-		else 
+		else
 		{
 			mHandler.postDelayed(new Runnable()
 			{
@@ -1481,16 +1558,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					if(timelineTopBarIndicator != null)
+					if (timelineTopBarIndicator != null)
 					{
 						int count = Utils.getNotificationCount(accountPrefs, false);
-						if(count > 9)
+						if (count > 9)
 						{
 							timelineTopBarIndicator.setVisibility(View.VISIBLE);
 							timelineTopBarIndicator.setText("9+");
 							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
 						}
-						else if(count > 0)
+						else if (count > 0)
 						{
 							timelineTopBarIndicator.setVisibility(View.VISIBLE);
 							timelineTopBarIndicator.setText(String.valueOf(count));
