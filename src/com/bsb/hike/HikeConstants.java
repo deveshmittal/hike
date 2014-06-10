@@ -1386,6 +1386,8 @@ public class HikeConstants
 		public static final String ENTER_WRONG_STEALTH_MODE = "entWrongStlth";
 		
 		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
+
+		public static final String FTUE_WELCOME_CARD_CLICKED = "ftueWelcomeCardClicked";
 		
 	}
 

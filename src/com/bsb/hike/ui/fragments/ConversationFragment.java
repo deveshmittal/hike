@@ -280,6 +280,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				
 				Intent intent = new Intent(getActivity(), FtueCardsActivity.class);
 				startActivity(intent);
+				
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_WELCOME_CARD_CLICKED);
 			}
 			
 		};
