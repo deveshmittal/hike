@@ -1542,12 +1542,12 @@
      <string name="camera_upper_case">CAMERA</string>
      <string name="new_stickers_available">Tap to download new stickers</string>
      <string name="sticker_tip_msg">tap to check out the stickers.</string>
-     <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike!\nStart chatting.</string>
+     <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike, start chatting!</string>
      <string name="see_all_upper_caps">SEE ALL</string>
-     <string name="ftue_sms_contact_card_header">Hey, you have %1$d contacts.</string>
+     <string name="ftue_sms_contact_card_header">Hey, you have %1$d contacts!</string>
      <string name="skip_upper_caps">SKIP</string>
      <string name="welcome_to_hike">Welcome to hike</string>
-     <string name="ftue_welcome_card_msg">Hike is full of awesome things that we would like to show you</string>
+     <string name="ftue_welcome_card_msg">Hike is full of awesome things that we would like to show you.</string>
      <string name="start_exploring">START EXPLORING</string>
      <string name="hidden_mode">Hidden mode</string>
      <string name="ftue_hidden_mode_card_msg">Mark your private chats as hidden and access them with passcode.</string>
@@ -1559,8 +1559,8 @@
      <string name="ftue_favorites_card_msg">Only favourites can see your status update and last seen.</string>
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
      <string name="themes">Themes</string>
-     <string name="ftue_updates_are_fun_with_favorites">Only favourites can see your status update and last seen. Chose them wisely!</string>
-     <string name="ftue_sms_contact_card_subtext">Would you like to send free sms.</string>
+     <string name="ftue_updates_are_fun_with_favorites">Only favorites can see your status update and last seen. Choose them wisely!</string>
+     <string name="ftue_sms_contact_card_subtext">Would you like to send them free sms.</string>
      <string name="new_chat_tip_header">Start a chat</string>
      <string name="new_chat_tip_msg">tap to see contacts</string>
      <string name="sticker_tip_msg">tap sticker icon to open sticker panel!</string>
