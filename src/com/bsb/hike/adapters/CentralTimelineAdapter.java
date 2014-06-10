@@ -473,7 +473,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 					break;
 				}
 			}
-			viewHolder.seeAll.setText(R.string.recommend_more_upper_caps);
+			viewHolder.seeAll.setText(R.string.see_all_upper_caps);
 			viewHolder.seeAll.setOnClickListener(seeAllBtnClickListener);
 			break;
 		}
