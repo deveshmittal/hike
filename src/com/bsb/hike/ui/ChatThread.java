@@ -2188,11 +2188,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabelView = (TextView) actionBarView.findViewById(R.id.contact_name);
 		mLastSeenView = (TextView) actionBarView.findViewById(R.id.contact_status);
 
-		mLastSeenView.setVisibility(View.GONE);
-		mLastSeenView.setSelected(true);
-
 		if (initialising)
 		{
+			mLastSeenView.setVisibility(View.GONE);
+			mLastSeenView.setSelected(true);
+
 			if (mConversation instanceof GroupConversation)
 			{
 				updateActivePeopleNumberView(0);
@@ -2281,6 +2281,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		mLastSeenView.setText(text);
+
+		if (TextUtils.isEmpty(text))
+		{
+			mLastSeenView.setVisibility(View.GONE);
+			return;
+		}
+
 		if (mLastSeenView.getVisibility() == View.GONE)
 		{
 			if (mLabelView == null)
