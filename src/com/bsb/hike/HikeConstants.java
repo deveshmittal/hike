@@ -1388,7 +1388,11 @@ public class HikeConstants
 		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
 
 		public static final String FTUE_WELCOME_CARD_CLICKED = "ftueWelcomeCardClicked";
+
+		public static final String FTUE_CARD_START_CHAT_CLICKED = "ftueCardStartChatClicked";
 		
+		public static final String FTUE_FAV_CARD_START_CHAT_CLICKED = "ftueFavCardStartChatClicked";
+
 	}
 
 	public static final class MqttMessageTypes

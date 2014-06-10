@@ -200,6 +200,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
+			
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
 
 		}
 	};
