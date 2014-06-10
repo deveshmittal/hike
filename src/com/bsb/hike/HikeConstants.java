@@ -1393,6 +1393,10 @@ public class HikeConstants
 		
 		public static final String FTUE_FAV_CARD_START_CHAT_CLICKED = "ftueFavCardStartChatClicked";
 
+		public static final String FTUE_CARD_SEEL_ALL_CLICKED = "ftueCardSeeAllClicked";
+
+		public static final String FTUE_FAV_CARD_SEEL_ALL_CLICKED = "ftueFavCardSeeAllClicked";
+		
 	}
 
 	public static final class MqttMessageTypes

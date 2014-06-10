@@ -693,6 +693,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			Intent intent = new Intent(context, PeopleActivity.class);
 			context.startActivity(intent);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
 		}
 	};
 	

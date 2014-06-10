@@ -214,6 +214,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		{
 			Intent intent = new Intent(context, ComposeChatActivity.class);
 			context.startActivity(intent);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_SEEL_ALL_CLICKED);
 		}
 	};
 
