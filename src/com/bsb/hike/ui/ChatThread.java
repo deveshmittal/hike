@@ -1770,6 +1770,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mLabel = mConversation.getLabel();
+		if (!(mConversation instanceof GroupConversation))
+		{
+			 	  mLabel = Utils.getFirstName(mLabel);
+	    }
 
 		if (showKeyboard && !wasOrientationChanged)
 		{
@@ -1845,8 +1849,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isOnline = true;
 				}
 
-				setLastSeenText("");
-
 				/*
 				 * Making sure nothing is already scheduled wrt last seen.
 				 */
@@ -1889,6 +1891,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				else
 				{
 					messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
+				}
+			}
+		}
+		
+		/*
+		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
+		 */
+		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		{
+			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
+			{
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
+				{
+					showStickerFtueTip();
 				}
 			}
 		}
@@ -2011,13 +2027,58 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		wasOrientationChanged = false;
 	}
 
+	private void showStickerFtueTip()
+	{
+		tipView = findViewById(R.id.emoticon_tip);
+		tipView.setVisibility(View.VISIBLE);
+		tipView.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1)
+			{
+				// disabling on touch gesture for sticker ftue tip
+				// so that we do not send an unnecessary nudge on a
+				// double tap on tipview.
+				return true;
+			}
+		});
+		tipView.setTag(TipType.EMOTICON);
+		
+		ImageView closeIcon = (ImageView) tipView.findViewById(R.id.close_tip);
+		closeIcon.setOnClickListener(new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+			}
+		});
+	}
+	
 	private void addtoMessageMap(int from, int to)
 	{
 		for(int i = to - 1; i >= from; i--)
 		{
-			ConvMessage msg = messages.get(i);
-			addtoMessageMap(msg);
+			ConvMessage message = messages.get(i);
+			ConvMessage msg = checkNUpdateFTMsg(message);
+			if (msg != null)
+			{
+				message = msg;
+				messages.set(i, message);
+			}
+			addtoMessageMap(message);
 		}
+	}
+
+	private ConvMessage checkNUpdateFTMsg(ConvMessage message)
+	{
+		if (message.isSent() && message.isFileTransferMessage())
+		{
+			ConvMessage msg  = FileTransferManager.getInstance(getApplicationContext()).getMessage(message.getMsgID());
+			return msg;
+		}
+		return null;
 	}
 
 	public static void addtoMessageMap(ConvMessage msg)
@@ -2236,7 +2297,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabelView = (TextView) actionBarView.findViewById(R.id.contact_name);
 		mLastSeenView = (TextView) actionBarView.findViewById(R.id.contact_status);
 
-		mLastSeenView.setVisibility(View.VISIBLE);
+		mLastSeenView.setVisibility(View.GONE);
 		mLastSeenView.setSelected(true);
 
 		if (initialising)
@@ -2247,7 +2308,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
+				setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 			}
 		}
 		else
@@ -2329,6 +2390,65 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		mLastSeenView.setText(text);
+		if (mLastSeenView.getVisibility() == View.GONE)
+		{
+			if (mLabelView == null)
+			{
+				mLastSeenView.setVisibility(View.VISIBLE);
+				return;
+			}
+			
+			if (mConversation.isOnhike() && !(mConversation instanceof GroupConversation))
+			{
+				mLastSeenView.setVisibility(View.INVISIBLE);
+				Animation animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_last_seen);
+				mLabelView.startAnimation(animation);
+
+				animation.setAnimationListener(new AnimationListener()
+				{
+					@Override
+					public void onAnimationStart(Animation animation)
+					{
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation)
+					{
+					}
+
+					@Override
+					public void onAnimationEnd(Animation animation)
+					{
+						mLastSeenView.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+			else
+			{
+				mLastSeenView.setVisibility(View.VISIBLE);
+			}
+		}
+	}
+
+	private void hideLastSeenText()
+	{
+		if (mLastSeenView == null)
+		{
+			return;
+		}
+		mLastSeenView.setVisibility(View.GONE);
+	}
+
+	private void setLastSeenTextBasedOnHikeValue(boolean onHike)
+	{
+		if (onHike)
+		{
+			hideLastSeenText();
+		}
+		else
+		{
+			setLastSeenText(getString(R.string.on_sms));
+		}
 	}
 
 	private void updateActivePeopleNumberView(int addPeopleCount)
@@ -2824,7 +2944,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				public void run()
 				{
-					setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
+					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
@@ -2877,6 +2997,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
 				this.mLabel = contactInfo.getName();
+				if (!(mConversation instanceof GroupConversation))
+      			{
+	                 this.mLabel = Utils.getFirstName(mLabel);
+				}
 				runOnUiThread(new Runnable()
 				{
 					@Override
@@ -2900,24 +3024,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.UPLOAD_FINISHED.equals(type))
 		{
-			ConvMessage convMessage = (ConvMessage) object;
-			if (!convMessage.getMsisdn().equals(this.mContactNumber))
-			{
-				return;
-			}
-			ConvMessage adapterMessage = findMessageById(convMessage.getMsgID());
-			if (adapterMessage != null)
-			{
-				try
-				{
-					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
-					adapterMessage.setTimestamp(convMessage.getTimestamp());
-				}
-				catch (JSONException e)
-				{
-					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-				}
-			}
 			runOnUiThread(mUpdateAdapter);
 		}
 		else if (HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED.equals(type))
@@ -5197,6 +5303,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						dismissPopupWindow();
 						return;
 					}
+					if (tipView != null)
+					{
+						TipType viewTipType = (TipType) tipView.getTag();
+						if (viewTipType == TipType.EMOTICON)
+						{
+							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+							tipView = null;
+						}
+					}
 					if (emoticonType != EmoticonType.STICKERS)
 					{
 						emoticonType = EmoticonType.STICKERS;
@@ -5655,21 +5771,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			dividerBg = getResources().getColor(R.color.love_div);
 			break;
-		case angry:
-			resParentBg = getResources().getColor(R.color.angry_bg);
-
-			stickerBtnBg = R.drawable.angry_btn;
-			stickerBtnText = R.string.download;
-			stickerBtnTextColor = getResources().getColor(R.color.angry_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.angry_btn_text_shadow);
-
-			categoryText = "Hot Heads";
-			categoryTextColor = getResources().getColor(R.color.angry_text);
-			categoryTextShadowColor = getResources().getColor(R.color.angry_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.angry_div);
-			break;
-		case sports:
+        case sports:
 			resParentBg = getResources().getColor(R.color.sports_bg);
 
 			stickerBtnBg = R.drawable.sports_btn;
@@ -6900,7 +7002,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if (lastSeenString == null)
 				{
-					setLastSeenText(getString(mConversation.isOnhike() ? R.string.on_hike : R.string.on_sms));
+					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 				}
 				else
 				{

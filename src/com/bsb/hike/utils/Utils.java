@@ -90,6 +90,7 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -142,6 +143,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
@@ -1276,15 +1278,24 @@ public class Utils
 
 	public static String getRealPathFromUri(Uri contentUri, Activity activity)
 	{
+		String filePath = null;
 		String[] proj = { MediaStore.Images.Media.DATA };
 		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
 		if (cursor == null || cursor.getCount() == 0)
 		{
-			return null;
+			//return null;
 		}
-		int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		cursor.moveToFirst();
-		return cursor.getString(column_index);
+		else
+		{
+			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			filePath = cursor.getString(column_index);
+		}
+		if(filePath == null)
+		{
+			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
+		}
+		return filePath;
 	}
 
 	public static enum ExternalStorageState
@@ -2919,6 +2930,11 @@ public class Utils
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 	}
 
+	public static boolean isKitkatOrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	}
+
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
 	{
 		if (isHoneycombOrHigher())
@@ -3015,7 +3031,7 @@ public class Utils
 		}
 	}
 
-	public static void executeContactInfoListResultTask(AsyncTask<Void, Void, List<ContactInfo>> asyncTask)
+	public static void executeContactInfoListResultTask(AsyncTask<Void, Void, FtueContactsData> asyncTask)
 	{
 		if (isHoneycombOrHigher())
 		{
@@ -3088,6 +3104,15 @@ public class Utils
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
+	
+	public static void resetOverflowCountHomeScreen(Context context)
+	{
+		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
+	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
 	{
@@ -3115,11 +3140,11 @@ public class Utils
 
 		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
 
-		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable);
+		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
-		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.ARGB_8888, false, true, true);
+		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.RGB_565, false, true, true);
 		bitmap = null;
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
@@ -3924,5 +3949,58 @@ public class Utils
 				contactInfo.setOffline(isOffline);
 			}
 		}
+	}
+
+	public static boolean isListContainsMsisdn(List<ContactInfo> contacts, String msisdn)
+	{
+		for(ContactInfo contactInfo : contacts)
+		{
+			if(contactInfo.getMsisdn().equals(msisdn))
+			{
+				Logger.d("tesst", "matched");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Adding this method to compute the overall count for showing in overflow menu on home screen
+	 * @param accountPref
+	 * @param count
+	 * @return
+	 */
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	{
+		int overallCount = 0;
+		if(!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		{
+			overallCount++;
+		}
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		{
+			overallCount++;
+		}
+		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		if(frCount>0)
+		{
+			overallCount += frCount;
+		}
+
+		return overallCount;
+	}
+	
+	public static void incrementOrDecrementHomeOverflowCount(SharedPreferences accountPref, int count)
+	{
+		int currentCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+
+		currentCount += count;
+		if (currentCount >=0)
+		{
+			Editor editor = accountPref.edit();
+			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.commit();
+		}
+
 	}
 }

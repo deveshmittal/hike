@@ -325,26 +325,6 @@ public class StickerManager
 				return "humanoid2DownloadShown";
 			}
 		},
-		angry
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.angry;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_angry;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "angryDownloadShown";
-			}
-		},
 		avatars
 		{
 			@Override

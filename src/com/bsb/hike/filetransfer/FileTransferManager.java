@@ -273,6 +273,20 @@ public class FileTransferManager extends BroadcastReceiver
 		return fileTaskMap.containsKey(msgId);
 	}
 
+	public ConvMessage getMessage(long msgId)
+	{
+		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+		if (obj != null)
+		{
+			Object msg = ((MyFutureTask) obj).getTask().getUserContext();
+			if (msg != null)
+			{
+				return ((ConvMessage) msg);
+			}
+		}
+		return null;
+	}
+
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
 		if (isFileTaskExist(msgId))

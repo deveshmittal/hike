@@ -338,6 +338,16 @@ public class HikePubSub implements Runnable
 	public static final String REMOVE_STATUS_UPDATE_TIP = "RemoveStatusUpdateTip";
 
 	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
+	
+	public static final String STEALTH_POPUP_WITH_PUSH = "stealthPopupShowPush";
+
+	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
+
+	public static final String REMOVE_STEALTH_UNREAD_TIP = "removeStealthUnreadTip";
+
+	public static final String STEALTH_UNREAD_TIP_CLICKED = "stealthUnreadTipClicked";
+
+	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
 
 	private final Thread mThread;
 

@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -57,7 +59,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 	private List<StatusMessage> statusMessages;
 
-	private Context context;
+	private Activity context;
 
 	private String userMsisdn;
 
@@ -83,7 +85,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
 	}
 
-	public CentralTimelineAdapter(Context context, List<StatusMessage> statusMessages, String userMsisdn)
+	public CentralTimelineAdapter(Activity context, List<StatusMessage> statusMessages, String userMsisdn)
 	{
 		this.context = context;
 		mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
@@ -210,6 +212,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 				viewHolder.contactsContainer = (ViewGroup) convertView.findViewById(R.id.contacts_container);
 				viewHolder.parent = convertView.findViewById(R.id.main_content);
+				viewHolder.seeAll = (TextView) convertView.findViewById(R.id.see_all);
 
 				break;
 			case PROFILE_PIC_CHANGE:
@@ -427,13 +430,14 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 		case FTUE_ITEM:
 			viewHolder.name.setText(R.string.favorites_ftue_item_label);
-			viewHolder.mainInfo.setText(R.string.updates_are_fun_with_favorites);
+			viewHolder.mainInfo.setText(R.string.ftue_updates_are_fun_with_favorites);
 
 			viewHolder.contactsContainer.removeAllViews();
 
 			int limit = HikeConstants.FTUE_LIMIT;
 
-			for (ContactInfo contactInfo : HomeActivity.ftueList)
+			View parentView = null;
+			for (ContactInfo contactInfo : HomeActivity.ftueContactsData.getCompleteList())
 			{
 				FavoriteType favoriteType = contactInfo.getFavoriteType();
 				if (favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_SENT || favoriteType == FavoriteType.REQUEST_SENT_REJECTED
@@ -442,26 +446,35 @@ public class CentralTimelineAdapter extends BaseAdapter
 					continue;
 				}
 
-				View parentView = inflater.inflate(R.layout.ftue_updates_contact_item, parent, false);
+				parentView = inflater.inflate(R.layout.ftue_recommended_list_item, parent, false);
 
 				ImageView avatar = (ImageView) parentView.findViewById(R.id.avatar);
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
-				TextView addBtn = (TextView) parentView.findViewById(R.id.invite_btn);
+				TextView status = (TextView) parentView.findViewById(R.id.info);
+				ImageView addFriendBtn = (ImageView) parentView.findViewById(R.id.add_friend);
+				addFriendBtn.setVisibility(View.VISIBLE);
+				parentView.findViewById(R.id.add_friend_divider).setVisibility(View.VISIBLE);
 
 				setAvatar(contactInfo.getMsisdn(), avatar);
 
 				name.setText(contactInfo.getName());
+				status.setText(contactInfo.getMsisdn());
 
-				addBtn.setTag(contactInfo);
-				addBtn.setOnClickListener(addOnClickListener);
+				addFriendBtn.setTag(contactInfo);
+				addFriendBtn.setOnClickListener(addOnClickListener);
 
 				viewHolder.contactsContainer.addView(parentView);
+				
+				parentView.setTag(contactInfo);
+				parentView.setOnClickListener(ftueListItemClickListener);
 
 				if (--limit == 0)
 				{
 					break;
 				}
 			}
+			viewHolder.seeAll.setText(R.string.recommend_more_upper_caps);
+			viewHolder.seeAll.setOnClickListener(seeAllBtnClickListener);
 			break;
 		}
 
@@ -533,6 +546,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 		ViewGroup contactsContainer;
 
 		ViewGroup moodsContainer;
+		
+		TextView seeAll;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener()
@@ -667,6 +682,31 @@ public class CentralTimelineAdapter extends BaseAdapter
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(contactInfo2, context, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.ftue_add_prompt_invite_title),
 						context.getString(R.string.ftue_add_prompt_invite), WhichScreen.UPDATES_TAB);
+		}
+	};
+	
+	private OnClickListener seeAllBtnClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			Intent intent = new Intent(context, PeopleActivity.class);
+			context.startActivity(intent);
+		}
+	};
+	
+	private OnClickListener ftueListItemClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+
+			Utils.startChatThread(context, contactInfo);
+
+			context.finish();
 		}
 	};
 

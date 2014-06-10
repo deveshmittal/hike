@@ -15,21 +15,12 @@
         android:layout_height="0dp"
         android:layout_weight="468"
         android:clickable="true"
-        android:orientation="vertical"
-        android:visibility="visible" >
+        android:orientation="horizontal"
+        android:visibility="visible"
+        android:gravity="center_vertical" >
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/tutorial_pager"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="420" /> 
+		<include layout="@layout/tutorial_fragments"/>
 
-        <com.viewpagerindicator.IconPageIndicator
-            android:id="@+id/tutorial_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="62"
-            android:layout_gravity="center"/>
     </LinearLayout>
     
     <RelativeLayout
@@ -90,6 +81,22 @@
         </LinearLayout>
 
     </RelativeLayout>
+     <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical" >
+        
+        <ImageView
+            android:id="@+id/loveIndia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/with_love"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerInside"
+             />
+        </RelativeLayout>
 
     
 </LinearLayout>

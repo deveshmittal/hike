@@ -21,22 +21,13 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tip_header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="2dp"
-            android:text="@string/status_update_tip_header"
-            android:textColor="#ffffff"
-            android:textSize="24sp"
-            android:textStyle="italic" />
+            style="@style/TipHeader"
+            android:text="@string/status_update_tip_header" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tip_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/status_update_tip_msg"
-            android:textColor="#ffffff"
-            android:textSize="12sp"
-            android:textStyle="italic" />
+            style="@style/TipBody"
+            android:text="@string/status_update_tip_msg" />
     </LinearLayout>
 
     <LinearLayout

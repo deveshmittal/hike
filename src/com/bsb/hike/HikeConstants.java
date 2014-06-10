@@ -400,6 +400,10 @@ public class HikeConstants
 	public static final String REQUEST_DP = "rdp";
 
 	public static final String C_TIME_STAMP = "cts";
+	
+	public static final String HEADER = "h";
+	
+	public static final String BODY = "b";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -817,6 +821,8 @@ public class HikeConstants
 
 	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
+	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES_SMALL = 25;
+
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
@@ -854,6 +860,8 @@ public class HikeConstants
 	public static final int RETRY_WAIT_ADDITION = 2;
 
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
+	
+	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
 
 	public static final class ResultCodes
 	{
@@ -1151,6 +1159,13 @@ public class HikeConstants
 		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
 
 		public static final String FROM_NOTIFICATION = "fromNotification";
+		
+		public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
+		
+		public static final String STEALTH_PUSH_HEADER = "stealthPushHeader";
+		
+		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
+		
 	}
 
 	public static final class LogEvent
@@ -1479,6 +1494,8 @@ public class HikeConstants
 		public static final String STEALTH = "stlth";
 
 		public static final String TOGGLE_STEALTH = "ts";
+		
+		public static final String POPUP = "popup"; //this is a generic popup type
 
 	}
 
@@ -1556,4 +1573,6 @@ public class HikeConstants
 	public static final long[] SHORT_VIB_PATTERN = new long[] { 0, 200, 100, 250 };
 
 	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
+
+	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
 }

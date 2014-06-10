@@ -333,9 +333,6 @@
         <item name="android:actionModeBackground">@drawable/bg_header_transparent</item>
         
     </style>
-    <style name="AppTheme.Home.HomeA">
-        <item name="homeAsUpIndicator">@drawable/home_screen_top_bar_up</item>
-    </style>
     <style name="ActivityAnimation">
         <item name="android:windowExitAnimation">@anim/fade_out_animation</item>
     	<item name="android:windowEnterAnimation">@anim/fade_in_animation</item>
@@ -431,12 +428,19 @@
 	<style name="UpdatesContainer">
 	    <item name="android:layout_marginLeft">@dimen/updates_margin</item>
 	    <item name="android:layout_marginRight">@dimen/updates_margin</item>
-	    <item name="android:layout_marginTop">@dimen/updates_margin</item>
+	    <item name="android:layout_marginTop">@dimen/updates_margin_top</item>
         <item name="android:background">@drawable/updates_bg_selector</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
-	</style>    
+	</style>
+	
+	<style name="CardContainerWithdoutPadding">
+	    <item name="android:layout_marginLeft">@dimen/updates_margin</item>
+	    <item name="android:layout_marginRight">@dimen/updates_margin</item>
+	    <item name="android:layout_marginTop">@dimen/updates_margin_top</item>
+	    <item name="android:background">@drawable/bg_updates_white</item>
+	</style>
 	
 	<style name="AvatarStyle">
 	    <item name="android:layout_width">match_parent</item>
@@ -606,5 +610,62 @@
         <item name="android:textColor">@color/block_add_unknown</item>
         <item name="android:textSize">17sp</item>
         <item name="android:textStyle">bold|italic</item>
+	</style>
+	
+	<style name="TipHeader">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textSize">24sp</item>
+	    <item name="android:textStyle">italic</item>
+	    <item name="android:textColor">#ffffff</item>
+	</style>
+
+	<style name="TipBody">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textSize">12sp</item>
+	    <item name="android:textStyle">italic</item>
+	    <item name="android:textColor">#ffffff</item>
+   </style>
+
+	<style name="FtueCardActionButton">
+	    <item name="android:layout_width">match_parent</item>
+	    <item name="android:layout_height">48dp</item>
+	    <item name="android:background">@drawable/list_item</item>
+	    <item name="android:gravity">center</item>
+	    <item name="android:textColor">@color/blue_hike</item>
+	    <item name="android:textSize">14sp</item>
+        <item name="android:paddingBottom">2dp</item>
+	</style>
+	
+	<style name="SmallListContactItemHeader">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textColor">@color/standerd_black</item>
+	    <item name="android:textSize">16sp</item>
+	    <item name="android:textStyle">bold|italic</item>
+	    <item name="android:ellipsize">end</item>
+	    <item name="android:singleLine">true</item>
+	</style>
+	
+	<style name="SmallListContactItemSubText" parent="SmallListContactItemHeader">
+	    <item name="android:textSize">12sp</item>
+	    <item name="android:textStyle">italic</item>
+	</style>
+	
+	<style name="TipHeader">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textSize">24sp</item>
+	    <item name="android:textStyle">italic</item>
+	    <item name="android:textColor">#ffffff</item>
+	</style>
+
+	<style name="TipBody">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
+	    <item name="android:textSize">12sp</item>
+	    <item name="android:textStyle">italic</item>
+	    <item name="android:textColor">#ffffff</item>
 	</style>
 </resources>
