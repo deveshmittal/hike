@@ -179,7 +179,7 @@ public class CommsReceiver implements Runnable
 			catch (MqttException ex)
 			{
 				// @TRACE 856=Stopping, MQttException
-				Logger.d(TAG, "exception occured , cause : " + ex.getCause());
+				Logger.e(TAG, "exception occured , cause : " , ex);
 				running = false;
 				// Token maybe null but that is handled in shutdown
 				clientComms.shutdownConnection(token, ex);
@@ -187,7 +187,7 @@ public class CommsReceiver implements Runnable
 			catch (IOException ioe)
 			{
 				// @TRACE 853=Stopping due to IOException
-				Logger.d(TAG, "IO excetion occured , cause : ", ioe.getCause());
+				Logger.e(TAG, "IO excetion occured , cause : ", ioe);
 
 				running = false;
 				// An EOFException could be raised if the broker processes the
@@ -235,23 +235,24 @@ public class CommsReceiver implements Runnable
 				Logger.d(TAG, "is socket channel connected : " + socket.getChannel().isRegistered());
 				Logger.d(TAG, "socket channel validOps: " + socket.getChannel().validOps());
 			}
-			Logger.d(TAG, "is socket keep alive on: " + socket.getKeepAlive());
-			Logger.d(TAG, "is socket tcp no delay on: " + socket.getTcpNoDelay());
-			Logger.d(TAG, "is socket OOBline enabled : " + socket.getOOBInline());
-			Logger.d(TAG, "is socket bound : " + socket.isBound());
-			Logger.d(TAG, "is socket closed : " + socket.isClosed());
-			Logger.d(TAG, "is socket connected : " + socket.isConnected());
-			Logger.d(TAG, "is socket input shutdown : " + socket.isInputShutdown());
-			Logger.d(TAG, "is socket output shutdown : " + socket.isOutputShutdown());
-			Logger.d(TAG, "socket receive buffer size : " + socket.getReceiveBufferSize());
-			Logger.d(TAG, "socket send buffer size : " + socket.getSendBufferSize());
-			Logger.d(TAG, "socket linger timeout : " + socket.getSoLinger());
-			Logger.d(TAG, "socket timeout : " + socket.getSoTimeout());
-			Logger.d(TAG, "socket traffic class : " + socket.getTrafficClass());
+			Logger.d(TAG, "is socket closed : " + socket.isClosed() + "  is socket connected : " + socket.isConnected() + "  is socket input shutdown : " + socket.isInputShutdown() + "  is socket output shutdown : " + socket.isOutputShutdown());
+			//Logger.d(TAG, "is socket keep alive on: " + socket.getKeepAlive());
+			//Logger.d(TAG, "is socket tcp no delay on: " + socket.getTcpNoDelay());
+			//Logger.d(TAG, "is socket OOBline enabled : " + socket.getOOBInline());
+			//Logger.d(TAG, "is socket bound : " + socket.isBound());
+			//Logger.d(TAG, "is socket closed : " + socket.isClosed());
+			//Logger.d(TAG, "is socket connected : " + socket.isConnected());
+			//Logger.d(TAG, "is socket input shutdown : " + socket.isInputShutdown());
+			//Logger.d(TAG, "is socket output shutdown : " + socket.isOutputShutdown());
+			//Logger.d(TAG, "socket receive buffer size : " + socket.getReceiveBufferSize());
+			//Logger.d(TAG, "socket send buffer size : " + socket.getSendBufferSize());
+			//Logger.d(TAG, "socket linger timeout : " + socket.getSoLinger());
+			//Logger.d(TAG, "socket timeout : " + socket.getSoTimeout());
+			//Logger.d(TAG, "socket traffic class : " + socket.getTrafficClass());
 		}
 		catch (Exception ex)
 		{
-			Logger.d(TAG, "exception during taking logs");
+			Logger.e(TAG, "exception during taking logs", ex);
 		}
 	}
 }

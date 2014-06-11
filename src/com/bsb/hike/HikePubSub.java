@@ -304,6 +304,8 @@ public class HikePubSub implements Runnable
 	public static final String CONTACT_SYNCED = "contactSynced";
 
 	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
+	
+	public static final String IPS_CHANGED = "ipsChanged";
 
 	public static final String DISMISS_STEALTH_FTUE_CONV_TIP = "dismissStealthFtueConvTip";
 
@@ -330,6 +332,12 @@ public class HikePubSub implements Runnable
 	public static final String CONNECTED_TO_MQTT = "connectedToMqtt";
 
 	public static final String CLOSE_CURRENT_STEALTH_CHAT = "closeCurrentStealthChat";
+
+	public static final String APP_FOREGROUNDED = "appForegrounded";
+
+	public static final String REMOVE_STATUS_UPDATE_TIP = "RemoveStatusUpdateTip";
+
+	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
 
 	private final Thread mThread;
 

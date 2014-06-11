@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
@@ -15,8 +16,6 @@ import com.bsb.hike.ui.fragments.ImageViewerFragment;
 
 public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener
 {
-
-	private static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 
 	private static final String TAG = "HikeAppState";
 
@@ -53,7 +52,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(IMAGE_FRAGMENT_TAG);
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
 		if (fragment != null && fragment.isVisible())
 		{
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -135,7 +134,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 					imageViewerFragment.setArguments(arguments);
 
 					FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-					fragmentTransaction.add(R.id.parent_layout, imageViewerFragment, IMAGE_FRAGMENT_TAG);
+					fragmentTransaction.add(R.id.parent_layout, imageViewerFragment, HikeConstants.IMAGE_FRAGMENT_TAG);
 					fragmentTransaction.commitAllowingStateLoss();
 				}
 			});

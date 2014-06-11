@@ -35,8 +35,6 @@ import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends FileTransferBase
 {
-	private URL mUrl;
-
 	private File tempDownloadedFile;
 
 	private boolean showToast;
@@ -44,9 +42,9 @@ public class DownloadFileTask extends FileTransferBase
 	private int num = 0;
 
 	protected DownloadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, String fileKey, long msgId,
-			HikeFileType hikeFileType, Object userContext, boolean showToast)
+			HikeFileType hikeFileType, Object userContext, boolean showToast, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType);
+		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType, token, uId);
 		this.fileKey = fileKey;
 		this.showToast = showToast;
 		this.userContext = userContext;
@@ -119,18 +117,6 @@ public class DownloadFileTask extends FileTransferBase
 		return FTResult.DOWNLOAD_FAILED;
 	}
 
-	private URLConnection initConn() throws IOException
-	{
-		URLConnection conn = (HttpURLConnection) mUrl.openConnection();
-		if (AccountUtils.ssl)
-		{
-			((HttpsURLConnection) conn).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-		}
-		AccountUtils.addUserAgent(conn);
-		AccountUtils.setNoTransform(conn);;
-		return conn;
-	}
-
 	// we can extend this later to multiple download threads (if required)
 	private FTResult downloadFile(long mStartByte, RandomAccessFile raf, boolean ssl)
 	{
@@ -140,7 +126,7 @@ public class DownloadFileTask extends FileTransferBase
 		URLConnection conn = null;
 		NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
 		chunkSize = networkType.getMinChunkSize();
-		while (shouldRetry() && _state == FTState.IN_PROGRESS)
+		while (shouldRetry())
 		{
 			try
 			{
@@ -149,6 +135,7 @@ public class DownloadFileTask extends FileTransferBase
 				String byteRange = mStart + "-";
 				try
 				{
+					conn.setRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
 					conn.setRequestProperty("Range", "bytes=" + byteRange);
 					conn.setConnectTimeout(10000);
 				}
@@ -159,7 +146,13 @@ public class DownloadFileTask extends FileTransferBase
 				conn.connect();
 				int resCode = ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
 				// Make sure the response code is in the 200 range.
-				if (resCode / 100 != 2)
+				if (resCode == RESPONSE_BAD_REQUEST || resCode == RESPONSE_NOT_FOUND)
+				{
+					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
+					error();
+					return FTResult.FILE_EXPIRED;
+				}
+				else if (resCode / 100 != 2)
 				{
 					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();

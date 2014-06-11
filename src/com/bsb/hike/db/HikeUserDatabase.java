@@ -26,9 +26,6 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
@@ -2345,5 +2342,83 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			contactInfo = getMostRecentContact(HikeConstants.NOT_ON_HIKE_VALUE);
 		}
 		return contactInfo;
+	}
+
+	public List<ContactInfo> fetchAllContacts(String myMsisdn)
+	{
+		Cursor c = null;
+		List<ContactInfo> contactInfos = null;
+		try
+		{
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO },
+					DBConstants.MSISDN + " != ?", new String[] { myMsisdn }, null, null, DBConstants.NAME + " COLLATE NOCASE");
+
+			contactInfos = extractContactInfo(c, true);
+
+			return contactInfos;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	public Map<String, FavoriteType> fetchFavoriteTypeMap()
+	{
+		Cursor c = null;
+		Map<String, FavoriteType> favoriteTypeMap = new HashMap<String, ContactInfo.FavoriteType>();
+
+		try
+		{
+			c = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.FAVORITE_TYPE }, null, null, null, null, null);
+
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int favTypeIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+
+			while (c.moveToNext())
+			{
+				favoriteTypeMap.put(c.getString(msisdnIdx), FavoriteType.values()[c.getInt(favTypeIdx)]);
+			}
+
+			return favoriteTypeMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	public Set<String> getBlockedMsisdnSet()
+	{
+		Cursor c = null;
+		Set<String> blockedSet = new HashSet<String>();
+
+		try
+		{
+			c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN }, null, null, null, null, null);
+
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+
+			while (c.moveToNext())
+			{
+				blockedSet.add(c.getString(msisdnIdx));
+			}
+
+			return blockedSet;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
 	}
 }

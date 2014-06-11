@@ -3,7 +3,9 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -14,6 +16,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -37,6 +40,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
+import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -44,10 +48,12 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -89,6 +95,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private volatile InitiateMultiFileTransferTask fileTransferTask;
 
 	private ProgressDialog progressDialog;
+
+	private LastSeenScheduler lastSeenScheduler;
+
+	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -141,7 +151,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		init();
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 	}
 
 	private boolean shouldInitiateFileTransfer()
@@ -202,7 +212,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		listView = (ListView) findViewById(R.id.list);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId);
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId, friendsListFetchedCallback);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
@@ -241,7 +251,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			progressDialog.dismiss();
 			progressDialog = null;
 		}
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+
+		if (lastSeenScheduler != null)
+		{
+			lastSeenScheduler.stop(true);
+			lastSeenScheduler = null;
+		}
+
+		HikeMessengerApp.getPubSub().removeListeners(this, hikePubSubListeners);
 		super.onDestroy();
 	}
 
@@ -280,7 +297,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 				return;
 			}
-			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_GROUP)
+			else if (adapter.getSelectedContactCount() >= HikeConstants.MAX_CONTACTS_IN_GROUP && !adapter.isContactAdded(contactInfo))
 			{
 				showToast(getString(R.string.maxContactInGroupErr, HikeConstants.MAX_CONTACTS_IN_GROUP));
 				return;
@@ -366,7 +383,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getSelectedContactCount()));
+			multiSelectTitle.setText(getString(R.string.gallery_num_selected, adapter.getCurrentSelection()));
 		}
 	}
 
@@ -778,6 +795,68 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			});
 		}
+		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
+		{
+
+			if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+			{
+				return;
+			}
+
+			runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					if (lastSeenScheduler == null)
+					{
+						lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
+					}
+					else
+					{
+						lastSeenScheduler.stop(true);
+					}
+					lastSeenScheduler.start(true);
+				}
+			});
+		}
+		else if (HikePubSub.LAST_SEEN_TIME_BULK_UPDATED.equals(type))
+		{
+			List<ContactInfo> friendsList = adapter.getFriendsList();
+
+			Utils.updateLastSeenTimeInBulk(friendsList);
+
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					adapter.makeCompleteList(false);
+				}
+			});
+
+		}
+		else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type))
+		{
+			final ContactInfo contactInfo = (ContactInfo) object;
+
+			if (contactInfo.getFavoriteType() != FavoriteType.FRIEND)
+			{
+				return;
+			}
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					adapter.addToGroup(contactInfo, FriendsAdapter.FRIEND_INDEX);
+				}
+
+			});
+		}
 	}
 
 	@Override
@@ -800,4 +879,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
 	}
+
+	FriendsListFetchedCallback friendsListFetchedCallback = new FriendsListFetchedCallback()
+	{
+		
+		@Override
+		public void listFetched()
+		{
+			if (PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.LAST_SEEN_PREF, true))
+			{
+				lastSeenScheduler = LastSeenScheduler.getInstance(ComposeChatActivity.this);
+				lastSeenScheduler.start(true);
+			}
+		}
+	};
 }

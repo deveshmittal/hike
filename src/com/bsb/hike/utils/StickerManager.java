@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
 {
+	public static final String STICKERS_MOVED_EXTERNAL_TO_INTERNAL = "movedStickersExtToInt";
+
 	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
 
 	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
@@ -496,7 +499,7 @@ public class StickerManager
 
 	public void loadRecentStickers()
 	{
-		recentStickers = getSortedListForCategory(StickerCategoryId.recent);
+		recentStickers = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
 	}
 
 	public List<StickerCategory> getStickerCategoryList()
@@ -797,7 +800,7 @@ public class StickerManager
 		{
 			externalAvailable = true;
 			String stickerDirPath = getExternalStickerDirectoryForCategoryId(context, catId);
-			Logger.d(TAG,"Sticker dir path : " + stickerDirPath);
+			Logger.d(TAG, "Sticker dir path : " + stickerDirPath);
 			if (stickerDirPath == null)
 			{
 				return null;
@@ -886,25 +889,26 @@ public class StickerManager
 	 * 
 	 *         This function can return null if file doesnot exist.
 	 */
-	public Set<Sticker> getSortedListForCategory(StickerCategoryId catId)
+	public Set<Sticker> getSortedListForCategory(StickerCategoryId catId, String dirPath)
 	{
 		Set<Sticker> list = null;
+		FileInputStream fileIn = null;
+		ObjectInputStream in = null;
 		try
 		{
 			long t1 = System.currentTimeMillis();
 			Logger.d(TAG, "Calling function get sorted list for category : " + catId.name());
-			String extDir = getStickerDirectoryForCategoryId(context, catId.name());
-			File dir = new File(extDir);
+			File dir = new File(dirPath);
 			if (!dir.exists())
 			{
 				dir.mkdirs();
 				return Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
 			}
-			File catFile = new File(extDir, catId.name() + ".bin");
+			File catFile = new File(dirPath, catId.name() + ".bin");
 			if (!catFile.exists())
 				return Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
-			FileInputStream fileIn = new FileInputStream(catFile);
-			ObjectInputStream in = new ObjectInputStream(fileIn);
+			fileIn = new FileInputStream(catFile);
+			in = new ObjectInputStream(fileIn);
 			int size = in.readInt();
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(size));
 			for (int i = 0; i < size; i++)
@@ -920,8 +924,6 @@ public class StickerManager
 					Logger.e(TAG, "Exception while deserializing sticker", e);
 				}
 			}
-			in.close();
-			fileIn.close();
 			long t2 = System.currentTimeMillis();
 			Logger.d(TAG, "Time in ms to get sticker list of category : " + catId + " from file :" + (t2 - t1));
 		}
@@ -929,6 +931,27 @@ public class StickerManager
 		{
 			Logger.e(TAG, "Exception while reading category file.", e);
 			list = Collections.synchronizedSet(new LinkedHashSet<Sticker>(RECENT_STICKERS_COUNT));
+		}
+		finally
+		{
+			if (in != null)
+				try
+				{
+					in.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			if (fileIn != null)
+				try
+				{
+					fileIn.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 		}
 		return list;
 	}
@@ -941,10 +964,12 @@ public class StickerManager
 				return;
 
 			long t1 = System.currentTimeMillis();
-			String extDir = getStickerDirectoryForCategoryId(context, catId.name());
+			String extDir = getInternalStickerDirectoryForCategoryId(context, catId.name());
 			File dir = new File(extDir);
-			if (!dir.exists())
-				dir.mkdirs();
+			if (!dir.exists() && !dir.mkdirs())
+			{
+				return;
+			}
 			File catFile = new File(extDir, catId.name() + ".bin");
 			FileOutputStream fileOut = new FileOutputStream(catFile);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -1059,5 +1084,23 @@ public class StickerManager
 		{
 			recentStickers.remove(new Sticker(categoryName, stickerId));
 		}
+	}
+
+	public void setContext(Context context)
+	{
+		this.context = context;
+	}
+
+	public void moveRecentStickerFileToInternal()
+	{
+		Set<Sticker> stickerOnOuterMem = getSortedListForCategory(StickerCategoryId.recent, getExternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
+		if (stickerOnOuterMem.size() == 0)
+		{
+			Set<Sticker> stickerOnInnerMem = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
+			if (stickerOnInnerMem.size() > 0)
+				saveSortedListForCategory(StickerCategoryId.recent, stickerOnInnerMem);
+			return;
+		}
+		saveSortedListForCategory(StickerCategoryId.recent, stickerOnOuterMem);
 	}
 }

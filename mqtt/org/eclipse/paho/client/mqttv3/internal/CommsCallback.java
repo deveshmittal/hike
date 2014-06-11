@@ -218,7 +218,7 @@ public class CommsCallback implements Runnable
 				// Users code could throw an Error or Exception e.g. in the case
 				// of class NoClassDefFoundError
 				// @TRACE 714=callback threw exception
-				Logger.d(TAG, "exception occured, shutting down : " + ex.getCause());
+				Logger.e(TAG, "exception occured, shutting down : " , ex);
 				running = false;
 				clientComms.shutdownConnection(null, new MqttException(ex));
 			}
@@ -281,7 +281,7 @@ public class CommsCallback implements Runnable
 			if (mqttCallback != null && cause != null)
 			{
 				// @TRACE 708=call connectionLost
-				Logger.d(TAG, "Connection lost occured");
+				Logger.e(TAG, "Connection lost occured" , cause);
 				mqttCallback.connectionLost(cause);
 			}
 		}
@@ -291,6 +291,15 @@ public class CommsCallback implements Runnable
 			// is called during shutdown processing so no need to do anything else
 			// @TRACE 720=exception from connectionLost {0}
 
+		}
+	}
+	
+	public void fastReconnect()
+	{
+		if (mqttCallback != null)
+		{
+			Logger.e(TAG, "Fast Disconnect");
+			mqttCallback.fastReconnect();
 		}
 	}
 
@@ -444,7 +453,7 @@ public class CommsCallback implements Runnable
 				// Users code could throw an Error or Exception e.g. in the case
 				// of class NoClassDefFoundError
 				// @TRACE 719=callback threw ex:
-				Logger.d(TAG, "problem in asyncopcomplete shutting down, cause : " + ex.getCause());
+				Logger.e(TAG, "problem in asyncopcomplete shutting down, cause : " , ex);
 				// Shutdown likely already in progress but no harm to confirm
 				System.err.println("problem in asyncopcomplete " + ex);
 				ex.printStackTrace();
