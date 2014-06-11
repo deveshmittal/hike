@@ -535,7 +535,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
-
+		possibleKeyboardHeight = 0;
 		unregisterReceivers();
 
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
@@ -6800,7 +6800,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				int rootHeight = root.getHeight();
 				int rootViewHeight = root.getRootView().getHeight();
 				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
-				if (temp > rootViewHeight / 3)
+				if (temp > 0)
 				{
 					possibleKeyboardHeight = temp;
 					isKeyboardOpen = true;
@@ -6915,23 +6915,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			lp = new RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 0);
 		}
-		boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-		if (isLandscape)
-		{
-			View root = findViewById(R.id.chat_layout);
 
-			int statusBarHeight = getStatusBarHeight();
-			int maxHeight = root.getRootView().getHeight();
-			// giving half height of screen in landscape mode
-			lp.height = (maxHeight - statusBarHeight) / 2;
-		}
-		else if (possibleKeyboardHeight != 0)
+		if (possibleKeyboardHeight != 0)
 		{
 			lp.height = possibleKeyboardHeight;
 		}
 		else
 		{
-			lp.height = (int) (getResources().getDimension(R.dimen.emoticon_pallete));
+			boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+			if (isLandscape)
+			{
+				View root = findViewById(R.id.chat_layout);
+
+				int statusBarHeight = getStatusBarHeight();
+				int maxHeight = root.getRootView().getHeight();
+				// giving half height of screen in landscape mode
+				lp.height = (maxHeight - statusBarHeight) / 2;
+			}
+			else
+			{
+				lp.height = (int) (getResources().getDimension(R.dimen.emoticon_pallete));
+			}
 
 			// lp.height = (int) (Utils.densityMultiplier * getResources().getDimension(R.dimen.emoticon_pallete));
 		}
