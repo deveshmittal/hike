@@ -94,7 +94,7 @@
                 android:focusable="true"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
-                android:src="?attr/searchViewCloseIcon" />
+                android:src="@drawable/ic_top_bar_search_close" />
         </LinearLayout>
 
         <LinearLayout
