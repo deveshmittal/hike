@@ -167,7 +167,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onDestroy()
 	{
-		removeStatusUpdateTip(false);
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
 	}
@@ -441,7 +440,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				friendCounter++;
 			}
 		}
-		return friendCounter < HikeConstants.FTUE_LIMIT;
+		return friendCounter < HikeConstants.FTUE_LIMIT && friendCounter < HomeActivity.ftueContactsData.getCompleteList().size();
 	}
 
 	private void addFTUEItem(List<StatusMessage> statusMessages)
@@ -495,28 +494,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			{
 				Logger.d(getClass().getSimpleName(), "Not added");
 				return;
-			}
-
-			String name = Utils.getFirstName(prefs.getString(HikeMessengerApp.NAME_SETTING, null));
-			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			/*
-			 * If we already have a few status messages in the timeline, no need to prompt the user to post his/her own message.
-			 */
-			if (result.size() < HikeConstants.MIN_STATUS_COUNT)
-			{
-				if (TextUtils.isEmpty(lastStatus))
-				{
-					noStatusMessage = new StatusMessage(CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID, null, "12345", getString(R.string.mood_update), getString(
-							R.string.hey_name, name), StatusMessageType.NO_STATUS, System.currentTimeMillis() / 1000);
-					statusMessages.add(0, noStatusMessage);
-				}
-				else if (result.isEmpty())
-				{
-					noStatusMessage = new StatusMessage(CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID, null, "12345", getString(R.string.mood_update), getString(
-							R.string.hey_name, name), StatusMessageType.NO_STATUS, System.currentTimeMillis() / 1000);
-					statusMessages.add(0, noStatusMessage);
-				}
 			}
 
 			long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP, -1);

@@ -2023,15 +2023,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public boolean hasNoConversation()
 	{
-		/*
-		 * if group chat tip is showing we should remove this first and than add stealth ftue conversation tip
-		 */
-		Conversation conv = getFirstConversation();
-
-		/*
-		 * if conv not null this implies, We certainly have some conversations on the screen other than group chat tip
-		 */
-		return conv == null;
+		for(Conversation conv : displayedConversations)
+		{
+			if(conv instanceof ConversationTip)
+			{
+				/*
+				 * we should ideally remove this tip here.
+				 */
+				continue;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	private class MenuArrayAdapter extends ArrayAdapter<CharSequence>
