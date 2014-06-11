@@ -1556,7 +1556,7 @@
      <string name="ftue_sticker_card_msg">When words can\'t express, say it with a sticker. You\'ll love them!</string>
      <string name="ftue_attachment_card_msg"> Send photos, video, pdfs, docs and a lot more up to 100MB each.</string>
      <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline.</string>
-     <string name="ftue_favorites_card_msg">Only favourites can see your status update and last seen.</string>
+     <string name="ftue_favorites_card_msg">Only favorites can see your status update and last seen.</string>
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
      <string name="themes">Themes</string>
      <string name="ftue_updates_are_fun_with_favorites">Only favorites can see your status update and last seen. Choose them wisely!</string>
