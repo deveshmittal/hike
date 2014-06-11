@@ -217,10 +217,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private HikeConversationsDatabase mConversationDb;
 
-	private String currentFileSelectionPath;
-
-	private String currentFileSelectionMimeType;
-
 	private String mContactName;
 
 	private String mContactNumber;
@@ -506,8 +502,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				selectedNonTextMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS);
 				selectedCancelableMsgs = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS);
 				shareableMessagesCount = savedInstanceState.getInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT);
-				currentFileSelectionPath = savedInstanceState.getString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH);
-				currentFileSelectionMimeType = savedInstanceState.getString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_MIME_TYPE);
 
 				setupActionModeActionBar();
 				invalidateOptionsMenu();
@@ -1313,14 +1307,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if (isMsgSelected)
 					{
 						shareableMessagesCount++;
-						currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
-						currentFileSelectionMimeType = hikeFile.getFileTypeString();
 					}
 					else
 					{
 						shareableMessagesCount--;
-						currentFileSelectionPath = null;
-						currentFileSelectionMimeType = null;
 					}
 				}
 			}
@@ -5251,8 +5241,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
-			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_PATH, currentFileSelectionPath);
-			outState.putString(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_MIME_TYPE, currentFileSelectionMimeType);
 		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
@@ -6478,8 +6466,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void destroyActionMode()
 	{
-		currentFileSelectionMimeType = null;
-		currentFileSelectionPath = null;
 		shareableMessagesCount = 0;
 		selectedNonTextMsgs = 0;
 		selectedNonForwadableMsgs = 0;
@@ -6635,8 +6621,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			return true;
 		case R.id.share_msgs:
-			if (currentFileSelectionPath != null)
+			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
+			if (selectedMsgIds.size() == 1)
 			{
+				ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
+				String currentFileSelectionMimeType = hikeFile.getFileTypeString();
 				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionMimeType, currentFileSelectionPath);
 				destroyActionMode();
 			}
