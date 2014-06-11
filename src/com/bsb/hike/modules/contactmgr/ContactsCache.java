@@ -1,5 +1,6 @@
 package com.bsb.hike.modules.contactmgr;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +17,10 @@ import com.bsb.hike.models.ContactInfo;
  */
 class ContactsCache
 {
-	// Memory persistence for all the contacts that should always be laoded
+	// Memory persistence for all the contacts that should always be loaded
 	private Map<String, ContactInfo> persistenceMap;
 
-	// Transient persistence for all the contacts that should always be laoded
+	// Transient persistence for all the contacts that should always be loaded
 	private Map<String, ContactInfo> transientMap;
 
 	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
@@ -156,11 +157,26 @@ class ContactsCache
 	}
 
 	/**
+	 * This method loads the contactInfo of msisdns in transient memory and returns the list of same
+	 * 
+	 * @param msisdns
+	 * @return
+	 */
+	List<ContactInfo> loadTransientMem(List<String> msisdns)
+	{
+		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+		
+		transientMap.putAll(map);
+
+		return new ArrayList<ContactInfo>(map.values());
+	}
+
+	/**
 	 * This will load all the persistent contacts in the memory
 	 */
 	void loadPersistenceMemory()
 	{
-		HikeUserDatabase.getInstance().getConversationContacts(persistenceMap);
+		persistenceMap = HikeUserDatabase.getInstance().getConversationContacts();
 	}
 
 	/**
@@ -168,9 +184,13 @@ class ContactsCache
 	 * @param msisdnsDB
 	 * @return
 	 */
-	List<ContactInfo> loadPersistenceMemory(String msisdnsDB)
+	List<ContactInfo> loadPersistenceMemory(List<String> msisdns)
 	{
-		return HikeUserDatabase.getInstance().getConversationContacts(persistenceMap, msisdnsDB);
+		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+
+		persistenceMap.putAll(map);
+
+		return new ArrayList<ContactInfo>(map.values());
 	}
 
 	public void clearTransientMemory()

@@ -35,13 +35,14 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * This method puts the contactInfo object list in persistence memory
+	 * 
 	 * @param contacts
 	 */
-	public List<ContactInfo> loadPersistenceCache(String msisdnsDB)
+	public List<ContactInfo> loadPersistenceCache(List<String> msisdns)
 	{
-		return cache.loadPersistenceMemory(msisdnsDB);
+		return cache.loadPersistenceMemory(msisdns);
 	}
-	
+
 	public static ContactManager getInstance()
 	{
 		return _instance;
@@ -54,6 +55,17 @@ public class ContactManager implements ITransientCache
 	public void load()
 	{
 		cache.loadTransientMem();
+	}
+
+	/**
+	 * This method puts the contact info for msisdns in transient memory and Returns the list for same.
+	 * 
+	 * @param msisdns
+	 * @return
+	 */
+	public List<ContactInfo> load(List<String> msisdns)
+	{
+		return cache.loadTransientMem(msisdns);
 	}
 
 	/**

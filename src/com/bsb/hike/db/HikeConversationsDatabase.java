@@ -1217,18 +1217,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public String getConversationMsisdns()
+	public List<String> getConversationMsisdns()
 	{
-		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA }, null, null, null,
-				null, null);
-
-		final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
-		final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
-		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+		Cursor c = null;
+		List<String> msisdns = new ArrayList<String>();
 
 		try
 		{
-			StringBuilder msisdns = new StringBuilder("(");
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA }, null, null, null,
+					null, null);
+
+			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
+			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 
 			while (c.moveToNext())
 			{
@@ -1242,32 +1243,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					if (null != grpMsisdns)
 					{
-						for (String m : grpMsisdns)
-						{
-							msisdns.append(DatabaseUtils.sqlEscapeString(m) + ",");
-						}
+						msisdns.addAll(grpMsisdns);
 					}
 					else
 					{
-						msisdns.append(DatabaseUtils.sqlEscapeString(groupParticipant) + ",");
+						if (null != groupParticipant && !groupParticipant.equals(""))
+						{
+							msisdns.add(groupParticipant);
+						}
 					}
-
 				}
 				else
 				{
-					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+					msisdns.add(msisdn);
 				}
 			}
-
-			int idx = msisdns.lastIndexOf(",");
-			if (idx < 0)
-			{
-				return null;
-			}
-
-			msisdns.replace(idx, msisdns.length(), ")");
-
-			return msisdns.toString();
+			return msisdns;
 		}
 		finally
 		{
@@ -1440,7 +1431,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conversationMap.put(msisdn, conv);
 			}
 
-			List<ContactInfo> contactList = getContactForMsisdnList(msisdns);
+			List<ContactInfo> contactList = getContactForMsisdnList(msisdns, true);
 
 			for (ContactInfo contactInfo : contactList)
 			{
@@ -1513,13 +1504,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return conversations;
 	}
 
-	private List<ContactInfo> getContactForMsisdnList(List<String> msisdns)
+	private List<ContactInfo> getContactForMsisdnList(List<String> msisdns, boolean setInPersistenceMem)
 	{
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 
 		ContactManager conMgr = HikeMessengerApp.getContactManager();
 
-		StringBuilder msisdnsDB = null;
+		List<String> msisdnsDB = new ArrayList<String>();
 
 		for (String msisdn : msisdns)
 		{
@@ -1530,20 +1521,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				if (null == msisdnsDB)
-				{
-					msisdnsDB = new StringBuilder("(");
-				}
-				msisdnsDB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				msisdnsDB.add(msisdn);
 			}
 		}
-		if (null != msisdnsDB)
+		if (msisdnsDB.size() > 0)
 		{
-			msisdnsDB.replace(msisdnsDB.lastIndexOf(","), msisdnsDB.length(), ")");
-
 			// if not found in persistence memory get contacts from Db. This will happen very rarely as we have already loaded all the persistence contacts initially
 
-			List<ContactInfo> contactsDB = conMgr.loadPersistenceCache(msisdnsDB.toString());
+			List<ContactInfo> contactsDB;
+			if (setInPersistenceMem)
+			{
+				contactsDB = conMgr.loadPersistenceCache(msisdnsDB);
+			}
+			else
+			{
+				contactsDB = conMgr.load(msisdnsDB);
+			}
+
 			if (null != contactsDB)
 			{
 				contacts.addAll(contactsDB);

@@ -1968,10 +1968,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return c;
 	}
 
-	public void getConversationContacts(Map<String, ContactInfo> map)
+	public Map<String, ContactInfo> getConversationContacts()
 	{
-		String msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
-		getConversationContacts(map, msisdns);
+		List<String> msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		return getContactInfoFromMsisdns(msisdns, true);
 	}
 
 	public List<ContactInfo> getConversationContacts(Map<String, ContactInfo> map, String msisdnsDB)
