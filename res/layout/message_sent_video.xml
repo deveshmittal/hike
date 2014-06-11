@@ -68,8 +68,8 @@
 
                 <ProgressBar
                     android:id="@+id/initializing"
-                    android:layout_width="47dp"
-                    android:layout_height="47dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_centerInParent="true"
                     android:indeterminateDrawable="@drawable/circular_double_spinner" />
 
