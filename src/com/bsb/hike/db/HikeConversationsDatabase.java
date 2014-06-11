@@ -2058,21 +2058,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
 			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
-			StringBuilder allMsisdns = new StringBuilder("(");
+			List<String> allMsisdns = new ArrayList<String>();
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
-				allMsisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+				allMsisdns.add(msisdn);
 				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(c.getColumnIndex(DBConstants.NAME)), msisdn), c.getInt(c
 						.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 				participantList.put(msisdn, groupParticipant);
 			}
-			String msisdns = allMsisdns.toString();
 			// at least one msisdn is required to run this in query
-			if (fetchParticipants && !"(".equals(msisdns))
+			if (fetchParticipants && allMsisdns.size() > 0)
 			{
-				msisdns = msisdns.substring(0, msisdns.length() - 1) + ")";
-				List<ContactInfo> list = huDB.getContactNamesFromMsisdnList(msisdns);
+				List<ContactInfo> list = getContactForMsisdnList(allMsisdns, false);
 				for (ContactInfo contactInfo : list)
 				{
 					participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
