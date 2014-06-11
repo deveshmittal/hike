@@ -535,7 +535,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onDestroy()
 	{
 		super.onDestroy();
-
+		possibleKeyboardHeight = 0;
 		unregisterReceivers();
 
 		if (prefs != null && !prefs.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false) && mAdapter != null && mAdapter.shownSdrToolTip())
@@ -5632,7 +5632,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.humanoid_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.humanoid_btn_text_shadow);
 
-			categoryText = "Hikins";
+			categoryText = getResources().getString(R.string.hikins);
 			categoryTextColor = getResources().getColor(R.color.humanoid_text);
 			categoryTextShadowColor = getResources().getColor(R.color.humanoid_text_shadow);
 
@@ -5646,7 +5646,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
 
-			categoryText = "Snuggles";
+			categoryText = getString(R.string.snuggles);
 			categoryTextColor = getResources().getColor(R.color.doggy_text);
 			categoryTextShadowColor = getResources().getColor(R.color.doggy_text_shadow);
 
@@ -5660,7 +5660,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.kitty_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.kitty_btn_text_shadow);
 
-			categoryText = "Miley";
+			categoryText = getString(R.string.meawmiley);
 			categoryTextColor = getResources().getColor(R.color.kitty_text);
 			categoryTextShadowColor = getResources().getColor(R.color.kitty_text_shadow);
 
@@ -5674,7 +5674,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.exp_btn_text_shadow);
 
-			categoryText = "Expressions";
+			categoryText = getString(R.string.expressions);
 			categoryTextColor = getResources().getColor(R.color.exp_text);
 			categoryTextShadowColor = getResources().getColor(R.color.exp_text_shadow);
 
@@ -5688,7 +5688,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.bollywood_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.bollywood_btn_text_shadow);
 
-			categoryText = "Bollywood";
+			categoryText = getString(R.string.bollywood);
 			categoryTextColor = getResources().getColor(R.color.bollywood_text);
 			categoryTextShadowColor = getResources().getColor(R.color.bollywood_text_shadow);
 
@@ -5702,7 +5702,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.rf_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.rf_btn_text_shadow);
 
-			categoryText = "Rage Face";
+			categoryText = getString(R.string.rageface);
 			categoryTextColor = getResources().getColor(R.color.rf_text);
 			categoryTextShadowColor = getResources().getColor(R.color.rf_text_shadow);
 
@@ -5716,7 +5716,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.humanoid2_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.humanoid2_btn_text_shadow);
 
-			categoryText = "You and I";
+			categoryText = getString(R.string.youandi);
 			categoryTextColor = getResources().getColor(R.color.humanoid2_text);
 			categoryTextShadowColor = getResources().getColor(R.color.humanoid2_text_shadow);
 
@@ -5730,7 +5730,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.se_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.se_btn_text_shadow);
 
-			categoryText = "Goofy Smileys";
+			categoryText = getString(R.string.wackysmilyes);
 			categoryTextColor = getResources().getColor(R.color.se_text);
 			categoryTextShadowColor = getResources().getColor(R.color.se_text_shadow);
 
@@ -5744,7 +5744,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.avtars_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.avtars_btn_text_shadow);
 
-			categoryText = "Hikin Avatars";
+			categoryText = getString(R.string.avatars);
 			categoryTextColor = getResources().getColor(R.color.avtars_text);
 			categoryTextShadowColor = getResources().getColor(R.color.avtars_text_shadow);
 
@@ -5758,7 +5758,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.indian_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.indian_btn_text_shadow);
 
-			categoryText = "Things Indians Say";
+			categoryText = getString(R.string.thingsIndianSay);
 			categoryTextColor = getResources().getColor(R.color.indian_text);
 			categoryTextShadowColor = getResources().getColor(R.color.indian_text_shadow);
 
@@ -5772,7 +5772,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.love_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.love_btn_text_shadow);
 
-			categoryText = "I Love You";
+			categoryText = getString(R.string.loveyouforever);
 			categoryTextColor = getResources().getColor(R.color.love_text);
 			categoryTextShadowColor = getResources().getColor(R.color.love_text_shadow);
 
@@ -5786,7 +5786,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.sports_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.sports_btn_text_shadow);
 
-			categoryText = "Sports";
+			categoryText = getString(R.string.sportmaniacs);
 			categoryTextColor = getResources().getColor(R.color.sports_text);
 			categoryTextShadowColor = getResources().getColor(R.color.sports_text_shadow);
 
@@ -6821,7 +6821,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				int rootHeight = root.getHeight();
 				int rootViewHeight = root.getRootView().getHeight();
 				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
-				if (temp > rootViewHeight / 3)
+				if (temp > 0)
 				{
 					possibleKeyboardHeight = temp;
 					isKeyboardOpen = true;
@@ -6936,23 +6936,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			lp = new RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 0);
 		}
-		boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-		if (isLandscape)
-		{
-			View root = findViewById(R.id.chat_layout);
 
-			int statusBarHeight = getStatusBarHeight();
-			int maxHeight = root.getRootView().getHeight();
-			// giving half height of screen in landscape mode
-			lp.height = (maxHeight - statusBarHeight) / 2;
-		}
-		else if (possibleKeyboardHeight != 0)
+		if (possibleKeyboardHeight != 0)
 		{
 			lp.height = possibleKeyboardHeight;
 		}
 		else
 		{
-			lp.height = (int) (getResources().getDimension(R.dimen.emoticon_pallete));
+			boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+			if (isLandscape)
+			{
+				View root = findViewById(R.id.chat_layout);
+
+				int statusBarHeight = getStatusBarHeight();
+				int maxHeight = root.getRootView().getHeight();
+				// giving half height of screen in landscape mode
+				lp.height = (maxHeight - statusBarHeight) / 2;
+			}
+			else
+			{
+				lp.height = (int) (getResources().getDimension(R.dimen.emoticon_pallete));
+			}
 
 			// lp.height = (int) (Utils.densityMultiplier * getResources().getDimension(R.dimen.emoticon_pallete));
 		}
