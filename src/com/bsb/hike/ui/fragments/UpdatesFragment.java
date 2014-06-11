@@ -440,7 +440,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				friendCounter++;
 			}
 		}
-		return friendCounter < HikeConstants.FTUE_LIMIT;
+		return friendCounter < HikeConstants.FTUE_LIMIT && friendCounter < HomeActivity.ftueContactsData.getCompleteList().size();
 	}
 
 	private void addFTUEItem(List<StatusMessage> statusMessages)
