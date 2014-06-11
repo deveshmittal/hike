@@ -486,6 +486,149 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return contactInfos.get(0);
 	}
 
+	private Map<String, ContactInfo> extractContactInfoMap(Cursor c)
+	{
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+
+		while (c.moveToNext())
+		{
+			ContactInfo contactInfo = processContact(c);
+			contactMap.put(contactInfo.getMsisdn(), contactInfo);
+		}
+		return contactMap;
+	}
+
+	private Map<String, ContactInfo> getContactMap(String msisdns)
+	{
+		Cursor c = null;
+
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+
+		try
+		{
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN },
+					DBConstants.MSISDN + " IN " + msisdns, null, null, null, null);
+
+			contactMap = extractContactInfoMap(c);
+
+			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
+	}
+
+	private Map<String, FavoriteType> getFavoriteMap(String msisdns)
+	{
+		Cursor c = null;
+
+		Map<String, FavoriteType> favMap = new HashMap<String, FavoriteType>();
+
+		try
+		{
+			c = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.FAVORITE_TYPE }, DBConstants.MSISDN + " IN " + msisdns, null, null, null,
+					null);
+
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int favoriteTypeIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+				FavoriteType favoriteType = FavoriteType.values()[c.getInt(favoriteTypeIdx)];
+				favMap.put(msisdn, favoriteType);
+			}
+
+			return favMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+
+		}
+	}
+
+	public Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded)
+	{
+		Cursor c = null;
+
+		Map<String, ContactInfo> contactInfos = new HashMap<String, ContactInfo>();
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+		Map<String, FavoriteType> favoriteMap = new HashMap<String, FavoriteType>();
+
+		StringBuilder msisdnsDB = new StringBuilder("(");
+		for (String msisdn : msisdns)
+		{
+			msisdnsDB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+		}
+		msisdnsDB.replace(msisdnsDB.lastIndexOf(","), msisdnsDB.length(), ")");
+
+		try
+		{
+			contactMap = getContactMap(msisdnsDB.toString());
+
+			if (favoriteTypeNeeded)
+			{
+				favoriteMap = getFavoriteMap(msisdnsDB.toString());
+			}
+
+			for (String msisdn : msisdns)
+			{
+				ContactInfo contact = contactMap.get(msisdn);
+				if (null != contact)
+				{
+					FavoriteType fav = favoriteMap.get(msisdn);
+					if (null != fav)
+					{
+						contact.setFavoriteType(fav);
+					}
+					contactInfos.put(msisdn, contact);
+				}
+				else
+				{
+					ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, null, msisdn, false);
+
+					if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
+					{
+						String name = HikeMessengerApp.hikeBotNamesMap.get(msisdn);
+						contactInfo.setName(name);
+						contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
+					}
+					else
+					{
+						FavoriteType fav = favoriteMap.get(msisdn);
+						if (null != fav)
+						{
+							contactInfo.setFavoriteType(fav);
+						}
+						else
+						{
+							contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
+						}
+					}
+					contactInfos.put(msisdn, contactInfo);
+				}
+			}
+			return contactInfos;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	public List<ContactInfo> getContactInfoFromMSISDN(String[] msisdn)
 	{
 		Cursor c = null;
