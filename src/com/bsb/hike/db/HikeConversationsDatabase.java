@@ -2500,7 +2500,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int moodIdIdx = c.getColumnIndex(DBConstants.MOOD_ID);
 			int timeOfDayIdx = c.getColumnIndex(DBConstants.TIME_OF_DAY);
 
-			StringBuilder msisdns = null;
+			List<String> msisdns = new ArrayList<String>();
+
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnIdx);
@@ -2512,21 +2513,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				List<StatusMessage> msisdnMessages = statusMessagesMap.get(msisdn);
 				if (msisdnMessages == null)
 				{
-					if (msisdns == null)
-					{
-						msisdns = new StringBuilder("(");
-					}
-					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+					msisdns.add(msisdn);
 					msisdnMessages = new ArrayList<StatusMessage>();
 					statusMessagesMap.put(msisdn, msisdnMessages);
 				}
 				msisdnMessages.add(statusMessage);
 			}
-			if (msisdns != null)
+			if (msisdns.size() > 0)
 			{
-				msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
+				List<ContactInfo> contactList = getContactForMsisdnList(msisdns, false);
 
-				List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactNamesFromMsisdnList(msisdns.toString());
 				for (ContactInfo contactInfo : contactList)
 				{
 					List<StatusMessage> msisdnMessages = statusMessagesMap.get(contactInfo.getMsisdn());
