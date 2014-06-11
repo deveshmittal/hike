@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask;
@@ -183,6 +184,14 @@ public class LastSeenScheduler
 		@Override
 		public void run()
 		{
+			/*
+			 * Adding this check to ensure we don't make a request for empty/null msisdn.
+			 * TODO figure out why this is happening
+			 */
+			if (TextUtils.isEmpty(msisdn))
+			{
+				return;
+			}
 			fetchLastSeenTask = new FetchLastSeenTask(context, msisdn, lastSeenCallback);
 			fetchLastSeenTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 		}
