@@ -27,7 +27,7 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 
 	private enum FtueCards
 	{
-		STICKER, FAVORITES, HIDDEN_MODE, ATTACHMENT, HIKE_OFFLINE, THEMES 
+		STICKER, FAVORITES, HIDDEN_MODE, HIKE_OFFLINE, ATTACHMENT, THEMES 
 	};
 
 	@Override
