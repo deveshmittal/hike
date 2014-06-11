@@ -41,10 +41,9 @@
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/file_extension"
                 android:layout_width="@dimen/file_message_item_size"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/file_message_item_size"
                 android:layout_alignLeft="@id/file_thumb"
                 android:layout_alignTop="@id/file_thumb"
-                android:layout_marginTop="15dp"
                 android:gravity="center"
                 android:singleLine="true"
                 android:text=".pdf"
@@ -107,8 +106,8 @@
 
         <ProgressBar
             android:id="@+id/initializing"
-            android:layout_width="37dp"
-            android:layout_height="37dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:layout_centerInParent="true"
             android:indeterminateDrawable="@drawable/circular_double_spinner_thin" />
 
