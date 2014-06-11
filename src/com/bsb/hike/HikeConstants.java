@@ -1546,8 +1546,8 @@ public class HikeConstants
 		EMOTICON, STICKERS
 	}
 
-	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
-
+	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2, R.string.native_sms_invite_3, R.string.native_sms_invite_4, R.string.native_sms_invite_5, R.string.native_sms_invite_6 };
+	
 	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3,
 			R.string.male_selected_string_4, R.string.male_selected_string_5 };
 
