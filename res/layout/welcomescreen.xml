@@ -61,8 +61,7 @@
                 android:id="@+id/loading_progress"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:layout_centerVertical="true"
-                android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
+                android:layout_centerVertical="true" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_loading"

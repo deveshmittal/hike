@@ -22,7 +22,7 @@
             android:paddingTop="10dp"
     		android:paddingBottom="15dp"
             android:orientation="vertical"
-            android:paddingRight="103dp" >
+            android:paddingRight="105dp" >
 
             <com.bsb.hike.view.CustomFontTextView
                 style="@style/TipHeader"
@@ -34,7 +34,7 @@
         </LinearLayout>
 
         <RelativeLayout
-            android:layout_width="100dp"
+            android:layout_width="104dp"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/tip_content"
             android:layout_alignBottom="@id/tip_content"
@@ -42,7 +42,7 @@
 
             <ImageView
                 android:id="@+id/arrow_pointer"
-                android:layout_width="43dp"
+                android:layout_width="47dp"
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
     			android:layout_alignParentLeft="true"
@@ -67,15 +67,4 @@
                 android:src="@drawable/ic_tip_cross" />
         </RelativeLayout>
     </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/dark_grey_drop_shadow" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/light_grey_drop_shadow" />
-
 </LinearLayout>

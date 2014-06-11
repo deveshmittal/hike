@@ -2071,7 +2071,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	{
 		FtueContactsData ftueContactsData = new FtueContactsData();
 		
-		int limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT;
+		int limit = HikeConstants.FTUE_LIMIT;
 
 		String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		
@@ -2089,7 +2089,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			
 		}
 		
-		limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT - ftueContactsData.getHikeContacts().size();
+		limit = HikeConstants.FTUE_LIMIT - ftueContactsData.getHikeContacts().size();
 		// added server recommended contacts
 		
 		/*
@@ -2142,7 +2142,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		{
 			return ftueContactsData;
 		}
-		limit = HikeConstants.EMPTY_CONVERSATIONS_PREFILL_LIMIT - ftueContactsData.getHikeContacts().size();
+		limit = HikeConstants.FTUE_LIMIT - ftueContactsData.getHikeContacts().size();
 		
 		// added random hike contacts
 		

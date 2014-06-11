@@ -49,8 +49,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/details_content"
             android:layout_marginTop="16dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
             android:orientation="vertical" />
         
         <com.bsb.hike.view.CustomFontTextView

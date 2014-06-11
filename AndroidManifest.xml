@@ -204,7 +204,8 @@
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
-            android:name="com.bsb.hike.ui.PeopleActivity" >
+            android:name="com.bsb.hike.ui.PeopleActivity" 
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
             android:name="com.bsb.hike.ui.TimelineActivity" 
