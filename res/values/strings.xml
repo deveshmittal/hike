@@ -1570,4 +1570,16 @@
      <string name="ftue_welcome_card_header_second">Explore hike</string>
      <string name="ftue_welcome_card_msg_second">Hike is full of awesome things! Tap on explore to check then out.</string>
      <string name="explore_upper_case">EXPLORE</string>
+    <string name="hikins">We are Hikins</string>
+	<string name="expressions">Express it all</string>
+	<string name="bollywood">Bollywood Masala</string>
+	<string name="rageface">What\'s your Rage Face?</string>
+	<string name="youandi">You &amp; I</string>
+	<string name="wackysmilyes">Wacky Smileys</string>
+	<string name="avatars">Superhero Avatars</string>
+	<string name="thingsIndianSay">Things Indians Say</string>
+	<string name="loveyouforever">Love you forever</string>
+	<string name="sportmaniacs">Sports Maniacs</string>
+	<string name="meawmiley">Meow, I\'m Miley!</string>
+	<string name="snuggles">Adorable Snuggles</string>
 </resources>

@@ -5625,7 +5625,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.humanoid_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.humanoid_btn_text_shadow);
 
-			categoryText = "Hikins";
+			categoryText = getResources().getString(R.string.hikins);
 			categoryTextColor = getResources().getColor(R.color.humanoid_text);
 			categoryTextShadowColor = getResources().getColor(R.color.humanoid_text_shadow);
 
@@ -5639,7 +5639,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
 
-			categoryText = "Snuggles";
+			categoryText = getString(R.string.snuggles);
 			categoryTextColor = getResources().getColor(R.color.doggy_text);
 			categoryTextShadowColor = getResources().getColor(R.color.doggy_text_shadow);
 
@@ -5653,7 +5653,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.kitty_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.kitty_btn_text_shadow);
 
-			categoryText = "Miley";
+			categoryText = getString(R.string.meawmiley);
 			categoryTextColor = getResources().getColor(R.color.kitty_text);
 			categoryTextShadowColor = getResources().getColor(R.color.kitty_text_shadow);
 
@@ -5667,7 +5667,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.exp_btn_text_shadow);
 
-			categoryText = "Expressions";
+			categoryText = getString(R.string.expressions);
 			categoryTextColor = getResources().getColor(R.color.exp_text);
 			categoryTextShadowColor = getResources().getColor(R.color.exp_text_shadow);
 
@@ -5681,7 +5681,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.bollywood_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.bollywood_btn_text_shadow);
 
-			categoryText = "Bollywood";
+			categoryText = getString(R.string.bollywood);
 			categoryTextColor = getResources().getColor(R.color.bollywood_text);
 			categoryTextShadowColor = getResources().getColor(R.color.bollywood_text_shadow);
 
@@ -5695,7 +5695,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.rf_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.rf_btn_text_shadow);
 
-			categoryText = "Rage Face";
+			categoryText = getString(R.string.rageface);
 			categoryTextColor = getResources().getColor(R.color.rf_text);
 			categoryTextShadowColor = getResources().getColor(R.color.rf_text_shadow);
 
@@ -5709,7 +5709,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.humanoid2_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.humanoid2_btn_text_shadow);
 
-			categoryText = "You and I";
+			categoryText = getString(R.string.youandi);
 			categoryTextColor = getResources().getColor(R.color.humanoid2_text);
 			categoryTextShadowColor = getResources().getColor(R.color.humanoid2_text_shadow);
 
@@ -5723,7 +5723,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.se_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.se_btn_text_shadow);
 
-			categoryText = "Goofy Smileys";
+			categoryText = getString(R.string.wackysmilyes);
 			categoryTextColor = getResources().getColor(R.color.se_text);
 			categoryTextShadowColor = getResources().getColor(R.color.se_text_shadow);
 
@@ -5737,7 +5737,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.avtars_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.avtars_btn_text_shadow);
 
-			categoryText = "Hikin Avatars";
+			categoryText = getString(R.string.avatars);
 			categoryTextColor = getResources().getColor(R.color.avtars_text);
 			categoryTextShadowColor = getResources().getColor(R.color.avtars_text_shadow);
 
@@ -5751,7 +5751,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.indian_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.indian_btn_text_shadow);
 
-			categoryText = "Things Indians Say";
+			categoryText = getString(R.string.thingsIndianSay);
 			categoryTextColor = getResources().getColor(R.color.indian_text);
 			categoryTextShadowColor = getResources().getColor(R.color.indian_text_shadow);
 
@@ -5765,7 +5765,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.love_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.love_btn_text_shadow);
 
-			categoryText = "I Love You";
+			categoryText = getString(R.string.loveyouforever);
 			categoryTextColor = getResources().getColor(R.color.love_text);
 			categoryTextShadowColor = getResources().getColor(R.color.love_text_shadow);
 
@@ -5779,7 +5779,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			stickerBtnTextColor = getResources().getColor(R.color.sports_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.sports_btn_text_shadow);
 
-			categoryText = "Sports";
+			categoryText = getString(R.string.sportmaniacs);
 			categoryTextColor = getResources().getColor(R.color.sports_text);
 			categoryTextShadowColor = getResources().getColor(R.color.sports_text_shadow);
 
