@@ -9,7 +9,7 @@
         android:layout_height="60dp"
         android:background="@drawable/list_item"
         android:orientation="horizontal"
-        android:paddingLeft="12dp" >
+        android:paddingLeft="22dp" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
@@ -30,7 +30,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:paddingLeft="14dp"
-            android:paddingRight="2dp"
+            android:paddingRight="12dp"
             android:background ="@drawable/list_item"
             android:src="@drawable/ic_add_friend"
             android:visibility="gone" />
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="12dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="10dp"
             android:layout_toLeftOf="@id/add_friend"
             android:layout_toRightOf="@id/avatar_container"
             android:orientation="vertical" >
@@ -71,6 +71,8 @@
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
         android:background="@color/list_divider" />
 
