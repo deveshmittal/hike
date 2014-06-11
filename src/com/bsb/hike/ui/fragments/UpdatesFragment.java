@@ -497,28 +497,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				return;
 			}
 
-			String name = Utils.getFirstName(prefs.getString(HikeMessengerApp.NAME_SETTING, null));
-			String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			/*
-			 * If we already have a few status messages in the timeline, no need to prompt the user to post his/her own message.
-			 */
-			if (result.size() < HikeConstants.MIN_STATUS_COUNT)
-			{
-				if (TextUtils.isEmpty(lastStatus))
-				{
-					noStatusMessage = new StatusMessage(CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID, null, "12345", getString(R.string.mood_update), getString(
-							R.string.hey_name, name), StatusMessageType.NO_STATUS, System.currentTimeMillis() / 1000);
-					statusMessages.add(0, noStatusMessage);
-				}
-				else if (result.isEmpty())
-				{
-					noStatusMessage = new StatusMessage(CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID, null, "12345", getString(R.string.mood_update), getString(
-							R.string.hey_name, name), StatusMessageType.NO_STATUS, System.currentTimeMillis() / 1000);
-					statusMessages.add(0, noStatusMessage);
-				}
-			}
-
 			long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP, -1);
 
 			Protip protip = null;

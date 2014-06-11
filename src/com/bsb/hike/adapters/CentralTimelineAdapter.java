@@ -49,10 +49,6 @@ import com.bsb.hike.utils.Utils.WhichScreen;
 public class CentralTimelineAdapter extends BaseAdapter
 {
 
-	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
-
-	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
-
 	public static final long FTUE_ITEM_ID = -6;
 
 	private int protipIndex;
@@ -135,10 +131,6 @@ public class CentralTimelineAdapter extends BaseAdapter
 		else if (viewType == ViewType.OTHER_UPDATE)
 		{
 			StatusMessage statusMessage = getItem(position);
-			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
-			{
-				return false;
-			}
 		}
 		return true;
 	}
@@ -242,14 +234,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			viewHolder.avatar.setScaleType(ScaleType.FIT_CENTER);
 			viewHolder.avatar.setBackgroundResource(0);
 
-			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
-			{
-				viewHolder.avatar.setScaleType(ScaleType.CENTER_INSIDE);
-				viewHolder.avatar.setImageResource(R.drawable.ic_ftue_moods_tip);
-				viewHolder.avatar.setBackgroundResource(R.drawable.bg_ftue_updates_tip);
-				viewHolder.avatarFrame.setVisibility(View.GONE);
-			}
-			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
 			{
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 				viewHolder.avatarFrame.setVisibility(View.GONE);
@@ -289,28 +274,6 @@ public class CentralTimelineAdapter extends BaseAdapter
 				viewHolder.yesBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setVisibility(View.GONE);
 
-				if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
-				{
-					viewHolder.timeStamp.setVisibility(View.GONE);
-
-					viewHolder.extraInfo.setText(R.string.no_status);
-					viewHolder.yesBtn.setText(R.string.post_a_mood);
-
-					viewHolder.moodsContainer.setVisibility(View.VISIBLE);
-
-					ViewGroup container1 = (ViewGroup) viewHolder.moodsContainer.findViewById(R.id.container1);
-					ViewGroup container2 = (ViewGroup) viewHolder.moodsContainer.findViewById(R.id.container2);
-
-					if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-					{
-						addMoods(container1, moodsRow1);
-						addMoods(container2, moodsRow2);
-					}
-					else
-					{
-						addMoods(container1, moodsRowLand);
-					}
-				}
 				viewHolder.yesBtn.setTag(statusMessage);
 				viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 				break;
@@ -578,14 +541,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		public void onClick(View v)
 		{
 			StatusMessage statusMessage = (StatusMessage) v.getTag();
-			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
-			{
-				Intent intent = new Intent(context, StatusUpdate.class);
-				context.startActivity(intent);
-
-				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
-			}
-			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
 			{
 				Protip protip = statusMessage.getProtip();
 				String url = protip.getGameDownlodURL();
