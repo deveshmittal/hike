@@ -17,7 +17,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="top"
             android:layout_marginBottom="33dp"
-            android:src="@drawable/ftue_themes_card_bg"
             android:scaleType="fitXY" />
 
         <ImageView
@@ -28,14 +27,14 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="74dp"
             android:scaleType="centerInside"
-            android:src="@drawable/ftue_themes_card_img" />
+            android:src="@drawable/ftue_welcome_card_sticker" />
 
         <ImageView
             android:id="@+id/card_small_img_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:src="@drawable/ftue_themes_card_small_img" />
+            android:src="@drawable/ftue_welcome_card_heart" />
     </FrameLayout>
 
     <LinearLayout
@@ -51,22 +50,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:text="@string/welcome_to_hike"
             android:textColor="#464646"
             android:textStyle="italic"
-            android:textSize="@dimen/ftue_card_text_header_font"
-            android:text="@string/themes" />
+            android:textSize="@dimen/ftue_card_text_header_font" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/card_txt_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:text="@string/ftue_welcome_card_msg"
             android:maxLines="2"
             android:ellipsize="end"
             android:textColor="#959595"
             android:textStyle="italic"
-            android:textSize="@dimen/ftue_card_text_msg_font"
-            android:text="@string/ftue_themes_card_msg" />
+            android:textSize="@dimen/ftue_card_text_msg_font" />
     </LinearLayout>
 
 </LinearLayout>
