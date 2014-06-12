@@ -1,5 +1,8 @@
 package com.bsb.hike.ui;
 
+import android.graphics.Bitmap;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -7,9 +10,11 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.viewpagerindicator.IconPageIndicator;
@@ -118,27 +123,33 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 		@Override
 		public Object instantiateItem(ViewGroup container, int position)
 		{
-			View parent = null;
+			View parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_cards_content, null);
 
 			switch (FtueCards.values()[position])
 			{
 			case HIDDEN_MODE:
-				parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_hidden_mode_card_content, null);
+				setupCard(parent, R.drawable.ftue_hidden_mode_card_bg_tile, R.drawable.ftue_hidden_mode_card_img, 
+						R.drawable.ftue_hidden_mode_card_small_img, R.string.hidden_mode, R.string.ftue_hidden_mode_card_msg);
 				break;
 			case FAVORITES:
-				parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_favorites_card_content, null);
+				setupCard(parent, R.drawable.ftue_favorites_card_bg_tile, R.drawable.ftue_favorites_card_img, 
+						R.drawable.ftue_favorites_card_small_img, R.string.favorites, R.string.ftue_favorites_card_msg);
 				break;
 			case ATTACHMENT:
-				parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_attachment_card_content, null);
+				setupCard(parent, R.drawable.ftue_attachment_card_bg_tile, R.drawable.ftue_attachment_card_img, 
+						R.drawable.ftue_attachment_card_small_img, R.string.attachments, R.string.ftue_attachment_card_msg);
 				break;
 			case HIKE_OFFLINE:
-				parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_hike_offline_card_content, null);
+				setupCard(parent, R.drawable.ftue_hike_offline_card_bg_tile, R.drawable.ftue_hike_offline_card_img, 
+						R.drawable.ftue_hike_offline_card_small_img, R.string.hike_offline, R.string.ftue_hike_offline_card_msg);
 				break;
 			case STICKER:
-				parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_sticker_card_content, null);
+				setupCard(parent, R.drawable.ftue_sticker_card_bg_tile, R.drawable.ftue_sticker_card_img, 
+						R.drawable.ftue_sticker_card_small_img, R.string.stickers, R.string.ftue_sticker_card_msg);
 				break;
 			case THEMES:
-				parent = LayoutInflater.from(FtueCardsActivity.this).inflate(R.layout.ftue_themes_card_content, null);
+				setupCard(parent, R.drawable.ftue_themes_card_bg_tile, R.drawable.ftue_themes_card_img, 
+						R.drawable.ftue_themes_card_small_img, R.string.themes, R.string.ftue_themes_card_msg);
 				break;	
 			}
 			((ViewPager) container).addView(parent);
@@ -152,4 +163,29 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 			((ViewPager) container).removeView((View) object);
 		}
 	}
+
+	private void setTiledBackground(ImageView imageView, int resId)
+	{
+		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), resId, 1);
+		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
+		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		imageView.setImageDrawable(bd);
+
+	}
+	
+	private void setupCard(View parent, int cardBgResId, int cardImgResId, int cardSmallImgResId, int cardTextHeaderResId, int cardTextMsgResId)
+	{
+		ImageView cardBg = (ImageView) parent.findViewById(R.id.card_header_img_bg);
+		ImageView cardImage = (ImageView) parent.findViewById(R.id.card_header_img_content);
+		ImageView cardSmallImage = (ImageView) parent.findViewById(R.id.card_small_img_content);
+		TextView cardTextHeader = (TextView) parent.findViewById(R.id.card_txt_header);
+		TextView cardTextMsg = (TextView) parent.findViewById(R.id.card_txt_msg);
+		
+		setTiledBackground(cardBg, cardBgResId );
+		cardImage.setImageResource( cardImgResId );
+		cardSmallImage.setImageResource( cardSmallImgResId );
+		cardTextHeader.setText( cardTextHeaderResId );
+		cardTextMsg.setText( cardTextMsgResId );		
+	}
+
 }
