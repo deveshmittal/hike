@@ -49,6 +49,10 @@ import com.bsb.hike.utils.Utils.WhichScreen;
 public class CentralTimelineAdapter extends BaseAdapter
 {
 
+	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
+
+	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
+
 	public static final long FTUE_ITEM_ID = -6;
 
 	private int protipIndex;
@@ -78,7 +82,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM
+		PROFILE_PIC_CHANGE, OTHER_UPDATE, FTUE_ITEM, FTUE_CARD
 	}
 
 	public CentralTimelineAdapter(Activity context, List<StatusMessage> statusMessages, String userMsisdn)
@@ -131,6 +135,10 @@ public class CentralTimelineAdapter extends BaseAdapter
 		else if (viewType == ViewType.OTHER_UPDATE)
 		{
 			StatusMessage statusMessage = getItem(position);
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
+			{
+				return false;
+			}
 		}
 		return true;
 	}
@@ -152,6 +160,10 @@ public class CentralTimelineAdapter extends BaseAdapter
 		else if (message.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 		{
 			return ViewType.PROFILE_PIC_CHANGE.ordinal();
+		}
+		else if (EMPTY_STATUS_NO_STATUS_ID == message.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == message.getId())
+		{
+			return ViewType.FTUE_CARD.ordinal();
 		}
 		return ViewType.OTHER_UPDATE.ordinal();
 	}
@@ -218,6 +230,10 @@ public class CentralTimelineAdapter extends BaseAdapter
 				viewHolder.timeStamp = (TextView) convertView.findViewById(R.id.timestamp);
 				viewHolder.infoContainer = convertView.findViewById(R.id.info_container);
 				viewHolder.parent = convertView.findViewById(R.id.main_content);
+				break;
+			case FTUE_CARD:
+				convertView = inflater.inflate(R.layout.ftue_status_update_card_content, null);
+				viewHolder.parent  = convertView.findViewById(R.id.main_content);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -439,6 +455,13 @@ public class CentralTimelineAdapter extends BaseAdapter
 			viewHolder.seeAll.setText(R.string.see_all_upper_caps);
 			viewHolder.seeAll.setOnClickListener(seeAllBtnClickListener);
 			break;
+		case FTUE_CARD:
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
+			{
+				viewHolder.parent.setTag(statusMessage);
+				viewHolder.parent.setOnClickListener(yesBtnClickListener);
+			}
+			break;
 		}
 
 		if (viewHolder.parent != null)
@@ -541,7 +564,14 @@ public class CentralTimelineAdapter extends BaseAdapter
 		public void onClick(View v)
 		{
 			StatusMessage statusMessage = (StatusMessage) v.getTag();
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
+			if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId() || EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage.getId())
+			{
+				Intent intent = new Intent(context, StatusUpdate.class);
+				context.startActivity(intent);
+
+				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
+			}
+			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
 			{
 				Protip protip = statusMessage.getProtip();
 				String url = protip.getGameDownlodURL();

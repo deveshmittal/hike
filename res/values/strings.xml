@@ -1583,4 +1583,6 @@
     <string name="native_sms_invite_5">Hey, check out hike messenger. You can now hide your private chats from others. Download - http://hike.in and Hike up your life!</string>
     <string name="native_sms_invite_6">Hey, check out hike messenger. You can chat with even those friends who are offline. Download - http://hike.in and Hike up your life!</string>
      <string name="new_chat_tip_msg">tap to compose</string>
+     <string name="ftue_status_update_card_header">Express yourself</string>
+     <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
 </resources>
