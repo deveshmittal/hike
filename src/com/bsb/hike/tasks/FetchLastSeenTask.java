@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -47,6 +48,15 @@ public class FetchLastSeenTask extends FetchLastSeenBase
 	@Override
 	protected Boolean doInBackground(Void... params)
 	{
+		/*
+		 * Adding this check to ensure we don't make a request for empty/null msisdn.
+		 * TODO figure out why this is happening
+		 */
+		if (TextUtils.isEmpty(msisdn))
+		{
+			return false;
+		}
+
 		try
 		{
 			JSONObject response = sendRequest(AccountUtils.base + "/user/lastseen/" + msisdn);

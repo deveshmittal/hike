@@ -479,7 +479,6 @@
     <string name="tutorial_sticker_info">Express yourself better\nwith new hike stickers.</string>
     <string name="tutorial_friends_header">Welcome to hike</string>
     <string name="tutorial_friends_info">Now share status updates\nwith your circle of friends.</string>
-    <string name="native_sms_invite_2">Download the new hike messenger, chat with everyone but show your Last Seen only to the friends you choose! Get it now at http://hike.in/</string>
     <string name="chat">Chat</string>
     <string name="group">Group</string>
     <string name="posting_update">Posting...</string>
@@ -1030,8 +1029,6 @@
     <string name="tutorial_sticker_info">Express yourself better\nwith new hike stickers.</string>
     <string name="tutorial_friends_header">Welcome to hike</string>
     <string name="tutorial_friends_info">Now share status updates\nwith your circle of friends.</string>
-    <string name="native_sms_invite_1">Hey, I just got the new hike messenger! It is faster, simpler and has amazing new stickers! Download it now at http://hike.in/</string>
-    <string name="native_sms_invite_2">Download the new hike messenger, chat with everyone but show your Last Seen only to the friends you choose! Get it now at http://hike.in/</string>
     <string name="chat">Chat</string>
     <string name="group">Group</string>
     <string name="posting_update">Posting...</string>
@@ -1267,9 +1264,8 @@
     <string name="not_enough_space_profile_pic">Unable to set profile picture, please free some space on your SD Card and retry</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="please_confirm">Please Confirm</string>
-    <string name="email_body">Hi,\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\nWith hike\'s hilarious new stickers, you\'ll surely never send another plain boring message!\nhike also gives you the choice of Privacy with Last Seen so that you can keep you close friends closer.\n\nDownload it now http://hike.in and join the fun!</string>
+    <string name="delete_confirm_msg_2">This action is irreversible. Are you sure you want to delete your account?</string>
     <string name="twitter_msg">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now http://hike.in #gethike</string>
-    <string name="native_sms_invite_1">I just got the new hike messenger! It\'s simpler, faster with hilarious new stickers! Download it now and lets chat for free http://hike.in</string>
     <string name="shortcut_created">Shortcut created</string>
     <string name="recent_empty_string">Recently used stickers will show up here.</string>
     <string name="merry_christmas_msg">Celebrate the month\nof love! We have a\ngift for you...</string>
@@ -1565,6 +1561,26 @@
      <string name="ftue_welcome_card_header_second">Explore hike</string>
      <string name="ftue_welcome_card_msg_second">Hike is full of awesome things! Tap to check them out.</string>
      <string name="explore_upper_case">EXPLORE</string>
+    <string name="hikins">We are Hikins</string>
+	<string name="expressions">Express it all</string>
+	<string name="bollywood">Bollywood Masala</string>
+	<string name="rageface">What\'s your Rage Face?</string>
+	<string name="youandi">You &amp; I</string>
+	<string name="wackysmilyes">Wacky Smileys</string>
+	<string name="avatars">Superhero Avatars</string>
+	<string name="thingsIndianSay">Things Indians Say</string>
+	<string name="loveyouforever">Love you forever</string>
+	<string name="sportmaniacs">Sports Maniacs</string>
+	<string name="meawmiley">Meow, I\'m Miley!</string>
+	<string name="snuggles">Adorable Snuggles</string>
+    <string name="recent_empty_string">Stickers you use often will be shown here</string>
+    <string name="recent_icon_text">Emoticons you use often will be shown here</string>
+    <string name="email_body">Hey!\n\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\n\nThe app also gives you the choice of showing your Last Seen and Status Updates only to your Favourite contacts! Privacy, alas! \n\nAnd here\'s the best part - Hike also lets you hide your private chats, from the world!\n\nDownload it now from http://hike.in and Hike up your life!</string>
+    <string name="native_sms_invite_1">Hey, join me on hike messenger!\n It\'s the only messaging app that is made in India! Get it now - http://hike.in/ and Hike up your life</string>
+    <string name="native_sms_invite_2">Hey! Check out hike messenger. Now send Docs, PPTs, MP3s and more; up to 100MB each! Get it now - http://hike.in/ and Hike up your life</string>
+    <string name="native_sms_invite_3">Hey, check out hike messenger. It has amazing stickers &amp; stunning chat themes! Download - http://hike.in and Hike up your life!</string>
+    <string name="native_sms_invite_4">Hey, check out hike messenger. It let\'s you show your \'Last Seen\' only to select friends! Download - http://hike.in and Hike up your life!</string>
+    <string name="native_sms_invite_5">Hey, check out hike messenger. You can now hide your private chats from others. Download - http://hike.in and Hike up your life!</string>
+    <string name="native_sms_invite_6">Hey, check out hike messenger. You can chat with even those friends who are offline. Download - http://hike.in and Hike up your life!</string>
      <string name="new_chat_tip_msg">tap to compose</string>
-     
 </resources>

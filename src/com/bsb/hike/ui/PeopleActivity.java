@@ -177,7 +177,17 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 
 		super.onBackPressed();
 	}
-	
+
+	@Override
+	protected void onStop()
+	{
+		/*
+		 * Ensuring we reset when leaving the activity as well, since we might receive a request when we were in this activity.
+		 */
+		Utils.resetOverflowCountHomeScreen(this);
+		super.onStop();
+	}
+
 	@Override
 	protected void onResume()
 	{
