@@ -190,6 +190,7 @@ public class LastSeenScheduler
 			 */
 			if (TextUtils.isEmpty(msisdn))
 			{
+				Logger.w("LastSeen", "msisdn is null!");
 				return;
 			}
 			fetchLastSeenTask = new FetchLastSeenTask(context, msisdn, lastSeenCallback);
