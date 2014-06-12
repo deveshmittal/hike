@@ -649,6 +649,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			Intent intent = new Intent(context, PeopleActivity.class);
 			context.startActivity(intent);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
 		}
 	};
 	
@@ -661,6 +662,8 @@ public class CentralTimelineAdapter extends BaseAdapter
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
+			
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_FAV_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
 
 			context.finish();
 		}

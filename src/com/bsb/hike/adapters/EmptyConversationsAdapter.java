@@ -200,6 +200,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
+			
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
 
 		}
 	};
@@ -212,6 +214,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		{
 			Intent intent = new Intent(context, ComposeChatActivity.class);
 			context.startActivity(intent);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_SEEL_ALL_CLICKED);
 		}
 	};
 
