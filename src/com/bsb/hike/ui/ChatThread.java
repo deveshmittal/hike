@@ -4281,9 +4281,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(true);
 		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 276));
+		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 270));
 		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -(int) (282 * Utils.densityMultiplier), -(int) (0.5 * Utils.densityMultiplier));
+		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor), -(int) (276 * Utils.densityMultiplier), -(int) (0.5 * Utils.densityMultiplier));
 	}
 
 	private class AudioActivityInfo
