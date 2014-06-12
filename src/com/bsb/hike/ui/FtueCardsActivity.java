@@ -1,8 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.graphics.Bitmap;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -13,8 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.smartImageLoader.FTUECardImageLoader;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.viewpagerindicator.IconPageIndicator;
@@ -44,7 +42,13 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 		skipButton = (TextView) findViewById(R.id.skip);
 
 		mPager = (ViewPager) findViewById(R.id.tutorial_pager);
+		mPager.setOffscreenPageLimit(5);
 		mPager.setAdapter(new TutorialPagerAdapter());
+
+		/*
+		 * Calling the GC to clear the the junk created when items from the cache are evicted to make room for the new images here.
+		 */
+		System.gc();
 
 		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
 		mIndicator.setOnPageChangeListener(onPageChangeListener);
@@ -64,12 +68,19 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 				}
 				else
 				{
+					clearFTUECardsFromCache();
 					finish();
 				}
 			}
 		});
 	}
 	
+	public void onBackPressed()
+	{
+		clearFTUECardsFromCache();
+		super.onBackPressed();
+	};
+
 	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
 	{
 		
@@ -101,6 +112,13 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 
 	private class TutorialPagerAdapter extends PagerAdapter implements IconPagerAdapter
 	{
+		FTUECardImageLoader imageLoader;
+
+		public TutorialPagerAdapter()
+		{
+			imageLoader = new FTUECardImageLoader(FtueCardsActivity.this);
+		}
+
 		@Override
 		public int getCount()
 		{
@@ -172,10 +190,28 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 			TextView cardTextMsg = (TextView) parent.findViewById(R.id.card_txt_msg);
 			
 			cardBg.setBackgroundColor(getResources().getColor(cardBgResId));
-			cardImage.setImageResource(cardImgResId);
+			imageLoader.loadImage(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + cardImgResId, cardImage);
 			cardSmallImage.setImageResource( cardSmallImgResId );
 			cardTextHeader.setText( cardTextHeaderResId );
 			cardTextMsg.setText( cardTextMsgResId );		
 		}
+	}
+
+	/**
+	 * Making sure we clear all the FTUE card images from the cache. Since we won't need this anymore.
+	 */
+	private void clearFTUECardsFromCache()
+	{
+		HikeMessengerApp.getLruCache().removeItemForKey(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + R.drawable.ftue_hidden_mode_card_img);
+		HikeMessengerApp.getLruCache().removeItemForKey(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + R.drawable.ftue_favorites_card_img);
+		HikeMessengerApp.getLruCache().removeItemForKey(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + R.drawable.ftue_attachment_card_img);
+		HikeMessengerApp.getLruCache().removeItemForKey(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + R.drawable.ftue_hike_offline_card_img);
+		HikeMessengerApp.getLruCache().removeItemForKey(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + R.drawable.ftue_sticker_card_img);
+		HikeMessengerApp.getLruCache().removeItemForKey(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + R.drawable.ftue_themes_card_img);
+
+		/*
+		 * Again trying to call the gc since we have evicted a few items from the cache.
+		 */
+		System.gc();
 	}
 }
