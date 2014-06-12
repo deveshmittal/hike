@@ -54,6 +54,7 @@ public class FetchLastSeenTask extends FetchLastSeenBase
 		 */
 		if (TextUtils.isEmpty(msisdn))
 		{
+			Logger.w("LastSeenTask", "msisdn is null!");
 			return false;
 		}
 
