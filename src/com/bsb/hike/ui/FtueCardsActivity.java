@@ -128,27 +128,27 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 			switch (FtueCards.values()[position])
 			{
 			case HIDDEN_MODE:
-				setupCard(parent, R.drawable.ftue_hidden_mode_card_bg_tile, R.drawable.ftue_hidden_mode_card_img, 
+				setupCard(parent, R.color.hidden_mode_ftue, R.drawable.ftue_hidden_mode_card_img, 
 						R.drawable.ftue_hidden_mode_card_small_img, R.string.hidden_mode, R.string.ftue_hidden_mode_card_msg);
 				break;
 			case FAVORITES:
-				setupCard(parent, R.drawable.ftue_favorites_card_bg_tile, R.drawable.ftue_favorites_card_img, 
+				setupCard(parent, R.color.favorite_ftue, R.drawable.ftue_favorites_card_img, 
 						R.drawable.ftue_favorites_card_small_img, R.string.favorites, R.string.ftue_favorites_card_msg);
 				break;
 			case ATTACHMENT:
-				setupCard(parent, R.drawable.ftue_attachment_card_bg_tile, R.drawable.ftue_attachment_card_img, 
+				setupCard(parent, R.color.attachments_ftue, R.drawable.ftue_attachment_card_img, 
 						R.drawable.ftue_attachment_card_small_img, R.string.attachments, R.string.ftue_attachment_card_msg);
 				break;
 			case HIKE_OFFLINE:
-				setupCard(parent, R.drawable.ftue_hike_offline_card_bg_tile, R.drawable.ftue_hike_offline_card_img, 
+				setupCard(parent, R.color.hike_offline_ftue, R.drawable.ftue_hike_offline_card_img, 
 						R.drawable.ftue_hike_offline_card_small_img, R.string.hike_offline, R.string.ftue_hike_offline_card_msg);
 				break;
 			case STICKER:
-				setupCard(parent, R.drawable.ftue_sticker_card_bg_tile, R.drawable.ftue_sticker_card_img, 
+				setupCard(parent, R.color.sticker_ftue, R.drawable.ftue_sticker_card_img, 
 						R.drawable.ftue_sticker_card_small_img, R.string.stickers, R.string.ftue_sticker_card_msg);
 				break;
 			case THEMES:
-				setupCard(parent, R.drawable.ftue_themes_card_bg_tile, R.drawable.ftue_themes_card_img, 
+				setupCard(parent, R.color.themes_ftue, R.drawable.ftue_themes_card_img, 
 						R.drawable.ftue_themes_card_small_img, R.string.themes, R.string.ftue_themes_card_msg);
 				break;	
 			}
@@ -162,30 +162,20 @@ public class FtueCardsActivity extends HikeAppStateBaseFragmentActivity
 			Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 			((ViewPager) container).removeView((View) object);
 		}
-	}
 
-	private void setTiledBackground(ImageView imageView, int resId)
-	{
-		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), resId, 1);
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
-		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		imageView.setImageDrawable(bd);
-
+		private void setupCard(View parent, int cardBgResId, int cardImgResId, int cardSmallImgResId, int cardTextHeaderResId, int cardTextMsgResId)
+		{
+			ImageView cardBg = (ImageView) parent.findViewById(R.id.card_header_img_bg);
+			ImageView cardImage = (ImageView) parent.findViewById(R.id.card_header_img_content);
+			ImageView cardSmallImage = (ImageView) parent.findViewById(R.id.card_small_img_content);
+			TextView cardTextHeader = (TextView) parent.findViewById(R.id.card_txt_header);
+			TextView cardTextMsg = (TextView) parent.findViewById(R.id.card_txt_msg);
+			
+			cardBg.setBackgroundColor(getResources().getColor(cardBgResId));
+			cardImage.setImageResource(cardImgResId);
+			cardSmallImage.setImageResource( cardSmallImgResId );
+			cardTextHeader.setText( cardTextHeaderResId );
+			cardTextMsg.setText( cardTextMsgResId );		
+		}
 	}
-	
-	private void setupCard(View parent, int cardBgResId, int cardImgResId, int cardSmallImgResId, int cardTextHeaderResId, int cardTextMsgResId)
-	{
-		ImageView cardBg = (ImageView) parent.findViewById(R.id.card_header_img_bg);
-		ImageView cardImage = (ImageView) parent.findViewById(R.id.card_header_img_content);
-		ImageView cardSmallImage = (ImageView) parent.findViewById(R.id.card_small_img_content);
-		TextView cardTextHeader = (TextView) parent.findViewById(R.id.card_txt_header);
-		TextView cardTextMsg = (TextView) parent.findViewById(R.id.card_txt_msg);
-		
-		setTiledBackground(cardBg, cardBgResId );
-		cardImage.setImageResource( cardImgResId );
-		cardSmallImage.setImageResource( cardSmallImgResId );
-		cardTextHeader.setText( cardTextHeaderResId );
-		cardTextMsg.setText( cardTextMsgResId );		
-	}
-
 }
