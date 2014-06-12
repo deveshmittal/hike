@@ -308,5 +308,11 @@
     <color name="white_50">#7fffffff</color>
     <color name="stealth_tip_bg">#ef554e</color>
     <color name="stealth_tip_divider">#f2706a</color>
+	<color name="sticker_ftue">#db3653</color>
+	<color name="hike_offline_ftue">#0e7bbd</color>
+	<color name="hidden_mode_ftue">#dc354b</color>
+	<color name="themes_ftue">#29264d</color>
+	<color name="attachments_ftue">#189dc9</color>
+    <color name="favorite_ftue">#f59029</color>
 </resources>
 	

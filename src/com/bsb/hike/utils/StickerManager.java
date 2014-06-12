@@ -1071,16 +1071,20 @@ public class StickerManager
 		this.context = context;
 	}
 
-	public void moveRecentStickerFileToInternal()
+	public void moveRecentStickerFileToInternal(Context context)
 	{
-		Set<Sticker> stickerOnOuterMem = getSortedListForCategory(StickerCategoryId.recent, getExternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
-		if (stickerOnOuterMem.size() == 0)
+		try
 		{
-			Set<Sticker> stickerOnInnerMem = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
-			if (stickerOnInnerMem.size() > 0)
-				saveSortedListForCategory(StickerCategoryId.recent, stickerOnInnerMem);
-			return;
+			this.context = context;
+			Logger.i("stickermanager", "moving recent file from external to internal");
+			String recent = StickerCategoryId.recent.name();
+			Utils.copyFile(getExternalStickerDirectoryForCategoryId(context, recent) + "/" + recent + ".bin", getInternalStickerDirectoryForCategoryId(context, recent) + "/"
+					+ recent + ".bin", null);
+			Logger.i("stickermanager", "moving finished recent file from external to internal");
 		}
-		saveSortedListForCategory(StickerCategoryId.recent, stickerOnOuterMem);
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
