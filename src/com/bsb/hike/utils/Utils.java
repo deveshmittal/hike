@@ -1398,6 +1398,11 @@ public class Utils
 			Logger.e("Utils", "Error while reading/writing/closing file", e);
 			return false;
 		}
+		catch (Exception ex)
+		{
+			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
+			return false;
+		}
 	}
 
 	public static String getImageOrientation(String filePath)
