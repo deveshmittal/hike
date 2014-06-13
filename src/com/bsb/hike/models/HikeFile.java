@@ -235,9 +235,13 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
-			if(isSent)
+			if(isSent && (getHikeFileType() != HikeFileType.CONTACT) && (getHikeFileType() != HikeFileType.LOCATION))
 			{
-				fileJSON.putOpt(HikeConstants.FILE_PATH, getFile().getPath());
+				File file = getFile();
+				if (file != null)
+				{
+					fileJSON.putOpt(HikeConstants.FILE_PATH, file.getPath());
+				}
 			}
 			if (sourceFilePath != null)
 			{
