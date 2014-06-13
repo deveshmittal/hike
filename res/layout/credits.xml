@@ -259,7 +259,7 @@
                          style="@style/FreeSmsSubtext"
                          android:layout_width="wrap_content"
                          android:layout_height="wrap_content"
-                         android:text="@string/earn_unlimited"
+                         android:text="@string/earn_free_sms"
                          android:textSize="15sp" />
 
                      <com.bsb.hike.view.CustomFontTextView
