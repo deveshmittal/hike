@@ -1154,7 +1154,6 @@
     <string name="add_as_friend_notification_line">Added you as a friend</string>
     <string name="friend_request_accepted_notification">You will now be able to see updates from %1$s</string>
     <string name="only_friends_last_seen">Only your friends can see when you were last seen</string>
-    <string name="email_subject">hike. Keep close friends close.</string>
     <string name="updates_friends">You can see updates from your friends here</string>
     <string name="tap_plus">Tap on + to add a contact as your friend</string>
     <string name="add_as_friend_menu">Add as friend</string>
@@ -1575,7 +1574,6 @@
 	<string name="snuggles">Adorable Snuggles</string>
     <string name="recent_empty_string">Stickers you use often will be shown here</string>
     <string name="recent_icon_text">Emoticons you use often will be shown here</string>
-    <string name="email_body">Hey!\n\nI just got the awesome new hike messenger, it\'s faster, simpler and even more beautiful!\n\nThe app also gives you the choice of showing your Last Seen and Status Updates only to your Favourite contacts! Privacy, alas! \n\nAnd here\'s the best part - Hike also lets you hide your private chats, from the world!\n\nDownload it now from http://hike.in and Hike up your life!</string>
     <string name="native_sms_invite_1">Hey, join me on hike messenger!\n It\'s the only messaging app that is made in India! Get it now - http://hike.in/ and Hike up your life</string>
     <string name="native_sms_invite_2">Hey! Check out hike messenger. Now send Docs, PPTs, MP3s and more; up to 100MB each! Get it now - http://hike.in/ and Hike up your life</string>
     <string name="native_sms_invite_3">Hey, check out hike messenger. It has amazing stickers &amp; stunning chat themes! Download - http://hike.in and Hike up your life!</string>
@@ -1586,5 +1584,6 @@
      <string name="ftue_status_update_card_header">Express yourself</string>
      <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
      <string name="earn_free_sms">Earn free SMS</string>
-    
+     <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
+     <string name="email_subject">hike up your life</string>
 </resources>
