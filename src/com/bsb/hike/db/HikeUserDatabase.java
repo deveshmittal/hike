@@ -732,29 +732,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	}
 
-	public List<ContactInfo> getContactInfoFromMSISDN(String[] msisdn)
-	{
-		Cursor c = null;
-		List<ContactInfo> contactInfos = null;
-		try
-		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION, DBConstants.HIKE_JOIN_TIME,
-					DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN }, DBConstants.MSISDN + "=?", msisdn, null, null, null);
-			contactInfos = extractContactInfo(c);
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-
-		return contactInfos;
-
-	}
-
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		Cursor c = null;
@@ -828,37 +805,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return contactInfos;
 	}
 
-	public HashMap<String, ContactInfo> getContactsMap(Map<String, ContactInfo> map)
-	{
-		Cursor c = null;
-		try
-		{
-			c = getContactsCursor(true);
-			HashMap<String, ContactInfo> transientContactMap = new HashMap<String, ContactInfo>();
-			while (c.moveToNext())
-			{
-				try
-				{
-					ContactInfo contactInfo = processContact(c);
-					if (!transientContactMap.containsKey(contactInfo.getMsisdn()))
-						transientContactMap.put(contactInfo.getMsisdn(), contactInfo);
-				}
-				catch (Exception e)
-				{
-					Logger.e(getClass().getSimpleName(), "Exception while getting contact", e);
-				}
-			}
-			return transientContactMap;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
 	private ContactInfo processContact(Cursor c)
 	{
 		int idx = c.getColumnIndex(DBConstants.ID);
@@ -901,30 +847,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			contactInfo.setLastSeenTime(c.getLong(lastSeenTimeIdx));
 		}
 		return contactInfo;
-	}
-
-	public ContactInfo getContactInfoFromId(String id)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.ID + "=?", new String[] { id }, null, null, null);
-			List<ContactInfo> contactInfos = extractContactInfo(c);
-			if (contactInfos.isEmpty())
-			{
-				return null;
-			}
-
-			return contactInfos.get(0);
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
 	}
 
 	/**
