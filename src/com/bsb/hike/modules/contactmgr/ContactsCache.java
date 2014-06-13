@@ -11,8 +11,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.utils.Logger;
 
 /**
  * @author Gautam This class is used as a cache to store the contacts. This hides the mechanism of storing the contacts object from the clients and the manager. This class should
@@ -120,6 +118,50 @@ class ContactsCache
 	}
 
 	/**
+	 * Inserts all the entries in a map to persistence map
+	 * 
+	 * @param map
+	 */
+	void insertContactsFromMap(Map<String, ContactInfo> map)
+	{
+		insertContactsFromMap(map, false);
+	}
+
+	/**
+	 * Inserts all the entries in a map to transient map
+	 * 
+	 * @param map
+	 * @param insertInTransient
+	 */
+	void insertContactsFromMap(Map<String, ContactInfo> map, boolean insertInTransient)
+	{
+		if (insertInTransient)
+		{
+			writeLockTrans.lock();
+			try
+			{
+				transientMap.putAll(map);
+			}
+			finally
+			{
+				writeLockTrans.unlock();
+			}
+		}
+		else
+		{
+			writeLock.lock();
+			try
+			{
+				persistenceMap.putAll(map);
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
+		}
+	}
+
+	/**
 	 * @param key
 	 * @param c
 	 *            This function will update the contact object in the corresponding memory
@@ -174,14 +216,14 @@ class ContactsCache
 	void loadTransientMem()
 	{
 		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getAllContactInfo();
-		
+
 		for (Entry<String, ContactInfo> mapEntry : map.entrySet())
 		{
 			String msisdn = mapEntry.getKey();
 			ContactInfo contact = mapEntry.getValue();
 			if (getContact(msisdn) == null)
 			{
-				transientMap.put(msisdn, contact);
+				insertContact(msisdn, contact, true);
 			}
 		}
 	}
@@ -195,8 +237,8 @@ class ContactsCache
 	List<ContactInfo> loadTransientMem(List<String> msisdns)
 	{
 		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
-		
-		transientMap.putAll(map);
+
+		insertContactsFromMap(map, true);
 
 		return new ArrayList<ContactInfo>(map.values());
 	}
@@ -210,7 +252,7 @@ class ContactsCache
 	ContactInfo loadTransientMem(String msisdn, Boolean ifNotFoundReturnNull)
 	{
 		ContactInfo c = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
-		transientMap.put(msisdn, c);
+		insertContact(msisdn, c, true);
 		return c;
 	}
 
@@ -220,11 +262,12 @@ class ContactsCache
 	void loadPersistenceMemory()
 	{
 		List<String> msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
-		persistenceMap =  HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+		persistenceMap = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
 	}
 
 	/**
-	 * This method loads the contactInfo of msisdns in msisdnsDB in persistence memory and returns the list of same 
+	 * This method loads the contactInfo of msisdns in msisdnsDB in persistence memory and returns the list of same
+	 * 
 	 * @param msisdnsDB
 	 * @return
 	 */
@@ -232,7 +275,7 @@ class ContactsCache
 	{
 		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
 
-		persistenceMap.putAll(map);
+		insertContactsFromMap(map);
 
 		return new ArrayList<ContactInfo>(map.values());
 	}
@@ -246,7 +289,7 @@ class ContactsCache
 	ContactInfo loadPersistenceMemory(String msisdn, Boolean ifNotFoundReturnNull)
 	{
 		ContactInfo c = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
-		persistenceMap.put(msisdn, c);
+		insertContact(msisdn, c);
 		return c;
 	}
 
