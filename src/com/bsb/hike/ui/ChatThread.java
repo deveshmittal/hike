@@ -6785,23 +6785,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onGlobalLayout()
 			{
-				if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+				Log.i("chatthread", "global layout listener");
+				View root = findViewById(R.id.chatThreadParentLayout);
+				Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
+				int rootHeight = root.getHeight();
+				int rootViewHeight = root.getRootView().getHeight();
+				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
+				if (temp > rootViewHeight / 3)
 				{
-					Log.i("chatthread", "global layout listener");
-					View root = findViewById(R.id.chatThreadParentLayout);
-					Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
-					int rootHeight = root.getHeight();
-					int rootViewHeight = root.getRootView().getHeight();
-					int temp = rootViewHeight - rootHeight - getStatusBarHeight();
-					if (temp > 0)
-					{
-						possibleKeyboardHeight = temp;
-						isKeyboardOpen = true;
-					}
-					else
-					{
-						isKeyboardOpen = false;
-					}
+					possibleKeyboardHeight = temp;
+					isKeyboardOpen = true;
+				}
+				else
+				{
+					isKeyboardOpen = false;
 				}
 			}
 		};
