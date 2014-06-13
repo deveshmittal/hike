@@ -92,11 +92,27 @@ public class ContactManager implements ITransientCache
 		return c;
 	}
 
+	/**
+	 * Returns the contactInfo for a particular msisdn. Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * 
+	 * @param msisdn
+	 * @param loadInTransient
+	 * @return
+	 */
 	public ContactInfo getContact(String msisdn, boolean loadInTransient)
 	{
 		return getContact(msisdn, loadInTransient, false);
 	}
 
+	/**
+	 * Returns the contactInfo for a particular msisdn.Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * 
+	 * @param msisdn
+	 * @param loadInTransient
+	 * @param ifNotFoundReturnNull
+	 *            if set to true returns null if not a saved contact
+	 * @return
+	 */
 	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifNotFoundReturnNull)
 	{
 		ContactInfo contact = cache.getContact(msisdn);
@@ -121,6 +137,13 @@ public class ContactManager implements ITransientCache
 		return contact;
 	}
 
+	/**
+	 * Returns List of contactInfo objects for a some msisdns. Inserts the contactInfo in transient if loadInTransient is set to true otherwise in persistence memory
+	 * 
+	 * @param msisdns
+	 * @param loadInTransient
+	 * @return
+	 */
 	public List<ContactInfo> getContact(List<String> msisdns, boolean loadInTransient)
 	{
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
@@ -160,6 +183,11 @@ public class ContactManager implements ITransientCache
 		return contacts;
 	}
 
+	/**
+	 * Returns the list of all the contacts
+	 * 
+	 * @return
+	 */
 	public List<ContactInfo> getAllContacts()
 	{
 		return cache.getAllContacts();
