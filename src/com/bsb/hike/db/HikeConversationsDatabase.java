@@ -1431,7 +1431,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conversationMap.put(msisdn, conv);
 			}
 
-			List<ContactInfo> contactList = getContactForMsisdnList(msisdns, true);
+			List<ContactInfo> contactList = HikeMessengerApp.getContactManager().getContact(msisdns, false);
 
 			for (ContactInfo contactInfo : contactList)
 			{
@@ -1502,48 +1502,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Logger.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
-	}
-
-	private List<ContactInfo> getContactForMsisdnList(List<String> msisdns, boolean setInPersistenceMem)
-	{
-		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
-
-		ContactManager conMgr = HikeMessengerApp.getContactManager();
-
-		List<String> msisdnsDB = new ArrayList<String>();
-
-		for (String msisdn : msisdns)
-		{
-			ContactInfo c = conMgr.getContact(msisdn);
-			if (null != c)
-			{
-				contacts.add(c);
-			}
-			else
-			{
-				msisdnsDB.add(msisdn);
-			}
-		}
-		if (msisdnsDB.size() > 0)
-		{
-			// if not found in persistence memory get contacts from Db. This will happen very rarely as we have already loaded all the persistence contacts initially
-
-			List<ContactInfo> contactsDB;
-			if (setInPersistenceMem)
-			{
-				contactsDB = conMgr.loadPersistenceCache(msisdnsDB);
-			}
-			else
-			{
-				contactsDB = conMgr.load(msisdnsDB);
-			}
-
-			if (null != contactsDB)
-			{
-				contacts.addAll(contactsDB);
-			}
-		}
-		return contacts;
 	}
 
 	private ConvMessage getLastMessageForConversation(String msisdn)
@@ -2070,7 +2028,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			// at least one msisdn is required to run this in query
 			if (fetchParticipants && allMsisdns.size() > 0)
 			{
-				List<ContactInfo> list = getContactForMsisdnList(allMsisdns, false);
+				List<ContactInfo> list = HikeMessengerApp.getContactManager().getContact(allMsisdns, true);
 				for (ContactInfo contactInfo : list)
 				{
 					participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
@@ -2521,7 +2479,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			if (msisdns.size() > 0)
 			{
-				List<ContactInfo> contactList = getContactForMsisdnList(msisdns, false);
+				List<ContactInfo> contactList = HikeMessengerApp.getContactManager().getContact(msisdns, true);
 
 				for (ContactInfo contactInfo : contactList)
 				{

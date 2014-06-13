@@ -173,6 +173,19 @@ class ContactsCache
 	}
 
 	/**
+	 * Loads the contact info for a msisdn in transient memory and returns the same
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
+	ContactInfo loadTransientMem(String msisdn, Boolean ifNotFoundReturnNull)
+	{
+		ContactInfo c = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
+		transientMap.put(msisdn, c);
+		return c;
+	}
+
+	/**
 	 * This will load all the persistent contacts in the memory
 	 */
 	void loadPersistenceMemory()
@@ -193,6 +206,19 @@ class ContactsCache
 		persistenceMap.putAll(map);
 
 		return new ArrayList<ContactInfo>(map.values());
+	}
+
+	/**
+	 * This method loads the contact info for a msisdn in persistence memory and returns the same
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
+	ContactInfo loadPersistenceMemory(String msisdn, Boolean ifNotFoundReturnNull)
+	{
+		ContactInfo c = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
+		persistenceMap.put(msisdn, c);
+		return c;
 	}
 
 	public void clearTransientMemory()

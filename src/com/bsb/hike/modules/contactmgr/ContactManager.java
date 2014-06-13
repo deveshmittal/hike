@@ -3,8 +3,10 @@
  */
 package com.bsb.hike.modules.contactmgr;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.iface.ITransientCache;
 
@@ -25,6 +27,11 @@ public class ContactManager implements ITransientCache
 		loadPersistenceCache();
 	}
 
+	public static ContactManager getInstance()
+	{
+		return _instance;
+	}
+
 	/**
 	 * This method loads the persistence memory
 	 */
@@ -41,11 +48,6 @@ public class ContactManager implements ITransientCache
 	public List<ContactInfo> loadPersistenceCache(List<String> msisdns)
 	{
 		return cache.loadPersistenceMemory(msisdns);
-	}
-
-	public static ContactManager getInstance()
-	{
-		return _instance;
 	}
 
 	/**
@@ -89,4 +91,68 @@ public class ContactManager implements ITransientCache
 		c = cache.getContact(msisdn);
 		return c;
 	}
+
+	public ContactInfo getContact(String msisdn, boolean ifNotFoundReturnNull, boolean loadInTransient)
+	{
+		ContactInfo contact = getContact(msisdn);
+		if (null == contact)
+		{
+			if (loadInTransient)
+			{
+				contact = cache.loadTransientMem(msisdn, ifNotFoundReturnNull);
+			}
+			else
+			{
+				contact = cache.loadPersistenceMemory(msisdn, ifNotFoundReturnNull);
+			}
+		}
+		else
+		{
+			if (ifNotFoundReturnNull && contact.getName() == null)
+			{
+				return null;
+			}
+		}
+		return contact;
+	}
+
+	public List<ContactInfo> getContact(List<String> msisdns, boolean loadInTransient)
+	{
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+
+		List<String> msisdnsDB = new ArrayList<String>();
+
+		for (String msisdn : msisdns)
+		{
+			ContactInfo c = getContact(msisdn);
+			if (null != c)
+			{
+				contacts.add(c);
+			}
+			else
+			{
+				msisdnsDB.add(msisdn);
+			}
+		}
+
+		if (msisdnsDB.size() > 0)
+		{
+			List<ContactInfo> contactsDB;
+			if (loadInTransient)
+			{
+				contactsDB = cache.loadTransientMem(msisdnsDB);
+			}
+			else
+			{
+				contactsDB = cache.loadPersistenceMemory(msisdnsDB);
+			}
+
+			if (null != contactsDB)
+			{
+				contacts.addAll(contactsDB);
+			}
+		}
+		return contacts;
+	}
+
 }
