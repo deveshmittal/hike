@@ -12,6 +12,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -92,7 +93,8 @@ public class GroupConversation extends Conversation
 
 	public String getGroupParticipantFirstName(String msisdn)
 	{
-		return getGroupParticipant(msisdn).getContactInfo().getFirstName();
+		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true);
+		return contact.getFirstName();
 	}
 
 	public String getLabel()

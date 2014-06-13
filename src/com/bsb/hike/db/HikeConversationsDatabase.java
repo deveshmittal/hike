@@ -1454,8 +1454,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			final int groupOwnerIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_OWNER);
 			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
 
-			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = getAllGroupParticipants();
-
 			while (groupInfoCursor.moveToNext())
 			{
 				String groupId = groupInfoCursor.getString(groupIdIdx);
@@ -1468,10 +1466,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					continue;
 				}
-				Map<String, GroupParticipant> groupParticipants = groupIdParticipantsMap.get(groupId);
 
 				GroupConversation groupConversation = new GroupConversation(groupId, conversation.getConvId(), groupName, groupOwner, isGroupAlive);
-				groupConversation.setGroupParticipantList(groupParticipants);
 				groupConversation.setMessages(conversation.getMessages());
 				groupConversation.setUnreadCount(conversation.getUnreadCount());
 				groupConversation.setIsStealth(conversation.isStealth());

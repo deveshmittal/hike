@@ -92,9 +92,14 @@ public class ContactManager implements ITransientCache
 		return c;
 	}
 
-	public ContactInfo getContact(String msisdn, boolean ifNotFoundReturnNull, boolean loadInTransient)
+	public ContactInfo getContact(String msisdn, boolean loadInTransient)
 	{
-		ContactInfo contact = getContact(msisdn);
+		return getContact(msisdn, loadInTransient, false);
+	}
+
+	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifNotFoundReturnNull)
+	{
+		ContactInfo contact = cache.getContact(msisdn);
 		if (null == contact)
 		{
 			if (loadInTransient)
@@ -124,7 +129,7 @@ public class ContactManager implements ITransientCache
 
 		for (String msisdn : msisdns)
 		{
-			ContactInfo c = getContact(msisdn);
+			ContactInfo c = cache.getContact(msisdn);
 			if (null != c)
 			{
 				contacts.add(c);
