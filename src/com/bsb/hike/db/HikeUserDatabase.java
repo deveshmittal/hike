@@ -2085,8 +2085,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
 			List<ContactInfo> recommendedContacts = getHikeContacts(limit*2, recommendedContactsSelection, null, myMsisdn);
-			ftueContactsData.getHikeContacts().addAll(recommendedContacts);
-			
+			if (recommendedContacts.size() >= limit)
+			{
+				ftueContactsData.getHikeContacts().addAll(recommendedContacts.subList(0, limit));
+				return ftueContactsData;
+			}
+			else
+			{
+				ftueContactsData.getHikeContacts().addAll(recommendedContacts);
+			}
 		}
 		
 		limit = HikeConstants.FTUE_LIMIT - ftueContactsData.getHikeContacts().size();
