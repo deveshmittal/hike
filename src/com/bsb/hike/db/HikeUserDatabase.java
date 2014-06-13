@@ -39,6 +39,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -1968,43 +1969,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return c;
 	}
 
-	public Map<String, ContactInfo> getConversationContacts()
-	{
-		List<String> msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
-		return getContactInfoFromMsisdns(msisdns, true);
-	}
-
-	public List<ContactInfo> getConversationContacts(Map<String, ContactInfo> map, String msisdnsDB)
-	{
-		if (null == msisdnsDB)
-		{
-			return null;
-		}
-		Cursor c = null;
-		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
-		try
-		{
-			c = getContactsCursorForMsisdnList(msisdnsDB);
-			if (c != null)
-			{
-				while (c.moveToNext())
-				{
-					ContactInfo cInfo = processContact(c);
-					map.put(cInfo.getMsisdn(), cInfo);
-					contacts.add(cInfo);
-				}
-			}
-			return contacts;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-	
 	public List<ContactInfo> getContactNamesFromMsisdnList(String msisdns)
 	{
 		Cursor c = null;

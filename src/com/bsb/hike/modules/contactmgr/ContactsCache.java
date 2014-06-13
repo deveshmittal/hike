@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
@@ -176,7 +177,8 @@ class ContactsCache
 	 */
 	void loadPersistenceMemory()
 	{
-		persistenceMap = HikeUserDatabase.getInstance().getConversationContacts();
+		List<String> msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		persistenceMap =  HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
 	}
 
 	/**
