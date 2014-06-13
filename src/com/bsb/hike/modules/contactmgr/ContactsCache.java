@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.utils.Logger;
 
 /**
  * @author Gautam This class is used as a cache to store the contacts. This hides the mechanism of storing the contacts object from the clients and the manager. This class should
@@ -23,6 +26,8 @@ class ContactsCache
 
 	// Transient persistence for all the contacts that should always be loaded
 	private Map<String, ContactInfo> transientMap;
+
+	private boolean allContactsLoaded = false;
 
 	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
 
@@ -149,12 +154,36 @@ class ContactsCache
 		}
 	}
 
+	List<ContactInfo> getAllContacts()
+	{
+		if (!allContactsLoaded)
+		{
+			loadTransientMem();
+			allContactsLoaded = true;
+		}
+
+		List<ContactInfo> allContacts = new ArrayList<ContactInfo>(persistenceMap.values());
+		allContacts.addAll(transientMap.values());
+
+		return allContacts;
+	}
+
 	/**
 	 * This function will load all the contacts from DB into transient storage. Contacts which are in persistence map will not be loaded into it
 	 */
 	void loadTransientMem()
 	{
-		HikeUserDatabase.getInstance().getContactsMap(persistenceMap);
+		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getAllContactInfo();
+		
+		for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+		{
+			String msisdn = mapEntry.getKey();
+			ContactInfo contact = mapEntry.getValue();
+			if (getContact(msisdn) == null)
+			{
+				transientMap.put(msisdn, contact);
+			}
+		}
 	}
 
 	/**
@@ -229,6 +258,7 @@ class ContactsCache
 			if (transientMap != null)
 			{
 				transientMap.clear();
+				allContactsLoaded = false;
 			}
 		}
 		finally

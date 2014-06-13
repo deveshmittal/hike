@@ -146,8 +146,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
 		long queryTime = System.currentTimeMillis();
-		List<ContactInfo> allContacts = hikeUserDatabase.fetchAllContacts(myMsisdn);
-		Map<String, FavoriteType> favTypeMap = hikeUserDatabase.fetchFavoriteTypeMap();
+		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
 		Set<String> blockSet = hikeUserDatabase.getBlockedMsisdnSet();
 		Logger.d("TestQuery", "qeury time: " + (System.currentTimeMillis() - queryTime));
 
@@ -164,17 +163,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				continue;
 			}
 
-			FavoriteType favoriteType = favTypeMap.get(msisdn);
-			contactInfo.setFavoriteType(favoriteType);
-
+			FavoriteType favoriteType = contactInfo.getFavoriteType();
+			
 			if (shouldAddToFavorites(favoriteType))
 			{
 				friendTaskList.add(contactInfo);
-
-				/*
-				 * Removing the contacts that have already been added to the list. At the end we will be left with unknown contacts.
-				 */
-				favTypeMap.remove(msisdn);
 			}
 			else
 			{
@@ -187,25 +180,6 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 					smsTaskList.add(contactInfo);
 				}
 			}
-		}
-
-		/*
-		 * Adding the unknown favorites.
-		 */
-		for (Entry<String, FavoriteType> favoriteTypeEntry : favTypeMap.entrySet())
-		{
-			String msisdn = favoriteTypeEntry.getKey();
-			FavoriteType favoriteType = favoriteTypeEntry.getValue();
-
-			if (!shouldAddToFavorites(favoriteType) || !shouldShowSmsContact(msisdn))
-			{
-				continue;
-			}
-
-			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, null, msisdn);
-			contactInfo.setFavoriteType(favoriteType);
-
-			friendTaskList.add(contactInfo);
 		}
 
 		Logger.d("TestQuery", "Iteration time: " + (System.currentTimeMillis() - iterationTime));

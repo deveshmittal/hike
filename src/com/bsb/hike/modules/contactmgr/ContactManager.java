@@ -155,4 +155,9 @@ public class ContactManager implements ITransientCache
 		return contacts;
 	}
 
+	public List<ContactInfo> getAllContacts()
+	{
+		return cache.getAllContacts();
+	}
+
 }

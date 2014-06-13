@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
@@ -499,6 +500,32 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return contactMap;
 	}
 
+	private Map<String, ContactInfo> getContactMap()
+	{
+		Cursor c = null;
+
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+
+		try
+		{
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN },
+					null, null, null, null, null);
+
+			contactMap = extractContactInfoMap(c);
+
+			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
+	}
+
 	private Map<String, ContactInfo> getContactMap(String msisdns)
 	{
 		Cursor c = null;
@@ -514,6 +541,37 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			contactMap = extractContactInfoMap(c);
 
 			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	private Map<String, FavoriteType> getFavoriteMap()
+	{
+		Cursor c = null;
+
+		Map<String, FavoriteType> favMap = new HashMap<String, FavoriteType>();
+
+		try
+		{
+			c = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.FAVORITE_TYPE }, null, null, null, null, null);
+
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int favoriteTypeIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+				FavoriteType favoriteType = FavoriteType.values()[c.getInt(favoriteTypeIdx)];
+				favMap.put(msisdn, favoriteType);
+			}
+
+			return favMap;
 		}
 		finally
 		{
@@ -554,7 +612,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			{
 				c.close();
 			}
-
 		}
 	}
 
@@ -628,6 +685,51 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
+	}
+
+	public Map<String, ContactInfo> getAllContactInfo()
+	{
+		Cursor c = null;
+
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+		Map<String, FavoriteType> favoriteMap = new HashMap<String, FavoriteType>();
+
+		try
+		{
+			contactMap = getContactMap();
+			favoriteMap = getFavoriteMap();
+
+			for (Entry<String, ContactInfo> contactEntry : contactMap.entrySet())
+			{
+				String msisdn = contactEntry.getKey();
+				ContactInfo contact = contactEntry.getValue();
+				FavoriteType favType = favoriteMap.get(msisdn);
+				if (null != favType)
+				{
+					contact.setFavoriteType(favType);
+					favoriteMap.remove(msisdn);
+				}
+			}
+
+			for (Entry<String, FavoriteType> favTypeEntry : favoriteMap.entrySet())
+			{
+				String msisdn = favTypeEntry.getKey();
+				FavoriteType favType = favTypeEntry.getValue();
+				ContactInfo contact = new ContactInfo(msisdn, msisdn, null, msisdn);
+				contact.setFavoriteType(favType);
+				contactMap.put(msisdn, contact);
+			}
+
+			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
 	}
 
 	public List<ContactInfo> getContactInfoFromMSISDN(String[] msisdn)
