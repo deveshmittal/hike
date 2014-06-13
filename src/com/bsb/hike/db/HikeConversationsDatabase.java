@@ -949,7 +949,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
 	{
 		HikeUserDatabase huDb = HikeUserDatabase.getInstance();
-		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ? new ContactInfo(msisdn, msisdn, groupName, msisdn) : huDb.getContactInfoFromMSISDN(msisdn, false);
+		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ? new ContactInfo(msisdn, msisdn, groupName, msisdn) : HikeMessengerApp.getContactManager().getContact(msisdn,
+				false);
 		InsertHelper ih = null;
 		try
 		{
@@ -1107,7 +1108,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
+					ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, false);
 					name = contactInfo.getName();
 					onhike |= contactInfo.isOnhike();
 				}
@@ -1187,8 +1188,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				huDb = HikeUserDatabase.getInstance();
-				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
+				ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, false);
 
 				onhike |= contactInfo.isOnhike();
 				conv = new Conversation(msisdn, convid, contactInfo.getName(), onhike);
