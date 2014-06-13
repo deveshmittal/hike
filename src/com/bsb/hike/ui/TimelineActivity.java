@@ -109,10 +109,6 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 				intent = new Intent(this, StatusUpdate.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				
-				if(!HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, false))
-				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STATUS_UPDATE_TIP, null);
-				}
 				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 				break;
 		}
