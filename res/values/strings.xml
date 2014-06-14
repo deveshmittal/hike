@@ -1549,7 +1549,7 @@
      <string name="hike_offline">Hike offline</string>
      <string name="attachments">Attachments</string>
      <string name="ftue_sticker_card_msg">When words can\'t express, say it with a sticker. You\'ll love them!</string>
-     <string name="ftue_attachment_card_msg"> Send photos, video, pdfs, docs and a lot more up to 100MB each.</string>
+     <string name="ftue_attachment_card_msg"> Send photos, videos, pdfs, docs and a lot more up to 100MB each.</string>
      <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline.</string>
      <string name="ftue_favorites_card_msg">Only favorites can see your status update and last seen.</string>
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
@@ -1583,7 +1583,7 @@
      <string name="new_chat_tip_msg">tap to compose</string>
      <string name="ftue_status_update_card_header">Express yourself</string>
      <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
+     <string name="earn_free_sms">Earn free SMS</string>
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
-    
 </resources>

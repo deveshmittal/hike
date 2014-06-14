@@ -959,5 +959,45 @@
      <string name="delete_leave">Gruppe löschen und verlassen</string>
      <string name="confirm_delete_chat_msg">Chat mit \"%1$s\" löschen? </string>
      <string name="confirm_delete_group_msg">Gruppe \"%1$s\" löschen und verlassen?</string>
-    
+    <string name="email_chat">Chat per E-Mail senden</string>
+     <string name="clear_chat">Chatdaten löschen</string>
+     <string name="add_shortcut">Shortcut hinzufügen</string>
+     <string name="timeline">Chronik</string>
+     <string name="add_favorites_upper_case">FAVORITEN HINZUFÜGEN</string>
+     <string name="status_update_tip_header">Veröffentliche deinen Status</string>
+     <string name="status_update_tip_msg">Der Status wird nur von Favoriten gesehen</string>
+     <string name="new_chat_compose_hint">Nach Name oder Nummer suchen</string>
+     <string name="new_ui_welcome_tip_header">Willkommen beim neuen hike</string>
+     <string name="new_ui_welcome_tip_msg">Leichter zu verwenden und schneller denn je</string>
+     <string name="camera">Kamera</string>
+     <string name="camera_upper_case">KAMERA</string>
+     <string name="new_stickers_available">Neue Sticker verfügbar!</string>
+     <string name="ftue_hike_contact_card_header">Hallo! %1$d Person(en), die du kennst, ist/sind auf hike. Chatte mit ihnen!</string>
+     <string name="see_all_upper_caps">ALLE ANZEIGEN</string>
+     <string name="ftue_sms_contact_card_header">Hey! Du hast %1$d Kontakte!</string>
+     <string name="skip_upper_caps">ÜBERSPRINGEN</string>
+     <string name="welcome_to_hike">Willkommen bei hike</string>
+     <string name="ftue_welcome_card_msg">Hike steckt voller toller Dinge, die wir dir gern zeigen möchten</string>
+     <string name="start_exploring">ERKUNDUNGSTOUR STARTEN</string>
+     <string name="hidden_mode">Geheimmodus</string>
+     <string name="ftue_hidden_mode_card_msg">Markiere deine persönlichen Chats als geheim. Du kannst sie dann mit einer PIN sperren.</string>
+     <string name="hike_offline">Nutze Hike offline</string>
+     <string name="attachments">Anhänge</string>
+     <string name="ftue_sticker_card_msg">Wenn dir die Worte fehlen, nutze Sticker. Du wirst sie lieben!</string>
+     <string name="ftue_attachment_card_msg"> Sende Fotos, Video, PDFs, Docs und eine Menge mehr mit max. 100 MB pro Datei.</string>
+     <string name="ftue_hike_offline_card_msg">Sende Nachrichten an deine Freunde, wenn sie offline sind.</string>
+     <string name="ftue_favorites_card_msg">Nur Favoriten können deine Statusmitteilung und Angabe zu Zuletzt online sehen.</string>
+     <string name="ftue_themes_card_msg">Gestalte deine Unterhaltungen mit unseren schönen Chatmotiven bunt.</string>
+     <string name="themes">Motive</string>
+     <string name="ftue_updates_are_fun_with_favorites">Nur Favoriten können deine Statusmitteilung und Angabe zu Zuletzt online sehen. Überlege dir genau, wenn du als Favorit auswählst.</string>
+     <string name="ftue_sms_contact_card_subtext">Möchtest du ihnen eine Gratis-SMS senden?</string>
+     <string name="new_chat_tip_header">Chat starten</string>
+     <string name="sticker_tip_msg">Tippe auf das Sticker-Symbol, um das Stickerfeld zu öffnen!</string>
+     <string name="ftue_welcome_card_header_second">hike erkunden</string>
+     <string name="ftue_welcome_card_msg_second">Hike steckt voller toller Dinge! Tippe, um Näheres zu erfahren.</string>
+     <string name="explore_upper_case">ERKUNDEN</string>
+     <string name="new_chat_tip_msg">Tippen um zu komponieren</string>
+     <string name="ftue_status_update_card_header">Drücken Sie sich</string>
+     <string name="ftue_status_update_card_msg">Tippen Sie hier, um ein Status-Update zu posten. Nur Ihre Favoriten können sie sehen.</string>
+     
 </resources>

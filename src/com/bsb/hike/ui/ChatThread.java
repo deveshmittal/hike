@@ -40,6 +40,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -6798,6 +6799,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private static int possibleKeyboardHeight;
 
+	private static int possibleKeyboardHeightLand;
+
 	private ViewTreeObserver.OnGlobalLayoutListener getGlobalLayoutListener()
 	{
 		return new ViewTreeObserver.OnGlobalLayoutListener()
@@ -6806,23 +6809,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onGlobalLayout()
 			{
-				if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+				Log.i("chatthread", "global layout listener");
+				View root = findViewById(R.id.chatThreadParentLayout);
+				Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
+				Rect r = new Rect();
+				root.getWindowVisibleDisplayFrame(r);
+				// this is height of view which is visible on screen
+				int rootHeight = r.bottom - r.top;
+				int rootViewHeight = root.getRootView().getHeight();
+				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
+				Logger.i("chatthread", "keyboard  height " + temp);
+				if (temp > 0)
 				{
-					Log.i("chatthread", "global layout listener");
-					View root = findViewById(R.id.chatThreadParentLayout);
-					Log.i("chatthread", "global layout listener rootHeight " + root.getRootView().getHeight() + " new height " + root.getHeight());
-					int rootHeight = root.getHeight();
-					int rootViewHeight = root.getRootView().getHeight();
-					int temp = rootViewHeight - rootHeight - getStatusBarHeight();
-					if (temp > 0)
+					if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 					{
+						possibleKeyboardHeightLand = temp;
+					}else{
 						possibleKeyboardHeight = temp;
-						isKeyboardOpen = true;
 					}
-					else
-					{
-						isKeyboardOpen = false;
-					}
+					isKeyboardOpen = true;
+				}
+				else
+				{
+					isKeyboardOpen = false;
 				}
 			}
 		};
@@ -6876,19 +6885,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean resizeMainheight(int emoticonPalHeight, boolean respectKeyboardVisiblity)
 	{
 		Logger.i("chatthread", "trying to resize main height with bottom padding");
-		View root = findViewById(R.id.chat_layout);
-		if (respectKeyboardVisiblity)
+		if (respectKeyboardVisiblity && isKeyboardOpen)
 		{
-			int statusBarHeight = getStatusBarHeight();
-			int maxHeight = root.getRootView().getHeight();
-			int requiredHeight = maxHeight - statusBarHeight - emoticonPalHeight;
-			// keyboard open
-			if (root.getHeight() - root.getPaddingBottom() == requiredHeight)
-			{
-				Logger.i("chatthread", "resize main height not needed");
-				return false;
-			}
+			return false;
 		}
+		View root = findViewById(R.id.chat_layout);
 		if (root.getPaddingBottom() != emoticonPalHeight)
 		{
 			Logger.i("chatthread", "resize main height with bottom padding " + emoticonPalHeight);
@@ -6930,15 +6931,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			lp = new RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 0);
 		}
-
-		if (possibleKeyboardHeight != 0)
+		boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+		if (isLandscape)
 		{
-			lp.height = possibleKeyboardHeight;
-		}
-		else
-		{
-			boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-			if (isLandscape)
+			if (possibleKeyboardHeightLand != 0)
+			{
+				lp.height = possibleKeyboardHeightLand;
+			}
+			else
 			{
 				View root = findViewById(R.id.chat_layout);
 
@@ -6947,12 +6947,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				// giving half height of screen in landscape mode
 				lp.height = (maxHeight - statusBarHeight) / 2;
 			}
+		}
+		else
+		{
+			if (possibleKeyboardHeight != 0)
+			{
+				lp.height = possibleKeyboardHeight;
+			}
 			else
 			{
 				lp.height = (int) (getResources().getDimension(R.dimen.emoticon_pallete));
 			}
-
-			// lp.height = (int) (Utils.densityMultiplier * getResources().getDimension(R.dimen.emoticon_pallete));
 		}
 
 		Log.i("keyboard", "height " + lp.height);

@@ -58,7 +58,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private boolean loadingMoreMessages;
 
 	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED,
-			HikePubSub.PROTIP_ADDED, HikePubSub.ICON_CHANGED, HikePubSub.REMOVE_STATUS_UPDATE_TIP };
+			HikePubSub.PROTIP_ADDED, HikePubSub.ICON_CHANGED };
 
 	private String[] friendMsisdns;
 
@@ -68,8 +68,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 	private int velocity;
 	
-	private View statusTipheader;
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -77,40 +75,8 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 		ListView updatesList = (ListView) parent.findViewById(android.R.id.list);
 		updatesList.setEmptyView(parent.findViewById(android.R.id.empty));
-		if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, false))
-		{
-			setupListHeader(updatesList);
-		}
 
 		return parent;
-	}
-
-	private void setupListHeader(ListView listView)
-	{
-		statusTipheader = LayoutInflater.from(getActivity()).inflate(
-				R.layout.status_update_ftue_tip, null);
-		statusTipheader.setOnClickListener(null);
-		ImageView closeIcon = (ImageView) statusTipheader.findViewById(R.id.close_tip);
-		closeIcon.setOnClickListener(new View.OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				removeStatusUpdateTip(true);
-			}
-			
-		});
-		listView.addHeaderView(statusTipheader);
-	}
-	
-	private void removeStatusUpdateTip(boolean removeHeader)
-	{
-		HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_STATUS_UPDATE_TIP, true);
-		if(statusTipheader != null && removeHeader)
-		{
-			getListView().removeHeaderView(statusTipheader);
-		}
 	}
 
 	@Override
@@ -390,21 +356,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				public void run()
 				{
 					centralTimelineAdapter.notifyDataSetChanged();
-				}
-			});
-		}
-		else if (HikePubSub.REMOVE_STATUS_UPDATE_TIP.equals(type))
-		{
-			if (!isAdded())
-			{
-				return;
-			}
-			getActivity().runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					removeStatusUpdateTip(true);
 				}
 			});
 		}
