@@ -25,7 +25,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartcache.HikeLruCache;

@@ -34,6 +34,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;

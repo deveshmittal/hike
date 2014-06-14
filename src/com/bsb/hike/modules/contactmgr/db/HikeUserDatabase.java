@@ -1,4 +1,4 @@
-package com.bsb.hike.db;
+package com.bsb.hike.modules.contactmgr.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +38,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.ContactManager;

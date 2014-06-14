@@ -19,8 +19,8 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 
 public class ContactUtils
 {

@@ -10,7 +10,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 
 public class UpgradeIntentService extends IntentService
 {

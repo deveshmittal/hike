@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import android.content.Context;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;

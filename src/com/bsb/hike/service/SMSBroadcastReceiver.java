@@ -12,9 +12,9 @@ import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
