@@ -1,4 +1,4 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +21,9 @@ import android.util.Pair;
 
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class ContactUtils
 {
