@@ -162,7 +162,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		}
 		else if (HikePubSub.USER_JOINED.equals(type) || HikePubSub.USER_LEFT.equals(type))
 		{
-			final ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN((String) object, true);
+			final ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact((String) object, true, true);
 
 			if (contactInfo == null)
 			{
@@ -288,7 +288,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		else if (HikePubSub.BLOCK_USER.equals(type) || HikePubSub.UNBLOCK_USER.equals(type))
 		{
 			String msisdn = (String) object;
-			final ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, true);
+			final ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 			final boolean blocked = HikePubSub.BLOCK_USER.equals(type);
 			if (contactInfo == null)
 			{

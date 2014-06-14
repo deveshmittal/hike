@@ -2421,7 +2421,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 							continue;
 						}
 
-						contactInfo = getContactInfoFromMSISDN(msisdn, false);
+						contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
 
 						if (contactInfo != null)
 						{

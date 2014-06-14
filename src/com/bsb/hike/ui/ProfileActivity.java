@@ -476,7 +476,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.CONTACT_INFO);
 
-		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mLocalMSISDN, false);
+		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true);
 
 		if (!contactInfo.isOnhike())
 		{

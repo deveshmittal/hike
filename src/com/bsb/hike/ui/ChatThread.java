@@ -1794,7 +1794,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		boolean addBlockHeader = false;
 		if (!(mConversation instanceof GroupConversation))
 		{
-			contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mContactNumber, false);
+			contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, false);
 
 			favoriteType = contactInfo.getFavoriteType();
 

@@ -1008,7 +1008,7 @@ public class MqttMessagesManager
 			 */
 			statusMessage.setTimeStamp(Utils.applyServerTimeOffset(context, statusMessage.getTimeStamp()));
 
-			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(statusMessage.getMsisdn(), true);
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			/*
 			 * Only add updates to timeline for contacts that have a 2-way relationship with the user.

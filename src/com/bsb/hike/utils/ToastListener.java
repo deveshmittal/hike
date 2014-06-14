@@ -132,7 +132,7 @@ public class ToastListener implements Listener
 					}
 					else
 					{
-						contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
+						contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), false);
 					}
 
 					if(message.getConversation().isStealth())
@@ -264,7 +264,7 @@ public class ToastListener implements Listener
 				}
 				else
 				{
-					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
+					contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), true);
 				}
 				toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
