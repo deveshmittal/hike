@@ -1543,61 +1543,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-
-	private Map<String, Map<String, GroupParticipant>> getAllGroupParticipants()
-	{
-		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.MSISDN, DBConstants.HAS_LEFT, DBConstants.ONHIKE, DBConstants.NAME,
-				DBConstants.ON_DND }, null, null, null, null, null);
-
-		try
-		{
-			int groupIdIdx = c.getColumnIndex(DBConstants.GROUP_ID);
-			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-			int hasLeftIdx = c.getColumnIndex(DBConstants.HAS_LEFT);
-			int onHikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
-			int nameIdx = c.getColumnIndex(DBConstants.NAME);
-			int onDndIdx = c.getColumnIndex(DBConstants.ON_DND);
-
-			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = new HashMap<String, Map<String, GroupParticipant>>();
-			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
-			Map<String, GroupParticipant> msisdnToGP = new HashMap<String, GroupParticipant>();
-			StringBuilder msisdnSB = new StringBuilder("(");
-
-			while (c.moveToNext())
-			{
-				String groupId = c.getString(groupIdIdx);
-				String msisdn = c.getString(msisdnIdx);
-				msisdnSB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
-				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(nameIdx), msisdn), c.getInt(hasLeftIdx) != 0,
-						c.getInt(onDndIdx) != 0);
-
-				Map<String, GroupParticipant> participantList = groupIdParticipantsMap.get(groupId);
-				if (participantList == null)
-				{
-					participantList = new HashMap<String, GroupParticipant>();
-					groupIdParticipantsMap.put(groupId, participantList);
-				}
-				participantList.put(msisdn, groupParticipant);
-				msisdnToGP.put(msisdn, groupParticipant);
-			}
-			// atleast one msisdn entered
-			if (!"(".equals(msisdnSB.toString()))
-			{
-				String msisdnMulti = msisdnSB.substring(0, msisdnSB.length() - 1) + ")";
-				List<ContactInfo> contactInfos = huDB.getContactNamesFromMsisdnList(msisdnMulti);
-				for (ContactInfo contactInfo : contactInfos)
-				{
-					msisdnToGP.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
-				}
-			}
-			return groupIdParticipantsMap;
-		}
-		finally
-		{
-			c.close();
-		}
-	}
-
+	
 	private Conversation getGroupConversation(String msisdn, long convid)
 	{
 		Cursor groupCursor = null;
