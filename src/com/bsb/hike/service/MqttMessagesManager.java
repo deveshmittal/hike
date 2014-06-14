@@ -837,7 +837,7 @@ public class MqttMessagesManager
 				return;
 			}
 
-			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, false);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
 			if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
 			{
 				return;
@@ -845,6 +845,9 @@ public class MqttMessagesManager
 			FavoriteType currentType = contactInfo.getFavoriteType();
 			FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND || currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 					: FavoriteType.FRIEND;
+
+			contactInfo.setFavoriteType(favoriteType);
+
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 			this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 			if (favoriteType == FavoriteType.FRIEND)
@@ -1172,7 +1175,7 @@ public class MqttMessagesManager
 			userDb.updateLastSeenTime(msisdn, lastSeenTime);
 			userDb.updateIsOffline(msisdn, (int) isOffline);
 
-			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, false);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
 			contactInfo.setLastSeenTime(lastSeenTime);
 			contactInfo.setOffline(isOffline);
 
@@ -1506,7 +1509,7 @@ public class MqttMessagesManager
 
 	private void removeOrPostponeFriendType(String msisdn)
 	{
-		ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, false);
+		ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
 		if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
 		{
 			return;
@@ -1514,6 +1517,9 @@ public class MqttMessagesManager
 		FavoriteType currentFavoriteType = contactInfo.getFavoriteType();
 		FavoriteType favoriteType = (currentFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentFavoriteType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.NOT_FRIEND
 				: FavoriteType.REQUEST_SENT_REJECTED;
+
+		contactInfo.setFavoriteType(favoriteType);
+
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contactInfo, favoriteType);
 		this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 	}
