@@ -80,6 +80,32 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
+	 * This method clears the persistence memory
+	 */
+	public void unloadPersistenceCache()
+	{
+		cache.clearPersistenceMemory();
+	}
+
+	/**
+	 * 
+	 */
+	public void unloadPersistenceCache(String msisdn)
+	{
+		List<String> msisdns = new ArrayList<String>();
+		msisdns.add(msisdn);
+		cache.clearPersistenceMemory(msisdns);
+	}
+
+	/**
+	 * 
+	 */
+	public void unloadPersistenceCache(List<String> msisdns)
+	{
+		cache.clearPersistenceMemory(msisdns);
+	}
+
+	/**
 	 * This function will return name or null for a particular msisdn
 	 * 
 	 * @param msisdn

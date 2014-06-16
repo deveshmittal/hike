@@ -120,6 +120,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
 
+			HikeMessengerApp.getContactManager().unloadPersistenceCache(msisdns);
+
 			return convs;
 		}
 

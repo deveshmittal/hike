@@ -1713,6 +1713,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
 				ContentValues contentValues = getContentValueForConversationMessage(message);
+				if (Utils.isGroupConversation(msisdn))
+				{
+					HikeMessengerApp.getContactManager().unloadPersistenceCache(c.getString(groupParticipantColumn));
+				}
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 			}
 			else

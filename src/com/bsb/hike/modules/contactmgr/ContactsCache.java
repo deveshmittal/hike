@@ -322,4 +322,41 @@ class ContactsCache
 			writeLockTrans.unlock();
 		}
 	}
+
+	public void clearPersistenceMemory()
+	{
+		writeLock.lock();
+		try
+		{
+			if (persistenceMap != null)
+			{
+				persistenceMap.clear();
+				allContactsLoaded = false;
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	public void clearPersistenceMemory(List<String> msisdns)
+	{
+		writeLock.lock();
+		try
+		{
+			for (String m : msisdns)
+			{
+				if (persistenceMap != null)
+				{
+					persistenceMap.remove(m);
+				}
+			}
+			allContactsLoaded = false;
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
 }
