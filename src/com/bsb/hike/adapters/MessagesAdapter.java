@@ -1647,7 +1647,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
-				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileThumb.setImageResource(R.drawable.ic_default_contact);
 				fileHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileHolder.fileName.setText(hikeFile.getDisplayName());
@@ -1776,7 +1775,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
-				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileName.setText(hikeFile.getFileName());
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
@@ -3713,19 +3711,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 		return ret;
-	}
-
-	private void createFileThumb(ImageView fileThumb)
-	{
-		// TODO Auto-generated method stub
-		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
-		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
-		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
-		fileThumb.getLayoutParams().height = pixels;
-		fileThumb.getLayoutParams().width = pixels;
-		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
-		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
-		fileThumb.setImageResource(0);
 	}
 
 	private void createMediaThumb(ImageView fileThumb)

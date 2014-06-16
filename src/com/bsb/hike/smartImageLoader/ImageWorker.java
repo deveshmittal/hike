@@ -88,6 +88,12 @@ public abstract class ImageWorker
 		loadImage(key, imageView, false, runOnUiThread);
 	}
 
+	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread, boolean isFlinging, boolean setDefaultAvatarInitially)
+	{
+		String key = data + (rounded ? ROUND_SUFFIX : "");
+		loadImage(key, imageView, isFlinging, runOnUiThread, setDefaultAvatarInitially);
+	}
+
 	/**
 	 * Load an image specified by the data parameter into an ImageView (override {@link ImageWorker#processBitmap(Object)} to define the processing logic). A memory and disk cache
 	 * will be used if an {@link ImageCache} has been added using {@link ImageWorker#addImageCache(FragmentManager, ImageCache.ImageCacheParams)}. If the image is found in the
@@ -110,6 +116,11 @@ public abstract class ImageWorker
 
 	public void loadImage(String data, ImageView imageView, boolean isFlinging, boolean runOnUiThread)
 	{
+		loadImage(data, imageView, isFlinging, runOnUiThread, false);
+	}
+
+	public void loadImage(String data, ImageView imageView, boolean isFlinging, boolean runOnUiThread, boolean setDefaultAvatarInitially)
+	{
 		if (data == null)
 		{
 			return;
@@ -117,8 +128,15 @@ public abstract class ImageWorker
 
 		BitmapDrawable value = null;
 
-		imageView.setImageDrawable(null);
-		imageView.setBackgroundDrawable(null);
+		if (setDefaultAvatarInitially)
+		{
+			setDefaultAvatar(imageView, data);
+		}
+		else
+		{
+			imageView.setImageDrawable(null);
+			imageView.setBackgroundDrawable(null);
+		}
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
@@ -154,8 +172,22 @@ public abstract class ImageWorker
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
+			Bitmap loadingBitmap = mLoadingBitmap;
+
+			/*
+			 * Setting this loading bitmap to prevent the imageView from showing a blank drawable while we try to fetch the actual drawable for the imageView.
+			 */
+			if (setDefaultAvatarInitially)
+			{
+				Drawable drawable = imageView.getDrawable();
+				if (drawable instanceof BitmapDrawable)
+				{
+					loadingBitmap = ((BitmapDrawable) drawable).getBitmap();
+				}
+			}
+
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, task);
+			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, loadingBitmap, task);
 			imageView.setImageDrawable(asyncDrawable);
 
 			// NOTE: This uses a custom version of AsyncTask that has been pulled from the
@@ -224,7 +256,7 @@ public abstract class ImageWorker
 	 */
 	public void setLoadingImage(int resId)
 	{
-		mLoadingBitmap = HikeBitmapFactory.decodeResource(mResources, resId);
+		mLoadingBitmap = HikeBitmapFactory.decodeBitmapFromResource(mResources, resId, Bitmap.Config.RGB_565);
 	}
 
 	/**

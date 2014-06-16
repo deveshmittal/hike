@@ -6,15 +6,14 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Bitmap.Config;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -32,37 +31,6 @@ import com.bsb.hike.utils.Utils;
 public class HikeBitmapFactory
 {
 	private static final String TAG = "HikeBitmapFactory";
-
-	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
-	{
-		if (bitmap == null)
-		{
-			return null;
-		}
-
-		Bitmap output = createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-
-		if (output == null)
-		{
-			return null;
-		}
-
-		Canvas canvas = new Canvas(output);
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-		final RectF rectF = new RectF(rect);
-		final float roundPx = 4;
-
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-		return output;
-	}
 
 	public static Bitmap getCircularBitmap(Bitmap bitmap)
 	{
@@ -125,87 +93,7 @@ public class HikeBitmapFactory
 			return null;
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
-		return getBitmapDrawable(decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-
-		thumbnail = decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail);
-		}
-
-		return thumbnail;
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-		if (applyBitmapConfig)
-		{
-			options.inPreferredConfig = Config.RGB_565;
-		}
-
-		thumbnail = decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail);
-		}
-
-		return thumbnail;
+		return getBitmapDrawable(decodeBitmapFromByteArray(thumbnailBytes, Config.RGB_565));
 	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail)
@@ -234,7 +122,7 @@ public class HikeBitmapFactory
 		return decodeByteArray(encodeByte, 0, encodeByte.length);
 	}
 
-	public static Bitmap drawableToBitmap(Drawable drawable)
+	public static Bitmap drawableToBitmap(Drawable drawable, Bitmap.Config config)
 	{
 		if (drawable == null)
 		{
@@ -248,7 +136,7 @@ public class HikeBitmapFactory
 		/*
 		 * http://developer.android.com/reference/android/graphics/Bitmap.Config. html
 		 */
-		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), Config.ARGB_8888);
+		Bitmap bitmap = createBitmap((int) (48 * Utils.densityMultiplier), (int) (48 * Utils.densityMultiplier), config);
 
 		if (bitmap == null)
 		{
@@ -293,7 +181,7 @@ public class HikeBitmapFactory
 		{
 			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
 			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			src = createScaledBitmap(src, width, height, Bitmap.Config.ARGB_8888, false, true, true);
+			src = createScaledBitmap(src, width, height, Bitmap.Config.RGB_565, false, true, true);
 			return src;
 		}
 		else
@@ -481,21 +369,20 @@ public class HikeBitmapFactory
 	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
 	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
 	 */
-	public static Bitmap decodeSampledBitmapFromByteArray(String msisdn, boolean rounded, int reqWidth, int reqHeight)
+	public static Bitmap decodeSampledBitmapFromByteArray(byte[] bytearray, int reqWidth, int reqHeight)
 	{
-		return decodeSampledBitmapFromByteArray(msisdn, rounded, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
+		return decodeSampledBitmapFromByteArray(bytearray, reqWidth, reqHeight, Bitmap.Config.ARGB_8888);
 	}
 
-	public static Bitmap decodeSampledBitmapFromByteArray(String msisdn, boolean rounded, int reqWidth, int reqHeight, Bitmap.Config con)
+	public static Bitmap decodeSampledBitmapFromByteArray(byte[] bytearray, int reqWidth, int reqHeight, Bitmap.Config con)
 	{
-		byte[] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
-		if (icondata == null)
+		if (bytearray == null)
 			return null;
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 
-		decodeByteArray(icondata, 0, icondata.length, options);
+		decodeByteArray(bytearray, 0, bytearray.length, options);
 
 		options.inPreferredConfig = con;
 
@@ -513,15 +400,104 @@ public class HikeBitmapFactory
 		Bitmap result = null;
 		try
 		{
-			result = decodeByteArray(icondata, 0, icondata.length, options);
+			result = decodeByteArray(bytearray, 0, bytearray.length, options);
 		}
 		catch (IllegalArgumentException e)
 		{
-			result = decodeByteArray(icondata, 0, icondata.length);
+			result = decodeByteArray(bytearray, 0, bytearray.length);
 		}
 		catch (Exception e)
 		{
 			Logger.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
+		}
+		return result;
+	}
+
+	/**
+	 * This method decodes a bitmap from byte array with particular configuration config passed as a parameter. Bitmap will not be sampled , only configuration will be config. To
+	 * sample down bitmap use decodeSampledBitmapFromByteArray
+	 * 
+	 * @param bytearray
+	 * @param con
+	 * @return
+	 */
+	public static Bitmap decodeBitmapFromByteArray(byte[] bytearray, Config config)
+	{
+		if (bytearray == null)
+			return null;
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = config;
+
+		Bitmap result = null;
+		try
+		{
+			result = decodeByteArray(bytearray, 0, bytearray.length, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = decodeByteArray(bytearray, 0, bytearray.length);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
+		}
+		return result;
+	}
+
+	/**
+	 * This method uses the configuration given by config to decode a bitmap from file.
+	 * @param filename
+	 * @param con
+	 * @return
+	 */
+	public static Bitmap decodeBitmapFromFile(String filename, Bitmap.Config config)
+	{
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = config;
+
+		Bitmap result = null;
+		try
+		{
+			result = decodeFile(filename, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = decodeFile(filename);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from file: ", e);
+		}
+		return result;
+	}
+
+	/**
+	 * This method uses the configuration given by config to decode a bitmap from resource.
+	 * 
+	 * @param filename
+	 * @param con
+	 * @return
+	 */
+	public static Bitmap decodeBitmapFromResource(Resources res, int resId, Bitmap.Config config)
+	{
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = config;
+
+		Bitmap result = null;
+		try
+		{
+			result = decodeResource(res, resId, options);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = decodeResource(res, resId);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Exception in decoding Bitmap from file: ", e);
 		}
 		return result;
 	}

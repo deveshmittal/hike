@@ -19,6 +19,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -58,9 +59,11 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private Context context;
 
+	private ListView listView;
+
 	private enum ViewType
 	{
-		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP
 	}
 
 	private class ViewHolder
@@ -80,14 +83,18 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView timeStamp;
 
 		ImageView avatar;
+		
+		View parent;
 	}
 
-	public ConversationsAdapter(Context context, List<Conversation> objects)
+	public ConversationsAdapter(Context context, List<Conversation> objects, ListView listView)
 	{
 		this.context = context;
 		this.conversationList = objects;
+		this.listView = listView;
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
+		iconLoader.setImageFadeIn(false);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		itemsToAnimat = new SparseBooleanArray();
 	}
@@ -139,6 +146,10 @@ public class ConversationsAdapter extends BaseAdapter
 				return ViewType.RESET_STEALTH_TIP.ordinal();
 			case ConversationTip.WELCOME_HIKE_TIP:
 				return ViewType.WELCOME_HIKE_TIP.ordinal();
+			case ConversationTip.START_NEW_CHAT_TIP:
+				return ViewType.START_NEW_CHAT_TIP.ordinal();
+			case ConversationTip.STEALTH_UNREAD_TIP:
+				return ViewType.STEALTH_UNREAD_TIP.ordinal();	
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
@@ -177,6 +188,22 @@ public class ConversationsAdapter extends BaseAdapter
 				break;
 			case WELCOME_HIKE_TIP:
 				v = inflater.inflate(R.layout.welcome_hike_tip, parent, false);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
+				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
+				viewHolder.closeTip = v.findViewById(R.id.close_tip);
+				break;	
+			case START_NEW_CHAT_TIP:
+				v = inflater.inflate(R.layout.start_new_chat_tip, parent, false);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
+				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
+				viewHolder.closeTip = v.findViewById(R.id.close_tip);
+				break;
+			case STEALTH_UNREAD_TIP:
+				v = inflater.inflate(R.layout.stealth_unread_tip, parent, false);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
+				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
+				viewHolder.closeTip = v.findViewById(R.id.close_tip);
+				viewHolder.parent = v.findViewById(R.id.all_content);
 				break;	
 			default:
 				break;
@@ -264,16 +291,57 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 		else if (viewType == ViewType.WELCOME_HIKE_TIP)
 		{
-			View close = v.findViewById(R.id.close_tip);
-			((TextView)v.findViewById(R.id.tip_header)).setText(R.string.new_ui_welcome_tip_header);
-			((TextView)v.findViewById(R.id.tip_msg)).setText(R.string.new_ui_welcome_tip_msg);
-			close.setOnClickListener(new OnClickListener()
+			viewHolder.headerText.setText(R.string.new_ui_welcome_tip_header);
+			viewHolder.subText.setText(R.string.new_ui_welcome_tip_msg);
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
 			{
 
 				@Override
 				public void onClick(View view)
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
+				}
+			});
+			return v;
+		}
+		else if (viewType == ViewType.START_NEW_CHAT_TIP)
+		{
+			viewHolder.headerText.setText(R.string.new_chat_tip_header);
+			viewHolder.subText.setText(R.string.new_chat_tip_msg);
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_START_NEW_CHAT_TIP, null);
+				}
+			});
+			return v;
+		}
+		else if (viewType == ViewType.STEALTH_UNREAD_TIP)
+		{
+			String headerTxt = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_UNREAD_TIP_HEADER, "");
+			String msgTxt = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, "");
+			viewHolder.headerText.setText(headerTxt);
+			viewHolder.subText.setText(msgTxt);
+			viewHolder.parent.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
+				}
+			});
+			
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View view)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
 				}
 			});
 			return v;
@@ -344,7 +412,7 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 		ImageView avatarView = viewHolder.avatar;
-		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, true);
+		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, false, isListFlinging, true);
 	}
 
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
@@ -669,5 +737,39 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		Logger.d("TestList", "NotifyDataSetChanged called");
 		super.notifyDataSetChanged();
+	}
+
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+		iconLoader.setPauseWork(isListFlinging);
+
+		if (notify && !isListFlinging)
+		{
+			/*
+			 * We don't want to call notifyDataSetChanged here since that causes the UI to freeze for a bit. Instead we pick out the views and update the avatars there.
+			 */
+			int count = listView.getChildCount();
+			for (int i = 0; i < count; i++)
+			{
+				View view = listView.getChildAt(i);
+				int indexOfData = listView.getFirstVisiblePosition() + i;
+
+				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
+				/*
+				 * Since tips cannot have custom avatars, we simply skip these cases.
+				 */
+				if (viewType != ViewType.CONVERSATION)
+				{
+					continue;
+				}
+
+				updateViewsRelatedToAvatar(view, getItem(indexOfData));
+			}
+		}
 	}
 }

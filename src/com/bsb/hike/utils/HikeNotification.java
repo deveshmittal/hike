@@ -53,6 +53,9 @@ public class HikeNotification
 	public static final int APP_UPDATE_AVAILABLE_ID = -126;
 
 	public static final int STEALTH_NOTIFICATION_ID = -127;
+	
+	public static final int STEALTH_POPUP_NOTIFICATION_ID = -128;
+
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -111,6 +114,34 @@ public class HikeNotification
 
 	}
 
+	public void notifyStealthPopup(final String headerString)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		/*
+		 * invoke the chat thread here. The Stealth tip popup should already be showing here ideally by now.
+		 */
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
+
+		notificationIntent.setData((Uri.parse("custom://" + STEALTH_POPUP_NOTIFICATION_ID)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), headerString, headerString, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
+
+	}
+
+	
 	public void notifyMessage(final Protip proTip)
 	{
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
@@ -390,8 +421,8 @@ public class HikeNotification
 		final String text = key + " " + message;
 
 		final int icon = returnSmallIcon();
-		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
 		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
+		final Bitmap bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(imagePath, Bitmap.Config.RGB_565);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
@@ -519,7 +550,7 @@ public class HikeNotification
 		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
-		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
+		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);

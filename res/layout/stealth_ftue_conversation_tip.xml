@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="#ef554e"
+    android:background="@color/stealth_tip_bg"
     android:gravity="center"
     android:orientation="vertical" >
 
@@ -22,7 +22,7 @@
         android:layout_alignBottom="@+id/tip"
         android:layout_alignTop="@+id/tip"
         android:layout_toLeftOf="@id/close"
-        android:background="#f2706a" />
+        android:background="@color/stealth_tip_divider" />
 
     <ImageView
         android:id="@+id/pointer"
