@@ -90,7 +90,7 @@ public class Util
 			 * In this case the bitmap is smaller, at least in one dimension, than the target. Transform it by placing as much of the image as possible into the target and leaving
 			 * the top/bottom or left/right (or both) black.
 			 */
-			Bitmap b2 = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+			Bitmap b2 = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.RGB_565);
 			Canvas c = new Canvas(b2);
 
 			int deltaXHalf = Math.max(0, deltaX / 2);

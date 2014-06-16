@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:paddingBottom="2dp" >
+
+    <LinearLayout
+        android:id="@+id/typing_avatar_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:gravity="left|center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/typing"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+        android:layout_toRightOf="@+id/typing_avatar_container"
+        android:background="@drawable/ic_bubble_white_selector"
+        android:scaleType="centerInside"
+        android:src="@drawable/typing"
+        android:visibility="gone" />
+
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/avatar"
+        style="@style/AvatarStyle.Padding" />
+
+</RelativeLayout>

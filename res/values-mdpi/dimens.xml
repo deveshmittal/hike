@@ -11,4 +11,9 @@
     <dimen name="addfriend_popup_btn_margin_bottom">12dp</dimen>
     <dimen name="gallery_cover_item_size">140dp</dimen>
     <dimen name="timeine_big_picture_size">285dp</dimen>
+    <dimen name="stealth_ftue_pu_img_margin_bottom">12dp</dimen>
+	<dimen name="stealth_ftue_pu_img_margin_top">18dp</dimen>
+	<dimen name="stealth_setup_des_margin_bottom">10dp</dimen>
+	<dimen name="stealth_ftue_pu_msg_margin_bottom">10dp</dimen>
+	<dimen name="platform_icon_margin_bottom">12dp</dimen>
 </resources>

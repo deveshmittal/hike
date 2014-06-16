@@ -21,8 +21,7 @@ import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
 {
-
-	public static final int SMS_TOGGLE_ID = -119;
+	private boolean isBlockAddHeader;
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
 
@@ -569,6 +568,11 @@ public class ConvMessage
 				else
 				{
 					data.put(HikeConstants.MESSAGE_ID, msgID);
+
+					if(mConversation.isStealth() && isSent())
+					{
+						data.put(HikeConstants.STEALTH, true);
+					}
 				}
 
 				object.put(HikeConstants.TO, mMsisdn);
@@ -697,6 +701,7 @@ public class ConvMessage
 		{
 			ids.put(String.valueOf(mappedMsgId));
 			object.put(HikeConstants.DATA, ids);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 			object.put(HikeConstants.TO, mMsisdn);
 		}
@@ -798,8 +803,14 @@ public class ConvMessage
 	{
 		this.shouldShowPush = shouldShowPush;
 	}
-	
-	public boolean isSmsToggle(){
-		return msgID == ConvMessage.SMS_TOGGLE_ID;
+
+	public void setBlockAddHeader(boolean isBlockAddHeader)
+	{
+		this.isBlockAddHeader = isBlockAddHeader;
+	}
+
+	public boolean isBlockAddHeader()
+	{
+		return isBlockAddHeader;
 	}
 }

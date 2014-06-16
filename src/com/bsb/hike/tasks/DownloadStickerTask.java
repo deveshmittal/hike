@@ -19,6 +19,8 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -46,6 +48,8 @@ public class DownloadStickerTask extends StickerTaskBase
 	private DownloadType downloadType;
 
 	private StickerPageAdapter stickerPageAdapter;
+
+	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
 
 	public DownloadStickerTask(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st)
 	{
@@ -89,9 +93,9 @@ public class DownloadStickerTask extends StickerTaskBase
 				existingStickerIds.put(stickerId);
 			}
 		}
-		else if (category.categoryId.equals(StickerCategoryId.doggy))
+		else if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
-			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY)
+			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				existingStickerIds.put(stickerId);
 			}
@@ -111,7 +115,7 @@ public class DownloadStickerTask extends StickerTaskBase
 			smallStickerDir.mkdirs();
 			Logger.d(getClass().getSimpleName(), "No existing sticker");
 		}
-		if(!largeStickerDir.exists())
+		if (!largeStickerDir.exists())
 			largeStickerDir.mkdirs();
 
 		Utils.makeNoMediaFile(largeStickerDir);
@@ -150,13 +154,7 @@ public class DownloadStickerTask extends StickerTaskBase
 					{
 						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
 					}
-					File f = new File(largeStickerDir, stickerId);
-					Utils.saveBase64StringToFile(f, stickerData);
-
-					Bitmap thumbnail = Utils.scaleDownImage(f.getPath(), -1, false);
-
-					File smallImage = new File(smallStickerDir, stickerId);
-					Utils.saveBitmapToFile(smallImage, thumbnail);
+					saveStickers(largeStickerDir, smallStickerDir, stickerId, stickerData);
 				}
 				catch (FileNotFoundException e)
 				{
@@ -188,6 +186,21 @@ public class DownloadStickerTask extends StickerTaskBase
 		category.setReachedEnd(reachedEnd);
 		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.categoryId.name(), totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
+	}
+
+	private void saveStickers(File largeStickerDir, File smallStickerDir, String stickerId, String stickerData) throws IOException
+	{
+		File f = new File(largeStickerDir, stickerId);
+		Utils.saveBase64StringToFile(f, stickerData);
+
+		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE, true, false);
+
+		if (small != null)
+		{
+			File smallImage = new File(smallStickerDir, stickerId);
+			BitmapUtils.saveBitmapToFile(smallImage, small);
+			small.recycle();
+		}
 	}
 
 	@Override

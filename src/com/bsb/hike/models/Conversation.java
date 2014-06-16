@@ -30,6 +30,15 @@ public class Conversation implements Comparable<Conversation>
 				return 1;
 			}
 
+			if (lhs instanceof ConversationTip)
+			{
+				return -1;
+			}
+			else if (rhs instanceof ConversationTip)
+			{
+				return 1;
+			}
+
 			return rhs.compareTo(lhs);
 		}
 	}
@@ -62,6 +71,8 @@ public class Conversation implements Comparable<Conversation>
 
 	private int unreadCount;
 
+	private boolean isStealth;
+
 	public void setOnhike(boolean onhike)
 	{
 		this.onhike = onhike;
@@ -87,10 +98,16 @@ public class Conversation implements Comparable<Conversation>
 
 	public Conversation(String msisdn, long convId, String contactName, boolean onhike)
 	{
+		this(msisdn, convId, contactName, onhike, false);
+	}
+
+	public Conversation(String msisdn, long convId, String contactName, boolean onhike, boolean isStealth)
+	{
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactName = contactName;
 		this.onhike = onhike;
+		this.isStealth = isStealth;
 		this.messages = new ArrayList<ConvMessage>();
 	}
 
@@ -160,6 +177,16 @@ public class Conversation implements Comparable<Conversation>
 		return messages;
 	}
 
+	public void setIsStealth(boolean isStealth)
+	{
+		this.isStealth = isStealth;
+	}
+
+	public boolean isStealth()
+	{
+		return isStealth;
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -167,7 +194,6 @@ public class Conversation implements Comparable<Conversation>
 		int result = 1;
 		result = prime * result + ((contactName == null) ? 0 : contactName.hashCode());
 		result = prime * result + (int) (convId ^ (convId >>> 32));
-		result = prime * result + ((messages == null) ? 0 : messages.hashCode());
 		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
 		result = prime * result + (onhike ? 1231 : 1237);
 		return result;
@@ -192,13 +218,6 @@ public class Conversation implements Comparable<Conversation>
 			return false;
 		if (convId != other.convId)
 			return false;
-		if (messages == null)
-		{
-			if (other.messages != null)
-				return false;
-		}
-		else if (!messages.equals(other.messages))
-			return false;
 		if (msisdn == null)
 		{
 			if (other.msisdn != null)
@@ -218,6 +237,7 @@ public class Conversation implements Comparable<Conversation>
 		{
 			object.put(HikeConstants.TYPE, type);
 			object.put(HikeConstants.TO, msisdn);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 		}
 		catch (JSONException e)
 		{
