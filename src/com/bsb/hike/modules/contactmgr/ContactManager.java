@@ -119,7 +119,9 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns the contactInfo for a particular msisdn. Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
+	 * 
+	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
 	 * 
 	 * @param msisdn
 	 * @param loadInTransient
@@ -131,7 +133,9 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns the contactInfo for a particular msisdn.Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
+	 * 
+	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
 	 * 
 	 * @param msisdn
 	 * @param loadInTransient
