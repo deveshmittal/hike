@@ -90,7 +90,6 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -2934,10 +2933,12 @@ public class Utils
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 	}
 
-	public static boolean isKitkatOrHigher()
-	{
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-	}
+
+	//removed kitkat specific code for nokia
+	//public static boolean isKitkatOrHigher()
+	//{
+	//	return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	//}
 
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
 	{
