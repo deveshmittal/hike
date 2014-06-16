@@ -503,8 +503,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return false;
 		}
 
-		//optionsList.add(getString(R.string.shortcut));
-		optionsList.add(getString(R.string.email_conversation));
 		/*
 		 * Switch to stealth mode if we are in ftue.
 		 */
