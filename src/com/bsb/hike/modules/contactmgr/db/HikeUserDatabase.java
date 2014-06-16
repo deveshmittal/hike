@@ -630,8 +630,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		{
 			msisdnsDB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 		}
-		msisdnsDB.replace(msisdnsDB.lastIndexOf(","), msisdnsDB.length(), ")");
-
+		int idx = msisdnsDB.lastIndexOf(",");
+		if (idx >= 0)
+		{
+			msisdnsDB.replace(idx, msisdnsDB.length(), ")");
+		}
+		
 		try
 		{
 			contactMap = getContactMap(msisdnsDB.toString());
@@ -1755,7 +1759,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				+ DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
 		return c;
 	}
-	
+
 	public void setMultipleContactsToFavorites(JSONObject favorites)
 	{
 		SQLiteStatement insertStatement = null;

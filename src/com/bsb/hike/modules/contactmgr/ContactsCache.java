@@ -236,11 +236,16 @@ class ContactsCache
 	 */
 	List<ContactInfo> loadTransientMem(List<String> msisdns)
 	{
-		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+		if (msisdns.size() > 0)
+		{
+			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
 
-		insertContactsFromMap(map, true);
+			insertContactsFromMap(map, true);
 
-		return new ArrayList<ContactInfo>(map.values());
+			return new ArrayList<ContactInfo>(map.values());
+		}
+
+		return null;
 	}
 
 	/**
@@ -262,7 +267,10 @@ class ContactsCache
 	void loadPersistenceMemory()
 	{
 		List<String> msisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
-		persistenceMap = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+		if (msisdns.size() > 0)
+		{
+			persistenceMap = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+		}
 	}
 
 	/**
@@ -273,11 +281,16 @@ class ContactsCache
 	 */
 	List<ContactInfo> loadPersistenceMemory(List<String> msisdns)
 	{
-		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+		if (msisdns.size() > 0)
+		{
+			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
 
-		insertContactsFromMap(map);
+			insertContactsFromMap(map);
 
-		return new ArrayList<ContactInfo>(map.values());
+			return new ArrayList<ContactInfo>(map.values());
+		}
+
+		return null;
 	}
 
 	/**
