@@ -727,8 +727,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
-		/* register listeners */
-		mPubSub.addListeners(this, pubSubListeners);
+
 		if (prefs.contains(HikeMessengerApp.TEMP_NUM))
 		{
 			mContactName = prefs.getString(HikeMessengerApp.TEMP_NAME, null);
@@ -780,7 +779,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-
+		/* register listeners */
+		mPubSub.addListeners(this, pubSubListeners);
 		Logger.i("chatthread", "on create end");
 	}
 
