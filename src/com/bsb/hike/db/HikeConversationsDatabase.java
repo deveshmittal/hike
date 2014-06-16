@@ -1438,7 +1438,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = new HashMap<String, Map<String, GroupParticipant>>();
 			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
-			Map<String, GroupParticipant> msisdnToGP = new HashMap<String, GroupParticipant>();
+			Map<String, List<GroupParticipant>> msisdnToGP = new HashMap<String, List<GroupParticipant>>();
 			StringBuilder msisdnSB = new StringBuilder("(");
 
 			while (c.moveToNext())
@@ -1456,7 +1456,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					groupIdParticipantsMap.put(groupId, participantList);
 				}
 				participantList.put(msisdn, groupParticipant);
-				msisdnToGP.put(msisdn, groupParticipant);
+
+				List<GroupParticipant> groupParticipants = msisdnToGP.get(msisdn);
+				if (groupParticipants == null)
+				{
+					groupParticipants = new ArrayList<GroupParticipant>();
+					msisdnToGP.put(msisdn, groupParticipants);
+				}
+				groupParticipants.add(groupParticipant);
 			}
 			// atleast one msisdn entered
 			if (!"(".equals(msisdnSB.toString()))
@@ -1465,7 +1472,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				List<ContactInfo> contactInfos = huDB.getContactNamesFromMsisdnList(msisdnMulti);
 				for (ContactInfo contactInfo : contactInfos)
 				{
-					msisdnToGP.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					List<GroupParticipant> groupParticipants = msisdnToGP.get(contactInfo.getMsisdn());
+					if (groupParticipants == null)
+					{
+						continue;
+					}
+					for (GroupParticipant groupParticipant : groupParticipants)
+					{
+						groupParticipant.setContactInfo(contactInfo);
+					}
 				}
 			}
 			return groupIdParticipantsMap;
