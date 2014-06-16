@@ -1978,7 +1978,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				List<ContactInfo> list = HikeMessengerApp.getContactManager().getContact(allMsisdns, true);
 				for (ContactInfo contactInfo : list)
 				{
-					participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					if (contactInfo.getName() == null)
+					{
+						String name = participantList.get(contactInfo.getMsisdn()).getContactInfo().getName();
+						contactInfo.setName(name);
+						participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					}
+					else
+					{
+						participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					}
 				}
 			}
 
