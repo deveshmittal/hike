@@ -2161,6 +2161,45 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public Map<String, String> getGroupParticipantNameMap(String groupId, List<String> msisdns)
+	{
+		Map<String, String> map = new HashMap<String, String>();
+
+		StringBuilder msisdnsDB = new StringBuilder("(");
+		for (String msisdn : msisdns)
+		{
+			msisdnsDB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+		}
+		int idx = msisdnsDB.lastIndexOf(",");
+		if (idx >= 0)
+		{
+			msisdnsDB.replace(idx, msisdnsDB.length(), ")");
+		}
+
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN
+					+ " IN ? ", new String[] { groupId, msisdnsDB.toString() }, null, null, null);
+			String name = "";
+
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
+				name = c.getString(c.getColumnIndex(DBConstants.NAME));
+				map.put(msisdn, name);
+			}
+			return map;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	public int toggleGroupDeadOrAlive(String groupId, boolean alive)
 	{
 		if (!doesConversationExist(groupId))

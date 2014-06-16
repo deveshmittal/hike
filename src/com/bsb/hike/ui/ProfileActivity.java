@@ -1667,21 +1667,39 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				final JSONObject obj = (JSONObject) object;
 				final JSONArray participants = obj.optJSONArray(HikeConstants.DATA);
+
+				List<String> msisdns = new ArrayList<String>();
+				List<String> msisdnsGroupTable = new ArrayList<String>();
 				for (int i = 0; i < participants.length(); i++)
 				{
 					String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
-
-					HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-					ContactInfo participant = hUDB.getContactInfoFromMSISDN(msisdn, false);
-
-					if (TextUtils.isEmpty(participant.getName()))
-					{
-						HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-						participant.setName(hCDB.getParticipantName(mLocalMSISDN, msisdn));
-					}
-
-					participantMap.put(msisdn, new GroupParticipant(participant));
+					msisdns.add(msisdn);
 				}
+
+				if (msisdns.size() > 0)
+				{
+					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true);
+					for (ContactInfo contactInfo : contacts)
+					{
+						participantMap.put(contactInfo.getMsisdn(), new GroupParticipant(contactInfo));
+						if (contactInfo.getName() == null)
+						{
+							msisdnsGroupTable.add(contactInfo.getMsisdn());
+						}
+					}
+				}
+
+				if (msisdnsGroupTable.size() > 0)
+				{
+					Map<String, String> contacts = HikeConversationsDatabase.getInstance().getGroupParticipantNameMap(mLocalMSISDN, msisdnsGroupTable);
+					for (Entry<String, String> mapEntry : contacts.entrySet())
+					{
+						String msisdn = mapEntry.getKey();
+						String name = mapEntry.getValue();
+						participantMap.get(msisdn).getContactInfo().setName(name);
+					}
+				}
+
 				groupConversation.setGroupMemberAliveCount(participantMap.size());
 				runOnUiThread(new Runnable()
 				{
