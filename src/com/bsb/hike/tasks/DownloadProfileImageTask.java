@@ -228,6 +228,9 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 				this.name = this.msisdn; // show the msisdn if its an unsaved contact
 			if (statusImage && !TextUtils.isEmpty(this.fileName) && !TextUtils.isEmpty(this.msisdn))
 			{
+				String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+				this.fileName = directory + "/" + Utils.getProfileImageFileName(msisdn);
+
 				Bundle bundle = new Bundle();
 				bundle.putString(HikeConstants.Extras.IMAGE_PATH, this.fileName);
 				bundle.putString(HikeConstants.Extras.MSISDN, this.msisdn);

@@ -95,7 +95,6 @@ public class CustomReceiveMessageTextView extends CustomFontTextView
 			int height = displaymetrics.heightPixels;
 			int width = displaymetrics.widthPixels;
 			int widthInDP = (int)(width / Utils.densityMultiplier);
-			Logger.d("gaurav","width in dp" + widthInDP);
 			int max_width = Math.min((widthInDP - minOutMargin),maxWidth);
 			if(linesMaxWidth>= (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth))
 			{

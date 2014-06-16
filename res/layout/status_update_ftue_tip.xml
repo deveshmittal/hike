@@ -22,28 +22,19 @@
             android:paddingTop="10dp"
     		android:paddingBottom="15dp"
             android:orientation="vertical"
-            android:paddingRight="103dp" >
+            android:paddingRight="105dp" >
 
             <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="2dp"
-                android:text="@string/status_update_tip_header"
-                android:textColor="#ffffff"
-                android:textSize="24sp"
-                android:textStyle="italic" />
+                style="@style/TipHeader"
+                android:text="@string/status_update_tip_header" />
 
             <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/status_update_tip_msg"
-                android:textColor="#ffffff"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+                style="@style/TipBody"
+                android:text="@string/status_update_tip_msg" />
         </LinearLayout>
 
         <RelativeLayout
-            android:layout_width="100dp"
+            android:layout_width="104dp"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/tip_content"
             android:layout_alignBottom="@id/tip_content"
@@ -51,7 +42,7 @@
 
             <ImageView
                 android:id="@+id/arrow_pointer"
-                android:layout_width="43dp"
+                android:layout_width="47dp"
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
     			android:layout_alignParentLeft="true"
@@ -76,15 +67,4 @@
                 android:src="@drawable/ic_tip_cross" />
         </RelativeLayout>
     </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/dark_grey_drop_shadow" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/light_grey_drop_shadow" />
-
 </LinearLayout>

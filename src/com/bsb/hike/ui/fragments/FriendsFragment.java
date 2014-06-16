@@ -16,7 +16,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -39,7 +41,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Utils;
 
-public class FriendsFragment extends SherlockListFragment implements Listener, OnItemLongClickListener
+public class FriendsFragment extends SherlockListFragment implements Listener, OnItemLongClickListener, OnScrollListener
 {
 
 	private FriendsAdapter friendsAdapter;
@@ -54,6 +56,12 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 	private LastSeenScheduler lastSeenScheduler;
 
+	private int previousFirstVisibleItem;
+
+	private int velocity;
+
+	private long previousEventTime;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -66,6 +74,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		friendsAdapter.setEmptyView(parent.findViewById(R.id.noResultView));
 
 		friendsList.setAdapter(friendsAdapter);
+		friendsList.setOnScrollListener(this);
 		friendsAdapter.executeFetchTask();
 		friendsList.setOnItemLongClickListener(this);
 		return parent;
@@ -593,4 +602,30 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			}
 		}
 	};
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	{
+		if (previousFirstVisibleItem != firstVisibleItem)
+		{
+			long currTime = System.currentTimeMillis();
+			long timeToScrollOneElement = currTime - previousEventTime;
+			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
+
+			previousFirstVisibleItem = firstVisibleItem;
+			previousEventTime = currTime;
+		}
+
+		if (friendsAdapter == null)
+		{
+			return;
+		}
+
+		friendsAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES_SMALL);
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState)
+	{
+	}
 }

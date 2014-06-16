@@ -346,4 +346,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		return bd;
 	}
 
+	public void removeItemForKey(String key)
+	{
+		remove(key);
+	}
 }

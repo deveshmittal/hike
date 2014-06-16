@@ -16,7 +16,7 @@ public class HikeTip
 {
 	public static enum TipType
 	{
-		LAST_SEEN, STATUS, MOOD, STEALTH_FTUE_TIP_2, STEALTH_FTUE_ENTER_PASS_TIP
+		EMOTICON, LAST_SEEN, STATUS, MOOD, STEALTH_FTUE_TIP_2, STEALTH_FTUE_ENTER_PASS_TIP
 	}
 
 	public static void showTip(final Activity activity, final TipType tipType, final View parentView)
@@ -81,6 +81,9 @@ public class HikeTip
 
 		switch (tipType)
 		{
+		case EMOTICON:
+			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
+			break;
 		case LAST_SEEN:
 			editor.putBoolean(HikeMessengerApp.SHOWN_LAST_SEEN_TIP, true);
 			break;

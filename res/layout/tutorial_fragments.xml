@@ -32,7 +32,7 @@
             	android:id="@+id/tutorial_img"
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content"
-            	android:src="@drawable/tutorial2_img"
+            	android:src="@drawable/tutorial1_img"
             	android:layout_centerHorizontal="true"
             	android:scaleType="centerInside"
             	android:layout_alignParentTop="true" />
@@ -50,7 +50,7 @@
 			android:scaleType="centerInside"
             android:layout_height="0dp"
             android:layout_weight="136"
-            android:visibility="gone" />
+            android:visibility="visible" />
         
         <View
             android:layout_width="match_parent"

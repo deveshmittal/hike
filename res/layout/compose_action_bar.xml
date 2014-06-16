@@ -72,7 +72,7 @@
 	
 	            <com.bsb.hike.view.CustomFontTextView
 	                android:id="@+id/title"
-	                style="@style/ActionBarText.Shadow"
+	                style="@style/ActionBarText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_marginBottom="1dp"
@@ -80,7 +80,7 @@
 	            
 	            <com.bsb.hike.view.CustomFontTextView
 	                android:id="@+id/subtext"
-	                style="@style/ActionBarText.Shadow"
+	                style="@style/ActionBarText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_marginBottom="@dimen/abs__action_bar_subtitle_bottom_margin"

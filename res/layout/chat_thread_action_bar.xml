@@ -73,7 +73,7 @@
             android:marqueeRepeatLimit="1"
             android:textStyle="normal"
             android:textSize="12dp"
-            android:visibility="gone" />
+            android:visibility="visible" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -146,7 +146,11 @@ public class MqttMessagesManager
 			 */
 			if (!HikeConstants.SIGNUP_IC.equals(jsonObj.optString(HikeConstants.SUB_TYPE)))
 			{
-				autoDownloadGroupImage(msisdn);
+				FavoriteType favType = HikeUserDatabase.getInstance().getFriendshipStatus(msisdn);
+				if(favType==FavoriteType.FRIEND||favType==FavoriteType.REQUEST_SENT||favType==FavoriteType.REQUEST_SENT_REJECTED)
+				{
+				    autoDownloadGroupImage(msisdn);
+				}
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type))
@@ -847,6 +851,15 @@ public class MqttMessagesManager
 					: FavoriteType.FRIEND;
 
 			contactInfo.setFavoriteType(favoriteType);
+			
+			if(favoriteType == FavoriteType.REQUEST_RECEIVED)
+			{
+				int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+				if(count >= 0)
+				{	
+					Utils.incrementOrDecrementHomeOverflowCount(settings, 1);
+				}
+			}
 
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 			this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
@@ -1382,6 +1395,51 @@ public class MqttMessagesManager
 		{
 			final String groupId = jsonObj.getString(HikeConstants.TO);
 			uploadGroupProfileImage(groupId, true);
+		}
+		else if (HikeConstants.MqttMessageTypes.POPUP.equals(type))
+		{
+			if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.SHOW_STEALTH_POPUP)) 
+			{
+				JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+				String id = data.optString(HikeConstants.MESSAGE_ID);
+				String lastPushPacketId = settings.getString(HikeConstants.Extras.LAST_STEALTH_POPUP_ID, "");
+				
+				if (!TextUtils.isEmpty(id)) 
+				{
+					if (lastPushPacketId.equals(id)) 
+					{
+						Logger.d(getClass().getSimpleName(),"Duplicate popup packet ! Gotcha");
+						return;
+					}
+				}
+				else
+				{
+					Logger.d(getClass().getSimpleName(),"Returning with empty packet Id");
+					return; //empty packet id : ignore this packet
+				}
+				
+				String header = data.optString(HikeConstants.HEADER);
+				String body = data.optString(HikeConstants.BODY);
+				
+				if (!TextUtils.isEmpty(header) && !TextUtils.isEmpty(body))
+				{
+					Editor editor = settings.edit();
+					editor.putString(HikeMessengerApp.STEALTH_UNREAD_TIP_HEADER, data.optString(HikeConstants.HEADER));
+					editor.putString(HikeMessengerApp.STEALTH_UNREAD_TIP_MESSAGE, data.optString(HikeConstants.BODY));
+					editor.putBoolean(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, true);
+					editor.putString(HikeMessengerApp.LAST_STEALTH_POPUP_ID, id);
+					editor.commit();
+					
+					if(data.optBoolean(HikeConstants.PUSH, true)) //Toast this only if the push flag is true
+					{
+						Bundle bundle = new Bundle();
+						bundle.putString(HikeConstants.Extras.STEALTH_PUSH_BODY, body);
+						bundle.putString(HikeConstants.Extras.STEALTH_PUSH_HEADER, header);
+						this.pubSub.publish(HikePubSub.STEALTH_POPUP_WITH_PUSH, bundle); 
+					}
+				}
+			}
+			
 		}
 	}
 
