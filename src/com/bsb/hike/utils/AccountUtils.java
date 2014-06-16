@@ -94,6 +94,8 @@ public class AccountUtils
 
 	public static String base = HTTP_STRING + host + "/v1";
 
+	public static String baseV2 = HTTP_STRING + host + "/v2";
+
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
@@ -171,8 +173,8 @@ public class AccountUtils
 		/*
 		 * set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds
 		 */
-		HttpConnectionParams.setConnectionTimeout(params, 6000);
-		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
+		HttpConnectionParams.setConnectionTimeout(params, HikeConstants.CONNECT_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 

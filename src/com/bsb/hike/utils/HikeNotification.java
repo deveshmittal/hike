@@ -53,6 +53,9 @@ public class HikeNotification
 	public static final int APP_UPDATE_AVAILABLE_ID = -126;
 
 	public static final int STEALTH_NOTIFICATION_ID = -127;
+	
+	public static final int STEALTH_POPUP_NOTIFICATION_ID = -128;
+
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -97,7 +100,7 @@ public class HikeNotification
 		/*
 		 * invoke the chat thread here. The free SMS invite switch popup should already be showing here ideally by now.
 		 */
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + FREE_SMS_POPUP_NOTIFICATION_ID)));
@@ -111,12 +114,40 @@ public class HikeNotification
 
 	}
 
+	public void notifyStealthPopup(final String headerString)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		/*
+		 * invoke the chat thread here. The Stealth tip popup should already be showing here ideally by now.
+		 */
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
+
+		notificationIntent.setData((Uri.parse("custom://" + STEALTH_POPUP_NOTIFICATION_ID)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), headerString, headerString, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
+
+	}
+
+	
 	public void notifyMessage(final Protip proTip)
 	{
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
 		// we've got to invoke the timeline here
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + PROTIP_NOTIFICATION_ID)));
@@ -278,7 +309,7 @@ public class HikeNotification
 		String text = message;
 
 		// we've got to invoke the timeline here
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.CHATS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
@@ -304,7 +335,7 @@ public class HikeNotification
 
 		final long timeStamp = System.currentTimeMillis() / 1000;
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.FRIENDS_TAB_INDEX);
+		final Intent notificationIntent = Utils.getPeopleActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -332,7 +363,7 @@ public class HikeNotification
 
 		final long timeStamp = statusMessage.getTimeStamp();
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -390,8 +421,8 @@ public class HikeNotification
 		final String text = key + " " + message;
 
 		final int icon = returnSmallIcon();
-		final Bitmap bigPictureImage = HikeBitmapFactory.decodeFile(imagePath);
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
+		final Bitmap bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(imagePath, Bitmap.Config.RGB_565);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
@@ -404,7 +435,7 @@ public class HikeNotification
 
 		final int notificationId = (int) timeStamp;
 
-		final Intent notificationIntent = Utils.getHomeActivityIntent(context, HomeActivity.UPDATES_TAB_INDEX);
+		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		final int icon = returnSmallIcon();
@@ -519,7 +550,7 @@ public class HikeNotification
 		String vibrate = preferenceManager.getString(HikeConstants.VIBRATE_PREF_LIST, VIB_DEF);
 		final boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
 
-		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable)), context);
+		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
@@ -552,12 +583,12 @@ public class HikeNotification
 					else if (VIB_SHORT.equals(vibrate))
 					{
 						// short vibrate
-						mBuilder.setVibrate(new long[] { 0, 200, 100, 250 });
+						mBuilder.setVibrate(HikeConstants.SHORT_VIB_PATTERN);
 					}
 					else if (VIB_LONG.equals(vibrate))
 					{
 						// long vibrate
-						mBuilder.setVibrate(new long[] { 0, 1000 });
+						mBuilder.setVibrate(HikeConstants.LONG_VIB_PATTERN);
 					}
 				}
 			}

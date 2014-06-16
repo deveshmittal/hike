@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="415"
-    android:versionName="2.9.6.3" >
+    android:versionCode="520"
+    android:versionName="3.0.0" >
 
     <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="16"/>
         
@@ -78,7 +78,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_label"
             android:theme="@style/AppTheme.Home"
-            android:windowSoftInputMode="stateVisible" >
+            android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -115,7 +115,6 @@
             android:name="com.bsb.hike.ui.ChatThread"
             android:label="@string/app_label"
             android:launchMode="singleTop"
-            android:theme="@style/ChatThreadTheme"
             android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
@@ -192,6 +191,21 @@
             android:name="com.bsb.hike.ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>
+        <activity
+            android:name="com.bsb.hike.ui.PeopleActivity" 
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.TimelineActivity" 
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+         <activity
+            android:name="com.bsb.hike.ui.FtueCardsActivity"
+            android:label="@string/app_label"
+            android:launchMode="singleTop"
+            android:theme="@style/NoTitleBar" >
+        </activity>
+        
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"

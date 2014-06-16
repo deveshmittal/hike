@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
+
 import android.net.Uri;
 import android.os.Environment;
 
@@ -399,6 +401,10 @@ public class HikeConstants
 	public static final String REQUEST_DP = "rdp";
 
 	public static final String C_TIME_STAMP = "cts";
+	
+	public static final String HEADER = "h";
+	
+	public static final String BODY = "b";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -490,6 +496,10 @@ public class HikeConstants
 
 	/* Constant used to name the preference file which saves the drafts */
 	public static final String DRAFT_SETTING = "draftSetting";
+
+	public static final int CONNECT_TIMEOUT = 6 * 1000;
+
+	public static final int SOCKET_TIMEOUT = 30 * 1000;
 
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5 * 1000;
@@ -668,6 +678,9 @@ public class HikeConstants
 	// Gmail URI prefix for all devices
 	public static final String GMAIL_PREFIX = "content://gmail-ls";
 
+	// Google Plus URI prefix for all devices
+	public static final String GOOGLE_PLUS_PREFIX = "content://com.google.android.apps.photos.content";
+
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
@@ -809,6 +822,8 @@ public class HikeConstants
 
 	public static final int SELECT_COUNTRY_REQUEST_CODE = 4001;
 
+	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES_SMALL = 25;
+
 	public static final int MAX_VELOCITY_FOR_LOADING_IMAGES = 10;
 
 	public static final int MAX_VELOCITY_FOR_LOADING_TIMELINE_IMAGES = 5;
@@ -840,7 +855,15 @@ public class HikeConstants
 	public static final String FILE_SHARE_PREFIX = "file://";
 
 	public static final String SHARE_CONTACT_CONTENT_TYPE = "text/x-vcard";
+
+	public static final int MAX_LAST_SEEN_RETRY_COUNT = 3;
+
+	public static final int RETRY_WAIT_ADDITION = 2;
+
+	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 	
+	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1135,6 +1158,15 @@ public class HikeConstants
 		public static final String RECOMMENDED_CONTACTS_COUNT = "recommendedContactsCount";
 
 		public static final String SELECTED_SHARABLE_MSGS_MIME_TYPE = "selectedCancelableMsgsMimeType";
+
+		public static final String FROM_NOTIFICATION = "fromNotification";
+		
+		public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
+		
+		public static final String STEALTH_PUSH_HEADER = "stealthPushHeader";
+		
+		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
+		
 	}
 
 	public static final class LogEvent
@@ -1355,6 +1387,16 @@ public class HikeConstants
 		public static final String ENTER_WRONG_STEALTH_MODE = "entWrongStlth";
 		
 		public static final String EXIT_STEALTH_MODE = "exitStlthMode";
+
+		public static final String FTUE_WELCOME_CARD_CLICKED = "ftueWelcomeCardClicked";
+
+		public static final String FTUE_CARD_START_CHAT_CLICKED = "ftueCardStartChatClicked";
+		
+		public static final String FTUE_FAV_CARD_START_CHAT_CLICKED = "ftueFavCardStartChatClicked";
+
+		public static final String FTUE_CARD_SEEL_ALL_CLICKED = "ftueCardSeeAllClicked";
+
+		public static final String FTUE_FAV_CARD_SEEL_ALL_CLICKED = "ftueFavCardSeeAllClicked";
 		
 	}
 
@@ -1463,6 +1505,8 @@ public class HikeConstants
 		public static final String STEALTH = "stlth";
 
 		public static final String TOGGLE_STEALTH = "ts";
+		
+		public static final String POPUP = "popup"; //this is a generic popup type
 
 	}
 
@@ -1513,8 +1557,8 @@ public class HikeConstants
 		EMOTICON, STICKERS
 	}
 
-	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2 };
-
+	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2, R.string.native_sms_invite_3, R.string.native_sms_invite_4, R.string.native_sms_invite_5, R.string.native_sms_invite_6 };
+	
 	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3,
 			R.string.male_selected_string_4, R.string.male_selected_string_5 };
 
@@ -1523,6 +1567,8 @@ public class HikeConstants
 
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
+
+	public static final StatusMessageType[] STATUS_TYPE_LIST_TO_FETCH = {StatusMessageType.TEXT, StatusMessageType.TEXT_IMAGE};
 
 	public static enum WelcomeTutorial
 	{
@@ -1534,4 +1580,10 @@ public class HikeConstants
 	 * this key to true in preference
 	 */
 	public static final String PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST = "soundVibTransitionDone";
+
+	public static final long[] SHORT_VIB_PATTERN = new long[] { 0, 200, 100, 250 };
+
+	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
+
+	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
 }

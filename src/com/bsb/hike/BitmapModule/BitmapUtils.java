@@ -5,27 +5,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.bsb.hike.R;
-import com.bsb.hike.utils.Utils;
-
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
 
+import com.bsb.hike.R;
+import com.bsb.hike.utils.Utils;
+
 public class BitmapUtils
 {
-	/**
-	 * Returns aspect ratio of bitmap (Width to Height ratio)
-	 */
-	public static float getAspectRatioFromFile(String filename)
-	{
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-		HikeBitmapFactory.decodeFile(filename, options);
-		return (float) (options.outWidth) / options.outHeight;
-	}
-
 	public static boolean isThumbnailSquare(Bitmap thumbnail)
 	{
 		return (thumbnail.getWidth() == thumbnail.getHeight());

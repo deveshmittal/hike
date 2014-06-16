@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -24,16 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -43,16 +33,18 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowManager.BadTokenException;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -62,7 +54,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -72,14 +63,13 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
 import com.bsb.hike.ui.fragments.ConversationFragment;
-import com.bsb.hike.ui.fragments.FriendsFragment;
-import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -88,35 +78,21 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.viewpagerindicator.IconPagerAdapter;
-import com.viewpagerindicator.TabPageIndicator;
 
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
 
-	public static final int UPDATES_TAB_INDEX = 0;
-
-	public static final int CHATS_TAB_INDEX = 1;
-
-	public static final int FRIENDS_TAB_INDEX = 2;
-
-	public static List<ContactInfo> ftueList = new ArrayList<ContactInfo>(0);
+	public static FtueContactsData ftueContactsData = new FtueContactsData();
 
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, ADD_FRIEND_FTUE_POPUP, FILE_TRANSFER_POP_Up, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
-	private ViewPager viewPager;
-
 	private DialogShowing dialogShowing;
-
-	private int[] headers = { R.string.updates, R.string.chats, R.string.contacts_upper_case };
-
-	private int[] tabIcons = { R.drawable.updates_tab, R.drawable.chats_tab, R.drawable.friends_tab };
 
 	private boolean deviceDetailsSent;
 
@@ -141,12 +117,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private PopupWindow overFlowWindow;
 
 	private TextView topBarIndicator;
+	
+	private TextView timelineTopBarIndicator;
 
 	private Drawable myProfileImage;
 
 	private View ftueAddFriendWindow;
-
-	private boolean shouldShowAddFriendsPopup = true;
 
 	private boolean isAddFriendFtueShowing = false;
 
@@ -159,11 +135,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private HikeTip.TipType tipTypeShowing;
 
 	private FetchContactsTask fetchContactsTask;
+	
+	private ConversationFragment mainFragment;
+	
+	private Handler mHandler = new Handler();
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FRIEND_REQ_COUNT_RESET, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -194,104 +174,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
 
-		shouldShowAddFriendsPopup = false;
-
 		if (!showingProgress)
 		{
 			initialiseHomeScreen(savedInstanceState);
-		}
-
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
-		{
-			if (savedInstanceState != null)
-			{
-				shouldShowAddFriendsPopup = savedInstanceState.getBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING);
-				isAddFriendFtueShowing = shouldShowAddFriendsPopup;
-				friendsListCount = savedInstanceState.getInt(HikeConstants.Extras.FRIENDS_LIST_COUNT);
-				hikeContactsCount = savedInstanceState.getInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT);
-				recommendedCount = savedInstanceState.getInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT);
-				Object o = getLastCustomNonConfigurationInstance();
-				if (o instanceof FetchContactsTask)
-				{
-					fetchContactsTask = (FetchContactsTask) o;
-				}
-			}
-			if (friendsListCount == -1 && fetchContactsTask == null)
-			{
-				fetchContactsTask = new FetchContactsTask();
-				Utils.executeAsyncTask(fetchContactsTask);
-			}
 		}
 	}
 
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
-		actionBar.setIcon(R.drawable.hike_logo_top_bar);
-		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-
-		View actionBarView = LayoutInflater.from(this).inflate(R.layout.home_action_bar, null);
-
-		View logo = actionBarView.findViewById(R.id.hike_logo);
-		logo.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
-				{
-					return;
-				}
-				if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
-				{
-					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
-					{
-						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
-						tipTypeShowing = null;
-						LockPattern.createNewPattern(HomeActivity.this);
-					}
-					else
-					{
-						if (!(dialog != null && dialog.isShowing()))
-						{
-							if (!((ConversationFragment) getFragmentForIndex(null, CHATS_TAB_INDEX)).hasNoConversation())
-							{
-
-								dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
-								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
-							}
-							else
-							{
-								dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
-								dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
-							}
-						}
-					}
-				}
-				else
-				{
-					if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
-					{
-						findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
-						tipTypeShowing = null;
-					}
-					final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-					if (stealthType == HikeConstants.STEALTH_OFF)
-					{
-						LockPattern.confirmPattern(HomeActivity.this);
-					}
-					else
-					{
-						HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
-						Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
-					}
-				}
-			}
-		});
-
-		actionBar.setCustomView(actionBarView);
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setTitle("");
+		actionBar.setLogo(R.drawable.home_screen_top_bar_logo);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowTitleEnabled(true);
 	}
 
 	private void initialiseHomeScreen(Bundle savedInstanceState)
@@ -312,25 +208,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
 			}
 		}
-
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false))
-		{
-			// if chat bg ftue is not shown show this on the highest priority
-			dialogShowing = DialogShowing.ADD_FRIEND_FTUE_POPUP;
-		}
-		else if (!HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, false))
-		{
-			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
-		}
 		else
 		{
 			// check the preferences and show update
 			updateType = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 			showUpdatePopup(updateType);
 		}
-		showUpdateIcon = Utils.getNotificationCount(accountPrefs, false) > 0;
 
-		initialiseViewPager(savedInstanceState);
+		setupMainFragment(savedInstanceState);
 		initialiseTabs();
 
 		/*
@@ -358,6 +243,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
+	}
+
+	private void setupMainFragment(Bundle savedInstanceState)
+	{
+		if (savedInstanceState != null) {
+            return;
+        }
+        mainFragment = new ConversationFragment();
+        
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.home_screen, mainFragment).commit();
+		
 	}
 
 	private void showStealthFtueTip(final boolean isSetPasswordTip)
@@ -433,54 +330,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private boolean setupMenuOptions(Menu menu)
 	{
+		getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
 
-		if (viewPager == null)
-		{
-			return false;
-		}
-
-		switch (viewPager.getCurrentItem())
-		{
-		case UPDATES_TAB_INDEX:
-			getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
-			break;
-		case CHATS_TAB_INDEX:
-			getSupportMenuInflater().inflate(R.menu.chats_menu, menu);
-			break;
-		case FRIENDS_TAB_INDEX:
-			getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
-			final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-			searchView.setQueryHint(getString(R.string.search_hint));
-			searchView.setIconifiedByDefault(false);
-			searchView.setIconified(false);
-			searchView.setOnQueryTextListener(onQueryTextListener);
-			searchView.clearFocus();
-
-			MenuItem searchItem = menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint);
-
-			searchItem.setIcon(R.drawable.ic_top_bar_search).setActionView(searchView)
-					.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-
-			searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
-			{
-
-				@Override
-				public boolean onMenuItemActionExpand(MenuItem item)
-				{
-					return true;
-				}
-
-				@Override
-				public boolean onMenuItemActionCollapse(MenuItem item)
-				{
-					searchView.setQuery("", true);
-					return true;
-				}
-			});
-			break;
-		default:
-			return false;
-		}
 		topBarIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
 		updateOverFlowMenuNotification();
 		menu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new View.OnClickListener()
@@ -489,6 +340,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void onClick(View v)
 			{
 				showOverFlowMenu();
+			}
+		});
+		
+		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
+		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
+		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 1000);
+		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class);
+				startActivity(intent);
 			}
 		});
 
@@ -506,12 +370,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false))
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_START_NEW_CHAT_TIP, null);
+			}
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
-		case R.id.new_update:
-			intent = new Intent(this, StatusUpdate.class);
-
-			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
+		case android.R.id.home:
+			hikeLogoClicked();
 			break;
 		}
 
@@ -525,25 +391,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
-	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener()
-	{
-
-		@Override
-		public boolean onQueryTextSubmit(String query)
-		{
-			return false;
-		}
-
-		@Override
-		public boolean onQueryTextChange(String newText)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY, newText);
-			return true;
-		}
-	};
-
-	private TabPageIndicator tabIndicator;
 
 	private Intent getGamingIntent()
 	{
@@ -755,167 +602,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onResume();
 		checkNShowNetworkError();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
-		/*
-		 * We only show addfriends popup on second resume and also not on orientation changes
-		 */
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, false) && friendsListCount != -1 && shouldShowAddFriendsPopup && ftueAddFriendWindow == null)
-		{
-			/*
-			 * we only show ftue popups if user doesn't friends over a certain limit
-			 */
-			if (friendsListCount < HikeConstants.FRIENDS_LIMIT_MAGIC_NUMBER)
-			{
-				showFTUEAddFtriendsPopup();
-			}
-			else
-			{
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-				editor.commit();
-			}
-		}
-		shouldShowAddFriendsPopup = true;
-	}
-
-	private void showFTUEAddFtriendsPopup()
-	{
-
-		ViewStub popupViewStub = (ViewStub) findViewById(R.id.addfriends_popup_viewstub);
-		popupViewStub.setOnInflateListener(new ViewStub.OnInflateListener()
-		{
-			boolean isAddFriendsPopup = Utils.shouldShowAddFriendsFTUE(hikeContactsCount, recommendedCount);
-
-			@Override
-			public void onInflate(ViewStub stub, View inflated)
-			{
-				ftueAddFriendWindow = inflated;
-				ImageView popUpImage = (ImageView) ftueAddFriendWindow.findViewById(R.id.popup_img);
-				TextView popUpTitle = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_title);
-				TextView popUpMsg = (TextView) ftueAddFriendWindow.findViewById(R.id.popup_msg);
-				Button popUpAddButton = (Button) ftueAddFriendWindow.findViewById(R.id.add_btn);
-
-				if (isAddFriendsPopup)
-				{
-					popUpImage.setImageResource(R.drawable.signup_intro_add_friends_img);
-
-					String titleString = getResources().getString(R.string.add_favorites_popup_msg);
-					Spannable titleStringSpan = new SpannableString(titleString);
-
-					String statusUpdatesString = getResources().getString(R.string.blue_status_updates);
-					int startSpan = titleString.indexOf(statusUpdatesString);
-					int endSpan = startSpan + statusUpdatesString.length();
-					if (startSpan >= 0)
-					{
-						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					String lastSeenString = getResources().getString(R.string.red_last_seen);
-					startSpan = titleString.indexOf(lastSeenString);
-					endSpan = startSpan + lastSeenString.length();
-					if (startSpan >= 0)
-					{
-						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.red_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					popUpTitle.setText(R.string.favorites_on_hike_tut);
-					popUpMsg.setText(titleStringSpan);
-					popUpAddButton.setText(R.string.start_adding_favorites);
-					/*
-					 * This tag value true represents weather this popup is Add Friends popup and false represents that this popup is invite Friends popup
-					 */
-					popUpAddButton.setTag(true);
-				}
-				else
-				{
-					if (!accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, "").startsWith(HikeConstants.INDIA_COUNTRY_CODE))
-					{
-						Editor editor = accountPrefs.edit();
-						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-						editor.commit();
-						return;
-					}
-					popUpImage.setImageResource(R.drawable.signup_intro_invite_friend);
-					popUpTitle.setText(R.string.invite_friends);
-
-					String titleString = getResources().getString(R.string.ftue_invite_friends_msg);
-					Spannable titleStringSpan = new SpannableString(titleString);
-
-					int startSpan = titleString.indexOf("20");
-					int endSpan = startSpan + 2;
-					if (startSpan >= 0)
-					{
-						titleStringSpan.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blue_color_span)), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					startSpan = titleString.indexOf("*");
-					endSpan = startSpan + 1;
-					if (startSpan > 0)
-					{
-						titleStringSpan.setSpan(new ImageSpan(HomeActivity.this, R.drawable.ic_rupee), startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-
-					popUpMsg.setText(titleStringSpan);
-					popUpAddButton.setText(R.string.start_inviting_friends);
-					popUpAddButton.setTag(false);
-				}
-
-				findViewById(R.id.popup_black_overlay).setOnClickListener(null);
-				popUpAddButton.setOnClickListener(new OnClickListener()
-				{
-
-					@Override
-					public void onClick(View v)
-					{
-						boolean isAddFriendsPopup = (Boolean) v.getTag();
-						Intent intent = new Intent(HomeActivity.this, isAddFriendsPopup ? AddFriendsActivity.class : HikeListActivity.class);
-						intent.putExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, true);
-						startActivity(intent);
-						Editor editor = accountPrefs.edit();
-						editor.putBoolean(HikeMessengerApp.SHOWN_ADD_FRIENDS_POPUP, true);
-						editor.commit();
-						(new Handler()).postDelayed(new Runnable()
-						{
-
-							@Override
-							public void run()
-							{
-								getSupportActionBar().show();
-								findViewById(R.id.action_bar_img).setVisibility(View.GONE);
-							}
-						}, 800);
-						ftueAddFriendWindow.setVisibility(View.GONE);
-					}
-				});
-
-				ftueAddFriendWindow.setVisibility(View.VISIBLE);
-				findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
-				findViewById(R.id.action_bar_img).setBackgroundResource(R.drawable.action_bar_img);
-				getSupportActionBar().hide();
-
-				/*
-				 * here if condition is used to not show this slide up animation on orientation changes
-				 */
-				if (!isAddFriendFtueShowing)
-				{
-					View popup = ftueAddFriendWindow.findViewById(R.id.popup);
-					Animation anim = AnimationUtils.loadAnimation(HomeActivity.this, R.anim.slide_up_noalpha);
-					anim.setInterpolator(new AccelerateDecelerateInterpolator());
-					anim.setDuration(600);
-					popup.setAnimation(anim);
-				}
-
-				/*
-				 * if overflow popup is showing we should dismiss it
-				 */
-				if (overFlowWindow != null && overFlowWindow.isShowing())
-				{
-					overFlowWindow.dismiss();
-				}
-
-			}
-		});
-		popupViewStub.inflate();
-
 	}
 
 	@Override
@@ -941,7 +627,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			outState.putInt(HikeConstants.Extras.DIALOG_SHOWING, dialogShowing != null ? dialogShowing.ordinal() : -1);
 		}
 		outState.putBoolean(HikeConstants.Extras.IS_HOME_POPUP_SHOWING, overFlowWindow != null && overFlowWindow.isShowing());
-		outState.putBoolean(HikeConstants.Extras.IS_FTUT_ADD_FRIEND_POPUP_SHOWING, ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE);
 		outState.putInt(HikeConstants.Extras.FRIENDS_LIST_COUNT, friendsListCount);
 		outState.putInt(HikeConstants.Extras.HIKE_CONTACTS_COUNT, hikeContactsCount);
 		outState.putInt(HikeConstants.Extras.RECOMMENDED_CONTACTS_COUNT, recommendedCount);
@@ -995,212 +680,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	@SuppressLint("NewApi")
 	private void initialiseTabs()
 	{
-		tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
-
-		int position = getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1);
-		tabIndicator.setViewPager(viewPager, position);
-		tabIndicator.setOnPageChangeListener(onPageChangeListener);
-
-		onPageChangeListener.onPageSelected(position);
-
 		invalidateOptionsMenu();
-		setBackground();
 	}
-
-	int initialRed = 231;
-
-	int initialGreen = 226;
-
-	int initialBlue = 214;
-
-	int finalRed = 255;
-
-	int finalGreen = 255;
-
-	int finalBlue = 255;
-
-	private void setBackground()
-	{
-		int position = viewPager.getCurrentItem();
-		if (position == 0)
-		{
-			parentLayout.setBackgroundColor(getResources().getColor(R.color.updates_bg));
-		}
-		else
-		{
-			parentLayout.setBackgroundColor(getResources().getColor(R.color.white));
-		}
-	}
-
-	@SuppressLint("NewApi")
-	/*
-	 * Implemented to add a fade change in color when switching between updates tab and other tabs
-	 */
-	OnPageChangeListener onPageChangeListener = new OnPageChangeListener()
-	{
-
-		@Override
-		public void onPageSelected(int position)
-		{
-			invalidateOptionsMenu();
-			setBackground();
-
-			/*
-			 * Sending a blank query search to ensure all friends are shown.
-			 */
-			if (position == CHATS_TAB_INDEX)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FRIENDS_TAB_QUERY, "");
-			}
-
-			if (position == UPDATES_TAB_INDEX)
-			{
-				showUpdateIcon = false;
-
-				SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-				if (prefs.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0) > 0 || prefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0) > 0)
-				{
-					Utils.resetUnseenStatusCount(prefs);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_NOTIFICATION_COUNTER, null);
-				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
-
-				tabIndicator.notifyDataSetChanged();
-			}
-
-			if (position != CHATS_TAB_INDEX)
-			{
-				long firstViewFtueTs = accountPrefs.getLong(HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, 0);
-				if (firstViewFtueTs == 0)
-				{
-					Editor editor = accountPrefs.edit();
-					editor.putLong(HikeMessengerApp.FIRST_VIEW_FTUE_LIST_TIMESTAMP, System.currentTimeMillis() / 1000);
-					editor.commit();
-				}
-			}
-		}
-
-		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-		{
-			if (position != 0)
-			{
-				return;
-			}
-
-			int percent = (int) (positionOffset * 100);
-			if (percent % 2 != 0)
-			{
-				return;
-			}
-
-			int red = initialRed + (int) (((finalRed - initialRed) * percent) / 100);
-			int green = initialGreen + (int) (((finalGreen - initialGreen) * percent) / 100);
-			int blue = initialBlue + (int) (((finalBlue - initialBlue) * percent) / 100);
-
-			parentLayout.setBackgroundColor(Color.argb(255, red, green, blue));
-		}
-
-		@Override
-		public void onPageScrollStateChanged(int state)
-		{
-
-		}
-	};
 
 	private boolean showUpdateIcon;
-
-	private void initialiseViewPager(Bundle outBundle)
-	{
-		viewPager = (ViewPager) findViewById(R.id.viewpager);
-
-		List<Fragment> fragmentList = new ArrayList<Fragment>(headers.length);
-		fragmentList.add(getFragmentForIndex(outBundle, 0));
-		fragmentList.add(getFragmentForIndex(outBundle, 1));
-		fragmentList.add(getFragmentForIndex(outBundle, 2));
-		viewPager.setOffscreenPageLimit(2);
-		viewPager.setAdapter(new HomeAdapter(getSupportFragmentManager(), fragmentList));
-		viewPager.setCurrentItem(1);
-	}
-
-	private Fragment getFragmentForIndex(Bundle oBundle, int index)
-	{
-
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + index);
-		if (fragment == null)
-		{
-			switch (index)
-			{
-			case 0:
-
-				fragment = new UpdatesFragment();
-
-				break;
-
-			case 1:
-				fragment = new ConversationFragment();
-				break;
-
-			case 2:
-				fragment = new FriendsFragment();
-				break;
-			}
-		}
-		return fragment;
-	}
-
-	private class HomeAdapter extends FragmentPagerAdapter implements IconPagerAdapter
-	{
-
-		List<Fragment> fragments;
-
-		public HomeAdapter(FragmentManager fm, List<Fragment> fragments)
-		{
-
-			super(fm);
-			this.fragments = fragments;
-		}
-
-		@Override
-		public Fragment getItem(int position)
-		{
-			return fragments.get(position);
-		}
-
-		@Override
-		public int getCount()
-		{
-			return fragments.size();
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position)
-		{
-			return getString(headers[position]);
-		}
-
-		@Override
-		public int getIconResId(int index)
-		{
-			if (index == UPDATES_TAB_INDEX && showUpdateIcon)
-			{
-				return R.drawable.ic_new_update;
-			}
-			else
-			{
-				return tabIcons[index];
-			}
-		}
-
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object)
-		{
-			// TODO Auto-generated method stub
-			super.destroyItem(container, position, object);
-			viewPager.removeView(((Fragment) object).getView());
-		}
-	}
 
 	private void showUpdatePopup(final int updateType)
 	{
@@ -1303,8 +786,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onEventReceived(type, object);
 		if (HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT.equals(type))
 		{
-			showUpdateIcon = true;
-			runOnUiThread(refreshTabIcon);
+			runOnUiThread( new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
+				}
+			});
 		}
 		else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE))
 		{
@@ -1352,14 +842,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
-			if (ftueList.isEmpty())
+			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+			if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)|| (HikePubSub.FAVORITE_TOGGLED.equals(type) && (favoriteToggle.second.equals(FavoriteType.REQUEST_RECEIVED) || favoriteToggle.second.equals(FavoriteType.FRIEND))))
+			{
+				updateOverFlowMenuNotification();
+			}
+
+			if (ftueContactsData.isEmpty())
 			{
 				return;
 			}
-			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			ContactInfo favoriteToggleContact = favoriteToggle.first;
 
-			for (ContactInfo contactInfo : ftueList)
+			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(favoriteToggleContact.getMsisdn()))
 				{
@@ -1368,16 +863,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				}
 			}
-
 		}
 		else if (HikePubSub.USER_JOINED.equals(type) || HikePubSub.USER_LEFT.equals(type))
 		{
-			if (ftueList.isEmpty())
+			if (ftueContactsData.isEmpty())
 			{
 				return;
 			}
 			String msisdn = (String) object;
-			for (ContactInfo contactInfo : ftueList)
+			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(msisdn))
 				{
@@ -1511,46 +1005,102 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					if (viewPager.getCurrentItem() != 1)
-					{
-						viewPager.setCurrentItem(1);
-					}
+				}
+			});
+		}
+		else if (HikePubSub.STEALTH_UNREAD_TIP_CLICKED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run()
+				{
+					hikeLogoClicked();
+				}
+			});
+		}
+		else if(HikePubSub.FRIEND_REQ_COUNT_RESET.equals(type))
+		{
+			runOnUiThread( new Runnable() {
+			@Override
+			public void run()
+			{
+
+				
+					topBarIndicator.setVisibility(View.INVISIBLE);
+
 				}
 			});
 		}
 	}
 
-	Runnable refreshTabIcon = new Runnable()
+	private void updateHomeOverflowToggleCount(final int count, int delayTime)
 	{
 
-		@Override
-		public void run()
+		if (count < 1)
 		{
-			tabIndicator.notifyDataSetChanged();
+			topBarIndicator.setVisibility(View.GONE);
 		}
-	};
+		else
+		{
+			mHandler.postDelayed(new Runnable()
+			{
 
-	private class GetFTUEContactsTask extends AsyncTask<Void, Void, List<ContactInfo>>
+				@Override
+				public void run()
+				{
+					if (topBarIndicator != null)
+					{
+						/*
+						 * Fetching the count again since it could have changed after the delay. 
+						 */
+						int newCount = Utils.updateHomeOverflowToggleCount(accountPrefs);
+						if (newCount < 1)
+						{
+							topBarIndicator.setVisibility(View.GONE);
+						}
+						else if (newCount > 9)
+						{
+							topBarIndicator.setVisibility(View.VISIBLE);
+							topBarIndicator.setText("9+");
+							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
+						}
+						else if (newCount > 0)
+						{
+							topBarIndicator.setVisibility(View.VISIBLE);
+							topBarIndicator.setText(String.valueOf(count));
+							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
+						}
+					}
+				}
+			}, delayTime);
+		}
+
+	}
+
+	private class GetFTUEContactsTask extends AsyncTask<Void, Void, FtueContactsData>
 	{
 
 		@Override
-		protected List<ContactInfo> doInBackground(Void... params)
+		protected FtueContactsData doInBackground(Void... params)
 		{
-			List<ContactInfo> contactList = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+			FtueContactsData ftueContactsDataResult = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
 			/*
 			 * This msisdn type will be the identifier for ftue contacts in the friends tab.
 			 */
-			for (ContactInfo contactInfo : contactList)
+			ftueContactsDataResult.setCompleteList();
+			for (ContactInfo contactInfo : ftueContactsDataResult.getCompleteList())
 			{
 				contactInfo.setMsisdnType(HikeConstants.FTUE_MSISDN_TYPE);
 			}
-			return contactList;
+
+			return ftueContactsDataResult;
 		}
 
 		@Override
-		protected void onPostExecute(List<ContactInfo> result)
+		protected void onPostExecute(FtueContactsData result)
 		{
-			ftueList = result;
+			ftueContactsData = result;
+			Logger.d("GetFTUEContactsTask","ftueContactsData = "+ ftueContactsData.toString());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
 		}
 	}
@@ -1631,12 +1181,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	public void showOverFlowMenu()
 	{
 
-		final boolean shownGroupChatTip = accountPrefs.getBoolean(HikeMessengerApp.SHOWN_GROUP_CHAT_TIP, false);
-		if (!shownGroupChatTip)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.DISMISS_GROUP_CHAT_TIP, null);
-		}
-
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
@@ -1648,7 +1192,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * removing out new chat option for now
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
-
+		
+		optionsList.add(new OverFlowMenuItem(getString(R.string.favorites), 10));
+		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
@@ -1670,7 +1216,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		overFlowWindow = new PopupWindow(this);
 
-		LinearLayout homeScreen = (LinearLayout) findViewById(R.id.home_screen);
+		FrameLayout homeScreen = (FrameLayout) findViewById(R.id.home_screen);
 
 		View parentView = getLayoutInflater().inflate(R.layout.overflow_menu, homeScreen, false);
 
@@ -1710,17 +1256,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 				else
 				{
+					
 					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-				}
-
-				View arrow = convertView.findViewById(R.id.arrow);
-				if (item.getKey() == 6)
-				{
-					arrow.setVisibility(shownGroupChatTip ? View.GONE : View.VISIBLE);
-				}
-				else
-				{
-					arrow.setVisibility(View.GONE);
 				}
 
 				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
@@ -1735,9 +1272,21 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					freeSmsCount.setVisibility(View.GONE);
 				}
+				
+				TextView friendRequestCount = (TextView) convertView.findViewById(R.id.friend_req_count);
+				int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+				if(frCount>0 && item.getKey() == 10)
+				{
+					friendRequestCount.setText(Integer.toString(frCount));
+					friendRequestCount.setVisibility(View.VISIBLE);
+
+				}
+				else
+					friendRequestCount.setVisibility(View.GONE);
 
 				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
+								
 				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 				if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked))
@@ -1746,6 +1295,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 				else
 					newGamesIndicator.setVisibility(View.GONE);
+				
+				
 				return convertView;
 			}
 		});
@@ -1799,6 +1350,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
+				case 10:
+					intent = new Intent(HomeActivity.this, PeopleActivity.class);
+					break;	
 				}
 
 				if (intent != null)
@@ -1818,7 +1372,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		try
 		{
-			overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor));
+			int rightMargin = getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
+			overFlowWindow.showAsDropDown(findViewById(R.id.overflow_anchor), -rightMargin, 0);
 		}
 		catch (BadTokenException e)
 		{
@@ -1861,13 +1416,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public void updateOverFlowMenuNotification()
 	{
-		if (accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true) && accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true) && topBarIndicator != null)
+		final int count = Utils.updateHomeOverflowToggleCount(accountPrefs);
+		if (topBarIndicator != null)
 		{
-			topBarIndicator.setVisibility(View.INVISIBLE);
-		}
-		else
-		{
-			topBarIndicator.setVisibility(View.VISIBLE);
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					updateHomeOverflowToggleCount(count, 1000);
+				}
+			});
+
 		}
 	}
 
@@ -1923,10 +1484,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		case FREE_INVITE_POPUP:
 			showFreeInviteDialog();
 			break;
-		case FILE_TRANSFER_POP_Up:
-			dialogShowing = DialogShowing.FILE_TRANSFER_POP_Up;
-			dialog = HikeDialog.showDialog(this, HikeDialog.FILE_TRANSFER_DIALOG, getHomeActivityDialogListener());
-			break;
 		case STEALTH_FTUE_POPUP:
 			dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
 			dialog = HikeDialog.showDialog(this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
@@ -1954,9 +1511,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				switch (dialogShowing)
 				{
-				case FILE_TRANSFER_POP_Up:
-					HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.SHOWN_FILE_TRANSFER_POP_UP, true);
-					break;
 				case STEALTH_FTUE_POPUP:
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
 					Utils.sendUILogEvent(HikeConstants.LogEvent.QUICK_SETUP_CLICK);
@@ -1983,4 +1537,148 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+	
+
+	public void updateTimelineNotificationCount(int count, int delayTime)
+	{
+		if (count < 1)
+		{
+			timelineTopBarIndicator.setVisibility(View.GONE);
+		}
+		else
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (timelineTopBarIndicator != null)
+					{
+						int count = Utils.getNotificationCount(accountPrefs, false);
+						if (count > 9)
+						{
+							timelineTopBarIndicator.setVisibility(View.VISIBLE);
+							timelineTopBarIndicator.setText("9+");
+							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+						}
+						else if (count > 0)
+						{
+							timelineTopBarIndicator.setVisibility(View.VISIBLE);
+							timelineTopBarIndicator.setText(String.valueOf(count));
+							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+						}
+					}
+				}
+			}, delayTime);
+		}
+	}
+	
+	private Animation getNotificationIndicatorAnim()
+	{
+		AnimationSet animSet = new AnimationSet(true);
+		float a = 0.5f;
+		float b = 1.15f;
+		float c = 0.8f;
+		float d = 1.07f;
+		float e = 1f;
+		int initialOffset = 0;
+		float pivotX = 0.5f;
+		float pivotY = 0.5f;
+		Animation anim0 = new ScaleAnimation(1, a, 1, a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim0.setInterpolator(new AccelerateInterpolator(2f));
+		anim0.setStartOffset(initialOffset);
+		anim0.setDuration(150);
+		animSet.addAnimation(anim0);
+
+		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim1.setInterpolator(new AccelerateInterpolator(2f));
+		anim1.setDuration(200);
+		anim1.setStartOffset(initialOffset+ anim0.getDuration());
+		animSet.addAnimation(anim1);
+
+		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim2.setInterpolator(new AccelerateInterpolator(-1f));
+		anim2.setDuration(150);
+		anim2.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration());
+		animSet.addAnimation(anim2);
+
+		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim2.setInterpolator(new AccelerateInterpolator(1f));
+		anim3.setDuration(150);
+		anim3.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
+		animSet.addAnimation(anim3);
+
+		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim4.setInterpolator(new AccelerateInterpolator(1f));
+		anim4.setDuration(150);
+		anim4.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
+		animSet.addAnimation(anim4);
+
+		return animSet;
+	}
+	
+
+	private void hikeLogoClicked()
+	{
+		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
+		}
+		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_WELCOME_HIKE_TIP, null);
+		}
+		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP, false))
+		{
+			return;
+		}
+		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+		{
+			if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_TIP_2)
+			{
+				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+				tipTypeShowing = null;
+				LockPattern.createNewPattern(HomeActivity.this);
+			}
+			else
+			{
+				if (!(dialog != null && dialog.isShowing()) && mainFragment != null)
+				{
+					if (!mainFragment.hasNoConversation())
+					{
+
+						dialogShowing = DialogShowing.STEALTH_FTUE_POPUP;
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_DIALOG, getHomeActivityDialogListener());
+					}
+					else
+					{
+						dialogShowing = DialogShowing.STEALTH_FTUE_EMPTY_STATE_POPUP;
+						dialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.STEALTH_FTUE_EMPTY_STATE_DIALOG, getHomeActivityDialogListener());
+					}
+				}
+			}
+		}
+		else
+		{
+			if (tipTypeShowing != null && tipTypeShowing == TipType.STEALTH_FTUE_ENTER_PASS_TIP)
+			{
+				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
+				tipTypeShowing = null;
+			}
+			final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			if (stealthType == HikeConstants.STEALTH_OFF)
+			{
+				LockPattern.confirmPattern(HomeActivity.this);
+			}
+			else
+			{
+				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+			}
+		}
+	}
+
+	
 }

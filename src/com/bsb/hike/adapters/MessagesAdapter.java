@@ -1272,11 +1272,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					/*
 					 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
 					 */
+
+					// Set Thumbnail Width
 					int maxWidth = (int) (250 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
 					int minWidth = (int) (119 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
-
 					if (fileThumbParams.width == minWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
@@ -1284,6 +1285,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					else if (fileThumbParams.width == maxWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
+
+					// Set Thumbnail Height
+					int minHeight = (int) (70 * Utils.densityMultiplier);
+					fileThumbParams.height = Math.max(fileThumbParams.height, minHeight);
+					if (fileThumbParams.height == minHeight)
+					{
+						int width = ((thumbnail.getIntrinsicWidth() * minHeight) / thumbnail.getIntrinsicHeight());
+						if(width >= minWidth && width<=maxWidth)
+							fileThumbParams.width = width;
 					}
 				}
 				videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
@@ -1417,11 +1428,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					/*
 					 * fixed the bug when image thumbnail is very big. By specifying a maximum width for the thumbnail so that download button can also fit to the screen.
 					 */
+
+					// Set Thumbnail Width
 					int maxWidth = (int) (250 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.min(fileThumbParams.width, maxWidth);
 					int minWidth = (int) (119 * Utils.densityMultiplier);
 					fileThumbParams.width = Math.max(fileThumbParams.width, minWidth);
-
 					if (fileThumbParams.width == minWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * minWidth) / thumbnail.getIntrinsicWidth());
@@ -1429,6 +1441,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					else if (fileThumbParams.width == maxWidth)
 					{
 						fileThumbParams.height = ((thumbnail.getIntrinsicHeight() * maxWidth) / thumbnail.getIntrinsicWidth());
+					}
+
+					// Set Thumbnail Height
+					int minHeight = (int) (70 * Utils.densityMultiplier);
+					fileThumbParams.height = Math.max(fileThumbParams.height, minHeight);
+					if (fileThumbParams.height == minHeight)
+					{
+						int width = ((thumbnail.getIntrinsicWidth() * minHeight) / thumbnail.getIntrinsicHeight());
+						if(width >= minWidth && width<=maxWidth)
+							fileThumbParams.width = width;
 					}
 				}
 				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
@@ -1625,7 +1647,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
-				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileThumb.setImageResource(R.drawable.ic_default_contact);
 				fileHolder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileHolder.fileName.setText(hikeFile.getDisplayName());
@@ -1754,7 +1775,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dayHolder = fileHolder;
 				setSenderDetails(convMessage, position, fileHolder, false);
-				createFileThumb(fileHolder.fileThumb);
 				fileHolder.fileName.setText(hikeFile.getFileName());
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
@@ -3693,19 +3713,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return ret;
 	}
 
-	private void createFileThumb(ImageView fileThumb)
-	{
-		// TODO Auto-generated method stub
-		Logger.d(getClass().getSimpleName(), "creating default thumb. . . ");
-		int pixels = context.getResources().getDimensionPixelSize(R.dimen.file_message_item_size);
-		Logger.d(getClass().getSimpleName(), "density: " + Utils.densityMultiplier);
-		fileThumb.getLayoutParams().height = pixels;
-		fileThumb.getLayoutParams().width = pixels;
-		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg));
-		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
-		fileThumb.setImageResource(0);
-	}
-
 	private void createMediaThumb(ImageView fileThumb)
 	{
 		// TODO Auto-generated method stub
@@ -4351,11 +4358,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		chatThread.showContactDetails(items, name, null, true);
 	}
 
+	/*
+	 * We need to setup this onLongClickListener for all
+	 * such message item which are clickable because otherwise
+	 * these items will consume this event on its on.
+	 */
 	@Override
 	public boolean onLongClick(View view)
 	{
-		chatThread.showMessageContextMenu((ConvMessage) view.getTag());
-		return true;
+		/*
+		 * here returning false will pass this event to
+		 * onItemLongClick method of listview.
+		 */
+		return false;
 	}
 
 	@Override

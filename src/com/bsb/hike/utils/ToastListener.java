@@ -20,6 +20,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.adapters.CentralTimelineAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -35,6 +36,8 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
@@ -53,7 +56,7 @@ public class ToastListener implements Listener
 	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED, HikePubSub.PUSH_FILE_DOWNLOADED, HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS, HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED, HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
-			HikePubSub.SHOW_FREE_INVITE_SMS };
+			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH};
 
 	public ToastListener(Context context)
 	{
@@ -169,6 +172,10 @@ public class ToastListener implements Listener
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+			if (activity instanceof PeopleActivity) 
+			{
+				return;
+			}
 			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
 				this.toaster.notifyStealthMessage();
@@ -180,8 +187,10 @@ public class ToastListener implements Listener
 		}
 		else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type))
 		{
-			if (currentActivity != null && currentActivity.get() != null)
+			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+			if (activity instanceof TimelineActivity)
 			{
+				Utils.resetUnseenStatusCount(activity);
 				return;
 			}
 			StatusMessage statusMessage = (StatusMessage) object;
@@ -312,6 +321,18 @@ public class ToastListener implements Listener
 				}
 			}
 		}
+		else if (HikePubSub.STEALTH_POPUP_WITH_PUSH.equals(type))
+		{
+			if (object != null && object instanceof Bundle)
+			{
+				Bundle bundle = (Bundle) object;
+				String header = bundle.getString(HikeConstants.Extras.STEALTH_PUSH_HEADER);
+				if (!TextUtils.isEmpty(header))
+				{
+					toaster.notifyStealthPopup(header);  //TODO: toasting header for now
+				}
+			}
+		}
 	}
 
 	private Bitmap returnBigPicture(ConvMessage convMessage, Context context)
@@ -330,7 +351,7 @@ public class ToastListener implements Listener
 				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
 				{
 					final String filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
+					bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(filePath, Bitmap.Config.RGB_565);
 				}
 			}
 
@@ -359,7 +380,7 @@ public class ToastListener implements Listener
 				if (resourceId > 0)
 				{
 					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr);
+					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr, Bitmap.Config.ARGB_8888);
 				}
 
 			}

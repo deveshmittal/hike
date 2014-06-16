@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
@@ -33,6 +35,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -64,7 +67,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private long previousEventTime;
 
 	private int velocity;
-
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -137,7 +140,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
-		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
+		StatusMessage statusMessage = centralTimelineAdapter.getItem(position - getListView().getHeaderViewsCount());
 		if (statusMessage.getId() == CentralTimelineAdapter.FTUE_ITEM_ID || (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) || (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP))
 		{
@@ -164,6 +167,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		intent.setClass(getActivity(), ChatThread.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
+		getActivity().finish();
 	}
 
 	@Override
@@ -262,7 +266,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		{
 			final StatusMessage statusMessage = (StatusMessage) object;
 			final int startIndex = getStartIndex();
-			Utils.resetUnseenStatusCount(prefs);
 
 			if (!isAdded())
 			{
@@ -370,7 +373,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 	private boolean shouldAddFTUEItem()
 	{
-		if (HomeActivity.ftueList.isEmpty() || statusMessages.size() > HikeConstants.MIN_STATUS_COUNT || prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false))
+		if (HomeActivity.ftueContactsData.isEmpty() || statusMessages.size() > HikeConstants.MIN_STATUS_COUNT || prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false))
 		{
 			return false;
 		}
@@ -379,7 +382,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		 * To add an ftue item, we need to make sure the user does not have 5 friends.
 		 */
 		int friendCounter = 0;
-		for (ContactInfo contactInfo : HomeActivity.ftueList)
+		for (ContactInfo contactInfo : HomeActivity.ftueContactsData.getCompleteList())
 		{
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			if (favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_SENT
@@ -388,7 +391,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				friendCounter++;
 			}
 		}
-		return friendCounter < HikeConstants.FTUE_LIMIT;
+		return friendCounter < HikeConstants.FTUE_LIMIT && friendCounter < HomeActivity.ftueContactsData.getCompleteList().size();
 	}
 
 	private void addFTUEItem(List<StatusMessage> statusMessages)
