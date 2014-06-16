@@ -509,9 +509,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		try
 		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN },
-					null, null, null, null, null);
+			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE
+					+ ", " + DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", "
+					+ DBConstants.HIKE_JOIN_TIME + ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from "
+					+ DBConstants.USERS_TABLE + " GROUP BY " + DBConstants.MSISDN, null);
 
 			contactMap = extractContactInfoMap(c);
 
@@ -535,9 +536,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		try
 		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN },
-					DBConstants.MSISDN + " IN " + msisdns, null, null, null, null);
+			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", "
+					+ DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME
+					+ ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE + " WHERE "
+					+ DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
 
 			contactMap = extractContactInfoMap(c);
 
@@ -1771,16 +1773,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		Pair<String, Map<String, Integer>> data = ContactUtils.getMostContactedContacts(mContext, limit * 2);
 		return getNonHikeMostContactedContactsFromListOfNumbers(data.first, data.second, limit);
-	}
-
-	private Cursor getContactsCursorForMsisdnList(String msisdns)
-	{
-		Cursor c = null;
-		c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", "
-				+ DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME
-				+ ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE + " WHERE "
-				+ DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN, null);
-		return c;
 	}
 
 	public void setMultipleContactsToFavorites(JSONObject favorites)
