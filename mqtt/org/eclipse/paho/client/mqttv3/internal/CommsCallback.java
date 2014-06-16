@@ -412,7 +412,6 @@ public class CommsCallback implements Runnable
 
 			// @TRACE 713=call messageArrived key={0} topic={1}
 
-			mqttCallback.messageArrived(destName, publishMessage.getMessage());
 			if (publishMessage.getMessage().getQos() == 1)
 			{
 				this.clientComms.internalSend(new MqttPubAck(publishMessage), new MqttToken(clientComms.getClient().getClientId()));
@@ -423,6 +422,7 @@ public class CommsCallback implements Runnable
 				MqttPubComp pubComp = new MqttPubComp(publishMessage);
 				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 			}
+			mqttCallback.messageArrived(destName, publishMessage.getMessage());
 		}
 	}
 
