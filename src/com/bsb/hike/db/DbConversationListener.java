@@ -162,6 +162,15 @@ public class DbConversationListener implements Listener
 			 * When a user blocks someone, we reset the contact's friend type.
 			 */
 			mUserDb.toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
+
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
+			if (null != contact)
+			{
+				ContactInfo updatedContact = new ContactInfo(contact);
+				updatedContact.setFavoriteType(FavoriteType.NOT_FRIEND);
+				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			}
+
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
 			/*
 			 * We remove the icon for a blocked user as well.
@@ -242,6 +251,14 @@ public class DbConversationListener implements Listener
 			FavoriteType favoriteType = favoriteToggle.second;
 
 			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
+
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(contactInfo.getMsisdn());
+			if (null != contact)
+			{
+				ContactInfo updatedContact = new ContactInfo(contact);
+				updatedContact.setFavoriteType(favoriteType);
+				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			}
 
 			if (favoriteType != FavoriteType.REQUEST_RECEIVED && favoriteType != FavoriteType.REQUEST_SENT_REJECTED && !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type))
 			{
