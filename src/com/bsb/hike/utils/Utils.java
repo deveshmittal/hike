@@ -1607,7 +1607,16 @@ public class Utils
 
 		if (!dbUpdated)
 		{
-			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn, System.currentTimeMillis() / 1000);
+			long time = System.currentTimeMillis() / 1000;
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
+			if (null != contact)
+			{
+				ContactInfo updatedContact = new ContactInfo(contact);
+				updatedContact.setInviteTime(time);
+				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			}
+
+			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn, time);
 		}
 	}
 
@@ -1698,6 +1707,14 @@ public class Utils
 
 		long inviteTime = System.currentTimeMillis() / 1000;
 		contactInfo.setInviteTime(inviteTime);
+
+		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(contactInfo.getMsisdn());
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setInviteTime(inviteTime);
+			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+		}
 
 		HikeUserDatabase.getInstance().updateInvitedTimestamp(contactInfo.getMsisdn(), inviteTime);
 
