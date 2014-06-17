@@ -1812,6 +1812,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					favoriteType = FavoriteType.FRIEND;
 				}
 
+				ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn);
+				if(null != contactInfo)
+				{
+					ContactInfo updatedContact = new ContactInfo(contactInfo);
+					updatedContact.setFavoriteType(favoriteType);
+					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+				}
+
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), msisdn);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.FAVORITE_TYPE), favoriteType.ordinal());
 
