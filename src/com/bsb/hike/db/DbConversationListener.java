@@ -319,6 +319,14 @@ public class DbConversationListener implements Listener
 			long hikeJoinTime = msisdnHikeJoinTimePair.second;
 
 			mUserDb.setHikeJoinTime(msisdn, hikeJoinTime);
+			
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
+			if (null != contact)
+			{
+				ContactInfo updatedContact = new ContactInfo(contact);
+				updatedContact.setHikeJoinTime(hikeJoinTime);
+				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			}
 		}
 		else if (HikePubSub.SEND_HIKE_SMS_FALLBACK.equals(type))
 		{

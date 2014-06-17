@@ -243,6 +243,14 @@ public class MqttMessagesManager
 				{
 					joinTime = Utils.applyServerTimeOffset(context, joinTime);
 					userDb.setHikeJoinTime(msisdn, joinTime);
+
+					ContactInfo con = HikeMessengerApp.getContactManager().getContact(msisdn);
+					if (null != con)
+					{
+						ContactInfo updatedContact = new ContactInfo(con);
+						updatedContact.setHikeJoinTime(joinTime);
+						HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+					}
 				}
 
 				saveStatusMsg(jsonObj, msisdn);
