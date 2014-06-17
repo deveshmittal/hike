@@ -108,6 +108,15 @@ public class DbConversationListener implements Listener
 				}
 				// Recency was already updated when the ft message was added.
 				mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
+
+				ContactInfo contact = HikeMessengerApp.getContactManager().getContact(convMessage.getMsisdn());
+				if (null != contact)
+				{
+					ContactInfo updatedContact = new ContactInfo(contact);
+					updatedContact.setLastMessaged(convMessage.getTimestamp());
+					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+				}
+
 				mPubSub.publish(HikePubSub.RECENT_CONTACTS_UPDATED, convMessage.getMsisdn());
 			}
 
