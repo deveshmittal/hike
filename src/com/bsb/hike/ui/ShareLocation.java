@@ -132,6 +132,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	private TextView title;
 
 	private ImageView backIcon;
+	
+	public boolean isActivityDestroyed = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -325,6 +327,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		isActivityDestroyed = true;
 		if (mLocationClient != null)
 		{
 			mLocationClient.disconnect();
@@ -611,7 +614,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		{
 			for (int p = 0; p < totalPlaces; p++)
 			{
-				if (places[p] != null)
+				/*
+				 * We should not run this if activity is destroyed already
+				 * We added this because sometime add marker was getting
+				 * called even if activity is destroyed
+				 */
+				if (places[p] != null && !isActivityDestroyed)
 				{
 					placeMarkers[p] = map.addMarker(places[p]);
 					addItemToAdapter(places[p].getTitle(), places[p].getSnippet(), placeMarkers[p], false);
