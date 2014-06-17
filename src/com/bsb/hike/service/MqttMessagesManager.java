@@ -867,8 +867,6 @@ public class MqttMessagesManager
 			FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND || currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 					: FavoriteType.FRIEND;
 
-			contactInfo.setFavoriteType(favoriteType);
-			
 			if(favoriteType == FavoriteType.REQUEST_RECEIVED)
 			{
 				int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
@@ -878,7 +876,13 @@ public class MqttMessagesManager
 				}
 			}
 
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+			ContactInfo contact = new ContactInfo(contactInfo);
+			
+			ContactInfo updatedContact = new ContactInfo(contactInfo);
+			updatedContact.setFavoriteType(favoriteType);
+			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contact, favoriteType);
 			this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 			if (favoriteType == FavoriteType.FRIEND)
 			{
@@ -1596,9 +1600,13 @@ public class MqttMessagesManager
 		FavoriteType favoriteType = (currentFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentFavoriteType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.NOT_FRIEND
 				: FavoriteType.REQUEST_SENT_REJECTED;
 
-		contactInfo.setFavoriteType(favoriteType);
+		ContactInfo contact = new ContactInfo(contactInfo);
+		
+		ContactInfo updatedContact = new ContactInfo(contactInfo);
+		updatedContact.setFavoriteType(favoriteType);
+		HikeMessengerApp.getContactManager().updateContacts(updatedContact);
 
-		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contactInfo, favoriteType);
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contact, favoriteType);
 		this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 	}
 
