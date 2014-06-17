@@ -6,7 +6,6 @@ package com.bsb.hike.modules.contactmgr;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.iface.ITransientCache;
 
@@ -221,6 +220,11 @@ public class ContactManager implements ITransientCache
 	public List<ContactInfo> getAllContacts()
 	{
 		return cache.getAllContacts();
+	}
+
+	public void removeOlderLastGroupMsisdns(String groupId, List<String> currentGroupMsisdns)
+	{
+		cache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
 	}
 
 }

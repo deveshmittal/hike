@@ -25,6 +25,8 @@ class ContactsCache
 	// Transient persistence for all the contacts that should always be loaded
 	private Map<String, ContactInfo> transientMap;
 
+	private Map<String, List<String>> groupLastMsisdns;
+
 	private boolean allContactsLoaded = false;
 
 	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
@@ -43,6 +45,7 @@ class ContactsCache
 	{
 		persistenceMap = new HashMap<String, ContactInfo>();
 		transientMap = new HashMap<String, ContactInfo>();
+		groupLastMsisdns = new HashMap<String, List<String>>();
 	}
 
 	/**
@@ -306,7 +309,7 @@ class ContactsCache
 		return c;
 	}
 
-	public void clearTransientMemory()
+	void clearTransientMemory()
 	{
 		writeLockTrans.lock();
 		try
@@ -323,7 +326,7 @@ class ContactsCache
 		}
 	}
 
-	public void clearPersistenceMemory()
+	void clearPersistenceMemory()
 	{
 		writeLock.lock();
 		try
@@ -340,23 +343,52 @@ class ContactsCache
 		}
 	}
 
-	public void clearPersistenceMemory(List<String> msisdns)
+	void clearPersistenceMemory(String msisdn)
 	{
 		writeLock.lock();
 		try
 		{
-			for (String m : msisdns)
+			if (persistenceMap != null)
 			{
-				if (persistenceMap != null)
-				{
-					persistenceMap.remove(m);
-				}
+				persistenceMap.remove(msisdn);
 			}
 			allContactsLoaded = false;
 		}
 		finally
 		{
 			writeLock.unlock();
+		}
+	}
+
+	void clearPersistenceMemory(List<String> msisdns)
+	{
+		for (String m : msisdns)
+		{
+			clearPersistenceMemory(m);
+		}
+	}
+
+	void removeOlderLastGroupMsisdn(String groupId, List<String> currentGroupMsisdns)
+	{
+		if (groupLastMsisdns != null)
+		{
+			List<String> grpMsisdns = groupLastMsisdns.get(groupId);
+			if (null != grpMsisdns)
+			{
+				Map<String, Boolean> map = new HashMap<String, Boolean>();
+				for (String s : currentGroupMsisdns)
+				{
+					map.put(s, true);
+				}
+				for (String msisdn : grpMsisdns)
+				{
+					if (!map.containsKey(msisdn))
+					{
+						clearPersistenceMemory(msisdn);
+					}
+				}
+			}
+			groupLastMsisdns.put(groupId, currentGroupMsisdns);
 		}
 	}
 }

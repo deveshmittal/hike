@@ -1243,18 +1243,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					List<String> grpMsisdns = getGroupLastMsgMsisdn(metadata);
+					List<String> grpMsisdns = getGroupLastMsgMsisdn(msisdn, metadata, groupParticipant);
 
-					if (null != grpMsisdns)
+					if (null != grpMsisdns && grpMsisdns.size() > 0)
 					{
 						msisdns.addAll(grpMsisdns);
-					}
-					else
-					{
-						if (null != groupParticipant && !groupParticipant.equals(""))
-						{
-							msisdns.add(groupParticipant);
-						}
 					}
 				}
 				else
@@ -1274,7 +1267,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 
-	private List<String> getGroupLastMsgMsisdn(String metadataString)
+	private List<String> getGroupLastMsgMsisdn(String groupId, String metadataString, String groupParticipant)
 	{
 		List<String> grpLastMsisdns = new ArrayList<String>();
 		JSONObject metadata;
@@ -1285,11 +1278,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					: ParticipantInfoState.fromJSON(metadata);
 			switch (participantInfoState)
 			{
-			case BLOCK_INTERNATIONAL_SMS:
-			case GROUP_END:
-			case INTRO_MESSAGE:
-			case NO_INFO:
-				return null;
 			case CHANGED_GROUP_NAME:
 				grpLastMsisdns.add(metadata.getString(HikeConstants.FROM));
 				break;
@@ -1339,6 +1327,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		catch (JSONException e)
 		{
 			Logger.e(getClass().getSimpleName(), "Exception while getting last message in group msisdn from metadata " + e);
+		}
+
+		if (grpLastMsisdns.size() == 0)
+		{
+			if (null != groupParticipant && !groupParticipant.equals(""))
+			{
+				grpLastMsisdns.add(groupParticipant);
+			}
 		}
 		return grpLastMsisdns;
 	}
@@ -1408,19 +1404,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					{
 						message.setMetadata(metadata);
 
-						List<String> groupLastMsisdns = getGroupLastMsgMsisdn(metadata);
+						List<String> groupLastMsisdns = getGroupLastMsgMsisdn(msisdn, metadata, c.getString(groupParticipantColumn));
 
-						if (null != groupLastMsisdns)
+						if (null != groupLastMsisdns && groupLastMsisdns.size() > 0)
 						{
 							msisdns.addAll(groupLastMsisdns);
-						}
-						else
-						{
-							String groupParticipant = c.getString(groupParticipantColumn);
-							if (null != groupParticipant && !groupParticipant.equals(""))
-							{
-								msisdns.add(c.getString(groupParticipantColumn));
-							}
+							HikeMessengerApp.getContactManager().removeOlderLastGroupMsisdns(msisdn, groupLastMsisdns);
 						}
 					}
 					catch (JSONException e)
