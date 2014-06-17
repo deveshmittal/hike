@@ -77,6 +77,38 @@ class ContactsCache
 		}
 	}
 
+	void removeContact(ContactInfo c)
+	{
+		writeLockTrans.lock();
+		try
+		{
+			if (transientMap.containsKey(c.getMsisdn()))
+			{
+				transientMap.remove(c.getMsisdn());
+				allContactsLoaded = false;
+				return;
+			}
+		}
+		finally
+		{
+			writeLockTrans.unlock();
+		}
+
+		writeLock.lock();
+		try
+		{
+			if (persistenceMap.containsKey(c.getMsisdn()))
+			{
+				persistenceMap.remove(c.getMsisdn());
+				allContactsLoaded = false;
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
 	/**
 	 * @param key
 	 * @param contact
@@ -365,6 +397,14 @@ class ContactsCache
 		for (String m : msisdns)
 		{
 			clearPersistenceMemory(m);
+		}
+	}
+
+	void removeFromCache(List<ContactInfo> contacts)
+	{
+		for (ContactInfo contact : contacts)
+		{
+			removeContact(contact);
 		}
 	}
 

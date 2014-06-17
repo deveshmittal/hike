@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 
@@ -19,6 +20,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.AccountUtils;
@@ -101,6 +103,18 @@ public class ContactUtils
 			Logger.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
+			HikeMessengerApp.getContactManager().updateContacts(updatedContacts);
+			
+			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
+			
+			for(Entry<String,List<ContactInfo>> mapEntry : hike_contacts_by_id.entrySet())
+			{
+				List<ContactInfo> contacts = mapEntry.getValue();
+				contactsToDelete.addAll(contacts);
+			}
+			
+			HikeMessengerApp.getContactManager().removeFromCache(contactsToDelete);
+			
 			/* Delete ids from hike user DB */
 			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will
 																	// delete

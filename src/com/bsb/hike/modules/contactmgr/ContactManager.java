@@ -105,6 +105,28 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
+	 * 
+	 * @param contacts
+	 */
+	public void removeFromCache(List<ContactInfo> contacts)
+	{
+		cache.removeFromCache(contacts);
+	}
+
+	/**
+	 * This updates a list of contactInfo objects in memory
+	 * 
+	 * @param updatescontacts
+	 */
+	public void updateContacts(List<ContactInfo> updatescontacts)
+	{
+		for (ContactInfo contact : updatescontacts)
+		{
+			cache.updateContact(contact.getMsisdn(), contact);
+		}
+	}
+
+	/**
 	 * This function will return name or null for a particular msisdn
 	 * 
 	 * @param msisdn
