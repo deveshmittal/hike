@@ -212,6 +212,15 @@ public class MqttMessagesManager
 			boolean stateChanged = false;
 
 			int rowsChanged = ContactUtils.updateHikeStatus(this.context, msisdn, joined);
+			
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
+			if (null != contact)
+			{
+				ContactInfo updatedContact = new ContactInfo(contact);
+				updatedContact.setOnhike(joined);
+				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			}
+			
 			rowsChanged += this.convDb.updateOnHikeStatus(msisdn, joined);
 
 			/*

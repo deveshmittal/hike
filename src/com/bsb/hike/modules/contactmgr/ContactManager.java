@@ -114,6 +114,16 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
+	 * This method updates the contact info object in memory
+	 * 
+	 * @param contact
+	 */
+	public void updateContacts(ContactInfo contact)
+	{
+		cache.updateContact(contact.getMsisdn(), contact);
+	}
+
+	/**
 	 * This updates a list of contactInfo objects in memory
 	 * 
 	 * @param updatescontacts
