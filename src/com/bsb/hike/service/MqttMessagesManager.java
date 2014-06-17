@@ -1202,14 +1202,17 @@ public class MqttMessagesManager
 				isOffline = (int) lastSeenTime;
 				lastSeenTime = System.currentTimeMillis() / 1000;
 			}
+
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true);
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setLastSeenTime(lastSeenTime);
+			updatedContact.setOffline((int) isOffline);
+			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+
 			userDb.updateLastSeenTime(msisdn, lastSeenTime);
 			userDb.updateIsOffline(msisdn, (int) isOffline);
 
-			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
-			contactInfo.setLastSeenTime(lastSeenTime);
-			contactInfo.setOffline(isOffline);
-
-			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, updatedContact);
 		}
 		else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type))
 		{

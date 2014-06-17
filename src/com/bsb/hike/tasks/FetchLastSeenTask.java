@@ -9,6 +9,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
@@ -104,6 +106,15 @@ public class FetchLastSeenTask extends FetchLastSeenBase
 			lastSeenValue = System.currentTimeMillis() / 1000;
 		}
 
+		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setLastSeenTime(lastSeenValue);
+			updatedContact.setOffline(offline);
+			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+		}
+		
 		HikeUserDatabase.getInstance().updateLastSeenTime(msisdn, lastSeenValue);
 		HikeUserDatabase.getInstance().updateIsOffline(msisdn, offline);
 

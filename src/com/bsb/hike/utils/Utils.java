@@ -3940,6 +3940,15 @@ public class Utils
 				}
 				HikeUserDatabase userDb = HikeUserDatabase.getInstance();
 
+				ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
+				if (null != contact)
+				{
+					ContactInfo updatedContact = new ContactInfo(contact);
+					updatedContact.setLastSeenTime(lastSeenTime);
+					updatedContact.setOffline((int) isOffline);
+					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+				}
+
 				userDb.updateLastSeenTime(msisdn, lastSeenTime);
 				userDb.updateIsOffline(msisdn, (int) isOffline);
 
