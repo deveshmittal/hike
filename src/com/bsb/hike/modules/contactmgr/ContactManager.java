@@ -296,14 +296,24 @@ public class ContactManager implements ITransientCache
 	{
 		return cache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
 	}
-	
+
 	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
 		return cache.getNonHikeContacts();
 	}
-	
+
 	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
 	{
 		return cache.getNonHikeMostContactedContacts(limit);
+	}
+
+	public ContactInfo getContactInfoFromPhoneNo(String number)
+	{
+		return cache.getContactInfoFromPhoneNo(number);
+	}
+
+	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
+	{
+		return cache.getContactInfoFromPhoneNoOrMsisdn(number);
 	}
 }
