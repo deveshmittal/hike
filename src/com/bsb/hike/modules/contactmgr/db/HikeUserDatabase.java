@@ -580,6 +580,32 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	private Map<String, ContactInfo> getContactMap(String phoneNumbers, int onHike, int limit)
+	{
+		Cursor c = null;
+
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+
+		try
+		{
+			c = mReadDb.rawQuery("SELECT " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", " + DBConstants.LAST_MESSAGED
+					+ ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME + ", "
+					+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE + " WHERE "
+					+ DBConstants.PHONE + " IN " + phoneNumbers + " AND " + DBConstants.ONHIKE + "=" + onHike + " LIMIT " + limit, null);
+
+			contactMap = extractContactInfoMap(c);
+
+			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	private Map<String, ContactInfo> getContactMap(String msisdns, int onHike, boolean nativeSMSOn, boolean inMsisdns)
 	{
 		Cursor c = null;
@@ -1812,85 +1838,33 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	private List<ContactInfo> getNonHikeMostContactedContactsFromListOfNumbers(String selectionNumbers, final Map<String, Integer> mostContactedValues, int limit)
 	{
+		Map<String, FavoriteType> favoriteMap = getFavoriteMap();
 
-		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
-				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION };
+		Map<String, ContactInfo> contactMap = getContactMap(selectionNumbers, HikeConstants.NOT_ON_HIKE_VALUE, limit);
 
-		String selection = DBConstants.PHONE + " IN " + selectionNumbers + " AND " + DBConstants.MSISDN + "!='null' AND " + DBConstants.ONHIKE + "=0 LIMIT " + limit;
+		List<String> msisdns = new ArrayList<String>(contactMap.keySet());
 
-		Cursor c = null;
-		try
+		Map<String, ContactInfo> contactInfoMap = getContactInfoMap(msisdns, contactMap, favoriteMap, true);
+
+		List<ContactInfo> contactList = new ArrayList<ContactInfo>(contactInfoMap.values());
+		
+		Collections.sort(contactList, new Comparator<ContactInfo>()
 		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection, null, null, null, null);
-
-			int idx = c.getColumnIndex(DBConstants.ID);
-			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-			int nameIdx = c.getColumnIndex(DBConstants.NAME);
-			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
-			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
-			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
-			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
-			int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
-			int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
-
-			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
-
-			Set<String> msisdnSet = new HashSet<String>();
-			Set<String> nameSet = new HashSet<String>();
-
-			while (c.moveToNext())
+			@Override
+			public int compare(ContactInfo lhs, ContactInfo rhs)
 			{
-				String msisdn = c.getString(msisdnIdx);
-				String name = c.getString(nameIdx);
+				int lhsContactNum = mostContactedValues.get(lhs.getPhoneNum());
+				int rhsContactNum = mostContactedValues.get(rhs.getPhoneNum());
 
-				if (msisdnSet.contains(msisdn))
+				if (lhsContactNum != rhsContactNum)
 				{
-					continue;
+					return -((Integer) lhsContactNum).compareTo(rhsContactNum);
 				}
-				if (nameSet.contains(name))
-				{
-					continue;
-				}
-
-				msisdnSet.add(msisdn);
-				nameSet.add(name);
-
-				/*
-				 * All our timestamps are in seconds.
-				 */
-				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
-
-				ContactInfo contactInfo = new ContactInfo(c.getString(idx), msisdn, name, c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
-						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
-				contactInfo.setFavoriteType(FavoriteType.values()[c.getInt(favoriteIdx)]);
-				contactList.add(contactInfo);
+				return lhs.getName().toLowerCase().compareTo(rhs.getName().toLowerCase());
 			}
+		});
 
-			Collections.sort(contactList, new Comparator<ContactInfo>()
-			{
-				@Override
-				public int compare(ContactInfo lhs, ContactInfo rhs)
-				{
-					int lhsContactNum = mostContactedValues.get(lhs.getPhoneNum());
-					int rhsContactNum = mostContactedValues.get(rhs.getPhoneNum());
-
-					if (lhsContactNum != rhsContactNum)
-					{
-						return -((Integer) lhsContactNum).compareTo(rhsContactNum);
-					}
-					return lhs.getName().toLowerCase().compareTo(rhs.getName().toLowerCase());
-				}
-			});
-
-			return contactList;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
+		return contactList;
 	}
 
 	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
@@ -2240,7 +2214,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		if(limit > 0)
 		{
-			List<ContactInfo> nonHikeContacts = getNonHikeMostContactedContacts(limit*4);
+			List<ContactInfo> nonHikeContacts = HikeMessengerApp.getContactManager().getNonHikeMostContactedContacts(limit * 4);
 			ftueContactsData.setTotalSmsContactsCount(getNonHikeContactsCount());
 
 			if (nonHikeContacts.size() >= limit)

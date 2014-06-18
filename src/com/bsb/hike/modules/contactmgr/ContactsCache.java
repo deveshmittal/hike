@@ -508,8 +508,20 @@ class ContactsCache
 				insertContact(contact.getMsisdn(), contact, true);
 			}
 		}
-		
+
 		return contacts;
 	}
 
+	List<ContactInfo> getNonHikeMostContactedContacts(int limit)
+	{
+		List<ContactInfo> contacts = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(limit);
+		for(ContactInfo contact : contacts)
+		{
+			if(null == getContact(contact.getMsisdn()))
+			{
+				insertContact(contact.getMsisdn(), contact, true);
+			}
+		}
+		return contacts;
+	}
 }

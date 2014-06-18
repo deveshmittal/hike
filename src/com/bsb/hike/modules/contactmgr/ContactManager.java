@@ -301,4 +301,9 @@ public class ContactManager implements ITransientCache
 	{
 		return cache.getNonHikeContacts();
 	}
+	
+	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
+	{
+		return cache.getNonHikeMostContactedContacts(limit);
+	}
 }
