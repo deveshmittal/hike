@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 
 /**
@@ -431,4 +432,51 @@ class ContactsCache
 			groupLastMsisdns.put(groupId, currentGroupMsisdns);
 		}
 	}
+
+	List<ContactInfo> getNOTFRIENDScontacts(int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	{
+		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getNOTFRIENDScontactsFromDB(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+
+		if (map != null)
+		{
+			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+			{
+				String msisdn = mapEntry.getKey();
+				ContactInfo contact = mapEntry.getValue();
+				if (getContact(msisdn) == null)
+				{
+					insertContact(msisdn, contact, true);
+				}
+				contacts.add(contact);
+			}
+		}
+
+		return contacts;
+	}
+
+	List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	{
+		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactsOfFavoriteTypeDB(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+
+		if (map != null)
+		{
+			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+			{
+				String msisdn = mapEntry.getKey();
+				ContactInfo contact = mapEntry.getValue();
+				if (getContact(msisdn) == null)
+				{
+					insertContact(msisdn, contact, true);
+				}
+				contacts.add(contact);
+			}
+		}
+
+		return contacts;
+	}
+
 }

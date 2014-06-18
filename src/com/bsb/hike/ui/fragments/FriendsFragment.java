@@ -277,7 +277,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
-			final List<ContactInfo> favoriteList = hikeUserDatabase.getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED,
+			final List<ContactInfo> favoriteList = HikeMessengerApp.getContactManager().getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED,
 					FavoriteType.REQUEST_SENT, FavoriteType.REQUEST_SENT_REJECTED }, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false);
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			if (!isAdded())

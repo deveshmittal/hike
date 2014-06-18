@@ -6,7 +6,11 @@ package com.bsb.hike.modules.contactmgr;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.database.DatabaseUtils;
+
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.iface.ITransientCache;
 
 /**
@@ -259,4 +263,30 @@ public class ContactManager implements ITransientCache
 		cache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
 	}
 
+	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn)
+	{
+		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, false, false);
+	}
+
+	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn)
+	{
+		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, false);
+	}
+
+	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	{
+		if (favoriteType == FavoriteType.NOT_FRIEND)
+		{
+			return cache.getNOTFRIENDScontacts(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+		}
+		else
+		{
+			return getContactsOfFavoriteType(new FavoriteType[] { favoriteType }, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+		}
+	}
+
+	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	{
+		return cache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+	}
 }

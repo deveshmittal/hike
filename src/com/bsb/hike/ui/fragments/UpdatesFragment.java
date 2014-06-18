@@ -417,7 +417,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		@Override
 		protected List<StatusMessage> doInBackground(Void... params)
 		{
-			List<ContactInfo> friendsList = HikeUserDatabase.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, userMsisdn);
+			List<ContactInfo> friendsList = HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, userMsisdn);
 
 			ArrayList<String> msisdnList = new ArrayList<String>();
 

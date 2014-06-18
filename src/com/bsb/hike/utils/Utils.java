@@ -3653,9 +3653,9 @@ public class Utils
 		SharedPreferences settings = (SharedPreferences) context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
-		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false));
-		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, msisdn, false));
-		friendsList.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
+		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false));
+		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, msisdn, false));
+		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
 
 		Logger.d("AddFriendsActivity", " friendsList size " + friendsList.size());
 		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(settings.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), msisdn);
@@ -3667,9 +3667,9 @@ public class Utils
 
 		Logger.d("AddFriendsActivity", " size recommendedContacts = " + recommendedContacts.size());
 
-		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false));
-		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
-		hikeContacts.addAll(hikeUserDatabase.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
+		hikeContacts.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false));
+		hikeContacts.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
+		hikeContacts.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
 	}
 
 	public static void addFavorite(final Context context, final ContactInfo contactInfo, final boolean isFtueContact)
