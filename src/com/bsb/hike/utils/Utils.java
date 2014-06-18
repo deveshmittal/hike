@@ -3662,7 +3662,7 @@ public class Utils
 		Logger.d("AddFriendsActivity", " recommendedContactsSelection " + recommendedContactsSelection);
 		if (!TextUtils.isEmpty(recommendedContactsSelection))
 		{
-			recommendedContacts.addAll(HikeUserDatabase.getInstance().getHikeContacts(-1, recommendedContactsSelection, null, msisdn));
+			recommendedContacts.addAll(HikeMessengerApp.getContactManager().getHikeContacts(-1, recommendedContactsSelection, null, msisdn));
 		}
 
 		Logger.d("AddFriendsActivity", " size recommendedContacts = " + recommendedContacts.size());

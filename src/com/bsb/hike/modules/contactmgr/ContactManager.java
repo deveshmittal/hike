@@ -289,4 +289,10 @@ public class ContactManager implements ITransientCache
 	{
 		return cache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
 	}
+
+	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	{
+		return cache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+
+	}
 }

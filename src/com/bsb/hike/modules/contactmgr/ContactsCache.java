@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -476,6 +477,19 @@ class ContactsCache
 			}
 		}
 
+		return contacts;
+	}
+
+	List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	{
+		List<ContactInfo> contacts = HikeUserDatabase.getInstance().getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+		for (ContactInfo contact : contacts)
+		{
+			if (null == getContact(contact.getMsisdn()))
+			{
+				insertContact(contact.getMsisdn(), contact, true);
+			}
+		}
 		return contacts;
 	}
 
