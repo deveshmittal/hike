@@ -5,8 +5,10 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.database.DatabaseUtils;
+import android.util.Pair;
 
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.ContactInfo;
@@ -293,6 +295,10 @@ public class ContactManager implements ITransientCache
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		return cache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
-
+	}
+	
+	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
+	{
+		return cache.getNonHikeContacts();
 	}
 }

@@ -438,7 +438,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		case BLOCK:
 			return hUDB.getBlockedUserList();
 		case INVITE:
-			return hUDB.getNonHikeContacts();
+			return HikeMessengerApp.getContactManager().getNonHikeContacts();
 		}
 		return null;
 	}

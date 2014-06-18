@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -490,6 +493,22 @@ class ContactsCache
 				insertContact(contact.getMsisdn(), contact, true);
 			}
 		}
+		return contacts;
+	}
+
+	List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
+	{
+		List<Pair<AtomicBoolean, ContactInfo>> contacts = HikeUserDatabase.getInstance().getNonHikeContacts();
+		
+		for (Pair<AtomicBoolean, ContactInfo> p : contacts)
+		{
+			ContactInfo contact = p.second;
+			if (null == getContact(contact.getMsisdn()))
+			{
+				insertContact(contact.getMsisdn(), contact, true);
+			}
+		}
+		
 		return contacts;
 	}
 

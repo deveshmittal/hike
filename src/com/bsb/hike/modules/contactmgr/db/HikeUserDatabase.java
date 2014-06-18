@@ -554,6 +554,32 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	private Map<String, ContactInfo> getContactMap(int onHike)
+	{
+		Cursor c = null;
+
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+
+		try
+		{
+			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE
+					+ ", " + DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", "
+					+ DBConstants.HIKE_JOIN_TIME + ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from "
+					+ DBConstants.USERS_TABLE + " WHERE " + DBConstants.ONHIKE + " = " + onHike + " GROUP BY " + DBConstants.MSISDN, null);
+
+			contactMap = extractContactInfoMap(c);
+
+			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	private Map<String, ContactInfo> getContactMap(String msisdns, int onHike, boolean nativeSMSOn, boolean inMsisdns)
 	{
 		Cursor c = null;
@@ -985,51 +1011,23 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		try
 		{
-			c = mReadDb.rawQuery("SELECT " + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", " + DBConstants.USERS_TABLE + "." + DBConstants.ID + ", "
-					+ DBConstants.USERS_TABLE + "." + DBConstants.NAME + ", " + DBConstants.USERS_TABLE + "." + DBConstants.ONHIKE + ", " + DBConstants.USERS_TABLE + "."
-					+ DBConstants.PHONE + ", " + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN_TYPE + ", " + DBConstants.USERS_TABLE + "." + DBConstants.HAS_CUSTOM_PHOTO
-					+ ", " + DBConstants.USERS_TABLE + "." + DBConstants.LAST_MESSAGED + " FROM " + DBConstants.USERS_TABLE + " WHERE " + DBConstants.USERS_TABLE + "."
-					+ DBConstants.MSISDN + " NOT IN (SELECT " + DBConstants.MSISDN + " FROM " + DBConstants.BLOCK_TABLE + ") AND " + DBConstants.USERS_TABLE + "."
-					+ DBConstants.ONHIKE + " =0 AND " + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + " !='null'" + " ORDER BY " + DBConstants.USERS_TABLE + "."
-					+ DBConstants.NAME + " COLLATE NOCASE", null);
-
 			List<Pair<AtomicBoolean, ContactInfo>> contactInfos = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(c.getCount());
-			int idx = c.getColumnIndex(DBConstants.ID);
-			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-			int nameIdx = c.getColumnIndex(DBConstants.NAME);
-			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
-			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
-			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
-			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
-			int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
-			int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
 
-			Set<String> msisdnSet = new HashSet<String>();
+			Map<String, ContactInfo> contactMap = getContactMap(HikeConstants.NOT_ON_HIKE_VALUE);
 
-			while (c.moveToNext())
+			Set<String> blockMsisdns = getBlockedMsisdnSet();
+
+			for (String msisdn : blockMsisdns)
 			{
-				String msisdn = c.getString(msisdnIdx);
+				contactMap.remove(msisdn);
+			}
 
-				if (msisdnSet.contains(msisdn))
-				{
-					continue;
-				}
-
-				msisdnSet.add(msisdn);
-
-				ContactInfo contactInfo = new ContactInfo(c.getString(idx), msisdn, c.getString(nameIdx), c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
-						c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx), c.getInt(hasCustomPhotoIdx) == 1);
-				if (favoriteIdx != -1)
-				{
-					int favoriteTypeOrd = c.getInt(favoriteIdx);
-					contactInfo.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
-				}
-				else
-				{
-					contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
-				}
+			for (Entry<String, ContactInfo> mapEntry : contactMap.entrySet())
+			{
+				ContactInfo contactInfo = mapEntry.getValue();
 				contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
 			}
+			
 			return contactInfos;
 		}
 		finally
