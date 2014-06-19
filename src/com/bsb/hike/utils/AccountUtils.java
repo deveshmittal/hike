@@ -508,7 +508,7 @@ public class AccountUtils
 		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
-	public static void setProfile(String name, Birthday birthdate, boolean isFemale) throws NetworkErrorException, IllegalStateException
+	public static void setProfile(String name, Birthday birthdate) throws NetworkErrorException, IllegalStateException
 	{
 		HttpPost httppost = new HttpPost(base + "/account/profile");
 		addToken(httppost);
@@ -517,7 +517,6 @@ public class AccountUtils
 		try
 		{
 			data.put("name", name);
-			data.put("gender", isFemale ? "f" : "m");
 			if (birthdate != null)
 			{
 				JSONObject bday = new JSONObject();

@@ -87,7 +87,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED
 	};
 
 	public class StateValue
@@ -124,8 +124,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public static boolean isAlreadyFetchingNumber = false;
 
 	private Birthday birthdate;
-
-	private Boolean isFemale;
 
 	private String userName;
 
@@ -188,12 +186,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public void addUserName(String name)
 	{
 		this.userName = name;
-	}
-
-	
-	public void addGender(Boolean isFemale)
-	{
-		this.isFemale = isFemale;
 	}
 
 	@Override
@@ -418,11 +410,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		if(userName != null)
 		{
-			publishProgress(new StateValue(State.GENDER, ""));
-			if(isFemale != null)
-			{
-				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
-			}
+			publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 		}
 
 		/* scan the addressbook */
@@ -508,24 +496,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
-				if (isFemale == null)
-				{
-					/*
-					 * publishing this will cause the the Activity to ask the user for a name and signal us
-					 */
-					publishProgress(new StateValue(State.GENDER, ""));
-					synchronized (this)
-					{
-						this.wait();
-					}
-				}
-				
 				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
 				{
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
+				AccountUtils.setProfile(userName, birthdate);
 			}
 			catch (InterruptedException e)
 			{
@@ -548,7 +524,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
-			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
 			if (birthdate != null)
 			{
 				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
@@ -671,12 +646,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask startTask(Activity activity, String userName, Birthday birthday, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
 		{
-			signupTask.addGender(isFemale);
 			signupTask.addUserName(userName);
 			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
@@ -700,13 +674,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask restartTask(Activity activity, String userName, Birthday birthday, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, isFemale, birthday, profilePicSmall);
+		startTask(activity, userName, birthday, profilePicSmall);
 		return signupTask;
 	}
 }
