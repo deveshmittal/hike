@@ -68,7 +68,9 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.FtueCardsActivity;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -816,6 +818,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getActivity().getApplicationContext());
+		String tpe = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "nn");
+		Logger.i("tip", "#" + tpe + "#-currenttype");
+		Logger.i("tip", pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER, "") + " -currenttype ");
 		if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
@@ -829,11 +835,23 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false) )
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_UNREAD_TIP));
 		}
-		
+		else if (pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "").equals(HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_PROFILE_PIC_TIP));
+			// show atomic pop up profile pic
+		}
+		else if (pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "").equals(HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_FAVOURTITES_TIP));
+		}
+		else if (pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "").equals(HikeMessengerApp.ATOMIC_POP_UP_INVITE))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INVITE_TIP));
+		}
 	}
 
 	private void setupConversationLists()

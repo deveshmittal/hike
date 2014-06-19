@@ -14,6 +14,12 @@ public class ConversationTip extends Conversation
 	
 	public static final int STEALTH_UNREAD_TIP = 6;
 
+	public static final int ATOMIC_PROFILE_PIC_TIP = 7;
+
+	public static final int ATOMIC_FAVOURTITES_TIP = 8;
+
+	public static final int ATOMIC_INVITE_TIP = 9;
+
 	private int tipType;
 	public ConversationTip(int tipType)
 	{

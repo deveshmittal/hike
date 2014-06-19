@@ -352,12 +352,30 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String STEALTH_UNREAD_TIP_MESSAGE = "stealthUnreadTipMessage";
 
 	public static final String STEALTH_UNREAD_TIP_HEADER = "stealthUnreadTipHeader";
-	
+
 	public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
 
 	public static final String SHOWN_WELCOME_TO_HIKE_CARD = "shownWelcomeToHikeCard";
 
 	public static final String FRIEND_REQ_COUNT = "frReqCount";
+
+	public static final String ATOMIC_POP_UP_TYPE = "apuType";
+
+	public static final String ATOMIC_POP_UP_STICKER = "apust";
+
+	public static final String ATOMIC_POP_UP_PROFILE_PIC = "apupp";
+
+	public static final String ATOMIC_POP_UP_ATTACHMENT = "apuat";
+
+	public static final String ATOMIC_POP_UP_INFORMATIONAL = "apuin";
+
+	public static final String ATOMIC_POP_UP_FAVOURITES = "apufv";
+
+	public static final String ATOMIC_POP_UP_INVITE = "apuiv";
+
+	public static final String ATOMIC_POP_UP_HEADER = "apuHeader";
+
+	public static final String ATOMIC_POP_UP_MESSAGE = "apuMessage";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

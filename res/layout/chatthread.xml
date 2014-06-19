@@ -41,25 +41,25 @@
             android:layout_marginTop="@dimen/chat_thread_margin_top"
             android:layout_weight="30" >
 
-            <include
-                android:id="@+id/sms_toggle_button"
-                layout="@layout/sms_toggle_item" />
-
             <LinearLayout
                 android:id="@+id/tipContainerTop"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:orientation="vertical" >
+
+                <include
+                    android:id="@+id/sms_toggle_button"
+                    layout="@layout/sms_toggle_item" />
             </LinearLayout>
 
             <ListView
                 android:id="@+id/conversations_list"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:layout_above="@+id/tipContainerBottom"
                 android:layout_alignWithParentIfMissing="true"
                 android:layout_below="@+id/tipContainerTop"
-                android:layout_above="@+id/tipContainerBottom"
                 android:cacheColorHint="#00000000"
                 android:divider="@null"
                 android:fadingEdge="none"
@@ -67,10 +67,10 @@
             </ListView>
 
             <LinearLayout
-				android:layout_alignParentBottom="true"
                 android:id="@+id/tipContainerBottom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
                 android:orientation="vertical" >
             </LinearLayout>
 

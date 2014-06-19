@@ -51,11 +51,13 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -123,6 +125,7 @@ public class MqttMessagesManager
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
+		Logger.i("tip mqtt", jsonObj.toString());
 		String type = jsonObj.optString(HikeConstants.TYPE);
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
@@ -1436,7 +1439,12 @@ public class MqttMessagesManager
 					}
 				}
 			}
-			
+			else
+			{
+				// updatePopUpData
+				updateAtomicPopUpData(jsonObj);
+			}
+
 		}
 	}
 
@@ -1726,5 +1734,40 @@ public class MqttMessagesManager
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
 		}
 	}
-		
+
+	/**
+	 * We call it atomic pop up , as we discard old if any when new comes --gauravKhanna
+	 * 
+	 * @param jsonObject
+	 *            - jsonFromServer
+	 * @throws JSONException
+	 */
+	private void updateAtomicPopUpData(JSONObject jsonObj) throws JSONException
+	{
+		Logger.i("tip", jsonObj.toString());
+		String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
+		Editor edit = settings.edit();
+		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+		if (isDuplicateOrWrongPacket("last" + subType, data))
+		{
+			return;
+		}
+		Logger.i("tip", "id passed");
+		String header = data.optString(HikeConstants.HEADER);
+		String body = data.optString(HikeConstants.BODY);
+		if (!TextUtils.isEmpty(header) && !TextUtils.isEmpty(body))
+		{
+			edit.putString("last" + subType, jsonObj.getString(HikeConstants.MESSAGE_ID));
+			edit.putString(HikeMessengerApp.ATOMIC_POP_UP_TYPE, subType);
+			edit.putString(HikeMessengerApp.ATOMIC_POP_UP_HEADER, header);
+			edit.putString(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE, body);
+			edit.commit();
+		}
+	}
+
+	private boolean isDuplicateOrWrongPacket(String key, JSONObject jsonObject)
+	{
+		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
+		return TextUtils.isEmpty(id) || settings.getString(key, "").equals(id);
+	}
 }
