@@ -123,8 +123,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static boolean isAlreadyFetchingNumber = false;
 
-	private Birthday birthdate;
-
 	private String userName;
 
 	private static final String INDIA_ISO = "IN";
@@ -176,11 +174,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			editor.commit();
 		}
 		this.profilePicSmall = profilePic;
-	}
-
-	public void addBirthdate(Birthday birthdate)
-	{
-		this.birthdate = birthdate;
 	}
 
 	public void addUserName(String name)
@@ -501,7 +494,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName, birthdate);
+				AccountUtils.setProfile(userName);
 			}
 			catch (InterruptedException e)
 			{
@@ -524,12 +517,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
-			if (birthdate != null)
-			{
-				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
-				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
-				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
-			}
 			/*
 			 * Setting these values as true for now. They will be reset on upgrades.
 			 */
@@ -646,13 +633,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask startTask(Activity activity, String userName, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
 		{
 			signupTask.addUserName(userName);
-			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
 			/*
 			 * if we are on signupActivity we should not anymore try to
@@ -674,13 +660,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask restartTask(Activity activity, String userName, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, birthday, profilePicSmall);
+		startTask(activity, userName, profilePicSmall);
 		return signupTask;
 	}
 }

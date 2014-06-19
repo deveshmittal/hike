@@ -125,8 +125,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ImageView mIconView;
 
-	private TextView birthdayText;
-
 	private ImageView profilePicCamIcon;
 
 	private Handler mHandler;
@@ -206,8 +204,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		public long timeLeft = 0;
 
 		public boolean fbConnected = false;
-
-		public Birthday birthday = null;
 	}
 
 	@Override
@@ -291,7 +287,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
-			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.birthday, mActivityState.profileBitmap);
+			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.profileBitmap);
 		}
 		else
 		{
@@ -666,13 +662,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						prepareLayoutForScanning(null);
 					}
 					mTask.addUserInput(input);
-					if (birthdayText != null && !TextUtils.isEmpty(birthdayText.getText().toString()))
-					{
-						Calendar calendar = Calendar.getInstance();
-						int currentYear = calendar.get(Calendar.YEAR);
-						mActivityState.birthday = new Birthday(0, 0, currentYear - Integer.valueOf(birthdayText.getText().toString()));
-						mTask.addBirthdate(mActivityState.birthday);
-					}
 				}
 			}
 		}
@@ -689,7 +678,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 		case R.id.name_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
-			birthdayText = (TextView) layout.findViewById(R.id.birthday);
 			profilePicCamIcon = (ImageView) layout.findViewById(R.id.profile_cam);
 			break;
 		case R.id.num_layout:
@@ -927,10 +915,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		mTask = SignupTask.restartTask(this);
 	}
 
-	private void restartTask(String userName, Birthday birthday)
+	private void restartTask(String userName)
 	{
 		resetViewFlipper();
-		mTask = SignupTask.restartTask(this, userName, birthday, mActivityState.profileBitmap);
+		mTask = SignupTask.restartTask(this, userName, mActivityState.profileBitmap);
 	}
 
 	private void showErrorMsg()
@@ -982,7 +970,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							}
 						}, 100);
 					}
-					restartTask(mActivityState.userName, mActivityState.birthday);
+					restartTask(mActivityState.userName);
 
 				}
 			}
@@ -1243,22 +1231,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim()) && (loadingLayout == null || loadingLayout.getVisibility() != View.VISIBLE))
 		{
-			if (viewFlipper.getDisplayedChild() == NAME)
-			{
-				if (enterEditText.isFocused())
-				{
-					birthdayText.requestFocus();
-				}
-				else
-				{
-					Utils.hideSoftKeyboard(this, enterEditText);
-				}
-			}
-			else
-			{
 				submitClicked();
 				Utils.hideSoftKeyboard(this, enterEditText);
-			}
 		}
 		return true;
 	}
@@ -1369,28 +1343,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 						String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 						String fileName = Utils.getTempProfileImageFileName(accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, ""));
-
-						try
-						{
-							String birthdayString = user.getBirthday();
-							if (!TextUtils.isEmpty(birthdayString))
-							{
-								Date date = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).parse(user.getBirthday());
-								if (date.compareTo(Calendar.getInstance().getTime()) <= 0)
-								{
-									Calendar calendar = Calendar.getInstance();
-									calendar.setTime(date);
-									mActivityState.birthday = new Birthday(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
-									mTask.addBirthdate(mActivityState.birthday);
-									birthdayText.setText(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - mActivityState.birthday.year));
-								}
-							}
-
-						}
-						catch (Exception e)
-						{
-							Logger.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
-						}
 
 						final File destFile = new File(directory, fileName);
 						downloadImage(destFile, Uri.parse(fbProfileUrl), new ImageDownloadResult()
