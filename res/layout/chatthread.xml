@@ -45,16 +45,34 @@
                 android:id="@+id/sms_toggle_button"
                 layout="@layout/sms_toggle_item" />
 
+            <LinearLayout
+                android:id="@+id/tipContainerTop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical" >
+            </LinearLayout>
+
             <ListView
                 android:id="@+id/conversations_list"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_below="@id/sms_toggle_button"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_below="@+id/tipContainerTop"
+                android:layout_above="@+id/tipContainerBottom"
                 android:cacheColorHint="#00000000"
                 android:divider="@null"
                 android:fadingEdge="none"
                 android:listSelector="@android:color/transparent" >
             </ListView>
+
+            <LinearLayout
+				android:layout_alignParentBottom="true"
+                android:id="@+id/tipContainerBottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
 
             <include
                 android:id="@android:id/empty"
