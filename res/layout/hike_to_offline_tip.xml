@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#424242"
+    android:orientation="horizontal" >
+
+    <ImageView
+        android:id="@+id/arrow_pointer"
+        android:layout_width="49dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:paddingLeft="7dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_white_bolt" />
+
+    <LinearLayout
+        android:id="@+id/tip_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:background="@drawable/popup_button_bg_selector"
+        android:orientation="vertical"
+        android:paddingRight="6dp"
+        android:paddingBottom="15dp"
+        android:paddingTop="10dp" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/tip_header"
+            style="@style/TipHeader"
+            android:text="@string/stickers" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/tip_msg"
+            style="@style/TipBody"
+            android:text="@string/sticker_tip_msg" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="right" >
+
+        <View
+            android:id="@+id/close_divider"
+            android:layout_width="1dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center_vertical"
+            android:background="#606060" />
+
+        <ImageView
+            android:id="@+id/close_tip"
+            android:layout_width="56dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/popup_button_bg_selector"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_tip_cross"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/send_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/popup_button_bg_selector"
+            android:gravity="center_vertical"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:visibility="gone" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_action_bar_arrow" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:text="@string/send_uppercase"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

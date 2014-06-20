@@ -542,6 +542,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					return;
 				}
+				scheduleHikeOfflineTip();
 				notifyDataSetChanged();
 			}
 		};
@@ -3838,23 +3839,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	Handler handler = new Handler();
 
-	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, ConvMessage message, View inflated)
+	private void scheduleHikeOfflineTip()
 	{
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		long diff = (((long) System.currentTimeMillis() / 1000) - message.getTimestamp());
+		long diff = (((long) System.currentTimeMillis() / 1000) - convMessages.get(lastSentMessagePosition).getTimestamp());
 
-		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
+		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME && chatThread.shouldRunTimerForHikeOfflineTip)
 		{
-			showUndeliveredMessage = new ShowUndeliveredMessage(message, tv, container, iv, inflated);
+			showUndeliveredMessage = new ShowUndeliveredMessage();
 			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		}
-		else
+		else if (lastSentMessagePosition != -1 && convMessages.get(lastSentMessagePosition).getState() == State.SENT_CONFIRMED)
 		{
-			showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
+			chatThread.showHikeToOfflineTip();
 		}
 	}
 
@@ -4009,13 +4010,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
 			updateViewWindowForReadBy(message);
-		}
-		else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
-		{
-			if (!message.isSMS())
-			{
-				scheduleUndeliveredText(messageInfo, clickableItem, sending, message, inflated);
-			}
 		}
 	}
 
@@ -4431,25 +4425,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private class ShowUndeliveredMessage implements Runnable
 	{
-		ConvMessage message;
-
-		TextView tv;
-
-		ImageView iv;
-
-		View container;
-
-		View inflated;
-
-		public ShowUndeliveredMessage(ConvMessage message, TextView tv, View container, ImageView iv, View inflated)
-		{
-			this.message = message;
-			this.tv = tv;
-			this.container = container;
-			this.iv = iv;
-			this.inflated = inflated;
-		}
-
 		@Override
 		public void run()
 		{
@@ -4460,29 +4435,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
 			if (isMessageUndelivered(lastSentMessage))
 			{
-				showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
+				chatThread.showHikeToOfflineTip();
 			}
 		}
-	}
-
-	private void showUndeliveredTextAndSetClick(ConvMessage message, TextView tv, View container, ImageView iv, boolean fromHandler, View inflated)
-	{
-		String undeliveredText = getUndeliveredTextRes();
-		if (!TextUtils.isEmpty(undeliveredText))
-		{
-			iv.setVisibility(View.GONE);
-			inflated.setVisibility(View.VISIBLE);
-			tv.setVisibility(View.VISIBLE);
-			tv.setText(undeliveredText);
-		}
-		tv.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-
-		container.setTag(convMessages.get(lastSentMessagePosition));
-		container.setOnClickListener(this);
-
-		container.setOnLongClickListener(this);
-
-		updateViewWindowForReadBy(message);
 	}
 
 	private String getUndeliveredTextRes()

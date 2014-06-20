@@ -116,6 +116,7 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -305,6 +306,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean showKeyboard = false;
 
 	private boolean isOnline = false;
+	
+	private View hikeToOfflineTipview;
+	
+	/*
+	 * We should run client timer before showing hikeOffline tip
+	 * only if user is entering chat thread and reciever's
+	 * online state changes while user is on chatthread
+	 */
+	public boolean shouldRunTimerForHikeOfflineTip = true;
 
 	private ContactInfo contactInfo;
 
@@ -7017,13 +7027,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		final String lastSeenString = Utils.getLastSeenTimeAsString(this, lastSeenTime, offline, false, true);
 
 		isOnline = contactInfo.getOffline() == 0;
-
+		
 		runOnUiThread(new Runnable()
 		{
 
 			@Override
 			public void run()
 			{
+				if(isOnline)
+				{
+					hideHikeToOfflineTip(true);
+				}
+
 				if (lastSeenString == null)
 				{
 					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
@@ -7035,5 +7050,47 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			}
 		});
+	}
+	
+	public void showHikeToOfflineTip()
+	{
+		if(!mConversation.isOnhike() || mConversation instanceof GroupConversation)
+		{
+			return;
+		}
+		
+		if(hikeToOfflineTipview == null)
+		{
+			hikeToOfflineTipview = LayoutInflater.from(this).inflate(R.layout.hike_to_offline_tip, null);
+		}
+
+		((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.reciever_is_offline, mContactName));
+		((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(R.string.hike_to_offline_tip_msg);
+
+		hikeToOfflineTipview.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				hideHikeToOfflineTip(false);
+			}
+		});
+		
+		if(( (LinearLayout) findViewById(R.id.tipContainerBottom)).getChildCount() == 0 )
+		{
+			( (LinearLayout) findViewById(R.id.tipContainerBottom)).addView(hikeToOfflineTipview);
+		}
+		hikeToOfflineTipview.setVisibility(View.VISIBLE);
+		shouldRunTimerForHikeOfflineTip = false;
+	}
+
+	public void hideHikeToOfflineTip(boolean shouldRunTimerForHikeOfflineTip)
+	{
+		if(hikeToOfflineTipview != null)
+		{
+			this.shouldRunTimerForHikeOfflineTip = shouldRunTimerForHikeOfflineTip;
+			hikeToOfflineTipview.setVisibility(View.GONE);
+			( (LinearLayout) findViewById(R.id.tipContainerBottom)).removeView(hikeToOfflineTipview);
+		}
 	}
 }
