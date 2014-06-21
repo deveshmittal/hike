@@ -6897,22 +6897,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Rect r = new Rect();
 				root.getWindowVisibleDisplayFrame(r);
 				// this is height of view which is visible on screen
-				int rootHeight = r.bottom - r.top;
 				int rootViewHeight = root.getRootView().getHeight();
-				int temp = rootViewHeight - rootHeight - getStatusBarHeight();
+				int temp = rootViewHeight - r.bottom;
 				Logger.i("chatthread", "keyboard  height " + temp);
+				boolean islandScape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 				if (temp > 0)
 				{
-					if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+					if (islandScape)
 					{
 						possibleKeyboardHeightLand = temp;
-					}else{
+					}
+					else
+					{
 						possibleKeyboardHeight = temp;
 					}
 					isKeyboardOpen = true;
 				}
 				else
 				{
+					// when we change orientation , from portrait to landscape and keyboard is open , it is possible that screen does adjust its size more than once until it
+					// stabilize
+					if (islandScape)
+						possibleKeyboardHeightLand = 0;
 					isKeyboardOpen = false;
 				}
 			}
@@ -7016,8 +7022,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 		if (isLandscape)
 		{
+			Logger.i("chatthread", "landscape mode is on");
 			if (possibleKeyboardHeightLand != 0)
 			{
+				Logger.i("chatthread", "landscape mode is on landkeyboardheight " + possibleKeyboardHeightLand);
 				lp.height = possibleKeyboardHeightLand;
 			}
 			else
@@ -7027,7 +7035,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				int statusBarHeight = getStatusBarHeight();
 				int maxHeight = root.getRootView().getHeight();
 				// giving half height of screen in landscape mode
-				lp.height = (maxHeight - statusBarHeight) / 2;
+				Logger.i("chatthread", "landscape mode is on setting half of screen " + maxHeight);
+				lp.height = (maxHeight) / 2;
 			}
 		}
 		else
