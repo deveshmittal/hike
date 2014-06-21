@@ -1742,11 +1742,11 @@ public class MqttMessagesManager
 	 *            - jsonFromServer
 	 * @throws JSONException
 	 */
-	private void updateAtomicPopUpData(JSONObject jsonObj) throws JSONException
+	public void updateAtomicPopUpData(JSONObject jsonObj) throws JSONException
 	{
 		Logger.i("tip", jsonObj.toString());
 		String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
-		Editor edit = settings.edit();
+
 		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 		if (isDuplicateOrWrongPacket("last" + subType, data))
 		{
@@ -1757,17 +1757,22 @@ public class MqttMessagesManager
 		String body = data.optString(HikeConstants.BODY);
 		if (!TextUtils.isEmpty(header) && !TextUtils.isEmpty(body))
 		{
-			edit.putString("last" + subType, jsonObj.getString(HikeConstants.MESSAGE_ID));
-			edit.putString(HikeMessengerApp.ATOMIC_POP_UP_TYPE, subType);
-			edit.putString(HikeMessengerApp.ATOMIC_POP_UP_HEADER, header);
-			edit.putString(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE, body);
-			edit.commit();
+			Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
+			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
+			pref.saveData("last" + subType, data.getString(HikeConstants.MESSAGE_ID));
+			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, subType);
+			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HEADER, header);
+			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE, body);
+		}
+		else
+		{
+			Logger.i("tip", "header message failed " + header + " -- " + body);
 		}
 	}
 
 	private boolean isDuplicateOrWrongPacket(String key, JSONObject jsonObject)
 	{
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
-		return TextUtils.isEmpty(id) || settings.getString(key, "").equals(id);
+		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
 	}
 }
