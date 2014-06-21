@@ -812,7 +812,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
 		{
 			View v = LayoutInflater.from(this).inflate(R.layout.tip_left_arrow, null);
-			((ImageView) (v.findViewById(R.id.arrow_pointer))).setImageResource(0);
+			((ImageView) (v.findViewById(R.id.arrow_pointer))).setImageResource(R.drawable.ic_information);
 			setAtomicTipContent(v, pref);
 			((LinearLayout) findViewById(R.id.tipContainerTop)).addView(v, 0);
 		}

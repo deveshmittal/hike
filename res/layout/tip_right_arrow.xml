@@ -43,6 +43,7 @@
             android:layout_alignParentRight="true" >
 
             <ImageView
+                android:layout_centerInParent="true"
                 android:id="@+id/arrow_pointer"
                 android:layout_width="47dp"
                 android:layout_height="wrap_content"

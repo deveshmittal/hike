@@ -225,6 +225,7 @@ public class ConversationsAdapter extends BaseAdapter
 			case ATOMIC_FAVOURITE_TIP:
 			case ATOMIC_INVITE_TIP:
 				v = inflater.inflate(R.layout.tip_left_arrow, parent, false);
+				viewHolder.avatar = (ImageView) v.findViewById(R.id.arrow_pointer);
 				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
 				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
 				viewHolder.closeTip = v.findViewById(R.id.close_tip);
@@ -379,6 +380,18 @@ public class ConversationsAdapter extends BaseAdapter
 			viewHolder.headerText.setText(headerTxt);
 			viewHolder.subText.setText(message);
 			viewHolder.closeTip.setTag(position);
+			if (viewType == ViewType.ATOMIC_PROFILE_PIC_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_profile);
+			}
+			else if (viewType == ViewType.ATOMIC_FAVOURITE_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_favorites);
+			}
+			else if (viewType == ViewType.ATOMIC_INVITE_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_rewards);
+			}
 			viewHolder.closeTip.setOnClickListener(new OnClickListener()
 			{
 
@@ -517,7 +530,7 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 
 		CharSequence markedUp = getConversationText(conversation, message);
-		
+
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(markedUp);
 		TextView tsView = viewHolder.timeStamp;
