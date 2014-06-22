@@ -3957,6 +3957,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			status.setVisibility(View.VISIBLE);
 		}
 
+		if(message.getState() == State.SENT_CONFIRMED && !message.isSMS() && chatThread.isHikeOfflineTipShowing() && conversation.isOnhike())
+		{
+			status.setImageResource(R.drawable.ic_bolt);
+		}
+		
 		if (timeStatus != null)
 			timeStatus.setVisibility(View.VISIBLE);
 

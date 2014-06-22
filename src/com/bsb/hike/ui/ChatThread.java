@@ -7269,4 +7269,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		v.setAnimation(anim);
 		
 	}
+
+	public boolean isHikeOfflineTipShowing()
+	{
+		return hikeToOfflineTipview != null && hikeToOfflineTipview.getVisibility() == View.VISIBLE;
+	}
 }
