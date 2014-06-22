@@ -7116,6 +7116,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
 			hikeToOfflineTipview.findViewById(R.id.tip_content).setOnClickListener(null);
+			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(false);
 		}
 		else if (isHikeToOfflineMode)
 		{
@@ -7123,6 +7124,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg, mContactName));
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
+			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(false);
 		}
 		else
 		{
@@ -7130,6 +7132,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(R.string.hike_to_offline_tip_msg);
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
+			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(true);
 		}
 	}
 
