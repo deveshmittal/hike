@@ -1591,4 +1591,6 @@
      <string name="send_uppercase">SEND</string>
      <string name="hike_offline_mode_header">%1$d free sms</string>
      <string name="hike_offline_mode_msg">selected messages will be send to %1$s</string>
+     <string name="messages_sent">Messages sent!</string>
+     <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
 </resources>

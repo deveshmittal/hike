@@ -2,7 +2,6 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +28,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
@@ -347,19 +347,16 @@ public class DbConversationListener implements Listener
 			{
 				return;
 			}
-			/*
-			 * Reversing order since we want to send the oldest message first
-			 */
-			Collections.reverse(messages);
 
 			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages)
 			{
-				sendNativeSMS(convMessage);
 				convMessage.setSMS(true);
 				mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 			}
+			ConvMessage lastMessage = messages.get(messages.size() - 1);
+			sendNativeSMS(new ConvMessage(combineInOneSmsString(true, messages), lastMessage.getMsisdn(), lastMessage.getTimestamp(), State.UNKNOWN, lastMessage.getMsgID(), -1));
 
 			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 		}
@@ -550,4 +547,38 @@ public class DbConversationListener implements Listener
 		context.getContentResolver().insert(HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
 	}
 
+	public String combineInOneSmsString(boolean resetTimestamp, List<ConvMessage> convMessages)
+	{
+		String combinedMessageString = "";
+		int count = 0;
+		for (ConvMessage convMessage : convMessages)
+		{
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+			
+			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+			
+			combinedMessageString += Utils.getMessageDisplayText(convMessage, context);
+			
+			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
+			{
+				break;
+			}
+			
+			/*
+			 * Added line enters among messages
+			 */
+			if(count != convMessages.size())
+			{
+				combinedMessageString += "\n\n";
+			}
+		}
+		
+		return combinedMessageString;
+	}
 }

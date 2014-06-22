@@ -7104,7 +7104,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void setupHikeToOfflineTipViews()
 	{
-		if(isHikeToOfflineMode)
+		setupHikeToOfflineTipViews(false);
+	}
+	
+	public void setupHikeToOfflineTipViews(boolean messagesSent)
+	{
+		if(messagesSent)
+		{
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.messages_sent));
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_messages_sent_msg, mCredits));
+			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
+			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
+			hikeToOfflineTipview.findViewById(R.id.tip_content).setOnClickListener(null);
+		}
+		else if (isHikeToOfflineMode)
 		{
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.hike_offline_mode_header, mAdapter.getSelectedFreeSmsCount()));
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg, mContactName));
@@ -7134,6 +7147,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 		sethikeToOfflineMode(true);
+		
+		hikeToOfflineTipview.findViewById(R.id.send_button).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mAdapter.hikeOfflineSendClick();
+			}
+		});
 	}
 
 	public void hideHikeToOfflineTip(boolean shouldRunTimerForHikeOfflineTip)
@@ -7141,6 +7163,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(hikeToOfflineTipview != null)
 		{
 			this.shouldRunTimerForHikeOfflineTip = shouldRunTimerForHikeOfflineTip;
+			hikeToOfflineTipview.clearAnimation();
 			hikeToOfflineTipview.setVisibility(View.GONE);
 			if(isHikeToOfflineMode)
 			{
@@ -7205,4 +7228,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return true;
 	}
 	
+	public void messagesSentCloseHikeToOfflineMode()
+	{
+		destroyHikeToOfflineMode();
+		setupHikeToOfflineTipViews(true);
+		setHikeOfflineTipAnimation(hikeToOfflineTipview);
+	}
+	
+	private void setHikeOfflineTipAnimation(final View v)
+	{
+		slideUp = AnimationUtils.loadAnimation(ChatThread.this, R.anim.slide_up_noalpha);
+		slideUp.setDuration(400);
+
+		slideDown = AnimationUtils.loadAnimation(ChatThread.this, R.anim.slide_down_noalpha);
+		slideDown.setDuration(400);
+		slideDown.setStartOffset(3000);
+
+		slideDown.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				hideHikeToOfflineTip(false);
+			}
+		});
+		
+		AnimationSet anim = new AnimationSet(true);
+		anim.addAnimation(slideUp);
+		anim.addAnimation(slideDown);
+		v.setAnimation(anim);
+		
+	}
 }

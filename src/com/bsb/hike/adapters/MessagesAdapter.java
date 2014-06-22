@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -4143,52 +4145,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		Logger.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
 
-		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
-				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
-		{
-			long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
-
-			/*
-			 * Only show fallback if the message has not been sent for our max wait time.
-			 */
-			if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME || !Utils.isUserOnline(context))
-			{
-
-				if (conversation.isOnhike())
-				{
-					if (!Utils.isUserOnline(context))
-					{
-						if (conversation instanceof GroupConversation)
-						{
-							Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
-						}
-						else
-						{
-							showSMSDialog(true);
-						}
-					}
-					else
-					{
-						if (conversation instanceof GroupConversation)
-						{
-							showSMSDialog(false);
-						}
-						else
-						{
-							/*
-							 * Only show the H2S fallback option if messaging indian numbers.
-							 */
-							showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-						}
-					}
-				}
-				else
-				{
-					sendAllUnsentMessagesAsSMS(Utils.getSendSmsPref(context));
-				}
-				return;
-			}
-		}
 		if (convMessage.isFileTransferMessage())
 		{
 			// @GM
@@ -4518,7 +4474,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 
-		int numUnsentMessages = getAllUnsentMessages(false).size();
+		int numUnsentMessages = getAllUnsentSelectedMessages(false).size();
 		nativeHeader.setText(context.getString(R.string.x_regular_sms, numUnsentMessages));
 
 		sendHike.setOnClickListener(new OnClickListener()
@@ -4554,7 +4510,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (sendHike.isChecked())
 				{
 					Utils.setSendUndeliveredSmsSetting(context, false);
-					sendAllUnsentMessagesAsSMS(false);
+					sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
 				}
 				else
 				{
@@ -4564,7 +4520,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					}
 					else
 					{
-						sendAllUnsentMessagesAsSMS(true);
+						sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
 						Utils.setSendUndeliveredSmsSetting(context, true);
 					}
 				}
@@ -4618,7 +4574,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Utils.setReceiveSmsSetting(context, true);
 					if (!triggeredFromToggle)
 					{
-						sendAllUnsentMessagesAsSMS(true);
+						sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
 					}
 					if (!preferences.getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
 					{
@@ -4697,20 +4653,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return unsentMessages;
 	}
 
-	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS)
+	private void sendAllMessagesAsSMS(boolean nativeSMS, List<ConvMessage> unsentMessages)
 	{
-		List<ConvMessage> unsentMessages = getAllUnsentMessages(true);
 		Logger.d(getClass().getSimpleName(), "Unsent messages: " + unsentMessages.size());
 
 		if (nativeSMS)
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
+			chatThread.messagesSentCloseHikeToOfflineMode();
 		}
 		else
 		{
 			if (conversation.isOnhike())
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
+				chatThread.messagesSentCloseHikeToOfflineMode();
 			}
 			else
 			{
@@ -5061,4 +5018,86 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return (totalMsgLength / 140) + 1;
 	}
 	
+	public void hikeOfflineSendClick()
+	{
+		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
+		final HashMap<Long, ConvMessage> selectedMessagesMap = getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
+		Collections.sort(selectedMsgIds);
+		
+		if (lastSentMessagePosition != -1 && !selectedMessagesMap.isEmpty() && !chatThread.isContactOnline())
+		{
+			long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
+
+			/*
+			 * Only show fallback if the message has not been sent for our max wait time.
+			 */
+			if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME || !Utils.isUserOnline(context))
+			{
+
+				if (conversation.isOnhike())
+				{
+					if (!Utils.isUserOnline(context))
+					{
+						if (conversation instanceof GroupConversation)
+						{
+							Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
+						}
+						else
+						{
+							showSMSDialog(true);
+						}
+					}
+					else
+					{
+						if (conversation instanceof GroupConversation)
+						{
+							showSMSDialog(false);
+						}
+						else
+						{
+							/*
+							 * Only show the H2S fallback option if messaging indian numbers.
+							 */
+							showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+						}
+					}
+				}
+				return;
+			}
+		}
+	}
+
+	public List<ConvMessage> getAllUnsentSelectedMessages(boolean resetTimestamp)
+	{
+		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
+		final HashMap<Long, ConvMessage> selectedMessagesMap = getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
+		Collections.sort(selectedMsgIds);
+		for (int i = 0; i < selectedMsgIds.size(); i++)
+		{
+			ConvMessage convMessage = selectedMessagesMap.get(selectedMsgIds.get(i));
+			if(convMessage == null)
+			{
+				continue;
+			}
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+			if (!isMessageUndelivered(convMessage))
+			{
+				break;
+			}
+			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+			
+			unsentMessages.add(convMessage);
+		}
+		
+		return unsentMessages;
+	}
+
 }
