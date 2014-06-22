@@ -418,6 +418,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean shownSdrIntroTip = true;
 
 	private boolean sdrTipFadeInShown = false;
+	
+	private boolean isHikeToOfflineMode = false;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
@@ -3373,7 +3375,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setSelection(ConvMessage convMessage, View overlay)
 	{
-		if (isActionModeOn)
+		if (isActionModeOn || isHikeToOfflineMode)
 		{
 			/*
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
@@ -3853,7 +3855,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showUndeliveredMessage = new ShowUndeliveredMessage();
 			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		}
-		else if (lastSentMessagePosition != -1 && convMessages.get(lastSentMessagePosition).getState() == State.SENT_CONFIRMED)
+		else if (lastSentMessagePosition != -1 && convMessages.get(lastSentMessagePosition).getState() == State.SENT_CONFIRMED 
+				&& !convMessages.get(lastSentMessagePosition).isSMS())
 		{
 			chatThread.showHikeToOfflineTip();
 		}
@@ -4118,7 +4121,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void onClick(View v)
 		{
-			chatThread.showMessageContextMenu((ConvMessage) v.getTag());
+			if(isActionModeOn)
+			{
+				chatThread.showMessageContextMenu((ConvMessage) v.getTag());
+			}
+			else if (isHikeToOfflineMode)
+			{
+				chatThread.clickedHikeToOfflineMessage((ConvMessage) v.getTag());
+			}
 			return;
 		}
 	};
@@ -4659,7 +4669,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		dialog.show();
 	}
 
-	private List<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
+	public List<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
 	{
 		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
 		int count = 0;
@@ -5030,4 +5040,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		return msgIdForSdrTip != -1;
 	}
+	
+	public void sethikeToOfflineMode(boolean isOn)
+	{
+		isHikeToOfflineMode = isOn;
+	}
+	
+	public int getSelectedFreeSmsCount()
+	{
+		Collection<ConvMessage> selectedMessages = getSelectedMessagesMap().values();
+		int totalMsgLength = 0;
+		for (ConvMessage convMessage : selectedMessages)
+		{
+			totalMsgLength += Utils.getMessageDisplayText(convMessage, context).length();
+			
+			// number of line enters after each msg;
+			totalMsgLength += 2;
+		}
+		
+		return (totalMsgLength / 140) + 1;
+	}
+	
 }

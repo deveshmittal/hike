@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -386,6 +387,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int selectedCancelableMsgs = 0;
 
 	private boolean isActionModeOn = false;
+	
+	private boolean isHikeToOfflineMode = false;
 
 	private TextView mActionModeTitle;
 
@@ -808,6 +811,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (isActionModeOn)
 		{
 			destroyActionMode();
+			return;
+		}
+		
+		if (isHikeToOfflineMode)
+		{
+			destroyHikeToOfflineMode();
 			return;
 		}
 
@@ -5988,7 +5997,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		public boolean onDoubleTap(MotionEvent e)
 		{
 			Logger.i("chatthread", "double tap");
-			if (isActionModeOn)
+			if (isActionModeOn || isHikeToOfflineMode)
 			{
 				return false;
 			}
@@ -7064,8 +7073,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview = LayoutInflater.from(this).inflate(R.layout.hike_to_offline_tip, null);
 		}
 
-		((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.reciever_is_offline, mContactName));
-		((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(R.string.hike_to_offline_tip_msg);
+		setupHikeToOfflineTipViews();
 
 		hikeToOfflineTipview.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
 		{
@@ -7073,6 +7081,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				hideHikeToOfflineTip(false);
+			}
+		});
+		
+		hikeToOfflineTipview.findViewById(R.id.tip_content).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				initialiseHikeToOfflineMode();
+				setupHikeToOfflineTipViews();
 			}
 		});
 		
@@ -7084,13 +7102,107 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		shouldRunTimerForHikeOfflineTip = false;
 	}
 
+	public void setupHikeToOfflineTipViews()
+	{
+		if(isHikeToOfflineMode)
+		{
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.hike_offline_mode_header, mAdapter.getSelectedFreeSmsCount()));
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg, mContactName));
+			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
+			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
+		}
+		else
+		{
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.reciever_is_offline, mContactName));
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(R.string.hike_to_offline_tip_msg);
+			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
+			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
+		}
+	}
+
+	private void initialiseHikeToOfflineMode()
+	{
+		hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
+		hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
+
+		List<ConvMessage> unsentMessages = mAdapter.getAllUnsentMessages(false);
+		for (ConvMessage convMsg : unsentMessages)
+		{
+			if(convMsg.getState() == State.SENT_CONFIRMED)
+			{
+				mAdapter.selectView(convMsg, true);
+			}
+		}
+		sethikeToOfflineMode(true);
+	}
+
 	public void hideHikeToOfflineTip(boolean shouldRunTimerForHikeOfflineTip)
 	{
 		if(hikeToOfflineTipview != null)
 		{
 			this.shouldRunTimerForHikeOfflineTip = shouldRunTimerForHikeOfflineTip;
 			hikeToOfflineTipview.setVisibility(View.GONE);
+			if(isHikeToOfflineMode)
+			{
+				destroyHikeToOfflineMode();
+			}
 			( (LinearLayout) findViewById(R.id.tipContainerBottom)).removeView(hikeToOfflineTipview);
 		}
 	}
+	
+	public void sethikeToOfflineMode(boolean isOn)
+	{
+		isHikeToOfflineMode = isOn;
+		mAdapter.sethikeToOfflineMode(isOn);
+		mAdapter.notifyDataSetChanged();
+	}
+
+	private void destroyHikeToOfflineMode()
+	{
+		sethikeToOfflineMode(false);
+		setupHikeToOfflineTipViews();
+		mAdapter.removeSelection();
+	}
+
+	/*
+	 * Method called when user selects one of the chat bubbles
+	 * while inside hike to offline mode.
+	 */
+	public boolean clickedHikeToOfflineMessage(ConvMessage message)
+	{
+		dismissPopupWindow();
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
+		{
+			return false;
+		}
+		
+		if(message.getState() != State.SENT_CONFIRMED || message.isSMS())
+		{
+			return false;
+		}
+		mAdapter.toggleSelection(message);
+		boolean isMsgSelected = mAdapter.isSelected(message);
+
+		boolean hasCheckedItems = mAdapter.getSelectedCount() > 0;
+
+		if (hasCheckedItems && !isHikeToOfflineMode)
+		{
+			// there are some selected items, start the actionMode
+			setupActionModeActionBar();
+		}
+		else if (!hasCheckedItems && isHikeToOfflineMode)
+		{
+			// there no selected items, finish the actionMode
+			destroyHikeToOfflineMode();
+			return true;
+		}
+
+		if (isHikeToOfflineMode)
+		{
+			setupHikeToOfflineTipViews();
+		}
+		
+		return true;
+	}
+	
 }

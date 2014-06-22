@@ -1589,4 +1589,6 @@
      <string name="reciever_is_offline">%1$s is offline</string>
      <string name="hike_to_offline_tip_msg">send bolt marked bubbles as sms</string>
      <string name="send_uppercase">SEND</string>
+     <string name="hike_offline_mode_header">%1$d free sms</string>
+     <string name="hike_offline_mode_msg">selected messages will be send to %1$s</string>
 </resources>
