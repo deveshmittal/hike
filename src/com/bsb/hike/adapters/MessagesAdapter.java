@@ -5025,49 +5025,40 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	public void hikeOfflineSendClick()
 	{
-		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
 		final HashMap<Long, ConvMessage> selectedMessagesMap = getSelectedMessagesMap();
 		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
 		Collections.sort(selectedMsgIds);
 		
 		if (lastSentMessagePosition != -1 && !selectedMessagesMap.isEmpty() && !chatThread.isContactOnline())
 		{
-			long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
-
-			/*
-			 * Only show fallback if the message has not been sent for our max wait time.
-			 */
-			if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME || !Utils.isUserOnline(context))
+			if (conversation.isOnhike())
 			{
-
-				if (conversation.isOnhike())
+				if (!Utils.isUserOnline(context))
 				{
-					if (!Utils.isUserOnline(context))
+					if (conversation instanceof GroupConversation)
 					{
-						if (conversation instanceof GroupConversation)
-						{
-							Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
-						}
-						else
-						{
-							showSMSDialog(true);
-						}
+						Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
 					}
 					else
 					{
-						if (conversation instanceof GroupConversation)
-						{
-							showSMSDialog(false);
-						}
-						else
-						{
-							/*
-							 * Only show the H2S fallback option if messaging indian numbers.
-							 */
-							showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-						}
+						showSMSDialog(true);
 					}
 				}
+				else
+				{
+					if (conversation instanceof GroupConversation)
+					{
+						showSMSDialog(false);
+					}
+					else
+					{
+						/*
+						 * Only show the H2S fallback option if messaging indian numbers.
+						 */
+						showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+					}
+				}
+
 				return;
 			}
 		}
