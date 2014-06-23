@@ -11,7 +11,8 @@
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
         android:background="@color/white"
-        android:fastScrollEnabled="false" />
+        android:fastScrollEnabled="true"
+        android:scrollbarStyle="outsideInset" />
 
     <include
         android:id="@+id/spinner"
