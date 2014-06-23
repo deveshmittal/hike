@@ -209,7 +209,7 @@ public class ConversationsAdapter extends BaseAdapter
 				viewHolder.closeTip = v.findViewById(R.id.close_tip);
 				break;	
 			case START_NEW_CHAT_TIP:
-				v = inflater.inflate(R.layout.start_new_chat_tip, parent, false);
+				v = inflater.inflate(R.layout.tip_middle_arrow, parent, false);
 				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
 				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
 				viewHolder.closeTip = v.findViewById(R.id.close_tip);

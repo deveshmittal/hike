@@ -799,15 +799,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			((ImageView) (v.findViewById(R.id.arrow_pointer))).setImageResource(R.drawable.ftue_up_arrow);
 			setAtomicTipContent(v, pref);
 			((LinearLayout) findViewById(R.id.tipContainerTop)).addView(v, 0);
-			v.setOnClickListener(new OnClickListener()
-			{
 
-				@Override
-				public void onClick(View v)
-				{
-					attachmentClicked();
-				}
-			});
 		}
 		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
 		{
@@ -825,6 +817,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setAtomicTipContent(v, pref);
 			ll.addView(v, 0);
 
+		}
+		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_THEME))
+		{
+			Logger.i("chatthread", "theme tip");
+			LinearLayout ll = ((LinearLayout) findViewById(R.id.tipContainerTop));
+			View v = LayoutInflater.from(this).inflate(R.layout.tip_middle_arrow, null);
+			((ImageView) (v.findViewById(R.id.arrow_pointer))).setImageResource(R.drawable.ftue_up_arrow);
+			setAtomicTipContent(v, pref);
+			ll.addView(v, 0);
 		}
 	}
 
