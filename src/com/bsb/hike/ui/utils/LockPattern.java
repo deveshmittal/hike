@@ -44,12 +44,15 @@ public class LockPattern
 			}
 			else
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_FTUE_STEALTH_CONV, null);
+				//making this check so that we can find out if this is password reset flow or otherwise
+				if(!data.getExtras().getBoolean(HikeConstants.Extras.STEALTH_PASS_RESET))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_FTUE_STEALTH_CONV, null);
+				}
 			}
 			break;// _ReqCreateLockPattern
 
 		case HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN:
-
 			switch (resultCode)
 			{
 			case Activity.RESULT_OK:
@@ -68,6 +71,20 @@ public class LockPattern
 				return;
 			}
 
+			break;
+		case HikeConstants.ResultCodes.CONFIRM_AND_ENTER_NEW_PASSWORD:
+			switch (resultCode)
+			{
+			case Activity.RESULT_OK:
+				LockPattern.createNewPattern(activity);
+				break;
+			case Activity.RESULT_CANCELED:
+				break;
+			case LockPatternActivity.RESULT_FAILED:
+				break;
+			default:
+				return;
+			}
 			break;
 		}
 	}
@@ -93,7 +110,7 @@ public class LockPattern
 		activity.startActivityForResult(i, HikeConstants.ResultCodes.CREATE_LOCK_PATTERN);
 	}// onClick()
 
-	public static void confirmPattern(Activity activity)
+	public static void confirmPattern(Activity activity, boolean isResetPassword)
 	{
 		Intent i = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null, activity, LockPatternActivity.class);
 		String encryptedPattern = HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, "");
@@ -102,7 +119,7 @@ public class LockPattern
 		i.putExtra(Settings.Security.METADATA_AUTO_SAVE_PATTERN, true);
 		i.putExtra(Settings.Display.METADATA_MIN_WIRED_DOTS, mBarMaxTries);
 		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		activity.startActivityForResult(i, HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN);
+		activity.startActivityForResult(i, isResetPassword?HikeConstants.ResultCodes.CONFIRM_AND_ENTER_NEW_PASSWORD:HikeConstants.ResultCodes.CONFIRM_LOCK_PATTERN);
 	}// onClick()
 
 }

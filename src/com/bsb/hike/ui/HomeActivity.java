@@ -1674,7 +1674,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 			if (stealthType == HikeConstants.STEALTH_OFF)
 			{
-				LockPattern.confirmPattern(HomeActivity.this);
+				LockPattern.confirmPattern(HomeActivity.this, false);
 			}
 			else
 			{

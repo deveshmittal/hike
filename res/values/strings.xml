@@ -1586,4 +1586,7 @@
      <string name="earn_free_sms">Earn free SMS</string>
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
+     <string name="change_stealth_password">Change Stealth passcode</string>
+     <string name="change_stealth_password_body">Change your stealth passcode to something sneaky!</string>
+     
 </resources>

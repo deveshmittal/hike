@@ -396,6 +396,8 @@ public class HikeConstants
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
 	public static final String RESET_STEALTH_PREF = "resetStealthPref";
+	
+	public static final String CHANGE_STEALTH_PASSCODE = "changeStealthPasscode";
 
 	public static final String REQUEST_DP = "rdp";
 
@@ -870,6 +872,8 @@ public class HikeConstants
 		public static final int CREATE_LOCK_PATTERN = 4002;
 
 		public static final int CONFIRM_LOCK_PATTERN = 4003;
+		
+		public static final int CONFIRM_AND_ENTER_NEW_PASSWORD = 4004;
 	}
 
 	public static final class Extras
@@ -1165,6 +1169,8 @@ public class HikeConstants
 		public static final String STEALTH_PUSH_HEADER = "stealthPushHeader";
 		
 		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
+		
+		public static final String STEALTH_PASS_RESET = "stealthPasswordReset";
 		
 	}
 

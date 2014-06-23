@@ -36,6 +36,7 @@ import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
+import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -226,7 +227,25 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				getPreferenceScreen().removePreference(resetStealthPreference);
 			}
 		}
+		Preference resetStealthPassword = getPreferenceScreen().findPreference(HikeConstants.CHANGE_STEALTH_PASSCODE);
+		if (resetStealthPassword != null)
+		{
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			{
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				{
+					resetStealthPassword.setTitle(R.string.change_stealth_password);
+					resetStealthPassword.setSummary(R.string.change_stealth_password_body);
+				}
 
+				resetStealthPassword.setOnPreferenceClickListener(this);
+			}
+			else
+			{
+				getPreferenceScreen().removePreference(resetStealthPassword);
+			}
+		}
+		
 		setupActionBar(titleRes);
 
 	}
@@ -630,6 +649,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}, dialogStrings);
 			}
 		}
+		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
+		{
+			LockPattern.confirmPattern(HikePreferences.this, true);
+		}
 
 		return true;
 	}
@@ -790,4 +813,16 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 
 	}
+	/**
+	 * Adding this to handle the onactivityresult callback for reset password 
+	 */
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		//passing true here to denote that this is coming from the password reset operation
+		data.putExtra("IsResetPassword", true);
+		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+
 }
