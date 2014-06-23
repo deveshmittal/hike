@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1920,6 +1921,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
+		
+		if(!(mConversation instanceof GroupConversation))
+		{
+			mAdapter.addAllUndeliverdMessages(messages);
+		}
+
 		// add block view
 		if (addBlockHeader)
 		{
@@ -2875,6 +2882,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
+				if(!(mConversation instanceof GroupConversation) && !msg.isSMS())
+				{
+					mAdapter.removeFromUndeliverdMessage(msg);
+				}
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
@@ -2925,6 +2936,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 				}
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+				if(!(mConversation instanceof GroupConversation))
+				{
+					if(!msg.isSMS())
+					{
+						mAdapter.addToUndeliverdMessage(msg);
+					}
+					else
+					{
+						mAdapter.removeFromUndeliverdMessage(msg);
+					}
+				}
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
@@ -6533,6 +6555,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					for (ConvMessage convMessage : selectedMessagesMap.values())
 					{
 						removeMessage(convMessage);
+						if(isHikeToOfflineMode && convMessage.getState() == State.SENT_CONFIRMED)
+						{
+							mAdapter.removeFromUndeliverdMessage(convMessage);
+							if(mAdapter.isSelected(convMessage))
+							{
+								mAdapter.toggleSelection(convMessage);
+							}
+						}
+						
 						if (convMessage.isFileTransferMessage())
 						{
 							if (convMessage.isFileTransferMessage())
@@ -7141,7 +7172,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 		hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
-		List<ConvMessage> unsentMessages = mAdapter.getAllUnsentMessages(false);
+		Set<ConvMessage> unsentMessages = mAdapter.getAllUnsentMessages(false);
 		for (ConvMessage convMsg : unsentMessages)
 		{
 			if(convMsg.getState() == State.SENT_CONFIRMED)

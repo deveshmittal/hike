@@ -422,7 +422,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean sdrTipFadeInShown = false;
 	
 	private boolean isHikeToOfflineMode = false;
+	
+	/*
+	 * this is set of all the currently visible messages which are 
+	 * stuck in tick and are not sms
+	 */
+	private Set<ConvMessage> undeliveredMessages = new HashSet<ConvMessage>();
 
+	/*
+	 * this variable will point to first ConvMessage object which is stuck in tick
+	 * and have not sent as sms till now. if there is no such message than
+	 * this should point to null.
+	 */
+	private ConvMessage firstPendingConvMessage = null;
+	
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -3850,17 +3863,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		long diff = (((long) System.currentTimeMillis() / 1000) - convMessages.get(lastSentMessagePosition).getTimestamp());
+		if(firstPendingConvMessage != null)
+		{
+			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
 
-		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME && chatThread.shouldRunTimerForHikeOfflineTip)
-		{
-			showUndeliveredMessage = new ShowUndeliveredMessage();
-			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
-		}
-		else if (lastSentMessagePosition != -1 && convMessages.get(lastSentMessagePosition).getState() == State.SENT_CONFIRMED 
-				&& !convMessages.get(lastSentMessagePosition).isSMS())
-		{
-			chatThread.showHikeToOfflineTip();
+			if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME && chatThread.shouldRunTimerForHikeOfflineTip)
+			{
+				showUndeliveredMessage = new ShowUndeliveredMessage();
+				handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
+			}
+			else if (!undeliveredMessages.isEmpty())
+			{
+				chatThread.showHikeToOfflineTip();
+			}
 		}
 	}
 
@@ -4630,32 +4645,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		dialog.show();
 	}
 
-	public List<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
+	public Set<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
 	{
-		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
-		int count = 0;
-		for (int i = lastSentMessagePosition; i >= 0; i--)
-		{
-			ConvMessage convMessage = convMessages.get(i);
-			if (!convMessage.isSent())
-			{
-				break;
-			}
-			if (!isMessageUndelivered(convMessage))
-			{
-				break;
-			}
-			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
-			{
-				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
-			}
-			unsentMessages.add(convMessage);
-			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
-			{
-				break;
-			}
-		}
-		return unsentMessages;
+		return undeliveredMessages;
 	}
 
 	private void sendAllMessagesAsSMS(boolean nativeSMS, List<ConvMessage> unsentMessages)
@@ -4666,6 +4658,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
 			chatThread.messagesSentCloseHikeToOfflineMode();
+			removeAllFromUndeliverdMessage(unsentMessages);
 		}
 		else
 		{
@@ -5096,4 +5089,88 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return unsentMessages;
 	}
 
+	public void addToUndeliverdMessage(final ConvMessage convMessage)
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				if(convMessage.isSMS())
+				{
+					return;
+				}
+				undeliveredMessages.add(convMessage);
+				if(undeliveredMessages.size() == 1)
+				{
+					firstPendingConvMessage = convMessage;
+					scheduleHikeOfflineTip();
+				}
+			}
+		});
+	}
+	
+	public void removeFromUndeliverdMessage(final ConvMessage convMessage)
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				undeliveredMessages.remove(convMessage);
+				if(firstPendingConvMessage == convMessage)
+				{
+					firstPendingConvMessage = null;
+					updateFirstPendingConvMessage();
+				}
+				if(undeliveredMessages.isEmpty())
+				{
+					chatThread.hideHikeToOfflineTip(false);
+				}
+			}
+		});
+	}
+	
+
+	private void removeAllFromUndeliverdMessage(List<ConvMessage> unsentMessages)
+	{
+		for (ConvMessage convMessage : unsentMessages)
+		{
+			removeFromUndeliverdMessage(convMessage);
+		}
+	}
+
+	public void addAllUndeliverdMessages(List<ConvMessage> messages)
+	{
+		for (ConvMessage convMessage : messages)
+		{
+			if(convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			{
+				undeliveredMessages.add(convMessage);
+				if(firstPendingConvMessage == null)
+				{
+					firstPendingConvMessage = convMessage;
+				}
+			}
+		}
+	}
+	
+	public void setFirstPendingConvMessage(ConvMessage convMessage)
+	{
+		firstPendingConvMessage = convMessage;
+	}
+
+	private void updateFirstPendingConvMessage()
+	{
+		for (ConvMessage convMessage : undeliveredMessages)
+		{
+			if(firstPendingConvMessage == null || firstPendingConvMessage.getMsgID() > convMessage.getMsgID())
+			{
+				firstPendingConvMessage = convMessage;
+			}
+		}
+	}
+	
 }
