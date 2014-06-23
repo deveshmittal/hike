@@ -311,6 +311,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private View hikeToOfflineTipview;
 	
+	private int HIKE_TO_OFFLINE_TIP_STATE_1 = 1;
+	
+	private int HIKE_TO_OFFLINE_TIP_STATE_2 = 2;
+	
+	private int HIKE_TO_OFFLINE_TIP_STATE_3 = 3;
 	/*
 	 * We should run client timer before showing hikeOffline tip
 	 * only if user is entering chat thread and reciever's
@@ -7104,6 +7109,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview = LayoutInflater.from(this).inflate(R.layout.hike_to_offline_tip, null);
 		}
 
+		hikeToOfflineTipview.clearAnimation();
 		setupHikeToOfflineTipViews();
 
 		hikeToOfflineTipview.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
@@ -7148,6 +7154,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
 			hikeToOfflineTipview.findViewById(R.id.tip_content).setOnClickListener(null);
 			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(false);
+			
+			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_3);
 		}
 		else if (isHikeToOfflineMode)
 		{
@@ -7156,6 +7164,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
 			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(false);
+			
+			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_2);
 		}
 		else
 		{
@@ -7164,6 +7174,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
 			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(true);
+			
+			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_1);
 		}
 	}
 
@@ -7195,7 +7207,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void hideHikeToOfflineTip(boolean shouldRunTimerForHikeOfflineTip)
 	{
 		if(hikeToOfflineTipview != null)
-		{
+		{ 
+			if(((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3)
+			{
+				return;
+			}
+			
 			this.shouldRunTimerForHikeOfflineTip = shouldRunTimerForHikeOfflineTip;
 			hikeToOfflineTipview.clearAnimation();
 			hikeToOfflineTipview.setVisibility(View.GONE);
@@ -7293,6 +7310,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onAnimationEnd(Animation animation)
 			{
+				hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_1);
 				hideHikeToOfflineTip(false);
 			}
 		});
