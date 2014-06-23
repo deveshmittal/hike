@@ -4666,6 +4666,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
 				chatThread.messagesSentCloseHikeToOfflineMode();
+				removeAllFromUndeliverdMessage(unsentMessages);
 			}
 			else
 			{

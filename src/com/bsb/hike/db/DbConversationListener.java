@@ -315,14 +315,23 @@ public class DbConversationListener implements Listener
 				for (ConvMessage convMessage : messages)
 				{
 
-					JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
-
-					messagesArray.put(messageJSON);
-
 					mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 
 					convMessage.setSMS(true);
 				}
+				
+				/*
+				 * We will send combined string of all the messages
+				 * in json of last convMessage object
+				 */
+				ConvMessage lastMessage = messages.get(messages.size() -1);
+				
+				ConvMessage convMessage = new ConvMessage(combineInOneSmsString(true, messages), lastMessage.getMsisdn(), 
+						lastMessage.getTimestamp(), lastMessage.getState(), lastMessage.getMsgID(), lastMessage.getMappedMsgID());
+				convMessage.setConversation(lastMessage.getConversation());
+				JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
+
+				messagesArray.put(messageJSON);
 
 				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
 				data.put(HikeConstants.COUNT, messages.size());
