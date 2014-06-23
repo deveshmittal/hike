@@ -434,6 +434,8 @@ public class HikeConstants
 	public static final String FTUE_GAMING_MSISDN = "+hike2+";
 
 	public static final String FTUE_HIKE_DAILY = "+hike3+";
+	
+	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
 	public static final String UNLINK_PREF = "unlinkAccount";
 
