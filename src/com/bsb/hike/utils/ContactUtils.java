@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 
@@ -421,6 +423,11 @@ public class ContactUtils
 				while (greenblueContactsCursor.moveToNext())
 				{
 					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
+					String msisdn = greenblueContactsCursor.getInt(id)+"";
+					if(isIndianMobileNumber(msisdn))
+					{
+					greenblueContactIds.append(msisdn + ",");
+					}
 				}
 				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
 			}
@@ -497,6 +504,16 @@ public class ContactUtils
 			}
 		}
 	}
+	
+	public static boolean isIndianMobileNumber(String number)
+	{
+		Pattern pattern = Pattern.compile("^(?:(?:\\+|0{0,2})91(\\s*[\\-]\\s*)?|[0]?)?[789]\\d{9}$");
+		Matcher matcher = pattern.matcher(number);
+		if (matcher.matches())
+			return true;
+
+		return false;
+	}
 
 	private static void extractContactInfo(Cursor c, StringBuilder sb, Map<String, Integer> numbers, boolean greenblueContacts)
 	{
@@ -511,7 +528,8 @@ public class ContactUtils
 			{
 				continue;
 			}
-
+			if(isIndianMobileNumber(number)){
+			
 			/*
 			 * We apply a multiplier of 2 for greenblue contacts to give them a greater weight.
 			 */
@@ -528,6 +546,8 @@ public class ContactUtils
 
 			number = DatabaseUtils.sqlEscapeString(number);
 			sb.append(number + ",");
+			}
+				
 		}
 	}
 
