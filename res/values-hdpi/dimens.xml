@@ -27,5 +27,9 @@
 	<dimen name="stealth_ftue_pu_img_margin_top">26dp</dimen>
 	<dimen name="ftue_card_text_header_font">32dp</dimen>
 	<dimen name="ftue_card_text_msg_font">16dp</dimen>
-	
+	<dimen name="ftue_card_header">20dp</dimen>
+	<dimen name="ftue_card_body">12.5dp</dimen>
+	<dimen name="ftue_card_click_text">12dp</dimen>
+	<dimen name="ftue_card_right_padding">7dp</dimen>
+	<dimen name="ftue_card_left_margin">12dp</dimen>
 </resources>
