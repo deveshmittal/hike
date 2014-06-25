@@ -602,10 +602,7 @@ public class HikeNotification
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
 	{
-		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		stackBuilder.addNextIntent(notificationIntent);
-
-		final PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(resultPendingIntent);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(contentIntent);
 	}
 }
