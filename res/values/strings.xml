@@ -1586,11 +1586,11 @@
      <string name="earn_free_sms">Earn free SMS</string>
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
-    <string name="ftue_card_header_last_seen">Last Seen</string>
+    <string name="ftue_card_header_last_seen">Last seen</string>
     <string name="ftue_card_body_last_seen">Only favorites can see your last seen &amp; status updates</string>
     <string name="ftue_card_click_text_last_seen">Tap here to choose them!</string>
-    <string name="ftue_card_header_hidden_mode">Hidden Mode</string>
-    <string name="ftue_card_body_hidden_mode">Mark your chats as hidden &amp; access with passcode</string>
+    <string name="ftue_card_header_hidden_mode">Hidden mode</string>
+    <string name="ftue_card_body_hidden_mode">Mark your chats as hidden and access with passcode</string>
     <string name="ftue_card_click_text_hidden_mode">Tap here to get started!</string>
     <string name="ftue_card_header_hike_offline">Hike offline</string>
     <string name="ftue_card_body_hike_offline">Send messages to friends even when they are offline</string>
@@ -1598,4 +1598,5 @@
     <string name="ftue_card_header_sticker">Stickers</string>
     <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
     <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
+    <string name="ftue_card_sep">Amazing things you can do on hike</string>
 </resources>
