@@ -4,20 +4,22 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.EmptyConversationFtueCardItem;
+import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationItem;
+import com.bsb.hike.smartImageLoader.FTUECardImageLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
@@ -33,6 +35,13 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 	private IconLoader iconLoader;
 
 	private LayoutInflater inflater;
+	
+	private enum ViewType
+	{
+		CONTACTS_CARD, FTUE_CARD
+	}
+
+	FTUECardImageLoader imageLoader;
 
 	private class ViewHolder
 	{
@@ -46,6 +55,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 		TextView seeAll;
 
+		ImageView cardImg;
 	}
 
 	public EmptyConversationsAdapter(Context context, int textViewResourceId, List<EmptyConversationItem> objects)
@@ -57,21 +67,41 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		imageLoader = new FTUECardImageLoader(context);
+	}
+	
+	public int getViewTypeCount()
+	{
+		return ViewType.values().length;
+	};
+
+
+	@Override
+	public int getItemViewType(int position)
+	{
+		EmptyConversationItem item = getItem(position);
+		if (item instanceof EmptyConversationContactItem)
+		{
+			return ViewType.CONTACTS_CARD.ordinal();
+		}
+		else if (item instanceof EmptyConversationFtueCardItem)
+		{
+			return ViewType.FTUE_CARD.ordinal();
+		}
+		return ViewType.CONTACTS_CARD.ordinal();
 	}
 
 	@Override
 	public View getView(int position, View v, ViewGroup parent)
 	{
-		EmptyConversationItem item = getItem(position);
-
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
 		ViewHolder viewHolder;
 		if (v == null)
 		{
 			viewHolder = new ViewHolder();
-			switch (item.getType())
+			if (viewType == ViewType.CONTACTS_CARD)
 			{
-			case EmptyConversationItem.HIKE_CONTACTS:
-			case EmptyConversationItem.SMS_CONTACTS:
+				EmptyConversationContactItem item = (EmptyConversationContactItem) getItem(position);
 
 				v = inflater.inflate(R.layout.ftue_updates_item, parent, false);
 
@@ -82,24 +112,27 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.parent = v.findViewById(R.id.main_content);
 
 				viewHolder.seeAll = (TextView) v.findViewById(R.id.see_all);
-				
+
 				viewHolder.contactsContainer.removeAllViews();
 				int limit = HikeConstants.FTUE_LIMIT;
-				for (int i=0; i< item.getContactList().size(); i++)
+				for (int i = 0; i < item.getContactList().size(); i++)
 				{
 					View parentView = inflater.inflate(R.layout.ftue_recommended_list_item, parent, false);
 					viewHolder.contactsContainer.addView(parentView);
-					
+
 					if (--limit == 0)
 					{
 						break;
 					}
 				}
-
-				break;
-
-			default:
-				break;
+			}
+			else if (viewType == ViewType.FTUE_CARD)
+			{
+				v = inflater.inflate(R.layout.empty_conv_ftue_item, parent, false);
+				viewHolder.name = (TextView) v.findViewById(R.id.card_txt_header);
+				viewHolder.mainInfo = (TextView) v.findViewById(R.id.card_txt_msg);
+				viewHolder.seeAll = (TextView) v.findViewById(R.id.card_action_txt);
+				viewHolder.cardImg = (ImageView) v.findViewById(R.id.card_img);
 			}
 			v.setTag(viewHolder);
 		}
@@ -108,13 +141,14 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			viewHolder = (ViewHolder) v.getTag();
 		}
 
-		if (item.getType() == EmptyConversationItem.HIKE_CONTACTS || item.getType() == EmptyConversationItem.SMS_CONTACTS)
+		if (viewType == ViewType.CONTACTS_CARD)
 		{
+			EmptyConversationContactItem item = (EmptyConversationContactItem) getItem(position);
 			viewHolder.name.setText(item.getHeader());
 
 			int limit = HikeConstants.FTUE_LIMIT;
 			View parentView = null;
-			for (int i=0; i< item.getContactList().size(); i++)
+			for (int i = 0; i < item.getContactList().size(); i++)
 			{
 				ContactInfo contactInfo = item.getContactList().get(i);
 				parentView = viewHolder.contactsContainer.getChildAt(i);
@@ -165,6 +199,17 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 			}
 		}
+		else if (viewType == ViewType.FTUE_CARD)
+		{
+			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) getItem(position);
+			viewHolder.name.setText(item.getHeaderTxtResId());
+			viewHolder.mainInfo.setText(item.getSubTxtResId());
+			viewHolder.seeAll.setText(item.getClickableTxtResId());
+			viewHolder.seeAll.setTextColor(item.getClickableTxtColor());
+			imageLoader.loadImage(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + item.getImgResId(), viewHolder.cardImg);
+			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
+			viewHolder.cardImg.setScaleType(ScaleType.CENTER);
+		}
 		return v;
 	}
 
@@ -193,14 +238,13 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 	private OnClickListener ftueListItemClickListener = new OnClickListener()
 	{
-
 		@Override
 		public void onClick(View v)
 		{
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
-			
+
 			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
 
 		}
@@ -208,7 +252,6 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 	private OnClickListener seeAllBtnClickListener = new OnClickListener()
 	{
-
 		@Override
 		public void onClick(View v)
 		{

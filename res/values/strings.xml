@@ -1551,7 +1551,7 @@
      <string name="ftue_sticker_card_msg">When words can\'t express, say it with a sticker. You\'ll love them!</string>
      <string name="ftue_attachment_card_msg"> Send photos, videos, pdfs, docs and a lot more up to 100MB each.</string>
      <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline.</string>
-     <string name="ftue_favorites_card_msg">Only favorites can see your status update and last seen.</string>
+     <!-- <string name="ftue_favorites_card_msg">Only favorites can see your status update and last seen.</string> -->
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
      <string name="themes">Themes</string>
      <string name="ftue_updates_are_fun_with_favorites">Only favorites can see your status update and last seen. Choose them wisely!</string>
@@ -1586,4 +1586,16 @@
      <string name="earn_free_sms">Earn free SMS</string>
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
+    <string name="ftue_card_header_last_seen">Last Seen</string>
+    <string name="ftue_card_body_last_seen">Only favorites can see your last seen &amp; status updates</string>
+    <string name="ftue_card_click_text_last_seen">Tap here to choose them!</string>
+    <string name="ftue_card_header_hidden_mode">Hidden Mode</string>
+    <string name="ftue_card_body_hidden_mode">Mark your chats as hidden &amp; access with passcode</string>
+    <string name="ftue_card_click_text_hidden_mode">Tap here to get started!</string>
+    <string name="ftue_card_header_hike_offline">Hike offline</string>
+    <string name="ftue_card_body_hike_offline">Send messages to friends even when they are offline</string>
+    <string name="ftue_card_click_text_hike_offline">It works like magic!</string>
+    <string name="ftue_card_header_sticker">Stickers</string>
+    <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
+    <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
 </resources>
